@@ -65,7 +65,7 @@ qx.Class.define("client.Application",
 	    layout.setColumnAlign(2, "right", "top");
 	    
 	    /* Container widget */
-	    this.__container = new qx.ui.groupbox.GroupBox().set({
+	    this.__container = new qx.ui.groupbox.GroupBox("Members:").set({
 		contentPadding: [16, 16, 16, 16]
 	    });
 	    this.__container.setLayout(layout);
@@ -125,17 +125,17 @@ qx.Class.define("client.Application",
 
 	    wm1.moveTo(150, 150);
 	    this.getRoot().add(wm1);
-
+/*
 	    var btn2 = new qx.ui.form.Button("Open Modal Dialog 2", "icon/16/apps/office-calendar.png");
 	    wm1.add(btn2);
 
 	    var chkm1 = new qx.ui.form.CheckBox("Modal");
 	    chkm1.setChecked(true);
 	    wm1.add(chkm1);
-
-	    chkm1.addListener("changeChecked", function(e) {
+*/
+/*	    chkm1.addListener("changeChecked", function(e) {
 		wm1.setModal(e.getData());
-	    })
+	    })*/
 
 	    /* Labels */
 /*	    var l2 = ["Name:", "Password:"];
