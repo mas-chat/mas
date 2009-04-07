@@ -28,55 +28,63 @@ qx.Class.define("client.Application",
 	    __rpc.callAsync(this.result, "echo", "Testi");
 
 	},
+
+	registerUser : function()
+	{
+	    __rpc.callAsync(this.result, "register", this.__field1.getValue(), this.__field2.getValue(),
+			    this.__field3.getValue(), this.__field4.getValue(), this.__field5.getValue(), 
+			    this.__field6.getValue());
+	},
 	
 	__prepareEffect : function()
 	{
 	    this.__effect = new qx.fx.effect.combination.Shake(
-		this.__container.getContainerElement().getDomElement());
+		this.__box1.getContainerElement().getDomElement());
 	},
 
 	main: function()
 	{
 	    this.base(arguments);
-	    
+	   
 	    __rpc = new qx.io.remote.Rpc(
-		"http://moe.portaali.org/rpcperl/jsonrpc.pl",
+		"http://evergreen.portaali.org/svn/lisa/jsonrpc.pl",
 		"qooxdoo.test"
 	    );
 
-	    var layout2 = new qx.ui.layout.VBox();
-	    layout2.setSpacing(25); // apply spacing
+	    /* Layout for root */
+	    var rootLayout = new qx.ui.layout.VBox();
+	    rootLayout.setSpacing(25); // apply spacing
 
-	    this.__container2 = new qx.ui.container.Composite(layout2);
+	    /* Root widget */
+	    this.rootContainer = new qx.ui.container.Composite(rootLayout);
 
-	    this.__container2.addListener(
+	    this.rootContainer.addListener(
 		"resize", function(e)
 		{
-		    var bounds = this.__container2.getBounds();
-		    this.__container2.set({
+		    var bounds = this.rootContainer.getBounds();
+		    this.rootContainer.set({
 			marginTop: Math.round(-bounds.height / 2),
 			marginLeft : Math.round(-bounds.width / 2)
 		    });
 		}, this); 
 
-	    /* Container layout */
+	    /* Layout for members box */
 	    var layout = new qx.ui.layout.Grid(9, 5);
 	    layout.setColumnAlign(0, "right", "top");
 	    layout.setColumnAlign(2, "right", "top");
 	    
-	    /* Container widget */
-	    this.__container = new qx.ui.groupbox.GroupBox("Members:").set({
+	    /* Members box widget */
+	    this.__box1 = new qx.ui.groupbox.GroupBox("Existing users:").set({
 		contentPadding: [16, 16, 16, 16]
 	    });
-	    this.__container.setLayout(layout);
+	    this.__box1.setLayout(layout);
 	    
-	    this.__container2.add(this.__container);
-	    this.getRoot().add(this.__container2, {left: "50%", top: "30%"});
+	    this.rootContainer.add(this.__box1);
 
 	    /* Labels */
 	    var labels = ["Name:", "Password:"];
 	    for (var i=0; i<labels.length; i++) {
-		this.__container.add(new qx.ui.basic.Label(labels[i]).set({
+		this.__box1.add(new qx.ui.basic.Label(labels[i]).set({
 		    allowShrinkX: false,
 		    paddingTop: 3
 		}), {row: i, column : 0});
@@ -86,11 +94,11 @@ qx.Class.define("client.Application",
 	    var field1 = new qx.ui.form.TextField();
 	    var field2 = new qx.ui.form.PasswordField();
 
-	    this.__container.add(field1.set({
+	    this.__box1.add(field1.set({
 		allowShrinkX: false, paddingTop: 3
 	    }), {row: 0, column : 1});
 	    
-	    this.__container.add(field2.set({
+	    this.__box1.add(field2.set({
 		allowShrinkX: false, paddingTop: 3
 	    }), {row: 1, column : 1});
 	    
@@ -98,10 +106,19 @@ qx.Class.define("client.Application",
 	    var button1 = this.__okButton =  new qx.ui.form.Button("Login");
 	    button1.setAllowStretchX(false);
 
-	    this.__container.add(button1,{ row : 3, column : 1 });
+	    this.__box1.add(button1,{ row : 3, column : 1 });
 	    
 	    /* Check input on click */
 	    button1.addListener("execute", this.checkInput, this);
+
+	    /* Layout for register box */
+            var layout2 = new qx.ui.layout.VBox();
+
+	    /* Register box widget */
+	    this.__box2 = new qx.ui.groupbox.GroupBox("New members:").set({
+		contentPadding: [16, 16, 16, 16]
+	    });
+	    this.__box2.setLayout(layout2);
 
 	    /* Button 2 */
 	    var wm1 = this.getModalWindow1();
@@ -109,55 +126,155 @@ qx.Class.define("client.Application",
 	    var button2 = this.__okButton =  new qx.ui.form.Button("Register!");
 	    button2.addListener("execute", wm1.open, wm1); 
 	    button2.setAllowStretchX(true); 
-	    this.__container2.add(button2);
+	    this.__box2.add(button2);
 	    
 	    /* Prepare effect as soon as the container is ready */
-	    this.__container.addListener("appear", this.__prepareEffect, this);
+	    this.__box1.addListener("appear", this.__prepareEffect, this);
+
+	    this.rootContainer.add(this.__box2); 
+	    this.getRoot().add(this.rootContainer, {left: "50%", top: "30%"});	    
 	},
 
 	getModalWindow1 : function()
 	{
-	    var wm1 = new qx.ui.window.Window("First Modal Dialog");
-	    wm1.setLayout(new qx.ui.layout.Grid(10));
+	    var wm1 = new qx.ui.window.Window("Registration form");
+	    wm1.setLayout(new qx.ui.layout.VBox());
 	    wm1.setModal(true);
 	    wm1.setAllowMinimize(false);
 	    wm1.setAllowMaximize(false);
-
 	    wm1.moveTo(150, 150);
-	    this.getRoot().add(wm1);
-/*
-	    var btn2 = new qx.ui.form.Button("Open Modal Dialog 2", "icon/16/apps/office-calendar.png");
-	    wm1.add(btn2);
+	    wm1.setShowStatusbar(true);
 
-	    var chkm1 = new qx.ui.form.CheckBox("Modal");
-	    chkm1.setChecked(true);
-	    wm1.add(chkm1);
-*/
-/*	    chkm1.addListener("changeChecked", function(e) {
-		wm1.setModal(e.getData());
-	    })*/
+
+	    /* Layout for basic info box */
+	    var layout = new qx.ui.layout.Grid(9, 5);
+	    layout.setColumnAlign(0, "right", "top");
+	    layout.setColumnAlign(2, "right", "top");
+	    
+	    /* Info box widget */
+	    var box1 = new qx.ui.groupbox.GroupBox("Basic information:").set({
+		contentPadding: [16, 16, 16, 16]
+	    });
+	    box1.setLayout(layout);
 
 	    /* Labels */
-/*	    var l2 = ["Name:", "Password:"];
-	    for (var i=0; i<l2.length; i++) {
-		wm1.add(new qx.ui.basic.Label(l2[i]).set({
+	    var labels = ["First Name:", "Last Name:", "Gender:", "Email:"];
+	    for (var i=0; i<labels.length; i++) {
+		box1.add(new qx.ui.basic.Label(labels[i]).set({
 		    allowShrinkX: false,
 		    paddingTop: 3
 		}), {row: i, column : 0});
 	    }
-	    */
+	    
 	    /* Text fields */
-	 /*   var f1 = new qx.ui.form.TextField();
-	    var f2 = new qx.ui.form.PasswordField();
+	    this.__field1 = new qx.ui.form.TextField();
+	    this.__field2 = new qx.ui.form.TextField();
+	    this.__field3 = new qx.ui.form.TextField();
+	    
+	    box1.add(this.__field1.set({
+		allowGrowX: true, paddingTop: 3
+	    }), {row: 0, column : 1, colSpan : 2});
+	    
+	    box1.add(this.__field2.set({
+		allowShrinkX: false, paddingTop: 3
+	    }), {row: 1, column : 1, colSpan : 2});
 
-	    wm1.add(f1.set({
+	    // Create some radio buttons
+	    this.__rbMale = new qx.ui.form.RadioButton("Male");
+	    this.__rbFemale = new qx.ui.form.RadioButton("Female");
+
+	    // Add them to the container
+	    box1.add(this.__rbMale, { row : 2, column : 1 });
+	    box1.add(this.__rbFemale, { row : 2, column : 2 });
+
+	    box1.add(this.__field3.set({
+		allowShrinkX: false, paddingTop: 3
+	    }), {row: 3, column : 1, colSpan : 2});
+
+	    // Add all radio buttons to the manager
+	    var manager = new qx.ui.form.RadioGroup(this.__rbMale, this.__rbFemale);
+ 
+	    /* Layout for password box */
+	    var layout2 = new qx.ui.layout.Grid(9, 5);
+	    layout2.setColumnAlign(0, "right", "top");
+	    layout2.setColumnAlign(2, "right", "top");
+	    
+	    /* Password box widget */
+	    var box2 = new qx.ui.groupbox.GroupBox("Password:").set({
+		contentPadding: [16, 16, 16, 16]
+	    });
+	    box2.setLayout(layout2);
+
+	    /* Labels */
+	    var labels = ["Password:", "Password again:"];
+	    for (var i=0; i<labels.length; i++) {
+		box2.add(new qx.ui.basic.Label(labels[i]).set({
+		    allowShrinkX: false,
+		    paddingTop: 3
+		}), {row: i, column : 0});
+	    }
+	    
+	    /* Text fields */
+	    this.__field4 = new qx.ui.form.PasswordField();
+	    this.__field5 = new qx.ui.form.PasswordField();
+	    
+	    box2.add(this.__field4.set({
 		allowShrinkX: false, paddingTop: 3
 	    }), {row: 0, column : 1});
 	    
-	    wm1.add(f2.set({
+	    box2.add(this.__field5.set({
 		allowShrinkX: false, paddingTop: 3
 	    }), {row: 1, column : 1});
-*/
+	
+	    /* Layout for nick box */
+	    var layout3 = new qx.ui.layout.Grid(9, 5);
+	    layout3.setColumnAlign(0, "right", "top");
+	    layout3.setColumnAlign(2, "right", "top");
+	    
+	    /* Nick box widget */
+	    var box3 = new qx.ui.groupbox.GroupBox("Nick name:").set({
+		contentPadding: [16, 16, 16, 16]
+	    });
+	    box3.setLayout(layout3);
+
+	    /* Labels */
+	    box3.add(new qx.ui.basic.Label("Nick name:").set({
+		allowShrinkX: false,
+		paddingTop: 3
+	    }), {row: 0, column : 0});
+	    
+	    /* Text fields */
+	    this.__field6 = new qx.ui.form.TextField();
+	    
+	    box3.add(this.__field6.set({
+		allowShrinkX: false, paddingTop: 3
+	    }), {row: 0, column : 1});
+
+	    /* Layout for send box */
+	    var layout4 = new qx.ui.layout.VBox();
+	    
+	    /* Send box widget */
+	    var box4 = new qx.ui.groupbox.GroupBox().set({
+		contentPadding: [10, 10, 10, 10]
+	    });
+	    box4.setLayout(layout4);
+	
+	    /* Button */
+	    var button1 =  new qx.ui.form.Button("Complete registration");
+	    
+	    /* Check input on click */
+	    button1.addListener("execute", this.registerUser, this);
+	    
+	    box4.add(button1);
+	    
+	    wm1.add(box1); 
+	    wm1.add(box2);
+	    wm1.add(box3);
+	    wm1.add(new qx.ui.core.Spacer(30));
+	    wm1.add(box4);
+
+	    this.getRoot().add(wm1);
+
 	    return wm1;
     
 	}
