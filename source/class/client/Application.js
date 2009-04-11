@@ -14,9 +14,32 @@ qx.Class.define("client.Application",
 	
 	result : function(result, exc) 
 	{
-	    if (exc == null) {
-		alert("Reesult of async call: " + result);
-	    } else {
+
+	    gMain.__wm1.setStatus("foo");
+	    alert("testtttt:" + this);
+
+//	    this.__effect.start();
+
+	    if (exc == null) 
+	    {
+
+		alert("Done");
+
+		if (result == true)
+		{
+		    this.setStatus("foo");
+
+//		    this.__wm1.setShowStatusbar(true);
+//		    this.__wm1.setStatus("OK");
+		}
+		else
+		{
+//		    this.__wm1.setShowStatusbar(true);
+//		    this.__wm1.setStatus("NOT OK");
+		}
+	    } 
+	    else 
+	    {
 		alert("Exception during async call: " + exc);
 	    }
 	},
@@ -31,7 +54,10 @@ qx.Class.define("client.Application",
 
 	registerUser : function()
 	{
+	    gMain = this;
+
 	    __rpc.callAsync(this.result, "register", this.__field1.getValue(), this.__field2.getValue(),
+			    this.__manager.getValue(), 			    
 			    this.__field3.getValue(), this.__field4.getValue(), this.__field5.getValue(), 
 			    this.__field6.getValue());
 	},
@@ -121,10 +147,10 @@ qx.Class.define("client.Application",
 	    this.__box2.setLayout(layout2);
 
 	    /* Button 2 */
-	    var wm1 = this.getModalWindow1();
-	  
+	    this.__wm1 = this.getModalWindow1();
+
 	    var button2 = this.__okButton =  new qx.ui.form.Button("Register!");
-	    button2.addListener("execute", wm1.open, wm1); 
+	    button2.addListener("execute", this.__wm1.open, this.__wm1); 
 	    button2.setAllowStretchX(true); 
 	    this.__box2.add(button2);
 	    
@@ -144,7 +170,6 @@ qx.Class.define("client.Application",
 	    wm1.setAllowMaximize(false);
 	    wm1.moveTo(150, 150);
 	    wm1.setShowStatusbar(true);
-
 
 	    /* Layout for basic info box */
 	    var layout = new qx.ui.layout.Grid(9, 5);
@@ -192,7 +217,7 @@ qx.Class.define("client.Application",
 	    }), {row: 3, column : 1, colSpan : 2});
 
 	    // Add all radio buttons to the manager
-	    var manager = new qx.ui.form.RadioGroup(this.__rbMale, this.__rbFemale);
+	    this.__manager = new qx.ui.form.RadioGroup(this.__rbMale, this.__rbFemale);
  
 	    /* Layout for password box */
 	    var layout2 = new qx.ui.layout.Grid(9, 5);
