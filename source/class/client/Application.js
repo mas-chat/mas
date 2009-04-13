@@ -14,28 +14,22 @@ qx.Class.define("client.Application",
 	
 	result : function(result, exc) 
 	{
-
-	    gMain.__wm1.setStatus("foo");
-	    alert("testtttt:" + this);
-
-//	    this.__effect.start();
-
 	    if (exc == null) 
 	    {
+//		foobaari = qx.util.Json.parseQx(result); 
 
-		alert("Done");
+		var tyyppi = typeof(result);
 
-		if (result == true)
+		alert ("foo2: " + tyyppi);
+
+		if (result == 1)
 		{
-		    this.setStatus("foo");
-
-//		    this.__wm1.setShowStatusbar(true);
-//		    this.__wm1.setStatus("OK");
+//		    gMain.__wm1.close();
+		    gMain.__wm1.setStatus("Good!!!");
 		}
 		else
 		{
-//		    this.__wm1.setShowStatusbar(true);
-//		    this.__wm1.setStatus("NOT OK");
+		    gMain.__wm1.setStatus("Check fields!!!");
 		}
 	    } 
 	    else 
@@ -71,7 +65,9 @@ qx.Class.define("client.Application",
 	main: function()
 	{
 	    this.base(arguments);
-	   
+	
+	    qx.log.appender.Console;
+   
 	    __rpc = new qx.io.remote.Rpc(
 		"http://evergreen.portaali.org/svn/lisa/jsonrpc.pl",
 		"qooxdoo.test"
