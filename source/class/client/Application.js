@@ -23,8 +23,8 @@ qx.Class.define("client.Application",
 		"qooxdoo.test"
 	    );
 
-	    registrationForm = new client.Registration(__rpc);
 	    loginForm = new client.Login(__rpc);
+	    registrationForm = new client.Registration(__rpc);
 
 	    loginForm.show(this.getRoot());
 	}
