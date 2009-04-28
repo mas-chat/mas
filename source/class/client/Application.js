@@ -12,7 +12,7 @@ qx.Class.define("client.Application",
     {
 	__rpc : 0,
 	
-	main: function()
+	main : function()
 	{
 	    this.base(arguments);
 	
@@ -23,12 +23,20 @@ qx.Class.define("client.Application",
 		"qooxdoo.test"
 	    );
 
-	    loginForm = new client.Login(__rpc);
+	    loginForm = new client.Login(__rpc, this);
 	    registrationForm = new client.Registration(__rpc);
 
-	    loginForm.show(this.getRoot());
-	}
+//	    loginForm.show(this.getRoot());
 
+	    this.loginDone();
+	},
+
+	loginDone : function()
+	{
+	    this.getRoot().removeAll();
+	    mainView = new client.MainScreen();
+	    mainView.show(this.getRoot());
+	}
     }
 });
 

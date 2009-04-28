@@ -8,9 +8,10 @@ qx.Class.define("client.Login",
 {
     extend : qx.core.Object,
 
-    construct : function(rpcref)
+    construct : function(rpcref, appref)
     {
-        __myrpc = rpcref;
+	myapp2 = appref;
+        this.__myrpc = rpcref;
     },
 
     members :
@@ -18,15 +19,28 @@ qx.Class.define("client.Login",
 	wm1 : 0,
         __myrpc : 0,
 
-	result : function()
+	result : function(result, exc) 
 	{
-
-
+	    if (exc == null) 
+	    {
+		if (result == 0)
+		{
+		    alert("go away");
+		}
+		else
+		{
+		    myapp2.loginDone();
+		}
+	    } 
+	    else 
+	    {
+		alert("Exception during async call: " + exc);
+	    }
 	},
 
 	checkInput : function()
 	{
-	    this.__myrpc.callAsync(this.result, "login", "Testi");
+	    this.__myrpc.callAsync(this.result, "login", this.__field1.getValue(), this.__field2.getValue());
 	},
 
 	show : function(rootItem)
@@ -72,14 +86,14 @@ qx.Class.define("client.Login",
 	    }
 	    
 	    /* Text fields */
-	    var field1 = new qx.ui.form.TextField();
-	    var field2 = new qx.ui.form.PasswordField();
+	    this.__field1 = new qx.ui.form.TextField();
+	    this.__field2 = new qx.ui.form.PasswordField();
 
-	    this.__box1.add(field1.set({
+	    this.__box1.add(this.__field1.set({
 		allowShrinkX: false, paddingTop: 3
 	    }), {row: 0, column : 1});
 	    
-	    this.__box1.add(field2.set({
+	    this.__box1.add(this.__field2.set({
 		allowShrinkX: false, paddingTop: 3
 	    }), {row: 1, column : 1});
 	    
