@@ -11,32 +11,96 @@ qx.Class.define("client.MainScreen",
     construct : function(rpcref, appref)
     {
 	myapp2 = appref;
-        this.__myrpc = rpcref;
+
+	// read "socket"
+	__rrpc = new qx.io.remote.Rpc(
+	    "http://evergreen.portaali.org:7070/",
+	    "ralph"
+	);
+	__rrpc.setCrossDomain(true);
+
+	// read "socket"
+	__srpc = new qx.io.remote.Rpc(
+	    "http://evergreen.portaali.org:7070/",
+	    "ralph"
+	);
+	__srpc.setCrossDomain(true);
+
     },
 
     members :
     {
-        __myrpc : 0,
+        __rrpc : 0,
+	__srpc : 0,
 	__input1 : 0,
 	__atom : 0,
 	__channelText : "",
 	__scroll : 0,
-	
+
+	readresult : function(result, exc) 
+	{
+	    if (exc == null) 
+	    {
+		var pos = result.search(/!/);
+		var nick = result.slice(0,pos);
+		var msg = result.slice(pos+2);
+
+		MainScreenObj.addline(nick, msg);
+	    } 
+	    else 
+	    {
+//		alert("Exception during async call: " + exc);
+	    }
+
+	    __rrpc.callAsync(MainScreenObj.readresult, "hello", "securitycookie");
+	},
+
+	sendresult : function(result, exc) 
+	{
+	    if (exc == null) 
+	    {
+
+	    } 
+	    else 
+	    {
+//		alert("Exception during async call: " + exc);
+	    }
+
+	},
+
 	show : function(rootItem)
 	{
+
+	    __rrpc.setTimeout(20000);
+	    __rrpc.callAsync(this.readresult, "hello", "securitycookie");
+
+	    MainScreenObj = this;
+
 	    /* Layout for root */
-	    var rootLayout = new qx.ui.layout.Canvas();
+	    var rootLayout = new qx.ui.layout.VBox(1);
 
 	    /* Root widget */
 	    var rootContainer = new qx.ui.container.Composite(rootLayout);
+	    rootContainer.setAllowGrowY(true);
 
 	    var bounds = rootContainer.getBounds();
 
-	    rootContainer.add(this.getMenuBar(bounds), {left:"3%", top:"3%", right:"3%", width:"20%" });
+	    rootContainer.add(this.getMenuBar(bounds));//, {left:"3%", top:"3%", right:"3%", width:"20%" });
 
+	    var middleContainer0 = new qx.ui.container.Composite();
+	    middleContainer0.setLayout(new qx.ui.layout.Grow());
+	    middleContainer0.setAllowGrowY(true);
+	    middleContainer0.set({ minHeight : 700 });
+	    
 	    /* middle */
-	    var middleContainer = new qx.ui.container.Composite();
-	    rootContainer.add(middleContainer,  {left:"3%", bottom:"40%", right:"3%", width:"20%" });
+	    var windowManager = new qx.ui.window.Manager();
+	    var middleContainer = new qx.ui.window.Desktop(windowManager);
+	    middleContainer.set({decorator: "main", backgroundColor: "background-pane"});
+	    middleContainer.setAllowGrowY(true);
+	    
+	    middleContainer0.add(middleContainer);//,  {left:"3%",  top: "4%",bottom:"10%", right:"3%", width:"20%" });
+	    rootContainer.add(middleContainer0);
+//	    middleContainer.setAllowShrinkY(false);
 	    
 	    // create the toolbar
 	    toolbar = new qx.ui.toolbar.ToolBar();
@@ -56,13 +120,13 @@ qx.Class.define("client.MainScreen",
 	    part1.add(pasteButton);
 	    toolbar.add(part1);
 
-	    rootContainer.add(toolbar, {left:"3%", bottom:"3%", right:"3%", width:"20%" });
+	    rootContainer.add(toolbar);//, {left:"3%",bottom:"3%", right:"3%", width:"20%" });
 
 	    this.wm3 = this.getModalWindow3();
-	    rootContainer.add(this.wm3);
+	    middleContainer.add(this.wm3);
 	    this.wm3.open();
 
-	    rootItem.add(rootContainer, {edge : 0});	    
+	    rootItem.add(rootContainer, {edge : 10});	    
 	},
 
 	getMenuBar : function(bounds)
@@ -133,15 +197,18 @@ qx.Class.define("client.MainScreen",
 	    
 	    if (input !== "")
 	    {
-		var sizes = __scroll.getItemBottom(__atom);
-
-		this.debug("ChangeValue: " + input);
-		this.debug("s: " + sizes);
+		__srpc.callAsync(this.sendresult, "send", input);
 		__input1.setValue("");
-		__channelText = __channelText + "&lt;ilkka&gt; " + input + "<br>";
-		__atom.setLabel(__channelText);
-		__scroll.scrollToY(sizes);
+		this.addline("foobar", input);
 	    }
+	},
+
+	addline : function(nick, line)
+	{
+	    var sizes = __scroll.getItemBottom(__atom);
+	    __channelText = __channelText + "&lt;" + nick + "&gt; " + line + "<br>";
+	    __atom.setLabel(__channelText);
+	    __scroll.scrollToY(sizes);
 	},
 
 	getFileMenu : function()
@@ -156,13 +223,13 @@ qx.Class.define("client.MainScreen",
 	    var printButton = new qx.ui.menu.Button("Print", "icon/16/actions/document-print.png");
 	    var exitButton = new qx.ui.menu.Button("Exit", "icon/16/actions/application-exit.png");
 
-	    newButton.addListener("execute", this.debugButton);
-	    openButton.addListener("execute", this.debugButton);
-	    closeButton.addListener("execute", this.debugButton);
-	    saveButton.addListener("execute", this.debugButton);
-	    saveAsButton.addListener("execute", this.debugButton);
-	    printButton.addListener("execute", this.debugButton);
-	    exitButton.addListener("execute", this.debugButton);
+//	    newButton.addListener("execute", this.debugButton);
+//	    openButton.addListener("execute", this.debugButton);
+//	    closeButton.addListener("execute", this.debugButton);
+//	    saveButton.addListener("execute", this.debugButton);
+//	    saveAsButton.addListener("execute", this.debugButton);
+//	    printButton.addListener("execute", this.debugButton);
+//	    exitButton.addListener("execute", this.debugButton);
 
 	    menu.add(newButton);
 	    menu.add(openButton);
@@ -185,11 +252,11 @@ qx.Class.define("client.MainScreen",
 	    var copyButton = new qx.ui.menu.Button("Copy", "icon/16/actions/edit-copy.png", this._copyCommand);
 	    var pasteButton = new qx.ui.menu.Button("Paste", "icon/16/actions/edit-paste.png", this._pasteCommand);
 
-	    undoButton.addListener("execute", this.debugButton);
-	    redoButton.addListener("execute", this.debugButton);
-	    cutButton.addListener("execute", this.debugButton);
-	    copyButton.addListener("execute", this.debugButton);
-	    pasteButton.addListener("execute", this.debugButton);
+//	    undoButton.addListener("execute", this.debugButton);
+//	    redoButton.addListener("execute", this.debugButton);
+//	    cutButton.addListener("execute", this.debugButton);
+//	    copyButton.addListener("execute", this.debugButton);
+//	    pasteButton.addListener("execute", this.debugButton);
 
 	    menu.add(undoButton);
 	    menu.add(redoButton);
@@ -214,12 +281,12 @@ qx.Class.define("client.MainScreen",
 
 	    previousButton.setEnabled(false);
 
-	    searchButton.addListener("execute", this.debugButton);
-	    nextButton.addListener("execute", this.debugButton);
-	    previousButton.addListener("execute", this.debugButton);
-	    replaceButton.addListener("execute", this.debugButton);
-	    searchFilesButton.addListener("execute", this.debugButton);
-	    replaceFilesButton.addListener("execute", this.debugButton);
+//	    searchButton.addListener("execute", this.debugButton);
+//	    nextButton.addListener("execute", this.debugButton);
+//	    previousButton.addListener("execute", this.debugButton);
+//	    replaceButton.addListener("execute", this.debugButton);
+//	    searchFilesButton.addListener("execute", this.debugButton);
+//	    replaceFilesButton.addListener("execute", this.debugButton);
 
 	    menu.add(searchButton);
 	    menu.add(nextButton);
@@ -242,9 +309,9 @@ qx.Class.define("client.MainScreen",
 	    var numbersButton = new qx.ui.menu.CheckBox("Show line numbers");
 	    var asciiButton = new qx.ui.menu.Button("ASCII table");
 
-	    rulerButton.addListener("changeChecked", this.debugCheckBox);
-	    numbersButton.addListener("changeChecked", this.debugCheckBox);
-	    asciiButton.addListener("execute", this.debugButton);
+//	    rulerButton.addListener("changeChecked", this.debugCheckBox);
+//	    numbersButton.addListener("changeChecked", this.debugCheckBox);
+//	    asciiButton.addListener("execute", this.debugButton);
 
 	    menu.add(panesButton);
 	    menu.add(syntaxButton);
@@ -273,12 +340,12 @@ qx.Class.define("client.MainScreen",
 	    statusCheckbox.setChecked(true);
 	    macroCheckbox.setChecked(true);
 
-	    tabsCheckbox.addListener("changeChecked", this.debugCheckBox);
-	    statusCheckbox.addListener("changeChecked", this.debugCheckBox);
-	    treeCheckbox.addListener("changeChecked", this.debugCheckBox);
-	    macroCheckbox.addListener("changeChecked", this.debugCheckBox);
-	    tagCheckbox.addListener("changeChecked", this.debugCheckBox);
-	    consoleCheckbox.addListener("changeChecked", this.debugCheckBox);
+//	    tabsCheckbox.addListener("changeChecked", this.debugCheckBox);
+//	    statusCheckbox.addListener("changeChecked", this.debugCheckBox);
+//	    treeCheckbox.addListener("changeChecked", this.debugCheckBox);
+//	    macroCheckbox.addListener("changeChecked", this.debugCheckBox);
+//	    tagCheckbox.addListener("changeChecked", this.debugCheckBox);
+//	    consoleCheckbox.addListener("changeChecked", this.debugCheckBox);
 
 	    menu.add(statusCheckbox);
 	    menu.add(tabsCheckbox);
@@ -314,7 +381,7 @@ qx.Class.define("client.MainScreen",
 	    langGroup.add(htmlButton, xmlButton, jsButton, perlButton, pythonButton);
 	    langGroup.add.apply(langGroup, cdialectButton.getMenu().getChildren());
 
-	    langGroup.addListener("changeSelected", this.debugRadio);
+//	    langGroup.addListener("changeSelected", this.debugRadio);
 
 	    return menu;
 	},
@@ -349,13 +416,13 @@ qx.Class.define("client.MainScreen",
 	    var ansiButton = new qx.ui.menu.Button("OEM to ANSI");
 	    var oemButton = new qx.ui.menu.Button("ANSI to OEM");
 
-	    spacesButton.addListener("execute", this.debugButton);
-	    tabsButton.addListener("execute", this.debugButton);
-	    upperButton.addListener("execute", this.debugButton);
-	    lowerButton.addListener("execute", this.debugButton);
-	    capitalsButton.addListener("execute", this.debugButton);
-	    ansiButton.addListener("execute", this.debugButton);
-	    oemButton.addListener("execute", this.debugButton);
+//	    spacesButton.addListener("execute", this.debugButton);
+//	    tabsButton.addListener("execute", this.debugButton);
+//	    upperButton.addListener("execute", this.debugButton);
+//	    lowerButton.addListener("execute", this.debugButton);
+//	    capitalsButton.addListener("execute", this.debugButton);
+//	    ansiButton.addListener("execute", this.debugButton);
+//	    oemButton.addListener("execute", this.debugButton);
 
 	    menu.add(paragraphButton)
 	    menu.add(spacesButton);
@@ -380,10 +447,10 @@ qx.Class.define("client.MainScreen",
 	    var centeredButton = new qx.ui.menu.Button("Centered", "icon/16/actions/format-justify-center.png");
 	    var justifyButton = new qx.ui.menu.Button("Justified", "icon/16/actions/format-justify-fill.png");
 
-	    leftButton.addListener("execute", this.debugButton);
-	    rightButton.addListener("execute", this.debugButton);
-	    centeredButton.addListener("execute", this.debugButton);
-	    justifyButton.addListener("execute", this.debugButton);
+//	    leftButton.addListener("execute", this.debugButton);
+//	    rightButton.addListener("execute", this.debugButton);
+//	    centeredButton.addListener("execute", this.debugButton);
+//	    justifyButton.addListener("execute", this.debugButton);
 
 	    menu.add(leftButton);
 	    menu.add(rightButton);
@@ -402,10 +469,10 @@ qx.Class.define("client.MainScreen",
 	    var onlineButton = new qx.ui.menu.Button("Online Forum");
 	    var infoButton = new qx.ui.menu.Button("Info...");
 
-	    topicsButton.addListener("execute", this.debugButton);
-	    quickButton.addListener("execute", this.debugButton);
-	    onlineButton.addListener("execute", this.debugButton);
-	    infoButton.addListener("execute", this.debugButton);
+//	    topicsButton.addListener("execute", this.debugButton);
+//	    quickButton.addListener("execute", this.debugButton);
+//	    onlineButton.addListener("execute", this.debugButton);
+//	    infoButton.addListener("execute", this.debugButton);
 
 	    menu.add(topicsButton);
 	    menu.add(quickButton);
