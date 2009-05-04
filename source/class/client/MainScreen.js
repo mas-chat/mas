@@ -36,23 +36,24 @@ qx.Class.define("client.MainScreen",
 	__atom : 0,
 	__channelText : "",
 	__scroll : 0,
+	seq : 0,
 
 	readresult : function(result, exc) 
 	{
 	    if (exc == null) 
 	    {
-		var pos = result.search(/!/);
+		var pos = result.search(/4/);
 		var nick = result.slice(0,pos);
 		var msg = result.slice(pos+2);
 
-		MainScreenObj.addline(nick, msg);
+ 		MainScreenObj.addline(result);
 	    } 
 	    else 
 	    {
 //		alert("Exception during async call: " + exc);
 	    }
 
-	    __rrpc.callAsync(MainScreenObj.readresult, "hello", "securitycookie");
+	    __rrpc.callAsync(MainScreenObj.readresult, "hello", MainScreenObj.seq);
 	},
 
 	sendresult : function(result, exc) 
@@ -72,7 +73,8 @@ qx.Class.define("client.MainScreen",
 	{
 
 	    __rrpc.setTimeout(20000);
-	    __rrpc.callAsync(this.readresult, "hello", "securitycookie");
+	    __rrpc.callAsync(this.readresult, "hello", this.seq);
+	    this.seq = 1; // not robust as possible
 
 	    MainScreenObj = this;
 
@@ -100,7 +102,6 @@ qx.Class.define("client.MainScreen",
 	    
 	    middleContainer0.add(middleContainer);//,  {left:"3%",  top: "4%",bottom:"10%", right:"3%", width:"20%" });
 	    rootContainer.add(middleContainer0);
-//	    middleContainer.setAllowShrinkY(false);
 	    
 	    // create the toolbar
 	    toolbar = new qx.ui.toolbar.ToolBar();
@@ -158,8 +159,12 @@ qx.Class.define("client.MainScreen",
 
 	getModalWindow3 : function()
 	{
-	    var wm1 = new qx.ui.window.Window("Main Window - Moe v0.01");
-	    wm1.setLayout(new qx.ui.layout.VBox());
+	    var layout = new qx.ui.layout.Grid();
+	    layout.setColumnFlex(0, 1); // make row 0 flexible
+	    layout.setColumnWidth(1, 100); // set with of column 1 to 200 pixel
+
+	    var wm1 = new qx.ui.window.Window("Channel #main - Moe v0.01");
+	    wm1.setLayout(layout);
 	    wm1.setModal(false);
 //	    wm1.setAllowResize(true);
 	    wm1.setAllowMaximize(false);
@@ -172,21 +177,23 @@ qx.Class.define("client.MainScreen",
 		scrollbarY : "on"
 	    });
 	    
-	    __channelText = "Welcome to evergreen<br>Ready.<br>";
+	    __channelText = "Ready.<br>";
 
 	    __atom = new qx.ui.basic.Atom(__channelText);
 	    __atom.setRich(true);
-	    wm1.add(__atom);
+//	    wm1.add(__atom, {row: 0, column: 0});
 
 	    __scroll.add(__atom);		       
-	    wm1.add(__scroll);
+	    wm1.add(__scroll, {row: 0, column: 0});
 
 	    __input1 = new qx.ui.form.TextField().set({
 		maxLength: 150
 	    });
 	    __input1.focus();
 	    __input1.addListener("changeValue", this.getUserText, this);
-	    wm1.add(__input1);
+	    wm1.add(__input1, {row: 1, column: 0});
+
+	    wm1.add(this.getList(), {row: 0, column: 1, rowSpan: 2});
 
 	    return wm1;
     	},
@@ -199,17 +206,49 @@ qx.Class.define("client.MainScreen",
 	    {
 		__srpc.callAsync(this.sendresult, "send", input);
 		__input1.setValue("");
-		this.addline("foobar", input);
+		this.addline("&lt;foobar&gt; " + input + "<br>");
 	    }
 	},
 
-	addline : function(nick, line)
+	addline : function(line)
 	{
 	    var sizes = __scroll.getItemBottom(__atom);
-	    __channelText = __channelText + "&lt;" + nick + "&gt; " + line + "<br>";
+	    __channelText = __channelText + line;
 	    __atom.setLabel(__channelText);
 	    __scroll.scrollToY(sizes);
 	},
+
+	getList : function()
+	{
+	    var list = new qx.ui.form.List;
+	    list.setContextMenu(this.getContextMenu());
+
+	    for (var i=0; i<20; i++) {
+		list.add(new qx.ui.form.ListItem("@user" + i));
+	    }
+
+	    return list;
+	},
+
+	getContextMenu : function()
+	{
+	    var menu = new qx.ui.menu.Menu;
+
+	    var cutButton = new qx.ui.menu.Button("Info", "icon/16/actions/edit-cut.png", this._cutCommand);
+	    var copyButton = new qx.ui.menu.Button("Send Message", "icon/16/actions/edit-copy.png", this._copyCommand);
+	    var pasteButton = new qx.ui.menu.Button("De-op", "icon/16/actions/edit-paste.png", this._pasteCommand);
+
+	    cutButton.addListener("execute", this.debugButton);
+	    copyButton.addListener("execute", this.debugButton);
+	    pasteButton.addListener("execute", this.debugButton);
+
+	    menu.add(cutButton);
+	    menu.add(copyButton);
+	    menu.add(pasteButton);
+
+	    return menu;
+	},
+
 
 	getFileMenu : function()
 	{
