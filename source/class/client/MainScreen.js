@@ -18,42 +18,53 @@ qx.Class.define("client.MainScreen",
 	    "ralph"
 	);
 	__rrpc.setCrossDomain(true);
-
-	// read "socket"
-	__srpc = new qx.io.remote.Rpc(
-	    "http://evergreen.portaali.org:7070/",
-	    "ralph"
-	);
-	__srpc.setCrossDomain(true);
-
     },
 
     members :
     {
         __rrpc : 0,
-	__srpc : 0,
-	__input1 : 0,
-	__atom : 0,
-	__channelText : "",
-	__scroll : 0,
 	seq : 0,
+	windows : [],
+	desktop : 0,
 
 	readresult : function(result, exc) 
 	{
 	    if (exc == null) 
 	    {
-		var pos = result.search(/4/);
-		var nick = result.slice(0,pos);
-		var msg = result.slice(pos+2);
+		var pos = result.search(/ /);
+		var command = result.slice(0, pos);
+		var param = result.slice(pos+1);
 
- 		MainScreenObj.addline(result);
+		pos = param.search(/ /);
+		var window = param.slice(0, pos);
+
+		if (command === "CREATE")
+		{
+		    var system = false;
+		    var name = param.slice(pos+1);
+
+		    if (window == 0)
+		    {
+			system = true;
+		    }
+
+		    var newWindow = new client.UserWindow(MainScreenObj.desktop, system, name);
+		    newWindow.show();
+		    newWindow.winid = window;
+		    MainScreenObj.windows[window] = newWindow;
+		}
+		else if (command === "ADDTEXT")
+		{
+ 		    MainScreenObj.windows[window].addline(param);
+		}   
 	    } 
 	    else 
 	    {
 //		alert("Exception during async call: " + exc);
 	    }
 
-	    __rrpc.callAsync(MainScreenObj.readresult, "hello", MainScreenObj.seq);
+	    MainScreenObj.seq++;
+	    __rrpc.callAsync(MainScreenObj.readresult, "hello", "1 1234 " + MainScreenObj.seq);
 	},
 
 	sendresult : function(result, exc) 
@@ -71,10 +82,6 @@ qx.Class.define("client.MainScreen",
 
 	show : function(rootItem)
 	{
-
-	    __rrpc.setTimeout(20000);
-	    __rrpc.callAsync(this.readresult, "hello", this.seq);
-	    this.seq = 1; // not robust as possible
 
 	    MainScreenObj = this;
 
@@ -97,6 +104,8 @@ qx.Class.define("client.MainScreen",
 	    /* middle */
 	    var windowManager = new qx.ui.window.Manager();
 	    var middleContainer = new qx.ui.window.Desktop(windowManager);
+	    this.desktop = middleContainer;
+
 	    middleContainer.set({decorator: "main", backgroundColor: "background-pane"});
 	    middleContainer.setAllowGrowY(true);
 	    
@@ -123,11 +132,10 @@ qx.Class.define("client.MainScreen",
 
 	    rootContainer.add(toolbar);//, {left:"3%",bottom:"3%", right:"3%", width:"20%" });
 
-	    this.wm3 = this.getModalWindow3();
-	    middleContainer.add(this.wm3);
-	    this.wm3.open();
-
 	    rootItem.add(rootContainer, {edge : 10});	    
+
+	    __rrpc.setTimeout(20000);
+	    __rrpc.callAsync(this.readresult, "hello", "1 1234 " + this.seq);
 	},
 
 	getMenuBar : function(bounds)
@@ -156,99 +164,6 @@ qx.Class.define("client.MainScreen",
 
 	    return frame;
 	},
-
-	getModalWindow3 : function()
-	{
-	    var layout = new qx.ui.layout.Grid();
-	    layout.setColumnFlex(0, 1); // make row 0 flexible
-	    layout.setColumnWidth(1, 100); // set with of column 1 to 200 pixel
-
-	    var wm1 = new qx.ui.window.Window("Channel #main - Moe v0.01");
-	    wm1.setLayout(layout);
-	    wm1.setModal(false);
-//	    wm1.setAllowResize(true);
-	    wm1.setAllowMaximize(false);
-	    wm1.moveTo(250, 150);
-
-	    // create scroll container
-	    __scroll = new qx.ui.container.Scroll().set({
-		width: 300,
-		height: 200,
-		scrollbarY : "on"
-	    });
-	    
-	    __channelText = "Ready.<br>";
-
-	    __atom = new qx.ui.basic.Atom(__channelText);
-	    __atom.setRich(true);
-//	    wm1.add(__atom, {row: 0, column: 0});
-
-	    __scroll.add(__atom);		       
-	    wm1.add(__scroll, {row: 0, column: 0});
-
-	    __input1 = new qx.ui.form.TextField().set({
-		maxLength: 150
-	    });
-	    __input1.focus();
-	    __input1.addListener("changeValue", this.getUserText, this);
-	    wm1.add(__input1, {row: 1, column: 0});
-
-	    wm1.add(this.getList(), {row: 0, column: 1, rowSpan: 2});
-
-	    return wm1;
-    	},
-
-	getUserText : function(e)
-	{
-	    var input = e.getData();
-	    
-	    if (input !== "")
-	    {
-		__srpc.callAsync(this.sendresult, "send", input);
-		__input1.setValue("");
-		this.addline("&lt;foobar&gt; " + input + "<br>");
-	    }
-	},
-
-	addline : function(line)
-	{
-	    var sizes = __scroll.getItemBottom(__atom);
-	    __channelText = __channelText + line;
-	    __atom.setLabel(__channelText);
-	    __scroll.scrollToY(sizes);
-	},
-
-	getList : function()
-	{
-	    var list = new qx.ui.form.List;
-	    list.setContextMenu(this.getContextMenu());
-
-	    for (var i=0; i<20; i++) {
-		list.add(new qx.ui.form.ListItem("@user" + i));
-	    }
-
-	    return list;
-	},
-
-	getContextMenu : function()
-	{
-	    var menu = new qx.ui.menu.Menu;
-
-	    var cutButton = new qx.ui.menu.Button("Info", "icon/16/actions/edit-cut.png", this._cutCommand);
-	    var copyButton = new qx.ui.menu.Button("Send Message", "icon/16/actions/edit-copy.png", this._copyCommand);
-	    var pasteButton = new qx.ui.menu.Button("De-op", "icon/16/actions/edit-paste.png", this._pasteCommand);
-
-	    cutButton.addListener("execute", this.debugButton);
-	    copyButton.addListener("execute", this.debugButton);
-	    pasteButton.addListener("execute", this.debugButton);
-
-	    menu.add(cutButton);
-	    menu.add(copyButton);
-	    menu.add(pasteButton);
-
-	    return menu;
-	},
-
 
 	getFileMenu : function()
 	{
