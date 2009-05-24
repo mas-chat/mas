@@ -17,7 +17,6 @@ qx.Class.define("client.MainScreen",
 	    "http://evergreen.portaali.org:7070/",
 	    "ralph"
 	);
-	__rrpc.setCrossDomain(true);
     },
 
     members :
@@ -55,7 +54,8 @@ qx.Class.define("client.MainScreen",
 		}
 		else if (command === "ADDTEXT")
 		{
- 		    MainScreenObj.windows[window].addline(param);
+		    var usertext = param.slice(pos+1);
+                    MainScreenObj.windows[window].addline(usertext);
 		}   
 	    } 
 	    else 
@@ -65,19 +65,6 @@ qx.Class.define("client.MainScreen",
 
 	    MainScreenObj.seq++;
 	    __rrpc.callAsync(MainScreenObj.readresult, "hello", "1 1234 " + MainScreenObj.seq);
-	},
-
-	sendresult : function(result, exc) 
-	{
-	    if (exc == null) 
-	    {
-
-	    } 
-	    else 
-	    {
-//		alert("Exception during async call: " + exc);
-	    }
-
 	},
 
 	show : function(rootItem)

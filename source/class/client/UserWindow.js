@@ -16,7 +16,6 @@ qx.Class.define("client.UserWindow",
 	    "http://evergreen.portaali.org:7070/",
 	    "ralph"
 	);
-	__srpc.setCrossDomain(true);
 
 	var layout = new qx.ui.layout.Grid();
 	layout.setColumnFlex(0, 1); // make row 0 flexible
@@ -70,6 +69,19 @@ qx.Class.define("client.UserWindow",
 	__srpc : 0,
 	winid : 0,
 
+	sendresult : function(result, exc) 
+	{
+	    if (exc == null) 
+	    {
+
+	    } 
+	    else 
+	    {
+		alert("!!! Exception during async call: " + exc);
+	    }
+
+	},
+
 	show : function()
 	{
 	    this.__window.open();
@@ -81,8 +93,8 @@ qx.Class.define("client.UserWindow",
 	    
 	    if (input !== "")
 	    {
-		__srpc.callAsync(this.sendresult, "send", "1 1234 " + winid + " " + input);
-		__input1.setValue("");
+		__srpc.callAsync(this.sendresult, "send", "1 1234 " + this.winid + " " + input);
+		this.__input1.setValue("");
 		this.addline("&lt;foobar&gt; " + input + "<br>");
 	    }
 	},
@@ -115,9 +127,9 @@ qx.Class.define("client.UserWindow",
 	    var copyButton = new qx.ui.menu.Button("Send Message", "icon/16/actions/edit-copy.png", this._copyCommand);
 	    var pasteButton = new qx.ui.menu.Button("De-op", "icon/16/actions/edit-paste.png", this._pasteCommand);
 
-	    cutButton.addListener("execute", this.debugButton);
-	    copyButton.addListener("execute", this.debugButton);
-	    pasteButton.addListener("execute", this.debugButton);
+//	    cutButton.addListener("execute", this.debugButton);
+//	    copyButton.addListener("execute", this.debugButton);
+//	    pasteButton.addListener("execute", this.debugButton);
 
 	    menu.add(cutButton);
 	    menu.add(copyButton);
