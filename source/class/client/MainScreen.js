@@ -57,6 +57,11 @@ qx.Class.define("client.MainScreen",
 		    var usertext = param.slice(pos+1);
                     MainScreenObj.windows[window].addline(usertext);
 		}   
+		else if (command === "NAMES")
+		{
+		    var usertext = param.slice(pos+1);
+                    MainScreenObj.windows[window].addnames(usertext);
+		}
 	    } 
 	    else 
 	    {
@@ -64,7 +69,7 @@ qx.Class.define("client.MainScreen",
 	    }
 
 	    MainScreenObj.seq++;
-	    __rrpc.callAsync(MainScreenObj.readresult, "hello", "1 1234 " + MainScreenObj.seq);
+	    __rrpc.callAsync(MainScreenObj.readresult, "HELLO", "1 1234 " + MainScreenObj.seq);
 	},
 
 	show : function(rootItem)
@@ -103,9 +108,14 @@ qx.Class.define("client.MainScreen",
 	    toolbar = new qx.ui.toolbar.ToolBar();
 	    toolbar.set({ maxHeight : 40 });
 
+	    // create hidden join new channel window
+	    this.wm4 = new client.NewChannelWindow(middleContainer);
+
 	    // create and add Part 1 to the toolbar
 	    var part1 = new qx.ui.toolbar.Part();
 	    var newButton = new qx.ui.toolbar.Button("Join new channel..", "icon/22/actions/document-new.png");
+	    newButton.addListener("execute", this.wm4.show, this.wm4);
+
 	    var copyButton = new qx.ui.toolbar.Button("#parkano", "icon/22/actions/edit-copy.png");
 	    var cutButton = new qx.ui.toolbar.Button("wilma", "icon/22/actions/edit-cut.png");
 	    var pasteButton = new qx.ui.toolbar.Button("#suomi", "icon/22/actions/edit-paste.png");
@@ -122,7 +132,7 @@ qx.Class.define("client.MainScreen",
 	    rootItem.add(rootContainer, {edge : 10});	    
 
 	    __rrpc.setTimeout(20000);
-	    __rrpc.callAsync(this.readresult, "hello", "1 1234 " + this.seq);
+	    __rrpc.callAsync(this.readresult, "HELLO", "1 1234 " + this.seq);
 	},
 
 	getMenuBar : function(bounds)

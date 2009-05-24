@@ -93,7 +93,7 @@ qx.Class.define("client.UserWindow",
 	    
 	    if (input !== "")
 	    {
-		__srpc.callAsync(this.sendresult, "send", "1 1234 " + this.winid + " " + input);
+		__srpc.callAsync(this.sendresult, "SEND", "1 1234 " + this.winid + " " + input);
 		this.__input1.setValue("");
 		this.addline("&lt;foobar&gt; " + input + "<br>");
 	    }
@@ -103,6 +103,14 @@ qx.Class.define("client.UserWindow",
 	{
 	    var sizes = this.__scroll.getItemBottom(this.__atom);
 	    this.__channelText = this.__channelText + line;
+	    this.__atom.setLabel(this.__channelText);
+	    this.__scroll.scrollToY(sizes);
+	},
+
+	addnames : function(line)
+	{
+	    var sizes = this.__scroll.getItemBottom(this.__atom);
+	    this.__channelText = this.__channelText + "names: " + line + "<br>";
 	    this.__atom.setLabel(this.__channelText);
 	    this.__scroll.scrollToY(sizes);
 	},
