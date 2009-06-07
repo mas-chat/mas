@@ -23,7 +23,11 @@ qx.Class.define("client.Login",
 	{
 	    if (exc == null) 
 	    {
-		if (result == 0)
+		var pos = result.search(/ /);
+                global_id = result.slice(0, pos);
+                global_sec  = result.slice(pos+1);
+              
+		if (global_id == 0)
 		{
 		    alert("go away");
 		}

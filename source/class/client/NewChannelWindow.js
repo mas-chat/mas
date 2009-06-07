@@ -88,7 +88,7 @@ qx.Class.define("client.NewChannelWindow",
 	    
 	    if (input !== "")
 	    {
-		__srpc.callAsync(this.sendresult, "JOIN", "1 1234 " + input);
+		__srpc.callAsync(this.sendresult, "JOIN", global_id + " " + global_sec + " " + input);
 	    }
 
 	    this.hide();

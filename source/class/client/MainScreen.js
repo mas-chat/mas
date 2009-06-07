@@ -22,6 +22,8 @@ qx.Class.define("client.MainScreen",
     members :
     {
         __rrpc : 0,
+	__part2 : 0,
+	__windowGroup : 0,
 	seq : 0,
 	windows : [],
 	desktop : 0,
@@ -49,8 +51,11 @@ qx.Class.define("client.MainScreen",
 
 		    var newWindow = new client.UserWindow(MainScreenObj.desktop, system, name);
 		    newWindow.show();
+		    newWindow.moveTo(50 + window * 50, 50 + window * 50);
 		    newWindow.winid = window;
 		    MainScreenObj.windows[window] = newWindow;
+
+		    MainScreenObj.updateWindowButtons();
 		}
 		else if (command === "ADDTEXT")
 		{
@@ -62,6 +67,15 @@ qx.Class.define("client.MainScreen",
 		    var usertext = param.slice(pos+1);
                     MainScreenObj.windows[window].addnames(usertext);
 		}
+		else if (command === "NICK")
+		{
+		    global_nick = param.slice(pos+1);
+		}
+		else if (command === "DIE")
+		{
+		    var reason = param.slice(pos+1);
+		    alert("Your session is terminated: " + reason + " Please press reload.");
+		}
 	    } 
 	    else 
 	    {
@@ -69,7 +83,12 @@ qx.Class.define("client.MainScreen",
 	    }
 
 	    MainScreenObj.seq++;
-	    __rrpc.callAsync(MainScreenObj.readresult, "HELLO", "1 1234 " + MainScreenObj.seq);
+              
+	    if (command !== "DIE")
+	    {
+		__rrpc.callAsync(MainScreenObj.readresult,
+				 "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
+	    }
 	},
 
 	show : function(rootItem)
@@ -82,16 +101,12 @@ qx.Class.define("client.MainScreen",
 
 	    /* Root widget */
 	    var rootContainer = new qx.ui.container.Composite(rootLayout);
-	    rootContainer.setAllowGrowY(true);
+//	    rootContainer.setAllowGrowY(true);
 
 	    var bounds = rootContainer.getBounds();
-
-	    rootContainer.add(this.getMenuBar(bounds));//, {left:"3%", top:"3%", right:"3%", width:"20%" });
+	    rootContainer.add(this.getMenuBar(bounds));
 
 	    var middleContainer0 = new qx.ui.container.Composite();
-	    middleContainer0.setLayout(new qx.ui.layout.Grow());
-	    middleContainer0.setAllowGrowY(true);
-	    middleContainer0.set({ minHeight : 700 });
 	    
 	    /* middle */
 	    var windowManager = new qx.ui.window.Manager();
@@ -100,9 +115,7 @@ qx.Class.define("client.MainScreen",
 
 	    middleContainer.set({decorator: "main", backgroundColor: "background-pane"});
 	    middleContainer.setAllowGrowY(true);
-	    
-	    middleContainer0.add(middleContainer);//,  {left:"3%",  top: "4%",bottom:"10%", right:"3%", width:"20%" });
-	    rootContainer.add(middleContainer0);
+	    rootContainer.add(middleContainer, {flex:1});
 	    
 	    // create the toolbar
 	    toolbar = new qx.ui.toolbar.ToolBar();
@@ -113,26 +126,63 @@ qx.Class.define("client.MainScreen",
 
 	    // create and add Part 1 to the toolbar
 	    var part1 = new qx.ui.toolbar.Part();
-	    var newButton = new qx.ui.toolbar.Button("Join new channel..", "icon/22/actions/document-new.png");
-	    newButton.addListener("execute", this.wm4.show, this.wm4);
+	    this.__part2 = new qx.ui.toolbar.Part();
+	    
+	    var joinButton = new qx.ui.toolbar.Button("Join new channel..", "icon/22/actions/document-new.png");
+	    joinButton.addListener("execute", this.wm4.show, this.wm4);
+	    part1.add(joinButton);
 
-	    var copyButton = new qx.ui.toolbar.Button("#parkano", "icon/22/actions/edit-copy.png");
-	    var cutButton = new qx.ui.toolbar.Button("wilma", "icon/22/actions/edit-cut.png");
-	    var pasteButton = new qx.ui.toolbar.Button("#suomi", "icon/22/actions/edit-paste.png");
-
-	    part1.add(newButton);
-	    part1.add(new qx.ui.toolbar.Separator());
-	    part1.add(copyButton);
-	    part1.add(cutButton);
-	    part1.add(pasteButton);
 	    toolbar.add(part1);
+	    toolbar.add(this.__part2);
+	    this.updateWindowButtons();
 
 	    rootContainer.add(toolbar);//, {left:"3%",bottom:"3%", right:"3%", width:"20%" });
 
 	    rootItem.add(rootContainer, {edge : 10});	    
 
 	    __rrpc.setTimeout(20000);
-	    __rrpc.callAsync(this.readresult, "HELLO", "1 1234 " + this.seq);
+	    __rrpc.callAsync(this.readresult, "HELLO", global_id + " " + global_sec + " " + this.seq);
+	},
+
+	updateWindowButtons : function()
+	{
+	    var mythis = MainScreenObj;
+
+	    mythis.__part2.removeAll();
+	    mythis._disposeObjects("__windowgroup");
+	    mythis.__windowGroup = new qx.ui.form.RadioGroup();
+
+	    for (var i=0; i < mythis.windows.length; i++)
+	    {
+		if (mythis.windows[i])
+		{
+		    var item = new qx.ui.toolbar.RadioButton(mythis.windows[i].getName());
+		    mythis.__part2.add(item)
+		    mythis.__windowGroup.add(item);
+		}
+	    }
+
+	    mythis.__windowGroup.addListener("changeValue", mythis.switchToWindow, mythis);
+	},
+
+	switchToWindow : function(e)
+	{
+	    var mythis = MainScreenObj;
+
+	    for (var i=0; i < mythis.windows.length; i++)
+	    {
+		if (mythis.windows[i])
+		{
+		    var text = mythis.windows[i].getName();
+		    var pos = text.search(/:/);
+		    var name = text.slice(0, pos-1);
+
+		    if (e.getData() === name)
+		    {
+			mythis.windows[i].activate();
+		    }
+		}
+	    }
 	},
 
 	getMenuBar : function(bounds)

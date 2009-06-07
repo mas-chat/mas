@@ -22,13 +22,14 @@ qx.Class.define("client.Application",
 		"http://evergreen.portaali.org/svn/lisa/jsonrpc.pl",
 		"qooxdoo.test"
 	    );
+	    __rpc.setCrossDomain(true);
 
 	    loginForm = new client.Login(__rpc, this);
 	    registrationForm = new client.Registration(__rpc);
 
-//	    loginForm.show(this.getRoot());
+	    loginForm.show(this.getRoot());
 
-	    this.loginDone();
+//	    this.loginDone();
 	},
 
 	loginDone : function()

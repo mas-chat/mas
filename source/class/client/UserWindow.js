@@ -1,6 +1,7 @@
 /* ************************************************************************
 
 #asset(projectx/*)
+#require(qx.util.StringSplit)
 
 ************************************************************************ */
 
@@ -10,7 +11,6 @@ qx.Class.define("client.UserWindow",
 
     construct : function(middleContainer, system, name)
     {
-
 	// write "socket"
 	__srpc = new qx.io.remote.Rpc(
 	    "http://evergreen.portaali.org:7070/",
@@ -18,7 +18,8 @@ qx.Class.define("client.UserWindow",
 	);
 
 	var layout = new qx.ui.layout.Grid();
-	layout.setColumnFlex(0, 1); // make row 0 flexible
+	layout.setRowFlex(0, 1); // make row 0 flexible
+	layout.setColumnFlex(0, 1); // make column 0 flexible
 	layout.setColumnWidth(1, 100); // set with of column 1 to 200 pixel
 
 	var wm1 = new qx.ui.window.Window(name);
@@ -29,8 +30,8 @@ qx.Class.define("client.UserWindow",
 	
 	// create scroll container
 	this.__scroll = new qx.ui.container.Scroll().set({
-	    width: 300,
-	    height: 200,
+	    minWidth: 300,
+	    minHeight: 200,
 	    scrollbarY : "on"
 	});
 
@@ -40,7 +41,7 @@ qx.Class.define("client.UserWindow",
 	this.__atom.setRich(true);
 	
 	this.__scroll.add(this.__atom);		       
-	wm1.add(this.__scroll, {row: 0, column: 0});
+	wm1.add(this.__scroll, {row: 0, column: 0, flex: 1});
 	
 	this.__input1 = new qx.ui.form.TextField().set({
 	    maxLength: 150
@@ -51,18 +52,22 @@ qx.Class.define("client.UserWindow",
 	
 	if (system == false)
 	{
-	    wm1.add(this.getList(), {row: 0, column: 1, rowSpan: 3});
+	    wm1.add(this.getList(), {row: 0, column: 1, rowSpan: 2, flex:1});
 	}
 
+	this.__system = system;
 	this.__window = wm1;
 
 	middleContainer.add(wm1);
+	
     },
 
     members :
     {
         __window : 0,
+	__system : 0,
 	__input1 : 0,
+	__list : 0,
 	__atom : 0,
 	__channelText : "",
 	__scroll : 0,
@@ -73,7 +78,14 @@ qx.Class.define("client.UserWindow",
 	{
 	    if (exc == null) 
 	    {
-
+                var pos = result.search(/ /);
+                var command = result.slice(0, pos);
+                var param = result.slice(pos+1);
+                
+                if (command === "DIE")
+                {
+		    alert("Your session is terminated: " + param + " Please press reload.");
+		}
 	    } 
 	    else 
 	    {
@@ -82,10 +94,30 @@ qx.Class.define("client.UserWindow",
 
 	},
 
+	moveTo : function(x,y)
+	{
+	    this.__window.moveTo(x,y);
+	},
+
 	show : function()
 	{
 	    this.__window.open();
     	},
+
+	getName : function()
+	{
+	    var topic = this.__window.getCaption();
+	    
+	    var pos = topic.search(/:/);
+	    var channel = topic.slice(0, pos-1);
+		
+	    return channel;
+	},
+
+	activate : function()
+	{
+	    this.__window.setShowStatusbar(true);
+	},
 
 	getUserText : function(e)
 	{
@@ -93,9 +125,9 @@ qx.Class.define("client.UserWindow",
 	    
 	    if (input !== "")
 	    {
-		__srpc.callAsync(this.sendresult, "SEND", "1 1234 " + this.winid + " " + input);
+		__srpc.callAsync(this.sendresult, "SEND", global_id + " " + global_sec + " " + this.winid + " " + input);
 		this.__input1.setValue("");
-		this.addline("&lt;foobar&gt; " + input + "<br>");
+		this.addline("&lt;" + global_nick + "&gt; " + input + "<br>");
 	    }
 	},
 
@@ -109,10 +141,19 @@ qx.Class.define("client.UserWindow",
 
 	addnames : function(line)
 	{
-	    var sizes = this.__scroll.getItemBottom(this.__atom);
-	    this.__channelText = this.__channelText + "names: " + line + "<br>";
-	    this.__atom.setLabel(this.__channelText);
-	    this.__scroll.scrollToY(sizes);
+	    if (this.__system == false)
+	    {
+
+		this.__list.removeAll();
+
+//		var names = qx.util.StringSplit.split(line, / /, 300);
+		var names = line.split(" ");
+		
+		for (var i=0; i < names.length; i++)
+		{
+		    this.__list.add(new qx.ui.form.ListItem(names[i]));
+		}
+	    }
 	},
 
 	getList : function()
@@ -120,9 +161,11 @@ qx.Class.define("client.UserWindow",
 	    var list = new qx.ui.form.List;
 	    list.setContextMenu(this.getContextMenu());
 
-	    for (var i=0; i<20; i++) {
-		list.add(new qx.ui.form.ListItem("@user" + i));
-	    }
+	    list.add(new qx.ui.form.ListItem("Wait..."));
+
+	    list.setAllowGrowY(true);
+
+	    this.__list = list;
 
 	    return list;
 	},
