@@ -24,6 +24,11 @@ qx.Class.define("client.Application",
 	    );
 	    __rpc.setCrossDomain(true);
 
+//	    var sample_form = new client.draw.About();
+//	    var doc = this.getRoot();
+
+//	    doc.add(sample_form.getWidget(), {edge:0});
+
 	    loginForm = new client.Login(__rpc, this);
 	    registrationForm = new client.Registration(__rpc);
 

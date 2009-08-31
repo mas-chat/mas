@@ -24,6 +24,7 @@ qx.Class.define("client.MainScreen",
         __rrpc : 0,
 	__part2 : 0,
 	__windowGroup : 0,
+	__manager : 0,
 	seq : 0,
 	windows : [],
 	desktop : 0,
@@ -42,16 +43,26 @@ qx.Class.define("client.MainScreen",
 		if (command === "CREATE")
 		{
 		    var system = false;
-		    var name = param.slice(pos+1);
+		    var options = param.split(" ");
 
 		    if (window == 0)
 		    {
 			system = true;
 		    }
+		    
+		    options.shift(); // window id
+		    var x = options.shift();
+		    var y = options.shift();
+		    var width = options.shift();
+		    var height = options.shift();
+
+		    var name = options.join(" ");
 
 		    var newWindow = new client.UserWindow(MainScreenObj.desktop, system, name);
+
+		    newWindow.moveTo(x, y);
 		    newWindow.show();
-		    newWindow.moveTo(50 + window * 50, 50 + window * 50);
+		    newWindow.addHandlers();
 		    newWindow.winid = window;
 		    MainScreenObj.windows[window] = newWindow;
 
@@ -101,7 +112,6 @@ qx.Class.define("client.MainScreen",
 
 	    /* Root widget */
 	    var rootContainer = new qx.ui.container.Composite(rootLayout);
-//	    rootContainer.setAllowGrowY(true);
 
 	    var bounds = rootContainer.getBounds();
 	    rootContainer.add(this.getMenuBar(bounds));
@@ -110,6 +120,7 @@ qx.Class.define("client.MainScreen",
 	    
 	    /* middle */
 	    var windowManager = new qx.ui.window.Manager();
+	    this.__manager = windowManager;
 	    var middleContainer = new qx.ui.window.Desktop(windowManager);
 	    this.desktop = middleContainer;
 
@@ -137,7 +148,6 @@ qx.Class.define("client.MainScreen",
 	    this.updateWindowButtons();
 
 	    rootContainer.add(toolbar);//, {left:"3%",bottom:"3%", right:"3%", width:"20%" });
-
 	    rootItem.add(rootContainer, {edge : 10});	    
 
 	    __rrpc.setTimeout(20000);
@@ -177,9 +187,15 @@ qx.Class.define("client.MainScreen",
 		    var pos = text.search(/:/);
 		    var name = text.slice(0, pos-1);
 
+		    var manager = mythis.windows[i].getLayout().getWindowManager();
+		    manager.bringToFront(mythis.windows[i]);
+
+//		    this.__manager.bringToFront(mythis.windows[i]);
+//		    this.__manager.updateStack();
+
 		    if (e.getData() === name)
 		    {
-			mythis.windows[i].activate();
+
 		    }
 		}
 	    }

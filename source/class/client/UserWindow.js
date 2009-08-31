@@ -11,8 +11,9 @@ qx.Class.define("client.UserWindow",
 
     construct : function(middleContainer, system, name)
     {
+
 	// write "socket"
-	__srpc = new qx.io.remote.Rpc(
+	this.__srpc = new qx.io.remote.Rpc(
 	    "http://evergreen.portaali.org:7070/",
 	    "ralph"
 	);
@@ -55,8 +56,8 @@ qx.Class.define("client.UserWindow",
 	    wm1.add(this.getList(), {row: 0, column: 1, rowSpan: 2, flex:1});
 	}
 
-	this.__system = system;
 	this.__window = wm1;
+	this.__system = system;
 
 	middleContainer.add(wm1);
 	
@@ -73,6 +74,33 @@ qx.Class.define("client.UserWindow",
 	__scroll : 0,
 	__srpc : 0,
 	winid : 0,
+
+	handleResize : function(e) 
+	{
+	    var data = e.getData();
+	    var width = data.width;
+	    var height = data.height;
+
+	    this.__srpc.callAsync(this.sendresult,
+				  "RESIZE", global_id + " " + global_sec + " " + this.winid + " " +
+				  width + " " + height);
+	},
+
+	handleMove : function(e)
+	{
+	    var data = e.getData();
+	    var x = data.left;
+	    var y = data.top;
+
+	    var bounds = this.__window.getLayoutParent().getBounds();
+
+	    x = parseInt(x / bounds.width);
+	    y = parseInt(y / bounds.height);
+
+	    this.__srpc.callAsync(this.sendresult,
+				  "MOVE", global_id + " " + global_sec + " " + this.winid + " " +
+				  x + " " + y);
+	},
 
 	sendresult : function(result, exc) 
 	{
@@ -94,9 +122,15 @@ qx.Class.define("client.UserWindow",
 
 	},
 
+	addHandlers : function()
+	{
+	    this.__window.addListener('resize', this.handleResize, this);
+	    this.__window.addListener('move', this.handleMove, this);
+	},
+
 	moveTo : function(x,y)
 	{
-	    this.__window.moveTo(x,y);
+	    this.__window.moveTo(x, y);
 	},
 
 	show : function()
@@ -125,7 +159,7 @@ qx.Class.define("client.UserWindow",
 	    
 	    if (input !== "")
 	    {
-		__srpc.callAsync(this.sendresult, "SEND", global_id + " " + global_sec + " " + this.winid + " " + input);
+		this.__srpc.callAsync(this.sendresult, "SEND", global_id + " " + global_sec + " " + this.winid + " " + input);
 		this.__input1.setValue("");
 		this.addline("&lt;" + global_nick + "&gt; " + input + "<br>");
 	    }
