@@ -20,7 +20,7 @@ qx.Class.define("client.Application",
    
 	    __rpc = new qx.io.remote.Rpc(
 		"http://evergreen.portaali.org/svn/lisa/jsonrpc.pl",
-		"qooxdoo.test"
+		"lisa.main"
 	    );
 	    __rpc.setCrossDomain(true);
 
