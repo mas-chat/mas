@@ -145,7 +145,7 @@ qx.Class.define("client.Login",
 	    wm1.setAllowMaximize(false);
 	    wm1.moveTo(250, 150);
 
-	    var atom = new qx.ui.basic.Atom("Registration OK. Now log in!", "icon/32/apps/office-address-book.png");
+	    var atom = new qx.ui.basic.Atom("Registration OK. Now check your mail to proceed!", "icon/32/apps/office-address-book.png");
 	    atom.setRich(true);
 	    wm1.add(atom);
 
