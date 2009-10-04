@@ -51,17 +51,23 @@ qx.Class.define("client.MainScreen",
 		    }
 		    
 		    options.shift(); // window id
-		    var x = options.shift();
-		    var y = options.shift();
+		    var x = parseInt(options.shift());
+		    var y = parseInt(options.shift());
 		    var width = options.shift();
 		    var height = options.shift();
 
 		    var name = options.join(" ");
 
 		    var newWindow = new client.UserWindow(MainScreenObj.desktop, system, name);
-
 		    newWindow.moveTo(x, y);
 		    newWindow.show();
+
+//		    newWindow.setLayoutProperties({
+//			width: 500,
+//			height: 500,
+//			edge: 0
+//		    });
+
 		    newWindow.addHandlers();
 		    newWindow.winid = window;
 		    MainScreenObj.windows[window] = newWindow;
@@ -115,8 +121,6 @@ qx.Class.define("client.MainScreen",
 
 	    var bounds = rootContainer.getBounds();
 	    rootContainer.add(this.getMenuBar(bounds));
-
-	    var middleContainer0 = new qx.ui.container.Composite();
 	    
 	    /* middle */
 	    var windowManager = new qx.ui.window.Manager();
@@ -125,7 +129,7 @@ qx.Class.define("client.MainScreen",
 	    this.desktop = middleContainer;
 
 	    middleContainer.set({decorator: "main", backgroundColor: "background-pane"});
-	    middleContainer.setAllowGrowY(true);
+	    //middleContainer.setAllowGrowY(true);
 	    rootContainer.add(middleContainer, {flex:1});
 	    
 	    // create the toolbar

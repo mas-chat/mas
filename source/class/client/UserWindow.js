@@ -81,6 +81,12 @@ qx.Class.define("client.UserWindow",
 	    var width = data.width;
 	    var height = data.height;
 
+//	    var hint = this.getSizeHint();
+//          var left = Math.round((bounds.width - hint.width) / 2);
+//          var top = Math.round((bounds.height - hint.height) / 2);
+
+	    this.__window.setCaption("w: " + width + " h: " + height);
+
 	    this.__srpc.callAsync(this.sendresult,
 				  "RESIZE", global_id + " " + global_sec + " " + this.winid + " " +
 				  width + " " + height);
@@ -92,10 +98,7 @@ qx.Class.define("client.UserWindow",
 	    var x = data.left;
 	    var y = data.top;
 
-	    var bounds = this.__window.getLayoutParent().getBounds();
-
-	    x = parseInt(x / bounds.width);
-	    y = parseInt(y / bounds.height);
+//	    this.__window.setCaption("x: " + x + " y: " + y);
 
 	    this.__srpc.callAsync(this.sendresult,
 				  "MOVE", global_id + " " + global_sec + " " + this.winid + " " +
@@ -196,9 +199,7 @@ qx.Class.define("client.UserWindow",
 	    list.setContextMenu(this.getContextMenu());
 
 	    list.add(new qx.ui.form.ListItem("Wait..."));
-
 	    list.setAllowGrowY(true);
-
 	    this.__list = list;
 
 	    return list;
