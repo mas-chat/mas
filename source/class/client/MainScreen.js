@@ -79,6 +79,11 @@ qx.Class.define("client.MainScreen",
 		    var usertext = param.slice(pos+1);
                     MainScreenObj.windows[window].addline(usertext);
 		}   
+		else if (command === "TOPIC")
+		{
+		    var usertext = param.slice(pos+1);
+                    MainScreenObj.windows[window].changetopic(usertext);
+		}   
 		else if (command === "NAMES")
 		{
 		    var usertext = param.slice(pos+1);

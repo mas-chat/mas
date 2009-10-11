@@ -85,7 +85,7 @@ qx.Class.define("client.UserWindow",
 //          var left = Math.round((bounds.width - hint.width) / 2);
 //          var top = Math.round((bounds.height - hint.height) / 2);
 
-	    this.__window.setCaption("w: " + width + " h: " + height);
+//	    this.__window.setCaption("w: " + width + " h: " + height);
 
 	    this.__srpc.callAsync(this.sendresult,
 				  "RESIZE", global_id + " " + global_sec + " " + this.winid + " " +
@@ -174,6 +174,11 @@ qx.Class.define("client.UserWindow",
 	    this.__channelText = this.__channelText + line;
 	    this.__atom.setLabel(this.__channelText);
 	    this.__scroll.scrollToY(sizes);
+	},
+
+	changetopic : function(line)
+	{
+	    this.__window.setCaption(line);	    
 	},
 
 	addnames : function(line)

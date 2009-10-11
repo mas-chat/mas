@@ -14,6 +14,11 @@ qx.Class.define("client.Login",
         this.__myrpc = rpcref;
     },
 
+    statics :
+    {
+	COOKIE_KEY : "ProjectEvergreen"
+    },
+
     members :
     {
 	wm1 : 0,
@@ -33,6 +38,10 @@ qx.Class.define("client.Login",
 		}
 		else
 		{
+		    if(cbRemember.getValue())
+		    {
+			qx.bom.Cookie.set(client.Login.COOKIE_KEY, global_sec);
+		    }
 		    myapp2.loginDone();
 		}
 	    } 
@@ -51,21 +60,16 @@ qx.Class.define("client.Login",
 	{
 
 	    /* Layout for root */
+	    var realrootLayout = new qx.ui.layout.HBox();
+	    realrootContainer = new qx.ui.container.Composite(realrootLayout);
+	    realrootLayout.setSpacing(25); // apply spacing
+
+	    /* Layout for root */
 	    var rootLayout = new qx.ui.layout.VBox();
 	    rootLayout.setSpacing(25); // apply spacing
 
 	    /* Root widget */
 	    rootContainer = new qx.ui.container.Composite(rootLayout);
-
-	    rootContainer.addListener(
-		"resize", function(e)
-		{
-		    var bounds = rootContainer.getBounds();
-		    rootContainer.set({
-			marginTop: Math.round(-bounds.height / 2),
-			marginLeft : Math.round(-bounds.width / 2)
-		    });
-		}, this); 
 
 	    /* Layout for members box */
 	    var layout = new qx.ui.layout.Grid(9, 5);
@@ -106,6 +110,10 @@ qx.Class.define("client.Login",
 	    button1.setAllowStretchX(false);
 
 	    this.__box1.add(button1,{ row : 3, column : 1 });
+
+	    /* remember me */
+	    cbRemember = new qx.ui.form.CheckBox("Remember me");
+	    this.__box1.add(cbRemember,{ row : 2, column : 1 });
 	    
 	    /* Check input on click */
 	    button1.addListener("execute", this.checkInput, this);
@@ -129,11 +137,27 @@ qx.Class.define("client.Login",
 	    /* Button 2 */
 	    var button2 = this.__okButton =  new qx.ui.form.Button("Register!");
 	    button2.addListener("execute", this.wm1.open, this.wm1); 
-	    button2.setAllowStretchX(true); 
 	    this.__box2.add(button2);
 
 	    rootContainer.add(this.__box2); 
-	    rootItem.add(rootContainer, {left: "50%", top: "30%"});	    
+
+	    /* frame */
+	    var html1 = "<center><h1>Project Evergreen</H1></center><p><br><br><center><img src=\"s.gif\"></center><p><br><center>Nothing public yet.</center><p><center>Contact: <a href=\"mailto:iao@iki.fi\">iao@iki.fi</a>";
+	    var frame = new qx.ui.embed.Html(html1);
+//	    frame.setMaxWidth(900);
+	    frame.setDecorator("main");
+
+	    rootItem.add(frame, {
+		top : 50,
+		right : 50,
+		bottom : 50,
+		left : 50
+	    });
+
+	    rootItem.add(rootContainer, {
+		top : 100,
+		left : 100
+	    });
 	},
 
 	getModalWindow2 : function()
