@@ -43,14 +43,6 @@ qx.Class.define("client.Registration",
 	    }
 	},
 
-	registerUser : function()
-	{
-	    this.__myrpc.callAsync(this.lisaresult, "register", this.__field1.getValue(), this.__field2.getValue(),
-				   this.__manager.getValue(), 			    
-				   this.__field3.getValue(), this.__field4.getValue(), this.__field5.getValue(),
-				   this.__field6.getValue());
-	},
-
 	getModalWindow1 : function()
 	{
 	    var wm1 = new qx.ui.window.Window("Registration form");
@@ -82,32 +74,33 @@ qx.Class.define("client.Registration",
 	    }
 	    
 	    /* Text fields */
-	    this.__field1 = new qx.ui.form.TextField();
-	    this.__field2 = new qx.ui.form.TextField();
-	    this.__field3 = new qx.ui.form.TextField();
+	    var __firstname = new qx.ui.form.TextField();
+	    __firstname.setRequired(true);
+	    var __lastname = new qx.ui.form.TextField();
+	    var __email = new qx.ui.form.TextField();
 	    
-	    box1.add(this.__field1.set({
+	    box1.add(__firstname.set({
 		allowGrowX: true, paddingTop: 3
 	    }), {row: 0, column : 1, colSpan : 2});
 	    
-	    box1.add(this.__field2.set({
+	    box1.add(__lastname.set({
 		allowShrinkX: false, paddingTop: 3
 	    }), {row: 1, column : 1, colSpan : 2});
 
 	    // Create some radio buttons
-	    this.__rbMale = new qx.ui.form.RadioButton("Male");
-	    this.__rbFemale = new qx.ui.form.RadioButton("Female");
+	    var __rbMale = new qx.ui.form.RadioButton("Male");
+	    var __rbFemale = new qx.ui.form.RadioButton("Female");
 
 	    // Add them to the container
-	    box1.add(this.__rbMale, { row : 2, column : 1 });
-	    box1.add(this.__rbFemale, { row : 2, column : 2 });
+	    box1.add(__rbMale, { row : 2, column : 1 });
+	    box1.add(__rbFemale, { row : 2, column : 2 });
 
-	    box1.add(this.__field3.set({
+	    box1.add(__email.set({
 		allowShrinkX: false, paddingTop: 3
 	    }), {row: 3, column : 1, colSpan : 2});
 
 	    // Add all radio buttons to the manager
-	    this.__manager = new qx.ui.form.RadioGroup(this.__rbMale, this.__rbFemale);
+	    var __manager = new qx.ui.form.RadioGroup(__rbMale, __rbFemale);
  
 	    /* Layout for password box */
 	    var layout2 = new qx.ui.layout.Grid(9, 5);
@@ -130,14 +123,14 @@ qx.Class.define("client.Registration",
 	    }
 	    
 	    /* Text fields */
-	    this.__field4 = new qx.ui.form.PasswordField();
-	    this.__field5 = new qx.ui.form.PasswordField();
+	    var __pw = new qx.ui.form.PasswordField();
+	    var __pwagain = new qx.ui.form.PasswordField();
 	    
-	    box2.add(this.__field4.set({
+	    box2.add(__pw.set({
 		allowShrinkX: false, paddingTop: 3
 	    }), {row: 0, column : 1});
 	    
-	    box2.add(this.__field5.set({
+	    box2.add(__pwagain.set({
 		allowShrinkX: false, paddingTop: 3
 	    }), {row: 1, column : 1});
 	
@@ -159,9 +152,9 @@ qx.Class.define("client.Registration",
 	    }), {row: 0, column : 0});
 	    
 	    /* Text fields */
-	    this.__field6 = new qx.ui.form.TextField();
+	    var __nick = new qx.ui.form.TextField();
 	    
-	    box3.add(this.__field6.set({
+	    box3.add(__nick.set({
 		allowShrinkX: false, paddingTop: 3
 	    }), {row: 0, column : 1});
 
@@ -178,18 +171,99 @@ qx.Class.define("client.Registration",
 	    var button1 =  new qx.ui.form.Button("Complete registration");
 	    
 	    /* Check input on click */
-	    button1.addListener("execute", this.registerUser, this);
-	    
 	    box4.add(button1);
 	    
+	    // create a checkbox
+	    var accepted = new qx.ui.form.CheckBox("Accept Terms Of Use");
+	    accepted.setRequired(true);
+
 	    wm1.add(box1); 
 	    wm1.add(box2);
 	    wm1.add(box3);
 	    wm1.add(new qx.ui.core.Spacer(30));
+	    wm1.add(accepted);
+	    wm1.add(new qx.ui.core.Spacer(30));
 	    wm1.add(box4);
 
+	    // create the form manager
+	    var manager = new qx.ui.form.validation.Manager();
+
+	    // create a validator function
+	    var passwordLengthValidator = function(value, item) {
+		var valid = value != null && value.length > 2;
+		if (!valid) 
+		{
+		    item.setInvalidMessage("Please enter a password at with least 6 characters.");
+		    return false;
+		}
+
+		if(__pw.getValue() == __pwagain.getValue())
+		{
+		    return true;
+		}
+		else
+		{
+		    item.setInvalidMessage("Passwords do not match");
+		    return false;
+		}
+	    }
+
+	    var nickLengthValidator = function(value, item) {
+		var valid = value != null && value.length > 2;
+		if (!valid) {
+		    item.setInvalidMessage("Please enter a nickname at with least 3 characters.");
+		}
+		return valid;
+	    }
+
+	    var userNameValidator = function(value, item) {
+		var valid = value != null && value.length > 0;
+		if (!valid) 
+		{
+		    item.setInvalidMessage("Please enter a name.");
+		}
+		return valid;
+	    }
+
+	    manager.add(__firstname, userNameValidator);
+	    manager.add(__lastname, userNameValidator);
+	    manager.add(__email, qx.util.Validate.email());
+	    manager.add(__pw, passwordLengthValidator);
+	    manager.add(__pwagain, passwordLengthValidator);
+	    manager.add(__nick, nickLengthValidator);
+	    manager.add(accepted);
+
+	    button1.addListener("execute", function() {
+		// configure the send button
+		button1.setEnabled(false);
+		button1.setLabel("Validating...");
+		manager.validate();
+
+		if (manager.getValid()) 
+		{
+		    button1.setLabel("Done");
+
+		    var gender = 1;
+
+		    if (__rbFemale.getValue())
+		    {
+			gender = 0;
+		    }
+
+		    this.__myrpc.callAsync(this.lisaresult, "register",
+					   __firstname.getValue(), __lastname.getValue(),
+					   gender, 			    
+					   __email.getValue(), __pw.getValue(), __pwagain.getValue(),
+					   __nick.getValue());
+		}
+		else 
+		{
+		    button1.setEnabled(true);
+		    button1.setLabel("Try again");
+		}
+	    }, this);
+
 	    return wm1;
-    
 	}
     }
 });
