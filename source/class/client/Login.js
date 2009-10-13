@@ -142,7 +142,7 @@ qx.Class.define("client.Login",
 	    rootContainer.add(this.__box2); 
 
 	    /* frame */
-	    var html1 = "<center><h1>Project Evergreen</H1></center><p><br><br><center><img src=\"s.gif\"></center><p><br><center>Nothing public yet.</center><p><center>Contact: <a href=\"mailto:iao@iki.fi\">iao@iki.fi</a>";
+	    var html1 = "<center><h1>Project Evergreen</H1></center><p><br><br><center><img src=\"img/s.gif\"></center><p><br><center>Nothing public yet.</center><p><center>Contact: <a href=\"mailto:iao@iki.fi\">iao@iki.fi</a>";
 	    var frame = new qx.ui.embed.Html(html1);
 //	    frame.setMaxWidth(900);
 	    frame.setDecorator("main");

@@ -9,12 +9,12 @@ qx.Class.define("client.UserWindow",
 {
     extend : qx.core.Object,
 
-    construct : function(middleContainer, system, name)
+    construct : function(desktop, system, name)
     {
 
 	// write "socket"
 	this.__srpc = new qx.io.remote.Rpc(
-	    "http://evergreen.portaali.org:7070/",
+	    "http://evergreen.portaali.org:" + ralph_port + "/",
 	    "ralph"
 	);
 
@@ -59,7 +59,7 @@ qx.Class.define("client.UserWindow",
 	this.__window = wm1;
 	this.__system = system;
 
-	middleContainer.add(wm1);
+	desktop.add(wm1);
 	
     },
 
@@ -172,6 +172,12 @@ qx.Class.define("client.UserWindow",
 	{
 	    var sizes = this.__scroll.getItemBottom(this.__atom);
 	    this.__channelText = this.__channelText + line;
+
+	    if (this.__channelText.length > 6000)
+	    {
+		//regexp
+	    }
+
 	    this.__atom.setLabel(this.__channelText);
 	    this.__scroll.scrollToY(sizes);
 	},

@@ -17,24 +17,30 @@ qx.Class.define("client.Application",
 	    this.base(arguments);
 	
 	    qx.log.appender.Console;
-   
-	    __rpc = new qx.io.remote.Rpc(
-		"http://evergreen.portaali.org/svn/lisa/jsonrpc.pl",
-		"lisa.main"
-	    );
+
+	    // install.sh changes the port
+	    ralph_port = 9999; 		
+
+	    if (ralph_port == 7070)
+	    {
+		__rpc = new qx.io.remote.Rpc(
+		    "http://evergreen.portaali.org/lisa/jsonrpc.pl",
+		    "lisa.main" );
+	    }
+	    else
+	    {
+		__rpc = new qx.io.remote.Rpc(
+		    "http://evergreen_dev.portaali.org/lisa/jsonrpc.pl",
+		    "lisa.main" );
+	    }
+
 	    __rpc.setCrossDomain(true);
-
-//	    var sample_form = new client.draw.About();
-//	    var doc = this.getRoot();
-
-//	    doc.add(sample_form.getWidget(), {edge:0});
 
 	    loginForm = new client.Login(__rpc, this);
 	    registrationForm = new client.Registration(__rpc);
 
 	    loginForm.show(this.getRoot());
 
-//	    this.loginDone();
 	},
 
 	loginDone : function()

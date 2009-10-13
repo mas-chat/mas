@@ -14,7 +14,7 @@ qx.Class.define("client.MainScreen",
 
 	// read "socket"
 	__rrpc = new qx.io.remote.Rpc(
-	    "http://evergreen.portaali.org:7070/",
+	    "http://evergreen.portaali.org:" + ralph_port + "/",
 	    "ralph"
 	);
     },
@@ -181,7 +181,8 @@ qx.Class.define("client.MainScreen",
 		}
 	    }
 
-	    mythis.__windowGroup.addListener("changeValue", mythis.switchToWindow, mythis);
+	    mythis.__windowGroup.addListener("changeSelection", mythis.switchToWindow, mythis);
+
 	},
 
 	switchToWindow : function(e)
@@ -190,22 +191,9 @@ qx.Class.define("client.MainScreen",
 
 	    for (var i=0; i < mythis.windows.length; i++)
 	    {
-		if (mythis.windows[i])
+		if (e.getData()[0] == mythis.__part2.getChildren()[i]) 
 		{
-		    var text = mythis.windows[i].getName();
-		    var pos = text.search(/:/);
-		    var name = text.slice(0, pos-1);
-
-		    var manager = mythis.windows[i].getLayout().getWindowManager();
-		    manager.bringToFront(mythis.windows[i]);
-
-//		    this.__manager.bringToFront(mythis.windows[i]);
-//		    this.__manager.updateStack();
-
-		    if (e.getData() === name)
-		    {
-
-		    }
+		    mythis.windows[i].show();
 		}
 	    }
 	},
@@ -215,7 +203,6 @@ qx.Class.define("client.MainScreen",
 	    var frame = new qx.ui.container.Composite(new qx.ui.layout.Grow);
 
 	    var menubar = new qx.ui.menubar.MenuBar;
-//	    menubar.setWidth(bounds.width);
 	    menubar.setAllowGrowX(true);
 
 	    frame.add(menubar);
