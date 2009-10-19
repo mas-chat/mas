@@ -13,7 +13,7 @@ qx.Class.define("client.NewChannelWindow",
 
 	// write "socket"
 	__srpc = new qx.io.remote.Rpc(
-	    "http://evergreen.portaali.org:" + ralph_port + "/",
+	    ralph_domain + "/",
 	    "ralph"
 	);
 

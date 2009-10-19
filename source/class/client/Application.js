@@ -23,6 +23,8 @@ qx.Class.define("client.Application",
 
 	    if (ralph_port == 80)
 	    {
+		ralph_domain = "http://a167.myrootshell.com";
+
 		//production
 		__rpc = new qx.io.remote.Rpc(
 		    "http://a167.myrootshell.com:8080/lisa/jsonrpc.pl",

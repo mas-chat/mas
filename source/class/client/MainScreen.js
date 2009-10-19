@@ -14,7 +14,7 @@ qx.Class.define("client.MainScreen",
 
 	// read "socket"
 	__rrpc = new qx.io.remote.Rpc(
-	    "http://evergreen.portaali.org:" + ralph_port + "/",
+	    ralph_domain + "/",
 	    "ralph"
 	);
     },
