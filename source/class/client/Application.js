@@ -21,7 +21,7 @@ qx.Class.define("client.Application",
 	    // install.sh changes the port
 	    ralph_port = 9999; 		
 
-	    if (ralph_port == 7070)
+	    if (ralph_port == 80)
 	    {
 		__rpc = new qx.io.remote.Rpc(
 		    "http://evergreen.portaali.org/lisa/jsonrpc.pl",
