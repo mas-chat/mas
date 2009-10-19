@@ -23,8 +23,9 @@ qx.Class.define("client.Application",
 
 	    if (ralph_port == 80)
 	    {
+		//production
 		__rpc = new qx.io.remote.Rpc(
-		    "http://evergreen.portaali.org/lisa/jsonrpc.pl",
+		    "http://a167.myrootshell.com:8080/lisa/jsonrpc.pl",
 		    "lisa.main" );
 	    }
 	    else
