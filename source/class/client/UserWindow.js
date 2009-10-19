@@ -164,7 +164,7 @@ qx.Class.define("client.UserWindow",
 	    {
 		this.__srpc.callAsync(this.sendresult, "SEND", global_id + " " + global_sec + " " + this.winid + " " + input);
 		this.__input1.setValue("");
-		this.addline("&lt;" + global_nick + "&gt; " + input + "<br>");
+		//this.addline("&lt;" + global_nick + "&gt; " + input + "<br>");
 	    }
 	},
 
