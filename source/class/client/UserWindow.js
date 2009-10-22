@@ -1,7 +1,7 @@
 /* ************************************************************************
 
 #asset(projectx/*)
-#require(qx.util.StringSplit)
+5B5B#require(qx.util.StringSplit)
 
 ************************************************************************ */
 
@@ -81,15 +81,19 @@ qx.Class.define("client.UserWindow",
 	    var width = data.width;
 	    var height = data.height;
 
-//	    var hint = this.getSizeHint();
-//          var left = Math.round((bounds.width - hint.width) / 2);
-//          var top = Math.round((bounds.height - hint.height) / 2);
-
-//	    this.__window.setCaption("w: " + width + " h: " + height);
-
 	    this.__srpc.callAsync(this.sendresult,
 				  "RESIZE", global_id + " " + global_sec + " " + this.winid + " " +
 				  width + " " + height);
+	},
+
+	setHeight : function(e)
+	{
+	    this.__window.setHeight(e);
+	},
+
+	setWidth : function(e)
+	{
+	    this.__window.setWidth(e);
 	},
 
 	handleMove : function(e)
@@ -97,8 +101,6 @@ qx.Class.define("client.UserWindow",
 	    var data = e.getData();
 	    var x = data.left;
 	    var y = data.top;
-
-//	    this.__window.setCaption("x: " + x + " y: " + y);
 
 	    this.__srpc.callAsync(this.sendresult,
 				  "MOVE", global_id + " " + global_sec + " " + this.winid + " " +
