@@ -39,6 +39,15 @@ qx.Class.define("client.Application",
 
 	    __rpc.setCrossDomain(true);
 
+	    var cookie = qx.bom.Cookie.get("ProjectEvergreen");
+
+	    if(cookie !== null)
+	    {
+		alert("cookie is set: " + cookie);
+	    }
+	    
+	    alert("cookie is: " + cookie);
+
 	    loginForm = new client.Login(__rpc, this);
 	    registrationForm = new client.Registration(__rpc);
 

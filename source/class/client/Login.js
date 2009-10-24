@@ -28,19 +28,25 @@ qx.Class.define("client.Login",
 	{
 	    if (exc == null) 
 	    {
-		var pos = result.search(/ /);
-                global_id = result.slice(0, pos);
-                global_sec  = result.slice(pos+1);
+		var options = param.split(" ");
+
+                global_id = options.shift();
+                global_sec = options.shift();
+		
+		var cookie = options.shift();
               
+
 		if (global_id == 0)
 		{
-		    alert("go away");
+		    alert("Wrong password. Go away");
 		}
 		else
 		{
-		    if(cbRemember.getValue())
+		    if(cookie != 0)
 		    {
-			qx.bom.Cookie.set(client.Login.COOKIE_KEY, global_sec);
+			alert("setting cookie");
+			// expires after two week or when server says so
+			qx.bom.Cookie.set(client.Login.COOKIE_KEY, cookie, 14);
 		    }
 		    myapp2.loginDone();
 		}
@@ -53,7 +59,13 @@ qx.Class.define("client.Login",
 
 	checkInput : function()
 	{
-	    this.__myrpc.callAsync(this.result, "login", this.__field1.getValue(), this.__field2.getValue());
+	    var remember = 0;
+
+	    if(cbRemember.getValue()) {
+		remember = 1;
+	    }
+
+	    this.__myrpc.callAsync(this.result, "login", this.__field1.getValue(), this.__field2.getValue(), remember);
 	},
 
 	show : function(rootItem)

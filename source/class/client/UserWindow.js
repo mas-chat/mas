@@ -73,7 +73,9 @@ qx.Class.define("client.UserWindow",
 	__channelText : "",
 	__scroll : 0,
 	__srpc : 0,
+	__lines : 0,
 	winid : 0,
+	
 
 	handleResize : function(e) 
 	{
@@ -175,9 +177,13 @@ qx.Class.define("client.UserWindow",
 	    var sizes = this.__scroll.getItemBottom(this.__atom);
 	    this.__channelText = this.__channelText + line;
 
-	    if (this.__channelText.length > 6000)
+	    this.__lines++;
+
+	    // limit lines
+	    if (this.__lines > 100)
 	    {
-		//regexp
+		var pos = this.__channelText.search(/<br>/i)
+		this.__channelText = this.__channelText.substr(pos + 4);
 	    }
 
 	    this.__atom.setLabel(this.__channelText);
