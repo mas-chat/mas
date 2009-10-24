@@ -28,23 +28,31 @@ qx.Class.define("client.Login",
 	{
 	    if (exc == null) 
 	    {
-		var options = param.split(" ");
+
+		var options = result.split(" ");
 
                 global_id = options.shift();
                 global_sec = options.shift();
 		
 		var cookie = options.shift();
-              
+		var reason = options.shift();
+
+		//TODO: this is not robuts. Try to send "" from server and you be surprised
+ 
 
 		if (global_id == 0)
 		{
-		    alert("Wrong password. Go away");
+		    if (reason == 0)
+		    {
+			alert("Wrong password. Go away");
+			qx.bom.Cookie.del(client.Login.COOKIE_KEY);
+		    }
+		    // else do nothing. Cookie is expired and user will see login page
 		}
 		else
 		{
 		    if(cookie != 0)
 		    {
-			alert("setting cookie");
 			// expires after two week or when server says so
 			qx.bom.Cookie.set(client.Login.COOKIE_KEY, cookie, 14);
 		    }

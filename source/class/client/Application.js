@@ -41,14 +41,14 @@ qx.Class.define("client.Application",
 
 	    var cookie = qx.bom.Cookie.get("ProjectEvergreen");
 
+	    loginForm = new client.Login(__rpc, this);
+
 	    if(cookie !== null)
 	    {
-		alert("cookie is set: " + cookie);
+		alert("trying cookie login");
+		__rpc.callAsync(loginForm.result, "login_cookie", cookie);
 	    }
-	    
-	    alert("cookie is: " + cookie);
 
-	    loginForm = new client.Login(__rpc, this);
 	    registrationForm = new client.Registration(__rpc);
 
 	    loginForm.show(this.getRoot());
