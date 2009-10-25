@@ -45,7 +45,6 @@ qx.Class.define("client.Application",
 
 	    if(cookie !== null)
 	    {
-		alert("trying cookie login");
 		__rpc.callAsync(loginForm.result, "login_cookie", cookie);
 	    }
 

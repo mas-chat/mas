@@ -137,6 +137,7 @@ qx.Class.define("client.Login",
 	    
 	    /* Check input on click */
 	    button1.addListener("execute", this.checkInput, this);
+	    this.__field2.addListener("changeValue", this.checkInput, this);
 
 	    /* Layout for register box */
             var layout2 = new qx.ui.layout.VBox();
