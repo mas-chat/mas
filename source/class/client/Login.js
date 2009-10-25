@@ -56,6 +56,7 @@ qx.Class.define("client.Login",
 			// expires after two week or when server says so
 			qx.bom.Cookie.set(client.Login.COOKIE_KEY, cookie, 14);
 		    }
+
 		    myapp2.loginDone();
 		}
 	    } 

@@ -8,10 +8,8 @@ qx.Class.define("client.MainScreen",
 {
     extend : qx.core.Object,
 
-    construct : function(rpcref, appref)
+    construct : function()
     {
-	myapp2 = appref;
-
 	// read "socket"
 	__rrpc = new qx.io.remote.Rpc(
 	    ralph_domain + "/",
@@ -95,7 +93,8 @@ qx.Class.define("client.MainScreen",
 		else if (command === "DIE")
 		{
 		    var reason = param.slice(pos+1);
-		    alert("Your session is terminated: " + reason + " Please press reload.");
+		    alert("You logged in from a different computer. This session terminates. Reason: " + reason);
+		    window.location="http://a167.myrootshell.com/";
 		}
 	    } 
 	    else 
@@ -247,7 +246,7 @@ qx.Class.define("client.MainScreen",
 	_logoutCommand : function()
 	{
 	    qx.bom.Cookie.del("ProjectEvergreen");
-	    window.location="http://a167.myrootshell.com/"
+	    window.location="http://a167.myrootshell.com/";
 	},
 
 	_manualCommand : function()
