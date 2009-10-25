@@ -32,6 +32,8 @@ qx.Class.define("client.Application",
 	    }
 	    else
 	    {
+		ralph_domain = "http://evergreen_dev.portaali.org";
+
 		__rpc = new qx.io.remote.Rpc(
 		    "http://evergreen_dev.portaali.org/lisa/jsonrpc.pl",
 		    "lisa.main" );
