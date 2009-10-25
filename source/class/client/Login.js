@@ -44,7 +44,7 @@ qx.Class.define("client.Login",
 		{
 		    if (reason == 0)
 		    {
-			alert("Wrong password. Go away");
+			infoDialog.getLoginFailedWin(__rootItem);
 			qx.bom.Cookie.del(client.Login.COOKIE_KEY);
 		    }
 		    // else do nothing. Cookie is expired and user will see login page
@@ -138,7 +138,7 @@ qx.Class.define("client.Login",
 	    
 	    /* Check input on click */
 	    button1.addListener("execute", this.checkInput, this);
-	    this.__field2.addListener("changeValue", this.checkInput, this);
+	    this.__field2.addListener("execute", this.checkInput, this);
 
 	    /* Layout for register box */
             var layout2 = new qx.ui.layout.VBox();
