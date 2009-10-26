@@ -15,6 +15,8 @@ qx.Class.define("client.Application",
 	main : function()
 	{
 	    this.base(arguments);
+
+	    infoDialog = new client.InfoDialog();
 	
 	    qx.log.appender.Console;
 
@@ -32,7 +34,7 @@ qx.Class.define("client.Application",
 	    }
 	    else
 	    {
-		ralph_domain = "http://evergreen_dev.portaali.org";
+		ralph_domain = "http://evergreen_dev.portaali.org:9999";
 
 		__rpc = new qx.io.remote.Rpc(
 		    "http://evergreen_dev.portaali.org/lisa/jsonrpc.pl",

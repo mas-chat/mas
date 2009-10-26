@@ -108,6 +108,7 @@ qx.Class.define("client.MainScreen",
               
 	    if (command !== "DIE")
 	    {
+		//TODO: can cause havoc towards server when looping
 		MainScreenObj.__rrpc.callAsync(MainScreenObj.readresult,
 				      "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
 	    }
@@ -158,8 +159,6 @@ qx.Class.define("client.MainScreen",
 
 	    rootContainer.add(toolbar);//, {left:"3%",bottom:"3%", right:"3%", width:"20%" });
 	    rootItem.add(rootContainer, {edge : 10});	    
-
-	    alert(global_id + " " + global_sec + " " + this.seq);
 
 	    this.__rrpc.callAsync(this.readresult, "HELLO", global_id + " " + global_sec + " " + this.seq);
 	},
