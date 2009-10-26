@@ -59,6 +59,8 @@ qx.Class.define("client.UserWindow",
 	this.__window = wm1;
 	this.__system = system;
 
+	this.__window.addListener("close", this.handleClose, this);
+
 	desktop.add(wm1);
 	
     },
@@ -86,6 +88,12 @@ qx.Class.define("client.UserWindow",
 	    this.__srpc.callAsync(this.sendresult,
 				  "RESIZE", global_id + " " + global_sec + " " + this.winid + " " +
 				  width + " " + height);
+	},
+
+	handleClose : function(e)
+	{
+	    this.__srpc.callAsync(this.sendresult,
+				  "CLOSE", global_id + " " + global_sec + " " + this.winid);
 	},
 
 	setHeight : function(e)
