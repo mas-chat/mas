@@ -65,6 +65,8 @@ qx.Class.define("client.UserWindow",
 	
     },
 
+    //TODO: write proper destructor
+
     members :
     {
         __window : 0,
@@ -182,7 +184,6 @@ qx.Class.define("client.UserWindow",
 
 	addline : function(line)
 	{
-	    var sizes = this.__scroll.getItemBottom(this.__atom);
 	    this.__channelText = this.__channelText + line;
 
 	    this.__lines++;
@@ -195,6 +196,8 @@ qx.Class.define("client.UserWindow",
 	    }
 
 	    this.__atom.setLabel(this.__channelText);
+
+	    var sizes = this.__scroll.getItemBottom(this.__atom);
 	    this.__scroll.scrollToY(sizes);
 	},
 

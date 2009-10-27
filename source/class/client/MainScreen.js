@@ -98,6 +98,14 @@ qx.Class.define("client.MainScreen",
 		    alert("You logged in from a different computer. This session terminates. Reason: " + reason);
 		    window.location="http://a167.myrootshell.com/";
 		}
+		else if (command === "CLOSE")
+		{
+		    var winid = param.slice(pos+1);
+		    //TODO: call destructor?
+		    delete MainScreenObj.windows[winid];
+
+		    MainScreenObj.updateWindowButtons();		    
+		}
 	    } 
 	    else 
 	    {
