@@ -44,7 +44,7 @@ qx.Class.define("client.Login",
 		{
 		    if (reason == 0)
 		    {
-			infoDialog.getLoginFailedWin(__rootItem);
+			infoDialog.getLoginFailedWin(myapp2.getRoot());
 			qx.bom.Cookie.del(client.Login.COOKIE_KEY);
 		    }
 		    // else do nothing. Cookie is expired and user will see login page

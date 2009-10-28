@@ -15,8 +15,6 @@ qx.Class.define("client.Application",
 	main : function()
 	{
 	    this.base(arguments);
-
-	    infoDialog = new client.InfoDialog();
 	
 	    qx.log.appender.Console;
 
@@ -40,6 +38,8 @@ qx.Class.define("client.Application",
 		    "http://evergreen_dev.portaali.org/lisa/jsonrpc.pl",
 		    "lisa.main" );
 	    }
+
+	    infoDialog = new client.InfoDialog();
 
 	    __rpc.setCrossDomain(true);
 

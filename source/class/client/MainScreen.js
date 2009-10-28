@@ -158,7 +158,11 @@ qx.Class.define("client.MainScreen",
 	    this.__part2 = new qx.ui.toolbar.Part();
 	    
 	    var joinButton = new qx.ui.toolbar.Button("Join new channel..", "icon/22/actions/document-new.png");
-	    joinButton.addListener("execute", this.wm4.show, this.wm4);
+
+	    joinButton.addListener("execute", function(e) {
+		infoDialog.getJoinNewChannelWin(myapp2.getRoot());
+	    }, this);
+
 	    part1.add(joinButton);
 
 	    toolbar.add(part1);
