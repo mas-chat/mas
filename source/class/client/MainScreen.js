@@ -23,6 +23,7 @@ qx.Class.define("client.MainScreen",
     {
         __rrpc : 0,
 	__part2 : 0,
+	__part3 : 0,
 	__windowGroup : 0,
 	__manager : 0,
 	seq : 0,
@@ -150,12 +151,10 @@ qx.Class.define("client.MainScreen",
 	    toolbar = new qx.ui.toolbar.ToolBar();
 	    toolbar.set({ maxHeight : 40 });
 
-	    // create hidden join new channel window
-	    this.wm4 = new client.NewChannelWindow(middleContainer);
-
 	    // create and add Part 1 to the toolbar
 	    var part1 = new qx.ui.toolbar.Part();
 	    this.__part2 = new qx.ui.toolbar.Part();
+	    this.__part3 = new qx.ui.toolbar.Part();
 	    
 	    var joinButton = new qx.ui.toolbar.Button("Join new channel..", "icon/22/actions/document-new.png");
 
@@ -167,6 +166,14 @@ qx.Class.define("client.MainScreen",
 
 	    toolbar.add(part1);
 	    toolbar.add(this.__part2);
+	    toolbar.addSpacer();
+
+	    this.__input = new qx.ui.form.TextField("Enter search keywords or date (DD.MM.YY)").set({
+		maxLength: 150 , width: 200});
+	    
+	    this.__part3.add(this.__input);
+	    toolbar.add(this.__part3);
+
 	    this.updateWindowButtons();
 
 	    rootContainer.add(toolbar);//, {left:"3%",bottom:"3%", right:"3%", width:"20%" });
