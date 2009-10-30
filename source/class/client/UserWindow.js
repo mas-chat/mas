@@ -80,7 +80,6 @@ qx.Class.define("client.UserWindow",
 	__lines : 0,
 	winid : 0,
 	
-
 	handleResize : function(e) 
 	{
 	    var data = e.getData();
@@ -218,7 +217,7 @@ qx.Class.define("client.UserWindow",
 		
 		for (var i=0; i < names.length; i++)
 		{
-		    this.__list.add(new qx.ui.form.ListItem(names[i]));
+		    this.__list.add(new qx.ui.form.ListItem(names[i]).set({ rich : true }));
 		}
 	    }
 	},
