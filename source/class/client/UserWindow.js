@@ -9,9 +9,8 @@ qx.Class.define("client.UserWindow",
 {
     extend : qx.core.Object,
 
-    construct : function(desktop, system, name)
+    construct : function(desktop, system, name, nw)
     {
-
 	// write "socket"
 	this.__srpc = new qx.io.remote.Rpc(
 	    ralph_domain + "/",
@@ -23,7 +22,9 @@ qx.Class.define("client.UserWindow",
 	layout.setColumnFlex(0, 1); // make column 0 flexible
 	layout.setColumnWidth(1, 100); // set with of column 1 to 200 pixel
 
-	var wm1 = new qx.ui.window.Window(name);
+	var wm1 = new qx.ui.window.Window("(" + nw + ") " + name);
+	this.__nw = nw;
+
 	wm1.setLayout(layout);
 	wm1.setModal(false);
 	wm1.setAllowMaximize(false);
@@ -79,6 +80,7 @@ qx.Class.define("client.UserWindow",
 	__srpc : 0,
 	__lines : 0,
 	winid : 0,
+	__nw : 0,
 	
 	handleResize : function(e) 
 	{
@@ -202,7 +204,7 @@ qx.Class.define("client.UserWindow",
 
 	changetopic : function(line)
 	{
-	    this.__window.setCaption(line);	    
+	    this.__window.setCaption("(" + this.__nw + ") " + line);	    
 	},
 
 	addnames : function(line)

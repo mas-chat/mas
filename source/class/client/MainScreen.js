@@ -56,10 +56,11 @@ qx.Class.define("client.MainScreen",
 		    var y = parseInt(options.shift());
 		    var width = parseInt(options.shift());
 		    var height = parseInt(options.shift());
+		    var nw = options.shift();
 
 		    var name = options.join(" ");
 
-		    var newWindow = new client.UserWindow(MainScreenObj.desktop, system, name);
+		    var newWindow = new client.UserWindow(MainScreenObj.desktop, system, name, nw);
 
 		    newWindow.moveTo(x, y);
 
