@@ -9,7 +9,7 @@ qx.Class.define("client.UserWindow",
 {
     extend : qx.core.Object,
 
-    construct : function(desktop, system, name, nw)
+    construct : function(desktop, topic, nw, name, type)
     {
 	// write "socket"
 	this.__srpc = new qx.io.remote.Rpc(
@@ -22,7 +22,7 @@ qx.Class.define("client.UserWindow",
 	layout.setColumnFlex(0, 1); // make column 0 flexible
 	layout.setColumnWidth(1, 100); // set with of column 1 to 200 pixel
 
-	var wm1 = new qx.ui.window.Window("(" + nw + ") " + name);
+	var wm1 = new qx.ui.window.Window("(" + nw + ") " + topic);
 	this.__nw = nw;
 
 	wm1.setLayout(layout);
@@ -50,20 +50,26 @@ qx.Class.define("client.UserWindow",
 	});
 	this.__input1.focus();
 	this.__input1.addListener("changeValue", this.getUserText, this);
-	wm1.add(this.__input1, {row: 1, column: 0});
-	
-	if (system == false)
+
+	if (type != 2)
+	{
+	    wm1.add(this.__input1, {row: 1, column: 0});
+	}
+
+	if (type == 0)
 	{
 	    wm1.add(this.getList(), {row: 0, column: 1, rowSpan: 2, flex:1});
 	}
 
 	this.__window = wm1;
-	this.__system = system;
+	this.__type = type;
+	this.__name = name;
 
 	this.__window.addListener("close", this.handleClose, this);
 
 	desktop.add(wm1);
-	
+
+	this.__changetopic(topic);
     },
 
     //TODO: write proper destructor
@@ -71,7 +77,6 @@ qx.Class.define("client.UserWindow",
     members :
     {
         __window : 0,
-	__system : 0,
 	__input1 : 0,
 	__list : 0,
 	__atom : 0,
@@ -81,6 +86,8 @@ qx.Class.define("client.UserWindow",
 	__lines : 0,
 	winid : 0,
 	__nw : 0,
+	__type : 0,
+	__name : 0,
 	
 	handleResize : function(e) 
 	{
@@ -204,7 +211,25 @@ qx.Class.define("client.UserWindow",
 
 	changetopic : function(line)
 	{
-	    this.__window.setCaption("(" + this.__nw + ") " + line);	    
+	    var nw = "(" + this.__nw ") ";
+
+	    if (nw == "(Evergreen) ")
+	    {
+		nw = "";
+	    }
+
+	    if (type == 0)
+	    {
+		this.__window.setCaption("System window - Moe version 0.4");
+	    }
+	    else if (type == 1)
+	    {
+		this.__window.setCaption(nw + this.__name + " : " + line);
+	    }
+	    else
+	    {
+		this.__window.setCaption(nw + "*** Private conversion with " + this.__name);
+	    }
 	},
 
 	addnames : function(line)

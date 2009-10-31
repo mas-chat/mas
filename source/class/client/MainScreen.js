@@ -43,13 +43,7 @@ qx.Class.define("client.MainScreen",
 
 		if (command === "CREATE")
 		{
-		    var system = false;
 		    var options = param.split(" ");
-
-		    if (window == 0)
-		    {
-			system = true;
-		    }
 		    
 		    options.shift(); // window id
 		    var x = parseInt(options.shift());
@@ -57,10 +51,11 @@ qx.Class.define("client.MainScreen",
 		    var width = parseInt(options.shift());
 		    var height = parseInt(options.shift());
 		    var nw = options.shift();
+		    var name = option.shift();
+		    var type = parseInt(options.shift());
+		    var topic = options.join(" ");
 
-		    var name = options.join(" ");
-
-		    var newWindow = new client.UserWindow(MainScreenObj.desktop, system, name, nw);
+		    var newWindow = new client.UserWindow(MainScreenObj.desktop, topic, nw, name, type);
 
 		    newWindow.moveTo(x, y);
 
