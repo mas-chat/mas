@@ -86,16 +86,22 @@ qx.Class.define("client.InfoDialog",
 	    this.__window.open();
 	},
 
-	getJoinNewChannelWin : function(rootItem)
+	getJoinNewChannelWin : function(rootItem, mode)
 	{
 	    this.__window.removeAll();
 	    
 	    this.__window.add(this.__message);
 	    
-	    this.__message.setLabel("Type channel name you wish to join:");
-	    this.__message2.setLabel("Advanced: Network");
-
-	    this.__window.setCaption("Join to new channel");
+	    if (mode == 0)
+	    {
+		this.__window.setCaption("Join to new forum");
+		this.__message.setLabel("Type forum name you wish to join:");
+	    }
+	    else
+	    {
+		this.__window.setCaption("Join to new IRC channel");
+		this.__message.setLabel("Type IRC channel name you wish to join:");
+	    }
 
 	    this.__input.focus();
 
@@ -112,22 +118,31 @@ qx.Class.define("client.InfoDialog",
 	    this.__nobutton.setLabel("Cancel");
 	    this.__box.add(this.__nobutton);
 
-	    this.__combo.removeAll();
-	    //TODO: configuration system needed, now UPDATE THIS manually!
-	    this.__combo.add(new qx.ui.form.ListItem("Evergreen"));
-	    this.__combo.add(new qx.ui.form.ListItem("IRCNet"));
-	    this.__combo.add(new qx.ui.form.ListItem("FreeNode"));
-	    this.__combo.add(new qx.ui.form.ListItem("W3C"));
-	    
-	    this.__combo.setValue("Evergreen");
+	    if (mode == 1)
+	    {
+		this.__message2.setLabel("Network:");
 
-	    this.__combo.addListener("changeValue", function(e) {
-		this.__nwselection = e.getData();
-	    }, this );
+		this.__combo.removeAll();
+		//TODO: configuration system needed, now UPDATE THIS manually!	    
+		this.__combo.add(new qx.ui.form.ListItem("IRCNet"));
+		this.__combo.add(new qx.ui.form.ListItem("FreeNode"));
+		this.__combo.add(new qx.ui.form.ListItem("W3C"));
 	    
-	    this.__box2.add(this.__message2);
-	    this.__box2.add(this.__combo);
+		this.__combo.setValue("IRCNet");
 
+		this.__combo.addListener("changeValue", function(e) {
+		    this.__nwselection = e.getData();
+		}, this);
+	    
+		this.__box2.add(this.__message2);
+		this.__box2.add(this.__combo);
+	    }
+	    else
+	    {
+		this.__nwselection = "Evergreen";
+	    }
+	    
+	    
 	    if (this.__nolistenerid != 0) {
 		this.__nobutton.removeListener(this.__nolistenerid);
 	    }

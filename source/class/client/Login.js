@@ -37,9 +37,8 @@ qx.Class.define("client.Login",
 		var cookie = options.shift();
 		var reason = options.shift();
 
-		//TODO: this is not robuts. Try to send "" from server and you be surprised
+		//TODO: this is not robust. Try to send "" from server and you be surprised
  
-
 		if (global_id == 0)
 		{
 		    if (reason == 0)

@@ -23,6 +23,8 @@ qx.Class.define("client.UserWindow",
 	layout.setColumnWidth(1, 100); // set with of column 1 to 200 pixel
 
 	var wm1 = new qx.ui.window.Window("(" + nw + ") " + topic);
+	wm1.userWindowRef = this;
+
 	this.__nw = nw;
 
 	wm1.setLayout(layout);
@@ -46,7 +48,7 @@ qx.Class.define("client.UserWindow",
 	wm1.add(this.__scroll, {row: 0, column: 0, flex: 1});
 	
 	this.__input1 = new qx.ui.form.TextField().set({
-	    maxLength: 150
+	    maxLength: 200
 	});
 	this.__input1.focus();
 	this.__input1.addListener("changeValue", this.getUserText, this);
@@ -69,7 +71,7 @@ qx.Class.define("client.UserWindow",
 
 	desktop.add(wm1);
 
-	this.__changetopic(topic);
+	this.changetopic(topic);
     },
 
     //TODO: write proper destructor
@@ -165,12 +167,7 @@ qx.Class.define("client.UserWindow",
 
 	getName : function()
 	{
-	    var topic = this.__window.getCaption();
-	    
-	    var pos = topic.search(/:/);
-	    var channel = topic.slice(0, pos-1);
-		
-	    return channel;
+	    return this.__name;
 	},
 
 	activate : function()
@@ -211,18 +208,18 @@ qx.Class.define("client.UserWindow",
 
 	changetopic : function(line)
 	{
-	    var nw = "(" + this.__nw ") ";
+	    var nw = "(" + this.__nw + ") ";
 
 	    if (nw == "(Evergreen) ")
 	    {
 		nw = "";
 	    }
 
-	    if (type == 0)
+	    if (this.__type == 2)
 	    {
 		this.__window.setCaption("System window - Moe version 0.4");
 	    }
-	    else if (type == 1)
+	    else if (this.__type == 0)
 	    {
 		this.__window.setCaption(nw + this.__name + " : " + line);
 	    }
@@ -234,9 +231,8 @@ qx.Class.define("client.UserWindow",
 
 	addnames : function(line)
 	{
-	    if (this.__system == false)
+	    if (this.__type == 0)
 	    {
-
 		this.__list.removeAll();
 
 //		var names = qx.util.StringSplit.split(line, / /, 300);
@@ -265,17 +261,23 @@ qx.Class.define("client.UserWindow",
 	{
 	    var menu = new qx.ui.menu.Menu;
 
-	    var cutButton = new qx.ui.menu.Button("Info", "icon/16/actions/edit-cut.png", this._cutCommand);
-	    var copyButton = new qx.ui.menu.Button("Send Message", "icon/16/actions/edit-copy.png", this._copyCommand);
-	    var pasteButton = new qx.ui.menu.Button("De-op", "icon/16/actions/edit-paste.png", this._pasteCommand);
+	    var cutButton = new qx.ui.menu.Button("Start private chat with",
+						  "icon/16/actions/edit-cut.png");
 
-//	    cutButton.addListener("execute", this.debugButton);
-//	    copyButton.addListener("execute", this.debugButton);
-//	    pasteButton.addListener("execute", this.debugButton);
+	    cutButton.addListener("execute", function(e) {
+
+		// huh!
+		var name = this.getLayoutParent().getOpener().getSelection()[0].getLabel();
+		
+		var userwindow = 
+		    this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
+
+		userwindow.__srpc.callAsync(userwindow.sendresult,
+					    "STARTCHAT", global_id + " " + global_sec + " " + 
+					    userwindow.__nw + " " + name);
+	    });
 
 	    menu.add(cutButton);
-	    menu.add(copyButton);
-	    menu.add(pasteButton);
 
 	    return menu;
 	}

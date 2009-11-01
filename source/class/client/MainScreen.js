@@ -51,7 +51,7 @@ qx.Class.define("client.MainScreen",
 		    var width = parseInt(options.shift());
 		    var height = parseInt(options.shift());
 		    var nw = options.shift();
-		    var name = option.shift();
+		    var name = options.shift();
 		    var type = parseInt(options.shift());
 		    var topic = options.join(" ");
 
@@ -148,24 +148,14 @@ qx.Class.define("client.MainScreen",
 	    toolbar.set({ maxHeight : 40 });
 
 	    // create and add Part 1 to the toolbar
-	    var part1 = new qx.ui.toolbar.Part();
 	    this.__part2 = new qx.ui.toolbar.Part();
 	    this.__part3 = new qx.ui.toolbar.Part();
 	    
-	    var joinButton = new qx.ui.toolbar.Button("Join new channel..", "icon/22/actions/document-new.png");
-
-	    joinButton.addListener("execute", function(e) {
-		infoDialog.getJoinNewChannelWin(myapp2.getRoot());
-	    }, this);
-
-	    part1.add(joinButton);
-
-	    toolbar.add(part1);
 	    toolbar.add(this.__part2);
 	    toolbar.addSpacer();
 
 	    this.__input = new qx.ui.form.TextField("Search (keywords or date (DD.MM.YY))").set({
-		maxLength: 150 , width: 200});
+		maxLength: 150 , width: 250});
 	    
 	    this.__part3.add(this.__input);
 	    toolbar.add(this.__part3);
@@ -222,9 +212,13 @@ qx.Class.define("client.MainScreen",
 
 	    frame.add(menubar);
 
+	    var forumMenu = new qx.ui.menubar.Button("Forums", null, this.getForumMenu());
+	    var advancedMenu = new qx.ui.menubar.Button("Advanced", null, this.getAdvancedMenu());
 	    var helpMenu = new qx.ui.menubar.Button("Help", null, this.getHelpMenu());
 	    var logoutMenu = new qx.ui.menubar.Button("Log Out", null, this.getLogoutMenu());
 
+	    menubar.add(forumMenu);
+	    menubar.add(advancedMenu);
 	    menubar.add(helpMenu);
 	    menubar.add(logoutMenu);
 
@@ -258,6 +252,50 @@ qx.Class.define("client.MainScreen",
 	    menu.add(aboutButton);
 
 	    return menu;
+	},
+
+	getForumMenu : function()
+	{
+	    var menu = new qx.ui.menu.Menu;
+
+	    var createButton = new qx.ui.menu.Button("Create new forum...");
+	    var joinButton = new qx.ui.menu.Button("Join to existing forum...");
+
+	    createButton.addListener("execute", this._createForumCommand);
+	    joinButton.addListener("execute", this._joinForumCommand);
+
+	    menu.add(createButton);
+	    menu.add(joinButton);
+
+	    return menu;
+	},
+
+	getAdvancedMenu : function()
+	{
+	    var menu = new qx.ui.menu.Menu;
+
+	    var joinButton = new qx.ui.menu.Button("Join to IRC channel...");
+
+	    joinButton.addListener("execute", this._joinIRCCommand);
+
+	    menu.add(joinButton);
+
+	    return menu;
+	},
+
+	_joinIRCCommand : function()
+	{
+	    infoDialog.getJoinNewChannelWin(myapp2.getRoot(), 1);
+	},
+
+	_joinForumCommand : function()
+	{
+	    infoDialog.getJoinNewChannelWin(myapp2.getRoot(), 0);
+	},
+
+	_createForumCommand : function()
+	{
+	    alert("tbd3");
 	},
 
 	_logoutCommand : function()
