@@ -235,12 +235,22 @@ qx.Class.define("client.UserWindow",
 	    {
 		this.__list.removeAll();
 
-//		var names = qx.util.StringSplit.split(line, / /, 300);
 		var names = line.split(" ");
 		
 		for (var i=0; i < names.length; i++)
 		{
-		    this.__list.add(new qx.ui.form.ListItem(names[i]).set({ rich : true }));
+		    var display = names[i];
+
+		    if(names[i].charAt(0) == "@")
+		    {
+			display = "<b>" + display + "</b>"; 
+		    }
+
+		    var tmp = new qx.ui.form.ListItem(display).set(
+			{ rich : true });
+		    tmp.realnick = names[i];
+
+		    this.__list.add(tmp);
 		}
 	    }
 	},
@@ -267,7 +277,7 @@ qx.Class.define("client.UserWindow",
 	    cutButton.addListener("execute", function(e) {
 
 		// huh!
-		var name = this.getLayoutParent().getOpener().getSelection()[0].getLabel();
+		var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
 		
 		var userwindow = 
 		    this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;

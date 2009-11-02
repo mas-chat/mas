@@ -129,6 +129,7 @@ qx.Class.define("client.InfoDialog",
 		this.__combo.add(new qx.ui.form.ListItem("W3C"));
 	    
 		this.__combo.setValue("IRCNet");
+		this.__nwselection = "IRCNet";
 
 		this.__combo.addListener("changeValue", function(e) {
 		    this.__nwselection = e.getData();
