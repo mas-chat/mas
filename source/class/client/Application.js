@@ -21,9 +21,9 @@ qx.Class.define("client.Application",
 	    // install.sh changes the port
 	    ralph_port = 9999; 		
 
-	    if (ralph_port == 80)
+	    if (ralph_port == 8080)
 	    {
-		ralph_domain = "http://a167.myrootshell.com";
+		ralph_domain = "http://a167.myrootshell.com:8080";
 	    }
 	    else
 	    {
