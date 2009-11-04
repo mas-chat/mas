@@ -261,8 +261,8 @@ qx.Class.define("client.MainScreen",
 	    var createButton = new qx.ui.menu.Button("Create new forum...");
 	    var joinButton = new qx.ui.menu.Button("Join to existing forum...");
 
-	    createButton.addListener("execute", this._createForumCommand);
-	    joinButton.addListener("execute", this._joinForumCommand);
+	    createButton.addListener("execute", this._createForumCommand, this);
+	    joinButton.addListener("execute", this._joinForumCommand, this);
 
 	    menu.add(createButton);
 	    menu.add(joinButton);
@@ -276,19 +276,18 @@ qx.Class.define("client.MainScreen",
 
 	    var joinButton = new qx.ui.menu.Button("Join to IRC channel...");
 
-	    joinButton.addListener("execute", this._joinIRCCommand);
-
+	    joinButton.addListener("execute", this._joinIRCCommand, this);
 	    menu.add(joinButton);
 
 	    return menu;
 	},
 
-	_joinIRCCommand : function()
+	_joinIRCCommand : function(app)
 	{
 	    infoDialog.getJoinNewChannelWin(this.__myapp, 1);
 	},
 
-	_joinForumCommand : function()
+	_joinForumCommand : function(app)
 	{
 	    infoDialog.getJoinNewChannelWin(this.__myapp, 0);
 	},
