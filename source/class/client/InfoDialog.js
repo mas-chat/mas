@@ -38,7 +38,7 @@ qx.Class.define("client.InfoDialog",
 	});
 
 	this.__rrpc = new qx.io.remote.Rpc(
-	    ralph_domain + "/",
+	    ralph_url + "/",
 	    "ralph"
 	);
     },

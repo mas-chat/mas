@@ -13,7 +13,7 @@ qx.Class.define("client.UserWindow",
     {
 	// write "socket"
 	this.__srpc = new qx.io.remote.Rpc(
-	    ralph_domain + "/",
+	    ralph_url + "/",
 	    "ralph"
 	);
 

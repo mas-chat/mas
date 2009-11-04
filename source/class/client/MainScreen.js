@@ -12,7 +12,7 @@ qx.Class.define("client.MainScreen",
     {
 	// read "socket"
 	this.__rrpc = new qx.io.remote.Rpc(
-	    ralph_domain + "/",
+	    ralph_url + "/",
 	    "ralph"
 	);
 	this.__rrpc.setTimeout(20000);
@@ -136,7 +136,11 @@ qx.Class.define("client.MainScreen",
 	    /* middle */
 	    var windowManager = new qx.ui.window.Manager();
 	    this.__manager = windowManager;
+
 	    var middleContainer = new qx.ui.window.Desktop(windowManager);
+	    middleContainer.setAllowGrowX(false);
+	    middleContainer.setAllowGrowY(false);
+
 	    this.desktop = middleContainer;
 
 	    middleContainer.set({decorator: "main", backgroundColor: "background-pane"});
@@ -300,7 +304,7 @@ qx.Class.define("client.MainScreen",
 	_logoutCommand : function()
 	{
 	    qx.bom.Cookie.del("ProjectEvergreen");
-	    window.location="http://a167.myrootshell.com/";
+	    window.location = ralph_domain + "/?logout=yes";
 	},
 
 	_manualCommand : function()
