@@ -16,7 +16,6 @@ qx.Class.define("client.MainScreen",
 	    "ralph"
 	);
 	this.__rrpc.setTimeout(20000);
-
     },
 
     members :
@@ -26,6 +25,7 @@ qx.Class.define("client.MainScreen",
 	__part3 : 0,
 	__windowGroup : 0,
 	__manager : 0,
+	__myapp : 0,
 	seq : 0,
 	windows : [],
 	desktop : 0,
@@ -121,7 +121,7 @@ qx.Class.define("client.MainScreen",
 
 	show : function(rootItem)
 	{
-
+	    this.__myapp = rootItem;
 	    MainScreenObj = this;
 
 	    /* Layout for root */
@@ -285,12 +285,12 @@ qx.Class.define("client.MainScreen",
 
 	_joinIRCCommand : function()
 	{
-	    infoDialog.getJoinNewChannelWin(myapp2.getRoot(), 1);
+	    infoDialog.getJoinNewChannelWin(this.__myapp, 1);
 	},
 
 	_joinForumCommand : function()
 	{
-	    infoDialog.getJoinNewChannelWin(myapp2.getRoot(), 0);
+	    infoDialog.getJoinNewChannelWin(this.__myapp, 0);
 	},
 
 	_createForumCommand : function()
