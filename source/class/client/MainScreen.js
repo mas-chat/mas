@@ -39,7 +39,7 @@ qx.Class.define("client.MainScreen",
 		var param = result.slice(pos+1);
 
 		pos = param.search(/ /);
-		var window = param.slice(0, pos);
+		var window_id = param.slice(0, pos);
 
 		if (command === "CREATE")
 		{
@@ -65,25 +65,25 @@ qx.Class.define("client.MainScreen",
 		    newWindow.show();
 
 		    newWindow.addHandlers();
-		    newWindow.winid = window;
-		    MainScreenObj.windows[window] = newWindow;
+		    newWindow.winid = window_id;
+		    MainScreenObj.windows[window_id] = newWindow;
 
 		    MainScreenObj.updateWindowButtons();
 		}
 		else if (command === "ADDTEXT")
 		{
 		    var usertext = param.slice(pos+1);
-                    MainScreenObj.windows[window].addline(usertext);
+                    MainScreenObj.windows[window_id].addline(usertext);
 		}   
 		else if (command === "TOPIC")
 		{
 		    var usertext = param.slice(pos+1);
-                    MainScreenObj.windows[window].changetopic(usertext);
+                    MainScreenObj.windows[window_id].changetopic(usertext);
 		}   
 		else if (command === "NAMES")
 		{
 		    var usertext = param.slice(pos+1);
-                    MainScreenObj.windows[window].addnames(usertext);
+                    MainScreenObj.windows[window_id].addnames(usertext);
 		}
 		else if (command === "NICK")
 		{
@@ -93,7 +93,7 @@ qx.Class.define("client.MainScreen",
 		{
 		    var reason = param.slice(pos+1);
 		    alert("You logged in from a different computer. This session terminates. Reason: " + reason);
-		    window.location="http://a167.myrootshell.com/";
+		    window.location = ralph_domain + "/?logout=yes";
 		}
 		else if (command === "CLOSE")
 		{
@@ -138,8 +138,8 @@ qx.Class.define("client.MainScreen",
 	    this.__manager = windowManager;
 
 	    var middleContainer = new qx.ui.window.Desktop(windowManager);
-	    middleContainer.setAllowGrowX(false);
-	    middleContainer.setAllowGrowY(false);
+//	    middleContainer.setAllowGrowX(false);
+//	    middleContainer.setAllowGrowY(false);
 
 	    this.desktop = middleContainer;
 
