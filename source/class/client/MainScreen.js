@@ -16,6 +16,10 @@ qx.Class.define("client.MainScreen",
 	    "ralph"
 	);
 	this.__rrpc.setTimeout(20000);
+
+        this.__timer = new qx.event.Timer(1000);
+        this.__timer.start();
+
     },
 
     members :
@@ -26,6 +30,7 @@ qx.Class.define("client.MainScreen",
 	__windowGroup : 0,
 	__manager : 0,
 	__myapp : 0,
+        __timer : 0,
 	seq : 0,
 	windows : [],
 	desktop : 0,
@@ -103,6 +108,11 @@ qx.Class.define("client.MainScreen",
 
 		    MainScreenObj.updateWindowButtons();		    
 		}
+	        else if (command === "FLIST")
+                {
+		    var usertext = param.slice(pos+1);
+ 	            MainScreenObj.updateFriendsList(globalflist, usertext);
+                }
 	    } 
 	    else 
 	    {
@@ -114,8 +124,8 @@ qx.Class.define("client.MainScreen",
 	    if (command !== "DIE")
 	    {
 		//TODO: can cause havoc towards server when looping
-		MainScreenObj.__rrpc.callAsync(MainScreenObj.readresult,
-				      "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
+//		MainScreenObj.__rrpc.callAsync(MainScreenObj.readresult,
+//				      "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
 	    }
 	},
 
@@ -129,13 +139,13 @@ qx.Class.define("client.MainScreen",
 
 	    /* Root widget */
 	    var rootContainer = new qx.ui.container.Composite(rootLayout);
-
-	    var bounds = rootContainer.getBounds();
-	    rootContainer.add(this.getMenuBar(bounds));
+	    rootContainer.add(this.getMenuBar());
 	    
 	    /* middle */
 	    var windowManager = new qx.ui.window.Manager();
 	    this.__manager = windowManager;
+
+	    var middleSection = new qx.ui.container.Composite(new qx.ui.layout.HBox(2));
 
 	    var middleContainer = new qx.ui.window.Desktop(windowManager);
 //	    middleContainer.setAllowGrowX(false);
@@ -144,9 +154,63 @@ qx.Class.define("client.MainScreen",
 	    this.desktop = middleContainer;
 
 	    middleContainer.set({decorator: "main", backgroundColor: "background-pane"});
-	    //middleContainer.setAllowGrowY(true);
-	    rootContainer.add(middleContainer, {flex:1});
+
+	    middleSection.add(middleContainer, {flex:1});
+
+	    var friendContainer = new qx.ui.container.Composite(new qx.ui.layout.Grid());
 	    
+	    var friendsLabel = new qx.ui.basic.Label("<b>Friends:</b>");
+            friendsLabel.setRich(true);
+	    friendsLabel.setMinWidth(200);	
+	    friendsLabel.setWidth(200);	
+	    friendsLabel.setPaddingTop(10);
+	    friendsLabel.setPaddingBottom(10);
+	    friendsLabel.setPaddingLeft(10);
+            
+            friendContainer.add(friendsLabel, {column:0, row:0});
+
+	    var hideLabel = new qx.ui.basic.Label("<font color=\"blue\">HIDE</font>");
+            hideLabel.setRich(true);
+	    hideLabel.setMinWidth(200);	
+	    hideLabel.setPaddingTop(10);
+	    hideLabel.setPaddingLeft(10);
+
+	    var showLabel = new qx.ui.basic.Label("<font color=\"blue\">S<br>H<br>O<br>W<br><br>F<br>R<br>I<br>E<br>N<br>D<br>S</font>");
+	    showLabel.setRich(true);
+
+	    showLabel.addListener("click", function(e) {
+		this.remove(showLabel);
+	        this.add(friendContainer);
+    
+		}, middleSection);
+
+
+	    hideLabel.addListener("click", function(e) {
+		this.remove(friendContainer);
+
+	        this.add(showLabel);
+    
+		}, middleSection);
+            
+            friendContainer.add(hideLabel, {column:1, row:0});
+
+	    var test = "Ilkka Oksanen|ilkka9|home|3||Wilma Vaaranen|Wilma|work|3600||Eka Toka|eka|mountains|1900800";
+
+	    globalflist = new qx.ui.container.Composite(new qx.ui.layout.VBox());
+
+	    globalflist.setAllowGrowY(true);
+//	    globalflist.set({backgroundColor: "background-pane"});
+
+	    this.updateFriendsList(globalflist, test);
+
+            this.addListener("interval", function(e) { alert(foo) }, this)
+    
+	    friendContainer.add(globalflist, {row: 1, column: 0, colSpan:2});
+
+	    middleSection.add(friendContainer);
+
+	    rootContainer.add(middleSection, {flex:1});		
+
 	    // create the toolbar
 	    toolbar = new qx.ui.toolbar.ToolBar();
 	    toolbar.set({ maxHeight : 40 });
@@ -171,6 +235,80 @@ qx.Class.define("client.MainScreen",
 
 	    this.__rrpc.callAsync(this.readresult, "HELLO", global_id + " " + global_sec + " " + this.seq);
 	},
+
+	updateFriendsList : function(parentFList, allFriends)
+        {
+	    parentFList.removeAll();
+
+	    var myfriends = allFriends.split("||");
+
+	    for (var i=0; i < myfriends.length; i++)	
+	    {
+	         var columns = myfriends[i].split("|");
+
+                 var friend = new qx.ui.basic.Label("<b>" + columns[1] + "</b> (" + columns[0] + ")");
+
+                 var friend2 = new qx.ui.basic.Label();
+                 friend2.setRich(true);
+                 friend.setRich(true);
+
+		 friend.setPaddingTop(7);
+		 friend2.setPaddingTop(0);
+		 friend2.setPaddingLeft(20);
+		 friend.setPaddingLeft(10);
+	         friend2.idleTime = columns[3]; 
+
+                 parentFList.add(friend);
+                 parentFList.add(friend2);
+            }
+
+	    this.printIdleTimes(parentFList);
+        }, 
+
+        printIdleTimes : function(parentFList)
+        {
+            var children = parentFList.getChildren();
+
+            for (var i=1; i < children.length; i = i + 2)
+            {
+	         var idle = children[i].idleTime;
+                 var result;
+
+		 if (idle == 0)
+                 {
+		      result = "<font color=\"green\">ONLINE<font>";
+                 }
+                 else if (idle < 60)
+                 {			
+                      result = "<font color=\"blue\">Last: " + idle + " minutes ago<font>";
+                 }
+		 else if (idle < 60 * 24)
+                 {  
+	             idle = idle / 60;
+                     result = "<font color=\"blue\">Last: " + idle + " hours ago<font>";
+                 }
+		 else
+                 {  
+	             idle = idle / 60 / 24;
+                     result = "<font color=\"blue\">Last: " + idle + " days ago<font>";
+                 }
+
+               children[i].setValue(result);
+            }	
+
+        },
+
+        updateIdleTimes : function(parentFList)
+        {
+            var children = parentFList.getChildren();
+
+            for (var i=0; i < children.length; i++)
+            {
+               children[i].idleTime++;
+            }	
+
+	    this.printIdleTimes(parentFList);
+        },
 
 	updateWindowButtons : function()
 	{
@@ -207,7 +345,7 @@ qx.Class.define("client.MainScreen",
 	    }
 	},
 
-	getMenuBar : function(bounds)
+	getMenuBar : function()
 	{
 	    var frame = new qx.ui.container.Composite(new qx.ui.layout.Grow);
 
