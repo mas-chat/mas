@@ -11,11 +11,14 @@ qx.Class.define("client.UserWindow",
 
     construct : function(desktop, topic, nw, name, type, nw_id)
     {
+	this.base(arguments);
+
 	// write "socket"
 	this.__srpc = new qx.io.remote.Rpc(
 	    ralph_url + "/",
 	    "ralph"
 	);
+	this.__srpc.setTimeout(10000);
 
 	var layout = new qx.ui.layout.Grid();
 	layout.setRowFlex(0, 1); // make row 0 flexible
@@ -34,7 +37,9 @@ qx.Class.define("client.UserWindow",
 	wm1.moveTo(250, 150);
 	
 	// create scroll container
-	this.__scroll = new qx.ui.container.Scroll().set({
+	this.__scroll = new qx.ui.container.Scroll();
+
+	this.__scroll.set({
 	    minWidth: 300,
 	    minHeight: 200,
 	    scrollbarY : "on"
@@ -48,15 +53,36 @@ qx.Class.define("client.UserWindow",
 	this.__scroll.add(this.__atom);		       
 	wm1.add(this.__scroll, {row: 0, column: 0, flex: 1});
 	
-	this.__input1 = new qx.ui.form.TextField().set({
-	    maxLength: 200
-	});
+	this.__input1 = new qx.ui.form.TextField();
+	this.__input1.set({ maxLength: 200 });
 	this.__input1.focus();
 
 	this.__input1.addListener("keypress", function(e) {
 	    if (e.getKeyIdentifier() == "Enter")
 	    {
-		this.getUserText();
+		var input = this.__input1.getValue();
+	    
+		if (input !== "")
+		{
+		    this.__srpc.callAsync(this.sendresult, "SEND", global_id + " " + global_sec + " " + this.winid + " " + input);
+		    this.__input1.setValue("");
+
+		    var currentTime = new Date();
+		    var hour = currentTime.getHours();
+		    var min = currentTime.getMinutes();
+
+		    if (min < 10)
+		    {
+			min = "0" + min;
+		    }
+
+		    if (hour < 10)
+		    {
+			hour = "0" + hour;
+		    }
+		    
+		    this.addline(hour + ":" + min + " <font color=\"blue\"><b>&lt;" + global_nick[this.__nw_id] + "&gt;</b> " + input + "</font><br>");
+		}
 	    }
 	}, this);
 
@@ -153,8 +179,9 @@ qx.Class.define("client.UserWindow",
 	    } 
 	    else 
 	    {
-		alert("Lost connection to server, sorry. Please relogin.  " + exc);
-		window.location = ralph_domain + "/?logout=yes";
+		//TODO: replace with qooxdoo window without buttons
+		alert("Lost connection to server... Press OK to recover.  " + exc);
+		window.location.reload(true);
 	    }
 	},
 
@@ -184,23 +211,6 @@ qx.Class.define("client.UserWindow",
 	    this.__window.setShowStatusbar(true);
 	},
 
-	getUserText : function(e)
-	{
-	    var input = e.getData();
-	    
-	    if (input !== "")
-	    {
-		this.__srpc.callAsync(this.sendresult, "SEND", global_id + " " + global_sec + " " + this.winid + " " + input);
-		this.__input1.setValue("");
-
-		var currentTime = new Date();
-		var hour = currentTime.getHours();
-		var min = currentTime.getMinutes();
-
-		this.addline(hour + ":" + min + " <font color=\"blue\"><b>&lt;" + global_nick[this.__nw_id] + "&gt;</b> " + input + "</font><br>");
-	    }
-	},
-
 	addline : function(line)
 	{
 	    this.__channelText = this.__channelText + line;
@@ -216,8 +226,8 @@ qx.Class.define("client.UserWindow",
 
 	    this.__atom.setLabel(this.__channelText);
 
-	    var sizes = this.__scroll.getItemBottom(this.__atom);
-	    this.__scroll.scrollToY(sizes);
+//	    var bottom = this.__scroll.getItemBottom(this.__atom);
+	    this.__scroll.scrollToY(100000);
 	},
 
 	changetopic : function(line)

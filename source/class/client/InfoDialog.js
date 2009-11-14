@@ -11,6 +11,7 @@ qx.Class.define("client.InfoDialog",
 
     construct : function(desktop, system, name)
     {
+	this.base(arguments);
 
 	this.__window = new qx.ui.window.Window("");
 	this.__window.setLayout(new qx.ui.layout.VBox(10));

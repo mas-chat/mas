@@ -17,7 +17,7 @@ qx.Class.define("client.MainScreen",
 	    ralph_url + "/",
 	    "ralph"
 	);
-	this.__rrpc.setTimeout(20000);
+	this.__rrpc.setTimeout(30000);
 
         this.__timer = new qx.event.Timer(1000 * 60);
         this.__timer.start();
@@ -40,98 +40,103 @@ qx.Class.define("client.MainScreen",
 	{
 	    if (exc == null) 
 	    {
-		var pos = result.search(/ /);
-		var command = result.slice(0, pos);
-		var param = result.slice(pos+1);
+		var commands = result.split("<>");
 
-		pos = param.search(/ /);
-		var window_id = param.slice(0, pos);
-
-		if (command === "CREATE")
+		for (var i=0; i < commands.length; i++)
 		{
-		    var options = param.split(" ");
+		    var pos = commands[i].search(/ /);
+		    var command = commands[i].slice(0, pos);
+		    var param = commands[i].slice(pos+1);
+
+		    pos = param.search(/ /);
+		    var window_id = param.slice(0, pos);
+
+		    if (command === "CREATE")
+		    {
+			var options = param.split(" ");
 		    
-		    options.shift(); // window id
-		    var x = parseInt(options.shift());
-		    var y = parseInt(options.shift());
-		    var width = parseInt(options.shift());
-		    var height = parseInt(options.shift());
-		    var nw = options.shift();
-		    var nw_id = options.shift();
-		    var name = options.shift();
-		    var type = parseInt(options.shift());
-		    var topic = options.join(" ");
+			options.shift(); // window id
+			var x = parseInt(options.shift());
+			var y = parseInt(options.shift());
+			var width = parseInt(options.shift());
+			var height = parseInt(options.shift());
+			var nw = options.shift();
+			var nw_id = options.shift();
+			var name = options.shift();
+			var type = parseInt(options.shift());
+			var topic = options.join(" ");
 
-		    var newWindow = 
-			new client.UserWindow(MainScreenObj.desktop,
-					      topic, nw, name, type, nw_id);
+			var newWindow = 
+			    new client.UserWindow(MainScreenObj.desktop,
+						  topic, nw, name, type, nw_id);
 
-		    newWindow.moveTo(x, y);
+			newWindow.moveTo(x, y);
+			
+			newWindow.setHeight(height);
+			newWindow.setWidth(width);
+			
+			newWindow.show();
+			
+			newWindow.addHandlers();
+			newWindow.winid = window_id;
+			MainScreenObj.windows[window_id] = newWindow;
 
-                    newWindow.setHeight(height);
-                    newWindow.setWidth(width);
+			MainScreenObj.updateWindowButtons();
+		    }
+		    else if (command === "ADDTEXT")
+		    {
+			var usertext = param.slice(pos+1);
+			MainScreenObj.windows[window_id].addline(usertext);
+		    }   
+		    else if (command === "TOPIC")
+		    {
+			var usertext = param.slice(pos+1);
+			MainScreenObj.windows[window_id].changetopic(usertext);
+		    }   
+		    else if (command === "NAMES")
+		    {
+			var usertext = param.slice(pos+1);
+			MainScreenObj.windows[window_id].addnames(usertext);
+		    }
+		    else if (command === "NICK")
+		    {
+			global_nick = param.split(" ");
+		    }
+		    else if (command === "DIE")
+		    {
+			var reason = param.slice(pos+1);
+			alert("Session expired. Press OK to return login page. " + reason);
+			window.location = ralph_domain + "/?logout=yes";
+		    }
+		    else if (command === "CLOSE")
+		    {
+			var winid = param.slice(pos+1);
+			//TODO: call destructor?
+			delete MainScreenObj.windows[winid];
 
-		    newWindow.show();
-
-		    newWindow.addHandlers();
-		    newWindow.winid = window_id;
-		    MainScreenObj.windows[window_id] = newWindow;
-
-		    MainScreenObj.updateWindowButtons();
+			MainScreenObj.updateWindowButtons();		    
+		    }
+	            else if (command === "FLIST")
+                    {
+ 			MainScreenObj.updateFriendsList(globalflist, param);
+                    }
 		}
-		else if (command === "ADDTEXT")
-		{
-		    var usertext = param.slice(pos+1);
-                    MainScreenObj.windows[window_id].addline(usertext);
-		}   
-		else if (command === "TOPIC")
-		{
-		    var usertext = param.slice(pos+1);
-                    MainScreenObj.windows[window_id].changetopic(usertext);
-		}   
-		else if (command === "NAMES")
-		{
-		    var usertext = param.slice(pos+1);
-                    MainScreenObj.windows[window_id].addnames(usertext);
-		}
-		else if (command === "NICK")
-		{
-		    global_nick = param.split(" ");
-		}
-		else if (command === "DIE")
-		{
-		    var reason = param.slice(pos+1);
-		    alert("Session expired. Press OK to return login page. " + reason);
-		    window.location = ralph_domain + "/?logout=yes";
-		}
-		else if (command === "CLOSE")
-		{
-		    var winid = param.slice(pos+1);
-		    //TODO: call destructor?
-		    delete MainScreenObj.windows[winid];
-
-		    MainScreenObj.updateWindowButtons();		    
-		}
-	        else if (command === "FLIST")
-                {
- 	            MainScreenObj.updateFriendsList(globalflist, param);
-                }
 	    } 
 	    else 
 	    {
-//		alert("Exception during async call: " + exc);
+		//		alert("Exception during async call: " + exc);
 	    }
-
+	    
 	    MainScreenObj.seq++;
               
 	    if (command !== "DIE")
 	    {
 		//TODO: can cause havoc towards server when looping
 		MainScreenObj.__rrpc.callAsync(MainScreenObj.readresult,
-				      "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
+					       "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
 	    }
 	},
-
+	
 	show : function(rootItem)
 	{
 	    this.__myapp = rootItem;
