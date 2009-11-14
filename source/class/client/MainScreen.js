@@ -96,13 +96,12 @@ qx.Class.define("client.MainScreen",
 		}
 		else if (command === "NICK")
 		{
-		    var nicks = param.slice(pos+1);
-		    global_nick = nicks.split(" ");
+		    global_nick = param.split(" ");
 		}
 		else if (command === "DIE")
 		{
 		    var reason = param.slice(pos+1);
-		    alert("You logged in from a different computer. This session terminates. Reason: " + reason);
+		    alert("Session expired. Press OK to return login page. " + reason);
 		    window.location = ralph_domain + "/?logout=yes";
 		}
 		else if (command === "CLOSE")

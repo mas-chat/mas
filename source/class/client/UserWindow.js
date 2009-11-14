@@ -52,7 +52,13 @@ qx.Class.define("client.UserWindow",
 	    maxLength: 200
 	});
 	this.__input1.focus();
-	this.__input1.addListener("changeValue", this.getUserText, this);
+
+	this.__input1.addListener("keypress", function(e) {
+	    if (e.getKeyIdentifier() == "Enter")
+	    {
+		this.getUserText();
+	    }
+	}, this);
 
 	if (type != 2)
 	{
@@ -141,14 +147,15 @@ qx.Class.define("client.UserWindow",
                 
                 if (command === "DIE")
                 {
-		    alert("Your session is terminated: " + param + " Please press reload.");
+		    alert("Your session is terminated: " + param + " Please relogin.");
+		    window.location = ralph_domain + "/?logout=yes";
 		}
 	    } 
 	    else 
 	    {
-		alert("!!! Exception during async call: " + exc);
+		alert("Lost connection to server, sorry. Please relogin.  " + exc);
+		window.location = ralph_domain + "/?logout=yes";
 	    }
-
 	},
 
 	addHandlers : function()
@@ -185,7 +192,12 @@ qx.Class.define("client.UserWindow",
 	    {
 		this.__srpc.callAsync(this.sendresult, "SEND", global_id + " " + global_sec + " " + this.winid + " " + input);
 		this.__input1.setValue("");
-		this.addline("<font color=\"blue\"><b>&lt;" + global_nick[this.__nw_id] + "&gt;</b> " + input + "</font><br>");
+
+		var currentTime = new Date();
+		var hour = currentTime.getHours();
+		var min = currentTime.getMinutes();
+
+		this.addline(hour + ":" + min + " <font color=\"blue\"><b>&lt;" + global_nick[this.__nw_id] + "&gt;</b> " + input + "</font><br>");
 	    }
 	},
 
