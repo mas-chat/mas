@@ -1,5 +1,5 @@
 /* ************************************************************************
-
+5B5B
 #asset(projectx/*)
 
 ************************************************************************ */
@@ -10,6 +10,8 @@ qx.Class.define("client.MainScreen",
 
     construct : function()
     {
+	this.base(arguments);
+
 	// read "socket"
 	this.__rrpc = new qx.io.remote.Rpc(
 	    ralph_url + "/",
@@ -17,9 +19,8 @@ qx.Class.define("client.MainScreen",
 	);
 	this.__rrpc.setTimeout(20000);
 
-        this.__timer = new qx.event.Timer(1000);
+        this.__timer = new qx.event.Timer(1000 * 60);
         this.__timer.start();
-
     },
 
     members :
@@ -56,11 +57,14 @@ qx.Class.define("client.MainScreen",
 		    var width = parseInt(options.shift());
 		    var height = parseInt(options.shift());
 		    var nw = options.shift();
+		    var nw_id = options.shift();
 		    var name = options.shift();
 		    var type = parseInt(options.shift());
 		    var topic = options.join(" ");
 
-		    var newWindow = new client.UserWindow(MainScreenObj.desktop, topic, nw, name, type);
+		    var newWindow = 
+			new client.UserWindow(MainScreenObj.desktop,
+					      topic, nw, name, type, nw_id);
 
 		    newWindow.moveTo(x, y);
 
@@ -92,7 +96,8 @@ qx.Class.define("client.MainScreen",
 		}
 		else if (command === "NICK")
 		{
-		    global_nick = param.slice(pos+1);
+		    var nicks = param.slice(pos+1);
+		    global_nick = nicks.split(" ");
 		}
 		else if (command === "DIE")
 		{
@@ -110,8 +115,7 @@ qx.Class.define("client.MainScreen",
 		}
 	        else if (command === "FLIST")
                 {
-		    var usertext = param.slice(pos+1);
- 	            MainScreenObj.updateFriendsList(globalflist, usertext);
+ 	            MainScreenObj.updateFriendsList(globalflist, param);
                 }
 	    } 
 	    else 
@@ -124,8 +128,8 @@ qx.Class.define("client.MainScreen",
 	    if (command !== "DIE")
 	    {
 		//TODO: can cause havoc towards server when looping
-//		MainScreenObj.__rrpc.callAsync(MainScreenObj.readresult,
-//				      "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
+		MainScreenObj.__rrpc.callAsync(MainScreenObj.readresult,
+				      "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
 	    }
 	},
 
@@ -177,51 +181,48 @@ qx.Class.define("client.MainScreen",
 
 	    var showLabel = new qx.ui.basic.Label("<font color=\"blue\">S<br>H<br>O<br>W<br><br>F<br>R<br>I<br>E<br>N<br>D<br>S</font>");
 	    showLabel.setRich(true);
-
+	    
 	    showLabel.addListener("click", function(e) {
 		this.remove(showLabel);
 	        this.add(friendContainer);
-    
-		}, middleSection);
-
-
+		
+	    }, middleSection);
+	    
+	    
 	    hideLabel.addListener("click", function(e) {
 		this.remove(friendContainer);
-
+		
 	        this.add(showLabel);
-    
-		}, middleSection);
+		
+	    }, middleSection);
             
             friendContainer.add(hideLabel, {column:1, row:0});
-
-	    var test = "Ilkka Oksanen|ilkka9|home|3||Wilma Vaaranen|Wilma|work|3600||Eka Toka|eka|mountains|1900800";
-
+	    	    
 	    globalflist = new qx.ui.container.Composite(new qx.ui.layout.VBox());
-
+	    
 	    globalflist.setAllowGrowY(true);
-//	    globalflist.set({backgroundColor: "background-pane"});
-
-	    this.updateFriendsList(globalflist, test);
-
-            this.addListener("interval", function(e) { alert(foo) }, this)
-    
+	    // globalflist.set({backgroundColor: "background-pane"});
+	    
+            this.__timer.addListener(
+		"interval", function(e) { this.updateIdleTimes(globalflist); }, this);
+	    
 	    friendContainer.add(globalflist, {row: 1, column: 0, colSpan:2});
-
+	    
 	    middleSection.add(friendContainer);
-
+	    
 	    rootContainer.add(middleSection, {flex:1});		
-
+	    
 	    // create the toolbar
 	    toolbar = new qx.ui.toolbar.ToolBar();
 	    toolbar.set({ maxHeight : 40 });
-
+	    
 	    // create and add Part 1 to the toolbar
 	    this.__part2 = new qx.ui.toolbar.Part();
 	    this.__part3 = new qx.ui.toolbar.Part();
 	    
 	    toolbar.add(this.__part2);
 	    toolbar.addSpacer();
-
+	    
 	    this.__input = new qx.ui.form.TextField("Search (keywords or date (DD.MM.YY))").set({
 		maxLength: 150 , width: 250});
 	    
@@ -239,77 +240,94 @@ qx.Class.define("client.MainScreen",
 	updateFriendsList : function(parentFList, allFriends)
         {
 	    parentFList.removeAll();
-
+	    
 	    var myfriends = allFriends.split("||");
-
+	    
 	    for (var i=0; i < myfriends.length; i++)	
 	    {
-	         var columns = myfriends[i].split("|");
-
-                 var friend = new qx.ui.basic.Label("<b>" + columns[1] + "</b> (" + columns[0] + ")");
-
-                 var friend2 = new qx.ui.basic.Label();
-                 friend2.setRich(true);
-                 friend.setRich(true);
-
-		 friend.setPaddingTop(7);
-		 friend2.setPaddingTop(0);
-		 friend2.setPaddingLeft(20);
-		 friend.setPaddingLeft(10);
-	         friend2.idleTime = columns[3]; 
-
-                 parentFList.add(friend);
-                 parentFList.add(friend2);
+	        var columns = myfriends[i].split("|");
+		
+                var friend = new qx.ui.basic.Label("<b>" + columns[1] + "</b> (" + columns[0] + ")");
+		
+                var friend2 = new qx.ui.basic.Label();
+                friend2.setRich(true);
+                friend.setRich(true);
+		
+		friend.setPaddingTop(7);
+		friend2.setPaddingTop(0);
+		friend2.setPaddingLeft(20);
+		friend.setPaddingLeft(10);
+	        friend2.idleTime = columns[3]; 
+		
+                parentFList.add(friend);
+                parentFList.add(friend2);
             }
-
+	    
 	    this.printIdleTimes(parentFList);
         }, 
 
         printIdleTimes : function(parentFList)
         {
             var children = parentFList.getChildren();
-
+	    
             for (var i=1; i < children.length; i = i + 2)
             {
-	         var idle = children[i].idleTime;
-                 var result;
+	        var idle = children[i].idleTime;
+                var result;
+		
+		if (idle == 0)
+                {
+		    result = "<font color=\"green\">ONLINE<font>";
+                }
+                else if (idle < 60)
+                {			
+                    result = "<font color=\"blue\">Last: " + idle + " minutes ago<font>";
+                }
+		else if (idle < 60 * 24)
+                {  
+	            idle = Math.round(idle / 60);
+		    if (idle == 0)
+		    {
+			idle = 1;
+		    }
 
-		 if (idle == 0)
-                 {
-		      result = "<font color=\"green\">ONLINE<font>";
-                 }
-                 else if (idle < 60)
-                 {			
-                      result = "<font color=\"blue\">Last: " + idle + " minutes ago<font>";
-                 }
-		 else if (idle < 60 * 24)
-                 {  
-	             idle = idle / 60;
-                     result = "<font color=\"blue\">Last: " + idle + " hours ago<font>";
-                 }
-		 else
-                 {  
-	             idle = idle / 60 / 24;
-                     result = "<font color=\"blue\">Last: " + idle + " days ago<font>";
-                 }
+                    result = "<font color=\"blue\">Last: " + idle + " hours ago<font>";
+                }
+		else if (idle < 5000000)
+                {  
+	            idle = Math.round(idle / 60 / 24);
+		    if (idle == 0)
+		    {
+			idle = 1;
+		    }
 
-               children[i].setValue(result);
+                    result = "<font color=\"blue\">Last: " + idle + " days ago<font>";
+                }
+		else
+		{
+		    result = "<font color=\"blue\">Last: Unknown<font>";
+		}
+		
+		children[i].setValue(result);
             }	
 
         },
-
+	
         updateIdleTimes : function(parentFList)
         {
             var children = parentFList.getChildren();
-
+	    
             for (var i=0; i < children.length; i++)
             {
-               children[i].idleTime++;
+		if (children[i].idleTime != 0)
+		{
+		    children[i].idleTime++;
+		}
             }	
 
 	    this.printIdleTimes(parentFList);
         },
-
+	
 	updateWindowButtons : function()
 	{
 	    var mythis = MainScreenObj;

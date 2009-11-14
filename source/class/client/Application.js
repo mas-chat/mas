@@ -23,12 +23,11 @@ qx.Class.define("client.Application",
 
 	    if (ralph_port == 8080)
 	    {
-		
 		ralph_domain = "http://a167.myrootshell.com";
 	    }
 	    else
 	    {
-		ralph_domain = "http://evergreen_dev.portaali.org";
+		ralph_domain = "http://evergreen.portaali.org";
 	    }
 
 	    ralph_url = ralph_domain + ":" + ralph_port;

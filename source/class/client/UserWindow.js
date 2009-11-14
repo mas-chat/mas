@@ -9,7 +9,7 @@ qx.Class.define("client.UserWindow",
 {
     extend : qx.core.Object,
 
-    construct : function(desktop, topic, nw, name, type)
+    construct : function(desktop, topic, nw, name, type, nw_id)
     {
 	// write "socket"
 	this.__srpc = new qx.io.remote.Rpc(
@@ -26,6 +26,7 @@ qx.Class.define("client.UserWindow",
 	wm1.userWindowRef = this;
 
 	this.__nw = nw;
+	this.__nw_id = nw_id;
 
 	wm1.setLayout(layout);
 	wm1.setModal(false);
@@ -88,6 +89,7 @@ qx.Class.define("client.UserWindow",
 	__lines : 0,
 	winid : 0,
 	__nw : 0,
+	__nw_id : 0,
 	__type : 0,
 	__name : 0,
 	
@@ -183,7 +185,7 @@ qx.Class.define("client.UserWindow",
 	    {
 		this.__srpc.callAsync(this.sendresult, "SEND", global_id + " " + global_sec + " " + this.winid + " " + input);
 		this.__input1.setValue("");
-		//this.addline("&lt;" + global_nick + "&gt; " + input + "<br>");
+		this.addline("<font color=\"blue\"><b>&lt;" + global_nick[this.__nw_id] + "&gt;</b> " + input + "</font><br>");
 	    }
 	},
 
@@ -212,7 +214,7 @@ qx.Class.define("client.UserWindow",
 
 	    if (nw == "(Evergreen) ")
 	    {
-		nw = "";
+		nw = "Forum: ";
 	    }
 
 	    if (this.__type == 2)
@@ -243,7 +245,7 @@ qx.Class.define("client.UserWindow",
 
 		    if(names[i].charAt(0) == "@")
 		    {
-			display = "<b>" + display + "</b>"; 
+			display = "<b>" + display.substr(1) + "</b>"; 
 		    }
 
 		    var tmp = new qx.ui.form.ListItem(display).set(
