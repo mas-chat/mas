@@ -3,7 +3,24 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>Evergreen</title>
+  <script type="text/javascript">
+   function detectBrowser()
+   {
+       var browser=navigator.appName;
+       var b_version=navigator.appVersion;
+       var version=parseFloat(b_version);
+
+       if (browser=="Microsoft Internet Explorer")
+       {
+            document.write("<p><a font color=\"red\">Your are using Internet Explorer. Because of IE performance problems, it might look like the browser stops responding sometimes when using this service. In such cases just wait patiently.<p> You might also want to reconsider upgrading you broser to Mozilla Firefox, Google Chore, Apple Safari or Opera 10</font> ");
+       }
+   }
+  </script>
   <script type="text/javascript" src="script/client.js"></script>
 </head>
-<body></body>
+<body onload="detectBrowser()">
+
+<p>Loading... Please wait
+
+</body>
 </html>

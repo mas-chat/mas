@@ -173,14 +173,17 @@ qx.Class.define("client.UserWindow",
                 
                 if (command === "DIE")
                 {
-		    alert("Your session is terminated: " + param + " Please relogin.");
-		    window.location = ralph_domain + "/?logout=yes";
+		    infoDialog.showInfoWin("Session terminated. <p>Press OK to return login page.",
+					   true,
+					   function () {
+					       window.location = ralph_domain + "/?logout=yes";
+					   });
 		}
 	    } 
 	    else 
 	    {
-		//TODO: replace with qooxdoo window without buttons
-		alert("Lost connection to server... Press OK to recover.  " + exc);
+		infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...",
+				       false);
 		window.location.reload(true);
 	    }
 	},

@@ -61,29 +61,40 @@ qx.Class.define("client.InfoDialog",
 	__nwselection : "Evergreen",
 	__rrpc : 0,
 
-	getLoginFailedWin : function(rootItem)
+	showInfoWin : function(text, showok, callback)
 	{
 	    this.__window.removeAll();
-
 	    this.__window.add(this.__message);
 
-	    this.__message.setLabel("Wrong email addres and/or password. Please try again.");
-	    this.__window.setCaption("Login error");
+	    this.__message.setRich(true);
+	    this.__message.setLabel(text);
+	    this.__window.setCaption("Info");
 
 	    this.__window.add(this.__box);
 
-	    this.__yesbutton.setLabel("OK");
-	    this.__box.add(this.__yesbutton);
 
-	    if (this.__yeslistenerid != 0) {
-		this.__yesbutton.removeListener(this.__yeslistenerid);
+	    if (showok == true)
+	    {
+		this.__yesbutton.setLabel("OK");
+		this.__box.add(this.__yesbutton);
+		
+		if (this.__yeslistenerid != 0) {
+		    this.__yesbutton.removeListener(this.__yeslistenerid);
+		}
+
+		this.__yeslistenerid = this.__yesbutton.addListener("execute", function(e) {
+		    this.__window.close();
+		    
+		    if (callback != null)
+		    {
+			callback();
+		    }
+		}, this);
 	    }
 
-	    this.__yeslistenerid = this.__yesbutton.addListener("execute", function(e) {
-		this.__window.close();
-	    }, this);
-
-	    rootItem.add(this.__window);
+	    this.__window.setModal(true);
+	    
+	    MainScreenObj.desktop.add(this.__window);
 	    this.__window.open();
 	},
 

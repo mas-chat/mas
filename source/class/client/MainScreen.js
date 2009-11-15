@@ -32,15 +32,40 @@ qx.Class.define("client.MainScreen",
 	__manager : 0,
 	__myapp : 0,
         __timer : 0,
+	__ack : 0,
 	seq : 0,
 	windows : [],
 	desktop : 0,
 
 	readresult : function(result, exc) 
 	{
+	    var doitagain = true;
+
+	    MainScreenObj.seq++;
+
 	    if (exc == null) 
 	    {
-		var commands = result.split("<>");
+
+		var initialpos = result.search(/ /);
+		var ack = result.slice(0, initialpos);
+		var allcommands = result.slice(initialpos+1);
+
+		if (ack == 1)
+		{
+		    MainScreenObj.__ack = 1;
+		}
+		else
+		{
+		    MainScreenObj.__ack++;
+		    if (MainScreenObj.__ack != ack)
+		    {
+			infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...",
+					       false);
+			window.location.reload(true);
+		    }
+		}
+
+		var commands = allcommands.split("<>");
 
 		for (var i=0; i < commands.length; i++)
 		{
@@ -105,8 +130,12 @@ qx.Class.define("client.MainScreen",
 		    else if (command === "DIE")
 		    {
 			var reason = param.slice(pos+1);
-			alert("Session expired. Press OK to return login page. " + reason);
-			window.location = ralph_domain + "/?logout=yes";
+			infoDialog.showInfoWin("Session expired. <p>Press OK to return login page.",
+					       true,
+					       function () {
+						   window.location = ralph_domain + "/?logout=yes";
+					       });
+			doitagain = false;
 		    }
 		    else if (command === "CLOSE")
 		    {
@@ -121,20 +150,20 @@ qx.Class.define("client.MainScreen",
  			MainScreenObj.updateFriendsList(globalflist, param);
                     }
 		}
-	    } 
+
+		if (doitagain == true)
+		{
+		    MainScreenObj.__rrpc.callAsync(MainScreenObj.readresult,
+						   "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
+		}
+	    }
 	    else 
 	    {
-		//		alert("Exception during async call: " + exc);
-	    }
-	    
-	    MainScreenObj.seq++;
-              
-	    if (command !== "DIE")
-	    {
-		//TODO: can cause havoc towards server when looping
-		MainScreenObj.__rrpc.callAsync(MainScreenObj.readresult,
-					       "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
-	    }
+		//Wait a little and try again. This is to make sure that we don't loop and consume all CPU cycles ifthere is no connection.
+		qx.event.Timer.once(function(e){
+		    MainScreenObj.__rrpc.callAsync(MainScreenObj.readresult, "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
+		}, this, 200); 
+	    }	    
 	},
 	
 	show : function(rootItem)
@@ -191,7 +220,6 @@ qx.Class.define("client.MainScreen",
 	        this.add(friendContainer);
 		
 	    }, middleSection);
-	    
 	    
 	    hideLabel.addListener("click", function(e) {
 		this.remove(friendContainer);
