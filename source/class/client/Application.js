@@ -39,6 +39,15 @@ qx.Class.define("client.Application",
 	    global_id = this.gup('id');
 	    global_sec = this.gup('token');
 
+	    if (this.gup('a') == "yes")
+	    {
+		global_anon = true;
+	    }
+	    else
+	    {
+		global_anon = false;
+	    }
+
 	    this.getRoot().removeAll();
 	    mainView = new client.MainScreen();
 	    mainView.show(this.getRoot());

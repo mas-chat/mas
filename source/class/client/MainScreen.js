@@ -21,6 +21,9 @@ qx.Class.define("client.MainScreen",
 
         this.__timer = new qx.event.Timer(1000 * 60);
         this.__timer.start();
+	
+	this.__tt = new qx.ui.tooltip.ToolTip("Send Message");
+
     },
 
     members :
@@ -33,9 +36,15 @@ qx.Class.define("client.MainScreen",
 	__myapp : 0,
         __timer : 0,
 	__ack : 0,
+	__tt : 0,
 	seq : 0,
 	windows : [],
 	desktop : 0,
+
+	sendresult : function(result, exc) 
+	{
+	    
+	},
 
 	readresult : function(result, exc) 
 	{
@@ -59,7 +68,7 @@ qx.Class.define("client.MainScreen",
 		    MainScreenObj.__ack++;
 		    if (MainScreenObj.__ack != ack)
 		    {
-			infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...",
+			infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...<p>(got: " + ack + ", expected: " + MainScreenObj.__ack,
 					       false);
 			window.location.reload(true);
 		    }
@@ -230,18 +239,21 @@ qx.Class.define("client.MainScreen",
             
             friendContainer.add(hideLabel, {column:1, row:0});
 	    	    
-	    globalflist = new qx.ui.container.Composite(new qx.ui.layout.VBox());
+	    globalflist = new qx.ui.container.Composite(new qx.ui.layout.Grid());
 	    
 	    globalflist.setAllowGrowY(true);
 	    // globalflist.set({backgroundColor: "background-pane"});
 	    
-            this.__timer.addListener(
-		"interval", function(e) { this.updateIdleTimes(globalflist); }, this);
-	    
 	    friendContainer.add(globalflist, {row: 1, column: 0, colSpan:2});
 	    
-	    middleSection.add(friendContainer);
-	    
+	    if (global_anon == false)
+	    {
+		middleSection.add(friendContainer);
+
+		this.__timer.addListener(
+		    "interval", function(e) { this.updateIdleTimes(globalflist); }, this);
+	    }
+
 	    rootContainer.add(middleSection, {flex:1});		
 	    
 	    // create the toolbar
@@ -259,7 +271,11 @@ qx.Class.define("client.MainScreen",
 		maxLength: 150 , width: 250});
 	    
 	    this.__part3.add(this.__input);
-	    toolbar.add(this.__part3);
+	    
+	    if (global_anon == false)
+	    {
+		toolbar.add(this.__part3);
+	    }
 
 	    this.updateWindowButtons();
 
@@ -280,29 +296,54 @@ qx.Class.define("client.MainScreen",
 	        var columns = myfriends[i].split("|");
 		
                 var friend = new qx.ui.basic.Label("<b>" + columns[1] + "</b> (" + columns[0] + ")");
-		
                 var friend2 = new qx.ui.basic.Label();
+                
+                var friend3 = new qx.ui.basic.Label();
+		friend3.setRich(true);	
+		friend3.setValue("<font color=\"green\">|M|</font>");
+		friend3.nickname = columns[0];
+
+		friend3.addListener("click", function (e) {
+		    MainScreenObj.__rrpc.callAsync(MainScreenObj.sendresult,
+						"STARTCHAT", global_id + " " + global_sec + " " +
+						"Evergreen " + this.nickname);
+		}, friend3);
+
+		friend3.addListener("mouseover", function (e) {
+		    this.setValue("<font color=\"green\"><b>|M|<b></font>");
+		}, friend3);
+
+		friend3.addListener("mouseout", function (e) {
+		    this.setValue("<font color=\"green\">|M|</font>");
+		}, friend3);
+
+		friend3.setToolTip(MainScreenObj.__tt);
+
                 friend2.setRich(true);
                 friend.setRich(true);
 		
 		friend.setPaddingTop(7);
+		friend3.setPaddingTop(7);
+
 		friend2.setPaddingTop(0);
 		friend2.setPaddingLeft(20);
+		friend3.setPaddingLeft(10);
 		friend.setPaddingLeft(10);
 	        friend2.idleTime = columns[3]; 
 		
-                parentFList.add(friend);
-                parentFList.add(friend2);
+                parentFList.add(friend, {row: 2*i, column: 0});
+                parentFList.add(friend2, {row: 2*i+1, column: 0, colSpan : 2});
+                parentFList.add(friend3, {row: 2*i, column: 1});
             }
 	    
-	    this.printIdleTimes(parentFList);
+	    MainScreenObj.printIdleTimes(parentFList);
         }, 
 
         printIdleTimes : function(parentFList)
         {
             var children = parentFList.getChildren();
 	    
-            for (var i=1; i < children.length; i = i + 2)
+            for (var i=1; i < children.length; i = i + 3)
             {
 	        var idle = children[i].idleTime;
                 var result;
@@ -313,7 +354,7 @@ qx.Class.define("client.MainScreen",
                 }
                 else if (idle < 60)
                 {			
-                    result = "<font color=\"blue\">Last: " + idle + " minutes ago<font>";
+                    result = "<font color=\"blue\">Last: " + idle + " minutes ago</font>";
                 }
 		else if (idle < 60 * 24)
                 {  
@@ -323,7 +364,7 @@ qx.Class.define("client.MainScreen",
 			idle = 1;
 		    }
 
-                    result = "<font color=\"blue\">Last: " + idle + " hours ago<font>";
+                    result = "<font color=\"blue\">Last: " + idle + " hours ago</font>";
                 }
 		else if (idle < 5000000)
                 {  
@@ -333,11 +374,11 @@ qx.Class.define("client.MainScreen",
 			idle = 1;
 		    }
 
-                    result = "<font color=\"blue\">Last: " + idle + " days ago<font>";
+                    result = "<font color=\"blue\">Last: " + idle + " days ago</font>";
                 }
 		else
 		{
-		    result = "<font color=\"blue\">Last: Unknown<font>";
+		    result = "<font color=\"blue\">Last: Unknown</font>";
 		}
 		
 		children[i].setValue(result);
@@ -409,8 +450,11 @@ qx.Class.define("client.MainScreen",
 	    var helpMenu = new qx.ui.menubar.Button("Help", null, this.getHelpMenu());
 	    var logoutMenu = new qx.ui.menubar.Button("Log Out", null, this.getLogoutMenu());
 
-	    menubar.add(forumMenu);
-	    menubar.add(advancedMenu);
+	    if (global_anon == false)
+	    {
+		menubar.add(forumMenu);
+		menubar.add(advancedMenu);
+	    }
 	    menubar.add(helpMenu);
 	    menubar.add(logoutMenu);
 

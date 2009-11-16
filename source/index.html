@@ -12,7 +12,10 @@
 
        if (browser=="Microsoft Internet Explorer")
        {
-            document.write("<p><a font color=\"red\">Your are using Internet Explorer. Because of IE performance problems, it might look like the browser stops responding sometimes when using this service. In such cases just wait patiently.<p> You might also want to reconsider upgrading you broser to Mozilla Firefox, Google Chore, Apple Safari or Opera 10</font> ");
+//            var w ="<p><font color=\"red\">Your are using Internet Explorer. Because of IE performance problems, it might look like the browser stops responding sometimes when using this service. In such cases just wait patiently.<p> You might also want to reconsider upgrading you broser to Mozilla Firefox, Google Chore, Apple Safari or Opera 10</font> ";
+//            var content = document.createTextNode(w);     
+//            var scr = document.getElementById('foo'); 
+//            scr.parentNode.insertBefore(content, scr); 
        }
    }
   </script>
@@ -21,6 +24,10 @@
 <body onload="detectBrowser()">
 
 <p>Loading... Please wait
+
+<p id="foo">
+
+
 
 </body>
 </html>

@@ -33,7 +33,7 @@ qx.Class.define("client.UserWindow",
 
 	wm1.setLayout(layout);
 	wm1.setModal(false);
-	wm1.setAllowMaximize(false);
+	wm1.setAllowMaximize(true);
 	wm1.moveTo(250, 150);
 	
 	// create scroll container
@@ -235,10 +235,17 @@ qx.Class.define("client.UserWindow",
 
 	changetopic : function(line)
 	{
-	    var nw = "(" + this.__nw + ") ";
+	    var nw = "(" + this.__nw + " channel) ";
+	    var cname = this.__name;
 
-	    if (nw == "(Evergreen) ")
+	    if(line == "")
 	    {
+		line = "Topic not set.";
+	    }
+
+	    if (this.__nw == "Evergreen" && this.__type == 0)
+	    {
+		cname = cname.substr(1, 1).toUpperCase() + cname.substr(2);
 		nw = "Forum: ";
 	    }
 
@@ -248,11 +255,11 @@ qx.Class.define("client.UserWindow",
 	    }
 	    else if (this.__type == 0)
 	    {
-		this.__window.setCaption(nw + this.__name + " : " + line);
+		this.__window.setCaption(nw + cname + " : " + line);
 	    }
 	    else
 	    {
-		this.__window.setCaption(nw + "*** Private conversion with " + this.__name);
+		this.__window.setCaption(nw + "*** Private conversion with " + cname);
 	    }
 	},
 
