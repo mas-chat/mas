@@ -40,8 +40,8 @@ qx.Class.define("client.UserWindow",
 	this.__scroll = new qx.ui.container.Scroll();
 
 	this.__scroll.set({
-	    minWidth: 300,
-	    minHeight: 200,
+	    minWidth: 100,
+	    minHeight: 50,
 	    scrollbarY : "on"
 	});
 
@@ -142,6 +142,8 @@ qx.Class.define("client.UserWindow",
 				  "CLOSE", global_id + " " + global_sec + " " + this.winid);
 	},
 
+	//TODO: handle beforeclose -> remove from mainscreen array
+
 	setHeight : function(e)
 	{
 	    this.__window.setHeight(e);
@@ -184,6 +186,7 @@ qx.Class.define("client.UserWindow",
 	    {
 		infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...",
 				       false);
+		//TODO: Add delay ~2s here
 		window.location.reload(true);
 	    }
 	},
@@ -246,7 +249,7 @@ qx.Class.define("client.UserWindow",
 	    if (this.__nw == "Evergreen" && this.__type == 0)
 	    {
 		cname = cname.substr(1, 1).toUpperCase() + cname.substr(2);
-		nw = "Forum: ";
+		nw = "Group: ";
 	    }
 
 	    if (this.__type == 2)

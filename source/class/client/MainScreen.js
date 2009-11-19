@@ -104,6 +104,37 @@ qx.Class.define("client.MainScreen",
 			    new client.UserWindow(MainScreenObj.desktop,
 						  topic, nw, name, type, nw_id);
 
+			if (x < 0) x = 0;
+			if (y < 0) y = 0;
+
+			var dim = MainScreenObj.desktop.getBounds();
+
+			if (x + width > dim.width)
+			{
+			    if (width < dim.width)
+			    {
+				x = dim.width - width;
+			    }
+			    else
+			    {
+				x = 5;
+				width = dim.width - 10;
+			    }
+			}
+
+			if (y + height > dim.height)
+			{
+			    if (height < dim.height)
+			    {
+				y = dim.height - height;
+			    }
+			    else
+			    {
+				y = 5;
+				height = dim.height - 10;
+			    }
+			}
+
 			newWindow.moveTo(x, y);
 			
 			newWindow.setHeight(height);
@@ -194,6 +225,9 @@ qx.Class.define("client.MainScreen",
 	    var middleSection = new qx.ui.container.Composite(new qx.ui.layout.HBox(2));
 
 	    var middleContainer = new qx.ui.window.Desktop(windowManager);
+
+	    middleContainer.addListener("resize", this.checkLimits,this);
+
 //	    middleContainer.setAllowGrowX(false);
 //	    middleContainer.setAllowGrowY(false);
 
@@ -385,6 +419,62 @@ qx.Class.define("client.MainScreen",
             }	
 
         },
+
+	checkLimits : function(dim)
+	{
+	    /*
+
+	    for (var i=0; i < this.windows.length; i++)
+            {
+		var wbounds = this.windows[i].getBounds();
+
+		var x = wbounds.left;
+		var y = wbounds.top;
+		var width = wbounds.width;
+		var height = wbounds.height;
+
+		if (x + width > dim.width)
+		{
+		    if (width < dim.width)
+		    {
+			x = dim.width - width;
+		    }
+		    else
+		    {
+			x = 5;
+			width = dim.width - 10;
+		    }
+		}
+		
+		if (y + height > dim.height)
+		{
+		    if (height < dim.height)
+		    {
+			y = dim.height - height;
+		    }
+		    else
+		    {
+			y = 5;
+			height = dim.height - 10;
+		    }
+		}
+
+		if (x != wbounds.left || y != wbounds.top)
+		{
+		    this.windows[i].moveTo(x, y);
+		}
+
+		if (width != wbounds.width)
+		{
+		    this.windows[i].setWidth(width);
+		}
+
+		if  (height != wbounds.height)
+		{
+		    this.windows[i].setHeight(height);
+		}
+            }	*/
+	},
 	
         updateIdleTimes : function(parentFList)
         {
@@ -445,7 +535,7 @@ qx.Class.define("client.MainScreen",
 
 	    frame.add(menubar);
 
-	    var forumMenu = new qx.ui.menubar.Button("Forums", null, this.getForumMenu());
+	    var forumMenu = new qx.ui.menubar.Button("Groups", null, this.getForumMenu());
 	    var advancedMenu = new qx.ui.menubar.Button("Advanced", null, this.getAdvancedMenu());
 	    var helpMenu = new qx.ui.menubar.Button("Help", null, this.getHelpMenu());
 	    var logoutMenu = new qx.ui.menubar.Button("Log Out", null, this.getLogoutMenu());
@@ -494,8 +584,8 @@ qx.Class.define("client.MainScreen",
 	{
 	    var menu = new qx.ui.menu.Menu;
 
-	    var createButton = new qx.ui.menu.Button("Create new forum...");
-	    var joinButton = new qx.ui.menu.Button("Join to existing forum...");
+	    var createButton = new qx.ui.menu.Button("Create new group...");
+	    var joinButton = new qx.ui.menu.Button("Join to existing group...");
 
 	    createButton.addListener("execute", this._createForumCommand, this);
 	    joinButton.addListener("execute", this._joinForumCommand, this);

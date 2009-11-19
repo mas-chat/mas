@@ -186,6 +186,8 @@ qx.Class.define("client.InfoDialog",
 
 	__sendresult : function(result, exc) 
 	{
+	    //TODO: fix me
+
 	    if (exc == null) 
 	    {
 
