@@ -220,14 +220,14 @@ qx.Class.define("client.MainScreen",
 			this.show();
 			break;
 		    }
+		}
 
-		    if (doitagain == true)
-		    {
-			this.__rrpc.callAsync(
-			    qx.lang.Function.bind(this.readresult, this),
-			    "HELLO", global_id + " " + global_sec + " " +
-				this.seq);
-		    }
+		if (doitagain == true)
+		{
+		    this.__rrpc.callAsync(
+			qx.lang.Function.bind(this.readresult, this),
+			"HELLO", global_id + " " + global_sec + " " +
+			    this.seq);
 		}
 	    }
 	    else 
@@ -346,11 +346,7 @@ qx.Class.define("client.MainScreen",
 	    toolbar.add(this.__part2);
 	    toolbar.addSpacer();
 	    
-	    this.__input = new qx.ui.form.TextField(
-		"Search (keywords or date (DD.MM.YY))").set({
-		maxLength: 150 , width: 250});
-	    
-	    this.__part3.add(this.__input);
+	    //this.__part3.add(this.__input);
 	    
 	    if (global_anon == false)
 	    {
