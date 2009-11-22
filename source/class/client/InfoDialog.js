@@ -21,7 +21,7 @@ qx.Class.define("client.InfoDialog",
 		
 	this.__message = new qx.ui.basic.Atom("", "");
 	this.__message2 = new qx.ui.basic.Atom("", "");
-	
+
 	this.__box = new qx.ui.container.Composite;
 	this.__box.setLayout(new qx.ui.layout.HBox(10, "right"));
 
@@ -35,6 +35,10 @@ qx.Class.define("client.InfoDialog",
 	this.__nobutton = new qx.ui.form.Button("No", "icon/16/actions/dialog-cancel.png");
 
 	this.__input = new qx.ui.form.TextField("").set({
+		maxLength: 25
+	});
+
+	this.__input2 = new qx.ui.form.TextField("").set({
 		maxLength: 25
 	});
 
@@ -57,6 +61,7 @@ qx.Class.define("client.InfoDialog",
 	__yeslistenerid : 0,
 	__nolistenerid : 0,
 	__input : 0,
+	__input2 : 0,
 	__combo : 0,
 	__nwselection : "Evergreen",
 	__rrpc : 0,
@@ -106,8 +111,8 @@ qx.Class.define("client.InfoDialog",
 	    
 	    if (mode == 0)
 	    {
-		this.__window.setCaption("Join to new forum");
-		this.__message.setLabel("Type forum name you wish to join:");
+		this.__window.setCaption("Join to new group");
+		this.__message.setLabel("Type the group name you wish to join:");
 	    }
 	    else
 	    {
@@ -184,13 +189,73 @@ qx.Class.define("client.InfoDialog",
 	    this.__window.open();
 	},
 
+	getCreateNewGroupWin : function(rootItem, mode)
+	{
+	    this.__window.removeAll();
+
+	    this.__window.setCaption("Create new Group");
+	    this.__message.setLabel("Type group name you wish to create:");
+	    this.__message2.setLabel("Optional password:");
+	    
+	    this.__window.add(this.__message);
+	    this.__window.add(this.__input);
+	    this.__input.focus();
+	    this.__window.add(this.__message2);
+	    this.__window.add(this.__input2);
+
+	    this.__window.add(this.__box2);
+	    this.__window.add(this.__box);
+
+	    this.__box.removeAll();
+	    this.__box2.removeAll();
+
+	    this.__yesbutton.setLabel("OK");
+	    this.__box.add(this.__yesbutton);
+	    this.__nobutton.setLabel("Cancel");
+	    this.__box.add(this.__nobutton);
+
+	    	    
+	    if (this.__nolistenerid != 0) {
+		this.__nobutton.removeListener(this.__nolistenerid);
+	    }
+
+	    this.__nolistenerid = this.__nobutton.addListener("execute", function(e) {
+		this.__window.close();
+	    }, this);
+
+	    if (this.__yeslistenerid != 0) {
+		this.__yesbutton.removeListener(this.__yeslistenerid);
+	    }
+
+	    this.__yeslistenerid = this.__yesbutton.addListener("execute", 
+								function(e) {
+		var input = this.__input.getValue();
+
+		if (input !== "")
+		{
+		    this.__rrpc.callAsync(this.__sendresult, "CREATE",
+					  global_id + " " + global_sec + " " +
+					  input + " ");
+		}
+		this.__window.close();
+	    }, this);
+
+	    rootItem.add(this.__window);
+	    this.__window.open();
+	},
+
 	__sendresult : function(result, exc) 
 	{
-	    //TODO: fix me
-
 	    if (exc == null) 
 	    {
+		var pos = result.search(/ /);
+		var command = result.slice(0, pos);
+		var param = result.slice(pos+1);
 
+		if (command == "NOK")
+		{
+		    alert(param);
+		}
 	    } 
 	    else 
 	    {

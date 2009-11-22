@@ -33,7 +33,10 @@ qx.Class.define("client.Application",
 	    ralph_url = ralph_domain + ":" + ralph_port;
 
 	    infoDialog = new client.InfoDialog();
-	
+	    logDialog = new client.LogDialog();
+
+	    global_settings = new client.Settings("");
+
 	    var query = window.location.search;
 
 	    global_id = this.gup('id');
@@ -49,8 +52,7 @@ qx.Class.define("client.Application",
 	    }
 
 	    this.getRoot().removeAll();
-	    mainView = new client.MainScreen();
-	    mainView.show(this.getRoot());
+	    MainScreenObj = new client.MainScreen(this.getRoot());
 	},
 
 	gup : function( name )

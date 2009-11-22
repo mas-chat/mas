@@ -154,6 +154,11 @@ qx.Class.define("client.UserWindow",
 	    this.__window.setWidth(e);
 	},
 
+	getBounds : function()
+	{
+	    return this.__window.getBounds();
+	},
+
 	handleMove : function(e)
 	{
 	    var data = e.getData();

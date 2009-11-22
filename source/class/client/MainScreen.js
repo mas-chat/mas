@@ -1,5 +1,5 @@
 /* ************************************************************************
-5B5B
+
 #asset(projectx/*)
 
 ************************************************************************ */
@@ -8,7 +8,7 @@ qx.Class.define("client.MainScreen",
 {
     extend : qx.core.Object,
 
-    construct : function()
+    construct : function(rootItem)
     {
 	this.base(arguments);
 
@@ -21,9 +21,13 @@ qx.Class.define("client.MainScreen",
 
         this.__timer = new qx.event.Timer(1000 * 60);
         this.__timer.start();
-	
-	this.__tt = new qx.ui.tooltip.ToolTip("Send Message");
 
+	this.__tt = new qx.ui.tooltip.ToolTip("Send Message");
+	this.__myapp = rootItem;
+	
+	this.__rrpc.callAsync(
+	    qx.lang.Function.bind(this.readresult, this), "HELLO",
+	    global_id + " " + global_sec + " " + this.seq);
     },
 
     members :
@@ -50,26 +54,32 @@ qx.Class.define("client.MainScreen",
 	{
 	    var doitagain = true;
 
-	    MainScreenObj.seq++;
+	    this.seq++;
 
 	    if (exc == null) 
 	    {
-
 		var initialpos = result.search(/ /);
 		var ack = result.slice(0, initialpos);
 		var allcommands = result.slice(initialpos+1);
 
 		if (ack == 1)
 		{
-		    MainScreenObj.__ack = 1;
+		    this.__ack = 1;
 		}
 		else
 		{
-		    MainScreenObj.__ack++;
-		    if (MainScreenObj.__ack != ack)
+		    this.__ack++;
+		    if (this.__ack != ack)
 		    {
-			infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...<p>(got: " + ack + ", expected: " + MainScreenObj.__ack,
-					       false);
+			if (this.desktop === 0)
+			{
+			    this.show();
+			}
+
+			infoDialog.showInfoWin(
+			    "Lost connection to server.<p>Trying to recover...<p>" +
+				"(got: " + ack + ", expected: " + this.__ack,
+			    false);
 			window.location.reload(true);
 		    }
 		}
@@ -85,8 +95,10 @@ qx.Class.define("client.MainScreen",
 		    pos = param.search(/ /);
 		    var window_id = param.slice(0, pos);
 
-		    if (command === "CREATE")
+		    switch(command)
 		    {
+			
+		    case "CREATE":
 			var options = param.split(" ");
 		    
 			options.shift(); // window id
@@ -101,15 +113,22 @@ qx.Class.define("client.MainScreen",
 			var topic = options.join(" ");
 
 			var newWindow = 
-			    new client.UserWindow(MainScreenObj.desktop,
+			    new client.UserWindow(this.desktop,
 						  topic, nw, name, type, nw_id);
 
-			if (x < 0) x = 0;
-			if (y < 0) y = 0;
+			if (x < 0)
+			{
+			    x = 0;
+			}
 
-			var dim = MainScreenObj.desktop.getBounds();
+			if (y < 0)
+			{
+			    y = 0;
+			}
 
-			if (x + width > dim.width)
+			var dim = this.desktop.getBounds();
+
+			if (dim && x + width > dim.width)
 			{
 			    if (width < dim.width)
 			    {
@@ -122,7 +141,7 @@ qx.Class.define("client.MainScreen",
 			    }
 			}
 
-			if (y + height > dim.height)
+			if (dim && y + height > dim.height)
 			{
 			    if (height < dim.height)
 			    {
@@ -144,73 +163,89 @@ qx.Class.define("client.MainScreen",
 			
 			newWindow.addHandlers();
 			newWindow.winid = window_id;
-			MainScreenObj.windows[window_id] = newWindow;
+			this.windows[window_id] = newWindow;
 
-			MainScreenObj.updateWindowButtons();
-		    }
-		    else if (command === "ADDTEXT")
-		    {
+			this.updateWindowButtons();
+			break;
+
+		    case "ADDTEXT":
 			var usertext = param.slice(pos+1);
-			MainScreenObj.windows[window_id].addline(usertext);
-		    }   
-		    else if (command === "TOPIC")
-		    {
-			var usertext = param.slice(pos+1);
-			MainScreenObj.windows[window_id].changetopic(usertext);
-		    }   
-		    else if (command === "NAMES")
-		    {
-			var usertext = param.slice(pos+1);
-			MainScreenObj.windows[window_id].addnames(usertext);
-		    }
-		    else if (command === "NICK")
-		    {
+			this.windows[window_id].addline(usertext);
+			break;
+   
+		    case "TOPIC":
+		    	var usertext = param.slice(pos+1);
+			this.windows[window_id].changetopic(usertext);
+			break;
+
+		    case "NAMES":
+		    	var usertext = param.slice(pos+1);
+			this.windows[window_id].addnames(usertext);
+			break;
+
+		    case "NICK":
 			global_nick = param.split(" ");
-		    }
-		    else if (command === "DIE")
-		    {
+			break;
+			
+		    case "DIE":
+		    	if (this.desktop === 0)
+			{
+			    this.show();
+			}
+
 			var reason = param.slice(pos+1);
-			infoDialog.showInfoWin("Session expired. <p>Press OK to return login page.",
-					       true,
-					       function () {
-						   window.location = ralph_domain + "/?logout=yes";
-					       });
+			infoDialog.showInfoWin(
+			    "Session expired. <p>Press OK to return login page.",
+			    true,
+			    function () {
+				window.location = ralph_domain + "/?logout=yes";
+			    });
 			doitagain = false;
-		    }
-		    else if (command === "CLOSE")
-		    {
+			break;
+
+		    case "CLOSE":
 			var winid = param.slice(pos+1);
 			//TODO: call destructor?
-			delete MainScreenObj.windows[winid];
+			delete this.windows[winid];
 
-			MainScreenObj.updateWindowButtons();		    
+			this.updateWindowButtons();		    
+			break;
+
+		    case "FLIST":
+			this.updateFriendsList(globalflist, param);
+			break;
+
+		    case "SET":
+			global_settings = new client.Settings(param);
+			this.show();
+			break;
 		    }
-	            else if (command === "FLIST")
-                    {
- 			MainScreenObj.updateFriendsList(globalflist, param);
-                    }
-		}
 
-		if (doitagain == true)
-		{
-		    MainScreenObj.__rrpc.callAsync(MainScreenObj.readresult,
-						   "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
+		    if (doitagain == true)
+		    {
+			this.__rrpc.callAsync(
+			    qx.lang.Function.bind(this.readresult, this),
+			    "HELLO", global_id + " " + global_sec + " " +
+				this.seq);
+		    }
 		}
 	    }
 	    else 
 	    {
-		//Wait a little and try again. This is to make sure that we don't loop and consume all CPU cycles ifthere is no connection.
+		//Wait a little and try again. This is to make sure
+		//that we don't loop and consume all CPU cycles if
+		//there is no connection.
 		qx.event.Timer.once(function(e){
-		    MainScreenObj.__rrpc.callAsync(MainScreenObj.readresult, "HELLO", global_id + " " + global_sec + " " + MainScreenObj.seq);
+		    this.__rrpc.callAsync(
+			qx.lang.Function.bind(this.readresult, this),
+			"HELLO", global_id + " " + global_sec + " " +
+			    this.seq);
 		}, this, 200); 
 	    }	    
 	},
 	
-	show : function(rootItem)
+	show : function()
 	{
-	    this.__myapp = rootItem;
-	    MainScreenObj = this;
-
 	    /* Layout for root */
 	    var rootLayout = new qx.ui.layout.VBox(1);
 
@@ -222,7 +257,8 @@ qx.Class.define("client.MainScreen",
 	    var windowManager = new qx.ui.window.Manager();
 	    this.__manager = windowManager;
 
-	    var middleSection = new qx.ui.container.Composite(new qx.ui.layout.HBox(2));
+	    var middleSection = new qx.ui.container.Composite(
+		new qx.ui.layout.HBox(2));
 
 	    var middleContainer = new qx.ui.window.Desktop(windowManager);
 
@@ -233,11 +269,13 @@ qx.Class.define("client.MainScreen",
 
 	    this.desktop = middleContainer;
 
-	    middleContainer.set({decorator: "main", backgroundColor: "background-pane"});
+	    middleContainer.set({decorator: "main",
+				 backgroundColor: "background-pane"});
 
 	    middleSection.add(middleContainer, {flex:1});
 
-	    var friendContainer = new qx.ui.container.Composite(new qx.ui.layout.Grid());
+	    var friendContainer = new qx.ui.container.Composite(
+		new qx.ui.layout.Grid());
 	    
 	    var friendsLabel = new qx.ui.basic.Label("<b>Friends:</b>");
             friendsLabel.setRich(true);
@@ -255,37 +293,44 @@ qx.Class.define("client.MainScreen",
 	    hideLabel.setPaddingTop(10);
 	    hideLabel.setPaddingLeft(10);
 
-	    var showLabel = new qx.ui.basic.Label("<font color=\"blue\">S<br>H<br>O<br>W<br><br>F<br>R<br>I<br>E<br>N<br>D<br>S</font>");
+	    var showLabel = new qx.ui.basic.Label(
+		"<font color=\"blue\">S<br>H<br>O<br>W<br><br>F<br>R<br>" +
+		    "I<br>E<br>N<br>D<br>S</font>");
 	    showLabel.setRich(true);
 	    
 	    showLabel.addListener("click", function(e) {
 		this.remove(showLabel);
 	        this.add(friendContainer);
-		
+		global_settings.setShowFriendBar(1)
 	    }, middleSection);
 	    
 	    hideLabel.addListener("click", function(e) {
 		this.remove(friendContainer);
-		
 	        this.add(showLabel);
-		
+		global_settings.setShowFriendBar(0)
 	    }, middleSection);
             
             friendContainer.add(hideLabel, {column:1, row:0});
 	    	    
 	    globalflist = new qx.ui.container.Composite(new qx.ui.layout.Grid());
-	    
 	    globalflist.setAllowGrowY(true);
-	    // globalflist.set({backgroundColor: "background-pane"});
 	    
 	    friendContainer.add(globalflist, {row: 1, column: 0, colSpan:2});
 	    
 	    if (global_anon == false)
 	    {
-		middleSection.add(friendContainer);
+		if (global_settings.getShowFriendBar() == 1)
+		{
+		    middleSection.add(friendContainer);
+		}
+		else
+		{
+		    middleSection.add(showLabel);
+		}
 
 		this.__timer.addListener(
-		    "interval", function(e) { this.updateIdleTimes(globalflist); }, this);
+		    "interval", function(e) { this.updateIdleTimes(globalflist); },
+		    this);
 	    }
 
 	    rootContainer.add(middleSection, {flex:1});		
@@ -301,7 +346,8 @@ qx.Class.define("client.MainScreen",
 	    toolbar.add(this.__part2);
 	    toolbar.addSpacer();
 	    
-	    this.__input = new qx.ui.form.TextField("Search (keywords or date (DD.MM.YY))").set({
+	    this.__input = new qx.ui.form.TextField(
+		"Search (keywords or date (DD.MM.YY))").set({
 		maxLength: 150 , width: 250});
 	    
 	    this.__part3.add(this.__input);
@@ -313,10 +359,8 @@ qx.Class.define("client.MainScreen",
 
 	    this.updateWindowButtons();
 
-	    rootContainer.add(toolbar);//, {left:"3%",bottom:"3%", right:"3%", width:"20%" });
-	    rootItem.add(rootContainer, {edge : 10});	    
-
-	    this.__rrpc.callAsync(this.readresult, "HELLO", global_id + " " + global_sec + " " + this.seq);
+	    rootContainer.add(toolbar);
+	    this.__myapp.add(rootContainer, {edge : 10});	    
 	},
 
 	updateFriendsList : function(parentFList, allFriends)
@@ -329,7 +373,8 @@ qx.Class.define("client.MainScreen",
 	    {
 	        var columns = myfriends[i].split("|");
 		
-                var friend = new qx.ui.basic.Label("<b>" + columns[1] + "</b> (" + columns[0] + ")");
+                var friend = new qx.ui.basic.Label("<b>" + columns[1] +
+						   "</b> (" + columns[0] + ")");
                 var friend2 = new qx.ui.basic.Label();
                 
                 var friend3 = new qx.ui.basic.Label();
@@ -338,9 +383,10 @@ qx.Class.define("client.MainScreen",
 		friend3.nickname = columns[0];
 
 		friend3.addListener("click", function (e) {
-		    MainScreenObj.__rrpc.callAsync(MainScreenObj.sendresult,
-						"STARTCHAT", global_id + " " + global_sec + " " +
-						"Evergreen " + this.nickname);
+		    this.__rrpc.callAsync(
+			this.sendresult,
+			"STARTCHAT", global_id + " " + global_sec + " " +
+			    "Evergreen " + this.nickname);
 		}, friend3);
 
 		friend3.addListener("mouseover", function (e) {
@@ -351,7 +397,7 @@ qx.Class.define("client.MainScreen",
 		    this.setValue("<font color=\"green\">|M|</font>");
 		}, friend3);
 
-		friend3.setToolTip(MainScreenObj.__tt);
+		friend3.setToolTip(this.__tt);
 
                 friend2.setRich(true);
                 friend.setRich(true);
@@ -370,7 +416,7 @@ qx.Class.define("client.MainScreen",
                 parentFList.add(friend3, {row: 2*i, column: 1});
             }
 	    
-	    MainScreenObj.printIdleTimes(parentFList);
+	    this.printIdleTimes(parentFList);
         }, 
 
         printIdleTimes : function(parentFList)
@@ -388,7 +434,8 @@ qx.Class.define("client.MainScreen",
                 }
                 else if (idle < 60)
                 {			
-                    result = "<font color=\"blue\">Last: " + idle + " minutes ago</font>";
+                    result = "<font color=\"blue\">Last: " + idle +
+			" minutes ago</font>";
                 }
 		else if (idle < 60 * 24)
                 {  
@@ -398,7 +445,8 @@ qx.Class.define("client.MainScreen",
 			idle = 1;
 		    }
 
-                    result = "<font color=\"blue\">Last: " + idle + " hours ago</font>";
+                    result = "<font color=\"blue\">Last: " + idle +
+			" hours ago</font>";
                 }
 		else if (idle < 5000000)
                 {  
@@ -408,7 +456,8 @@ qx.Class.define("client.MainScreen",
 			idle = 1;
 		    }
 
-                    result = "<font color=\"blue\">Last: " + idle + " days ago</font>";
+                    result = "<font color=\"blue\">Last: " + idle +
+			" days ago</font>";
                 }
 		else
 		{
@@ -420,62 +469,63 @@ qx.Class.define("client.MainScreen",
 
         },
 
-	checkLimits : function(dim)
+	checkLimits : function(e)
 	{
-	    /*
-
 	    for (var i=0; i < this.windows.length; i++)
             {
-		var wbounds = this.windows[i].getBounds();
-
-		var x = wbounds.left;
-		var y = wbounds.top;
-		var width = wbounds.width;
-		var height = wbounds.height;
-
-		if (x + width > dim.width)
+		if (typeof(this.windows[i]) != 'undefined')
 		{
-		    if (width < dim.width)
+		    var wbounds = this.windows[i].getBounds();
+		    var dim = e.getData();
+		    var x = wbounds.left;
+		    var y = wbounds.top;
+		    var width = wbounds.width;
+		    var height = wbounds.height;
+		    
+		    if (x + width > dim.width)
 		    {
-			x = dim.width - width;
+			if (width < dim.width)
+			{
+			    x = dim.width - width;
+			}
+			else
+			{
+			    x = 5;
+			    width = dim.width - 10;
+			}
 		    }
-		    else
+		    
+		    if (y + height > dim.height)
 		    {
-			x = 5;
-			width = dim.width - 10;
+			if (height < dim.height)
+			{
+			    y = dim.height - height;
+			}
+			else
+			{
+			    y = 5;
+			    height = dim.height - 10;
+			}
 		    }
-		}
-		
-		if (y + height > dim.height)
-		{
-		    if (height < dim.height)
+
+		    if (x != wbounds.left || y != wbounds.top)
 		    {
-			y = dim.height - height;
+			this.windows[i].moveTo(x, y);
 		    }
-		    else
+
+		    if (width != wbounds.width)
 		    {
-			y = 5;
-			height = dim.height - 10;
+			this.windows[i].setWidth(width);
+		    }
+		    
+		    if  (height != wbounds.height)
+		    {
+			this.windows[i].setHeight(height);
 		    }
 		}
-
-		if (x != wbounds.left || y != wbounds.top)
-		{
-		    this.windows[i].moveTo(x, y);
-		}
-
-		if (width != wbounds.width)
-		{
-		    this.windows[i].setWidth(width);
-		}
-
-		if  (height != wbounds.height)
-		{
-		    this.windows[i].setHeight(height);
-		}
-            }	*/
+	    }	
 	},
-	
+	    
         updateIdleTimes : function(parentFList)
         {
             var children = parentFList.getChildren();
@@ -493,35 +543,33 @@ qx.Class.define("client.MainScreen",
 	
 	updateWindowButtons : function()
 	{
-	    var mythis = MainScreenObj;
+	    this.__part2.removeAll();
+	    this._disposeObjects("__windowgroup");
+	    this.__windowGroup = new qx.ui.form.RadioGroup();
 
-	    mythis.__part2.removeAll();
-	    mythis._disposeObjects("__windowgroup");
-	    mythis.__windowGroup = new qx.ui.form.RadioGroup();
-
-	    for (var i=0; i < mythis.windows.length; i++)
+	    for (var i=0; i < this.windows.length; i++)
 	    {
-		if (mythis.windows[i])
+		if (this.windows[i])
 		{
-		    var item = new qx.ui.toolbar.RadioButton(mythis.windows[i].getName());
-		    mythis.__part2.add(item)
-		    mythis.__windowGroup.add(item);
+		    var item = new qx.ui.toolbar.RadioButton(
+			this.windows[i].getName());
+		    this.__part2.add(item)
+		    this.__windowGroup.add(item);
 		}
 	    }
 
-	    mythis.__windowGroup.addListener("changeSelection", mythis.switchToWindow, mythis);
+	    this.__windowGroup.addListener("changeSelection",
+					   this.switchToWindow, this);
 
 	},
 
 	switchToWindow : function(e)
 	{
-	    var mythis = MainScreenObj;
-
-	    for (var i=0; i < mythis.windows.length; i++)
+	    for (var i=0; i < this.windows.length; i++)
 	    {
-		if (e.getData()[0] == mythis.__part2.getChildren()[i]) 
+		if (e.getData()[0] == this.__part2.getChildren()[i]) 
 		{
-		    mythis.windows[i].show();
+		    this.windows[i].show();
 		}
 	    }
 	},
@@ -535,14 +583,20 @@ qx.Class.define("client.MainScreen",
 
 	    frame.add(menubar);
 
-	    var forumMenu = new qx.ui.menubar.Button("Groups", null, this.getForumMenu());
-	    var advancedMenu = new qx.ui.menubar.Button("Advanced", null, this.getAdvancedMenu());
+	    var forumMenu = new qx.ui.menubar.Button("Groups", null,
+						     this.getForumMenu());
+	    var viewMenu = new qx.ui.menubar.Button("View", null,
+						    this.getViewMenu());
+	    var advancedMenu = new qx.ui.menubar.Button("Advanced", null,
+							this.getAdvancedMenu());
 	    var helpMenu = new qx.ui.menubar.Button("Help", null, this.getHelpMenu());
-	    var logoutMenu = new qx.ui.menubar.Button("Log Out", null, this.getLogoutMenu());
+	    var logoutMenu = new qx.ui.menubar.Button("Log Out", null,
+						      this.getLogoutMenu());
 
 	    if (global_anon == false)
 	    {
 		menubar.add(forumMenu);
+		menubar.add(viewMenu);
 		menubar.add(advancedMenu);
 	    }
 	    menubar.add(helpMenu);
@@ -555,9 +609,9 @@ qx.Class.define("client.MainScreen",
 	{
 	    var menu = new qx.ui.menu.Menu;
 
-	    var logoutButton = new qx.ui.menu.Button("Log out", "icon/16/actions/edit-undo.png");
+	    var logoutButton = new qx.ui.menu.Button("Log out",
+						     "icon/16/actions/edit-undo.png");
 	    menu.add(logoutButton);
-
 	    logoutButton.addListener("execute", this._logoutCommand);
 
 	    return menu;
@@ -596,6 +650,23 @@ qx.Class.define("client.MainScreen",
 	    return menu;
 	},
 
+
+	getViewMenu : function()
+	{
+	    var menu = new qx.ui.menu.Menu;
+
+	    var prefButton = new qx.ui.menu.Button("Preferences...");
+	    var logsButton = new qx.ui.menu.Button("Log history...");
+
+	    prefButton.addListener("execute", this._prefCommand, this);
+	    logsButton.addListener("execute", this._logsCommand, this);
+
+	    menu.add(prefButton);
+	    menu.add(logsButton);
+
+	    return menu;
+	},
+
 	getAdvancedMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
@@ -613,6 +684,16 @@ qx.Class.define("client.MainScreen",
 	    infoDialog.getJoinNewChannelWin(this.__myapp, 1);
 	},
 
+	_logsCommand : function(app)
+	{
+	    logDialog.show(this.__myapp);
+	},
+
+	_prefCommand : function(app)
+	{
+	    alert("coming soon");
+	},
+
 	_joinForumCommand : function(app)
 	{
 	    infoDialog.getJoinNewChannelWin(this.__myapp, 0);
@@ -620,7 +701,7 @@ qx.Class.define("client.MainScreen",
 
 	_createForumCommand : function()
 	{
-	    alert("tbd3");
+	    infoDialog.getCreateNewGroupWin(this.__myapp, 0);
 	},
 
 	_logoutCommand : function()
