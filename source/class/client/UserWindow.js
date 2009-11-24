@@ -9,7 +9,7 @@ qx.Class.define("client.UserWindow",
 {
     extend : qx.core.Object,
 
-    construct : function(desktop, topic, nw, name, type, nw_id)
+    construct : function(desktop, topic, nw, name, type, sound, nw_id)
     {
 	this.base(arguments);
 
@@ -24,12 +24,14 @@ qx.Class.define("client.UserWindow",
 	layout.setRowFlex(0, 1); // make row 0 flexible
 	layout.setColumnFlex(0, 1); // make column 0 flexible
 	layout.setColumnWidth(1, 100); // set with of column 1 to 200 pixel
+	layout.setColumnAlign(1, "center", "middle");
 
 	var wm1 = new qx.ui.window.Window("(" + nw + ") " + topic);
 	wm1.userWindowRef = this;
 
 	this.__nw = nw;
 	this.__nw_id = nw_id;
+	this.sound = sound;
 
 	wm1.setLayout(layout);
 	wm1.setModal(false);
@@ -64,7 +66,10 @@ qx.Class.define("client.UserWindow",
 	    
 		if (input !== "")
 		{
-		    this.__srpc.callAsync(this.sendresult, "SEND", global_id + " " + global_sec + " " + this.winid + " " + input);
+		    this.__srpc.callAsync(
+			this.sendresult,
+			"SEND", global_id + " " + global_sec +
+			    " " + this.winid + " " + input);
 		    this.__input1.setValue("");
 
 		    var currentTime = new Date();
@@ -91,9 +96,43 @@ qx.Class.define("client.UserWindow",
 	    wm1.add(this.__input1, {row: 1, column: 0});
 	}
 
+	this.soundSetting = new qx.ui.basic.Label();
+	this.soundSetting.setRich(true);
+
+	this.soundSetting.setValue("<font color=\"blue\">Sounds: ON</font>");
+	this.soundSetting.oldValue = "<font color=\"blue\">Sounds: OFF</font>";
+
+	if (this.sound == 0)
+	{
+	    var temp = this.soundSetting.getValue();
+	    this.soundSetting.setValue(this.soundSetting.oldValue);
+	    this.soundSetting.oldValue = temp;
+	}
+
+	this.soundSetting.addListener("click", function(e) {
+	    if (this.sound == 0)
+	    {
+		this.sound = 1;
+	    }
+	    else
+	    {
+		this.sound = 0;
+	    }
+
+	    var temp = this.soundSetting.getValue();
+	    this.soundSetting.setValue(this.soundSetting.oldValue);
+	    this.soundSetting.oldValue = temp;
+
+	    this.__srpc.callAsync(
+		this.sendresult,
+		"SOUND", global_id + " " + global_sec +
+		    " " + this.winid + " " + this.sound);
+	}, this);
+
 	if (type == 0)
 	{
-	    wm1.add(this.getList(), {row: 0, column: 1, rowSpan: 2, flex:1});
+	    wm1.add(this.getList(), {row: 0, column: 1, rowSpan: 1, flex:1});
+	    wm1.add(this.soundSetting, {row: 1, column: 1});
 	}
 
 	this.__window = wm1;
@@ -189,6 +228,7 @@ qx.Class.define("client.UserWindow",
 	    } 
 	    else 
 	    {
+		alert(exc);
 		infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...",
 				       false);
 		//TODO: Add delay ~2s here

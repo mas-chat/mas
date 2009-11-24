@@ -22,12 +22,54 @@ qx.Class.define("client.MainScreen",
         this.__timer = new qx.event.Timer(1000 * 60);
         this.__timer.start();
 
+        this.__topictimer = new qx.event.Timer(1000);
+
+	this.__topictimer.addListener(
+	    "interval", function(e) {
+		if (this.__topicstate == 0)
+		{
+		    document.title = "[NEW] Evergreen";
+		    this.__topicstate = 1;
+		}
+		else
+		{
+		    document.title = "[MSG] Evergreen";
+		    this.__topicstate = 0;
+		}
+	    }, this);
+
 	this.__tt = new qx.ui.tooltip.ToolTip("Send Message");
 	this.__myapp = rootItem;
 	
 	this.__rrpc.callAsync(
 	    qx.lang.Function.bind(this.readresult, this), "HELLO",
 	    global_id + " " + global_sec + " " + this.seq);
+
+	qx.bom.Element.addListener(window, "focus", function(e) { 
+	    this.__blur = 0;
+	    document.title = "Evergreen";
+	    this.__topictimer.stop();
+	}, this);
+
+	qx.bom.Element.addListener(window, "blur", function(e) { 
+	    this.__blur = 1;
+	}, this);
+
+	FlashHelper =
+	    {
+		movieIsLoaded : function (theMovie)
+		{
+		    if (typeof(theMovie) != "undefined") return theMovie.PercentLoaded() == 100;
+		    else return
+		    false;
+		},
+
+		getMovie : function (movieName)
+		{
+		    if (navigator.appName.indexOf ("Microsoft") !=-1) return window[movieName];
+		    else return document[movieName];
+		}
+	    };
     },
 
     members :
@@ -39,8 +81,12 @@ qx.Class.define("client.MainScreen",
 	__manager : 0,
 	__myapp : 0,
         __timer : 0,
+        __topictimer : 0,
+	__topicstate : 0,
 	__ack : 0,
 	__tt : 0,
+	__blur : 0,
+	__newmsgs : 0,
 	seq : 0,
 	windows : [],
 	desktop : 0,
@@ -110,11 +156,12 @@ qx.Class.define("client.MainScreen",
 			var nw_id = options.shift();
 			var name = options.shift();
 			var type = parseInt(options.shift());
+			var sound = parseInt(options.shift());
 			var topic = options.join(" ");
 
 			var newWindow = 
 			    new client.UserWindow(this.desktop,
-						  topic, nw, name, type, nw_id);
+						  topic, nw, name, type, sound, nw_id);
 
 			if (x < 0)
 			{
@@ -171,6 +218,16 @@ qx.Class.define("client.MainScreen",
 		    case "ADDTEXT":
 			var usertext = param.slice(pos+1);
 			this.windows[window_id].addline(usertext);
+
+			if (this.windows[window_id].sound == 1)
+			{
+			    this.player_start();
+			}
+
+			if (this.__blur == 1)
+			{
+			    this.__topictimer.start();
+			} 
 			break;
    
 		    case "TOPIC":
@@ -608,7 +665,7 @@ qx.Class.define("client.MainScreen",
 	    var logoutButton = new qx.ui.menu.Button("Log out",
 						     "icon/16/actions/edit-undo.png");
 	    menu.add(logoutButton);
-	    logoutButton.addListener("execute", this._logoutCommand);
+	    logoutButton.addListener("execute", this._logoutCommand, this);
 
 	    return menu;
 	},
@@ -620,8 +677,8 @@ qx.Class.define("client.MainScreen",
 	    var manualButton = new qx.ui.menu.Button("Manual");
 	    var aboutButton = new qx.ui.menu.Button("About...");
 
-	    manualButton.addListener("execute", this._manualCommand);
-	    aboutButton.addListener("execute", this._aboutCommand);
+	    manualButton.addListener("execute", this._manualCommand, this);
+	    aboutButton.addListener("execute", this._aboutCommand, this);
 
 	    menu.add(manualButton);
 	    menu.addSeparator();
@@ -708,12 +765,76 @@ qx.Class.define("client.MainScreen",
 
 	_manualCommand : function()
 	{
+	    this.niftyplayer('niftyPlayer1').play();
 	    alert("manual: ask ilkka");
 	},
 
 	_aboutCommand : function()
 	{
 	    alert("Evergreen moe: ver 0.3");
+	},
+	
+	player_start : function()
+	{
+	    var obj = FlashHelper.getMovie('niftyPlayer1');
+	    if (!FlashHelper.movieIsLoaded(obj)) return;
+	    obj.TCallLabel('/','play');
+	},
+
+	player_stop : function()
+	{
+	    var obj = FlashHelper.getMovie(name);
+	    if (!FlashHelper.movieIsLoaded(obj)) return;
+	    obj.TCallLabel('/','stop');
+	},
+
+	player_pause : function()
+	{
+	    var obj = FlashHelper.getMovie(name);
+	    if (!FlashHelper.movieIsLoaded(obj)) return;
+	    obj.TCallLabel('/','pause');
+	},
+
+	player_pause : function()
+	{
+	    var obj = FlashHelper.getMovie(name);
+	    if (!FlashHelper.movieIsLoaded(obj)) return;
+	    obj.TCallLabel('/','reset');
+	},
+	
+	player_load : function(url)
+	{
+	    var obj = FlashHelper.getMovie(name);
+	    if (!FlashHelper.movieIsLoaded(obj)) return;
+	    obj.SetVariable('currentSong', url);
+	    obj.TCallLabel('/','load');
+	},
+	    
+	player_get_state : function ()
+	{
+	    var obj = FlashHelper.getMovie(name);
+	    var ps = obj.GetVariable('playingState');
+	    var ls = obj.GetVariable('loadingState');
+		
+	    // returns
+	    //   'empty' if no file is loaded
+	    //   'loading' if file is loading
+	    //   'playing' if user has pressed play AND file has loaded
+	    //   'stopped' if not empty and file is stopped
+	    //   'paused' if file is paused
+	    //   'finished' if file has finished playing
+	    //   'error' if an error occurred
+	    if (ps == 'playing')
+		if (ls == 'loaded') return ps;
+	    else return ls;
+	    
+	    if (ps == 'stopped')
+		if (ls == 'empty') return ls;
+	    if (ls == 'error') return ls;
+	    else return ps;
+		
+	    return ps;
+		
 	}
     }
 });
