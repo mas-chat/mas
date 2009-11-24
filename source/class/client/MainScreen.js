@@ -434,9 +434,10 @@ qx.Class.define("client.MainScreen",
 		friend3.setRich(true);	
 		friend3.setValue("<font color=\"green\">|M|</font>");
 		friend3.nickname = columns[0];
+		friend3.rrpc = this.__rrpc;
 
 		friend3.addListener("click", function (e) {
-		    this.__rrpc.callAsync(
+		    this.rrpc.callAsync(
 			this.sendresult,
 			"STARTCHAT", global_id + " " + global_sec + " " +
 			    "Evergreen " + this.nickname);
