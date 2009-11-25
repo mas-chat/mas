@@ -47,8 +47,8 @@ qx.Class.define("client.MainScreen",
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
 	    this.__blur = 0;
-	    document.title = "Evergreen";
 	    this.__topictimer.stop();
+	    document.title = "Evergreen";
 	}, this);
 
 	qx.bom.Element.addListener(window, "blur", function(e) { 
