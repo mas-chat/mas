@@ -87,6 +87,8 @@ qx.Class.define("client.MainScreen",
 	__tt : 0,
 	__blur : 0,
 	__newmsgs : 0,
+	__activewin : 0,
+	__initdone : 0,
 	seq : 0,
 	windows : [],
 	desktop : 0,
@@ -215,6 +217,10 @@ qx.Class.define("client.MainScreen",
 			this.updateWindowButtons();
 			break;
 
+		    case "INITDONE":
+			this.__initdone = 1;
+			break;
+
 		    case "ADDTEXT":
 			var usertext = param.slice(pos+1);
 			this.windows[window_id].addline(usertext);
@@ -228,6 +234,12 @@ qx.Class.define("client.MainScreen",
 			{
 			    this.__topictimer.start();
 			} 
+
+			if (this.__activewin != window_id && this.__initdone == 1)
+			{
+			    this.windows[window_id].setRed();
+			}
+
 			break;
    
 		    case "TOPIC":
@@ -252,10 +264,10 @@ qx.Class.define("client.MainScreen",
 
 			var reason = param.slice(pos+1);
 			infoDialog.showInfoWin(
-			    "Session expired. <p>Press OK to return login page.",
+			    "Session expired. <p>Press OK to restart.",
 			    true,
 			    function () {
-				window.location = ralph_domain + "/?logout=yes";
+				window.location = ralph_domain + "/";
 			    });
 			doitagain = false;
 			break;
@@ -605,11 +617,18 @@ qx.Class.define("client.MainScreen",
 	    {
 		if (this.windows[i])
 		{
-		    var item = new qx.ui.toolbar.RadioButton(
-			this.windows[i].getName());
-		    this.__part2.add(item)
+		    var item = new qx.ui.toolbar.RadioButton();
+		    this.__part2.add(item);
 		    this.__windowGroup.add(item);
+		    item.setRich(true);
+		    // Link from window object to its taskbarbutton.
+		    this.windows[i].taskbarButton = item;
+		    this.windows[i].taskbarControl = this.__windowGroup;
+		    //TODO: resets all red buttons now
+		    this.windows[i].setNormal();
 		}
+		
+		this.__activewin = 0;
 	    }
 
 	    this.__windowGroup.addListener("changeSelection",
@@ -621,9 +640,12 @@ qx.Class.define("client.MainScreen",
 	{
 	    for (var i=0; i < this.windows.length; i++)
 	    {
-		if (e.getData()[0] == this.__part2.getChildren()[i]) 
+		if (this.windows[i] && e.getData()[0] == this.windows[i].taskbarButton) 
 		{
 		    this.windows[i].show();
+		    this.windows[i].setNormal();
+		    this.__activewin = i;
+		    break;
 		}
 	    }
 	},

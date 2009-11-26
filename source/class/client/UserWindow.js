@@ -91,10 +91,7 @@ qx.Class.define("client.UserWindow",
 	    }
 	}, this);
 
-	if (type != 2)
-	{
-	    wm1.add(this.__input1, {row: 1, column: 0});
-	}
+	wm1.add(this.__input1, {row: 1, column: 0});
 
 	this.soundSetting = new qx.ui.basic.Label();
 	this.soundSetting.setRich(true);
@@ -198,6 +195,36 @@ qx.Class.define("client.UserWindow",
 	    return this.__window.getBounds();
 	},
 
+	setRed : function()
+	{
+	    var name = this.getName();
+
+	    if (this.__type == 0)
+	    {
+		name = name.substr(1)
+	    }
+
+	    name = name.substr(0, 1).toUpperCase() + name.substr(1);
+
+	    this.taskbarButton.setLabel("<font color=\"red\">" + name +
+					"</font>");
+	},
+
+	setNormal : function()
+	{ 
+	    var name = this.getName();
+
+	    if (this.__type == 0)
+	    {
+		name = name.substr(1)
+	    }
+
+	    name = name.substr(0, 1).toUpperCase() + name.substr(1);
+
+	    this.taskbarButton.setLabel("<font color=\"blue\">" + name +
+					"</font>");
+	},
+
 	handleMove : function(e)
 	{
 	    var data = e.getData();
@@ -240,6 +267,18 @@ qx.Class.define("client.UserWindow",
 	{
 	    this.__window.addListener('resize', this.handleResize, this);
 	    this.__window.addListener('move', this.handleMove, this);
+
+	    this.__window.addListener('activate', function(e) {
+
+		if (this.taskbarControl)
+		{
+		    var list = new Array(1)
+		    list[0] = this.taskbarButton;
+		    this.taskbarControl.setSelection(list);
+		}
+
+	    }, this);
+
 	},
 
 	moveTo : function(x,y)
@@ -297,11 +336,7 @@ qx.Class.define("client.UserWindow",
 		nw = "Group: ";
 	    }
 
-	    if (this.__type == 2)
-	    {
-		this.__window.setCaption("System window - Moe version 0.4");
-	    }
-	    else if (this.__type == 0)
+	    if (this.__type == 0)
 	    {
 		this.__window.setCaption(nw + cname + " : " + line);
 	    }
