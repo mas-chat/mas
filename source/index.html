@@ -4,6 +4,18 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>Evergreen</title>
   <script type="text/javascript">
+
+function loadjscssfile(filename, filetype){
+  var fileref=document.createElement('script')
+  fileref.setAttribute("type","text/javascript")
+  fileref.setAttribute("src", filename)
+
+ if (typeof fileref!="undefined")
+  document.getElementsByTagName("head")[0].appendChild(fileref)
+}
+
+loadjscssfile("<wwwaddress>/moescript/client.js", "js") //dynamically load and add this .js file
+
    function detectBrowser()
    {
        var browser=navigator.appName;
@@ -19,7 +31,7 @@
        }
    }
   </script>
-  <script type="text/javascript" src="<wwwaddress>/moescript/client.js"></script>
+<!--  <script type="text/javascript" src=""></script> -->
 </head>
 <body onload="detectBrowser()">
 
