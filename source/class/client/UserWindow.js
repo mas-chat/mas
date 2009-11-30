@@ -167,9 +167,12 @@ qx.Class.define("client.UserWindow",
 	    var width = data.width;
 	    var height = data.height;
 
-	    this.__srpc.callAsync(this.sendresult,
-				  "RESIZE", global_id + " " + global_sec + " " + this.winid + " " +
-				  width + " " + height);
+	    if (MainScreenObj.initdone == 1)
+	    {
+		this.__srpc.callAsync(this.sendresult,
+				      "RESIZE", global_id + " " + global_sec + " " + this.winid + " " +
+				      width + " " + height);
+	    }
 	},
 
 	handleClose : function(e)
@@ -231,9 +234,13 @@ qx.Class.define("client.UserWindow",
 	    var x = data.left;
 	    var y = data.top;
 
-	    this.__srpc.callAsync(this.sendresult,
-				  "MOVE", global_id + " " + global_sec + " " + this.winid + " " +
-				  x + " " + y);
+	    if (MainScreenObj.initdone == 1)
+	    {
+
+		this.__srpc.callAsync(this.sendresult,
+				      "MOVE", global_id + " " + global_sec + " " + this.winid + " " +
+				      x + " " + y);
+	    }
 	},
 
 	sendresult : function(result, exc) 
@@ -335,6 +342,10 @@ qx.Class.define("client.UserWindow",
 		cname = cname.substr(1, 1).toUpperCase() + cname.substr(2);
 		nw = "Group: ";
 	    }
+	    else if (this.__nw == "Evergreen" && this.__type == 1)
+	    {
+		nw = "";
+	    }
 
 	    if (this.__type == 0)
 	    {
@@ -342,7 +353,7 @@ qx.Class.define("client.UserWindow",
 	    }
 	    else
 	    {
-		this.__window.setCaption(nw + "*** Private conversion with " + cname);
+		this.__window.setCaption(nw + "*** Private conversation with " + cname);
 	    }
 	},
 

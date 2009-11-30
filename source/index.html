@@ -14,7 +14,7 @@ function loadjscssfile(filename, filetype){
   document.getElementsByTagName("head")[0].appendChild(fileref)
 }
 
-loadjscssfile("<wwwaddress>/moescript/client.js", "js") //dynamically load and add this .js file
+//loadjscssfile("", "js") //dynamically load and add this .js file
 
    function detectBrowser()
    {
@@ -31,7 +31,7 @@ loadjscssfile("<wwwaddress>/moescript/client.js", "js") //dynamically load and a
        }
    }
   </script>
-<!--  <script type="text/javascript" src=""></script> -->
+<script type="text/javascript" defer src="<wwwaddress>/moescript/client.js"></script>
 </head>
 <body onload="detectBrowser()">
 

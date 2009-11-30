@@ -88,7 +88,7 @@ qx.Class.define("client.MainScreen",
 	__blur : 0,
 	__newmsgs : 0,
 	__activewin : 0,
-	__initdone : 0,
+	initdone : 0,
 	seq : 0,
 	windows : [],
 	desktop : 0,
@@ -142,6 +142,8 @@ qx.Class.define("client.MainScreen",
 
 		    pos = param.search(/ /);
 		    var window_id = param.slice(0, pos);
+
+//		    alert ("handling:" + command + param)
 
 		    switch(command)
 		    {
@@ -214,11 +216,16 @@ qx.Class.define("client.MainScreen",
 			newWindow.winid = window_id;
 			this.windows[window_id] = newWindow;
 
-			this.updateWindowButtons();
+			if (this.initdone == 1)
+			{
+			    this.updateWindowButtons();
+			}
+			
 			break;
 
 		    case "INITDONE":
-			this.__initdone = 1;
+			this.initdone = 1;
+			this.updateWindowButtons();
 			break;
 
 		    case "ADDTEXT":
@@ -235,7 +242,7 @@ qx.Class.define("client.MainScreen",
 			    this.__topictimer.start();
 			} 
 
-			if (this.__activewin != window_id && this.__initdone == 1)
+			if (this.__activewin != window_id && this.initdone == 1)
 			{
 			    this.windows[window_id].setRed();
 			}
@@ -378,14 +385,27 @@ qx.Class.define("client.MainScreen",
 	        this.add(showLabel);
 		global_settings.setShowFriendBar(0)
 	    }, middleSection);
-            
+
             friendContainer.add(hideLabel, {column:1, row:0});
 	    	    
 	    globalflist = new qx.ui.container.Composite(new qx.ui.layout.Grid());
 	    globalflist.setAllowGrowY(true);
 	    
 	    friendContainer.add(globalflist, {row: 1, column: 0, colSpan:2});
+
+	    this.__input1 = new qx.ui.form.TextField("Nickname");
+	    friendContainer.add(this.__input1, {row: 2, column: 0});
 	    
+	    var button1 = new qx.ui.form.Button("Add");
+	    friendContainer.add(button1, {row: 2, column: 1});
+
+	    button1.addListener("execute", function (e) {
+		this.__rrpc.callAsync(
+		    this.sendresult,
+		    "ADDF", global_id + " " + global_sec + " " +
+			this.__input1.getValue());		
+	    }, this);
+
 	    if (global_anon == false)
 	    {
 		if (global_settings.getShowFriendBar() == 1)
@@ -422,10 +442,10 @@ qx.Class.define("client.MainScreen",
 		toolbar.add(this.__part3);
 	    }
 
-	    this.updateWindowButtons();
-
 	    rootContainer.add(toolbar);
 	    this.__myapp.add(rootContainer, {edge : 10});	    
+
+	    this.__windowGroup = new qx.ui.form.RadioGroup();
 	},
 
 	updateFriendsList : function(parentFList, allFriends)
@@ -610,8 +630,12 @@ qx.Class.define("client.MainScreen",
 	updateWindowButtons : function()
 	{
 	    this.__part2.removeAll();
-	    this._disposeObjects("__windowgroup");
-	    this.__windowGroup = new qx.ui.form.RadioGroup();
+	    
+	    var old = this.__windowGroup.getItems();
+	    for (var i=0; i < old.length; i++)
+	    {
+		this.__windowGroup.remove(old[i]);
+	    }
 
 	    for (var i=0; i < this.windows.length; i++)
 	    {
