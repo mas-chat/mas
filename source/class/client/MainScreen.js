@@ -55,6 +55,15 @@ qx.Class.define("client.MainScreen",
 	    this.__blur = 1;
 	}, this);
 
+//	this.popup = new qx.ui.popup.Popup(new qx.ui.layout.Grid());
+
+	    //.set({
+            //backgroundColor: "#FFFAD3"
+	//});
+	
+//	this.popup.add(new qx.ui.basic.Atom("Topic:"), {row : 0, column: 0});
+//	this.popup.add(new qx.ui.basic.Atom("Sounds:"), {row : 1, column: 0});
+
 	FlashHelper =
 	    {
 		movieIsLoaded : function (theMovie)
@@ -88,14 +97,46 @@ qx.Class.define("client.MainScreen",
 	__blur : 0,
 	__newmsgs : 0,
 	__activewin : 0,
+	__msgvisible : 0,
 	initdone : 0,
+	rootContainer : 0,
 	seq : 0,
 	windows : [],
 	desktop : 0,
 
 	sendresult : function(result, exc) 
 	{
-	    
+	    if (exc == null) 
+	    {
+                var pos = result.search(/ /);
+                var command = result.slice(0, pos);
+                var param = result.slice(pos+1);
+                
+		switch(command)
+		{
+		    
+		case "DIE" :
+		    infoDialog.showInfoWin("Session terminated. <p>Press OK to return login page.",
+					   "OK", function () {
+					       window.location = ralph_domain + "/?logout=yes";
+					   });
+		    break;
+
+		case "OK" :
+		    break;
+
+		case "INFO" :
+		    infoDialog.showInfoWin(param, "OK");
+		    break;
+		}
+	    }
+	    else 
+	    {
+		alert(exc);
+		infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
+		//TODO: Add delay ~2s here
+		window.location.reload(true);
+	    }
 	},
 
 	readresult : function(result, exc) 
@@ -126,8 +167,7 @@ qx.Class.define("client.MainScreen",
 
 			infoDialog.showInfoWin(
 			    "Lost connection to server.<p>Trying to recover...<p>" +
-				"(got: " + ack + ", expected: " + this.__ack,
-			    false);
+				"(got: " + ack + ", expected: " + this.__ack);
 			window.location.reload(true);
 		    }
 		}
@@ -248,6 +288,60 @@ qx.Class.define("client.MainScreen",
 			}
 
 			break;
+
+		    case "REQF":
+			var options = param.split(" ");
+		    	var friend_id = parseInt(options.shift());
+			var friend_nick = options.shift();
+			var friend_name = options.join(" ");
+
+			alert(friend_id);
+
+			if (this.__msgvisible == false)
+			{
+			    this.msg = new qx.ui.container.Composite(
+				new qx.ui.layout.HBox(8));
+			    this.msg.setPadding(5, 15, 5, 15);
+			    this.msg.set({ backgroundColor: "yellow"});
+
+			    this.msg.add(new qx.ui.basic.Label(
+				friend_name + " (" + friend_nick + ") wants to be your friend. Is this OK?"));
+
+			    var accept = new qx.ui.basic.Label("<font color=\"blue\">ACCEPT</font>");
+			    var decline = new qx.ui.basic.Label("<font color=\"blue\">DECLINE</font>");
+			    accept.setRich(true);
+			    decline.setRich(true);
+
+			    accept.addListener("click", function () {
+				this.__rrpc.callAsync(
+				    qx.lang.Function.bind(this.sendresult, this),
+				    "OKF", global_id + " " + global_sec + " " +
+					friend_id);
+				//TODO: this relies on proper carbage collection
+				this.rootContainer.remove(this.msg);
+				this.__msgvisible = false;
+			    }, this);
+
+			    decline.addListener("click", function () {
+				this.__rrpc.callAsync(
+				    qx.lang.Function.bind(this.sendresult, this),
+				    "NOKF", global_id + " " + global_sec + " " +
+					friend_id);
+				//TODO: this relies on proper carbage collection
+				this.rootContainer.remove(this.msg);
+				this.__msgvisible = false;
+			    }, this);
+
+			    this.msg.add(accept);
+			    this.msg.add(decline);
+			    
+			    this.__msgvisible = true;
+
+			    this.rootContainer.addAt(this.msg, 1, {flex:0});
+			}
+			// else ignore command
+
+			break;
    
 		    case "TOPIC":
 		    	var usertext = param.slice(pos+1);
@@ -272,7 +366,7 @@ qx.Class.define("client.MainScreen",
 			var reason = param.slice(pos+1);
 			infoDialog.showInfoWin(
 			    "Session expired. <p>Press OK to restart.",
-			    true,
+			    "OK", 
 			    function () {
 				window.location = ralph_domain + "/";
 			    });
@@ -322,12 +416,10 @@ qx.Class.define("client.MainScreen",
 	
 	show : function()
 	{
-	    /* Layout for root */
-	    var rootLayout = new qx.ui.layout.VBox(1);
-
 	    /* Root widget */
-	    var rootContainer = new qx.ui.container.Composite(rootLayout);
-	    rootContainer.add(this.getMenuBar());
+	    this.rootContainer = new qx.ui.container.Composite(
+		new qx.ui.layout.VBox(1));
+	    this.rootContainer.add(this.getMenuBar());
 	    
 	    /* middle */
 	    var windowManager = new qx.ui.window.Manager();
@@ -340,9 +432,6 @@ qx.Class.define("client.MainScreen",
 
 	    middleContainer.addListener("resize", this.checkLimits,this);
 
-//	    middleContainer.setAllowGrowX(false);
-//	    middleContainer.setAllowGrowY(false);
-
 	    this.desktop = middleContainer;
 
 	    middleContainer.set({decorator: "main",
@@ -351,9 +440,9 @@ qx.Class.define("client.MainScreen",
 	    middleSection.add(middleContainer, {flex:1});
 
 	    var friendContainer = new qx.ui.container.Composite(
-		new qx.ui.layout.Grid());
+		new qx.ui.layout.VBox());
 	    
-	    var friendsLabel = new qx.ui.basic.Label("<b>Friends:</b>");
+	    var friendsLabel = new qx.ui.basic.Label("<b>Contact list:</b>");
             friendsLabel.setRich(true);
 	    friendsLabel.setMinWidth(200);	
 	    friendsLabel.setWidth(200);	
@@ -361,43 +450,29 @@ qx.Class.define("client.MainScreen",
 	    friendsLabel.setPaddingBottom(10);
 	    friendsLabel.setPaddingLeft(10);
             
-            friendContainer.add(friendsLabel, {column:0, row:0});
-
-	    var hideLabel = new qx.ui.basic.Label("<font color=\"blue\">HIDE</font>");
-            hideLabel.setRich(true);
-	    hideLabel.setMinWidth(200);	
-	    hideLabel.setPaddingTop(10);
-	    hideLabel.setPaddingLeft(10);
-
-	    var showLabel = new qx.ui.basic.Label(
-		"<font color=\"blue\">S<br>H<br>O<br>W<br><br>F<br>R<br>" +
-		    "I<br>E<br>N<br>D<br>S</font>");
-	    showLabel.setRich(true);
-	    
-	    showLabel.addListener("click", function(e) {
-		this.remove(showLabel);
-	        this.add(friendContainer);
-		global_settings.setShowFriendBar(1)
-	    }, middleSection);
-	    
-	    hideLabel.addListener("click", function(e) {
-		this.remove(friendContainer);
-	        this.add(showLabel);
-		global_settings.setShowFriendBar(0)
-	    }, middleSection);
-
-            friendContainer.add(hideLabel, {column:1, row:0});
+            friendContainer.add(friendsLabel);
 	    	    
 	    globalflist = new qx.ui.container.Composite(new qx.ui.layout.Grid());
 	    globalflist.setAllowGrowY(true);
 	    
-	    friendContainer.add(globalflist, {row: 1, column: 0, colSpan:2});
+	    friendContainer.add(globalflist, {flex: 1});
 
-	    this.__input1 = new qx.ui.form.TextField("Nickname");
-	    friendContainer.add(this.__input1, {row: 2, column: 0});
-	    
+	    var addContainer = new qx.ui.container.Composite(
+		new qx.ui.layout.HBox());
+
+	    this.__input1 = new qx.ui.form.TextField();
+	    this.__input1.setPlaceholder("<nick name>");
+	    this.__input1.setMarginBottom(8);
+	    this.__input1.setMarginLeft(8);
+
+	    addContainer.add(this.__input1, {flex: 1});
+	    addContainer.add(new qx.ui.core.Spacer(8));
+
 	    var button1 = new qx.ui.form.Button("Add");
-	    friendContainer.add(button1, {row: 2, column: 1});
+	    button1.setMarginBottom(8);
+	    addContainer.add(button1);
+
+	    friendContainer.add(addContainer);
 
 	    button1.addListener("execute", function (e) {
 		this.__rrpc.callAsync(
@@ -406,23 +481,7 @@ qx.Class.define("client.MainScreen",
 			this.__input1.getValue());		
 	    }, this);
 
-	    if (global_anon == false)
-	    {
-		if (global_settings.getShowFriendBar() == 1)
-		{
-		    middleSection.add(friendContainer);
-		}
-		else
-		{
-		    middleSection.add(showLabel);
-		}
-
-		this.__timer.addListener(
-		    "interval", function(e) { this.updateIdleTimes(globalflist); },
-		    this);
-	    }
-
-	    rootContainer.add(middleSection, {flex:1});		
+	    this.rootContainer.add(middleSection, {flex:1});		
 	    
 	    // create the toolbar
 	    toolbar = new qx.ui.toolbar.ToolBar();
@@ -434,16 +493,44 @@ qx.Class.define("client.MainScreen",
 	    
 	    toolbar.add(this.__part2);
 	    toolbar.addSpacer();
-	    
-	    //this.__part3.add(this.__input);
-	    
+
 	    if (global_anon == false)
 	    {
-		toolbar.add(this.__part3);
+		var contactsButton = new qx.ui.toolbar.CheckBox("Show Contacts");
+	    
+		contactsButton.addListener("changeValue", function (e) {
+		if (e.getData() == true)
+		{
+	            this.add(friendContainer);
+		    global_settings.setShowFriendBar(1)
+		}
+		else
+		{
+		    this.remove(friendContainer);
+		    global_settings.setShowFriendBar(0)
+		} 
+		}, middleSection);
+		
+		if (global_settings.getShowFriendBar() == 1)
+		{
+		    middleSection.add(friendContainer);
+		    contactsButton.setValue(true);
+		}
+		else
+		{
+		    contactsButton.setValue(false);
+		}
+
+		this.__timer.addListener(
+		    "interval", function(e) { this.updateIdleTimes(globalflist); },
+		    this);
+	    
+		this.__part3.add(contactsButton);
+	    	toolbar.add(this.__part3);
 	    }
 
-	    rootContainer.add(toolbar);
-	    this.__myapp.add(rootContainer, {edge : 10});	    
+	    this.rootContainer.add(toolbar);
+	    this.__myapp.add(this.rootContainer, {edge : 10});	    
 
 	    this.__windowGroup = new qx.ui.form.RadioGroup();
 	},
@@ -454,54 +541,66 @@ qx.Class.define("client.MainScreen",
 	    
 	    var myfriends = allFriends.split("||");
 	    
-	    for (var i=0; i < myfriends.length; i++)	
+
+	    if (allFriends != "")
 	    {
-	        var columns = myfriends[i].split("|");
-		
-                var friend = new qx.ui.basic.Label("<b>" + columns[1] +
-						   "</b> (" + columns[0] + ")");
-                var friend2 = new qx.ui.basic.Label();
-                
-                var friend3 = new qx.ui.basic.Label();
-		friend3.setRich(true);	
-		friend3.setValue("<font color=\"green\">|M|</font>");
-		friend3.nickname = columns[0];
-		friend3.rrpc = this.__rrpc;
-
-		friend3.addListener("click", function (e) {
-		    this.rrpc.callAsync(
-			this.sendresult,
-			"STARTCHAT", global_id + " " + global_sec + " " +
-			    "Evergreen " + this.nickname);
-		}, friend3);
-
-		friend3.addListener("mouseover", function (e) {
-		    this.setValue("<font color=\"green\"><b>|M|<b></font>");
-		}, friend3);
-
-		friend3.addListener("mouseout", function (e) {
+		for (var i=0; i < myfriends.length; i++)	
+		{
+	            var columns = myfriends[i].split("|");
+		    
+                    var friend = new qx.ui.basic.Label("<b>" + columns[1] +
+						       "</b> (" + columns[0] + ")");
+                    var friend2 = new qx.ui.basic.Label();
+                    
+                    var friend3 = new qx.ui.basic.Label();
+		    friend3.setRich(true);	
+		    friend3.setValue("<font color=\"green\">|M|</font>");
+		    friend3.nickname = columns[0];
+		    friend3.rrpc = this.__rrpc;
+		    
+		    friend3.addListener("click", function (e) {
+			this.rrpc.callAsync(
+			    this.sendresult,
+			    "STARTCHAT", global_id + " " + global_sec + " " +
+				"Evergreen " + this.nickname);
+		    }, friend3);
+		    
+		    friend3.addListener("mouseover", function (e) {
+			this.setValue("<font color=\"green\"><b>|M|<b></font>");
+		    }, friend3);
+		    
+		    friend3.addListener("mouseout", function (e) {
 		    this.setValue("<font color=\"green\">|M|</font>");
-		}, friend3);
+		    }, friend3);
 
-		friend3.setToolTip(this.__tt);
+		    friend3.setToolTip(this.__tt);
+		    
+                    friend2.setRich(true);
+                    friend.setRich(true);
+		    
+		    friend.setPaddingTop(7);
+		    friend3.setPaddingTop(7);
 
-                friend2.setRich(true);
-                friend.setRich(true);
+		    friend2.setPaddingTop(0);
+		    friend2.setPaddingLeft(20);
+		    friend3.setPaddingLeft(10);
+		    friend.setPaddingLeft(10);
+	            friend2.idleTime = columns[3]; 
 		
-		friend.setPaddingTop(7);
-		friend3.setPaddingTop(7);
+                    parentFList.add(friend, {row: 2*i, column: 0});
+                    parentFList.add(friend2, {row: 2*i+1, column: 0, colSpan : 2});
+                    parentFList.add(friend3, {row: 2*i, column: 1});
+		}
+	    }
+	    else
+	    {
+		var nofriends = new qx.ui.basic.Label("No friends added<p>You can add new contacts by<br> using the field below<br>or by right-clicking <br>a name in any group window<p>You can send messages <br>and see status information<br> of your friends");
+		nofriends.setRich(true);
 
-		friend2.setPaddingTop(0);
-		friend2.setPaddingLeft(20);
-		friend3.setPaddingLeft(10);
-		friend.setPaddingLeft(10);
-	        friend2.idleTime = columns[3]; 
-		
-                parentFList.add(friend, {row: 2*i, column: 0});
-                parentFList.add(friend2, {row: 2*i+1, column: 0, colSpan : 2});
-                parentFList.add(friend3, {row: 2*i, column: 1});
-            }
-	    
+		nofriends.setPaddingLeft(10);
+		parentFList.add(nofriends, {row: 0, column: 0});
+	    }
+
 	    this.printIdleTimes(parentFList);
         }, 
 
@@ -547,7 +646,7 @@ qx.Class.define("client.MainScreen",
                 }
 		else
 		{
-		    result = "<font color=\"blue\">Last: Unknown</font>";
+		    result = "<font color=\"blue\">Last:</font> Unknown";
 		}
 		
 		children[i].setValue(result);

@@ -39,8 +39,10 @@ qx.Class.define("client.Application",
 
 	    var query = window.location.search;
 
-	    global_id = this.gup('id');
-	    global_sec = this.gup('token');
+	    var idstring = this.gup('i').split("-");
+	   
+	    global_id = idstring[0]; 
+	    global_sec = idstring[1];
 
 	    if (this.gup('a') == "yes")
 	    {

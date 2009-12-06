@@ -66,7 +66,7 @@ qx.Class.define("client.InfoDialog",
 	__nwselection : "Evergreen",
 	__rrpc : 0,
 
-	showInfoWin : function(text, showok, callback)
+	showInfoWin : function(text, showok, callbackok, showno, callbackno)
 	{
 	    this.__window.removeAll();
 	    this.__window.add(this.__message);
@@ -77,10 +77,10 @@ qx.Class.define("client.InfoDialog",
 
 	    this.__window.add(this.__box);
 
-
-	    if (showok == true)
+	    
+	    if (typeof(showok) != "undefined")
 	    {
-		this.__yesbutton.setLabel("OK");
+		this.__yesbutton.setLabel(showok);
 		this.__box.add(this.__yesbutton);
 		
 		if (this.__yeslistenerid != 0) {
@@ -90,9 +90,28 @@ qx.Class.define("client.InfoDialog",
 		this.__yeslistenerid = this.__yesbutton.addListener("execute", function(e) {
 		    this.__window.close();
 		    
-		    if (callback != null)
+		    if (typeof(callbackok) != "undefined")
 		    {
-			callback();
+			callbackok();
+		    }
+		}, this);
+	    }
+
+	    if (typeof(showno) != "undefined")
+	    {
+		this.__nobutton.setLabel(showno);
+		this.__box.add(this.__nobutton);
+		
+		if (this.__nolistenerid != 0) {
+		    this.__nobutton.removeListener(this.__nolistenerid);
+		}
+
+		this.__nolistenerid = this.__nobutton.addListener("execute", function(e) {
+		    this.__window.close();
+		    
+		    if (typeof(callbackno) != "undefined")
+		    {
+			callbackno();
 		    }
 		}, this);
 	    }
@@ -246,21 +265,7 @@ qx.Class.define("client.InfoDialog",
 
 	__sendresult : function(result, exc) 
 	{
-	    if (exc == null) 
-	    {
-		var pos = result.search(/ /);
-		var command = result.slice(0, pos);
-		var param = result.slice(pos+1);
-
-		if (command == "NOK")
-		{
-		    alert(param);
-		}
-	    } 
-	    else 
-	    {
-		alert("!!! Exception during async call: " + exc);
-	    }
+	    MainScreenObj.sendresult(result, exc);
 	}
     }
 });

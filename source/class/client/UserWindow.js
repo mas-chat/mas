@@ -57,6 +57,7 @@ qx.Class.define("client.UserWindow",
 	
 	this.__input1 = new qx.ui.form.TextField();
 	this.__input1.set({ maxLength: 200 });
+	this.__input1.setMarginTop(2);
 	this.__input1.focus();
 
 	this.__input1.addListener("keypress", function(e) {
@@ -64,7 +65,7 @@ qx.Class.define("client.UserWindow",
 	    {
 		var input = this.__input1.getValue();
 	    
-		if (input !== "")
+		if (input !== "" && input.charAt(0) != "/")
 		{
 		    this.__srpc.callAsync(
 			this.sendresult,
@@ -92,6 +93,14 @@ qx.Class.define("client.UserWindow",
 	}, this);
 
 	wm1.add(this.__input1, {row: 1, column: 0});
+
+	this.prefButton = new qx.ui.form.ToggleButton("Settings");
+	this.prefButton.setMargin(2,10,2,10);
+
+	this.prefButton.addListener("click", function(e) {
+	    MainScreenObj.popup.placeToMouse(e);
+            MainScreenObj.popup.show();
+	}, this);
 
 	this.soundSetting = new qx.ui.basic.Label();
 	this.soundSetting.setRich(true);
@@ -129,7 +138,8 @@ qx.Class.define("client.UserWindow",
 	if (type == 0)
 	{
 	    wm1.add(this.getList(), {row: 0, column: 1, rowSpan: 1, flex:1});
-	    wm1.add(this.soundSetting, {row: 1, column: 1});
+//	    wm1.add(this.soundSetting, {row: 1, column: 1});
+	    wm1.add(this.prefButton, {row: 1, column: 1});
 	}
 
 	this.__window = wm1;
@@ -245,29 +255,7 @@ qx.Class.define("client.UserWindow",
 
 	sendresult : function(result, exc) 
 	{
-	    if (exc == null) 
-	    {
-                var pos = result.search(/ /);
-                var command = result.slice(0, pos);
-                var param = result.slice(pos+1);
-                
-                if (command === "DIE")
-                {
-		    infoDialog.showInfoWin("Session terminated. <p>Press OK to return login page.",
-					   true,
-					   function () {
-					       window.location = ralph_domain + "/?logout=yes";
-					   });
-		}
-	    } 
-	    else 
-	    {
-		alert(exc);
-		infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...",
-				       false);
-		//TODO: Add delay ~2s here
-		window.location.reload(true);
-	    }
+	    MainScreenObj.sendresult(result, exc);
 	},
 
 	addHandlers : function()

@@ -70,7 +70,7 @@ qx.Class.define("client.Settings",
 
 	sendresult : function (result, exc)
 	{
-
+	    MainScreenObj.sendresult(result, exc);
 	}
     }
 });
