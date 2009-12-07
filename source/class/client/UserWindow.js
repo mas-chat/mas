@@ -26,7 +26,7 @@ qx.Class.define("client.UserWindow",
 	layout.setColumnWidth(1, 100); // set with of column 1 to 200 pixel
 	layout.setColumnAlign(1, "center", "middle");
 
-	var wm1 = new qx.ui.window.Window("(" + nw + ") " + topic);
+	var wm1 = new qx.ui.window.Window();
 	wm1.userWindowRef = this;
 
 	this.__nw = nw;
@@ -65,7 +65,7 @@ qx.Class.define("client.UserWindow",
 	    {
 		var input = this.__input1.getValue();
 	    
-		if (input !== "" && input.charAt(0) != "/")
+		if (input !== "")
 		{
 		    this.__srpc.callAsync(
 			this.sendresult,
@@ -86,8 +86,20 @@ qx.Class.define("client.UserWindow",
 		    {
 			hour = "0" + hour;
 		    }
-		    
-		    this.addline(hour + ":" + min + " <font color=\"blue\"><b>&lt;" + global_nick[this.__nw_id] + "&gt;</b> " + input + "</font><br>");
+		 
+		    var mynick = " <font color=\"blue\"><b>&lt;" +
+			global_nick[this.__nw_id] + "&gt;</b> ";
+
+		    if (input.substr(0,4) == "/me ")
+		    {
+			input = input.substr(4);
+			mynick = " <font color=\"blue\"><b>* " +
+			    global_nick[this.__nw_id] + "</b> ";
+		    }
+
+		    {
+			this.addline(hour + ":" + min + mynick + input + "</font><br>");
+		    }
 		}
 	    }
 	}, this);
@@ -97,48 +109,34 @@ qx.Class.define("client.UserWindow",
 	this.prefButton = new qx.ui.form.ToggleButton("Settings");
 	this.prefButton.setMargin(2,10,2,10);
 
-	this.prefButton.addListener("click", function(e) {
-	    MainScreenObj.popup.placeToMouse(e);
-            MainScreenObj.popup.show();
-	}, this);
-
-	this.soundSetting = new qx.ui.basic.Label();
-	this.soundSetting.setRich(true);
-
-	this.soundSetting.setValue("<font color=\"blue\">Sounds: ON</font>");
-	this.soundSetting.oldValue = "<font color=\"blue\">Sounds: OFF</font>";
-
-	if (this.sound == 0)
-	{
-	    var temp = this.soundSetting.getValue();
-	    this.soundSetting.setValue(this.soundSetting.oldValue);
-	    this.soundSetting.oldValue = temp;
-	}
-
-	this.soundSetting.addListener("click", function(e) {
-	    if (this.sound == 0)
+	this.prefButton.addListener("changeValue", function(e) {
+	    if (e.getData() == true)
 	    {
-		this.sound = 1;
+		if (this.__settings == 0)
+		{
+		    this.__settings = this.getSettingsView();		    
+		}
+		this.topicInput.setValue(this.__topic);
+
+		wm1.remove(this.__scroll);
+		wm1.remove(this.__list);
+		wm1.add(this.__settings, {row : 0, column : 0, colSpan : 2});
 	    }
 	    else
 	    {
-		this.sound = 0;
+		if (this.__settings != 0)
+		{
+		    wm1.remove(this.__settings);
+		}
+
+		wm1.add(this.__scroll, { row:0, column :0});
+		wm1.add(this.__list, { row:0, column :1});
 	    }
-
-	    var temp = this.soundSetting.getValue();
-	    this.soundSetting.setValue(this.soundSetting.oldValue);
-	    this.soundSetting.oldValue = temp;
-
-	    this.__srpc.callAsync(
-		this.sendresult,
-		"SOUND", global_id + " " + global_sec +
-		    " " + this.winid + " " + this.sound);
 	}, this);
 
 	if (type == 0)
 	{
 	    wm1.add(this.getList(), {row: 0, column: 1, rowSpan: 1, flex:1});
-//	    wm1.add(this.soundSetting, {row: 1, column: 1});
 	    wm1.add(this.prefButton, {row: 1, column: 1});
 	}
 
@@ -165,6 +163,7 @@ qx.Class.define("client.UserWindow",
 	__scroll : 0,
 	__srpc : 0,
 	__lines : 0,
+	__settings : 0,
 	winid : 0,
 	__nw : 0,
 	__nw_id : 0,
@@ -320,6 +319,8 @@ qx.Class.define("client.UserWindow",
 	    var nw = "(" + this.__nw + " channel) ";
 	    var cname = this.__name;
 
+	    this.__topic = line;
+
 	    if(line == "")
 	    {
 		line = "Topic not set.";
@@ -406,6 +407,84 @@ qx.Class.define("client.UserWindow",
 	    menu.add(cutButton);
 
 	    return menu;
+	},
+
+	getSettingsView : function()
+	{
+	    var composite = new qx.ui.container.Composite(
+		new qx.ui.layout.Grid(12,12));
+
+            var ltitle = new qx.ui.basic.Label("Topic:");
+	    composite.add(ltitle, {row:0, column: 0})
+
+	    var scomposite1 = new qx.ui.container.Composite(
+		new qx.ui.layout.HBox(10));
+
+	    this.topicInput = new qx.ui.form.TextField();
+	    this.topicInput.set({ maxLength: 200 });
+	    this.topicInput.setWidth(250);
+	    scomposite1.add(this.topicInput);
+
+	    var button1 = new qx.ui.form.Button("Change");
+	    scomposite1.add(button1);
+
+	    button1.addListener("execute", function (e) {
+		this.__srpc.callAsync(
+		    this.sendresult,
+		    "TOPIC", global_id + " " + global_sec + " " +
+			this.winid + " " +
+			this.topicInput.getValue());		
+	    }, this);
+	    
+	    composite.add(scomposite1, {row: 0, column: 1});
+
+            var lsounds = new qx.ui.basic.Label("Sound alerts:");
+	    composite.add(lsounds, {row:1, column: 0})
+
+	    var scomposite2 = new qx.ui.container.Composite(
+		new qx.ui.layout.HBox(10));
+	    
+	    var syes = new qx.ui.form.RadioButton("On");
+	    var sno = new qx.ui.form.RadioButton("Off");
+
+	    if (this.sound == 0)
+	    {
+		sno.setValue(true);
+	    }
+	    else
+	    {
+		syes.setValue(true);
+	    }
+
+	    syes.addListener("click", function(e) {
+		this.sound = 1;
+		
+		this.__srpc.callAsync(
+		    this.sendresult,
+		    "SOUND", global_id + " " + global_sec +
+			" " + this.winid + " " + 1);
+	    }, this);
+
+	    sno.addListener("click", function(e) {
+		this.sound = 0;
+		
+		this.__srpc.callAsync(
+		    this.sendresult,
+		    "SOUND", global_id + " " + global_sec +
+			" " + this.winid + " " + 0);
+	    }, this);
+
+	    var rmanager = new qx.ui.form.RadioGroup(syes, sno);
+
+	    scomposite2.add(syes);
+	    scomposite2.add(sno);
+
+	    composite.add(scomposite2, {row:1, column: 1})
+
+            var ltitles = new qx.ui.basic.Label("Title alerts:");
+	    composite.add(ltitles, {row:2, column: 0})
+
+	    return composite;
 	}
     }
 });

@@ -46,23 +46,14 @@ qx.Class.define("client.MainScreen",
 	    global_id + " " + global_sec + " " + this.seq);
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
+	    document.title = "Evergreen";
 	    this.__blur = 0;
 	    this.__topictimer.stop();
-	    document.title = "Evergreen";
 	}, this);
 
 	qx.bom.Element.addListener(window, "blur", function(e) { 
 	    this.__blur = 1;
 	}, this);
-
-//	this.popup = new qx.ui.popup.Popup(new qx.ui.layout.Grid());
-
-	    //.set({
-            //backgroundColor: "#FFFAD3"
-	//});
-	
-//	this.popup.add(new qx.ui.basic.Atom("Topic:"), {row : 0, column: 0});
-//	this.popup.add(new qx.ui.basic.Atom("Sounds:"), {row : 1, column: 0});
 
 	FlashHelper =
 	    {
@@ -435,7 +426,7 @@ qx.Class.define("client.MainScreen",
 	    this.desktop = middleContainer;
 
 	    middleContainer.set({decorator: "main",
-				 backgroundColor: "background-pane"});
+				 backgroundColor: "#DFE5E5"});
 
 	    middleSection.add(middleContainer, {flex:1});
 
