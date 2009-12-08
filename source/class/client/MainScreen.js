@@ -99,6 +99,9 @@ qx.Class.define("client.MainScreen",
 	{
 	    if (exc == null) 
 	    {
+		//Remove num of commands, should be always 1 to this case
+		//TODO: Common parts with readresult() should investigated
+		result = result.substr(2);
                 var pos = result.search(/ /);
                 var command = result.slice(0, pos);
                 var param = result.slice(pos+1);
@@ -107,12 +110,12 @@ qx.Class.define("client.MainScreen",
 		{
 		    
 		case "DIE" :
-		    infoDialog.showInfoWin("Session terminated. <p>Press OK to return login page.",
+		    infoDialog.showInfoWin("Session terminated. <p>Press OK to restart.",
 					   "OK", function () {
-					       window.location = ralph_domain + "/?logout=yes";
+					       window.location = ralph_domain + "/";
 					   });
 		    break;
-
+		    
 		case "OK" :
 		    break;
 
@@ -362,6 +365,9 @@ qx.Class.define("client.MainScreen",
 				window.location = ralph_domain + "/";
 			    });
 			doitagain = false;
+			break;
+
+		    case "OK" :
 			break;
 
 		    case "CLOSE":
