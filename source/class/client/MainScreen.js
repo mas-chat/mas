@@ -101,7 +101,13 @@ qx.Class.define("client.MainScreen",
 	    {
 		//Remove num of commands, should be always 1 to this case
 		//TODO: Common parts with readresult() should investigated
-		result = result.substr(2);
+		
+		//TODO: BIG HACK -> fix the protocol!!!
+		if (result.charAt(0) == "1")
+		{
+		    result = result.substr(2);
+		}
+
                 var pos = result.search(/ /);
                 var command = result.slice(0, pos);
                 var param = result.slice(pos+1);
