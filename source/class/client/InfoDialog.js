@@ -18,9 +18,15 @@ qx.Class.define("client.InfoDialog",
 	this.__window.setModal(true);
 	this.__window.setShowClose(false);
 	this.__window.moveTo(400, 300);
-		
+
 	this.__message = new qx.ui.basic.Atom("", "");
+	this.__message.setRich(true);
+
 	this.__message2 = new qx.ui.basic.Atom("", "");
+	this.__message2.setRich(true);
+
+	this.__message3 = new qx.ui.basic.Atom("", "");
+	this.__message3.setRich(true);
 
 	this.__box = new qx.ui.container.Composite;
 	this.__box.setLayout(new qx.ui.layout.HBox(10, "right"));
@@ -54,6 +60,7 @@ qx.Class.define("client.InfoDialog",
 	__window : 0,
 	__message : 0,
 	__message2 : 0,
+	__message3 : 0,
 	__box : 0,
 	__box2 : 0,
 	__yesbutton : 0,
@@ -69,15 +76,14 @@ qx.Class.define("client.InfoDialog",
 	showInfoWin : function(text, showok, callbackok, showno, callbackno)
 	{
 	    this.__window.removeAll();
+	    this.__box.removeAll();
 	    this.__window.add(this.__message);
 
-	    this.__message.setRich(true);
 	    this.__message.setLabel(text);
 	    this.__window.setCaption("Info");
 
 	    this.__window.add(this.__box);
 
-	    
 	    if (typeof(showok) != "undefined")
 	    {
 		this.__yesbutton.setLabel(showok);
@@ -119,13 +125,15 @@ qx.Class.define("client.InfoDialog",
 	    this.__window.setModal(true);
 	    
 	    MainScreenObj.desktop.add(this.__window);
+	    this.__window.center();
 	    this.__window.open();
 	},
 
 	getJoinNewChannelWin : function(rootItem, mode)
 	{
 	    this.__window.removeAll();
-	    
+	    this.__box.removeAll();	    
+
 	    this.__window.add(this.__message);
 	    
 	    if (mode == 0)
@@ -139,9 +147,13 @@ qx.Class.define("client.InfoDialog",
 		this.__message.setLabel("Type IRC channel name you wish to join:");
 	    }
 
+	    this.__window.add(this.__input);
 	    this.__input.focus();
 
-	    this.__window.add(this.__input);
+	    this.__message3.setLabel("Password if needed:");
+	    this.__window.add(this.__message3);
+
+	    this.__window.add(this.__input2);
 
 	    this.__window.add(this.__box2);
 	    this.__window.add(this.__box);
@@ -178,8 +190,7 @@ qx.Class.define("client.InfoDialog",
 	    {
 		this.__nwselection = "Evergreen";
 	    }
-	    
-	    
+	    	    
 	    if (this.__nolistenerid != 0) {
 		this.__nobutton.removeListener(this.__nolistenerid);
 	    }
@@ -199,7 +210,8 @@ qx.Class.define("client.InfoDialog",
 		{
 		    this.__rrpc.callAsync(this.__sendresult, "JOIN",
 					  global_id + " " + global_sec + " " +
-					  input + " " + this.__nwselection);
+					  input + " " + this.__nwselection +
+					  this.__input2.getValue());
 		}
 		this.__window.close();
 	    }, this);
@@ -211,6 +223,7 @@ qx.Class.define("client.InfoDialog",
 	getCreateNewGroupWin : function(rootItem, mode)
 	{
 	    this.__window.removeAll();
+	    this.__box.removeAll();
 
 	    this.__window.setCaption("Create new Group");
 	    this.__message.setLabel("Type group name you wish to create:");

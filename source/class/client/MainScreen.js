@@ -914,13 +914,12 @@ qx.Class.define("client.MainScreen",
 
 	_manualCommand : function()
 	{
-	    this.niftyplayer('niftyPlayer1').play();
-	    alert("manual: ask ilkka");
+	    alert("manual: TBD");
 	},
 
 	_aboutCommand : function()
 	{
-	    alert("Evergreen moe: ver 0.3");
+	    alert("Evergreen: ver 0.4");
 	},
 	
 	player_start : function()
