@@ -9,7 +9,7 @@ qx.Class.define("client.UserWindow",
 {
     extend : qx.core.Object,
 
-    construct : function(desktop, topic, nw, name, type, sound, nw_id, usermode)
+    construct : function(desktop, topic, nw, name, type, sound, nw_id, usermode, password)
     {
 	this.base(arguments);
 
@@ -33,6 +33,7 @@ qx.Class.define("client.UserWindow",
 	this.__nw_id = nw_id;
 	this.sound = sound;
 	this.__usermode = usermode;
+	this.__password = password;
 
 	wm1.setLayout(layout);
 	wm1.setModal(false);
@@ -118,6 +119,7 @@ qx.Class.define("client.UserWindow",
 		    this.__settings = this.getSettingsView();		    
 		}
 		this.topicInput.setValue(this.__topic);
+		this.pwInput.setValue(this.__password);
 
 		wm1.remove(this.__scroll);
 		wm1.remove(this.__list);
@@ -373,6 +375,42 @@ qx.Class.define("client.UserWindow",
 	    }
 	},
 
+	addname : function(index, nick)
+	{
+	    if (this.__type == 0)
+	    {
+		//This command is used only when somebody joins, op check is not needed
+		var tmp = new qx.ui.form.ListItem(nick).set(
+		    { rich : true });
+		tmp.realnick = nick;
+
+		this.__list.addAt(tmp, index);
+	    }
+	},
+
+	delname : function(nick)
+	{
+	    if (this.__type == 0)
+	    {
+		var childs = this.__list.getChildren();
+		
+		for (var i=0; i < childs.length; i++)
+		{
+		    var name = childs[i].getLabel();
+
+		    if(name.charAt(0) == "@" || name.charAt(0) == "+")
+		    {
+			name = name.substr(1);
+		    }
+
+		    if(name == nick || name == "<b>" + nick + "</b>") //hackish 2nd part
+		    {
+			this.__list.remove(childs[i]);
+		    }
+		}
+	    }
+	},
+
 	getList : function()
 	{
 	    var list = new qx.ui.form.List;
@@ -389,10 +427,10 @@ qx.Class.define("client.UserWindow",
 	{
 	    var menu = new qx.ui.menu.Menu;
 
-	    var cutButton = new qx.ui.menu.Button("Start private chat with",
+	    var chatButton = new qx.ui.menu.Button("Start private chat with",
 						  "icon/16/actions/edit-cut.png");
 
-	    cutButton.addListener("execute", function(e) {
+	    chatButton.addListener("execute", function(e) {
 
 		// huh!
 		var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
@@ -405,7 +443,26 @@ qx.Class.define("client.UserWindow",
 					    userwindow.__nw + " " + name);
 	    });
 
-	    menu.add(cutButton);
+	    menu.add(chatButton);
+
+	    if (this.__nw != "Evergreen")
+	    {
+
+		var whoisButton = new qx.ui.menu.Button("Whois",
+							"icon/16/actions/edit-cut.png");
+
+		whoisButton.addListener("execute", function(e) {
+		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
+		    var userwindow = 
+			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
+		    
+		    userwindow.__srpc.callAsync(userwindow.sendresult,
+						"WHOIS", global_id + " " + global_sec + " " + 
+						userwindow.winid + " " + name);
+		});
+
+		menu.add(whoisButton);
+	    }
 
 	    return menu;
 	},
@@ -508,7 +565,7 @@ qx.Class.define("client.UserWindow",
 		    this.sendresult,
 		    "PW", global_id + " " + global_sec + " " +
 			this.winid + " " +
-			this.topicInput.getValue());		
+			this.pwInput.getValue());		
 	    }, this);
 	    
 	    composite.add(scomposite3, {row: 2, column: 1});

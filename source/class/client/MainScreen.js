@@ -186,11 +186,6 @@ qx.Class.define("client.MainScreen",
 
 		for (var i=0; i < commands.length; i++)
 		{
-		    if(i > 200)
-		    {
-			alert("impossible!!" + commands.length);
-		    }
-
 		    var pos = commands[i].search(/ /);
 		    var command = commands[i].slice(0, pos);
 		    var param = commands[i].slice(pos+1);
@@ -217,11 +212,12 @@ qx.Class.define("client.MainScreen",
 			var type = parseInt(options.shift());
 			var sound = parseInt(options.shift());
 			var usermode = parseInt(options.shift());
+			var password = options.shift();
 			var topic = options.join(" ");
 
 			var newWindow = 
 			    new client.UserWindow(this.desktop,
-						  topic, nw, name, type, sound, nw_id, usermode);
+						  topic, nw, name, type, sound, nw_id, usermode, password);
 
 			if (x < 0)
 			{
@@ -360,6 +356,19 @@ qx.Class.define("client.MainScreen",
 		    case "NAMES":
 		    	var usertext = param.slice(pos+1);
 			this.windows[window_id].addnames(usertext);
+			break;
+
+		    case "ADDNAME":
+			var options = param.split(" ");
+		    	var windowid = parseInt(options.shift());
+		    	var index = parseInt(options.shift());
+		    	var nick = options.shift();
+			this.windows[windowid].addname(index, nick);
+			break;
+
+		    case "DELNAME":
+		    	var usertext = param.slice(pos+1);
+			this.windows[window_id].delname(usertext);
 			break;
 
 		    case "NICK":

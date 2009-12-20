@@ -210,7 +210,7 @@ qx.Class.define("client.InfoDialog",
 		{
 		    this.__rrpc.callAsync(this.__sendresult, "JOIN",
 					  global_id + " " + global_sec + " " +
-					  input + " " + this.__nwselection +
+					  input + " " + this.__nwselection + " " +
 					  this.__input2.getValue());
 		}
 		this.__window.close();
@@ -262,12 +262,13 @@ qx.Class.define("client.InfoDialog",
 	    this.__yeslistenerid = this.__yesbutton.addListener("execute", 
 								function(e) {
 		var input = this.__input.getValue();
+		var input2 = this.__input2.getValue();
 
 		if (input !== "")
 		{
 		    this.__rrpc.callAsync(this.__sendresult, "CREATE",
 					  global_id + " " + global_sec + " " +
-					  input + " ");
+					  input + " " + input2);
 		}
 		this.__window.close();
 	    }, this);
