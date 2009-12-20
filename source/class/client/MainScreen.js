@@ -59,15 +59,26 @@ qx.Class.define("client.MainScreen",
 	    {
 		movieIsLoaded : function (theMovie)
 		{
-		    if (typeof(theMovie) != "undefined") return theMovie.PercentLoaded() == 100;
-		    else return
-		    false;
+		    if (typeof(theMovie) != "undefined" && typeof(theMovie.PercentLoaded) == "function")
+		    {
+			return theMovie.PercentLoaded() == 100;
+		    }
+		    else 
+		    {
+			return false;
+		    }
 		},
 
 		getMovie : function (movieName)
 		{
-		    if (navigator.appName.indexOf ("Microsoft") !=-1) return window[movieName];
-		    else return document[movieName];
+		    if (navigator.appName.indexOf ("Microsoft") !=-1)
+		    {
+			return window[movieName];
+		    }
+		    else
+		    {
+			return document[movieName];
+		    }
 		}
 	    };
     },
@@ -132,7 +143,6 @@ qx.Class.define("client.MainScreen",
 	    }
 	    else 
 	    {
-		alert(exc);
 		infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
 		//TODO: Add delay ~2s here
 		window.location.reload(true);
@@ -176,6 +186,11 @@ qx.Class.define("client.MainScreen",
 
 		for (var i=0; i < commands.length; i++)
 		{
+		    if(i > 200)
+		    {
+			alert("impossible!!" + commands.length);
+		    }
+
 		    var pos = commands[i].search(/ /);
 		    var command = commands[i].slice(0, pos);
 		    var param = commands[i].slice(pos+1);
@@ -183,7 +198,7 @@ qx.Class.define("client.MainScreen",
 		    pos = param.search(/ /);
 		    var window_id = param.slice(0, pos);
 
-//		    alert ("handling:" + command + param)
+		    //alert ("handling:" + command + param);
 
 		    switch(command)
 		    {
@@ -201,11 +216,12 @@ qx.Class.define("client.MainScreen",
 			var name = options.shift();
 			var type = parseInt(options.shift());
 			var sound = parseInt(options.shift());
+			var usermode = parseInt(options.shift());
 			var topic = options.join(" ");
 
 			var newWindow = 
 			    new client.UserWindow(this.desktop,
-						  topic, nw, name, type, sound, nw_id);
+						  topic, nw, name, type, sound, nw_id, usermode);
 
 			if (x < 0)
 			{
@@ -256,16 +272,11 @@ qx.Class.define("client.MainScreen",
 			newWindow.winid = window_id;
 			this.windows[window_id] = newWindow;
 
-			if (this.initdone == 1)
-			{
-			    this.updateWindowButtons();
-			}
-			
+			this.addWindowButton(window_id);
 			break;
 
 		    case "INITDONE":
 			this.initdone = 1;
-			this.updateWindowButtons();
 			break;
 
 		    case "ADDTEXT":
@@ -294,8 +305,6 @@ qx.Class.define("client.MainScreen",
 		    	var friend_id = parseInt(options.shift());
 			var friend_nick = options.shift();
 			var friend_name = options.join(" ");
-
-			alert(friend_id);
 
 			if (this.__msgvisible == false)
 			{
@@ -376,12 +385,15 @@ qx.Class.define("client.MainScreen",
 		    case "OK" :
 			break;
 
-		    case "CLOSE":
-			var winid = param.slice(pos+1);
-			//TODO: call destructor?
-			delete this.windows[winid];
+		    case "INFO" :
+			infoDialog.showInfoWin(param, "OK");
+			break;
 
-			this.updateWindowButtons();		    
+		    case "CLOSE":
+			var window_id = param.slice(pos+1);
+			this.removeWindowButton(window_id);			
+			//TODO: call destructor?
+			delete this.windows[window_id];
 			break;
 
 		    case "FLIST":
@@ -414,7 +426,7 @@ qx.Class.define("client.MainScreen",
 			"HELLO", global_id + " " + global_sec + " " +
 			    this.seq);
 		}, this, 200); 
-	    }	    
+	    }
 	},
 	
 	show : function()
@@ -536,6 +548,9 @@ qx.Class.define("client.MainScreen",
 	    this.__myapp.add(this.rootContainer, {edge : 10});	    
 
 	    this.__windowGroup = new qx.ui.form.RadioGroup();
+	    this.__windowGroup.addListener("changeSelection",
+					   this.switchToWindow, this);
+
 	},
 
 	updateFriendsList : function(parentFList, allFriends)
@@ -728,38 +743,31 @@ qx.Class.define("client.MainScreen",
 
 	    this.printIdleTimes(parentFList);
         },
-	
-	updateWindowButtons : function()
+
+	removeWindowButton : function(winid)
 	{
-	    this.__part2.removeAll();
-	    
-	    var old = this.__windowGroup.getItems();
-	    for (var i=0; i < old.length; i++)
+	    if (this.windows[winid])
 	    {
-		this.__windowGroup.remove(old[i]);
+		this.__windowGroup.remove(this.windows[winid].taskbarControl);
+		this.__part2.remove(this.windows[winid].taskbarButton);
 	    }
+	},
 
-	    for (var i=0; i < this.windows.length; i++)
+	addWindowButton : function(winid)
+	{
+	    if (this.windows[winid])
 	    {
-		if (this.windows[i])
-		{
-		    var item = new qx.ui.toolbar.RadioButton();
-		    this.__part2.add(item);
-		    this.__windowGroup.add(item);
-		    item.setRich(true);
-		    // Link from window object to its taskbarbutton.
-		    this.windows[i].taskbarButton = item;
-		    this.windows[i].taskbarControl = this.__windowGroup;
-		    //TODO: resets all red buttons now
-		    this.windows[i].setNormal();
-		}
+		var item = new qx.ui.toolbar.RadioButton();
+		this.__part2.add(item);
+		this.__windowGroup.add(item);
+		item.setRich(true);
+		// Link from window object to its taskbarbutton.
+		this.windows[winid].taskbarButton = item;
+		this.windows[winid].taskbarControl = this.__windowGroup;
+		this.windows[winid].setNormal();
+	    }
 		
-		this.__activewin = 0;
-	    }
-
-	    this.__windowGroup.addListener("changeSelection",
-					   this.switchToWindow, this);
-
+	    this.__activewin = winid;
 	},
 
 	switchToWindow : function(e)

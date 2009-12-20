@@ -9,7 +9,7 @@ qx.Class.define("client.UserWindow",
 {
     extend : qx.core.Object,
 
-    construct : function(desktop, topic, nw, name, type, sound, nw_id)
+    construct : function(desktop, topic, nw, name, type, sound, nw_id, usermode)
     {
 	this.base(arguments);
 
@@ -32,6 +32,7 @@ qx.Class.define("client.UserWindow",
 	this.__nw = nw;
 	this.__nw_id = nw_id;
 	this.sound = sound;
+	this.__usermode = usermode;
 
 	wm1.setLayout(layout);
 	wm1.setModal(false);
@@ -213,7 +214,7 @@ qx.Class.define("client.UserWindow",
 
 	    if (this.__type == 0)
 	    {
-		name = name.substr(1)
+		name = name.substr(1);
 	    }
 
 	    name = name.substr(0, 1).toUpperCase() + name.substr(1);
@@ -414,6 +415,8 @@ qx.Class.define("client.UserWindow",
 	    var composite = new qx.ui.container.Composite(
 		new qx.ui.layout.Grid(12,12));
 
+	    //TOPIC
+
             var ltitle = new qx.ui.basic.Label("Topic:");
 	    composite.add(ltitle, {row:0, column: 0})
 
@@ -437,6 +440,8 @@ qx.Class.define("client.UserWindow",
 	    }, this);
 	    
 	    composite.add(scomposite1, {row: 0, column: 1});
+
+	    //SOUNDS
 
             var lsounds = new qx.ui.basic.Label("Sound alerts:");
 	    composite.add(lsounds, {row:1, column: 0})
@@ -481,8 +486,35 @@ qx.Class.define("client.UserWindow",
 
 	    composite.add(scomposite2, {row:1, column: 1})
 
-            var ltitles = new qx.ui.basic.Label("Title alerts:");
-	    composite.add(ltitles, {row:2, column: 0})
+	    //PASSWORD
+
+            var lusermode = new qx.ui.basic.Label("Password:");
+	    composite.add(lusermode, {row:2, column: 0})
+
+	    var scomposite3 = new qx.ui.container.Composite(
+		new qx.ui.layout.HBox(10));
+
+	    this.pwInput = new qx.ui.form.TextField();
+	    this.pwInput.set({ maxLength: 20 });
+	    this.pwInput.setWidth(250);
+
+	    scomposite3.add(this.pwInput);
+
+	    var button2 = new qx.ui.form.Button("Change");
+	    scomposite3.add(button2);
+
+	    button2.addListener("execute", function (e) {
+		this.__srpc.callAsync(
+		    this.sendresult,
+		    "PW", global_id + " " + global_sec + " " +
+			this.winid + " " +
+			this.topicInput.getValue());		
+	    }, this);
+	    
+	    composite.add(scomposite3, {row: 2, column: 1});
+
+            //var ltitles = new qx.ui.basic.Label("Title alerts:");
+	    //composite.add(ltitles, {row:2, column: 0})
 
 	    return composite;
 	}

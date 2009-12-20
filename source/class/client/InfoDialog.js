@@ -90,7 +90,7 @@ qx.Class.define("client.InfoDialog",
 		this.__box.add(this.__yesbutton);
 		
 		if (this.__yeslistenerid != 0) {
-		    this.__yesbutton.removeListener(this.__yeslistenerid);
+		    this.__yesbutton.removeListenerById(this.__yeslistenerid);
 		}
 
 		this.__yeslistenerid = this.__yesbutton.addListener("execute", function(e) {
@@ -109,7 +109,7 @@ qx.Class.define("client.InfoDialog",
 		this.__box.add(this.__nobutton);
 		
 		if (this.__nolistenerid != 0) {
-		    this.__nobutton.removeListener(this.__nolistenerid);
+		    this.__nobutton.removeListenerById(this.__nolistenerid);
 		}
 
 		this.__nolistenerid = this.__nobutton.addListener("execute", function(e) {
@@ -192,7 +192,7 @@ qx.Class.define("client.InfoDialog",
 	    }
 	    	    
 	    if (this.__nolistenerid != 0) {
-		this.__nobutton.removeListener(this.__nolistenerid);
+		this.__nobutton.removeListenerById(this.__nolistenerid);
 	    }
 
 	    this.__nolistenerid = this.__nobutton.addListener("execute", function(e) {
@@ -200,7 +200,7 @@ qx.Class.define("client.InfoDialog",
 	    }, this);
 
 	    if (this.__yeslistenerid != 0) {
-		this.__yesbutton.removeListener(this.__yeslistenerid);
+		this.__yesbutton.removeListenerById(this.__yeslistenerid);
 	    }
 
 	    this.__yeslistenerid = this.__yesbutton.addListener("execute", function(e) {
@@ -248,7 +248,7 @@ qx.Class.define("client.InfoDialog",
 
 	    	    
 	    if (this.__nolistenerid != 0) {
-		this.__nobutton.removeListener(this.__nolistenerid);
+		this.__nobutton.removeListenerById(this.__nolistenerid);
 	    }
 
 	    this.__nolistenerid = this.__nobutton.addListener("execute", function(e) {
@@ -256,7 +256,7 @@ qx.Class.define("client.InfoDialog",
 	    }, this);
 
 	    if (this.__yeslistenerid != 0) {
-		this.__yesbutton.removeListener(this.__yeslistenerid);
+		this.__yesbutton.removeListenerById(this.__yeslistenerid);
 	    }
 
 	    this.__yeslistenerid = this.__yesbutton.addListener("execute", 
