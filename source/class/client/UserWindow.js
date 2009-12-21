@@ -114,6 +114,7 @@ qx.Class.define("client.UserWindow",
 	this.prefButton.addListener("changeValue", function(e) {
 	    if (e.getData() == true)
 	    {
+		this.__settingsmode = 1;
 		if (this.__settings == 0)
 		{
 		    this.__settings = this.getSettingsView();		    
@@ -127,6 +128,7 @@ qx.Class.define("client.UserWindow",
 	    }
 	    else
 	    {
+		this.__settingsmode = 0;
 		if (this.__settings != 0)
 		{
 		    wm1.remove(this.__settings);
@@ -167,6 +169,7 @@ qx.Class.define("client.UserWindow",
 	__srpc : 0,
 	__lines : 0,
 	__settings : 0,
+	__settingsmode : 0,
 	winid : 0,
 	__nw : 0,
 	__nw_id : 0,
@@ -255,6 +258,14 @@ qx.Class.define("client.UserWindow",
 	    }
 	},
 
+	activatewin : function()
+	{
+	    if (this.__settingsmode == 0)
+	    {
+		this.__input1.focus();
+	    }
+	},
+
 	sendresult : function(result, exc) 
 	{
 	    MainScreenObj.sendresult(result, exc);
@@ -273,7 +284,7 @@ qx.Class.define("client.UserWindow",
 		    list[0] = this.taskbarButton;
 		    this.taskbarControl.setSelection(list);
 		}
-
+		this.activatewin();
 	    }, this);
 
 	},
@@ -291,11 +302,6 @@ qx.Class.define("client.UserWindow",
 	getName : function()
 	{
 	    return this.__name;
-	},
-
-	activate : function()
-	{
-	    this.__window.setShowStatusbar(true);
 	},
 
 	addline : function(line)

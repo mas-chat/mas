@@ -49,6 +49,11 @@ qx.Class.define("client.MainScreen",
 	    document.title = "Evergreen";
 	    this.__blur = 0;
 	    this.__topictimer.stop();
+
+	    if (this.windows[this.__activewin])
+	    {
+		this.windows[this.__activewin].activatewin();
+	    }
 	}, this);
 
 	qx.bom.Element.addListener(window, "blur", function(e) { 
@@ -212,7 +217,15 @@ qx.Class.define("client.MainScreen",
 			var type = parseInt(options.shift());
 			var sound = parseInt(options.shift());
 			var usermode = parseInt(options.shift());
-			var password = options.shift();
+			var pwset = parseInt(options.shift());
+
+			var password = "";
+
+			if (pwset == 1)
+			{
+			    password = options.shift();
+			}
+
 			var topic = options.join(" ");
 
 			var newWindow = 
@@ -775,8 +788,9 @@ qx.Class.define("client.MainScreen",
 		this.windows[winid].taskbarControl = this.__windowGroup;
 		this.windows[winid].setNormal();
 	    }
-		
+
 	    this.__activewin = winid;
+	    this.windows[winid].activatewin();
 	},
 
 	switchToWindow : function(e)
@@ -788,6 +802,7 @@ qx.Class.define("client.MainScreen",
 		    this.windows[i].show();
 		    this.windows[i].setNormal();
 		    this.__activewin = i;
+		    this.windows[i].activatewin();
 		    break;
 		}
 	    }
