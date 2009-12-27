@@ -275,13 +275,14 @@ qx.Class.define("client.MainScreen",
 			newWindow.setHeight(height);
 			newWindow.setWidth(width);
 			
-			newWindow.show();
-			
-			newWindow.addHandlers();
 			newWindow.winid = window_id;
 			this.windows[window_id] = newWindow;
 
 			this.addWindowButton(window_id);
+			
+			//Keep these two last
+			newWindow.show();
+			newWindow.addHandlers();
 			break;
 
 		    case "INITDONE":

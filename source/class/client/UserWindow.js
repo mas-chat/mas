@@ -175,6 +175,7 @@ qx.Class.define("client.UserWindow",
 	__nw_id : 0,
 	__type : 0,
 	__name : 0,
+	taskbarControl : 0,
 	
 	handleResize : function(e) 
 	{
@@ -276,13 +277,16 @@ qx.Class.define("client.UserWindow",
 	    this.__window.addListener('resize', this.handleResize, this);
 	    this.__window.addListener('move', this.handleMove, this);
 
-	    this.__window.addListener('activate', function(e) {
+	    this.__window.addListener('click', function(e) {
 
 		if (this.taskbarControl)
 		{
-		    var list = new Array(1)
-		    list[0] = this.taskbarButton;
-		    this.taskbarControl.setSelection(list);
+		    if (!this.taskbarButton)
+		    {
+			alert("ueueu");
+		    }
+
+		    this.taskbarControl.setSelection([this.taskbarButton]);
 		}
 		this.activatewin();
 	    }, this);
@@ -320,7 +324,14 @@ qx.Class.define("client.UserWindow",
 	    this.__atom.setLabel(this.__channelText);
 
 //	    var bottom = this.__scroll.getItemBottom(this.__atom);
-	    this.__scroll.scrollToY(100000);
+
+//	    alert(this.__scroll.getScrollY());
+//	    alert(this.__scroll.getItemBottom(this.__atom) + " < " + this.__scroll.getScrollY());
+
+//	    if (this.__scroll.getItemBottom(this.__atom) < this.__scroll.getScrollY());
+	    {
+//		this.__scroll.scrollToY(100000);
+	    }
 	},
 
 	changetopic : function(line)
@@ -433,11 +444,9 @@ qx.Class.define("client.UserWindow",
 	{
 	    var menu = new qx.ui.menu.Menu;
 
-	    var chatButton = new qx.ui.menu.Button("Start private chat with",
-						  "icon/16/actions/edit-cut.png");
+	    var chatButton = new qx.ui.menu.Button("Start private chat with");
 
 	    chatButton.addListener("execute", function(e) {
-
 		// huh!
 		var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
 		
@@ -454,8 +463,7 @@ qx.Class.define("client.UserWindow",
 	    if (this.__nw != "Evergreen")
 	    {
 
-		var whoisButton = new qx.ui.menu.Button("Whois",
-							"icon/16/actions/edit-cut.png");
+		var whoisButton = new qx.ui.menu.Button("Whois");
 
 		whoisButton.addListener("execute", function(e) {
 		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
@@ -468,6 +476,24 @@ qx.Class.define("client.UserWindow",
 		});
 
 		menu.add(whoisButton);
+	    }
+
+	    if (this.__nw == "Evergreen" && this.__usermode == 2)
+	    {
+
+		var kickButton = new qx.ui.menu.Button("Kick");
+
+		kickButton.addListener("execute", function(e) {
+		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
+		    var userwindow = 
+			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
+		    
+		    userwindow.__srpc.callAsync(userwindow.sendresult,
+						"KICK", global_id + " " + global_sec + " " + 
+						userwindow.winid + " " + name);
+		});
+
+		menu.add(kickButton);
 	    }
 
 	    return menu;
