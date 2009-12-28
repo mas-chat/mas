@@ -205,84 +205,12 @@ qx.Class.define("client.MainScreen",
 			
 		    case "CREATE":
 			var options = param.split(" ");
-		    
-			options.shift(); // window id
-			var x = parseInt(options.shift());
-			var y = parseInt(options.shift());
-			var width = parseInt(options.shift());
-			var height = parseInt(options.shift());
-			var nw = options.shift();
-			var nw_id = options.shift();
-			var name = options.shift();
-			var type = parseInt(options.shift());
-			var sound = parseInt(options.shift());
-			var usermode = parseInt(options.shift());
-			var pwset = parseInt(options.shift());
+			this.create_or_update_window(options, true);
+			break;
 
-			var password = "";
-
-			if (pwset == 1)
-			{
-			    password = options.shift();
-			}
-
-			var topic = options.join(" ");
-
-			var newWindow = 
-			    new client.UserWindow(this.desktop,
-						  topic, nw, name, type, sound, nw_id, usermode, password);
-
-			if (x < 0)
-			{
-			    x = 0;
-			}
-
-			if (y < 0)
-			{
-			    y = 0;
-			}
-
-			var dim = this.desktop.getBounds();
-
-			if (dim && x + width > dim.width)
-			{
-			    if (width < dim.width)
-			    {
-				x = dim.width - width;
-			    }
-			    else
-			    {
-				x = 5;
-				width = dim.width - 10;
-			    }
-			}
-
-			if (dim && y + height > dim.height)
-			{
-			    if (height < dim.height)
-			    {
-				y = dim.height - height;
-			    }
-			    else
-			    {
-				y = 5;
-				height = dim.height - 10;
-			    }
-			}
-
-			newWindow.moveTo(x, y);
-			
-			newWindow.setHeight(height);
-			newWindow.setWidth(width);
-			
-			newWindow.winid = window_id;
-			this.windows[window_id] = newWindow;
-
-			this.addWindowButton(window_id);
-			
-			//Keep these two last
-			newWindow.show();
-			newWindow.addHandlers();
+		    case "UPDATE":
+			var options = param.split(" ");
+			this.create_or_update_window(options, false);
 			break;
 
 		    case "INITDONE":
@@ -449,6 +377,99 @@ qx.Class.define("client.MainScreen",
 			"HELLO", global_id + " " + global_sec + " " +
 			    this.seq);
 		}, this, 200); 
+	    }
+	},
+
+	create_or_update_window : function(options, create)
+	{
+	    var window_id = options.shift();
+	    var x = parseInt(options.shift());
+	    var y = parseInt(options.shift());
+	    var width = parseInt(options.shift());
+	    var height = parseInt(options.shift());
+	    var nw = options.shift();
+	    var nw_id = options.shift();
+	    var name = options.shift();
+	    var type = parseInt(options.shift());
+	    var sound = parseInt(options.shift());
+	    var usermode = parseInt(options.shift());
+	    var pwset = parseInt(options.shift());
+
+	    var password = "";
+
+	    if (pwset == 1)
+	    {
+		password = options.shift();
+	    }
+	    
+	    var topic = options.join(" ");
+
+	    if (create == true)
+	    {
+		var newWindow = 
+		    new client.UserWindow(this.desktop,
+					  topic, nw, name, type, sound,
+					  nw_id, usermode, password);
+		
+		if (x < 0)
+		{
+		    x = 0;
+		}
+		
+		if (y < 0)
+		{
+		    y = 0;
+		}
+		
+		var dim = this.desktop.getBounds();
+		
+		if (dim && x + width > dim.width)
+		{
+		    if (width < dim.width)
+		    {
+			x = dim.width - width;
+		    }
+		    else
+		    {
+			x = 5;
+			width = dim.width - 10;
+		    }
+		}
+		
+		if (dim && y + height > dim.height)
+		{
+		    if (height < dim.height)
+		    {
+			y = dim.height - height;
+		    }
+		    else
+		    {
+			y = 5;
+			height = dim.height - 10;
+		    }
+		}
+
+		newWindow.moveTo(x, y);	
+		newWindow.setHeight(height);
+		newWindow.setWidth(width);
+
+		newWindow.winid = window_id;
+		this.windows[window_id] = newWindow;
+
+		this.addWindowButton(window_id);
+			
+		//Keep these two last
+		newWindow.show();
+		newWindow.addHandlers();
+	    }
+	    else
+	    {
+		if (this.windows[window_id])
+		{
+		    this.windows[window_id].updateValues(
+			topic, nw, name, type, sound,
+			nw_id, usermode, password);
+		}
 	    }
 	},
 	

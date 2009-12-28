@@ -157,7 +157,6 @@ qx.Class.define("client.UserWindow",
     },
 
     //TODO: write proper destructor
-
     members :
     {
         __window : 0,
@@ -176,6 +175,20 @@ qx.Class.define("client.UserWindow",
 	__type : 0,
 	__name : 0,
 	taskbarControl : 0,
+
+	updateValues : function(topic, nw, name, type, sound, nw_id, usermode, password)
+	{
+	    this.__password = password;
+	    this.__usermode = usermode;
+	    this.__topic = topic;
+
+	    if (this.__settingsmode == 1)
+	    {
+		//realtime update
+		this.topicInput.setValue(this.__topic);
+		this.pwInput.setValue(this.__password);
+	    }
+	},
 	
 	handleResize : function(e) 
 	{
@@ -586,6 +599,7 @@ qx.Class.define("client.UserWindow",
 	    this.pwInput = new qx.ui.form.TextField();
 	    this.pwInput.set({ maxLength: 20 });
 	    this.pwInput.setWidth(250);
+	    this.pwInput.setPlaceholder("<not set>");
 
 	    scomposite3.add(this.pwInput);
 
