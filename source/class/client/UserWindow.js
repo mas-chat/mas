@@ -589,7 +589,6 @@ qx.Class.define("client.UserWindow",
 	    composite.add(scomposite2, {row:1, column: 1})
 
 	    //PASSWORD
-
             var lusermode = new qx.ui.basic.Label("Password:");
 	    composite.add(lusermode, {row:2, column: 0})
 

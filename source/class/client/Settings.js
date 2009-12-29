@@ -10,6 +10,8 @@ qx.Class.define("client.Settings",
 
     construct : function(params)
     {
+	this.initdone = 0;
+
 	// write "socket"
 	this.__srpc = new qx.io.remote.Rpc(
 	    ralph_url + "/",
@@ -26,7 +28,6 @@ qx.Class.define("client.Settings",
 
 	    switch(key)
 	    {
-		
 	    case "showFriendBar":
 		this.setShowFriendBar(value);
 		break;
@@ -34,8 +35,14 @@ qx.Class.define("client.Settings",
 	    case "firstTime":
 		this.setFirstTime(value);
 		break;
+
+	    case "loggingEnabled":
+		this.setLoggingEnabled(value);
+		break;
 	    }
 	}
+	this.initdone = 1;
+
     },
 
     //TODO: write proper destructor
@@ -43,13 +50,15 @@ qx.Class.define("client.Settings",
     properties :
     {
 	firstTime : { init : 1, apply : "_applyFirstTime" },
-	showFriendBar : { init : 1, apply : "_applyShowFriendBar" }
+	showFriendBar : { init : 1, apply : "_applyShowFriendBar" },
+	loggingEnabled : { init : 1, apply : "_applyLoggingEnabled" }
     },
 
     members :
     {
 	__srpc : 0,
-	
+	initdone : 0,
+
 	_applyFirstTime : function(value) 
 	{
 	    this.send("firstTime", value);
@@ -60,12 +69,20 @@ qx.Class.define("client.Settings",
 	    this.send("showFriendBar", value);
 	},
 
+	_applyLoggingEnabled : function(value)
+	{
+	    this.send("loggingEnabled", value);
+	},
+
 	send : function(name, value)
 	{
-	    this.__srpc.callAsync(
-		this.sendresult,
-		"SET", global_id + " " + global_sec +
-		    " " + name + " " + value);
+	    if (this.initdone == 1)
+	    {
+		this.__srpc.callAsync(
+		    this.sendresult,
+		    "SET", global_id + " " + global_sec +
+			" " + name + " " + value);
+	    }
 	},
 
 	sendresult : function (result, exc)

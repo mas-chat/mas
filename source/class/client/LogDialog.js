@@ -27,18 +27,37 @@ qx.Class.define("client.LogDialog",
 	__pos : 0,
 	today : 0,
 
-	show : function(text, showok, callback)
+	show : function(text, dim)
 	{
 	    if (this.__window == 0)
 	    {
-		this.__window = new qx.ui.window.Window("");
+		this.__window = new qx.ui.window.Window("History Logs");
 		this.__window.setLayout(new qx.ui.layout.VBox(5));
 		this.__window.setModal(true);
 		this.__window.setShowClose(false);
-		this.__window.moveTo(400, 300);
-		
-		var navarea = new qx.ui.container.Composite(
-		    new qx.ui.layout.HBox(10, "left"));
+		this.__window.moveTo(40, 40);
+
+		var width = 700;
+		var height = 400;
+
+		if (dim.width < 700 + 40 + 40)
+		{
+		    width = dim.width - 80;
+		}
+
+		if (dim.height < 400 + 40 + 40)
+		{
+		    width = dim.height - 80;
+		}
+
+		this.__window.setWidth(width);
+		this.__window.setHeight(height);
+
+		var hbox = new qx.ui.layout.HBox(10, "left");
+
+		var navarea = new qx.ui.container.Composite(hbox);
+		hbox.setAlignX("center");
+		navarea.setPaddingBottom(4);
 
 		this.b1 = new qx.ui.form.Button("Prev year");
 		this.b2 = new qx.ui.form.Button("Prev month");
@@ -78,7 +97,10 @@ qx.Class.define("client.LogDialog",
 		    }, this);
 		
 		this.today = new qx.ui.basic.Label();
-	    
+		this.today.setAlignY("middle");
+		this.today.setMinWidth(100);
+		this.today.setTextAlign("center");
+
 		navarea.add(this.b1);
 		navarea.add(this.b2);
 		navarea.add(this.b3);
@@ -93,7 +115,7 @@ qx.Class.define("client.LogDialog",
 		    new qx.ui.layout.HBox(10, "left"));
 	    
 		this.list = new qx.ui.form.List;
-		this.list.add(new qx.ui.form.ListItem("Portaali"));
+		this.list.add(new qx.ui.form.ListItem("Wait.."));
 		this.list.setAllowGrowY(true);
 
 		var scroll = new qx.ui.container.Scroll();
@@ -101,27 +123,63 @@ qx.Class.define("client.LogDialog",
 		scroll.set({
 		    minWidth: 100,
 		    minHeight: 50,
-		    scrollbarY : "on"
+		    scrollbarY : "auto"
 		});
 	    
 		this.atom = new qx.ui.basic.Atom("");
 		this.atom.setRich(true);
 		this.atom.setAllowGrowX(true);
+		this.atom.setAllowGrowY(true);
+		this.atom.setAlignY("top");
 		scroll.add(this.atom);
 
 		infoarea.add(this.list);
 		infoarea.add(scroll, { flex : 1});
 	    
-		this.__window.add(infoarea);
+		this.__window.add(infoarea, { flex : 1});
 	    
+		var logtext = new qx.ui.basic.Atom("Logging:");
+		logtext.setMarginRight(15);
+		var logon = new qx.ui.form.RadioButton("Enabled");
+		logon.setMarginRight(10);
+		var logoff = new qx.ui.form.RadioButton("Disabled");
+
 		var close = new qx.ui.form.Button("Close");
+		close.setAlignX("right");
 		
 		close.addListener(
 		    "execute", function(e) {
 			this.__window.close();
 		    }, this);
-	    
-		this.__window.add(close);
+
+		var logbox = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+		logbox.add(logtext);
+		logbox.add(logon);
+		logbox.add(logoff);
+		logbox.add(new qx.ui.core.Spacer(50), {flex : 1});
+		logbox.add(close);
+
+		this.__window.add(logbox);
+		
+		var manager = new qx.ui.form.RadioGroup(logon, logoff);
+		
+		if (global_settings.getLoggingEnabled() == 1)
+		{
+		    logon.setValue(true);
+		}
+		else
+		{
+		    logoff.setValue(true);
+		}
+
+		logon.addListener("click", function(e) {
+		    global_settings.setLoggingEnabled(1);
+		}, this);
+
+		logoff.addListener("click", function(e) {
+		    global_settings.setLoggingEnabled(0);
+		}, this);
+
 		this.__window.setModal(true);
 	    
 		MainScreenObj.desktop.add(this.__window);

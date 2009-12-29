@@ -353,6 +353,7 @@ qx.Class.define("client.MainScreen",
 
 		    case "SET":
 			global_settings = new client.Settings(param);
+			//We have settings now, ready to draw main screen
 			this.show();
 			break;
 		    }
@@ -556,20 +557,8 @@ qx.Class.define("client.MainScreen",
 	    if (global_anon == false)
 	    {
 		var contactsButton = new qx.ui.toolbar.CheckBox("Show Contacts");
-	    
-		contactsButton.addListener("changeValue", function (e) {
-		if (e.getData() == true)
-		{
-	            this.add(friendContainer);
-		    global_settings.setShowFriendBar(1)
-		}
-		else
-		{
-		    this.remove(friendContainer);
-		    global_settings.setShowFriendBar(0)
-		} 
-		}, middleSection);
-		
+		this.__part3.add(contactsButton);	
+    
 		if (global_settings.getShowFriendBar() == 1)
 		{
 		    middleSection.add(friendContainer);
@@ -580,11 +569,23 @@ qx.Class.define("client.MainScreen",
 		    contactsButton.setValue(false);
 		}
 
+		contactsButton.addListener("changeValue", function (e) {
+		    if (e.getData() == true)
+		    {
+			this.add(friendContainer);
+			global_settings.setShowFriendBar(1)
+		    }
+		    else
+		    {
+			this.remove(friendContainer);
+			global_settings.setShowFriendBar(0)
+		    } 
+		}, middleSection);
+		
 		this.__timer.addListener(
 		    "interval", function(e) { this.updateIdleTimes(globalflist); },
 		    this);
 	    
-		this.__part3.add(contactsButton);
 	    	toolbar.add(this.__part3);
 	    }
 
@@ -942,7 +943,7 @@ qx.Class.define("client.MainScreen",
 
 	_logsCommand : function(app)
 	{
-	    logDialog.show(this.__myapp);
+	    logDialog.show(this.__myapp, this.desktop.getBounds());
 	},
 
 	_prefCommand : function(app)
