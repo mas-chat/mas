@@ -507,6 +507,20 @@ qx.Class.define("client.UserWindow",
 		});
 
 		menu.add(kickButton);
+
+		var banButton = new qx.ui.menu.Button("Kick and ban");
+
+		banButton.addListener("execute", function(e) {
+		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
+		    var userwindow = 
+			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
+		    
+		    userwindow.__srpc.callAsync(userwindow.sendresult,
+						"BAN", global_id + " " + global_sec + " " + 
+						userwindow.winid + " " + name);
+		});
+
+		menu.add(banButton);
 	    }
 
 	    return menu;
