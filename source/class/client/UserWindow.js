@@ -336,6 +336,7 @@ qx.Class.define("client.UserWindow",
 
 	    this.__atom.setLabel(this.__channelText);
 
+// THIS IS SCROLL LOCK TEST CODE
 //	    var bottom = this.__scroll.getItemBottom(this.__atom);
 
 //	    alert(this.__scroll.getScrollY());
@@ -343,7 +344,7 @@ qx.Class.define("client.UserWindow",
 
 //	    if (this.__scroll.getItemBottom(this.__atom) < this.__scroll.getScrollY());
 	    {
-//		this.__scroll.scrollToY(100000);
+		this.__scroll.scrollToY(100000);
 	    }
 	},
 
