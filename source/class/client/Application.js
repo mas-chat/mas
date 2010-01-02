@@ -27,24 +27,23 @@ qx.Class.define("client.Application",
 	    }
 	    else
 	    {
-		ralph_domain = "http://evergreen.portaali.org";
+		ralph_port = 4444;
+		ralph_domain = "http://portaali.org";
 	    }
 
-	    ralph_url = ralph_domain + ":" + ralph_port;
+	    ralph_url = ralph_domain + ":" + ralph_port + "/ralph";
 
 	    infoDialog = new client.InfoDialog();
 	    logDialog = new client.LogDialog();
 
 	    global_settings = new client.Settings("");
 
-	    var query = window.location.search;
-
-	    var idstring = this.gup('i').split("-");
+	    var idstring = qx.bom.Cookie.get("ProjectEvergreen").split("-");
 	   
 	    global_id = idstring[0]; 
 	    global_sec = idstring[1];
 
-	    if (this.gup('a') == "yes")
+	    if (idstring[2] == "a")
 	    {
 		global_anon = true;
 	    }
@@ -59,20 +58,7 @@ qx.Class.define("client.Application",
 	    this.getRoot().add(label);
 
 	    MainScreenObj = new client.MainScreen(this.getRoot());
-	},
-
-	gup : function( name )
-	{
-	    name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
-	    var regexS = "[\\?&]"+name+"=([^&#]*)";
-	    var regex = new RegExp( regexS );
-	    var results = regex.exec( window.location.href );
-	    if( results == null )
-		return "";
-	    else
-		return results[1];
 	}
-	
     }
 });
 

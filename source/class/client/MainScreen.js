@@ -328,7 +328,8 @@ qx.Class.define("client.MainScreen",
 			    "Session expired. <p>Press OK to restart.",
 			    "OK", 
 			    function () {
-				window.location = ralph_domain + "/";
+				qx.bom.Cookie.del("ProjectEvergreen");
+				window.location = ralph_domain + ":" + ralph_port;
 			    });
 			doitagain = false;
 			break;
@@ -964,7 +965,7 @@ qx.Class.define("client.MainScreen",
 	_logoutCommand : function()
 	{
 	    qx.bom.Cookie.del("ProjectEvergreen");
-	    window.location = ralph_domain + "/?logout=yes";
+	    window.location.reload(true);
 	},
 
 	_manualCommand : function()
