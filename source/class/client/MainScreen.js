@@ -50,9 +50,9 @@ qx.Class.define("client.MainScreen",
 	    this.__blur = 0;
 	    this.__topictimer.stop();
 
-	    if (this.windows[this.__activewin])
+	    if (this.windows[this.activewin])
 	    {
-		this.windows[this.__activewin].activatewin();
+		this.windows[this.activewin].activatewin();
 	    }
 	}, this);
 
@@ -103,7 +103,7 @@ qx.Class.define("client.MainScreen",
 	__tt : 0,
 	__blur : 0,
 	__newmsgs : 0,
-	__activewin : 0,
+	activewin : 0,
 	__msgvisible : 0,
 	initdone : 0,
 	rootContainer : 0,
@@ -231,7 +231,7 @@ qx.Class.define("client.MainScreen",
 			    this.__topictimer.start();
 			} 
 
-			if (this.__activewin != window_id && this.initdone == 1)
+			if (this.activewin.winid != window_id && this.initdone == 1)
 			{
 			    this.windows[window_id].setRed();
 			}
@@ -812,7 +812,7 @@ qx.Class.define("client.MainScreen",
 		this.windows[winid].setNormal();
 	    }
 
-	    this.__activewin = winid;
+	    this.activewin = winid;
 	    this.windows[winid].activatewin();
 	},
 
@@ -824,7 +824,7 @@ qx.Class.define("client.MainScreen",
 		{
 		    this.windows[i].show();
 		    this.windows[i].setNormal();
-		    this.__activewin = i;
+		    this.activewin = i;
 		    this.windows[i].activatewin();
 		    break;
 		}

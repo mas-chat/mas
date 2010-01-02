@@ -302,6 +302,7 @@ qx.Class.define("client.UserWindow",
 		    this.taskbarControl.setSelection([this.taskbarButton]);
 		}
 		this.activatewin();
+		MainScreenObj.activewin = this.winid;
 	    }, this);
 
 	},
