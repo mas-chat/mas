@@ -28,12 +28,12 @@ qx.Class.define("client.MainScreen",
 	    "interval", function(e) {
 		if (this.__topicstate == 0)
 		{
-		    document.title = "[NEW] Evergreen";
+		    document.title = "[NEW] MeetAndSpeak";
 		    this.__topicstate = 1;
 		}
 		else
 		{
-		    document.title = "[MSG] Evergreen";
+		    document.title = "[MSG] MeetAndSpeak";
 		    this.__topicstate = 0;
 		}
 	    }, this);
@@ -46,7 +46,7 @@ qx.Class.define("client.MainScreen",
 	    global_id + " " + global_sec + " " + this.seq);
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
-	    document.title = "Evergreen";
+	    document.title = "MeetAndSpeak";
 	    this.__blur = 0;
 	    this.__topictimer.stop();
 
@@ -227,7 +227,7 @@ qx.Class.define("client.MainScreen",
 			    this.player_start();
 			}
 
-			if (this.__blur == 1)
+			if (this.__blur == 1 && this.windows[window_id].titlealert == 1 && this.__topictimer.getEnabled() == false)
 			{
 			    this.__topictimer.start();
 			} 
@@ -395,6 +395,7 @@ qx.Class.define("client.MainScreen",
 	    var name = options.shift();
 	    var type = parseInt(options.shift());
 	    var sound = parseInt(options.shift());
+	    var titlealert = parseInt(options.shift());
 	    var usermode = parseInt(options.shift());
 	    var pwset = parseInt(options.shift());
 
@@ -411,7 +412,7 @@ qx.Class.define("client.MainScreen",
 	    {
 		var newWindow = 
 		    new client.UserWindow(this.desktop,
-					  topic, nw, name, type, sound,
+					  topic, nw, name, type, sound, titlealert,
 					  nw_id, usermode, password);
 		
 		if (x < 0)
@@ -470,7 +471,7 @@ qx.Class.define("client.MainScreen",
 		if (this.windows[window_id])
 		{
 		    this.windows[window_id].updateValues(
-			topic, nw, name, type, sound,
+			topic, nw, name, type, sound, titlealert,
 			nw_id, usermode, password);
 		}
 	    }

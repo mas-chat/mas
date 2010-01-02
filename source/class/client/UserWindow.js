@@ -9,7 +9,8 @@ qx.Class.define("client.UserWindow",
 {
     extend : qx.core.Object,
 
-    construct : function(desktop, topic, nw, name, type, sound, nw_id, usermode, password)
+    construct : function(desktop, topic, nw, name, type, sound, titlealert,
+			 nw_id, usermode, password)
     {
 	this.base(arguments);
 
@@ -32,6 +33,7 @@ qx.Class.define("client.UserWindow",
 	this.__nw = nw;
 	this.__nw_id = nw_id;
 	this.sound = sound;
+	this.titlealert = titlealert;
 	this.__usermode = usermode;
 	this.__password = password;
 
@@ -174,9 +176,11 @@ qx.Class.define("client.UserWindow",
 	__nw_id : 0,
 	__type : 0,
 	__name : 0,
+	__usermode : 0,
 	taskbarControl : 0,
+	titlealert : 0,
 
-	updateValues : function(topic, nw, name, type, sound, nw_id, usermode, password)
+	updateValues : function(topic, nw, name, type, sound, titlealert, nw_id, usermode, password)
 	{
 	    this.__password = password;
 	    this.__usermode = usermode;
@@ -547,6 +551,11 @@ qx.Class.define("client.UserWindow",
 	    scomposite1.add(this.topicInput);
 
 	    var button1 = new qx.ui.form.Button("Change");
+	    if (this.__nw != "Evergreen" || this.__usermode != 2)
+	    {
+		button1.setEnabled(false);
+	    }
+
 	    scomposite1.add(button1);
 
 	    button1.addListener("execute", function (e) {
@@ -604,9 +613,54 @@ qx.Class.define("client.UserWindow",
 
 	    composite.add(scomposite2, {row:1, column: 1})
 
+	    //TITLE ALERT
+
+            var ltitles = new qx.ui.basic.Label("Title alerts:");
+	    composite.add(ltitles, {row:2, column: 0})
+
+	    var scomposite4 = new qx.ui.container.Composite(
+		new qx.ui.layout.HBox(10));
+	    
+	    var tyes = new qx.ui.form.RadioButton("On");
+	    var tno = new qx.ui.form.RadioButton("Off");
+
+	    if (this.titlealert == 0)
+	    {
+		tno.setValue(true);
+	    }
+	    else
+	    {
+		tyes.setValue(true);
+	    }
+
+	    tyes.addListener("click", function(e) {
+		this.titlealert = 1;
+		
+		this.__srpc.callAsync(
+		    this.sendresult,
+		    "TITLEALERT", global_id + " " + global_sec +
+			" " + this.winid + " " + 1);
+	    }, this);
+
+	    tno.addListener("click", function(e) {
+		this.titlealert = 0;
+		
+		this.__srpc.callAsync(
+		    this.sendresult,
+		    "TITLEALERT", global_id + " " + global_sec +
+			" " + this.winid + " " + 0);
+	    }, this);
+
+	    var rmanager2 = new qx.ui.form.RadioGroup(syes, sno);
+
+	    scomposite4.add(tyes);
+	    scomposite4.add(tno);
+
+	    composite.add(scomposite4, {row:2, column: 1})
+
 	    //PASSWORD
             var lusermode = new qx.ui.basic.Label("Password:");
-	    composite.add(lusermode, {row:2, column: 0})
+	    composite.add(lusermode, {row:3, column: 0})
 
 	    var scomposite3 = new qx.ui.container.Composite(
 		new qx.ui.layout.HBox(10));
@@ -621,6 +675,11 @@ qx.Class.define("client.UserWindow",
 	    var button2 = new qx.ui.form.Button("Change");
 	    scomposite3.add(button2);
 
+	    if (this.__nw != "Evergreen" || this.__usermode != 2)
+	    {
+		button2.setEnabled(false);
+	    }
+
 	    button2.addListener("execute", function (e) {
 		this.__srpc.callAsync(
 		    this.sendresult,
@@ -629,7 +688,7 @@ qx.Class.define("client.UserWindow",
 			this.pwInput.getValue());		
 	    }, this);
 	    
-	    composite.add(scomposite3, {row: 2, column: 1});
+	    composite.add(scomposite3, {row: 3, column: 1});
 
             //var ltitles = new qx.ui.basic.Label("Title alerts:");
 	    //composite.add(ltitles, {row:2, column: 0})
