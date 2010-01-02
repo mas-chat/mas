@@ -23,15 +23,16 @@ qx.Class.define("client.Application",
 
 	    if (ralph_port == 8080)
 	    {
+		ralph_port = "";
 		ralph_domain = "http://meetandspeak.com";
 	    }
 	    else
 	    {
-		ralph_port = 4444;
+		ralph_port = ":4444";
 		ralph_domain = "http://portaali.org";
 	    }
 
-	    ralph_url = ralph_domain + ":" + ralph_port + "/ralph";
+	    ralph_url = ralph_domain + ralph_port + "/ralph";
 
 	    infoDialog = new client.InfoDialog();
 	    logDialog = new client.LogDialog();
