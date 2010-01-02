@@ -134,7 +134,8 @@ qx.Class.define("client.MainScreen",
 		case "DIE" :
 		    infoDialog.showInfoWin("Session terminated. <p>Press OK to restart.",
 					   "OK", function () {
-					       window.location = ralph_domain + "/";
+					       qx.bom.Cookie.del("ProjectEvergreen");
+					       window.location.reload(true);
 					   });
 		    break;
 		    

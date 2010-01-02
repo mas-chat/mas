@@ -23,7 +23,7 @@ qx.Class.define("client.Application",
 
 	    if (ralph_port == 8080)
 	    {
-		ralph_domain = "http://a167.myrootshell.com";
+		ralph_domain = "http://meetandspeak.com";
 	    }
 	    else
 	    {
