@@ -15,10 +15,7 @@ qx.Class.define("client.UserWindow",
 	this.base(arguments);
 
 	// write "socket"
-	this.__srpc = new qx.io.remote.Rpc(
-	    ralph_url + "/",
-	    "ralph"
-	);
+	this.__srpc = new qx.io.remote.Rpc("/", "ralph");
 	this.__srpc.setTimeout(10000);
 
 	var layout = new qx.ui.layout.Grid();

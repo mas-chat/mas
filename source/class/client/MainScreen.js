@@ -13,10 +13,7 @@ qx.Class.define("client.MainScreen",
 	this.base(arguments);
 
 	// read "socket"
-	this.__rrpc = new qx.io.remote.Rpc(
-	    ralph_url + "/",
-	    "ralph"
-	);
+	this.__rrpc = new qx.io.remote.Rpc("/", "ralph");
 	this.__rrpc.setTimeout(30000);
 
         this.__timer = new qx.event.Timer(1000 * 60);
