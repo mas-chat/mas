@@ -43,7 +43,7 @@ qx.Class.define("client.MainScreen",
 	
 	this.__rrpc.callAsync(
 	    qx.lang.Function.bind(this.readresult, this), "HELLO",
-	    global_id + " " + global_sec + " " + this.seq);
+	    global_ids + this.seq);
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
 	    document.title = "MeetAndSpeak";
@@ -203,7 +203,13 @@ qx.Class.define("client.MainScreen",
 
 		    switch(command)
 		    {
-			
+
+		    case "COOKIE":
+			var options = param.split(" ");
+			global_tmpcookie = options.shift();
+			global_ids = global_id + " " + global_sec + " " + global_tmpcookie + " ";
+			break;
+
 		    case "CREATE":
 			var options = param.split(" ");
 			this.create_or_update_window(options, true);
@@ -263,8 +269,7 @@ qx.Class.define("client.MainScreen",
 			    accept.addListener("click", function () {
 				this.__rrpc.callAsync(
 				    qx.lang.Function.bind(this.sendresult, this),
-				    "OKF", global_id + " " + global_sec + " " +
-					friend_id);
+				    "OKF", global_ids +	friend_id);
 				//TODO: this relies on proper carbage collection
 				this.rootContainer.remove(this.msg);
 				this.__msgvisible = false;
@@ -273,8 +278,7 @@ qx.Class.define("client.MainScreen",
 			    decline.addListener("click", function () {
 				this.__rrpc.callAsync(
 				    qx.lang.Function.bind(this.sendresult, this),
-				    "NOKF", global_id + " " + global_sec + " " +
-					friend_id);
+				    "NOKF", global_ids + friend_id);
 				//TODO: this relies on proper carbage collection
 				this.rootContainer.remove(this.msg);
 				this.__msgvisible = false;
@@ -317,8 +321,23 @@ qx.Class.define("client.MainScreen",
 		    case "NICK":
 			global_nick = param.split(" ");
 			break;
-			
+
 		    case "DIE":
+		    	if (this.desktop === 0)
+			{
+			    this.show();
+			}
+			infoDialog.showInfoWin(
+			    "Protocol Error. <p>Press OK to relogin.",
+			    "OK", 
+			    function () {
+				qx.bom.Cookie.del("ProjectEvergreen");
+				window.location.reload(true);
+			    });
+			doitagain = false;
+			break;
+						
+		    case "EXPIRE":
 		    	if (this.desktop === 0)
 			{
 			    this.show();
@@ -326,11 +345,10 @@ qx.Class.define("client.MainScreen",
 
 			var reason = param.slice(pos+1);
 			infoDialog.showInfoWin(
-			    "Session expired. <p>Press OK to restart.",
+			    "Session expired. You logged in from another location.<p>Press OK to restart.",
 			    "OK", 
 			    function () {
-				qx.bom.Cookie.del("ProjectEvergreen");
-				window.location = ralph_domain + ":" + ralph_port;
+				window.location.reload(true);
 			    });
 			doitagain = false;
 			break;
@@ -365,8 +383,7 @@ qx.Class.define("client.MainScreen",
 		{
 		    this.__rrpc.callAsync(
 			qx.lang.Function.bind(this.readresult, this),
-			"HELLO", global_id + " " + global_sec + " " +
-			    this.seq);
+			"HELLO", global_ids + this.seq);
 		}
 	    }
 	    else 
@@ -377,8 +394,7 @@ qx.Class.define("client.MainScreen",
 		qx.event.Timer.once(function(e){
 		    this.__rrpc.callAsync(
 			qx.lang.Function.bind(this.readresult, this),
-			"HELLO", global_id + " " + global_sec + " " +
-			    this.seq);
+			"HELLO", global_ids + this.seq);
 		}, this, 200); 
 	    }
 	},
@@ -540,8 +556,7 @@ qx.Class.define("client.MainScreen",
 	    button1.addListener("execute", function (e) {
 		this.__rrpc.callAsync(
 		    this.sendresult,
-		    "ADDF", global_id + " " + global_sec + " " +
-			this.__input1.getValue());		
+		    "ADDF", global_ids + this.__input1.getValue());		
 	    }, this);
 
 	    this.rootContainer.add(middleSection, {flex:1});		
@@ -627,8 +642,7 @@ qx.Class.define("client.MainScreen",
 		    friend3.addListener("click", function (e) {
 			this.rrpc.callAsync(
 			    this.sendresult,
-			    "STARTCHAT", global_id + " " + global_sec + " " +
-				"Evergreen " + this.nickname);
+			    "STARTCHAT", global_ids + "Evergreen " + this.nickname);
 		    }, friend3);
 		    
 		    friend3.addListener("mouseover", function (e) {

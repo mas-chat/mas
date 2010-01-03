@@ -73,8 +73,7 @@ qx.Class.define("client.UserWindow",
 		{
 		    this.__srpc.callAsync(
 			this.sendresult,
-			"SEND", global_id + " " + global_sec +
-			    " " + this.winid + " " + input);
+			"SEND", global_ids + this.winid + " " + input);
 		    this.__input1.setValue("");
 
 		    var currentTime = new Date();
@@ -179,6 +178,7 @@ qx.Class.define("client.UserWindow",
 	__usermode : 0,
 	taskbarControl : 0,
 	titlealert : 0,
+	sound : 0,
 
 	updateValues : function(topic, nw, name, type, sound, titlealert, nw_id, usermode, password)
 	{
@@ -203,7 +203,7 @@ qx.Class.define("client.UserWindow",
 	    if (MainScreenObj.initdone == 1)
 	    {
 		this.__srpc.callAsync(this.sendresult,
-				      "RESIZE", global_id + " " + global_sec + " " + this.winid + " " +
+				      "RESIZE", global_ids + this.winid + " " +
 				      width + " " + height);
 	    }
 	},
@@ -211,7 +211,7 @@ qx.Class.define("client.UserWindow",
 	handleClose : function(e)
 	{
 	    this.__srpc.callAsync(this.sendresult,
-				  "CLOSE", global_id + " " + global_sec + " " + this.winid);
+				  "CLOSE", global_ids + this.winid);
 	},
 
 	//TODO: handle beforeclose -> remove from mainscreen array
@@ -271,7 +271,7 @@ qx.Class.define("client.UserWindow",
 	    {
 
 		this.__srpc.callAsync(this.sendresult,
-				      "MOVE", global_id + " " + global_sec + " " + this.winid + " " +
+				      "MOVE", global_ids + this.winid + " " +
 				      x + " " + y);
 	    }
 	},
@@ -473,8 +473,7 @@ qx.Class.define("client.UserWindow",
 		    this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
 
 		userwindow.__srpc.callAsync(userwindow.sendresult,
-					    "STARTCHAT", global_id + " " + global_sec + " " + 
-					    userwindow.__nw + " " + name);
+					    "STARTCHAT", global_ids + userwindow.__nw + " " + name);
 	    });
 
 	    menu.add(chatButton);
@@ -490,7 +489,7 @@ qx.Class.define("client.UserWindow",
 			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
 		    
 		    userwindow.__srpc.callAsync(userwindow.sendresult,
-						"WHOIS", global_id + " " + global_sec + " " + 
+						"WHOIS", global_ids + 
 						userwindow.winid + " " + name);
 		});
 
@@ -508,7 +507,7 @@ qx.Class.define("client.UserWindow",
 			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
 		    
 		    userwindow.__srpc.callAsync(userwindow.sendresult,
-						"KICK", global_id + " " + global_sec + " " + 
+						"KICK", global_ids + 
 						userwindow.winid + " " + name);
 		});
 
@@ -522,7 +521,7 @@ qx.Class.define("client.UserWindow",
 			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
 		    
 		    userwindow.__srpc.callAsync(userwindow.sendresult,
-						"BAN", global_id + " " + global_sec + " " + 
+						"BAN", global_ids +  
 						userwindow.winid + " " + name);
 		});
 
@@ -561,7 +560,7 @@ qx.Class.define("client.UserWindow",
 	    button1.addListener("execute", function (e) {
 		this.__srpc.callAsync(
 		    this.sendresult,
-		    "TOPIC", global_id + " " + global_sec + " " +
+		    "TOPIC", global_ids +
 			this.winid + " " +
 			this.topicInput.getValue());		
 	    }, this);
@@ -593,8 +592,8 @@ qx.Class.define("client.UserWindow",
 		
 		this.__srpc.callAsync(
 		    this.sendresult,
-		    "SOUND", global_id + " " + global_sec +
-			" " + this.winid + " " + 1);
+		    "SOUND", global_ids +
+			this.winid + " " + 1);
 	    }, this);
 
 	    sno.addListener("click", function(e) {
@@ -602,8 +601,7 @@ qx.Class.define("client.UserWindow",
 		
 		this.__srpc.callAsync(
 		    this.sendresult,
-		    "SOUND", global_id + " " + global_sec +
-			" " + this.winid + " " + 0);
+		    "SOUND", global_ids + this.winid + " " + 0);
 	    }, this);
 
 	    var rmanager = new qx.ui.form.RadioGroup(syes, sno);
@@ -638,8 +636,7 @@ qx.Class.define("client.UserWindow",
 		
 		this.__srpc.callAsync(
 		    this.sendresult,
-		    "TITLEALERT", global_id + " " + global_sec +
-			" " + this.winid + " " + 1);
+		    "TITLEALERT", global_ids + this.winid + " " + 1);
 	    }, this);
 
 	    tno.addListener("click", function(e) {
@@ -647,11 +644,10 @@ qx.Class.define("client.UserWindow",
 		
 		this.__srpc.callAsync(
 		    this.sendresult,
-		    "TITLEALERT", global_id + " " + global_sec +
-			" " + this.winid + " " + 0);
+		    "TITLEALERT", global_ids + this.winid + " " + 0);
 	    }, this);
 
-	    var rmanager2 = new qx.ui.form.RadioGroup(syes, sno);
+	    var rmanager2 = new qx.ui.form.RadioGroup(tyes, tno);
 
 	    scomposite4.add(tyes);
 	    scomposite4.add(tno);
@@ -683,7 +679,7 @@ qx.Class.define("client.UserWindow",
 	    button2.addListener("execute", function (e) {
 		this.__srpc.callAsync(
 		    this.sendresult,
-		    "PW", global_id + " " + global_sec + " " +
+		    "PW", global_ids +
 			this.winid + " " +
 			this.pwInput.getValue());		
 	    }, this);

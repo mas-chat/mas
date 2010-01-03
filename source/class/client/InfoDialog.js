@@ -209,7 +209,7 @@ qx.Class.define("client.InfoDialog",
 		if (input !== "")
 		{
 		    this.__rrpc.callAsync(this.__sendresult, "JOIN",
-					  global_id + " " + global_sec + " " +
+					  global_ids +
 					  input + " " + this.__nwselection + " " +
 					  this.__input2.getValue());
 		}
@@ -267,7 +267,7 @@ qx.Class.define("client.InfoDialog",
 		if (input !== "")
 		{
 		    this.__rrpc.callAsync(this.__sendresult, "CREATE",
-					  global_id + " " + global_sec + " " +
+					  global_ids +
 					  input + " " + input2);
 		}
 		this.__window.close();

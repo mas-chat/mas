@@ -80,8 +80,7 @@ qx.Class.define("client.Settings",
 	    {
 		this.__srpc.callAsync(
 		    this.sendresult,
-		    "SET", global_id + " " + global_sec +
-			" " + name + " " + value);
+		    "SET", global_ids + name + " " + value);
 	    }
 	},
 

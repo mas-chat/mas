@@ -276,7 +276,7 @@ qx.Class.define("client.LogDialog",
 
 	    this.__rrpc.callAsync(
 		qx.lang.Function.bind(this.__sendresult, this),
-		"GETLOG", global_id + " " + global_sec + " " +
+		"GETLOG", global_ids +
 		    this.__pos);
 	}
     }
