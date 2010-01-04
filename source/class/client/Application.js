@@ -18,9 +18,6 @@ qx.Class.define("client.Application",
 	
 	    qx.log.appender.Console;
 
-	    // install.sh changes the port
-	    ralph_port = 9999; 		
-
 	    infoDialog = new client.InfoDialog();
 	    logDialog = new client.LogDialog();
 
