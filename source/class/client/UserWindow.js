@@ -104,7 +104,10 @@ qx.Class.define("client.UserWindow",
 	    }
 	}, this);
 
-	wm1.add(this.__input1, {row: 1, column: 0});
+	var icomposite = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+	icomposite.add(this.__input1, { flex : 1 });
+
+	wm1.add(icomposite, {row: 1, column: 0});
 
 	this.prefButton = new qx.ui.form.ToggleButton("Settings");
 	this.prefButton.setMargin(2,10,2,10);
@@ -121,8 +124,12 @@ qx.Class.define("client.UserWindow",
 		this.pwInput.setValue(this.__password);
 
 		wm1.remove(this.__scroll);
-		wm1.remove(this.__list);
-		wm1.add(this.__settings, {row : 0, column : 0, colSpan : 2});
+		if (type == 0)
+		{
+		    wm1.remove(this.__list);
+		}
+		wm1.add(this.__settings, {row : 0, column : 0 });
+		this.prefButton.setLabel("Back");
 	    }
 	    else
 	    {
@@ -133,14 +140,22 @@ qx.Class.define("client.UserWindow",
 		}
 
 		wm1.add(this.__scroll, { row:0, column :0});
-		wm1.add(this.__list, { row:0, column :1});
+		if (type == 0)
+		{
+		    wm1.add(this.__list, { row:0, column :1});
+		}
+		this.prefButton.setLabel("Settings");
 	    }
 	}, this);
 
 	if (type == 0)
 	{
-	    wm1.add(this.getList(), {row: 0, column: 1, rowSpan: 1, flex:1});
+	    wm1.add(this.getList(), {row: 0, column: 1, flex:1});
 	    wm1.add(this.prefButton, {row: 1, column: 1});
+	}
+	else
+	{
+	    icomposite.add(this.prefButton);
 	}
 
 	this.__window = wm1;
