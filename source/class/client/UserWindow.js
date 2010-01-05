@@ -76,8 +76,6 @@ qx.Class.define("client.UserWindow",
 		    input = input.replace(/</g, "&lt;");
 		    input = input.replace(/>/g, "&gt;");
 
-		    alert(input);
-
 		    var currentTime = new Date();
 		    var hour = currentTime.getHours();
 		    var min = currentTime.getMinutes();
