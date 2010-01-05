@@ -73,6 +73,11 @@ qx.Class.define("client.UserWindow",
 			"SEND", global_ids + this.winid + " " + input);
 		    this.__input1.setValue("");
 
+		    input = input.replace(/</g, "&lt;");
+		    input = input.replace(/>/g, "&gt;");
+
+		    alert(input);
+
 		    var currentTime = new Date();
 		    var hour = currentTime.getHours();
 		    var min = currentTime.getMinutes();
@@ -97,9 +102,7 @@ qx.Class.define("client.UserWindow",
 			    global_nick[this.__nw_id] + "</b> ";
 		    }
 
-		    {
-			this.addline(hour + ":" + min + mynick + input + "</font><br>");
-		    }
+		    this.addline(hour + ":" + min + mynick + input + "</font><br>");
 		}
 	    }
 	}, this);
@@ -508,7 +511,7 @@ qx.Class.define("client.UserWindow",
 		menu.add(whoisButton);
 	    }
 
-	    if (this.__nw == "Evergreen" && this.__usermode == 2)
+	    if (this.__nw == "Evergreen" && this.__usermode != 0)
 	    {
 
 		var kickButton = new qx.ui.menu.Button("Kick");
@@ -540,6 +543,23 @@ qx.Class.define("client.UserWindow",
 		menu.add(banButton);
 	    }
 
+	    if (this.__nw == "Evergreen" && this.__usermode == 2)
+	    {
+		var opButton = new qx.ui.menu.Button("Give operator rights");
+
+		opButton.addListener("execute", function(e) {
+		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
+		    var userwindow = 
+			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
+		    
+		    userwindow.__srpc.callAsync(userwindow.sendresult,
+						"OP", global_ids +  
+						userwindow.winid + " " + name);
+		});
+
+		menu.add(opButton);
+	    }
+
 	    return menu;
 	},
 
@@ -550,12 +570,15 @@ qx.Class.define("client.UserWindow",
 
 	    //TOPIC
 
-            var ltitle = new qx.ui.basic.Label("Topic:");
-	    composite.add(ltitle, {row:0, column: 0})
+	    if (this.__type == 0)
+	    {
+		var ltitle = new qx.ui.basic.Label("Topic:");
+		composite.add(ltitle, {row:0, column: 0})
+	    }
 
 	    var scomposite1 = new qx.ui.container.Composite(
 		new qx.ui.layout.HBox(10));
-
+	    
 	    this.topicInput = new qx.ui.form.TextField();
 	    this.topicInput.set({ maxLength: 200 });
 	    this.topicInput.setWidth(250);
@@ -576,8 +599,11 @@ qx.Class.define("client.UserWindow",
 			this.winid + " " +
 			this.topicInput.getValue());		
 	    }, this);
-	    
-	    composite.add(scomposite1, {row: 0, column: 1});
+
+	    if (this.__type == 0)
+	    {
+	    	composite.add(scomposite1, {row: 0, column: 1});
+	    }
 
 	    //SOUNDS
 
@@ -667,22 +693,26 @@ qx.Class.define("client.UserWindow",
 	    composite.add(scomposite4, {row:2, column: 1})
 
 	    //PASSWORD
-            var lusermode = new qx.ui.basic.Label("Password:");
-	    composite.add(lusermode, {row:3, column: 0})
+
+	    if (this.__type == 0)
+	    {
+		var lusermode = new qx.ui.basic.Label("Password:");
+		composite.add(lusermode, {row:3, column: 0})
+	    }
 
 	    var scomposite3 = new qx.ui.container.Composite(
 		new qx.ui.layout.HBox(10));
-
+	    
 	    this.pwInput = new qx.ui.form.TextField();
 	    this.pwInput.set({ maxLength: 20 });
 	    this.pwInput.setWidth(250);
 	    this.pwInput.setPlaceholder("<not set>");
-
+	    
 	    scomposite3.add(this.pwInput);
-
+	    
 	    var button2 = new qx.ui.form.Button("Change");
 	    scomposite3.add(button2);
-
+	    
 	    if (this.__nw != "Evergreen" || this.__usermode != 2)
 	    {
 		button2.setEnabled(false);
@@ -695,11 +725,11 @@ qx.Class.define("client.UserWindow",
 			this.winid + " " +
 			this.pwInput.getValue());		
 	    }, this);
-	    
-	    composite.add(scomposite3, {row: 3, column: 1});
 
-            //var ltitles = new qx.ui.basic.Label("Title alerts:");
-	    //composite.add(ltitles, {row:2, column: 0})
+	    if (this.__type == 0)
+	    {
+		composite.add(scomposite3, {row: 3, column: 1});
+	    }
 
 	    return composite;
 	}
