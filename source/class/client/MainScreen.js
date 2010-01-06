@@ -342,7 +342,7 @@ qx.Class.define("client.MainScreen",
 
 			var reason = param.slice(pos+1);
 			infoDialog.showInfoWin(
-			    "Session expired. You logged in from another location.<p>Press OK to restart.",
+			    "Session expired. You logged in from another location or<br>server was restarted.<p>Press OK to restart.",
 			    "OK", 
 			    function () {
 				window.location.reload(true);

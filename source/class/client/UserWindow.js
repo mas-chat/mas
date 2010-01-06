@@ -124,6 +124,24 @@ qx.Class.define("client.UserWindow",
 		this.topicInput.setValue(this.__topic);
 		this.pwInput.setValue(this.__password);
 
+		if (this.__usermode == 2)
+		{
+		    this.configListOper.removeAll();
+		    this.configListOper.add(new qx.ui.form.ListItem("Refreshing..."));
+		    
+		    this.__srpc.callAsync(qx.lang.Function.bind(this.sendresult, this),
+					  "GETOPERS", global_ids + this.winid);
+		}
+
+		if (this.__usermode != 0)
+		{
+		    this.configListBan.removeAll();
+		    this.configListBan.add(new qx.ui.form.ListItem("Refreshing..."));
+
+		    this.__srpc.callAsync(qx.lang.Function.bind(this.sendresult, this),
+					  "GETBANS", global_ids + this.winid);
+		}
+
 		wm1.remove(this.__scroll);
 		if (type == 0)
 		{
@@ -192,6 +210,8 @@ qx.Class.define("client.UserWindow",
 	taskbarControl : 0,
 	titlealert : 0,
 	sound : 0,
+	configListBan : 0,
+	configListOper : 0,
 
 	updateValues : function(topic, nw, name, type, sound, titlealert, nw_id, usermode, password)
 	{
@@ -299,7 +319,44 @@ qx.Class.define("client.UserWindow",
 
 	sendresult : function(result, exc) 
 	{
-	    MainScreenObj.sendresult(result, exc);
+	    var pos = result.search(/ /);
+	    var command = result.slice(0, pos);
+
+	    if (command == "OPERLIST")
+	    {
+		result = result.slice(pos+1);
+		var opers = result.split("<<>>"); 
+		
+		this.configListOper.removeAll();
+		
+		for (var i=0; i < opers.length; i++)
+		{
+		    var tmp = opers[i].split("<>");
+		    var tmpList = new qx.ui.form.ListItem(tmp[1]);
+		    tmpList.userid = tmp[0];
+		    this.configListOper.add(tmpList);
+		}
+	    }
+	    else if (command == "BANLIST")
+	    {
+		result = result.slice(pos+1);
+		var bans = result.split("<<>>"); 
+		
+		this.configListBan.removeAll();
+
+		for (var i=0; i < bans.length; i++)
+		{
+		    var tmp = bans[i].split("<>");
+		    var tmpList = new qx.ui.form.ListItem(tmp[0]);
+		    tmpList.banid = tmp[1];
+		    this.configListBan.add(tmpList);
+		}
+	    }
+	    else
+	    {
+		//call "superclass"
+		MainScreenObj.sendresult(result, exc);
+	    }
 	},
 
 	addHandlers : function()
@@ -694,8 +751,7 @@ qx.Class.define("client.UserWindow",
 
 	    if (this.__type == 0)
 	    {
-		var lusermode = new qx.ui.basic.Label("Password:");
-		composite.add(lusermode, {row:3, column: 0})
+		composite.add(new qx.ui.basic.Label("Password:"), {row:3, column: 0})
 	    }
 
 	    var scomposite3 = new qx.ui.container.Composite(
@@ -727,6 +783,70 @@ qx.Class.define("client.UserWindow",
 	    if (this.__type == 0)
 	    {
 		composite.add(scomposite3, {row: 3, column: 1});
+	    }
+
+	    //OPER LIST
+
+	    if (this.__usermode == 2)
+	    {
+		composite.add(new qx.ui.basic.Label("Operators:"), {row:4, column: 0})
+	    }
+
+	    var scroll1 = new qx.ui.container.Scroll();
+	    this.configListOper = new qx.ui.form.List;
+	    this.configListOper.set({ height: 120, selectionMode : "single" });
+	    scroll1.add(this.configListOper);
+	    scroll1.set({
+		scrollbarX : "auto",
+		scrollbarY : "auto"
+	    });
+
+	    if (this.__usermode == 2)
+	    {
+		composite.add(scroll1, {row: 4, column: 1});
+	    	var buttonOper = new qx.ui.form.Button("Remove rights");
+		buttonOper.setAllowStretchY(false);
+		composite.add(buttonOper, {row: 4, column: 2});
+
+		buttonOper.addListener("execute", function(e) {
+		    var userid = this.configListOper.getSelection()[0].userid;
+
+		    this.__srpc.callAsync(qx.lang.Function.bind(this.sendresult, this),
+					  "DEOP", global_ids + this.winid + " " + userid);
+		}, this);
+	    }
+
+	    //BAN LIST
+
+	    if (this.__usermode != 0)
+	    {
+		composite.add(new qx.ui.basic.Label("Ban list:"), {row:5, column: 0})
+	    }
+
+	    var scroll2 = new qx.ui.container.Scroll();
+	    this.configListBan = new qx.ui.form.List;
+	    this.configListBan.setAllowGrowX(true);
+	    this.configListBan.set({ height: 120, minWidth: 900, width: 1000, selectionMode : "single" });
+	    scroll2.add(this.configListBan);
+	    scroll2.set({
+		scrollbarX : "auto",
+		scrollbarY : "auto",
+		marginBottom : 15
+	    });
+
+	    if (this.__usermode != 0)
+	    {
+		composite.add(scroll2, {row: 5, column: 1});
+	    	var buttonBan = new qx.ui.form.Button("Unban");
+		buttonBan.setAllowStretchY(false);
+		composite.add(buttonBan, {row: 5, column: 2});
+
+		buttonBan.addListener("execute", function(e) {
+		    var banid = this.configListBan.getSelection()[0].banid;
+
+		    this.__srpc.callAsync(qx.lang.Function.bind(this.sendresult, this),
+					  "UNBAN", global_ids + this.winid + " " + banid);
+		}, this);
 	    }
 
 	    return composite;
