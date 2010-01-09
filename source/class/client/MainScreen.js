@@ -16,6 +16,10 @@ qx.Class.define("client.MainScreen",
 	this.__rrpc = new qx.io.remote.Rpc("/", "ralph");
 	this.__rrpc.setTimeout(30000);
 
+	//global because of call from LogDialog, not optimal
+	var d = new Date();
+	global_offset = d.getTimezoneOffset();
+
         this.__timer = new qx.event.Timer(1000 * 60);
         this.__timer.start();
 
@@ -223,6 +227,8 @@ qx.Class.define("client.MainScreen",
 
 		    case "ADDTEXT":
 			var usertext = param.slice(pos+1);
+
+			usertext = this.adjustTime(usertext);
 			this.windows[window_id].addline(usertext);
 
 			if (this.windows[window_id].sound == 1)
@@ -299,7 +305,8 @@ qx.Class.define("client.MainScreen",
 
 		    case "NAMES":
 		    	var usertext = param.slice(pos+1);
-			this.windows[window_id].addnames(usertext);
+			this.windows[window_id].nameslist = usertext.split(" ");
+			this.windows[window_id].addnames(true);
 			break;
 
 		    case "ADDNAME":
@@ -489,6 +496,42 @@ qx.Class.define("client.MainScreen",
 		}
 	    }
 	},
+
+	adjustTime : function(text)
+	{
+	    var myRe = /<(\d+)>/g;
+	    var myArray;
+
+	    while ((myArray = myRe.exec(text)) != null)
+	    {
+		var mytime = parseInt(myArray[1]) - global_offset;
+		if (mytime < 0)
+		{
+		    mytime = 1440 + mytime;
+		}
+		if (mytime > 1440)
+		{
+		    mytime = mytime - 1440;
+		}
+
+		var hour = Math.floor(mytime / 60);
+		var min = mytime % 60;
+		
+		if (min < 10)
+		{
+		    min = "0" + min;
+		}
+		
+		if (hour < 10)
+		{
+		    hour = "0" + hour;
+		}
+
+		text = text.replace(/<\d+>/, hour + ":" + min);
+	    }
+	    
+	    return text;
+	},
 	
 	show : function()
 	{
@@ -619,7 +662,6 @@ qx.Class.define("client.MainScreen",
 	    
 	    var myfriends = allFriends.split("||");
 	    
-
 	    if (allFriends != "")
 	    {
 		for (var i=0; i < myfriends.length; i++)	
@@ -627,13 +669,13 @@ qx.Class.define("client.MainScreen",
 	            var columns = myfriends[i].split("|");
 		    
                     var friend = new qx.ui.basic.Label("<b>" + columns[1] +
-						       "</b> (" + columns[0] + ")");
+						       "</b> (" + columns[3] + ")");
                     var friend2 = new qx.ui.basic.Label();
                     
                     var friend3 = new qx.ui.basic.Label();
 		    friend3.setRich(true);	
 		    friend3.setValue("<font color=\"green\">|M|</font>");
-		    friend3.nickname = columns[0];
+		    friend3.nickname = columns[3];
 		    friend3.rrpc = this.__rrpc;
 		    
 		    friend3.addListener("click", function (e) {
@@ -662,7 +704,7 @@ qx.Class.define("client.MainScreen",
 		    friend2.setPaddingLeft(20);
 		    friend3.setPaddingLeft(10);
 		    friend.setPaddingLeft(10);
-	            friend2.idleTime = columns[3]; 
+	            friend2.idleTime = columns[0]; 
 		
                     parentFList.add(friend, {row: 2*i, column: 0});
                     parentFList.add(friend2, {row: 2*i+1, column: 0, colSpan : 2});

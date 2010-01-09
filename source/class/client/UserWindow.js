@@ -212,6 +212,7 @@ qx.Class.define("client.UserWindow",
 	sound : 0,
 	configListBan : 0,
 	configListOper : 0,
+	nameslist : 0,
 
 	updateValues : function(topic, nw, name, type, sound, titlealert, nw_id, usermode, password)
 	{
@@ -455,28 +456,45 @@ qx.Class.define("client.UserWindow",
 	    }
 	},
 
-	addnames : function(line)
+	addnames : function(firstround)
 	{
 	    if (this.__type == 0)
 	    {
-		this.__list.removeAll();
-
-		var names = line.split(" ");
-		
-		for (var i=0; i < names.length; i++)
+		if (firstround == true)
 		{
-		    var display = names[i];
+		    this.__list.removeAll();
+		}
 
-		    if(names[i].charAt(0) == "@")
+		var amount = this.nameslist.length;
+
+		if (this.nameslist.length > 10)
+		{
+		    amount = 10;
+		}
+
+		for (var i=0; i < amount; i++)
+		{
+		    var display = this.nameslist[i];
+
+		    if(display.charAt(0) == "@")
 		    {
 			display = "<b>" + display.substr(1) + "</b>"; 
 		    }
 
 		    var tmp = new qx.ui.form.ListItem(display).set(
 			{ rich : true });
-		    tmp.realnick = names[i];
+		    tmp.realnick = display;
 
 		    this.__list.add(tmp);
+		}
+
+		if (this.nameslist.length > 10)
+		{
+		    this.nameslist.splice(0, 10);
+
+		    qx.event.Timer.once(function(e){
+			this.addnames(false);
+		    }, this, 300); 
 		}
 	    }
 	},

@@ -202,14 +202,13 @@ qx.Class.define("client.LogDialog",
 		this.today.setValue(date);
 		
 		var channels = data.split("<>");
-
 		this.list.removeAll();
 
 		for (var i=0; i < channels.length; i = i + 2)
 		{
 		    var tmp = new qx.ui.form.ListItem(channels[i]);
-		    tmp.atom = this.atom
-		    tmp.data = channels[i+1];
+		    tmp.atom = this.atom		    
+		    tmp.data = MainScreenObj.adjustTime(channels[i+1]);
 
 		    tmp.addListener("click", function (e) {
 			this.atom.setLabel(this.data);
@@ -220,7 +219,7 @@ qx.Class.define("client.LogDialog",
 
 		if (channels.length > 1)
 		{
-		    this.atom.setLabel(channels[1]);
+		    this.atom.setLabel(MainScreenObj.adjustTime(channels[1]));
 		}
 
 		this.b1.setEnabled(true);
