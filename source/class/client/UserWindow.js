@@ -494,7 +494,7 @@ qx.Class.define("client.UserWindow",
 
 		    qx.event.Timer.once(function(e){
 			this.addnames(false);
-		    }, this, 300); 
+		    }, this, 1000); 
 		}
 	    }
 	},
@@ -503,17 +503,31 @@ qx.Class.define("client.UserWindow",
 	{
 	    if (this.__type == 0)
 	    {
-		//This command is used only when somebody joins, op check is not needed
-		var tmp = new qx.ui.form.ListItem(nick).set(
-		    { rich : true });
-		tmp.realnick = nick;
+		if (index <= this.__list.getChildren().length)
+		{
+		    if(nick.charAt(0) == "@")
+		    {
+			nick = "<b>" + nick.substr(1) + "</b>"; 
+		    }
 
-		this.__list.addAt(tmp, index);
+		    var tmp = new qx.ui.form.ListItem(nick).set(
+			{ rich : true });
+		    tmp.realnick = nick;
+		    
+		    this.__list.addAt(tmp, index);
+		}
+		else
+		{
+		    //List construction is still ongoing
+		    this.nameslist.splice(index - this.__list.getChildren().length, 0, nick);
+		}
 	    }
 	},
 
 	delname : function(nick)
 	{
+	    var found = false;
+
 	    if (this.__type == 0)
 	    {
 		var childs = this.__list.getChildren();
@@ -529,7 +543,26 @@ qx.Class.define("client.UserWindow",
 
 		    if(name == nick || name == "<b>" + nick + "</b>") //hackish 2nd part
 		    {
+			found = true;
 			this.__list.remove(childs[i]);
+		    }
+		}
+
+		if (!found)
+		{
+		    for (var i=0; i < this.nameslist.length; i++)
+		    {
+			var name = this.nameslist[i];
+
+			if(name.charAt(0) == "@" || name.charAt(0) == "+")
+			{
+			    name = name.substr(1);
+			}
+
+			if (name == nick)
+			{
+			    this.nameslist.splice(i, 1);
+			}
 		    }
 		}
 	    }
