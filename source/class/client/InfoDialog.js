@@ -9,7 +9,7 @@ qx.Class.define("client.InfoDialog",
 {
     extend : qx.core.Object,
 
-    construct : function(desktop, system, name)
+    construct : function()
     {
 	this.base(arguments);
 
@@ -122,6 +122,7 @@ qx.Class.define("client.InfoDialog",
 	    this.__window.setModal(true);
 	    
 	    MainScreenObj.desktop.add(this.__window);
+	    MainScreenObj.manager.bringToFront(this.__window);
 	    this.__window.center();
 	    this.__window.open();
 	},
@@ -215,6 +216,7 @@ qx.Class.define("client.InfoDialog",
 
 	    rootItem.add(this.__window);
 	    this.__window.open();
+	    this.__window.center();
 	},
 
 	getCreateNewGroupWin : function(rootItem, mode)
@@ -272,6 +274,7 @@ qx.Class.define("client.InfoDialog",
 
 	    rootItem.add(this.__window);
 	    this.__window.open();
+	    this.__window.center();
 	},
 
 	__sendresult : function(result, exc) 

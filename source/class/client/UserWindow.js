@@ -181,8 +181,6 @@ qx.Class.define("client.UserWindow",
 	this.__type = type;
 	this.__name = name;
 
-	this.__window.addListener("close", this.handleClose, this);
-
 	desktop.add(wm1);
 
 	this.changetopic(topic);
@@ -213,6 +211,7 @@ qx.Class.define("client.UserWindow",
 	configListBan : 0,
 	configListOper : 0,
 	nameslist : 0,
+	closeok : 0,
 
 	updateValues : function(topic, nw, name, type, sound, titlealert, nw_id, usermode, password)
 	{
@@ -369,17 +368,29 @@ qx.Class.define("client.UserWindow",
 
 		if (this.taskbarControl)
 		{
-		    if (!this.taskbarButton)
-		    {
-			alert("ueueu");
-		    }
-
 		    this.taskbarControl.setSelection([this.taskbarButton]);
 		}
 		this.activatewin();
 		MainScreenObj.activewin = this.winid;
 	    }, this);
 
+	    this.__window.addListener("close", this.handleClose, this);
+
+	    var closeok = 0;
+
+	    this.__window.addListener("beforeClose", function(e) {
+		var mywindow = this.__window;
+
+		if (closeok == 0)
+		{
+		    e.preventDefault();
+
+		    infoDialog.showInfoWin("Are you sure?<p>You need to close windows only when you<br>wish to permanently stop following discussion", "Yes", function() {
+			closeok = 1;
+			mywindow.close();
+		    }, "NO");
+		}
+	    }, this);
 	},
 
 	moveTo : function(x,y)
@@ -483,7 +494,7 @@ qx.Class.define("client.UserWindow",
 
 		    var tmp = new qx.ui.form.ListItem(display).set(
 			{ rich : true });
-		    tmp.realnick = display;
+		    tmp.realnick = this.nameslist[i];
 
 		    this.__list.add(tmp);
 		}
@@ -505,12 +516,14 @@ qx.Class.define("client.UserWindow",
 	    {
 		if (index <= this.__list.getChildren().length)
 		{
+		    var display = nick;
+
 		    if(nick.charAt(0) == "@")
 		    {
-			nick = "<b>" + nick.substr(1) + "</b>"; 
+			display = "<b>" + nick.substr(1) + "</b>"; 
 		    }
 
-		    var tmp = new qx.ui.form.ListItem(nick).set(
+		    var tmp = new qx.ui.form.ListItem(display).set(
 			{ rich : true });
 		    tmp.realnick = nick;
 		    

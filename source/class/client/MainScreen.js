@@ -95,7 +95,7 @@ qx.Class.define("client.MainScreen",
 	__part2 : 0,
 	__part3 : 0,
 	__windowGroup : 0,
-	__manager : 0,
+	manager : 0,
 	__myapp : 0,
         __timer : 0,
         __topictimer : 0,
@@ -542,7 +542,7 @@ qx.Class.define("client.MainScreen",
 	    
 	    /* middle */
 	    var windowManager = new qx.ui.window.Manager();
-	    this.__manager = windowManager;
+	    this.manager = windowManager;
 
 	    var middleSection = new qx.ui.container.Composite(
 		new qx.ui.layout.HBox(2));
