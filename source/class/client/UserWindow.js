@@ -139,7 +139,7 @@ qx.Class.define("client.UserWindow",
 			    name = name.substr(1);
 			}
 
-			if (name.substr(0, searchstring.length) == searchstring)
+			if (name.substr(0, searchstring.length).toLowerCase() == searchstring.toLowerCase())
 			{
 			    this.__input1.setValue(name + ": ");
 			    this.__input1.setTextSelection(100,100);
