@@ -48,11 +48,11 @@ qx.Class.define("client.UserWindow",
 	    scrollbarY : "on"
 	});
 
-	var channelText = "Ready.<br>";
+	var channelText = "Please wait...<br>";
 	
 	this.__atom = new qx.ui.basic.Atom(channelText);
 	this.__atom.setRich(true);
-	
+
 	this.__scroll.add(this.__atom);		       
 	wm1.add(this.__scroll, {row: 0, column: 0, flex: 1});
 	
@@ -61,7 +61,12 @@ qx.Class.define("client.UserWindow",
 	this.__input1.setMarginTop(2);
 	this.__input1.focus();
 
+	var searchstart = 0;
+	var searchstring = "";
+	var extendedsearch = false;
+
 	this.__input1.addListener("keypress", function(e) {
+
 	    if (e.getKeyIdentifier() == "Enter")
 	    {
 		var input = this.__input1.getValue();
@@ -103,6 +108,64 @@ qx.Class.define("client.UserWindow",
 		    this.addline(hour + ":" + min + mynick + input + "</font><br>");
 		}
 	    }
+	    else if (e.getKeyIdentifier() == "Tab")
+	    {
+		var input2 = this.__input1.getValue();
+
+		if (input2 == null)
+		{
+		    input2 = "";
+		}
+
+		if (input2.length == 0 || input2.search(/^\S+\s*$/) != -1)
+		{
+		    var names = this.__list.getChildren();
+
+		    if (extendedsearch == false)
+		    {
+			extendedsearch = true;
+			searchstring = input2;
+		    }
+
+		    var found = false;
+
+		    for (var i=searchstart; i < names.length; i++)
+		    {
+			var name = names[i].realnick;	
+	    
+			if(name.charAt(0) == "@" || name.charAt(0) ==  "+")
+			{
+			    //TODO: get rid of @ and + in realname if possible
+			    name = name.substr(1);
+			}
+
+			if (name.substr(0, searchstring.length) == searchstring)
+			{
+			    this.__input1.setValue(name + ": ");
+			    this.__input1.setTextSelection(100,100);
+			    searchstart = i + 1;
+			    found = true;
+			    break;
+			}
+		    }
+
+		    if (!found)
+		    {
+			searchstart = 0;
+		    }
+		}
+
+		e.stopPropagation();
+		e.preventDefault();
+	    }
+
+	    if (e.getKeyIdentifier() != "Tab")
+	    {
+		searchstart = 0;
+		searchstring = "";
+		extendedsearch = false;
+	    }
+
 	}, this);
 
 	var icomposite = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
@@ -111,6 +174,7 @@ qx.Class.define("client.UserWindow",
 	wm1.add(icomposite, {row: 1, column: 0});
 
 	this.prefButton = new qx.ui.form.ToggleButton("Settings");
+	this.prefButton.setFocusable(false);
 	this.prefButton.setMargin(2,10,2,10);
 
 	this.prefButton.addListener("changeValue", function(e) {
@@ -584,6 +648,7 @@ qx.Class.define("client.UserWindow",
 	getList : function()
 	{
 	    var list = new qx.ui.form.List;
+	    list.setFocusable(false);
 	    list.setContextMenu(this.getContextMenu());
 
 	    list.add(new qx.ui.form.ListItem("Wait..."));
@@ -630,7 +695,7 @@ qx.Class.define("client.UserWindow",
 		menu.add(whoisButton);
 	    }
 
-	    if (this.__nw == "Evergreen" && this.__usermode != 0)
+	    if (this.__usermode != 0 || this.__nw != "Evergreen")
 	    {
 
 		var kickButton = new qx.ui.menu.Button("Kick");
@@ -646,9 +711,9 @@ qx.Class.define("client.UserWindow",
 		});
 
 		menu.add(kickButton);
-
+		
 		var banButton = new qx.ui.menu.Button("Kick and ban");
-
+		
 		banButton.addListener("execute", function(e) {
 		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
 		    var userwindow = 
@@ -662,7 +727,7 @@ qx.Class.define("client.UserWindow",
 		menu.add(banButton);
 	    }
 
-	    if (this.__nw == "Evergreen" && this.__usermode == 2)
+	    if (this.__nw != "Evergreen" || this.__usermode == 2)
 	    {
 		var opButton = new qx.ui.menu.Button("Give operator rights");
 

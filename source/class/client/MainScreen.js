@@ -223,6 +223,22 @@ qx.Class.define("client.MainScreen",
 
 		    case "INITDONE":
 			this.initdone = 1;
+			var group = qx.bom.Cookie.get("ProjectEvergreenJoin");
+			var that = this;
+			if (group != null)
+			{
+			    var data = group.split("-");
+
+			    qx.bom.Cookie.del("ProjectEvergreenJoin");
+			    infoDialog.showInfoWin("Do you want to join to group " + data[0] + "?", "Yes", 
+						   function()
+						   {
+						       that.__rrpc.callAsync(
+							   qx.lang.Function.bind(that.sendresult, that), "JOIN",
+							   global_ids + data[0] + " Evergreen " + data[1]);
+						   }, "NO");
+			}
+			
 			break;
 
 		    case "ADDTEXT":

@@ -69,9 +69,25 @@ qx.Class.define("client.InfoDialog",
 	__combo : 0,
 	__nwselection : "Evergreen",
 	__rrpc : 0,
+	__winvisible : 0,
+	__queue : [],
 
 	showInfoWin : function(text, showok, callbackok, showno, callbackno)
 	{
+	    if (this.__winvisible == 1)
+	    {
+		var obj = new Object();
+		obj.text = text;
+		obj.showok = showok;
+		obj.callbackok = callbackok;
+		obj.showno = showno;
+		obj.callbackno = callbackno;
+
+		this.__queue.push(obj);
+		return;
+	    }
+
+	    this.__winvisible = 1;
 	    this.__window.removeAll();
 	    this.__box.removeAll();
 	    this.__window.add(this.__message);
@@ -92,10 +108,19 @@ qx.Class.define("client.InfoDialog",
 
 		this.__yeslistenerid = this.__yesbutton.addListener("execute", function(e) {
 		    this.__window.close();
-		    
+
 		    if (typeof(callbackok) != "undefined")
 		    {
 			callbackok();
+		    }
+
+		    this.__winvisible = 0;		    
+		    
+		    if (this.__queue.length > 0)
+		    {
+			var obj = this.__queue.shift();
+			this.showInfoWin(obj.text, obj.showok, obj.callbackok,
+					 obj.showno, obj.callbackno);
 		    }
 		}, this);
 	    }
@@ -115,6 +140,15 @@ qx.Class.define("client.InfoDialog",
 		    if (typeof(callbackno) != "undefined")
 		    {
 			callbackno();
+		    }
+
+		    this.__winvisible = 0;		    
+
+		    if (this.__queue.length > 0)
+		    {
+			var obj = this.__queue.shift();
+			this.showInfoWin(obj.text, obj.showok, obj.callbackok,
+					 obj.showno, obj.callbackno);
 		    }
 		}, this);
 	    }
