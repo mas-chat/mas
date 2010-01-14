@@ -108,7 +108,7 @@ qx.Class.define("client.UserWindow",
 		    this.addline(hour + ":" + min + mynick + input + "</font><br>");
 		}
 	    }
-	    else if (e.getKeyIdentifier() == "Tab")
+	    else if (e.getKeyIdentifier() == "Tab" || this.__type == 0)
 	    {
 		var input2 = this.__input1.getValue();
 
@@ -611,14 +611,14 @@ qx.Class.define("client.UserWindow",
 		
 		for (var i=0; i < childs.length; i++)
 		{
-		    var name = childs[i].getLabel();
+		    var nickname = childs[i].realnick;
 
-		    if(name.charAt(0) == "@" || name.charAt(0) == "+")
+		    if(nickname.charAt(0) == "@" || nickname.charAt(0) == "+")
 		    {
-			name = name.substr(1);
+			nickname = nickname.substr(1);
 		    }
 
-		    if(name == nick || name == "<b>" + nick + "</b>") //hackish 2nd part
+		    if(nickname == nick)
 		    {
 			found = true;
 			this.__list.remove(childs[i]);
@@ -629,14 +629,14 @@ qx.Class.define("client.UserWindow",
 		{
 		    for (var i=0; i < this.nameslist.length; i++)
 		    {
-			var name = this.nameslist[i];
+			var nickname = this.nameslist[i];
 
-			if(name.charAt(0) == "@" || name.charAt(0) == "+")
+			if(nickname.charAt(0) == "@" || nickname.charAt(0) == "+")
 			{
-			    name = name.substr(1);
+			    nickname = nickname.substr(1);
 			}
 
-			if (name == nick)
+			if (nickname == nick)
 			{
 			    this.nameslist.splice(i, 1);
 			}
