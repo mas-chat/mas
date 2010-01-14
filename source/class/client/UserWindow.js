@@ -104,11 +104,13 @@ qx.Class.define("client.UserWindow",
 			mynick = " <font color=\"blue\"><b>* " +
 			    global_nick[this.__nw_id] + "</b> ";
 		    }
-
-		    this.addline(hour + ":" + min + mynick + input + "</font><br>");
+		    else if (input.substr(0,1) != "/")
+		    {
+			this.addline(hour + ":" + min + mynick + input + "</font><br>");
+		    }
 		}
 	    }
-	    else if (e.getKeyIdentifier() == "Tab" || this.__type == 0)
+	    else if (e.getKeyIdentifier() == "Tab" && this.__type == 0)
 	    {
 		var input2 = this.__input1.getValue();
 

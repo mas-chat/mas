@@ -916,6 +916,8 @@ qx.Class.define("client.MainScreen",
 						     this.getForumMenu());
 	    var viewMenu = new qx.ui.menubar.Button("View", null,
 						    this.getViewMenu());
+	    var settingsMenu = new qx.ui.menubar.Button("Settings", null,
+						    this.getSettingsMenu());
 	    var advancedMenu = new qx.ui.menubar.Button("Advanced", null,
 							this.getAdvancedMenu());
 	    var helpMenu = new qx.ui.menubar.Button("Help", null, this.getHelpMenu());
@@ -926,6 +928,7 @@ qx.Class.define("client.MainScreen",
 	    {
 		menubar.add(forumMenu);
 		menubar.add(viewMenu);
+		menubar.add(settingsMenu);
 		menubar.add(advancedMenu);
 	    }
 	    menubar.add(helpMenu);
@@ -937,7 +940,6 @@ qx.Class.define("client.MainScreen",
 	getLogoutMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
-
 	    var logoutButton = new qx.ui.menu.Button("Log out",
 						     "icon/16/actions/edit-undo.png");
 	    menu.add(logoutButton);
@@ -949,7 +951,6 @@ qx.Class.define("client.MainScreen",
 	getHelpMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
-
 	    var manualButton = new qx.ui.menu.Button("Manual");
 	    var aboutButton = new qx.ui.menu.Button("About...");
 
@@ -966,7 +967,6 @@ qx.Class.define("client.MainScreen",
 	getForumMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
-
 	    var createButton = new qx.ui.menu.Button("Create new group...");
 	    var joinButton = new qx.ui.menu.Button("Join to existing group...");
 
@@ -979,19 +979,30 @@ qx.Class.define("client.MainScreen",
 	    return menu;
 	},
 
-
 	getViewMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
-
-	    var prefButton = new qx.ui.menu.Button("Preferences...");
 	    var logsButton = new qx.ui.menu.Button("Log history...");
 
-	    prefButton.addListener("execute", this._prefCommand, this);
 	    logsButton.addListener("execute", this._logsCommand, this);
 
-	    menu.add(prefButton);
 	    menu.add(logsButton);
+
+	    return menu;
+	},
+
+	getSettingsMenu : function()
+	{
+	    var menu = new qx.ui.menu.Menu;
+	    var sslButton = new qx.ui.menu.CheckBox("Always use HTTPS");
+	    
+	    if (global_settings.getSslEnabled() == 1)
+	    {
+		sslButton.setValue(true);
+	    }
+
+	    sslButton.addListener("changeValue", this._sslCommand, this);
+	    menu.add(sslButton);
 
 	    return menu;
 	},
@@ -999,7 +1010,6 @@ qx.Class.define("client.MainScreen",
 	getAdvancedMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
-
 	    var joinButton = new qx.ui.menu.Button("Join to IRC channel...");
 
 	    joinButton.addListener("execute", this._joinIRCCommand, this);
@@ -1018,11 +1028,6 @@ qx.Class.define("client.MainScreen",
 	    logDialog.show(this.__myapp, this.desktop.getBounds());
 	},
 
-	_prefCommand : function(app)
-	{
-	    alert("coming soon");
-	},
-
 	_joinForumCommand : function(app)
 	{
 	    infoDialog.getJoinNewChannelWin(this.__myapp, 0);
@@ -1031,6 +1036,23 @@ qx.Class.define("client.MainScreen",
 	_createForumCommand : function()
 	{
 	    infoDialog.getCreateNewGroupWin(this.__myapp, 0);
+	},
+
+	_sslCommand : function(e)
+	{
+	    if (e.getData() == true)
+	    {
+		global_settings.setSslEnabled(1);
+	    }
+	    else
+	    {
+		global_settings.setSslEnabled(0);
+	    }
+
+	    infoDialog.showInfoWin("Please re-login to activate the change.", "OK", function() {
+		qx.bom.Cookie.del("ProjectEvergreen");
+		window.location.reload(true);
+	    });
 	},
 
 	_logoutCommand : function()

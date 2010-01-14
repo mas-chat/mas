@@ -36,6 +36,10 @@ qx.Class.define("client.Settings",
 	    case "loggingEnabled":
 		this.setLoggingEnabled(value);
 		break;
+
+	    case "sslEnabled":
+		this.setSslEnabled(value);
+		break;
 	    }
 	}
 	this.initdone = 1;
@@ -48,7 +52,8 @@ qx.Class.define("client.Settings",
     {
 	firstTime : { init : 1, apply : "_applyFirstTime" },
 	showFriendBar : { init : 1, apply : "_applyShowFriendBar" },
-	loggingEnabled : { init : 1, apply : "_applyLoggingEnabled" }
+	loggingEnabled : { init : 1, apply : "_applyLoggingEnabled" },
+	sslEnabled : { init : 0, apply : "_applySslEnabled" }
     },
 
     members :
@@ -69,6 +74,11 @@ qx.Class.define("client.Settings",
 	_applyLoggingEnabled : function(value)
 	{
 	    this.send("loggingEnabled", value);
+	},
+
+	_applySslEnabled : function(value)
+	{
+	    this.send("sslEnabled", value);
 	},
 
 	send : function(name, value)
