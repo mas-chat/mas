@@ -48,7 +48,7 @@ qx.Class.define("client.InfoDialog",
 		maxLength: 25
 	});
 
-	this.__rrpc = new qx.io.remote.Rpc("/", "ralph");
+	this.__rrpc = new qx.io.remote.Rpc("/ralph", "ralph");
     },
 
     members :

@@ -13,7 +13,7 @@ qx.Class.define("client.Settings",
 	this.initdone = 0;
 
 	// write "socket"
-	this.__srpc = new qx.io.remote.Rpc("/", "ralph");
+	this.__srpc = new qx.io.remote.Rpc("/ralph", "ralph");
 	this.__srpc.setTimeout(10000);
 
 	var allsettings = params.split("||");
