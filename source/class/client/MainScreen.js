@@ -1040,17 +1040,20 @@ qx.Class.define("client.MainScreen",
 
 	_sslCommand : function(e)
 	{
-	    if (e.getData() == true)
+	    var usessl = e.getData();
+
+	    if (usessl == true)
 	    {
 		global_settings.setSslEnabled(1);
+		qx.bom.Cookie.set("UseSSL", "Yep", 100, "/");
 	    }
 	    else
 	    {
 		global_settings.setSslEnabled(0);
+		qx.bom.Cookie.del("UseSSL");
 	    }
 
-	    infoDialog.showInfoWin("Please re-login to activate the change.", "OK", function() {
-		qx.bom.Cookie.del("ProjectEvergreen");
+	    infoDialog.showInfoWin("Application is now reloaded to activate<br> the change.", "OK", function() {
 		window.location.reload(true);
 	    });
 	},
