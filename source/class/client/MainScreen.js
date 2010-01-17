@@ -569,7 +569,7 @@ qx.Class.define("client.MainScreen",
 
 	    this.desktop = middleContainer;
 
-	    middleContainer.set({decorator: "main",
+	    middleContainer.set({decorator: "background2",
 				 backgroundColor: "#DFE5E5"});
 
 	    middleSection.add(middleContainer, {flex:1});

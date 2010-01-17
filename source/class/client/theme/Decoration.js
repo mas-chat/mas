@@ -14,5 +14,15 @@ qx.Theme.define("client.theme.Decoration",
 
   decorations :
   {
+      "background2" :
+      {
+	  decorator : qx.ui.decoration.Background,
+ 
+	  style :
+	  {
+              backgroundImage  : "/img/bg.jpg",
+              backgroundRepeat : "scale"
+	  }
+      }
   }
 });
