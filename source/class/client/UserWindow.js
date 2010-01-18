@@ -40,7 +40,23 @@ qx.Class.define("client.UserWindow",
 	wm1.moveTo(250, 150);
 	
 	// create scroll container
-	this.__scroll = new qx.ui.container.Scroll();
+	this.__scroll = new client.Scroll();
+
+	this.__scroll.addListener("scrollLock", function(e) {
+
+	    var caption = this.__window.getCaption();
+
+	    if (e.getData() == true)
+	    {
+		this.__window.setCaption("[SCROLL LOCK] " + caption);
+		this.scrollLock = true;
+	    }
+	    else
+	    {
+		this.__window.setCaption(caption.replace(/^\[SCROLL LOCK\] /, ""));
+		this.scrollLock = false;
+	    }
+	}, this);
 
 	this.__scroll.set({
 	    minWidth: 100,
@@ -279,6 +295,7 @@ qx.Class.define("client.UserWindow",
 	configListOper : 0,
 	nameslist : 0,
 	closeok : 0,
+	scrollLock : false,
 
 	updateValues : function(topic, nw, name, type, sound, titlealert, nw_id, usermode, password)
 	{
@@ -490,13 +507,7 @@ qx.Class.define("client.UserWindow",
 
 	    this.__atom.setLabel(this.__channelText);
 
-// THIS IS SCROLL LOCK TEST CODE
-//	    var bottom = this.__scroll.getItemBottom(this.__atom);
-
-//	    alert(this.__scroll.getScrollY());
-//	    alert(this.__scroll.getItemBottom(this.__atom) + " < " + this.__scroll.getScrollY());
-
-//	    if (this.__scroll.getItemBottom(this.__atom) < this.__scroll.getScrollY());
+	    if (this.scrollLock == false)
 	    {
 		this.__scroll.scrollToY(100000);
 	    }
