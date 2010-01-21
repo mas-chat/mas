@@ -892,35 +892,14 @@ qx.Class.define("client.MainScreen",
 
 	activateNextWin : function(direction)
 	{
-	    var i = this.activewin;
-
-	    do
+	    if (direction == "up")
 	    {
-		if (direction == "up")
-		{
-		    i++;
-		}
-		else
-		{
-		    i--;
-		}
-
-		if (i == -1)
-		{
-		    i = this.windows.length - 1;
-		}
-		if (i >= this.windows.length)
-		{
-		    i = 0;
-		}
+		this.__windowGroup.selectNext();
 	    }
-	    while(this.windows[i] == undefined)
-
-	    this.windows[i].show();
-	    this.__windowGroup.setSelection([this.windows[i].taskbarButton]);
-	    this.windows[i].setNormal();
-	    this.activewin = i;
-	    this.windows[i].activatewin();
+	    else
+	    {
+		this.__windowGroup.selectPrevious();
+	    }
 	},
 
 	switchToWindow : function(e)
