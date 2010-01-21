@@ -501,6 +501,8 @@ qx.Class.define("client.MainScreen",
 		//Keep these two last
 		newWindow.show();
 		newWindow.addHandlers();
+
+		this.activewin = window_id;
 	    }
 	    else
 	    {
@@ -886,6 +888,38 @@ qx.Class.define("client.MainScreen",
 
 	    this.activewin = winid;
 	    this.windows[winid].activatewin();
+	},
+
+	activateNextWin : function(direction)
+	{
+	    var i = this.activewin;
+
+	    do
+	    {
+		if (direction == "up")
+		{
+		    i++;
+		}
+		else
+		{
+		    i--;
+		}
+
+		if (i == -1)
+		{
+		    i = this.windows.length - 1;
+		}
+		if (i >= this.windows.length)
+		{
+		    i = 0;
+		}
+	    }
+	    while(this.windows[i] == undefined)
+
+	    this.windows[i].show();
+	    this.windows[i].setNormal();
+	    this.activewin = i;
+	    this.windows[i].activatewin();
 	},
 
 	switchToWindow : function(e)

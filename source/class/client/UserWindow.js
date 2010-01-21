@@ -44,16 +44,16 @@ qx.Class.define("client.UserWindow",
 
 	this.__scroll.addListener("scrollLock", function(e) {
 
-	    var caption = this.__window.getCaption();
+	    var caption = this.window.getCaption();
 
 	    if (e.getData() == true)
 	    {
-		this.__window.setCaption("[SCROLL LOCK] " + caption);
+		this.window.setCaption("[SCROLL LOCK] " + caption);
 		this.scrollLock = true;
 	    }
 	    else
 	    {
-		this.__window.setCaption(caption.replace(/^\[SCROLL LOCK\] /, ""));
+		this.window.setCaption(caption.replace(/^\[SCROLL LOCK\] /, ""));
 		this.scrollLock = false;
 	    }
 	}, this);
@@ -126,6 +126,14 @@ qx.Class.define("client.UserWindow",
 			this.addline(hour + ":" + min + mynick + input + "</font><br>");
 		    }
 		}
+	    }
+	    else if (e.getKeyIdentifier() == "Down")
+	    {
+		MainScreenObj.activateNextWin("down");
+	    }
+	    else if (e.getKeyIdentifier() == "Up")
+	    {
+		MainScreenObj.activateNextWin("up");
 	    }
 	    else if (e.getKeyIdentifier() == "Tab" && this.__type == 0)
 	    {
@@ -260,7 +268,7 @@ qx.Class.define("client.UserWindow",
 	    icomposite.add(this.prefButton);
 	}
 
-	this.__window = wm1;
+	this.window = wm1;
 	this.__type = type;
 	this.__name = name;
 
@@ -272,7 +280,7 @@ qx.Class.define("client.UserWindow",
     //TODO: write proper destructor
     members :
     {
-        __window : 0,
+        window : 0,
 	__input1 : 0,
 	__list : 0,
 	__atom : 0,
@@ -335,17 +343,17 @@ qx.Class.define("client.UserWindow",
 
 	setHeight : function(e)
 	{
-	    this.__window.setHeight(e);
+	    this.window.setHeight(e);
 	},
 
 	setWidth : function(e)
 	{
-	    this.__window.setWidth(e);
+	    this.window.setWidth(e);
 	},
 
 	getBounds : function()
 	{
-	    return this.__window.getBounds();
+	    return this.window.getBounds();
 	},
 
 	setRed : function()
@@ -445,10 +453,10 @@ qx.Class.define("client.UserWindow",
 
 	addHandlers : function()
 	{
-	    this.__window.addListener('resize', this.handleResize, this);
-	    this.__window.addListener('move', this.handleMove, this);
+	    this.window.addListener('resize', this.handleResize, this);
+	    this.window.addListener('move', this.handleMove, this);
 
-	    this.__window.addListener('click', function(e) {
+	    this.window.addListener('click', function(e) {
 
 		if (this.taskbarControl)
 		{
@@ -458,12 +466,12 @@ qx.Class.define("client.UserWindow",
 		MainScreenObj.activewin = this.winid;
 	    }, this);
 
-	    this.__window.addListener("close", this.handleClose, this);
+	    this.window.addListener("close", this.handleClose, this);
 
 	    var closeok = 0;
 
-	    this.__window.addListener("beforeClose", function(e) {
-		var mywindow = this.__window;
+	    this.window.addListener("beforeClose", function(e) {
+		var mywindow = this.window;
 
 		if (closeok == 0)
 		{
@@ -479,12 +487,12 @@ qx.Class.define("client.UserWindow",
 
 	moveTo : function(x,y)
 	{
-	    this.__window.moveTo(x, y);
+	    this.window.moveTo(x, y);
 	},
 
 	show : function()
 	{
-	    this.__window.open();
+	    this.window.open();
     	},
 
 	getName : function()
@@ -537,11 +545,11 @@ qx.Class.define("client.UserWindow",
 
 	    if (this.__type == 0)
 	    {
-		this.__window.setCaption(nw + cname + " : " + line);
+		this.window.setCaption(nw + cname + " : " + line);
 	    }
 	    else
 	    {
-		this.__window.setCaption(nw + "*** Private conversation with " + cname);
+		this.window.setCaption(nw + "*** Private conversation with " + cname);
 	    }
 	},
 
