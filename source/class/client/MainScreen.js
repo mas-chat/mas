@@ -917,6 +917,7 @@ qx.Class.define("client.MainScreen",
 	    while(this.windows[i] == undefined)
 
 	    this.windows[i].show();
+	    this.__windowGroup.setSelection([this.windows[i].taskbarButton]);
 	    this.windows[i].setNormal();
 	    this.activewin = i;
 	    this.windows[i].activatewin();
