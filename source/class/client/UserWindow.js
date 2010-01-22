@@ -38,6 +38,7 @@ qx.Class.define("client.UserWindow",
 	wm1.setModal(false);
 	wm1.setAllowMaximize(true);
 	wm1.moveTo(250, 150);
+	wm1.setResizeSensitivity(10);
 	
 	// create scroll container
 	this.__scroll = new client.Scroll();
