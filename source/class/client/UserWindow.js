@@ -128,6 +128,14 @@ qx.Class.define("client.UserWindow",
 		    }
 		}
 	    }
+	    else if (e.getKeyIdentifier() == "PageUp")
+	    {
+		this.__scroll.scrollByY((this.__scroll.getHeight() - 30) * - 1);
+	    }
+	    else if (e.getKeyIdentifier() == "PageDown")
+	    {
+		this.__scroll.scrollByY(this.__scroll.getHeight() - 30);
+	    }
 	    else if (e.getKeyIdentifier() == "Down")
 	    {
 		MainScreenObj.activateNextWin("down");
@@ -937,11 +945,28 @@ qx.Class.define("client.UserWindow",
 		composite.add(scomposite3, {row: 3, column: 1});
 	    }
 
+	    //Group URL:
+
+	    if (this.__type == 0 && this.__nw == "Evergreen")
+	    {
+		composite.add(new qx.ui.basic.Label("Participation link:"), {row:4, column: 0});
+	    }
+	    
+	    var link = new qx.ui.form.TextField();
+	    link.set({ maxLength: 200 });
+	    link.setWidth(250);
+	    link.setValue("http://meetandspeak.com/join/" + this.__name.substr(1));
+
+	    if (this.__type == 0 && this.__nw == "Evergreen")
+	    {
+		composite.add(link, {row: 4, column: 1});
+	    }
+
 	    //OPER LIST
 
 	    if (this.__usermode == 2)
 	    {
-		composite.add(new qx.ui.basic.Label("Operators:"), {row:4, column: 0})
+		composite.add(new qx.ui.basic.Label("Operators:"), {row:5, column: 0})
 	    }
 
 	    var scroll1 = new qx.ui.container.Scroll();
@@ -955,10 +980,10 @@ qx.Class.define("client.UserWindow",
 
 	    if (this.__usermode == 2)
 	    {
-		composite.add(scroll1, {row: 4, column: 1});
+		composite.add(scroll1, {row: 5, column: 1});
 	    	var buttonOper = new qx.ui.form.Button("Remove rights");
 		buttonOper.setAllowStretchY(false);
-		composite.add(buttonOper, {row: 4, column: 2});
+		composite.add(buttonOper, {row: 5, column: 2});
 
 		buttonOper.addListener("execute", function(e) {
 		    var userid = this.configListOper.getSelection()[0].userid;
@@ -972,7 +997,7 @@ qx.Class.define("client.UserWindow",
 
 	    if (this.__usermode != 0)
 	    {
-		composite.add(new qx.ui.basic.Label("Ban list:"), {row:5, column: 0})
+		composite.add(new qx.ui.basic.Label("Ban list:"), {row:6, column: 0})
 	    }
 
 	    var scroll2 = new qx.ui.container.Scroll();
@@ -988,10 +1013,10 @@ qx.Class.define("client.UserWindow",
 
 	    if (this.__usermode != 0)
 	    {
-		composite.add(scroll2, {row: 5, column: 1});
+		composite.add(scroll2, {row: 6, column: 1});
 	    	var buttonBan = new qx.ui.form.Button("Unban");
 		buttonBan.setAllowStretchY(false);
-		composite.add(buttonBan, {row: 5, column: 2});
+		composite.add(buttonBan, {row: 6, column: 2});
 
 		buttonBan.addListener("execute", function(e) {
 		    var banid = this.configListBan.getSelection()[0].banid;
