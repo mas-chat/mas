@@ -49,7 +49,7 @@ qx.Class.define("client.Scroll",
 	var pane = this.getChildControl("pane");
 	this.getChildControl("pane").scrollToY(e.getData());
 
-	if (pane.getScrollMaxY() == pane.getScrollY())
+	if (pane.getScrollMaxY() - pane.getScrollY() < 2)
 	{
 	    if (this.__oldvalue !== false)
 	    { 
