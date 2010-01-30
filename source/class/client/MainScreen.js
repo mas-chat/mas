@@ -578,6 +578,7 @@ qx.Class.define("client.MainScreen",
 
 	    var friendContainer = new qx.ui.container.Composite(
 		new qx.ui.layout.VBox());
+	    friendContainer.set({ backgroundColor: "#F2F5FE"});
 	    
 	    var friendsLabel = new qx.ui.basic.Label("<b>Contact list:</b>");
             friendsLabel.setRich(true);
@@ -965,7 +966,7 @@ qx.Class.define("client.MainScreen",
 	getHelpMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
-	    var manualButton = new qx.ui.menu.Button("Manual");
+	    var manualButton = new qx.ui.menu.Button("Support");
 	    var aboutButton = new qx.ui.menu.Button("About...");
 
 	    manualButton.addListener("execute", this._manualCommand, this);
@@ -1080,7 +1081,8 @@ qx.Class.define("client.MainScreen",
 
 	_manualCommand : function()
 	{
-	    alert("manual: TBD");
+	    var newWindow = window.open("/support.html", '_blank');
+	    newWindow.focus();
 	},
 
 	_aboutCommand : function()

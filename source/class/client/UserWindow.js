@@ -69,6 +69,7 @@ qx.Class.define("client.UserWindow",
 	
 	this.__atom = new qx.ui.basic.Atom(channelText);
 	this.__atom.setRich(true);
+	this.__atom.set({ backgroundColor: "#F2F5FE"});
 
 	this.__scroll.add(this.__atom);		       
 	wm1.add(this.__scroll, {row: 0, column: 0, flex: 1});
@@ -822,13 +823,13 @@ qx.Class.define("client.UserWindow",
 
 	    //SOUNDS
 
-            var lsounds = new qx.ui.basic.Label("Sound alerts:");
+            var lsounds = new qx.ui.basic.Label("Sound alert:");
 	    composite.add(lsounds, {row:1, column: 0})
 
 	    var scomposite2 = new qx.ui.container.Composite(
 		new qx.ui.layout.HBox(10));
 	    
-	    var syes = new qx.ui.form.RadioButton("On");
+	    var syes = new qx.ui.form.RadioButton("On (play sound when new msg arrives)");
 	    var sno = new qx.ui.form.RadioButton("Off");
 
 	    if (this.sound == 0)
@@ -866,13 +867,13 @@ qx.Class.define("client.UserWindow",
 
 	    //TITLE ALERT
 
-            var ltitles = new qx.ui.basic.Label("Title alerts:");
+            var ltitles = new qx.ui.basic.Label("Visual alert:");
 	    composite.add(ltitles, {row:2, column: 0})
 
 	    var scomposite4 = new qx.ui.container.Composite(
 		new qx.ui.layout.HBox(10));
 	    
-	    var tyes = new qx.ui.form.RadioButton("On");
+	    var tyes = new qx.ui.form.RadioButton("On (blink browser title bar when new msg arrives)");
 	    var tno = new qx.ui.form.RadioButton("Off");
 
 	    if (this.titlealert == 0)

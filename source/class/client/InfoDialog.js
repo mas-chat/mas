@@ -179,6 +179,7 @@ qx.Class.define("client.InfoDialog",
 		this.__message.setLabel("Type IRC channel name you wish to join:");
 	    }
 
+	    this.__input.setValue("");
 	    this.__window.add(this.__input);
 	    this.__input.focus();
 
@@ -263,6 +264,7 @@ qx.Class.define("client.InfoDialog",
 	    this.__message2.setLabel("Optional password:");
 	    
 	    this.__window.add(this.__message);
+	    this.__input.setValue("");
 	    this.__window.add(this.__input);
 	    this.__input.focus();
 	    this.__window.add(this.__message2);
