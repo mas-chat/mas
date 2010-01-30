@@ -421,43 +421,52 @@ qx.Class.define("client.UserWindow",
 
 	sendresult : function(result, exc) 
 	{
-	    var pos = result.search(/ /);
-	    var command = result.slice(0, pos);
-
-	    if (command == "OPERLIST")
+	    if (exc == null) 
 	    {
-		result = result.slice(pos+1);
-		var opers = result.split("<<>>"); 
+		var pos = result.search(/ /);
+		var command = result.slice(0, pos);
 		
-		this.configListOper.removeAll();
-		
-		for (var i=0; i < opers.length; i++)
+		if (command == "OPERLIST")
 		{
-		    var tmp = opers[i].split("<>");
-		    var tmpList = new qx.ui.form.ListItem(tmp[1]);
-		    tmpList.userid = tmp[0];
-		    this.configListOper.add(tmpList);
+		    result = result.slice(pos+1);
+		    var opers = result.split("<<>>"); 
+		    
+		    this.configListOper.removeAll();
+		    
+		    for (var i=0; i < opers.length; i++)
+		    {
+			var tmp = opers[i].split("<>");
+			var tmpList = new qx.ui.form.ListItem(tmp[1]);
+			tmpList.userid = tmp[0];
+			this.configListOper.add(tmpList);
+		    }
+		}
+		else if (command == "BANLIST")
+		{
+		    result = result.slice(pos+1);
+		    var bans = result.split("<<>>"); 
+		    
+		    this.configListBan.removeAll();
+
+		    for (var i=0; i < bans.length; i++)
+		    {
+			var tmp = bans[i].split("<>");
+			var tmpList = new qx.ui.form.ListItem(tmp[0]);
+			tmpList.banid = tmp[1];
+			this.configListBan.add(tmpList);
+		    }
+		}
+		else
+		{
+		    //call "superclass"
+		    MainScreenObj.sendresult(result, exc);
 		}
 	    }
-	    else if (command == "BANLIST")
+	    else 
 	    {
-		result = result.slice(pos+1);
-		var bans = result.split("<<>>"); 
-		
-		this.configListBan.removeAll();
-
-		for (var i=0; i < bans.length; i++)
-		{
-		    var tmp = bans[i].split("<>");
-		    var tmpList = new qx.ui.form.ListItem(tmp[0]);
-		    tmpList.banid = tmp[1];
-		    this.configListBan.add(tmpList);
-		}
-	    }
-	    else
-	    {
-		//call "superclass"
-		MainScreenObj.sendresult(result, exc);
+		infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
+		//TODO: Add delay ~2s here
+		window.location.reload(true);
 	    }
 	},
 
