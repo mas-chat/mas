@@ -34,11 +34,16 @@ qx.Class.define("client.UserWindow",
 	this.__usermode = usermode;
 	this.__password = password;
 
-	wm1.setLayout(layout);
 	wm1.setModal(false);
+	wm1.setLayout(new qx.ui.layout.VBox(0));
 	wm1.setAllowMaximize(true);
 	wm1.moveTo(250, 150);
 	wm1.setResizeSensitivity(10);
+	wm1.set({contentPadding: [0,0,0,0]});
+
+	var box1 = new qx.ui.container.Composite(layout);
+	box1.set({backgroundColor: "#F2F5FE", padding:10, margin: 0});
+	wm1.add(box1, {flex:1});
 
 	// create scroll container
 	this.__scroll = new client.Scroll();
@@ -72,7 +77,7 @@ qx.Class.define("client.UserWindow",
 	this.__atom.set({ backgroundColor: "#F2F5FE"});
 
 	this.__scroll.add(this.__atom);		       
-	wm1.add(this.__scroll, {row: 0, column: 0, flex: 1});
+	box1.add(this.__scroll, {row: 0, column: 0, flex: 1});
 	
 	this.__input1 = new qx.ui.form.TextField();
 	this.__input1.set({ maxLength: 200 });
@@ -208,7 +213,7 @@ qx.Class.define("client.UserWindow",
 	var icomposite = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
 	icomposite.add(this.__input1, { flex : 1 });
 
-	wm1.add(icomposite, {row: 1, column: 0});
+	box1.add(icomposite, {row: 1, column: 0});
 
 	this.prefButton = new qx.ui.form.ToggleButton("Settings");
 	this.prefButton.setFocusable(false);
@@ -243,12 +248,12 @@ qx.Class.define("client.UserWindow",
 					  "GETBANS", global_ids + this.winid);
 		}
 
-		wm1.remove(this.__scroll);
+		box1.remove(this.__scroll);
 		if (type == 0)
 		{
-		    wm1.remove(this.__list);
+		    box1.remove(this.__list);
 		}
-		wm1.add(this.__settings, {row : 0, column : 0 });
+		box1.add(this.__settings, {row : 0, column : 0 });
 		this.prefButton.setLabel("Back");
 	    }
 	    else
@@ -256,13 +261,13 @@ qx.Class.define("client.UserWindow",
 		this.__settingsmode = 0;
 		if (this.__settings != 0)
 		{
-		    wm1.remove(this.__settings);
+		    box1.remove(this.__settings);
 		}
 
-		wm1.add(this.__scroll, { row:0, column :0});
+		box1.add(this.__scroll, { row:0, column :0});
 		if (type == 0)
 		{
-		    wm1.add(this.__list, { row:0, column :1});
+		    box1.add(this.__list, { row:0, column :1});
 		}
 		this.prefButton.setLabel("Settings");
 	    }
@@ -270,8 +275,8 @@ qx.Class.define("client.UserWindow",
 
 	if (type == 0)
 	{
-	    wm1.add(this.getList(), {row: 0, column: 1, flex:1});
-	    wm1.add(this.prefButton, {row: 1, column: 1});
+	    box1.add(this.getList(), {row: 0, column: 1, flex:1});
+	    box1.add(this.prefButton, {row: 1, column: 1});
 	}
 	else
 	{
