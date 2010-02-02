@@ -13,7 +13,7 @@ qx.Class.define("client.InfoDialog",
     {
 	this.base(arguments);
 
-	this.__window = new qx.ui.window.Window("");
+	this.__window = new qx.ui.window.Window("X");
 	this.__window.setLayout(new qx.ui.layout.VBox(10));
 	this.__window.setModal(true);
 	this.__window.setShowClose(false);
@@ -64,10 +64,12 @@ qx.Class.define("client.InfoDialog",
 	__nobutton : 0,
 	__yeslistenerid : 0,
 	__nolistenerid : 0,
+	__inputlistenerid : 0,
+	__input2listenerid : 0,
 	__input : 0,
 	__input2 : 0,
 	__combo : 0,
-	__nwselection : "Evergreen",
+	__nwselection : "MeetAndSpeak",
 	__rrpc : 0,
 	__winvisible : 0,
 	__queue : [],
@@ -170,18 +172,17 @@ qx.Class.define("client.InfoDialog",
 	    
 	    if (mode == 0)
 	    {
-		this.__window.setCaption("Join to new group");
+		this.__window.setCaption("Join to existing group");
 		this.__message.setLabel("Type the group name you wish to join:");
 	    }
 	    else
 	    {
-		this.__window.setCaption("Join to new IRC channel");
+		this.__window.setCaption("Join to IRC channel");
 		this.__message.setLabel("Type IRC channel name you wish to join:");
 	    }
 
 	    this.__input.setValue("");
 	    this.__window.add(this.__input);
-	    this.__input.focus();
 
 	    this.__message3.setLabel("Password if needed:");
 	    this.__window.add(this.__message3);
@@ -221,7 +222,7 @@ qx.Class.define("client.InfoDialog",
 	    }
 	    else
 	    {
-		this.__nwselection = "Evergreen";
+		this.__nwselection = "MeetAndSpeak";
 	    }
 	    	    
 	    if (this.__nolistenerid != 0) {
@@ -251,6 +252,7 @@ qx.Class.define("client.InfoDialog",
 
 	    rootItem.add(this.__window);
 	    this.__window.open();
+	    this.__input.focus();
 	    this.__window.center();
 	},
 
@@ -266,7 +268,7 @@ qx.Class.define("client.InfoDialog",
 	    this.__window.add(this.__message);
 	    this.__input.setValue("");
 	    this.__window.add(this.__input);
-	    this.__input.focus();
+
 	    this.__window.add(this.__message2);
 	    this.__window.add(this.__input2);
 
@@ -296,21 +298,50 @@ qx.Class.define("client.InfoDialog",
 
 	    this.__yeslistenerid = this.__yesbutton.addListener("execute", 
 								function(e) {
-		var input = this.__input.getValue();
-		var input2 = this.__input2.getValue();
+								    this.__process();
+	    }, this);
 
-		if (input !== "")
+	    if (this.__inputlistenerid != 0) {
+		this.__input.removeListenerById(this.__inputlistenerid);
+	    }
+
+
+	    if (this.__input2listenerid != 0) {
+		this.__input2.removeListenerById(this.__input2listenerid);
+	    }
+
+	    this.__inputlistenerid = this.__input.addListener("keypress", function(e) {
+		if (e.getKeyIdentifier() == "Enter")
 		{
-		    this.__rrpc.callAsync(this.__sendresult, "CREATE",
-					  global_ids +
-					  input + " " + input2);
+		    this.__process();
 		}
-		this.__window.close();
+	    }, this);
+
+	    this.__input2listenerid = this.__input2.addListener("keypress", function(e) {
+		if (e.getKeyIdentifier() == "Enter")
+		{
+		    this.__process();
+		}
 	    }, this);
 
 	    rootItem.add(this.__window);
 	    this.__window.open();
+	    this.__input.focus();
 	    this.__window.center();
+	},
+
+	__process : function()
+	{
+	    var input = this.__input.getValue();
+	    var input2 = this.__input2.getValue();
+
+	    if (input !== "")
+	    {
+		this.__rrpc.callAsync(this.__sendresult, "CREATE",
+				      global_ids +
+				      input + " " + input2);
+	    }
+	    this.__window.close();
 	},
 
 	__sendresult : function(result, exc) 

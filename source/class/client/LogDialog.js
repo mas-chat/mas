@@ -135,7 +135,7 @@ qx.Class.define("client.LogDialog",
 	    
 		this.__window.add(infoarea, { flex : 1});
 	    
-		var logtext = new qx.ui.basic.Atom("Logging:");
+		var logtext = new qx.ui.basic.Atom("Logs contain conversations from past ten days.");
 		logtext.setMarginRight(15);
 		var logon = new qx.ui.form.RadioButton("Enabled");
 		logon.setMarginRight(10);
@@ -151,8 +151,8 @@ qx.Class.define("client.LogDialog",
 
 		var logbox = new qx.ui.container.Composite(new qx.ui.layout.HBox());
 		logbox.add(logtext);
-		logbox.add(logon);
-		logbox.add(logoff);
+//		logbox.add(logon);
+//		logbox.add(logoff);
 		logbox.add(new qx.ui.core.Spacer(50), {flex : 1});
 		logbox.add(close);
 

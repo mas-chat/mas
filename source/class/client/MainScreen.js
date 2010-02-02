@@ -500,6 +500,7 @@ qx.Class.define("client.MainScreen",
 			
 		//Keep these two last
 		newWindow.show();
+
 		newWindow.addHandlers();
 
 		this.activewin = window_id;
@@ -966,7 +967,7 @@ qx.Class.define("client.MainScreen",
 	getHelpMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
-	    var manualButton = new qx.ui.menu.Button("Support");
+	    var manualButton = new qx.ui.menu.Button("Support web site");
 	    var aboutButton = new qx.ui.menu.Button("About...");
 
 	    manualButton.addListener("execute", this._manualCommand, this);
@@ -1087,7 +1088,7 @@ qx.Class.define("client.MainScreen",
 
 	_aboutCommand : function()
 	{
-	    alert("Evergreen: ver 0.4");
+	    infoDialog.showInfoWin("<b>MeetAndSpeak Client SW 12.7.3</b><p>&copy; 2010 MeetAndSpeak. All rights reserved.", "OK");
 	},
 	
 	player_start : function()

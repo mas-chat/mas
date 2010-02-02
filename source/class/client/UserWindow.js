@@ -390,15 +390,22 @@ qx.Class.define("client.UserWindow",
 	{ 
 	    var name = this.getName();
 
-	    if (this.__type == 0)
+	    if (this.__type == 0 && this.__nw_id == 0)
 	    {
 		name = name.substr(1)
+		name = name.substr(0, 1).toUpperCase() + name.substr(1);
 	    }
 
-	    name = name.substr(0, 1).toUpperCase() + name.substr(1);
-
-	    this.taskbarButton.setLabel("<font color=\"blue\">" + name +
-					"</font>");
+	    if (this.__nw_id == 0)
+	    {
+		this.taskbarButton.setLabel("<font color=\"blue\">" + name +
+					    "</font>");
+	    }
+	    else
+	    {
+		this.taskbarButton.setLabel("<font color=\"#0033FF\">" + name +
+					    "</font>");
+	    }
 	},
 
 	handleMove : function(e)
@@ -557,12 +564,12 @@ qx.Class.define("client.UserWindow",
 		line = "Topic not set.";
 	    }
 
-	    if (this.__nw == "Evergreen" && this.__type == 0)
+	    if (this.__nw_id == 0 && this.__type == 0)
 	    {
 		cname = cname.substr(1, 1).toUpperCase() + cname.substr(2);
 		nw = "Group: ";
 	    }
-	    else if (this.__nw == "Evergreen" && this.__type == 1)
+	    else if (this.__nw_id == 0 && this.__type == 1)
 	    {
 		nw = "";
 	    }
@@ -715,7 +722,7 @@ qx.Class.define("client.UserWindow",
 		var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
 		
 		var userwindow = 
-		    this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
+		    this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
 
 		userwindow.__srpc.callAsync(userwindow.sendresult,
 					    "STARTCHAT", global_ids + userwindow.__nw + " " + name);
@@ -723,7 +730,7 @@ qx.Class.define("client.UserWindow",
 
 	    menu.add(chatButton);
 
-	    if (this.__nw != "Evergreen")
+	    if (this.__nw_id != 0)
 	    {
 
 		var whoisButton = new qx.ui.menu.Button("Whois");
@@ -731,7 +738,7 @@ qx.Class.define("client.UserWindow",
 		whoisButton.addListener("execute", function(e) {
 		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
 		    var userwindow = 
-			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
+			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
 		    
 		    userwindow.__srpc.callAsync(userwindow.sendresult,
 						"WHOIS", global_ids + 
@@ -741,7 +748,7 @@ qx.Class.define("client.UserWindow",
 		menu.add(whoisButton);
 	    }
 
-	    if (this.__usermode != 0 || this.__nw != "Evergreen")
+	    if (this.__usermode != 0 || this.__nw_id != 0)
 	    {
 
 		var kickButton = new qx.ui.menu.Button("Kick");
@@ -749,7 +756,7 @@ qx.Class.define("client.UserWindow",
 		kickButton.addListener("execute", function(e) {
 		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
 		    var userwindow = 
-			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
+			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
 		    
 		    userwindow.__srpc.callAsync(userwindow.sendresult,
 						"KICK", global_ids + 
@@ -763,7 +770,7 @@ qx.Class.define("client.UserWindow",
 		banButton.addListener("execute", function(e) {
 		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
 		    var userwindow = 
-			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
+			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
 		    
 		    userwindow.__srpc.callAsync(userwindow.sendresult,
 						"BAN", global_ids +  
@@ -773,14 +780,14 @@ qx.Class.define("client.UserWindow",
 		menu.add(banButton);
 	    }
 
-	    if (this.__nw != "Evergreen" || this.__usermode == 2)
+	    if (this.__nw_id != 0 || this.__usermode == 2)
 	    {
 		var opButton = new qx.ui.menu.Button("Give operator rights");
 
 		opButton.addListener("execute", function(e) {
 		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
 		    var userwindow = 
-			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().userWindowRef;
+			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
 		    
 		    userwindow.__srpc.callAsync(userwindow.sendresult,
 						"OP", global_ids +  
@@ -815,7 +822,7 @@ qx.Class.define("client.UserWindow",
 	    scomposite1.add(this.topicInput);
 
 	    var button1 = new qx.ui.form.Button("Change");
-	    if (this.__nw != "Evergreen" || this.__usermode != 2)
+	    if (this.__nw_id != 0 || this.__usermode != 2)
 	    {
 		button1.setEnabled(false);
 	    }
@@ -942,7 +949,7 @@ qx.Class.define("client.UserWindow",
 	    var button2 = new qx.ui.form.Button("Change");
 	    scomposite3.add(button2);
 	    
-	    if (this.__nw != "Evergreen" || this.__usermode != 2)
+	    if (this.__nw_id != 0 || this.__usermode != 2)
 	    {
 		button2.setEnabled(false);
 	    }
@@ -962,7 +969,7 @@ qx.Class.define("client.UserWindow",
 
 	    //Group URL:
 
-	    if (this.__type == 0 && this.__nw == "Evergreen")
+	    if (this.__type == 0 && this.__nw_id == 0)
 	    {
 		composite.add(new qx.ui.basic.Label("Participation link:"), {row:4, column: 0});
 	    }
@@ -972,7 +979,7 @@ qx.Class.define("client.UserWindow",
 	    link.setWidth(250);
 	    link.setValue("http://meetandspeak.com/join/" + this.__name.substr(1));
 
-	    if (this.__type == 0 && this.__nw == "Evergreen")
+	    if (this.__type == 0 && this.__nw_id == 0)
 	    {
 		composite.add(link, {row: 4, column: 1});
 	    }
