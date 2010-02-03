@@ -41,10 +41,11 @@ qx.Class.define("client.MainScreen",
 
 	this.__tt = new qx.ui.tooltip.ToolTip("Send Message");
 	this.__myapp = rootItem;
-	
+
+	//Initial hello, send TZ info
 	this.__rrpc.callAsync(
 	    qx.lang.Function.bind(this.readresult, this), "HELLO",
-	    global_ids + this.seq);
+	    global_ids + this.seq + " " + global_offset);
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
 	    document.title = "MeetAndSpeak";
@@ -1011,7 +1012,7 @@ qx.Class.define("client.MainScreen",
 	{
 	    var menu = new qx.ui.menu.Menu;
 	    var sslButton = new qx.ui.menu.CheckBox("Always use HTTPS");
-	    
+
 	    if (global_settings.getSslEnabled() == 1)
 	    {
 		sslButton.setValue(true);
@@ -1042,6 +1043,11 @@ qx.Class.define("client.MainScreen",
 	_logsCommand : function(app)
 	{
 	    logDialog.show(this.__myapp, this.desktop.getBounds());
+	},
+
+	_tzCommand : function(app)
+	{
+	    infoDialog.getTzWin(this.__myapp, 0);
 	},
 
 	_joinForumCommand : function(app)
