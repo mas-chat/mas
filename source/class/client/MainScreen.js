@@ -1045,11 +1045,6 @@ qx.Class.define("client.MainScreen",
 	    logDialog.show(this.__myapp, this.desktop.getBounds());
 	},
 
-	_tzCommand : function(app)
-	{
-	    infoDialog.getTzWin(this.__myapp, 0);
-	},
-
 	_joinForumCommand : function(app)
 	{
 	    infoDialog.getJoinNewChannelWin(this.__myapp, 0);
