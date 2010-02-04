@@ -112,6 +112,7 @@ qx.Class.define("client.MainScreen",
 	seq : 0,
 	windows : [],
 	desktop : 0,
+	contactsButton : 0,
 
 	sendresult : function(result, exc) 
 	{
@@ -586,12 +587,10 @@ qx.Class.define("client.MainScreen",
 
 	    var friendContainer = new qx.ui.container.Composite(
 		new qx.ui.layout.VBox());
-	    friendContainer.set({ backgroundColor: "#063676"}); // was #F2F5FE
+	    friendContainer.set({ backgroundColor: "#F2F5FE"}); 
 	    
 	    var friendsLabel = new qx.ui.basic.Label("<b>Contact list:</b>");
             friendsLabel.setRich(true);
-	    friendsLabel.setMinWidth(200);	
-	    friendsLabel.setWidth(200);	
 	    friendsLabel.setPaddingTop(10);
 	    friendsLabel.setPaddingBottom(10);
 	    friendsLabel.setPaddingLeft(10);
@@ -616,6 +615,7 @@ qx.Class.define("client.MainScreen",
 
 	    var button1 = new qx.ui.form.Button("Add");
 	    button1.setMarginBottom(8);
+	    button1.setMarginRight(8);
 	    addContainer.add(button1);
 
 	    friendContainer.add(addContainer);
@@ -639,31 +639,29 @@ qx.Class.define("client.MainScreen",
 	    toolbar.add(this.__part2);
 	    toolbar.addSpacer();
 
+	    //popup
+	    var contactsPopup = new qx.ui.popup.Popup(new qx.ui.layout.HBox(5));
+	    contactsPopup.set({ height : 500, width : 250 });
+	    contactsPopup.add(friendContainer, {flex : 1});
+
 	    if (global_anon == false)
 	    {
 		var contactsButton = new qx.ui.toolbar.CheckBox("Show Contacts");
+		this.contactsButton = contactsButton;
+
 		this.__part3.add(contactsButton);	
     
-		if (global_settings.getShowFriendBar() == 1)
-		{
-		    middleSection.add(friendContainer);
-		    contactsButton.setValue(true);
-		}
-		else
-		{
-		    contactsButton.setValue(false);
-		}
+		contactsButton.setValue(false);
 
 		contactsButton.addListener("changeValue", function (e) {
 		    if (e.getData() == true)
 		    {
-			this.add(friendContainer);
-			global_settings.setShowFriendBar(1)
+			contactsPopup.placeToWidget(contactsButton);
+			contactsPopup.show();
 		    }
 		    else
 		    {
-			this.remove(friendContainer);
-			global_settings.setShowFriendBar(0)
+			contactsPopup.hide();
 		    } 
 		}, middleSection);
 		
@@ -753,7 +751,8 @@ qx.Class.define("client.MainScreen",
         printIdleTimes : function(parentFList)
         {
             var children = parentFList.getChildren();
-	    
+	    var online = 0;
+
             for (var i=1; i < children.length; i = i + 3)
             {
 	        var idle = children[i].idleTime;
@@ -762,6 +761,7 @@ qx.Class.define("client.MainScreen",
 		if (idle == 0)
                 {
 		    result = "<font color=\"green\">ONLINE<font>";
+		    online++;
                 }
                 else if (idle < 60)
                 {			
@@ -798,6 +798,7 @@ qx.Class.define("client.MainScreen",
 		children[i].setValue(result);
             }	
 
+	    this.contactsButton.setLabel("Show contacts (Online: " + online + ")"); 
         },
 
 	checkLimits : function(e)

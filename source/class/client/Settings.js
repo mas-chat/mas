@@ -25,10 +25,6 @@ qx.Class.define("client.Settings",
 
 	    switch(key)
 	    {
-	    case "showFriendBar":
-		this.setShowFriendBar(value);
-		break;
-
 	    case "firstTime":
 		this.setFirstTime(value);
 		break;
@@ -51,7 +47,6 @@ qx.Class.define("client.Settings",
     properties :
     {
 	firstTime : { init : 1, apply : "_applyFirstTime" },
-	showFriendBar : { init : 1, apply : "_applyShowFriendBar" },
 	loggingEnabled : { init : 1, apply : "_applyLoggingEnabled" },
 	sslEnabled : { init : 0, apply : "_applySslEnabled" }
     },
@@ -64,11 +59,6 @@ qx.Class.define("client.Settings",
 	_applyFirstTime : function(value) 
 	{
 	    this.send("firstTime", value);
-	},
-
-	_applyShowFriendBar : function(value) 
-	{
-	    this.send("showFriendBar", value);
 	},
 
 	_applyLoggingEnabled : function(value)
