@@ -568,12 +568,6 @@ qx.Class.define("client.MainScreen",
 	    var middleSection = new qx.ui.container.Composite(
 		new qx.ui.layout.HBox(3));
 
-	    //ads
-	    var iframe = new qx.ui.embed.Iframe(
-		"http://meetandspeak.com/iframe_part_from_google.html");
-	    iframe.set({ alignY:"middle", height: 605, width: 125, decorator : null });
-	    middleSection.add(iframe);
-
 	    //desktop
 	    var middleContainer = new qx.ui.window.Desktop(windowManager);
 
@@ -584,6 +578,12 @@ qx.Class.define("client.MainScreen",
 	    middleContainer.set({decorator: "background2",
 				 backgroundColor: "#DFE5E5"});
 	    middleSection.add(middleContainer, {flex:1});
+
+	    //ads
+	    var iframe = new qx.ui.embed.Iframe(
+		"http://meetandspeak.com/iframe_part_from_google.html");
+	    iframe.set({ alignY:"middle", height: 605, width: 125, decorator : null });
+	    middleSection.add(iframe);
 
 	    var friendContainer = new qx.ui.container.Composite(
 		new qx.ui.layout.VBox());
@@ -641,7 +641,7 @@ qx.Class.define("client.MainScreen",
 
 	    //popup
 	    var contactsPopup = new qx.ui.popup.Popup(new qx.ui.layout.HBox(5));
-	    contactsPopup.set({ height : 500, width : 250 });
+	    contactsPopup.set({ autoHide : false, height : 500, width : 250 });
 	    contactsPopup.add(friendContainer, {flex : 1});
 
 	    if (global_anon == false)

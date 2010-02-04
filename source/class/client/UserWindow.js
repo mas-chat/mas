@@ -486,6 +486,7 @@ qx.Class.define("client.UserWindow",
 	{
 	    this.window.addListener('resize', this.handleResize, this);
 	    this.window.addListener('move', this.handleMove, this);
+	    this.window.addListener('minimize', this.handleMinimize, this);
 
 	    this.window.addListener('click', function(e) {
 
