@@ -375,13 +375,12 @@ qx.Class.define("client.UserWindow",
 	{
 	    var name = this.getName();
 
-	    if (this.__type == 0)
+	    if (this.__type == 0 && this.__nw_id == 0)
 	    {
 		name = name.substr(1);
+		name = name.substr(0, 1).toUpperCase() + name.substr(1);
 	    }
-
-	    name = name.substr(0, 1).toUpperCase() + name.substr(1);
-
+	    
 	    this.taskbarButton.setLabel("<font color=\"red\">" + name +
 					"</font>");
 	},
@@ -399,7 +398,7 @@ qx.Class.define("client.UserWindow",
 	    if (this.__nw_id == 0)
 	    {
 		this.taskbarButton.setLabel("<font color=\"blue\">" + name +
-					    "</font>");
+					    "</font>");	    
 	    }
 	    else
 	    {
@@ -420,6 +419,25 @@ qx.Class.define("client.UserWindow",
 		this.__srpc.callAsync(this.sendresult,
 				      "MOVE", global_ids + this.winid + " " +
 				      x + " " + y);
+	    }
+	},
+
+	handleMinimize : function(e)
+	{
+	    if (MainScreenObj.initdone == 1)
+	    {
+		this.__srpc.callAsync(this.sendresult,
+				      "HIDE", global_ids + this.winid);	    
+	    }
+	},
+
+
+	handleRestore : function(e)
+	{
+	    if (MainScreenObj.initdone == 1)
+	    {
+		this.__srpc.callAsync(this.sendresult,
+				      "REST", global_ids + this.winid);	    
 	    }
 	},
 
@@ -487,6 +505,7 @@ qx.Class.define("client.UserWindow",
 	    this.window.addListener('resize', this.handleResize, this);
 	    this.window.addListener('move', this.handleMove, this);
 	    this.window.addListener('minimize', this.handleMinimize, this);
+	    this.window.addListener('appear', this.handleRestore, this);
 
 	    this.window.addListener('click', function(e) {
 
@@ -525,6 +544,11 @@ qx.Class.define("client.UserWindow",
 	show : function()
 	{
 	    this.window.open();
+    	},
+
+	hide : function()
+	{
+	    this.window.minimize();
     	},
 
 	getName : function()

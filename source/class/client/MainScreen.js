@@ -435,6 +435,8 @@ qx.Class.define("client.MainScreen",
 	    var sound = parseInt(options.shift());
 	    var titlealert = parseInt(options.shift());
 	    var usermode = parseInt(options.shift());
+	    var visible = parseInt(options.shift());
+	    var new_msgs = parseInt(options.shift());
 	    var pwset = parseInt(options.shift());
 
 	    var password = "";
@@ -498,10 +500,16 @@ qx.Class.define("client.MainScreen",
 		newWindow.winid = window_id;
 		this.windows[window_id] = newWindow;
 
-		this.addWindowButton(window_id);
-			
-		//Keep these two last
+		this.addWindowButton(window_id, new_msgs);
+	
 		newWindow.show();
+		
+		//Keep these two last
+		if (visible == 0)
+		{
+		    //Qooxdoo bug propably, therefore first show and then hide.
+		    newWindow.hide();
+		}
 
 		newWindow.addHandlers();
 
@@ -623,7 +631,8 @@ qx.Class.define("client.MainScreen",
 	    button1.addListener("execute", function (e) {
 		this.__rrpc.callAsync(
 		    this.sendresult,
-		    "ADDF", global_ids + this.__input1.getValue());		
+		    "ADDF", global_ids + this.__input1.getValue());
+		this.__input1.setValue("");
 	    }, this);
 
 	    this.rootContainer.add(middleSection, {flex:1});		
@@ -675,7 +684,7 @@ qx.Class.define("client.MainScreen",
 	    this.rootContainer.add(toolbar);
 	    this.__myapp.add(this.rootContainer, {edge : 10});	    
 
-	    this.__windowGroup = new qx.ui.form.RadioGroup();
+	    this.__windowGroup = new client.RadioManager();
 	    this.__windowGroup.addListener("changeSelection",
 					   this.switchToWindow, this);
 
@@ -704,7 +713,7 @@ qx.Class.define("client.MainScreen",
 		    friend3.rrpc = this.__rrpc;
 		    
 		    friend3.addListener("click", function (e) {
-			this.rrpc.callAsync(
+			this.__rrpc.callAsync(
 			    this.sendresult,
 			    "STARTCHAT", global_ids + "Evergreen " + this.nickname);
 		    }, friend3);
@@ -882,7 +891,7 @@ qx.Class.define("client.MainScreen",
 	    }
 	},
 
-	addWindowButton : function(winid)
+	addWindowButton : function(winid, new_msgs)
 	{
 	    if (this.windows[winid])
 	    {
@@ -893,7 +902,15 @@ qx.Class.define("client.MainScreen",
 		// Link from window object to its taskbarbutton.
 		this.windows[winid].taskbarButton = item;
 		this.windows[winid].taskbarControl = this.__windowGroup;
-		this.windows[winid].setNormal();
+		
+		if (new_msgs == 1)
+		{
+		    this.windows[winid].setRed();
+		}
+		else
+		{
+		    this.windows[winid].setNormal();
+		}
 	    }
 
 	    this.activewin = winid;
@@ -1084,8 +1101,10 @@ qx.Class.define("client.MainScreen",
 
 	_logoutCommand : function()
 	{
-	    qx.bom.Cookie.del("ProjectEvergreen");
-	    window.location.reload(true);
+	    this.__rrpc.callAsync(function() {
+		qx.bom.Cookie.del("ProjectEvergreen");
+		window.location.reload(true);
+	    }, "LOGOUT", global_ids);
 	},
 
 	_manualCommand : function()
