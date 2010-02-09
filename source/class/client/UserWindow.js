@@ -319,6 +319,7 @@ qx.Class.define("client.UserWindow",
 	nameslist : 0,
 	closeok : 0,
 	scrollLock : false,
+	isRed : false,
 
 	updateValues : function(topic, nw, name, type, sound, titlealert, nw_id, usermode, password)
 	{
@@ -383,6 +384,23 @@ qx.Class.define("client.UserWindow",
 	    
 	    this.taskbarButton.setLabel("<font color=\"red\">" + name +
 					"</font>");
+	    this.isRed = true;
+	},
+
+	setGreen : function()
+	{
+	    //copy paste function
+	    var name = this.getName();
+
+	    if (this.__type == 0 && this.__nw_id == 0)
+	    {
+		name = name.substr(1);
+		name = name.substr(0, 1).toUpperCase() + name.substr(1);
+	    }
+	    
+	    this.taskbarButton.setLabel("<font color=\"green\">" + name +
+					"</font>");
+	    this.isRed = false;
 	},
 
 	setNormal : function()
@@ -405,6 +423,8 @@ qx.Class.define("client.UserWindow",
 		this.taskbarButton.setLabel("<font color=\"#0033FF\">" + name +
 					    "</font>");
 	    }
+
+	    this.isRed = false;
 	},
 
 	handleMove : function(e)
@@ -620,9 +640,9 @@ qx.Class.define("client.UserWindow",
 
 		var amount = this.nameslist.length;
 
-		if (this.nameslist.length > 10)
+		if (this.nameslist.length > 3)
 		{
-		    amount = 10;
+		    amount = 3;
 		}
 
 		for (var i=0; i < amount; i++)
@@ -641,9 +661,9 @@ qx.Class.define("client.UserWindow",
 		    this.__list.add(tmp);
 		}
 
-		if (this.nameslist.length > 10)
+		if (this.nameslist.length > 3)
 		{
-		    this.nameslist.splice(0, 10);
+		    this.nameslist.splice(0, 3);
 
 		    qx.event.Timer.once(function(e){
 			this.addnames(false);

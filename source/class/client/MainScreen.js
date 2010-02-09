@@ -104,7 +104,6 @@ qx.Class.define("client.MainScreen",
 	__ack : 0,
 	__tt : 0,
 	__blur : 0,
-	__newmsgs : 0,
 	activewin : 0,
 	__msgvisible : 0,
 	initdone : 0,
@@ -244,7 +243,10 @@ qx.Class.define("client.MainScreen",
 			break;
 
 		    case "ADDTEXT":
-			var usertext = param.slice(pos+1);
+			var options = param.split(" ");
+			var window_id = parseInt(options.shift());
+			var type = parseInt(options.shift());
+			var usertext = options.join(" ");
 
 			usertext = this.adjustTime(usertext);
 			this.windows[window_id].addline(usertext);
@@ -254,16 +256,23 @@ qx.Class.define("client.MainScreen",
 			    this.player_start();
 			}
 
-			if (this.__blur == 1 && this.windows[window_id].titlealert == 1 && this.__topictimer.getEnabled() == false)
+			if (this.__blur == 1 && this.windows[window_id].titlealert == 1 &&
+			    this.__topictimer.getEnabled() == false)
 			{
 			    this.__topictimer.start();
 			} 
 
 			if (this.activewin.winid != window_id && this.initdone == 1)
 			{
-			    this.windows[window_id].setRed();
+			    if (type == 0 && this.windows[window_id].isRed == false)
+			    {
+				this.windows[window_id].setGreen();
+			    }
+			    else
+			    {
+				this.windows[window_id].setRed();
+			    }
 			}
-
 			break;
 
 		    case "REQF":
@@ -593,6 +602,8 @@ qx.Class.define("client.MainScreen",
 	    iframe.set({ alignY:"middle", height: 605, width: 125, decorator : null });
 	    middleSection.add(iframe);
 
+	    var friendScroll = new qx.ui.container.Scroll();
+
 	    var friendContainer = new qx.ui.container.Composite(
 		new qx.ui.layout.VBox());
 	    friendContainer.set({ backgroundColor: "#F2F5FE"}); 
@@ -651,7 +662,14 @@ qx.Class.define("client.MainScreen",
 	    //popup
 	    var contactsPopup = new qx.ui.popup.Popup(new qx.ui.layout.HBox(5));
 	    contactsPopup.set({ autoHide : false, height : 500, width : 250 });
-	    contactsPopup.add(friendContainer, {flex : 1});
+
+	    friendScroll.add(friendContainer);
+	    friendScroll.set({
+		scrollbarX : "auto",
+		scrollbarY : "auto"
+	    });
+
+	    contactsPopup.add(friendScroll, {flex : 1});
 
 	    if (global_anon == false)
 	    {
@@ -807,7 +825,14 @@ qx.Class.define("client.MainScreen",
 		children[i].setValue(result);
             }	
 
-	    this.contactsButton.setLabel("Show contacts (Online: " + online + ")"); 
+	    var onlineText = "";
+
+	    if (online > 0)
+	    {
+		onlineText = " (Online: " + online + ")";
+	    }
+
+	    this.contactsButton.setLabel("Show contacts" + onlineText); 
         },
 
 	checkLimits : function(e)
@@ -904,6 +929,10 @@ qx.Class.define("client.MainScreen",
 		this.windows[winid].taskbarControl = this.__windowGroup;
 		
 		if (new_msgs == 1)
+		{
+		    this.windows[winid].setGreen();
+		}
+		else if (new_msgs == 2)
 		{
 		    this.windows[winid].setRed();
 		}
