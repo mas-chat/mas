@@ -583,7 +583,7 @@ qx.Class.define("client.MainScreen",
 	    this.manager = windowManager;
 
 	    var middleSection = new qx.ui.container.Composite(
-		new qx.ui.layout.HBox(3));
+		new qx.ui.layout.HBox(0));
 
 	    //desktop
 	    var middleContainer = new qx.ui.window.Desktop(windowManager);
@@ -597,8 +597,7 @@ qx.Class.define("client.MainScreen",
 	    middleSection.add(middleContainer, {flex:1});
 
 	    //ads
-	    var iframe = new qx.ui.embed.Iframe(
-		"http://meetandspeak.com/iframe_part_from_google.html");
+	    var iframe = new qx.ui.embed.Iframe("/iframe_part_from_google.html");
 	    iframe.set({ alignY:"middle", height: 605, width: 125, decorator : null });
 	    middleSection.add(iframe);
 
