@@ -21,7 +21,7 @@ qx.Theme.define("client.theme.Decoration",
 	  style :
 	  {
               backgroundImage  : "/i/bg.jpg",
-              backgroundRepeat : "scale"
+              backgroundRepeat : "repeat"
 	  }
       }
   }
