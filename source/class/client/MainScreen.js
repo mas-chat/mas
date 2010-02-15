@@ -734,7 +734,7 @@ qx.Class.define("client.MainScreen",
 			this.rrpc.callAsync(
 			    this.sendresult,
 			    "STARTCHAT", global_ids + "Evergreen " + this.nickname);
-		    }, this);
+		    }, friend3);
 		    
 		    friend3.addListener("mouseover", function (e) {
 			this.setValue("<font color=\"green\"><b>|M|<b></font>");
