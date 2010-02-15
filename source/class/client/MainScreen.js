@@ -236,7 +236,7 @@ qx.Class.define("client.MainScreen",
 						   {
 						       that.__rrpc.callAsync(
 							   qx.lang.Function.bind(that.sendresult, that), "JOIN",
-							   global_ids + data[0] + " Evergreen " + data[1]);
+							   global_ids + data[0] + " MeetAndSpeak " + data[1]);
 						   }, "NO");
 			}
 			
@@ -729,11 +729,12 @@ qx.Class.define("client.MainScreen",
 		    friend3.setValue("<font color=\"green\">|M|</font>");
 		    friend3.nickname = columns[3];
 		    friend3.rrpc = this.__rrpc;
+		    friend3.result = this.sendresult;
 		    
 		    friend3.addListener("click", function (e) {
 			this.rrpc.callAsync(
-			    this.sendresult,
-			    "STARTCHAT", global_ids + "Evergreen " + this.nickname);
+			    this.result,
+			    "STARTCHAT", global_ids + "MeetAndSpeak " + this.nickname);
 		    }, friend3);
 		    
 		    friend3.addListener("mouseover", function (e) {
