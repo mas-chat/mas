@@ -578,9 +578,7 @@ qx.Class.define("client.MainScreen",
 	    this.rootContainer = new qx.ui.container.Composite(
 		new qx.ui.layout.VBox(0));
 
-	    this.rootContainer.set({ backgroundColor: "#616161", padding:10});
-
-
+	    this.rootContainer.set({ backgroundColor: "#717172", padding:10});
 	    this.rootContainer.add(this.getMenuBar());
 	    
 	    /* middle */
@@ -603,7 +601,7 @@ qx.Class.define("client.MainScreen",
 
 	    //ads
 	    var iframe = new qx.ui.embed.Iframe("/iframe_part_from_google.html");
-	    iframe.set({ alignY:"middle", height: 605, width: 125, decorator : null });
+	    iframe.set({ alignY:"middle", height: 605, width: 120, decorator : null });
 	    middleSection.add(iframe);
 
 	    var friendScroll = new qx.ui.container.Scroll();
