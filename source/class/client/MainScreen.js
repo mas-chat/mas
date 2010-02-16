@@ -331,17 +331,18 @@ qx.Class.define("client.MainScreen",
 			break;
 
 		    case "NAMES":
-		    	var usertext = param.slice(pos+1);
-			this.windows[window_id].nameslist = usertext.split(" ");
+			// "clever" sort hack
+		    	var usertext = param.slice(pos+1).replace(/\@/g, "*");
+			this.windows[window_id].nameslist = usertext.split(" ").sort();
 			this.windows[window_id].addnames(true);
 			break;
 
 		    case "ADDNAME":
 			var options = param.split(" ");
 		    	var windowid = parseInt(options.shift());
-		    	var index = parseInt(options.shift());
+		    	options.shift(); // obsolete parameter
 		    	var nick = options.shift();
-			this.windows[windowid].addname(index, nick);
+			this.windows[windowid].addname(nick);
 			break;
 
 		    case "DELNAME":
@@ -575,7 +576,11 @@ qx.Class.define("client.MainScreen",
 	{
 	    /* Root widget */
 	    this.rootContainer = new qx.ui.container.Composite(
-		new qx.ui.layout.VBox(1));
+		new qx.ui.layout.VBox(0));
+
+	    this.rootContainer.set({ backgroundColor: "#616161", padding:10});
+
+
 	    this.rootContainer.add(this.getMenuBar());
 	    
 	    /* middle */
@@ -699,7 +704,7 @@ qx.Class.define("client.MainScreen",
 	    }
 
 	    this.rootContainer.add(toolbar);
-	    this.__myapp.add(this.rootContainer, {edge : 10});	    
+	    this.__myapp.add(this.rootContainer, {flex : 1, edge: 0}); //, {padding : 10});	    
 
 	    this.__windowGroup = new client.RadioManager();
 	    this.__windowGroup.addListener("changeSelection",

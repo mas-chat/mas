@@ -316,7 +316,7 @@ qx.Class.define("client.UserWindow",
 	sound : 0,
 	configListBan : 0,
 	configListOper : 0,
-	nameslist : 0,
+	nameslist : [],
 	closeok : 0,
 	scrollLock : false,
 	isRed : false,
@@ -648,23 +648,29 @@ qx.Class.define("client.UserWindow",
 		for (var i=0; i < amount; i++)
 		{
 		    var display = this.nameslist[i];
+		    var realnick;
 
-		    if(display.charAt(0) == "@")
+		    if(display.charAt(0) == "*")
 		    {
 			display = "<b>" + display.substr(1) + "</b>"; 
+			realnick = "@" + this.nameslist[i].substr(1);
+		    }
+		    else
+		    {
+			realnick = this.nameslist[i];
 		    }
 
 		    var tmp = new qx.ui.form.ListItem(display).set(
 			{ rich : true });
-		    tmp.realnick = this.nameslist[i];
+		    tmp.realnick = realnick;
 
 		    this.__list.add(tmp);
 		}
 
-		if (this.nameslist.length > 3)
-		{
-		    this.nameslist.splice(0, 3);
+		this.nameslist.splice(0, amount);
 
+		if (this.nameslist.length > 0)
+		{
 		    qx.event.Timer.once(function(e){
 			this.addnames(false);
 		    }, this, 1000); 
@@ -672,12 +678,41 @@ qx.Class.define("client.UserWindow",
 	    }
 	},
 
-	addname : function(index, nick)
+	addname : function(nick)
 	{
+	    var insert = -1;
+
 	    if (this.__type == 0)
 	    {
-		if (index <= this.__list.getChildren().length)
+		var childs = this.__list.getChildren();
+
+		for (var i=0; i < childs.length; i++)
 		{
+		    var listnick = childs[i].realnick;
+		    var newnick = nick;
+
+		    //trick to sort @ before +
+		    if (listnick.charAt(0) == "@")
+			listnick = "*" + listnick.substr(1);
+
+		    if (newnick.charAt(0) == "@")
+			newnick = "*" + newnick.substr(1);
+
+		    if (newnick < listnick)
+		    {
+			insert = i;
+			break;
+		    }
+		}
+
+		if (insert == -1 && this.nameslist.length == 0)
+		{
+		    insert = childs.length;
+		}
+
+		if (insert != -1)
+		{
+		    //place found
 		    var display = nick;
 
 		    if(nick.charAt(0) == "@")
@@ -688,13 +723,27 @@ qx.Class.define("client.UserWindow",
 		    var tmp = new qx.ui.form.ListItem(display).set(
 			{ rich : true });
 		    tmp.realnick = nick;
-		    
-		    this.__list.addAt(tmp, index);
+
+		    this.__list.addAt(tmp, insert);
 		}
 		else
 		{
 		    //List construction is still ongoing
-		    this.nameslist.splice(index - this.__list.getChildren().length, 0, nick);
+		    for (var i=0; i < this.nameslist.length; i++)
+		    {
+			if (nick < this.nameslist[i])
+			{
+			    insert = i;
+			    break;
+			}
+		    }
+		    
+		    if (insert == -1)
+		    {
+			insert = this.nameslist.length;
+		    }
+
+		    this.nameslist.splice(insert, 0, nick);
 		}
 	    }
 	},
