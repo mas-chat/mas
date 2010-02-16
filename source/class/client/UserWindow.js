@@ -72,9 +72,9 @@ qx.Class.define("client.UserWindow",
 
 	var channelText = "Please wait...<br>";
 	
-	this.__atom = new qx.ui.basic.Atom(channelText);
+	this.__atom = new qx.ui.basic.Label(channelText);
 	this.__atom.setRich(true);
-	this.__atom.set({ backgroundColor: "#F2F5FE"});
+	this.__atom.set({ backgroundColor: "#F2F5FE", selectable: true, nativeContextMenu : true});
 
 	this.__scroll.add(this.__atom);		       
 	box1.add(this.__scroll, {row: 0, column: 0, flex: 1});
@@ -533,7 +533,7 @@ qx.Class.define("client.UserWindow",
 		{
 		    this.taskbarControl.setSelection([this.taskbarButton]);
 		}
-		this.activatewin();
+		//this.activatewin();
 		MainScreenObj.activewin = this.winid;
 	    }, this);
 
@@ -589,7 +589,7 @@ qx.Class.define("client.UserWindow",
 		this.__channelText = this.__channelText.substr(pos + 4);
 	    }
 
-	    this.__atom.setLabel(this.__channelText);
+	    this.__atom.setValue(this.__channelText);
 
 	    if (this.scrollLock == false)
 	    {
