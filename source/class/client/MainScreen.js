@@ -96,6 +96,7 @@ qx.Class.define("client.MainScreen",
 	__part2 : 0,
 	__part3 : 0,
 	__windowGroup : 0,
+	__error : 0,
 	manager : 0,
 	__myapp : 0,
         __timer : 0,
@@ -152,8 +153,10 @@ qx.Class.define("client.MainScreen",
 	    else 
 	    {
 		infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
-		//TODO: Add delay ~2s here
-		window.location.reload(true);
+
+		qx.event.Timer.once(function(e){
+		    window.location.reload(true);
+		}, this, 2000);
 	    }
 	},
 
@@ -165,6 +168,8 @@ qx.Class.define("client.MainScreen",
 
 	    if (exc == null) 
 	    {
+		this.__error = 0;
+
 		var initialpos = result.search(/ /);
 		var ack = result.slice(0, initialpos);
 		var allcommands = result.slice(initialpos+1);
@@ -423,11 +428,24 @@ qx.Class.define("client.MainScreen",
 		//Wait a little and try again. This is to make sure
 		//that we don't loop and consume all CPU cycles if
 		//there is no connection.
-		qx.event.Timer.once(function(e){
-		    this.__rrpc.callAsync(
-			qx.lang.Function.bind(this.readresult, this),
-			"HELLO", global_ids + this.seq);
-		}, this, 200); 
+		this.__error++;
+
+		if (this.__error > 7)
+		{
+		    infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
+
+		    qx.event.Timer.once(function(e){
+			window.location.reload(true);
+		    }, this, 2000);
+		}
+		else
+		{
+		    qx.event.Timer.once(function(e){
+			this.__rrpc.callAsync(
+			    qx.lang.Function.bind(this.readresult, this),
+			    "HELLO", global_ids + this.seq);
+		    }, this, 2000); 
+		}
 	    }
 	},
 
