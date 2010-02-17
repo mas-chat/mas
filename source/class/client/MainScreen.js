@@ -27,15 +27,19 @@ qx.Class.define("client.MainScreen",
 
 	this.__topictimer.addListener(
 	    "interval", function(e) {
-		if (this.__topicstate == 0)
+		//there seems to be bug in qooxdoo, one event can come after the timer is stopped
+		if (this.__topictimeractive == true)
 		{
-		    document.title = "[NEW] MeetAndSpeak";
-		    this.__topicstate = 1;
-		}
-		else
-		{
-		    document.title = "[MSG] MeetAndSpeak";
-		    this.__topicstate = 0;
+		    if (this.__topicstate == 0)
+		    {
+			document.title = "[NEW] MeetAndSpeak";
+			this.__topicstate = 1;
+		    }
+		    else
+		    {
+			document.title = "[MSG] MeetAndSpeak";
+			this.__topicstate = 0;
+		    }
 		}
 	    }, this);
 
@@ -50,6 +54,7 @@ qx.Class.define("client.MainScreen",
 	qx.bom.Element.addListener(window, "focus", function(e) { 
 	    document.title = "MeetAndSpeak";
 	    this.__blur = 0;
+	    this.__topictimeractive = false;
 	    this.__topictimer.stop();
 
 	    if (this.windows[this.activewin])
@@ -105,6 +110,7 @@ qx.Class.define("client.MainScreen",
 	__ack : 0,
 	__tt : 0,
 	__blur : 0,
+	__topictimeractive : 0,
 	activewin : 0,
 	__msgvisible : 0,
 	initdone : 0,
@@ -265,6 +271,7 @@ qx.Class.define("client.MainScreen",
 			if (this.__blur == 1 && this.windows[window_id].titlealert == 1 &&
 			    this.__topictimer.getEnabled() == false)
 			{
+			    this.__topictimeractive = true;
 			    this.__topictimer.start();
 			} 
 
@@ -431,25 +438,24 @@ qx.Class.define("client.MainScreen",
 		//there is no connection.
 		this.__error++;
 
-		if (this.__error > 15)
-		{
-		    //TODO: Does not work, long idle time, no errors and we are here
-
+		//TODO: Does not work, long idle time, no errors and we are here
+		//if (this.__error > 15)
+		//{
 		    //time to give up
 		    //infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
 
 		    //qx.event.Timer.once(function(e){
 		    //	window.location.reload(true);
 		    //   }, this, 2000);
-		}
-		else
-		{
+		//}
+		//else
+		//{
 		    qx.event.Timer.once(function(e){
 			this.__rrpc.callAsync(
 			    qx.lang.Function.bind(this.readresult, this),
 			    "HELLO", global_ids + this.seq);
 		    }, this, 2000); 
-		}
+		//}
 	    }
 	},
 
