@@ -188,10 +188,11 @@ qx.Class.define("client.MainScreen",
 			    this.show();
 			}
 
-			infoDialog.showInfoWin(
-			    "Lost connection to server.<p>Trying to recover...<p>" +
-				"(got: " + ack + ", expected: " + this.__ack);
-			window.location.reload(true);
+			infoDialog.showInfoWin("Connection error.<p>Trying to recover...");
+
+			qx.event.Timer.once(function(e){
+			    window.location.reload(true);
+			}, this, 2000);
 		    }
 		}
 
@@ -430,13 +431,16 @@ qx.Class.define("client.MainScreen",
 		//there is no connection.
 		this.__error++;
 
-		if (this.__error > 7)
+		if (this.__error > 15)
 		{
-		    infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
+		    //TODO: Does not work, long idle time, no errors and we are here
 
-		    qx.event.Timer.once(function(e){
-			window.location.reload(true);
-		    }, this, 2000);
+		    //time to give up
+		    //infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
+
+		    //qx.event.Timer.once(function(e){
+		    //	window.location.reload(true);
+		    //   }, this, 2000);
 		}
 		else
 		{
