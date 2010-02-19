@@ -52,10 +52,10 @@ qx.Class.define("client.MainScreen",
 	    global_ids + this.seq + " " + global_offset);
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
-	    document.title = "MeetAndSpeak";
 	    this.__blur = 0;
 	    this.__topictimeractive = false;
 	    this.__topictimer.stop();
+	    document.title = "MeetAndSpeak";
 
 	    if (this.windows[this.activewin])
 	    {
