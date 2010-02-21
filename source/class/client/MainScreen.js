@@ -680,7 +680,7 @@ qx.Class.define("client.MainScreen",
 	    
 	    // create the toolbar
 	    toolbar = new qx.ui.toolbar.ToolBar();
-	    toolbar.set({ maxHeight : 40 });
+	    toolbar.set({ maxHeight : 40, spacing : 25 });
 	    
 	    // create and add Part 1 to the toolbar
 	    this.__part2 = new qx.ui.toolbar.Part();
@@ -703,7 +703,8 @@ qx.Class.define("client.MainScreen",
 
 	    if (global_anon == false)
 	    {
-		var contactsButton = new qx.ui.toolbar.CheckBox("Show Contacts");
+		var contactsButton = new qx.ui.toolbar.CheckBox("<font color=\"#cccccc\">Show Contacts</font>");
+		contactsButton.setRich(true);
 		this.contactsButton = contactsButton;
 
 		this.__part3.add(contactsButton);	
@@ -863,7 +864,7 @@ qx.Class.define("client.MainScreen",
 		onlineText = " (Online: " + online + ")";
 	    }
 
-	    this.contactsButton.setLabel("Show contacts" + onlineText); 
+	    this.contactsButton.setLabel("<font color=\"#cccccc\">Show contacts" + onlineText + "</font>"); 
         },
 
 	checkLimits : function(e)
@@ -1010,6 +1011,7 @@ qx.Class.define("client.MainScreen",
 
 	    var menubar = new qx.ui.menubar.MenuBar;
 	    menubar.setAllowGrowX(true);
+	    menubar.set({decorator: "menu2", textColor : "#cccccc"});
 
 	    frame.add(menubar);
 

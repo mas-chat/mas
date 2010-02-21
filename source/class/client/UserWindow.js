@@ -382,7 +382,7 @@ qx.Class.define("client.UserWindow",
 		name = name.substr(0, 1).toUpperCase() + name.substr(1);
 	    }
 	    
-	    this.taskbarButton.setLabel("<font color=\"red\">" + name +
+	    this.taskbarButton.setLabel("<font color=\"ffaaaa\">" + name +
 					"</font>");
 	    this.isRed = true;
 	},
@@ -398,7 +398,7 @@ qx.Class.define("client.UserWindow",
 		name = name.substr(0, 1).toUpperCase() + name.substr(1);
 	    }
 	    
-	    this.taskbarButton.setLabel("<font color=\"green\">" + name +
+	    this.taskbarButton.setLabel("<font color=\"#aaffaa\">" + name +
 					"</font>");
 	    this.isRed = false;
 	},
@@ -413,16 +413,8 @@ qx.Class.define("client.UserWindow",
 		name = name.substr(0, 1).toUpperCase() + name.substr(1);
 	    }
 
-	    if (this.__nw_id == 0)
-	    {
-		this.taskbarButton.setLabel("<font color=\"blue\">" + name +
-					    "</font>");	    
-	    }
-	    else
-	    {
-		this.taskbarButton.setLabel("<font color=\"#0033FF\">" + name +
-					    "</font>");
-	    }
+	    this.taskbarButton.setLabel("<font color=\"#cccccc\">" + name +
+					"</font>");
 
 	    this.isRed = false;
 	},
