@@ -382,7 +382,7 @@ qx.Class.define("client.UserWindow",
 		name = name.substr(0, 1).toUpperCase() + name.substr(1);
 	    }
 	    
-	    this.taskbarButton.setLabel("<font color=\"ffaaaa\">" + name +
+	    this.taskbarButton.setLabel("<font color=\"#ffaaaa\">" + name +
 					"</font>");
 	    this.isRed = true;
 	},
