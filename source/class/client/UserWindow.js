@@ -690,7 +690,7 @@ qx.Class.define("client.UserWindow",
 		    if (newnick.charAt(0) == "@")
 			newnick = "*" + newnick.substr(1);
 
-		    if (newnick < listnick)
+		    if (newnick.toLowerCase() < listnick.toLowerCase())
 		    {
 			insert = i;
 			break;
@@ -723,7 +723,7 @@ qx.Class.define("client.UserWindow",
 		    //List construction is still ongoing
 		    for (var i=0; i < this.nameslist.length; i++)
 		    {
-			if (nick < this.nameslist[i])
+			if (nick.toLowerCase() < this.nameslist[i].toLowerCase())
 			{
 			    insert = i;
 			    break;

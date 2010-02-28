@@ -41,6 +41,10 @@ qx.Class.define("client.MainScreen",
 			this.__topicstate = 0;
 		    }
 		}
+		else
+		{
+		    document.title = "MeetAndSpeak";
+		}
 	    }, this);
 
 	this.__tt = new qx.ui.tooltip.ToolTip("Send Message");
@@ -54,13 +58,17 @@ qx.Class.define("client.MainScreen",
 	qx.bom.Element.addListener(window, "focus", function(e) { 
 	    this.__blur = 0;
 	    this.__topictimeractive = false;
-	    this.__topictimer.stop();
-	    document.title = "MeetAndSpeak";
+	    if (this.__topictimeractive == true)
+	    {
+		this.__topictimer.stop();
+	    }
 
 	    if (this.windows[this.activewin])
 	    {
 		this.windows[this.activewin].activatewin();
 	    }
+
+	    document.title = "MeetAndSpeak";
 	}, this);
 
 	qx.bom.Element.addListener(window, "blur", function(e) { 
