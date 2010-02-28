@@ -499,7 +499,7 @@ qx.Class.define("client.MainScreen",
 		var newWindow = 
 		    new client.UserWindow(this.desktop,
 					  topic, nw, name, type, sound, titlealert,
-					  nw_id, usermode, password);
+					  nw_id, usermode, password, new_msgs);
 		
 		if (x < 0)
 		{
@@ -976,7 +976,7 @@ qx.Class.define("client.MainScreen",
 		{
 		    this.windows[winid].setRed();
 		}
-		else
+		else if (new_msgs == 0)
 		{
 		    this.windows[winid].setNormal();
 		}

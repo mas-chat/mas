@@ -10,7 +10,7 @@ qx.Class.define("client.UserWindow",
     extend : qx.core.Object,
 
     construct : function(desktop, topic, nw, name, type, sound, titlealert,
-			 nw_id, usermode, password)
+			 nw_id, usermode, password, new_msgs)
     {
 	this.base(arguments);
 
@@ -33,6 +33,7 @@ qx.Class.define("client.UserWindow",
 	this.titlealert = titlealert;
 	this.__usermode = usermode;
 	this.__password = password;
+	this.__newmsgsatstart = new_msgs;
 
 	wm1.setModal(false);
 	wm1.setLayout(new qx.ui.layout.VBox(0));
@@ -94,7 +95,7 @@ qx.Class.define("client.UserWindow",
 	    {
 		var input = this.__input1.getValue();
 	    
-		if (input !== "")
+		if (input !== "" && input !== null)
 		{
 		    this.__srpc.callAsync(
 			this.sendresult,
@@ -311,6 +312,7 @@ qx.Class.define("client.UserWindow",
 	__type : 0,
 	__name : 0,
 	__usermode : 0,
+	__newmsgsatstart : 0,
 	taskbarControl : 0,
 	titlealert : 0,
 	sound : 0,
@@ -415,6 +417,13 @@ qx.Class.define("client.UserWindow",
 
 	    this.taskbarButton.setLabel("<font color=\"#cccccc\">" + name +
 					"</font>");
+
+	    if (this.__newmsgsatstart != 0)
+	    {
+		this.__newmsgsatstart = 0;
+		this.__srpc.callAsync(this.sendresult,
+				      "SEEN", global_ids + this.winid);
+	    }
 
 	    this.isRed = false;
 	},
