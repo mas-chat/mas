@@ -135,7 +135,7 @@ qx.Class.define("client.LogDialog",
 	    
 		this.__window.add(infoarea, { flex : 1});
 	    
-		var logtext = new qx.ui.basic.Atom("Logs contain conversations from past ten days.");
+		var logtext = new qx.ui.basic.Atom("Logs contain conversations from past four weeks.");
 		logtext.setMarginRight(15);
 		var logon = new qx.ui.form.RadioButton("Enabled");
 		logon.setMarginRight(10);
