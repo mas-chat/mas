@@ -118,8 +118,10 @@ qx.Class.define("client.MainScreen",
 	__ack : 0,
 	__tt : 0,
 	__blur : 0,
+	__firstrpc : 1,
 	__topictimeractive : 0,
 	activewin : 0,
+	__prevwin : -1,
 	__msgvisible : 0,
 	initdone : 0,
 	rootContainer : 0,
@@ -183,6 +185,7 @@ qx.Class.define("client.MainScreen",
 	    if (exc == null) 
 	    {
 		this.__error = 0;
+		this.__firstrpc = 0;
 
 		var initialpos = result.search(/ /);
 		var ack = result.slice(0, initialpos);
@@ -441,21 +444,28 @@ qx.Class.define("client.MainScreen",
 	    }
 	    else 
 	    {
-		//Wait a little and try again. This is to make sure
-		//that we don't loop and consume all CPU cycles if
-		//there is no connection.
-		this.__error++;
+		if (this.__firstrpc == 1)
+		{
+		    alert("MeetAndSpeak is having some technical problems, sorry!\n\n You can try to reload this page to see if the service\n is back online.\n\n We are trying to fix the situation as quickly as possible.");
+		}
+		else
+		{
 
-		//TODO: Does not work, long idle time, no errors and we are here
-		//if (this.__error > 15)
-		//{
+		    //Wait a little and try again. This is to make sure
+		    //that we don't loop and consume all CPU cycles if
+		    //there is no connection.
+		    this.__error++;
+		    
+		    //TODO: Does not work, long idle time, no errors and we are here
+		    //if (this.__error > 15)
+		    //{
 		    //time to give up
 		    //infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
-
+		    
 		    //qx.event.Timer.once(function(e){
 		    //	window.location.reload(true);
 		    //   }, this, 2000);
-		//}
+		    //}
 		//else
 		//{
 		    qx.event.Timer.once(function(e){
@@ -463,6 +473,7 @@ qx.Class.define("client.MainScreen",
 			    qx.lang.Function.bind(this.readresult, this),
 			    "HELLO", global_ids + this.seq);
 		    }, this, 2000); 
+		}
 		//}
 	    }
 	},
@@ -688,7 +699,7 @@ qx.Class.define("client.MainScreen",
 	    
 	    // create the toolbar
 	    toolbar = new qx.ui.toolbar.ToolBar();
-	    toolbar.set({ maxHeight : 40, spacing : 25 });
+	    toolbar.set({ maxHeight : 40, spacing : 30 });
 	    
 	    // create and add Part 1 to the toolbar
 	    this.__part2 = new qx.ui.toolbar.Part();
@@ -961,13 +972,30 @@ qx.Class.define("client.MainScreen",
 	    if (this.windows[winid])
 	    {
 		var item = new qx.ui.toolbar.RadioButton();
-		this.__part2.add(item);
-		this.__windowGroup.add(item);
-		item.setRich(true);
+		item.winid = winid;
+		item.mainscreenobj = this;
+
+		item.addListener("click", function () {
+		    if (winid == this.__prevwin && this.windows[winid].hidden == true)
+                    {
+                        this.windows[winid].show();
+                    }
+                    else if (winid == this.__prevwin)
+                    {
+                        this.windows[winid].hide();
+                    }
+		    this.__prevwin = winid;
+		}, this);
+
 		// Link from window object to its taskbarbutton.
 		this.windows[winid].taskbarButton = item;
 		this.windows[winid].taskbarControl = this.__windowGroup;
+		item.setRich(true);
 		
+		this.__part2.add(item);
+		this.__windowGroup.add(item);
+		this.__windowGroup.setSelection([item]);
+
 		if (new_msgs == 1)
 		{
 		    this.windows[winid].setGreen();
@@ -1000,16 +1028,14 @@ qx.Class.define("client.MainScreen",
 
 	switchToWindow : function(e)
 	{
-	    for (var i=0; i < this.windows.length; i++)
+	    var i = (e.getData()[0]).winid;
+
+	    if (this.windows[i])
 	    {
-		if (this.windows[i] && e.getData()[0] == this.windows[i].taskbarButton) 
-		{
-		    this.windows[i].show();
-		    this.windows[i].setNormal();
-		    this.activewin = i;
-		    this.windows[i].activatewin();
-		    break;
-		}
+		this.windows[i].show();
+		this.windows[i].setNormal();
+		this.activewin = i;
+		this.windows[i].activatewin();
 	    }
 	},
 

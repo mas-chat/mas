@@ -299,6 +299,7 @@ qx.Class.define("client.UserWindow",
         window : 0,
 	__input1 : 0,
 	__list : 0,
+	hidden : false,
 	__atom : 0,
 	__channelText : "",
 	__scroll : 0,
@@ -310,6 +311,7 @@ qx.Class.define("client.UserWindow",
 	__nw : 0,
 	__nw_id : 0,
 	__type : 0,
+	__taskbarButtonColor : "cccccc",
 	__name : 0,
 	__usermode : 0,
 	__newmsgsatstart : 0,
@@ -376,47 +378,23 @@ qx.Class.define("client.UserWindow",
 
 	setRed : function()
 	{
-	    var name = this.getName();
-
-	    if (this.__type == 0 && this.__nw_id == 0)
-	    {
-		name = name.substr(1);
-		name = name.substr(0, 1).toUpperCase() + name.substr(1);
-	    }
-	    
-	    this.taskbarButton.setLabel("<font color=\"#ffaaaa\">" + name +
-					"</font>");
+	    this.__taskbarButtonColor = "ffaaaa";
+	    this.updateButton();
 	    this.isRed = true;
 	},
 
 	setGreen : function()
 	{
-	    //copy paste function
-	    var name = this.getName();
-
-	    if (this.__type == 0 && this.__nw_id == 0)
-	    {
-		name = name.substr(1);
-		name = name.substr(0, 1).toUpperCase() + name.substr(1);
-	    }
-	    
-	    this.taskbarButton.setLabel("<font color=\"#aaffaa\">" + name +
-					"</font>");
+	    this.__taskbarButtonColor = "aaffaa";
+	    this.updateButton();
 	    this.isRed = false;
 	},
 
 	setNormal : function()
 	{ 
-	    var name = this.getName();
-
-	    if (this.__type == 0 && this.__nw_id == 0)
-	    {
-		name = name.substr(1)
-		name = name.substr(0, 1).toUpperCase() + name.substr(1);
-	    }
-
-	    this.taskbarButton.setLabel("<font color=\"#cccccc\">" + name +
-					"</font>");
+	    this.__taskbarButtonColor = "cccccc";
+	    this.updateButton();
+	    this.isRed = false;
 
 	    if (this.__newmsgsatstart != 0)
 	    {
@@ -424,8 +402,20 @@ qx.Class.define("client.UserWindow",
 		this.__srpc.callAsync(this.sendresult,
 				      "SEEN", global_ids + this.winid);
 	    }
+	},
 
-	    this.isRed = false;
+	updateButton : function()
+	{
+	    var name = this.getName();
+	    
+	    if (this.__type == 0 && this.__nw_id == 0)
+	    {
+		name = name.substr(1);
+		name = name.substr(0, 1).toUpperCase() + name.substr(1);
+	    }
+	    
+	    this.taskbarButton.setLabel("<font color=\"#" + this.__taskbarButtonColor + "\">" + name +
+					(this.hidden == true ? " (min)" : "") + "</font>");	    
 	},
 
 	handleMove : function(e)
@@ -445,6 +435,9 @@ qx.Class.define("client.UserWindow",
 
 	handleMinimize : function(e)
 	{
+	    this.hidden = true;
+	    this.updateButton();
+
 	    if (MainScreenObj.initdone == 1)
 	    {
 		this.__srpc.callAsync(this.sendresult,
@@ -455,6 +448,9 @@ qx.Class.define("client.UserWindow",
 
 	handleRestore : function(e)
 	{
+	    this.hidden = false;
+	    this.updateButton();
+
 	    if (MainScreenObj.initdone == 1)
 	    {
 		this.__srpc.callAsync(this.sendresult,
@@ -565,11 +561,15 @@ qx.Class.define("client.UserWindow",
 	show : function()
 	{
 	    this.window.open();
+	    this.hidden = false;
+	    this.updateButton();
     	},
 
 	hide : function()
 	{
 	    this.window.minimize();
+	    this.hidden = true;
+	    this.updateButton();
     	},
 
 	getName : function()

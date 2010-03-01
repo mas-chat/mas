@@ -7,7 +7,7 @@
 
 qx.Class.define("client.RadioManager",
 {
-  extend : qx.ui.form.RadioGroup,
+    extend : qx.ui.form.RadioGroup,
 
   /*
   *****************************************************************************
@@ -15,10 +15,10 @@ qx.Class.define("client.RadioManager",
   *****************************************************************************
   */
 
-  construct : function(content)
-  {
-    this.base(arguments);
-  },
+    construct : function(content)
+    {
+      this.base(arguments);
+    },
 
   /*
   *****************************************************************************
@@ -26,9 +26,25 @@ qx.Class.define("client.RadioManager",
   *****************************************************************************
   */
 
-  members :
-  {
-  }
+    members :
+    {
+	_onItemChangeChecked : function(e)
+	{
+	    var item = e.getTarget();
+
+	    //alert(item.getValue());
+	    
+	    if (item.getValue())
+	    {
+		this.setSelection([item]);	    
+	    } 
+	    else if (this.getSelection()[0] == item) 
+	    {
+		item.setValue(true);
+		this.setSelection([item]);
+	    }
+	}	
+    }
 });
 
 
