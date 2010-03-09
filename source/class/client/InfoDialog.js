@@ -172,19 +172,19 @@ qx.Class.define("client.InfoDialog",
 	    
 	    if (mode == 0)
 	    {
-		this.__window.setCaption("Join to existing group");
-		this.__message.setLabel("Type the group name you wish to join:");
+		this.__window.setCaption("Join existing group");
+		this.__message.setLabel("Type the name of the group you wish to join:");
 	    }
 	    else
 	    {
-		this.__window.setCaption("Join to IRC channel");
-		this.__message.setLabel("Type IRC channel name you wish to join:");
+		this.__window.setCaption("Join IRC channel");
+		this.__message.setLabel("Type the name of the IRC channel you wish to join:");
 	    }
 
 	    this.__input.setValue("");
 	    this.__window.add(this.__input);
 
-	    this.__message3.setLabel("Password if needed:");
+	    this.__message3.setLabel("Password, if needed:");
 	    this.__window.add(this.__message3);
 
 	    this.__window.add(this.__input2);
@@ -261,9 +261,9 @@ qx.Class.define("client.InfoDialog",
 	    this.__window.removeAll();
 	    this.__box.removeAll();
 
-	    this.__window.setCaption("Create new Group");
-	    this.__message.setLabel("Type group name you wish to create:");
-	    this.__message2.setLabel("Optional password:");
+	    this.__window.setCaption("Create new group");
+	    this.__message.setLabel("Type the name of the group you wish to create:");
+	    this.__message2.setLabel("Password (optional):");
 	    
 	    this.__window.add(this.__message);
 	    this.__input.setValue("");

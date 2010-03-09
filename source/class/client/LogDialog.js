@@ -112,7 +112,7 @@ qx.Class.define("client.LogDialog",
 		    new qx.ui.layout.HBox(10, "left"));
 	    
 		this.list = new qx.ui.form.List;
-		this.list.add(new qx.ui.form.ListItem("Wait.."));
+		this.list.add(new qx.ui.form.ListItem("Wait..."));
 		this.list.setAllowGrowY(true);
 
 		var scroll = new qx.ui.container.Scroll();
@@ -135,7 +135,7 @@ qx.Class.define("client.LogDialog",
 	    
 		this.__window.add(infoarea, { flex : 1});
 	    
-		var logtext = new qx.ui.basic.Atom("Logs contain conversations from past four weeks.");
+		var logtext = new qx.ui.basic.Atom("The logs contain conversations from the last four weeks.");
 		logtext.setMarginRight(15);
 		var logon = new qx.ui.form.RadioButton("Enabled");
 		logon.setMarginRight(10);

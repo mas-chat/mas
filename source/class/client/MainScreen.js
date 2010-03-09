@@ -254,7 +254,7 @@ qx.Class.define("client.MainScreen",
 			    var data = group.split("-");
 
 			    qx.bom.Cookie.del("ProjectEvergreenJoin");
-			    infoDialog.showInfoWin("Do you want to join to group " + data[0] + "?", "Yes", 
+			    infoDialog.showInfoWin("Do you want to join the group " + data[0] + "?", "Yes", 
 						   function()
 						   {
 						       that.__rrpc.callAsync(
@@ -394,7 +394,7 @@ qx.Class.define("client.MainScreen",
 			    this.show();
 			}
 			infoDialog.showInfoWin(
-			    "Protocol Error. <p>Press OK to relogin.",
+			    "Protocol Error. <p>Press OK to login again.",
 			    "OK", 
 			    function () {
 				qx.bom.Cookie.del("ProjectEvergreen");
@@ -411,7 +411,7 @@ qx.Class.define("client.MainScreen",
 
 			var reason = param.slice(pos+1);
 			infoDialog.showInfoWin(
-			    "Session expired. You logged in from another location or<br>server was restarted.<p>Press OK to restart.",
+			    "Your session expired, you logged in from another location, or<br>the server was restarted.<p>Press OK to restart.",
 			    "OK", 
 			    function () {
 				window.location.reload(true);
@@ -456,7 +456,7 @@ qx.Class.define("client.MainScreen",
 	    {
 		if (this.__firstrpc == 1)
 		{
-		    alert("MeetAndSpeak is having some technical problems, sorry!\n\n You can try to reload this page to see if the service\n is back online.\n\n We are trying to fix the situation as quickly as possible.");
+		    alert("MeetAndSpeak is having some technical problems. Sorry!\n\n You can try to reload this page in a few moments to see if the service\n is back online.\n\n We are trying to address the situation as quickly as possible.");
 		}
 		else
 		{
@@ -684,7 +684,7 @@ qx.Class.define("client.MainScreen",
 		new qx.ui.layout.HBox());
 
 	    this.__input1 = new qx.ui.form.TextField();
-	    this.__input1.setPlaceholder("<nick name>");
+	    this.__input1.setPlaceholder("<nickname>");
 	    this.__input1.setMarginBottom(8);
 	    this.__input1.setMarginLeft(8);
 
@@ -826,7 +826,7 @@ qx.Class.define("client.MainScreen",
 	    }
 	    else
 	    {
-		var nofriends = new qx.ui.basic.Label("No friends added<p>You can add new contacts by<br> using the field below<br>or by right-clicking <br>a name in any group window<p>You can send messages <br>and see status information<br> of your friends");
+		var nofriends = new qx.ui.basic.Label("No friends added<p>You can add new contacts by<br> using the field below<br>or by right-clicking <br>a name in any group window.<p>You can send messages <br>and see status information<br> of your friends.");
 		nofriends.setRich(true);
 
 		nofriends.setPaddingLeft(10);
@@ -853,7 +853,7 @@ qx.Class.define("client.MainScreen",
                 }
                 else if (idle < 60)
                 {			
-                    result = "<font color=\"blue\">Last: " + idle +
+                    result = "<font color=\"blue\">Last activity: " + idle +
 			" minutes ago</font>";
                 }
 		else if (idle < 60 * 24)
@@ -864,7 +864,7 @@ qx.Class.define("client.MainScreen",
 			idle = 1;
 		    }
 
-                    result = "<font color=\"blue\">Last: " + idle +
+                    result = "<font color=\"blue\">Last activity: " + idle +
 			" hours ago</font>";
                 }
 		else if (idle < 5000000)
@@ -875,12 +875,12 @@ qx.Class.define("client.MainScreen",
 			idle = 1;
 		    }
 
-                    result = "<font color=\"blue\">Last: " + idle +
+                    result = "<font color=\"blue\">Last activity: " + idle +
 			" days ago</font>";
                 }
 		else
 		{
-		    result = "<font color=\"blue\">Last:</font> Unknown";
+		    result = "<font color=\"blue\">Last activity:</font> Unknown";
 		}
 		
 		children[i].setValue(result);
@@ -1103,7 +1103,7 @@ qx.Class.define("client.MainScreen",
 	getHelpMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
-	    var manualButton = new qx.ui.menu.Button("Support web site");
+	    var manualButton = new qx.ui.menu.Button("Support Web site");
 	    var aboutButton = new qx.ui.menu.Button("About...");
 
 	    manualButton.addListener("execute", this._manualCommand, this);
@@ -1120,7 +1120,7 @@ qx.Class.define("client.MainScreen",
 	{
 	    var menu = new qx.ui.menu.Menu;
 	    var createButton = new qx.ui.menu.Button("Create new group...");
-	    var joinButton = new qx.ui.menu.Button("Join to existing group...");
+	    var joinButton = new qx.ui.menu.Button("Join existing group...");
 
 	    createButton.addListener("execute", this._createForumCommand, this);
 	    joinButton.addListener("execute", this._joinForumCommand, this);
@@ -1162,7 +1162,7 @@ qx.Class.define("client.MainScreen",
 	getAdvancedMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
-	    var joinButton = new qx.ui.menu.Button("Join to IRC channel...");
+	    var joinButton = new qx.ui.menu.Button("Join IRC channel...");
 
 	    joinButton.addListener("execute", this._joinIRCCommand, this);
 	    menu.add(joinButton);
@@ -1205,7 +1205,7 @@ qx.Class.define("client.MainScreen",
 		qx.bom.Cookie.del("UseSSL");
 	    }
 
-	    infoDialog.showInfoWin("Application is now reloaded to activate<br> the change.", "OK", function() {
+	    infoDialog.showInfoWin("The application is now being reloaded to activate<br> the change.", "OK", function() {
 		window.location.reload(true);
 	    });
 	},

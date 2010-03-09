@@ -1,4 +1,4 @@
-/* ************************************************************************
+xf/* ************************************************************************
 
 #asset(projectx/*)
 5B5B#require(qx.util.StringSplit)
@@ -546,7 +546,7 @@ qx.Class.define("client.UserWindow",
 		{
 		    e.preventDefault();
 
-		    infoDialog.showInfoWin("Are you sure?<p>You need to close windows only when you<br>wish to permanently stop following discussion", "Yes", function() {
+		    infoDialog.showInfoWin("Are you sure?<p>You need to close windows only when you<br>wish to permanently stop following the discussion", "Yes", function() {
 			closeok = 1;
 			mywindow.close();
 		    }, "NO");
@@ -940,7 +940,7 @@ qx.Class.define("client.UserWindow",
 
 	    //SOUNDS
 
-            var lsounds = new qx.ui.basic.Label("Sound alert:");
+            var lsounds = new qx.ui.basic.Label("Audible alert:");
 	    composite.add(lsounds, {row:1, column: 0})
 
 	    var scomposite2 = new qx.ui.container.Composite(
@@ -990,7 +990,7 @@ qx.Class.define("client.UserWindow",
 	    var scomposite4 = new qx.ui.container.Composite(
 		new qx.ui.layout.HBox(10));
 	    
-	    var tyes = new qx.ui.form.RadioButton("On (blink browser title bar when new msg arrives)");
+	    var tyes = new qx.ui.form.RadioButton("On (make browser title bar blink when new msg arrives)");
 	    var tno = new qx.ui.form.RadioButton("Off");
 
 	    if (this.titlealert == 0)
