@@ -288,14 +288,15 @@ qx.Class.define("client.MainScreen",
 
 			if (this.activewin.winid != window_id && this.initdone == 1)
 			{
-			    if (type == 0 && this.windows[window_id].isRed == false)
+			    if (type == 1 && this.windows[window_id].isRed == false)
 			    {
 				this.windows[window_id].setGreen();
 			    }
-			    else
+			    else if (type == 2)
 			    {
 				this.windows[window_id].setRed();
 			    }
+			    //else don't change color
 			}
 			break;
 
