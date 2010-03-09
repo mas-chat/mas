@@ -415,7 +415,8 @@ qx.Class.define("client.UserWindow",
 	    }
 	    
 	    this.taskbarButton.setLabel("<font color=\"#" + this.__taskbarButtonColor + "\">" + name +
-					(this.hidden == true ? " (min)" : "") + "</font>");	    
+					(this.hidden == true ?
+					 " <font color=\"#ccaacc\">M</font>" : "<span style=\"visibility:hidden;\"> M</span>") + "</font>");	    
 	},
 
 	handleMove : function(e)

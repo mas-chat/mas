@@ -763,8 +763,8 @@ qx.Class.define("client.MainScreen",
 	    this.__myapp.add(this.rootContainer, {flex : 1, edge: 0}); //, {padding : 10});	    
 
 	    this.__windowGroup = new client.RadioManager();
-	    this.__windowGroup.addListener("changeSelection",
-					   this.switchToWindow, this);
+//	    this.__windowGroup.addListener("changeSelection",
+//					   this.switchToWindow, this);
 
 	},
 
@@ -986,7 +986,11 @@ qx.Class.define("client.MainScreen",
 		item.mainscreenobj = this;
 
 		item.addListener("click", function () {
-		    if (winid == this.__prevwin && this.windows[winid].hidden == true)
+		    if (winid != this.__prevwin)
+		    {
+			this.switchToWindow(winid);
+		    }
+		    else if (winid == this.__prevwin && this.windows[winid].hidden == true)
                     {
                         this.windows[winid].show();
                     }
@@ -1038,7 +1042,8 @@ qx.Class.define("client.MainScreen",
 
 	switchToWindow : function(e)
 	{
-	    var i = (e.getData()[0]).winid;
+//	    var i = (e.getData()[0]).winid;
+	    var i = e;
 
 	    if (this.windows[i])
 	    {
