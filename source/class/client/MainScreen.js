@@ -358,7 +358,16 @@ qx.Class.define("client.MainScreen",
 		    case "NAMES":
 			// "clever" sort hack
 		    	var usertext = param.slice(pos+1).replace(/\@/g, "*");
-			this.windows[window_id].nameslist = usertext.split(" ").sort();
+			this.windows[window_id].nameslist = usertext.split(" ").sort(function(x,y){ 
+			    var a = String(x).toUpperCase(); 
+			    var b = String(y).toUpperCase(); 
+			    if (a > b) 
+				return 1 
+			    if (a < b) 
+				return -1 
+			    return 0; 
+			}); 
+
 			this.windows[window_id].addnames(true);
 			break;
 
