@@ -456,7 +456,7 @@ qx.Class.define("client.MainScreen",
 	    {
 		if (this.__firstrpc == 1)
 		{
-		    alert("MeetAndSpeak is having some technical problems. Sorry!\n\n You can try to reload this page in a few moments to see if the service\n is back online.\n\n We are trying to address the situation as quickly as possible.");
+		    alert("MeetAndSpeak is having some technical problems. Sorry!\n\nYou can try to reload this page in a few moments to see if the service is back online.\n\nWe are trying to address the situation as quickly as possible.");
 		}
 		else
 		{
