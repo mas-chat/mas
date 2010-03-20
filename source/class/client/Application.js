@@ -24,7 +24,15 @@ qx.Class.define("client.Application",
 	    global_settings = new client.Settings("");
 	    global_tmpcookie = 0;
 
-	    var idstring = qx.bom.Cookie.get("ProjectEvergreen").split("-");
+	    var cookie = qx.bom.Cookie.get("ProjectEvergreen");
+
+	    if (cookie == null)
+	    {
+		qx.bom.Cookie.del("ProjectEvergreen");
+		window.location.reload(true);
+	    }
+
+	    var idstring = cookie.split("-");
 	   
 	    global_id = idstring[0]; 
 	    global_sec = idstring[1];

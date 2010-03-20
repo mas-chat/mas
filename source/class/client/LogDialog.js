@@ -14,6 +14,7 @@ qx.Class.define("client.LogDialog",
 	this.base(arguments);
 
 	this.__rrpc = new qx.io.remote.Rpc("/ralph", "ralph");
+	this.__rrpc2 = new qx.io.remote.Rpc("/lisa/jsonrpc.pl", "lisa.main");
     },
 
     members :
@@ -21,8 +22,10 @@ qx.Class.define("client.LogDialog",
 	//common
 	__window : 0,
 	__rrpc : 0,
+	__rrpc2 : 0,
 	__pos : 0,
 	today : 0,
+	searchstring : "",
 
 	show : function(text, dim)
 	{
@@ -31,8 +34,7 @@ qx.Class.define("client.LogDialog",
 		this.__window = new qx.ui.window.Window("History Logs");
 		this.__window.setLayout(new qx.ui.layout.VBox(5));
 		this.__window.setModal(true);
-		this.__window.setShowClose(false);
-		this.__window.moveTo(40, 40);
+		this.__window.setShowClose(true);
 
 		var width = 700;
 		var height = 400;
@@ -50,12 +52,85 @@ qx.Class.define("client.LogDialog",
 		this.__window.setWidth(width);
 		this.__window.setHeight(height);
 
-		var hbox = new qx.ui.layout.HBox(10, "left");
+		var modearea = new qx.ui.container.Composite(new qx.ui.layout.HBox(10, "left"));
+	     
+		var rbSearch = new qx.ui.form.RadioButton("Search");
+		var rbBrowse = new qx.ui.form.RadioButton("Browse");
 
-		var navarea = new qx.ui.container.Composite(hbox);
+		modearea.add(rbSearch);
+		modearea.add(rbBrowse);
+
+		var manager = new qx.ui.form.RadioGroup(rbSearch, rbBrowse);
+
+		var hbox = new qx.ui.layout.HBox(10, "left");
 		hbox.setAlignX("center");
+		var navarea = new qx.ui.container.Composite(hbox);
 		navarea.setPaddingBottom(4);
 
+		var hbox2 = new qx.ui.layout.HBox(10, "left");
+		hbox2.setAlignX("center");
+		var searcharea = new qx.ui.container.Composite(hbox2);
+		searcharea.setPaddingBottom(4);
+
+		var searchInput = new qx.ui.form.TextField();
+		searchInput.set({ maxLength: 200, width: 350 });
+		searcharea.add(searchInput);
+
+		manager.addListener("changeSelection", function (e)
+				    {
+					var label = (e.getData()[0]).getLabel();
+
+					if (label == "Search")
+					{
+					    this.__window.remove(navarea);
+					    this.__window.addAt(searcharea, 1);
+					    searchInput.focus();
+					    this.list.removeAll();
+					    this.atom.setLabel("");
+					}
+					else
+					{
+					    this.__window.remove(searcharea);
+					    this.__window.addAt(navarea, 1);
+					    this.seek(0);
+					}
+				    }, this);
+
+		searchInput.addListener("keypress", function(e) {
+		    if (e.getKeyIdentifier() == "Enter")
+		    {
+			var input = searchInput.getValue();
+			
+			if (input !== "" && input !== null)
+			{
+			    this.searchstring = input;
+			    this.atom.setLabel("Searching...");
+
+			    input = input.replace(/[^a-z0-9 ]/g, "??");
+
+			    this.__rrpc2.callAsync(
+				qx.lang.Function.bind(this.__searchresult, this),
+				"search", input);
+			}
+		    }
+		}, this)
+
+		var button1 = new qx.ui.form.Button("Search");
+		searcharea.add(button1);
+
+		button1.addListener("execute", function (e)
+				    {
+					var input = searchInput.getValue();
+
+					this.searchstring = input;
+					input = input.replace(/[^a-z0-9 ]/g, "??");
+
+					this.atom.setLabel("Searching...");
+					this.__rrpc2.callAsync(
+					    qx.lang.Function.bind(this.__searchresult, this),
+					    "search", input);
+				    }, this);
+				    
 		this.b1 = new qx.ui.form.Button("Prev year");
 		this.b2 = new qx.ui.form.Button("Prev month");
 		this.b3 = new qx.ui.form.Button("Prev day");
@@ -106,13 +181,14 @@ qx.Class.define("client.LogDialog",
 		navarea.add(this.b5);
 		navarea.add(this.b6);
 	    
-		this.__window.add(navarea);
+		this.__window.add(modearea);
+		this.__window.add(searcharea);
 		
 		var infoarea = new qx.ui.container.Composite(
 		    new qx.ui.layout.HBox(10, "left"));
 	    
 		this.list = new qx.ui.form.List;
-		this.list.add(new qx.ui.form.ListItem("Wait..."));
+		this.list.add(new qx.ui.form.ListItem(""));
 		this.list.setAllowGrowY(true);
 
 		var scroll = new qx.ui.container.Scroll();
@@ -182,7 +258,7 @@ qx.Class.define("client.LogDialog",
 		MainScreenObj.desktop.add(this.__window);
 	    }
 
-	    this.seek(0);
+	    this.__window.center();
 	    this.__window.open();
 	},
 	
@@ -215,6 +291,11 @@ qx.Class.define("client.LogDialog",
 		    }, tmp);
 
 		    this.list.add(tmp);
+
+		    if (i == 0)
+		    {
+			this.list.setSelection([tmp]);
+		    }
 		}
 
 		if (channels.length > 1)
@@ -255,10 +336,83 @@ qx.Class.define("client.LogDialog",
 	    } 
 	    else 
 	    {
-		alert("!!! Exception during async call: " + exc);
+		alert("!!! Connection error, please reload this page: " + exc);
 	    }
 	},
 
+	__searchresult : function(result, exc) 
+	{
+	    if (exc == null) 
+	    {
+		var hits = result.split("||");
+		this.list.removeAll();
+
+		if (result == "")
+		{
+		    this.atom.setLabel("Your search did not match any log files.");
+		}
+		else
+		{
+		    var firstitem = hits[0].split("|");
+		    this.atom.setLabel("Loading...");
+		    this.__rrpc2.callAsync(
+			qx.lang.Function.bind(
+			    this.__showdayresult, this),
+			"get_day", firstitem[0], global_id, firstitem[1]);
+
+		    for (var i=0; i < hits.length; i = i + 2)
+		    {
+			var item = hits[i].split("|");
+			
+			var tmp = new qx.ui.form.ListItem("Hit " + (i / 2 + 1));
+			tmp.channel = item[1];
+			tmp.date = item[0];
+			tmp.rrpc = this.__rrpc2;
+			tmp.logdialog = this;
+			tmp.atom = this.atom;
+			
+			tmp.addListener("click", function (e) {
+			    this.atom.setLabel("Loading...");
+			    this.rrpc.callAsync(
+				qx.lang.Function.bind(
+				    this.logdialog.__showdayresult, this.logdialog),
+				"get_day", this.date, global_id, this.channel);
+			}, tmp);
+			
+			this.list.add(tmp);
+			if (i == 0)
+			{
+			    this.list.setSelection([tmp]);
+			}
+		    }
+		}
+	    }
+	    else
+	    {
+		alert("!!! Connection error, please reload the application: " + exc);
+	    }
+	},
+
+	__showdayresult : function(result, exc) 
+	{
+	    if (exc == null) 
+	    {
+		var words = this.searchstring.split(" ");
+
+		for (var i=0; i < words.length; i++)
+		{
+		    var re = new RegExp(words[i], "ig"); 
+		    result = result.replace(re, "<b style=\"background-color: #FF0000\">" + words[i] + "</b>");
+		}
+   
+		this.atom.setLabel(MainScreenObj.adjustTime(result));
+	    }
+	    else
+	    {
+		alert("!!! Connection error, please reload the application: " + exc);
+	    }
+	},
+	
 	seek : function(days)
 	{
 	    this.__pos = this.__pos + days;
