@@ -354,7 +354,8 @@ qx.Class.define("client.LogDialog",
 		else
 		{
 		    var firstitem = hits[0].split("|");
-		    this.atom.setLabel("Loading...");
+		    this.atom.setLabel("Loading conversation...");
+		    this.list.setEnabled(false);
 		    this.__rrpc2.callAsync(
 			qx.lang.Function.bind(
 			    this.__showdayresult, this),
@@ -372,7 +373,8 @@ qx.Class.define("client.LogDialog",
 			tmp.atom = this.atom;
 			
 			tmp.addListener("click", function (e) {
-			    this.atom.setLabel("Loading...");
+			    this.list.setEnabled(false);
+			    this.atom.setLabel("Loading conversation...");
 			    this.rrpc.callAsync(
 				qx.lang.Function.bind(
 				    this.logdialog.__showdayresult, this.logdialog),
@@ -395,6 +397,8 @@ qx.Class.define("client.LogDialog",
 
 	__showdayresult : function(result, exc) 
 	{
+	    this.list.setEnabled(true);
+
 	    if (exc == null) 
 	    {
 		var words = this.searchstring.split(" ");

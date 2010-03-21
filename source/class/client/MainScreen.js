@@ -127,6 +127,7 @@ qx.Class.define("client.MainScreen",
 	rootContainer : 0,
 	seq : 0,
 	windows : [],
+	showads : 1,
 	desktop : 0,
 	contactsButton : 0,
 
@@ -386,6 +387,11 @@ qx.Class.define("client.MainScreen",
 
 		    case "NICK":
 			global_nick = param.split(" ");
+			break;
+
+		    case "A":
+			var options = param.split(" ");
+			this.showads = options.shift();
 			break;
 
 		    case "DIE":
@@ -657,9 +663,12 @@ qx.Class.define("client.MainScreen",
 	    middleSection.add(middleContainer, {flex:1});
 
 	    //ads
-	    var iframe = new qx.ui.embed.Iframe("/iframe_part_from_google.html");
-	    iframe.set({ alignY:"middle", height: 605, width: 120, decorator : null });
-	    middleSection.add(iframe);
+	    if (this.showads == 1)
+	    {
+		var iframe = new qx.ui.embed.Iframe("/iframe_part_from_google.html");
+		iframe.set({ alignY:"middle", height: 605, width: 120, decorator : null });
+		middleSection.add(iframe);
+	    }
 
 	    var friendScroll = new qx.ui.container.Scroll();
 
