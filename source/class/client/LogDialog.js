@@ -368,8 +368,8 @@ qx.Class.define("client.LogDialog",
 			var tmp = new qx.ui.form.ListItem("Hit " + (i / 2 + 1));
 			tmp.channel = item[1];
 			tmp.date = item[0];
-			tmp.rrpc = this.__rrpOBc2;
-			tmp.logdialog = this;
+			tmp.rrpc = this.__rrpc2;
+			tmp.logdialog = this;
 			tmp.atom = this.atom;
 			tmp.list = this.list;
 
