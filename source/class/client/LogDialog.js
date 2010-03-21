@@ -356,10 +356,10 @@ qx.Class.define("client.LogDialog",
 		    var firstitem = hits[0].split("|");
 		    this.atom.setLabel("Loading conversation...");
 		    this.list.setEnabled(false);
-		    this.__rrpc2.callAsync(
-			qx.lang.Function.bind(
-			    this.__showdayresult, this),
-			"get_day", firstitem[0], global_id, firstitem[1]);
+//		    this.__rrpc2.callAsync(
+//			qx.lang.Function.bind(
+//			    this.__showdayresult, this),
+//			"get_day", firstitem[0], global_id, firstitem[1]);
 
 		    for (var i=0; i < hits.length; i = i + 2)
 		    {
@@ -368,10 +368,11 @@ qx.Class.define("client.LogDialog",
 			var tmp = new qx.ui.form.ListItem("Hit " + (i / 2 + 1));
 			tmp.channel = item[1];
 			tmp.date = item[0];
-			tmp.rrpc = this.__rrpc2;
-			tmp.logdialog = this;
+			tmp.rrpc = this.__rrpOBc2;
+			tmp.logdialog = this;
 			tmp.atom = this.atom;
-			
+			tmp.list = this.list;
+
 			tmp.addListener("click", function (e) {
 			    this.list.setEnabled(false);
 			    this.atom.setLabel("Loading conversation...");
