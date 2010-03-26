@@ -410,7 +410,8 @@ qx.Class.define("client.LogDialog",
 		//    result = result.replace(re, "<b style=\"background-color: #FF0000\">" + words[i] + "</b>");
 		//}
    
-		this.atom.setLabel(MainScreenObj.adjustTime(result));
+		//this.atom.setLabel(MainScreenObj.adjustTime(result));
+		this.atom.setLabel(result);
 	    }
 	    else
 	    {
