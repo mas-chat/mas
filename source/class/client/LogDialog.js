@@ -355,15 +355,6 @@ qx.Class.define("client.LogDialog",
 		else
 		{
 		    var firstitem = hits[0].split("|");
-		    this.atom.setLabel("Downloading the matching log file. Please wait...");
-		    this.list.setEnabled(false);
-		    this.__rrpc2.callAsync(
-			qx.lang.Function.bind(
-			    this.__showdayresult, this),
-			"get_day", firstitem[0], global_id, firstitem[1]);
-
-
-		    var firsthit;
 
 		    for (var i=0; i < hits.length; i = i + 2)
 		    {
@@ -389,14 +380,16 @@ qx.Class.define("client.LogDialog",
 			this.list.add(tmp);
 			if (i == 0)
 			{
-			    firsthit = tmp;
+			    this.list.setSelection([tmp]);
 			}
 		    }
 
-		    if (hits.length > 0)
-		    {
-			this.list.setSelection([firsthit]);
-		    }
+		    this.atom.setLabel("Downloading the first matching log file. Please wait...");
+		    this.list.setEnabled(false);
+		    this.__rrpc2.callAsync(
+			qx.lang.Function.bind(
+			    this.__showdayresult, this),
+			"get_day", firstitem[0], global_id, firstitem[1]);
 		}
 	    }
 	    else
