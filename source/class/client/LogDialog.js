@@ -57,8 +57,8 @@ qx.Class.define("client.LogDialog",
 		var rbSearch = new qx.ui.form.RadioButton("Search (alpha)");
 		var rbBrowse = new qx.ui.form.RadioButton("Browse");
 
-		modearea.add(rbSearch);
 		modearea.add(rbBrowse);
+		modearea.add(rbSearch);
 
 		var manager = new qx.ui.form.RadioGroup(rbSearch, rbBrowse);
 
@@ -361,6 +361,9 @@ qx.Class.define("client.LogDialog",
 			    this.__showdayresult, this),
 			"get_day", firstitem[0], global_id, firstitem[1]);
 
+
+		    var firsthit;
+
 		    for (var i=0; i < hits.length; i = i + 2)
 		    {
 			var item = hits[i].split("|");
@@ -385,8 +388,13 @@ qx.Class.define("client.LogDialog",
 			this.list.add(tmp);
 			if (i == 0)
 			{
-			    this.list.setSelection([tmp]);
+			    firsthit = tmp;
 			}
+		    }
+
+		    if (hits.length > 0)
+		    {
+			this.list.setSelection([firsthit]);
 		    }
 		}
 	    }
