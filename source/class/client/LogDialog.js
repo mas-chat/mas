@@ -182,7 +182,8 @@ qx.Class.define("client.LogDialog",
 		navarea.add(this.b6);
 	    
 		this.__window.add(modearea);
-		this.__window.add(searcharea);
+		this.__window.add(navarea);
+		searchInput.focus();
 		
 		var infoarea = new qx.ui.container.Composite(
 		    new qx.ui.layout.HBox(10, "left"));
