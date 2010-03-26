@@ -80,7 +80,7 @@ qx.Class.define("client.LogDialog",
 				    {
 					var label = (e.getData()[0]).getLabel();
 
-					if (label == "Search")
+					if (label == "Search (alpha)")
 					{
 					    this.__window.remove(navarea);
 					    this.__window.addAt(searcharea, 1);
