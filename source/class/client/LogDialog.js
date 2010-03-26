@@ -60,7 +60,7 @@ qx.Class.define("client.LogDialog",
 		modearea.add(rbBrowse);
 		modearea.add(rbSearch);
 
-		var manager = new qx.ui.form.RadioGroup(rbSearch, rbBrowse);
+		var manager = new qx.ui.form.RadioGroup(rbBrowse, rbSearch);
 
 		var hbox = new qx.ui.layout.HBox(10, "left");
 		hbox.setAlignX("center");
