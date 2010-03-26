@@ -54,7 +54,7 @@ qx.Class.define("client.LogDialog",
 
 		var modearea = new qx.ui.container.Composite(new qx.ui.layout.HBox(10, "left"));
 	     
-		var rbSearch = new qx.ui.form.RadioButton("Search");
+		var rbSearch = new qx.ui.form.RadioButton("Search (alpha)");
 		var rbBrowse = new qx.ui.form.RadioButton("Browse");
 
 		modearea.add(rbSearch);
@@ -354,12 +354,12 @@ qx.Class.define("client.LogDialog",
 		else
 		{
 		    var firstitem = hits[0].split("|");
-		    this.atom.setLabel("Loading conversation...");
+		    this.atom.setLabel("Downloading the matching log file. Please wait...");
 		    this.list.setEnabled(false);
-//		    this.__rrpc2.callAsync(
-//			qx.lang.Function.bind(
-//			    this.__showdayresult, this),
-//			"get_day", firstitem[0], global_id, firstitem[1]);
+		    this.__rrpc2.callAsync(
+			qx.lang.Function.bind(
+			    this.__showdayresult, this),
+			"get_day", firstitem[0], global_id, firstitem[1]);
 
 		    for (var i=0; i < hits.length; i = i + 2)
 		    {
@@ -375,7 +375,7 @@ qx.Class.define("client.LogDialog",
 
 			tmp.addListener("click", function (e) {
 			    this.list.setEnabled(false);
-			    this.atom.setLabel("Loading conversation...");
+			    this.atom.setLabel("Downloading the matching log file. Please wait...");
 			    this.rrpc.callAsync(
 				qx.lang.Function.bind(
 				    this.logdialog.__showdayresult, this.logdialog),
@@ -404,11 +404,11 @@ qx.Class.define("client.LogDialog",
 	    {
 		var words = this.searchstring.split(" ");
 
-		for (var i=0; i < words.length; i++)
-		{
-		    var re = new RegExp(words[i], "ig"); 
-		    result = result.replace(re, "<b style=\"background-color: #FF0000\">" + words[i] + "</b>");
-		}
+		//for (var i=0; i < words.length; i++)
+		//{
+		//    var re = new RegExp(words[i], "ig"); 
+		//    result = result.replace(re, "<b style=\"background-color: #FF0000\">" + words[i] + "</b>");
+		//}
    
 		this.atom.setLabel(MainScreenObj.adjustTime(result));
 	    }
