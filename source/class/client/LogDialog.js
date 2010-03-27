@@ -249,23 +249,28 @@ qx.Class.define("client.LogDialog",
 	__startSearch : function()
 	{
 	    var input = this.searchInput.getValue();
+	    var doit = true;
 
 	    this.searchstring = input;
 
-	    for (i=0; i<user.length; i++) 
+	    for (i=0; i < input.length; i++) 
 	    {
-		if (user.charCodeAt(i)>127) 
+		if (input.charCodeAt(i) > 127) 
 		{
+		    //glimpse supports only ascii (utf7 is a real solution)
 		    this.atom.setLabel("Your search string contains unsupported special character(s).");
+		    doit = false;
 		}
-		else
-		{
-		    this.atom.setLabel("Searching...");
-		    this.__rrpc2.callAsync(
-			qx.lang.Function.bind(this.__searchresult, this),
-			"search", input);
-		}
-	}
+	    }
+
+	    if (doit == true)
+	    {
+		this.atom.setLabel("Searching...");
+		this.__rrpc2.callAsync(
+		    qx.lang.Function.bind(this.__searchresult, this),
+		    "search", input);
+	    }
+	},
 	
 	__sendresult : function(result, exc) 
 	{
