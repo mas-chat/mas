@@ -602,37 +602,36 @@ qx.Class.define("client.MainScreen",
 	adjustTime : function(text)
 	{
 	    var myRe = /<(\d+)>/g;
-	    var myArray;
 
-	    while ((myArray = myRe.exec(text)) != null)
-	    {
-		var mytime = parseInt(myArray[1]) - global_offset;
-		if (mytime < 0)
+	    return text.replace(
+		myRe, 
+		function(m)
 		{
-		    mytime = 1440 + mytime;
-		}
-		if (mytime > 1440)
-		{
-		    mytime = mytime - 1440;
-		}
-
-		var hour = Math.floor(mytime / 60);
-		var min = mytime % 60;
-		
-		if (min < 10)
-		{
-		    min = "0" + min;
-		}
-		
-		if (hour < 10)
-		{
-		    hour = "0" + hour;
-		}
-
-		text = text.replace(/<\d+>/, hour + ":" + min);
-	    }
-	    
-	    return text;
+		    var mytime = parseInt(m.substring(1, m.length-1)) - global_offset;
+		    if (mytime < 0)
+		    {
+			mytime = 1440 + mytime;
+		    }
+		    if (mytime > 1440)
+		    {
+			mytime = mytime - 1440;
+		    }
+		    
+		    var hour = Math.floor(mytime / 60);
+		    var min = mytime % 60;
+		    
+		    if (min < 10)
+		    {
+			min = "0" + min;
+		    }
+		    
+		    if (hour < 10)
+		    {
+			hour = "0" + hour;
+		    }
+		    
+		    return hour + ":" + min;
+		});
 	},
 	
 	show : function()

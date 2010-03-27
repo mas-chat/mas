@@ -183,7 +183,7 @@ qx.Class.define("client.LogDialog",
 	    
 		this.__window.add(modearea);
 		this.__window.add(navarea);
-		searchInput.focus();
+		this.seek(0);
 		
 		var infoarea = new qx.ui.container.Composite(
 		    new qx.ui.layout.HBox(10, "left"));
@@ -406,13 +406,10 @@ qx.Class.define("client.LogDialog",
 	    {
 		var words = this.searchstring.split(" ");
 
-		//for (var i=0; i < words.length; i++)
-		//{
-		//    var re = new RegExp(words[i], "ig"); 
-		//    result = result.replace(re, "<b style=\"background-color: #FF0000\">" + words[i] + "</b>");
-		//}
-   
-		//this.atom.setLabel(MainScreenObj.adjustTime(result));
+		var re = new RegExp(words.join("|", "ig"); 
+		result = result.replace(re, "<b style=\"background-color: #FF0000\">$1</b>");
+		   
+		this.atom.setLabel(MainScreenObj.adjustTime(result));
 		this.atom.setLabel(result);
 	    }
 	    else
