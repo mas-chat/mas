@@ -406,11 +406,10 @@ qx.Class.define("client.LogDialog",
 	    {
 		var words = this.searchstring.split(" ");
 
-		var re = new RegExp(words.join("|", "ig"); 
+		var re = new RegExp("(" + words.join(")|(") + ")", "ig"); 
 		result = result.replace(re, "<b style=\"background-color: #FF0000\">$1</b>");
 		   
 		this.atom.setLabel(MainScreenObj.adjustTime(result));
-		this.atom.setLabel(result);
 	    }
 	    else
 	    {
