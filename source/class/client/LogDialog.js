@@ -414,6 +414,7 @@ qx.Class.define("client.LogDialog",
 	    if (exc == null) 
 	    {
 		this.atom.setLabel("Formatting the log file. Please wait...");
+		qx.ui.core.queue.Widget.flush();
 
 		var words = this.searchstring.split(" ");
 
