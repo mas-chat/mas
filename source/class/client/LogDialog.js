@@ -26,6 +26,7 @@ qx.Class.define("client.LogDialog",
 	__pos : 0,
 	today : 0,
 	searchstring : "",
+	searchInput : 0,
 
 	show : function(text, dim)
 	{
@@ -72,9 +73,9 @@ qx.Class.define("client.LogDialog",
 		var searcharea = new qx.ui.container.Composite(hbox2);
 		searcharea.setPaddingBottom(4);
 
-		var searchInput = new qx.ui.form.TextField();
-		searchInput.set({ maxLength: 200, width: 350 });
-		searcharea.add(searchInput);
+		this.searchInput = new qx.ui.form.TextField();
+		this.searchInput.set({ maxLength: 200, width: 350 });
+		searcharea.add(this.searchInput);
 
 		manager.addListener("changeSelection", function (e)
 				    {
@@ -84,7 +85,7 @@ qx.Class.define("client.LogDialog",
 					{
 					    this.__window.remove(navarea);
 					    this.__window.addAt(searcharea, 1);
-					    searchInput.focus();
+					    this.searchInput.focus();
 					    this.list.removeAll();
 					    this.atom.setLabel("");
 					}
@@ -96,21 +97,14 @@ qx.Class.define("client.LogDialog",
 					}
 				    }, this);
 
-		searchInput.addListener("keypress", function(e) {
+		this.searchInput.addListener("keypress", function(e) {
 		    if (e.getKeyIdentifier() == "Enter")
 		    {
-			var input = searchInput.getValue();
+			var input = this.searchInput.getValue();
 			
 			if (input !== "" && input !== null)
 			{
-			    this.searchstring = input;
-			    this.atom.setLabel("Searching...");
-
-			    input = input.replace(/[^a-z0-9 ]/g, "??");
-
-			    this.__rrpc2.callAsync(
-				qx.lang.Function.bind(this.__searchresult, this),
-				"search", input);
+			    this.__startSearch();
 			}
 		    }
 		}, this)
@@ -118,18 +112,7 @@ qx.Class.define("client.LogDialog",
 		var button1 = new qx.ui.form.Button("Search");
 		searcharea.add(button1);
 
-		button1.addListener("execute", function (e)
-				    {
-					var input = searchInput.getValue();
-
-					this.searchstring = input;
-					input = input.replace(/[^a-z0-9 ]/g, "??");
-
-					this.atom.setLabel("Searching...");
-					this.__rrpc2.callAsync(
-					    qx.lang.Function.bind(this.__searchresult, this),
-					    "search", input);
-				    }, this);
+		button1.addListener("execute", this.__startSearch(), this);
 				    
 		this.b1 = new qx.ui.form.Button("Prev year");
 		this.b2 = new qx.ui.form.Button("Prev month");
@@ -262,6 +245,27 @@ qx.Class.define("client.LogDialog",
 	    this.__window.center();
 	    this.__window.open();
 	},
+
+	__startSearch : function()
+	{
+	    var input = this.searchInput.getValue();
+
+	    this.searchstring = input;
+
+	    for (i=0; i<user.length; i++) 
+	    {
+		if (user.charCodeAt(i)>127) 
+		{
+		    this.atom.setLabel("Your search string contains unsupported special character(s).");
+		}
+		else
+		{
+		    this.atom.setLabel("Searching...");
+		    this.__rrpc2.callAsync(
+			qx.lang.Function.bind(this.__searchresult, this),
+			"search", input);
+		}
+	}
 	
 	__sendresult : function(result, exc) 
 	{
