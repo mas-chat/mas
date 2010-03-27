@@ -404,16 +404,18 @@ qx.Class.define("client.LogDialog",
 
 	    if (exc == null) 
 	    {
+		this.atom.setLabel("Formatting the log file. Please wait...");
+
 		var words = this.searchstring.split(" ");
 
-		var re = new RegExp("(" + words.join(")|(") + ")", "ig"); 
+		var re = new RegExp("(" + words.join("|") + ")", "ig"); 
 		result = result.replace(re, "<b style=\"background-color: #FF0000\">$1</b>");
 		   
 		this.atom.setLabel(MainScreenObj.adjustTime(result));
 	    }
 	    else
 	    {
-		alert("!!! Connection error, please reload the application: " + exc);
+		this.atom.setLabel("Downloading of the log file failed. Please try again later.");
 	    }
 	},
 	
