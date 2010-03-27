@@ -55,7 +55,7 @@ qx.Class.define("client.LogDialog",
 
 		var modearea = new qx.ui.container.Composite(new qx.ui.layout.HBox(10, "left"));
 	     
-		var rbSearch = new qx.ui.form.RadioButton("Search (alpha)");
+		var rbSearch = new qx.ui.form.RadioButton("Search (beta)");
 		var rbBrowse = new qx.ui.form.RadioButton("Browse");
 
 		modearea.add(rbBrowse);
@@ -112,7 +112,7 @@ qx.Class.define("client.LogDialog",
 		var button1 = new qx.ui.form.Button("Search");
 		searcharea.add(button1);
 
-		button1.addListener("execute", this.__startSearch(), this);
+		button1.addListener("execute", this.__startSearch, this);
 				    
 		this.b1 = new qx.ui.form.Button("Prev year");
 		this.b2 = new qx.ui.form.Button("Prev month");
@@ -255,7 +255,7 @@ qx.Class.define("client.LogDialog",
 
 	    for (i=0; i < input.length; i++) 
 	    {
-		if (input.charCodeAt(i) > 127) 
+		if (input.charCodeAt(0) > 127) 
 		{
 		    //glimpse supports only ascii (utf7 is a real solution)
 		    this.atom.setLabel("Your search string contains unsupported special character(s).");
