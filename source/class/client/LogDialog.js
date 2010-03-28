@@ -25,6 +25,7 @@ qx.Class.define("client.LogDialog",
 	__rrpc2 : 0,
 	__pos : 0,
 	today : 0,
+	weeks : 0,
 	searchstring : "",
 	searchInput : 0,
 
@@ -194,9 +195,10 @@ qx.Class.define("client.LogDialog",
 		infoarea.add(scroll, { flex : 1});
 	    
 		this.__window.add(infoarea, { flex : 1});
-	    
-		var logtext = new qx.ui.basic.Atom("The logs contain conversations from the last four weeks.");
-		logtext.setMarginRight(15);
+
+		this.weeks = new qx.ui.basic.Label();
+		this.weeks.setMarginRight(15);
+		
 		var logon = new qx.ui.form.RadioButton("Enabled");
 		logon.setMarginRight(10);
 		var logoff = new qx.ui.form.RadioButton("Disabled");
@@ -210,7 +212,7 @@ qx.Class.define("client.LogDialog",
 		    }, this);
 
 		var logbox = new qx.ui.container.Composite(new qx.ui.layout.HBox());
-		logbox.add(logtext);
+		logbox.add(this.weeks);
 //		logbox.add(logon);
 //		logbox.add(logoff);
 		logbox.add(new qx.ui.core.Spacer(50), {flex : 1});
@@ -243,6 +245,7 @@ qx.Class.define("client.LogDialog",
 	    }
 
 	    this.__window.center();
+	    this.updateLogLength();
 	    this.__window.open();
 	},
 
@@ -253,7 +256,7 @@ qx.Class.define("client.LogDialog",
 
 	    this.searchstring = input;
 
-	    for (i=0; i < input.length; i++) 
+	    for (var i=0; i < input.length; i++) 
 	    {
 		if (input.charCodeAt(0) > 127) 
 		{
@@ -427,6 +430,16 @@ qx.Class.define("client.LogDialog",
 	    {
 		this.atom.setLabel("Downloading of the log file failed. Please try again later.");
 	    }
+	},
+
+	updateLogLength : function()
+	{
+	    var firstDate = new Date('2/1/2010 0:00');
+	    var now = new Date();
+	    var numWeeks = (now.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24 * 7);
+	    numWeeks =  Math.round(numWeeks*Math.pow(10,7))/Math.pow(10,7);
+
+	    this.weeks.setValue("The logs contain conversations from the last " + numWeeks + " weeks.");
 	},
 	
 	seek : function(days)
