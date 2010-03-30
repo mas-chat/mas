@@ -28,6 +28,7 @@ qx.Class.define("client.UserWindow",
 
 	var wm1 = new qx.ui.window.Window();
 	wm1.userWindowRef = this;
+	wm1.setAppearance("aie-mtsk-window");
 
 	this.__nw = nw;
 	this.__nw_id = nw_id;

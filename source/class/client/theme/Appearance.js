@@ -10,9 +10,9 @@
 
 qx.Theme.define("client.theme.Appearance",
 {
-  extend : qx.theme.modern.Appearance,
+    extend : aie.theme.mtsk.Appearance,
 
-  appearances :
-  {
-  }
+    appearances :
+    {
+    }
 });

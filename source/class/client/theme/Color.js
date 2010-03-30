@@ -10,9 +10,9 @@
 
 qx.Theme.define("client.theme.Color",
 {
-  extend : qx.theme.modern.Color,
+    extend : aie.theme.mtsk.Color,
 
-  colors :
-  {
-  }
+    colors :
+    {
+    }
 });

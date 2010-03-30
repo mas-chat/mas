@@ -35,12 +35,12 @@
     "API_EXCLUDE"  : ["qx.legacy.*","qx.test.*"],
     "LOCALES"      : [ "en" ],
     "ROOT"         : "."
-  }
+  },
 
   // You only need to edit the remainder of this file, if you want to customize
   // specific jobs, or add own job definitions.
 
-  /*
+  
   "jobs" :
   {
     // Uncomment the following entry to add a contrib or library to your
@@ -52,10 +52,13 @@
       "library" :
       [
         {
-          "manifest" : "contrib://SkeletonApplication/trunk/Manifest.json"
+          "manifest" : "../aie/Manifest.json"
         }
       ]
-    },
+    }
+  }
+}	
+    /*
 
     // If you want to tweak a job setting, see the following sample where
     // the "format" feature of the "build-script" job is overridden.
@@ -71,5 +74,6 @@
       }
     }
   }
-  */
 }
+
+*/

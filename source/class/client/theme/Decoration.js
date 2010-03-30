@@ -10,8 +10,8 @@
 
 qx.Theme.define("client.theme.Decoration",
 {
-  extend : qx.theme.modern.Decoration,
-
+  extend : aie.theme.mtsk.Decoration,
+  
   decorations :
   {
       "background2" :

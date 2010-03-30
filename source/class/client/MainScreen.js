@@ -544,7 +544,7 @@ qx.Class.define("client.MainScreen",
 		    new client.UserWindow(this.desktop,
 					  topic, nw, name, type, sound, titlealert,
 					  nw_id, usermode, password, new_msgs);
-		
+
 		if (x < 0)
 		{
 		    x = 0;
