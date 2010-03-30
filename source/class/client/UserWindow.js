@@ -43,9 +43,9 @@ qx.Class.define("client.UserWindow",
 	wm1.setResizeSensitivity(10);
 	wm1.set({contentPadding: [0,0,0,0]});
 
-	var box1 = new qx.ui.container.Composite(layout);
-	box1.set({backgroundColor: "#F2F5FE", padding:10, margin: 0});
-	wm1.add(box1, {flex:1});
+	this.__box1 = new qx.ui.container.Composite(layout);
+	this.__box1.set({backgroundColor: "#F2F5FE", padding:10, margin: 0});
+	wm1.add(this.__box1, {flex:1});
 
 	// create scroll container
 	this.__scroll = new client.Scroll();
@@ -79,7 +79,7 @@ qx.Class.define("client.UserWindow",
 	this.__atom.set({ backgroundColor: "#F2F5FE", selectable: true, nativeContextMenu : true});
 
 	this.__scroll.add(this.__atom);		       
-	box1.add(this.__scroll, {row: 0, column: 0, flex: 1});
+	this.__box1.add(this.__scroll, {row: 0, column: 0, flex: 1});
 	
 	this.__input1 = new qx.ui.form.TextField();
 	this.__input1.set({ maxLength: 200 });
@@ -215,7 +215,7 @@ qx.Class.define("client.UserWindow",
 	var icomposite = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
 	icomposite.add(this.__input1, { flex : 1 });
 
-	box1.add(icomposite, {row: 1, column: 0});
+	this.__box1.add(icomposite, {row: 1, column: 0});
 
 	this.prefButton = new qx.ui.form.ToggleButton("Settings");
 	this.urlButton = new qx.ui.form.ToggleButton("L");
@@ -234,8 +234,8 @@ qx.Class.define("client.UserWindow",
 
 	if (type == 0)
 	{
-	    box1.add(this.getList(), {row: 0, column: 1, flex:1});
-	    box1.add(buttons, {row: 1, column: 1});
+	    this.__box1.add(this.getList(), {row: 0, column: 1, flex:1});
+	    this.__box1.add(buttons, {row: 1, column: 1});
 	}
 	else
 	{
@@ -252,7 +252,6 @@ qx.Class.define("client.UserWindow",
 	    if (e.getData() == true)
 	    {
 		this.urlButton.setEnabled(false);
-		this.prefButton.setLabel("Back");
 
 		this.topicInput.setValue(this.__topic);
 		this.pwInput.setValue(this.__password);
@@ -275,32 +274,22 @@ qx.Class.define("client.UserWindow",
 					  "GETBANS", global_ids + this.winid);
 		}
 
-		box1.remove(this.__scroll);
-		if (type == 0)
+		this.__box1.remove(this.__scroll);
+		if (this.__type == 0)
 		{
-		    box1.remove(this.__list);
-		    box1.add(this.__settings, {row : 0, column : 0, colSpan : 2 });
+		    this.__box1.remove(this.__list);
+		    this.__box1.add(this.__settings, {row : 0, column : 0, colSpan : 2 });
 		}
 		else
 		{
-		    box1.add(this.__settings, {row : 0, column : 0});
+		    this.__box1.add(this.__settings, {row : 0, column : 0});
 		}
 
 		this.__viewmode = 1;
 	    }
 	    else
 	    {
-		this.prefButton.setLabel("Settings");
-		box1.remove(this.__settings);
-		box1.add(this.__scroll, { row:0, column :0});
-
-		if (type == 0)
-		{
-		    box1.add(this.__list, { row:0, column :1});
-		}
-
-		this.__viewmode = 0;
-		this.urlButton.setEnabled(true);
+		this.getBackFromSettingsMode();
 	    }
 	}, this);
 
@@ -310,31 +299,22 @@ qx.Class.define("client.UserWindow",
 		this.prefButton.setEnabled(false);
 		this.updateUrls();
 
-		box1.remove(this.__scroll);
-		if (type == 0)
+		this.__box1.remove(this.__scroll);
+		if (this.__type == 0)
 		{
-		    box1.remove(this.__list);
-		    box1.add(this.__urls, {row : 0, column : 0, colSpan : 2 });
+		    this.__box1.remove(this.__list);
+		    this.__box1.add(this.__urls, {row : 0, column : 0, colSpan : 2 });
 		}
 		else
 		{
-		    box1.add(this.__urls, {row : 0, column : 0 });
+		    this.__box1.add(this.__urls, {row : 0, column : 0 });
 		}
 
 		this.__viewmode = 2;
 	    }
 	    else
 	    {
-		box1.remove(this.__urls);
-
-		box1.add(this.__scroll, { row:0, column :0});
-		if (type == 0)
-		{
-		    box1.add(this.__list, { row:0, column :1});
-		}
-
-		this.__viewmode = 0;
-	    	this.prefButton.setEnabled(true);
+		this.getBackFromUrlMode();
 	    }
 	}, this);
 
@@ -360,6 +340,7 @@ qx.Class.define("client.UserWindow",
 	__urls : 0,
 	__viewmode : 0,
 	winid : 0,
+	__box1 : 0,
 	__nw : 0,
 	__nw_id : 0,
 	__type : 0,
@@ -596,8 +577,18 @@ qx.Class.define("client.UserWindow",
 
 	    this.window.addListener("beforeClose", function(e) {
 		var mywindow = this.window;
-
-		if (closeok == 0)
+		
+		if (this.__viewmode == 1)
+		{
+		    e.preventDefault();
+		    this.prefButton.setValue(false);
+		}
+		else if (this.__viewmode == 2)
+		{
+		    e.preventDefault();
+		    this.urlButton.setValue(false);
+		}
+		else if (closeok == 0)
 		{
 		    e.preventDefault();
 
@@ -851,6 +842,35 @@ qx.Class.define("client.UserWindow",
 		    }
 		}
 	    }
+	},
+
+	getBackFromSettingsMode : function()
+	{
+	    this.prefButton.setLabel("Settings");
+	    this.__box1.remove(this.__settings);
+	    this.__box1.add(this.__scroll, { row:0, column :0});
+
+	    if (this.__type == 0)
+	    {
+		this.__box1.add(this.__list, { row:0, column :1});
+	    }
+
+	    this.__viewmode = 0;
+	    this.urlButton.setEnabled(true);
+	},
+
+	getBackFromUrlMode : function()
+	{
+	    this.__box1.remove(this.__urls);
+	    
+	    this.__box1.add(this.__scroll, { row:0, column :0});
+	    if (this.__type == 0)
+	    {
+		this.__box1.add(this.__list, { row:0, column :1});
+	    }
+	    
+	    this.__viewmode = 0;
+	    this.prefButton.setEnabled(true);
 	},
 
 	getList : function()
