@@ -13,6 +13,8 @@ qx.Class.define("client.UserWindow",
 			 nw_id, usermode, password, new_msgs)
     {
 	this.base(arguments);
+	this.__urllist = new Array();
+	this.nameslist = new Array();
 
 	// write "socket"
 	this.__srpc = new qx.io.remote.Rpc("/ralph", "ralph");
@@ -38,7 +40,6 @@ qx.Class.define("client.UserWindow",
 	wm1.setModal(false);
 	wm1.setLayout(new qx.ui.layout.VBox(0));
 	wm1.setAllowMaximize(true);
-	wm1.moveTo(250, 150);
 	wm1.setResizeSensitivity(10);
 	wm1.set({contentPadding: [0,0,0,0]});
 
@@ -217,17 +218,42 @@ qx.Class.define("client.UserWindow",
 	box1.add(icomposite, {row: 1, column: 0});
 
 	this.prefButton = new qx.ui.form.ToggleButton("Settings");
+	this.urlButton = new qx.ui.form.ToggleButton("L");
+
 	this.prefButton.setFocusable(false);
-	this.prefButton.setMargin(2,10,2,10);
+	this.urlButton.setFocusable(false);
+
+	this.prefButton.setMargin(2,5,2,5);
+	this.urlButton.setMargin(2,5,2,5);
+
+	var buttons = new qx.ui.container.Composite(
+	    new qx.ui.layout.HBox(0));
+
+	buttons.add(this.prefButton);
+	buttons.add(this.urlButton);
+
+	if (type == 0)
+	{
+	    box1.add(this.getList(), {row: 0, column: 1, flex:1});
+	    box1.add(buttons, {row: 1, column: 1});
+	}
+	else
+	{
+	    icomposite.add(buttons);
+	}
+
+	this.window = wm1;
+	this.__type = type;
+	this.__name = name;
+	this.__settings = this.getSettingsView();		    
+	this.__urls = this.getUrlsView();
 
 	this.prefButton.addListener("changeValue", function(e) {
 	    if (e.getData() == true)
 	    {
-		this.__settingsmode = 1;
-		if (this.__settings == 0)
-		{
-		    this.__settings = this.getSettingsView();		    
-		}
+		this.urlButton.setEnabled(false);
+		this.prefButton.setLabel("Back");
+
 		this.topicInput.setValue(this.__topic);
 		this.pwInput.setValue(this.__password);
 
@@ -253,40 +279,64 @@ qx.Class.define("client.UserWindow",
 		if (type == 0)
 		{
 		    box1.remove(this.__list);
+		    box1.add(this.__settings, {row : 0, column : 0, colSpan : 2 });
 		}
-		box1.add(this.__settings, {row : 0, column : 0 });
-		this.prefButton.setLabel("Back");
+		else
+		{
+		    box1.add(this.__settings, {row : 0, column : 0});
+		}
+
+		this.__viewmode = 1;
 	    }
 	    else
 	    {
-		this.__settingsmode = 0;
-		if (this.__settings != 0)
+		this.prefButton.setLabel("Settings");
+		box1.remove(this.__settings);
+		box1.add(this.__scroll, { row:0, column :0});
+
+		if (type == 0)
 		{
-		    box1.remove(this.__settings);
+		    box1.add(this.__list, { row:0, column :1});
 		}
+
+		this.__viewmode = 0;
+		this.urlButton.setEnabled(true);
+	    }
+	}, this);
+
+	this.urlButton.addListener("changeValue", function(e) {
+	    if (e.getData() == true)
+	    {
+		this.prefButton.setEnabled(false);
+		this.updateUrls();
+
+		box1.remove(this.__scroll);
+		if (type == 0)
+		{
+		    box1.remove(this.__list);
+		    box1.add(this.__urls, {row : 0, column : 0, colSpan : 2 });
+		}
+		else
+		{
+		    box1.add(this.__urls, {row : 0, column : 0 });
+		}
+
+		this.__viewmode = 2;
+	    }
+	    else
+	    {
+		box1.remove(this.__urls);
 
 		box1.add(this.__scroll, { row:0, column :0});
 		if (type == 0)
 		{
 		    box1.add(this.__list, { row:0, column :1});
 		}
-		this.prefButton.setLabel("Settings");
+
+		this.__viewmode = 0;
+	    	this.prefButton.setEnabled(true);
 	    }
 	}, this);
-
-	if (type == 0)
-	{
-	    box1.add(this.getList(), {row: 0, column: 1, flex:1});
-	    box1.add(this.prefButton, {row: 1, column: 1});
-	}
-	else
-	{
-	    icomposite.add(this.prefButton);
-	}
-
-	this.window = wm1;
-	this.__type = type;
-	this.__name = name;
 
 	desktop.add(wm1);
 
@@ -298,6 +348,7 @@ qx.Class.define("client.UserWindow",
     {
         window : 0,
 	__input1 : 0,
+	__urllabel : 0,
 	__list : 0,
 	hidden : false,
 	__atom : 0,
@@ -306,21 +357,25 @@ qx.Class.define("client.UserWindow",
 	__srpc : 0,
 	__lines : 0,
 	__settings : 0,
-	__settingsmode : 0,
+	__urls : 0,
+	__viewmode : 0,
 	winid : 0,
 	__nw : 0,
 	__nw_id : 0,
 	__type : 0,
+	__topic : 0,
 	__taskbarButtonColor : "cccccc",
 	__name : 0,
+	__password : 0,
 	__usermode : 0,
 	__newmsgsatstart : 0,
 	taskbarControl : 0,
+	__urllist : null,
 	titlealert : 0,
 	sound : 0,
 	configListBan : 0,
 	configListOper : 0,
-	nameslist : [],
+	nameslist : null,
 	closeok : 0,
 	scrollLock : false,
 	isRed : false,
@@ -331,7 +386,7 @@ qx.Class.define("client.UserWindow",
 	    this.__usermode = usermode;
 	    this.__topic = topic;
 
-	    if (this.__settingsmode == 1)
+	    if (this.__viewmode == 1)
 	    {
 		//realtime update
 		this.topicInput.setValue(this.__topic);
@@ -461,7 +516,7 @@ qx.Class.define("client.UserWindow",
 
 	activatewin : function()
 	{
-	    if (this.__settingsmode == 0)
+	    if (this.__viewmode == 0)
 	    {
 		this.__input1.focus();
 	    }
@@ -695,10 +750,14 @@ qx.Class.define("client.UserWindow",
 
 		    //trick to sort @ before +
 		    if (listnick.charAt(0) == "@")
+		    {
 			listnick = "*" + listnick.substr(1);
+		    }
 
 		    if (newnick.charAt(0) == "@")
+		    {
 			newnick = "*" + newnick.substr(1);
+		    }
 
 		    if (newnick.toLowerCase() < listnick.toLowerCase())
 		    {
@@ -896,6 +955,62 @@ qx.Class.define("client.UserWindow",
 	    return menu;
 	},
 
+	getUrlsView : function()
+	{
+	    var scroll = new qx.ui.container.Scroll();
+	    
+	    scroll.set({
+		scrollbarY : "auto"
+	    });
+
+	    this.__urllabel = new qx.ui.basic.Label("");
+	    this.__urllabel.setRich(true);
+	    this.__urllabel.setAllowGrowX(true);
+	    this.__urllabel.setAllowGrowY(true);
+	    this.__urllabel.setAlignY("top");
+		
+	    scroll.add(this.__urllabel);
+
+	    return scroll;
+	},
+
+	updateUrls : function()
+	{
+	    var text = "<b>Link Catcher</b><p>";
+
+	    if (global_anon == true)
+	    {
+		text = text + 
+		    "(If you register, links are not lost when you log out.)<p>"; 
+	    }
+
+	    if (this.__urllist.length == 0)
+	    {
+		text = text + 
+		  "<br><br><br><center>No links detected yet in conversation.<br><br>" + 
+		    "Press the U-button again to return normal view.</center>";
+	    }
+	    else
+	    {
+		text = text + "<ul>";
+
+		for (var i=0; i < this.__urllist.length; i++) 
+		{
+		    text = text + "<li><a target=\"_blank\" href=\"" +
+			this.__urllist[i] + "\">" +
+			this.__urllist[i] + "</a><br></li>";
+		}
+
+		text = text + "</ul>";
+	    }
+	    this.__urllabel.setValue(text);
+	},
+
+	addUrl : function(url)
+	{
+	    this.__urllist.push(url);
+	},
+
 	getSettingsView : function()
 	{
 	    var composite = new qx.ui.container.Composite(
@@ -975,8 +1090,6 @@ qx.Class.define("client.UserWindow",
 		    "SOUND", global_ids + this.winid + " " + 0);
 	    }, this);
 
-	    var rmanager = new qx.ui.form.RadioGroup(syes, sno);
-
 	    scomposite2.add(syes);
 	    scomposite2.add(sno);
 
@@ -1017,8 +1130,6 @@ qx.Class.define("client.UserWindow",
 		    this.sendresult,
 		    "TITLEALERT", global_ids + this.winid + " " + 0);
 	    }, this);
-
-	    var rmanager2 = new qx.ui.form.RadioGroup(tyes, tno);
 
 	    scomposite4.add(tyes);
 	    scomposite4.add(tno);

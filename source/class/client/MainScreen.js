@@ -12,6 +12,8 @@ qx.Class.define("client.MainScreen",
     {
 	this.base(arguments);
 
+	this.windows = new Array();
+
 	// read "socket"
 	this.__rrpc = new qx.io.remote.Rpc("/ralph", "ralph");
 	this.__rrpc.setTimeout(30000);
@@ -119,6 +121,7 @@ qx.Class.define("client.MainScreen",
 	__tt : 0,
 	__blur : 0,
 	__firstrpc : 1,
+	__input1 : 0,
 	__topictimeractive : 0,
 	activewin : 0,
 	__prevwin : -1,
@@ -126,7 +129,7 @@ qx.Class.define("client.MainScreen",
 	initdone : 0,
 	rootContainer : 0,
 	seq : 0,
-	windows : [],
+	windows : null,
 	showads : 1,
 	desktop : 0,
 	contactsButton : 0,
@@ -224,7 +227,7 @@ qx.Class.define("client.MainScreen",
 
 		    pos = param.search(/ /);
 		    var window_id = param.slice(0, pos);
-
+		    
 		    //alert ("handling:" + command + param);
 
 		    switch(command)
@@ -362,11 +365,18 @@ qx.Class.define("client.MainScreen",
 			this.windows[window_id].nameslist = usertext.split(" ").sort(function(x,y){ 
 			    var a = String(x).toUpperCase(); 
 			    var b = String(y).toUpperCase(); 
-			    if (a > b) 
-				return 1 
-			    if (a < b) 
-				return -1 
-			    return 0; 
+			    if (a > b)
+			    { 
+				return 1;
+			    }
+			    else if (a < b) 
+			    {
+				return -1; 
+			    }
+			    else
+			    {
+				return 0; 
+			    }
 			}); 
 
 			this.windows[window_id].addnames(true);
@@ -394,6 +404,13 @@ qx.Class.define("client.MainScreen",
 			this.showads = options.shift();
 			break;
 
+		    case "ADDURL":
+			var options = param.split(" ");
+		    	var windowid = parseInt(options.shift());
+			var url = options.shift();
+			this.windows[windowid].addUrl(url);
+			break;
+
 		    case "DIE":
 		    	if (this.desktop === 0)
 			{
@@ -415,7 +432,7 @@ qx.Class.define("client.MainScreen",
 			    this.show();
 			}
 
-			var reason = param.slice(pos+1);
+			//var reason = param.slice(pos+1);
 			infoDialog.showInfoWin(
 			    "Your session expired, you logged in from another location, or<br>the server was restarted.<p>Press OK to restart.",
 			    "OK", 
@@ -537,9 +554,38 @@ qx.Class.define("client.MainScreen",
 		{
 		    y = 0;
 		}
-		
-		var dim = this.desktop.getBounds();
-		
+
+		if (height == -1)
+		{
+		    var myWidth = 0, myHeight = 0;
+		    
+		    //horror, for some reason getBounds doesn't work for 1st anon window
+		    if( typeof( window.innerWidth ) == 'number' ) 
+		    {
+			//Non-IE
+			myWidth = window.innerWidth;
+			myHeight = window.innerHeight;
+		    } 
+		    else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) 
+		    {
+			//IE 6+ in 'standards compliant mode'
+			myWidth = document.documentElement.clientWidth;
+			myHeight = document.documentElement.clientHeight;
+		    }
+		    else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) 
+		    {
+			//IE 4 compatible
+			myWidth = document.body.clientWidth;
+			myHeight = document.body.clientHeight;
+		    }
+
+		    //anonymous user
+		    height = Math.round(myHeight * 0.7);
+		    width = Math.round(myWidth * 0.7);
+		}
+
+		var dim = this.desktop.getBounds();		
+
 		if (dim && x + width > dim.width)
 		{
 		    if (width < dim.width)
@@ -773,7 +819,6 @@ qx.Class.define("client.MainScreen",
 	    this.__windowGroup = new client.RadioManager();
 //	    this.__windowGroup.addListener("changeSelection",
 //					   this.switchToWindow, this);
-
 	},
 
 	updateFriendsList : function(parentFList, allFriends)
@@ -1240,44 +1285,49 @@ qx.Class.define("client.MainScreen",
 	player_start : function()
 	{
 	    var obj = FlashHelper.getMovie('niftyPlayer1');
-	    if (!FlashHelper.movieIsLoaded(obj)) return;
+	    if (!FlashHelper.movieIsLoaded(obj)) 
+	    {
+		return;
+	    }
 	    obj.TCallLabel('/','play');
 	},
 
 	player_stop : function()
 	{
 	    var obj = FlashHelper.getMovie(name);
-	    if (!FlashHelper.movieIsLoaded(obj)) return;
+	    if (!FlashHelper.movieIsLoaded(obj))
+	    {
+		return;
+	    }
 	    obj.TCallLabel('/','stop');
 	},
 
 	player_pause : function()
 	{
 	    var obj = FlashHelper.getMovie(name);
-	    if (!FlashHelper.movieIsLoaded(obj)) return;
-	    obj.TCallLabel('/','pause');
-	},
-
-	player_pause : function()
-	{
-	    var obj = FlashHelper.getMovie(name);
-	    if (!FlashHelper.movieIsLoaded(obj)) return;
+	    if (!FlashHelper.movieIsLoaded(obj))
+	    {
+		return;
+	    }
 	    obj.TCallLabel('/','reset');
 	},
 	
 	player_load : function(url)
 	{
 	    var obj = FlashHelper.getMovie(name);
-	    if (!FlashHelper.movieIsLoaded(obj)) return;
+	    if (!FlashHelper.movieIsLoaded(obj))
+	    {
+		return;
+	    }
 	    obj.SetVariable('currentSong', url);
 	    obj.TCallLabel('/','load');
 	},
 	    
 	player_get_state : function ()
 	{
-	    var obj = FlashHelper.getMovie(name);
-	    var ps = obj.GetVariable('playingState');
-	    var ls = obj.GetVariable('loadingState');
+	    //var obj = FlashHelper.getMovie(name);
+	    //var ps = obj.GetVariable('playingState');
+	    //var ls = obj.GetVariable('loadingState');
 		
 	    // returns
 	    //   'empty' if no file is loaded
@@ -1287,16 +1337,16 @@ qx.Class.define("client.MainScreen",
 	    //   'paused' if file is paused
 	    //   'finished' if file has finished playing
 	    //   'error' if an error occurred
-	    if (ps == 'playing')
-		if (ls == 'loaded') return ps;
-	    else return ls;
+	    // if (ps == 'playing')
+	    //	if (ls == 'loaded') return ps;
+	    //   else return ls;
 	    
-	    if (ps == 'stopped')
-		if (ls == 'empty') return ls;
-	    if (ls == 'error') return ls;
-	    else return ps;
-		
-	    return ps;
+	    //  if (ps == 'stopped')
+	    //		if (ls == 'empty') return ls;
+	    //    if (ls == 'error') return ls;
+	    //   else return ps;
+	    
+	    //    return ps;
 		
 	}
     }
