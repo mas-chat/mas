@@ -34,7 +34,10 @@ qx.Class.define("client.LogDialog",
 	    if (this.__window == 0)
 	    {
 		this.__window = new qx.ui.window.Window("History Logs");
+		this.__window.setAppearance("aie-mtsk-window");
 		this.__window.setLayout(new qx.ui.layout.VBox(5));
+		this.__window.set({contentPadding: [10,10,10,10]});
+
 		this.__window.setModal(true);
 		this.__window.setShowClose(true);
 

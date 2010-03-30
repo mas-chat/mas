@@ -14,7 +14,10 @@ qx.Class.define("client.InfoDialog",
 	this.base(arguments);
 
 	this.__window = new qx.ui.window.Window("X");
+	this.__window.setAppearance("aie-mtsk-window");
 	this.__window.setLayout(new qx.ui.layout.VBox(10));
+	this.__window.set({contentPadding: [10,10,10,10]});
+
 	this.__window.setModal(true);
 	this.__window.setShowClose(false);
 	this.__window.moveTo(400, 300);
@@ -156,11 +159,10 @@ qx.Class.define("client.InfoDialog",
 	    }
 
 	    this.__window.setModal(true);
-	    
 	    MainScreenObj.desktop.add(this.__window);
-	    MainScreenObj.manager.bringToFront(this.__window);
 	    this.__window.center();
 	    this.__window.open();
+	    MainScreenObj.manager.bringToFront(this.__window);
 	},
 
 	getJoinNewChannelWin : function(rootItem, mode)
