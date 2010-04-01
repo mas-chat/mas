@@ -1084,6 +1084,7 @@ qx.Class.define("client.UserWindow",
 	    
 	    var syes = new qx.ui.form.RadioButton("On (play sound when new msg arrives)");
 	    var sno = new qx.ui.form.RadioButton("Off");
+	    var smanager = new qx.ui.form.RadioGroup(syes, sno);
 
 	    if (this.sound == 0)
 	    {
@@ -1126,6 +1127,7 @@ qx.Class.define("client.UserWindow",
 	    
 	    var tyes = new qx.ui.form.RadioButton("On (make browser title bar blink when new msg arrives)");
 	    var tno = new qx.ui.form.RadioButton("Off");
+	    var tmanager = new qx.ui.form.RadioGroup(tyes, tno);
 
 	    if (this.titlealert == 0)
 	    {
