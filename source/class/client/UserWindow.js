@@ -83,7 +83,7 @@ qx.Class.define("client.UserWindow",
 	this.__box1.add(this.__scroll, {row: 0, column: 0, flex: 1});
 	
 	this.__input1 = new qx.ui.form.TextField();
-	this.__input1.set({ maxLength: 200 });
+	this.__input1.set({ maxLength: 400 });
 	this.__input1.setMarginTop(2);
 	this.__input1.focus();
 

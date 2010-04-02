@@ -59,10 +59,11 @@ qx.Class.define("client.MainScreen",
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
 	    this.__blur = 0;
-	    this.__topictimeractive = false;
+
 	    if (this.__topictimeractive == true)
 	    {
 		this.__topictimer.stop();
+		this.__topictimeractive = false;
 	    }
 
 	    if (this.windows[this.activewin])
