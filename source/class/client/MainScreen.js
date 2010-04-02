@@ -57,6 +57,7 @@ qx.Class.define("client.MainScreen",
 	this.rpc.read("HELLO", this.seq + " " + this.timezone, this, this.readresult);
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
+	    document.title = "MeetAndSpeak";
 	    this.__blur = 0;
 
 	    if (this.__topictimeractive == true)
@@ -238,13 +239,13 @@ qx.Class.define("client.MainScreen",
 			usertext = this.adjustTime(usertext);
 			this.windows[window_id].addline(usertext);
 
-			if (this.windows[window_id].sound == 1)
+			if (this.windows[window_id].sound == 1 && this.__ack != 1)
 			{
 			    this.player_start();
 			}
 
 			if (this.__blur == 1 && this.windows[window_id].titlealert == 1 &&
-			    this.__topictimer.getEnabled() == false)
+			    this.__topictimer.getEnabled() == false && this.__ack != 1)
 			{
 			    this.__topictimeractive = true;
 			    this.__topictimer.start();
