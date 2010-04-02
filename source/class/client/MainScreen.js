@@ -601,12 +601,13 @@ qx.Class.define("client.MainScreen",
 	adjustTime : function(text)
 	{
 	    var myRe = /<(\d+)>/g;
+	    var timezone = this.timezone;
 
 	    return text.replace(
 		myRe, 
 		function(m)
 		{
-		    var mytime = parseInt(m.substring(1, m.length-1)) - this.timezone;
+		    var mytime = parseInt(m.substring(1, m.length-1)) - timezone;
 		    if (mytime < 0)
 		    {
 			mytime = 1440 + mytime;
