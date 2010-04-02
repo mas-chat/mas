@@ -22,7 +22,7 @@ qx.Class.define("client.Application",
 	    var start_label = new qx.ui.basic.Label("Initializing...").set({
 		font : new qx.bom.Font(12, ["Arial", "sans-serif"])});
 	    
-	    start_label.setMargin(20,20,20,20);
+	    start_label.setMargin(10,10,10,10);
 	    this.getRoot().add(start_label, {flex : 1});
 
 	    var srpc = new client.RpcManager();
