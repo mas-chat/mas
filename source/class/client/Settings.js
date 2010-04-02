@@ -8,38 +8,10 @@ qx.Class.define("client.Settings",
 {
     extend : qx.core.Object,
 
-    construct : function(params)
+    construct : function(srpc, params)
     {
-	this.initdone = 0;
-
-	// write "socket"
-	this.__srpc = new qx.io.remote.Rpc("/ralph", "ralph");
-	this.__srpc.setTimeout(10000);
-
-	var allsettings = params.split("||");
-
-	for (var i=0; i < allsettings.length; i = i + 2)
-	{
-	    var key = allsettings[i];
-	    var value = allsettings[i+1];
-
-	    switch(key)
-	    {
-	    case "firstTime":
-		this.setFirstTime(value);
-		break;
-
-	    case "loggingEnabled":
-		this.setLoggingEnabled(value);
-		break;
-
-	    case "sslEnabled":
-		this.setSslEnabled(value);
-		break;
-	    }
-	}
-	this.initdone = 1;
-
+	this.rpc = srpc;
+	this.update(params);
     },
 
     //TODO: write proper destructor
@@ -53,8 +25,37 @@ qx.Class.define("client.Settings",
 
     members :
     {
-	__srpc : 0,
+	rpc : 0,
 	initdone : 0,
+
+	update : function(params)
+	{
+	    this.initdone = 0;
+	    
+	    var allsettings = params.split("||");
+	    
+	    for (var i=0; i < allsettings.length; i = i + 2)
+	    {
+		var key = allsettings[i];
+		var value = allsettings[i+1];
+		
+		switch(key)
+		{
+		case "firstTime":
+		    this.setFirstTime(value);
+		    break;
+		    
+		case "loggingEnabled":
+		    this.setLoggingEnabled(value);
+		    break;
+		    
+		case "sslEnabled":
+		    this.setSslEnabled(value);
+		    break;
+		}
+	    }
+	    this.initdone = 1;
+	},
 
 	_applyFirstTime : function(value) 
 	{
@@ -75,15 +76,8 @@ qx.Class.define("client.Settings",
 	{
 	    if (this.initdone == 1)
 	    {
-		this.__srpc.callAsync(
-		    this.sendresult,
-		    "SET", global_ids + name + " " + value);
+		this.rpc.call("SET", name + " " + value);
 	    }
-	},
-
-	sendresult : function (result, exc)
-	{
-	    MainScreenObj.sendresult(result, exc);
 	}
     }
 });

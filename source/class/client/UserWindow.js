@@ -9,16 +9,15 @@ qx.Class.define("client.UserWindow",
 {
     extend : qx.core.Object,
 
-    construct : function(desktop, topic, nw, name, type, sound, titlealert,
-			 nw_id, usermode, password, new_msgs)
+    construct : function(srpc, desktop, topic, nw, name, type, sound, titlealert,
+			 nw_id, usermode, password, new_msgs, infoDialog, mainscreen)
     {
 	this.base(arguments);
 	this.__urllist = new Array();
 	this.nameslist = new Array();
-
-	// write "socket"
-	this.__srpc = new qx.io.remote.Rpc("/ralph", "ralph");
-	this.__srpc.setTimeout(10000);
+	this.rpc = srpc;
+	this.mainscreen = mainscreen;
+	this.infoDialog = infoDialog;
 
 	var layout = new qx.ui.layout.Grid();
 	layout.setRowFlex(0, 1); // make row 0 flexible
@@ -99,9 +98,8 @@ qx.Class.define("client.UserWindow",
 	    
 		if (input !== "" && input !== null)
 		{
-		    this.__srpc.callAsync(
-			this.sendresult,
-			"SEND", global_ids + this.winid + " " + input);
+		    this.rpc.call("SEND", this.winid + " " + input, this);
+
 		    this.__input1.setValue("");
 
 		    input = input.replace(/</g, "&lt;");
@@ -122,13 +120,13 @@ qx.Class.define("client.UserWindow",
 		    }
 		 
 		    var mynick = " <font color=\"blue\"><b>&lt;" +
-			global_nick[this.__nw_id] + "&gt;</b> ";
+			this.mainscreen.nicks[this.__nw_id] + "&gt;</b> ";
 
 		    if (input.substr(0,4) == "/me ")
 		    {
 			input = input.substr(4);
 			mynick = " <font color=\"blue\"><b>* " +
-			    global_nick[this.__nw_id] + "</b> ";
+			    this.mainscreen.nicks[this.__nw_id] + "</b> ";
 		    }
 		    
 		    if (input.substr(0,1) != "/")
@@ -147,11 +145,11 @@ qx.Class.define("client.UserWindow",
 	    }
 	    else if (e.getKeyIdentifier() == "Down")
 	    {
-		MainScreenObj.activateNextWin("down");
+		this.mainscreen.activateNextWin("down");
 	    }
 	    else if (e.getKeyIdentifier() == "Up")
 	    {
-		MainScreenObj.activateNextWin("up");
+		this.mainscreen.activateNextWin("up");
 	    }
 	    else if (e.getKeyIdentifier() == "Tab" && this.__type == 0)
 	    {
@@ -262,8 +260,7 @@ qx.Class.define("client.UserWindow",
 		    this.configListOper.removeAll();
 		    this.configListOper.add(new qx.ui.form.ListItem("Refreshing..."));
 		    
-		    this.__srpc.callAsync(qx.lang.Function.bind(this.sendresult, this),
-					  "GETOPERS", global_ids + this.winid);
+		    this.rpc.call("GETOPERS", this.winid, this);
 		}
 
 		if (this.__usermode != 0)
@@ -271,8 +268,7 @@ qx.Class.define("client.UserWindow",
 		    this.configListBan.removeAll();
 		    this.configListBan.add(new qx.ui.form.ListItem("Refreshing..."));
 
-		    this.__srpc.callAsync(qx.lang.Function.bind(this.sendresult, this),
-					  "GETBANS", global_ids + this.winid);
+		    this.rpc.call("GETBANS", this.winid, this);
 		}
 
 		this.__box1.remove(this.__scroll);
@@ -328,19 +324,31 @@ qx.Class.define("client.UserWindow",
     members :
     {
         window : 0,
+	hidden : false,
+	winid : 0,
+	rpc : 0,
+	taskbarControl : 0,
+	titlealert : 0,
+	sound : 0,
+	configListBan : 0,
+	configListOper : 0,
+	nameslist : null,
+	closeok : 0,
+	scrollLock : false,
+	isRed : false,
+	infoDialog : 0,
+	mainscreen : 0,
+
 	__input1 : 0,
 	__urllabel : 0,
 	__list : 0,
-	hidden : false,
 	__atom : 0,
 	__channelText : "",
 	__scroll : 0,
-	__srpc : 0,
 	__lines : 0,
 	__settings : 0,
 	__urls : 0,
 	__viewmode : 0,
-	winid : 0,
 	__box1 : 0,
 	__nw : 0,
 	__nw_id : 0,
@@ -351,18 +359,10 @@ qx.Class.define("client.UserWindow",
 	__password : 0,
 	__usermode : 0,
 	__newmsgsatstart : 0,
-	taskbarControl : 0,
 	__urllist : null,
-	titlealert : 0,
-	sound : 0,
-	configListBan : 0,
-	configListOper : 0,
-	nameslist : null,
-	closeok : 0,
-	scrollLock : false,
-	isRed : false,
 
-	updateValues : function(topic, nw, name, type, sound, titlealert, nw_id, usermode, password)
+	updateValues : function(topic, nw, name, type, sound, titlealert,
+				nw_id, usermode, password)
 	{
 	    this.__password = password;
 	    this.__usermode = usermode;
@@ -382,18 +382,16 @@ qx.Class.define("client.UserWindow",
 	    var width = data.width;
 	    var height = data.height;
 
-	    if (MainScreenObj.initdone == 1)
+	    if (this.mainscreen.initdone == 1)
 	    {
-		this.__srpc.callAsync(this.sendresult,
-				      "RESIZE", global_ids + this.winid + " " +
-				      width + " " + height);
+		this.rpc.call("RESIZE", this.winid + " " + width + " " + height,
+			     this);
 	    }
 	},
 
 	handleClose : function(e)
 	{
-	    this.__srpc.callAsync(this.sendresult,
-				  "CLOSE", global_ids + this.winid);
+	    this.rpc.call("CLOSE", this.winid, this);
 	},
 
 	//TODO: handle beforeclose -> remove from mainscreen array
@@ -436,8 +434,7 @@ qx.Class.define("client.UserWindow",
 	    if (this.__newmsgsatstart != 0)
 	    {
 		this.__newmsgsatstart = 0;
-		this.__srpc.callAsync(this.sendresult,
-				      "SEEN", global_ids + this.winid);
+		this.rpc.call("SEEN", this.winid, this);
 	    }
 	},
 
@@ -462,12 +459,9 @@ qx.Class.define("client.UserWindow",
 	    var x = data.left;
 	    var y = data.top;
 
-	    if (MainScreenObj.initdone == 1)
+	    if (this.mainscreen.initdone == 1)
 	    {
-
-		this.__srpc.callAsync(this.sendresult,
-				      "MOVE", global_ids + this.winid + " " +
-				      x + " " + y);
+		this.rpc.call("MOVE", this.winid + " " + x + " " + y, this);
 	    }
 	},
 
@@ -476,23 +470,20 @@ qx.Class.define("client.UserWindow",
 	    this.hidden = true;
 	    this.updateButton();
 
-	    if (MainScreenObj.initdone == 1)
+	    if (this.mainscreen.initdone == 1)
 	    {
-		this.__srpc.callAsync(this.sendresult,
-				      "HIDE", global_ids + this.winid);	    
+		this.rpc.call("HIDE", this.winid, this);
 	    }
 	},
-
 
 	handleRestore : function(e)
 	{
 	    this.hidden = false;
 	    this.updateButton();
 
-	    if (MainScreenObj.initdone == 1)
+	    if (this.mainscreen.initdone == 1)
 	    {
-		this.__srpc.callAsync(this.sendresult,
-				      "REST", global_ids + this.winid);	    
+		this.rpc.call("REST", this.winid, this);
 	    }
 	},
 
@@ -501,57 +492,6 @@ qx.Class.define("client.UserWindow",
 	    if (this.__viewmode == 0)
 	    {
 		this.__input1.focus();
-	    }
-	},
-
-	sendresult : function(result, exc) 
-	{
-	    if (exc == null) 
-	    {
-		var pos = result.search(/ /);
-		var command = result.slice(0, pos);
-		
-		if (command == "OPERLIST")
-		{
-		    result = result.slice(pos+1);
-		    var opers = result.split("<<>>"); 
-		    
-		    this.configListOper.removeAll();
-		    
-		    for (var i=0; i < opers.length; i++)
-		    {
-			var tmp = opers[i].split("<>");
-			var tmpList = new qx.ui.form.ListItem(tmp[1]);
-			tmpList.userid = tmp[0];
-			this.configListOper.add(tmpList);
-		    }
-		}
-		else if (command == "BANLIST")
-		{
-		    result = result.slice(pos+1);
-		    var bans = result.split("<<>>"); 
-		    
-		    this.configListBan.removeAll();
-
-		    for (var i=0; i < bans.length; i++)
-		    {
-			var tmp = bans[i].split("<>");
-			var tmpList = new qx.ui.form.ListItem(tmp[0]);
-			tmpList.banid = tmp[1];
-			this.configListBan.add(tmpList);
-		    }
-		}
-		else
-		{
-		    //call "superclass"
-		    MainScreenObj.sendresult(result, exc);
-		}
-	    }
-	    else 
-	    {
-		infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
-		//TODO: Add delay ~2s here
-		window.location.reload(true);
 	    }
 	},
 
@@ -569,7 +509,7 @@ qx.Class.define("client.UserWindow",
 		    this.taskbarControl.setSelection([this.taskbarButton]);
 		}
 		//this.activatewin();
-		MainScreenObj.activewin = this.winid;
+		this.mainscreen.activewin = this.winid;
 	    }, this);
 
 	    this.window.addListener("close", this.handleClose, this);
@@ -593,7 +533,7 @@ qx.Class.define("client.UserWindow",
 		{
 		    e.preventDefault();
 
-		    infoDialog.showInfoWin("Are you sure?<p>You need to close windows only when you<br>wish to permanently stop following the discussion", "Yes", function() {
+		    this.infoDialog.showInfoWin("Are you sure?<p>You need to close windows only when you<br>wish to permanently stop following the discussion", "Yes", function() {
 			closeok = 1;
 			mywindow.close();
 		    }, "NO");
@@ -900,8 +840,9 @@ qx.Class.define("client.UserWindow",
 		var userwindow = 
 		    this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
 
-		userwindow.__srpc.callAsync(userwindow.sendresult,
-					    "STARTCHAT", global_ids + userwindow.__nw + " " + name);
+		
+		userwindow.rpc.call("STARTCHAT", userwindow.__nw + " " + name,
+				    userwindow);
 	    });
 
 	    menu.add(chatButton);
@@ -916,9 +857,8 @@ qx.Class.define("client.UserWindow",
 		    var userwindow = 
 			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
 		    
-		    userwindow.__srpc.callAsync(userwindow.sendresult,
-						"WHOIS", global_ids + 
-						userwindow.winid + " " + name);
+		    userwindow.rpc.call("WHOIS", userwindow.winid + " " + name,
+				       userwindow);
 		});
 
 		menu.add(whoisButton);
@@ -934,9 +874,8 @@ qx.Class.define("client.UserWindow",
 		    var userwindow = 
 			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
 		    
-		    userwindow.__srpc.callAsync(userwindow.sendresult,
-						"KICK", global_ids + 
-						userwindow.winid + " " + name);
+		    userwindow.rpc.call("KICK", userwindow.winid + " " + name,
+					userwindow);
 		});
 
 		menu.add(kickButton);
@@ -948,9 +887,8 @@ qx.Class.define("client.UserWindow",
 		    var userwindow = 
 			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
 		    
-		    userwindow.__srpc.callAsync(userwindow.sendresult,
-						"BAN", global_ids +  
-						userwindow.winid + " " + name);
+		    userwindow.rpc.call("BAN", userwindow.winid + " " + name,
+				       userwindow);
 		});
 
 		menu.add(banButton);
@@ -965,9 +903,8 @@ qx.Class.define("client.UserWindow",
 		    var userwindow = 
 			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
 		    
-		    userwindow.__srpc.callAsync(userwindow.sendresult,
-						"OP", global_ids +  
-						userwindow.winid + " " + name);
+		    userwindow.rpc.call("OP", userwindow.winid + " " + name,
+				       userwindow);
 		});
 
 		menu.add(opButton);
@@ -999,7 +936,7 @@ qx.Class.define("client.UserWindow",
 	{
 	    var text = "<b>Link Catcher</b><p>";
 
-	    if (global_anon == true)
+	    if (this.mainscreen.anon_user == true)
 	    {
 		text = text + 
 		    "(If you register, links are not lost when you log out.)<p>"; 
@@ -1062,11 +999,8 @@ qx.Class.define("client.UserWindow",
 	    scomposite1.add(button1);
 
 	    button1.addListener("execute", function (e) {
-		this.__srpc.callAsync(
-		    this.sendresult,
-		    "TOPIC", global_ids +
-			this.winid + " " +
-			this.topicInput.getValue());		
+		this.rpc.call("TOPIC", this.winid + " " + this.topicInput.getValue(),
+			     this);
 	    }, this);
 
 	    if (this.__type == 0)
@@ -1098,18 +1032,13 @@ qx.Class.define("client.UserWindow",
 	    syes.addListener("click", function(e) {
 		this.sound = 1;
 		
-		this.__srpc.callAsync(
-		    this.sendresult,
-		    "SOUND", global_ids +
-			this.winid + " " + 1);
+		this.rpc.call("SOUND", this.winid + " " + 1, this);
 	    }, this);
 
 	    sno.addListener("click", function(e) {
 		this.sound = 0;
-		
-		this.__srpc.callAsync(
-		    this.sendresult,
-		    "SOUND", global_ids + this.winid + " " + 0);
+
+		this.rpc.call("SOUND", this.winid + " " + 0, this);
 	    }, this);
 
 	    scomposite2.add(syes);
@@ -1141,17 +1070,13 @@ qx.Class.define("client.UserWindow",
 	    tyes.addListener("click", function(e) {
 		this.titlealert = 1;
 		
-		this.__srpc.callAsync(
-		    this.sendresult,
-		    "TITLEALERT", global_ids + this.winid + " " + 1);
+		this.rpc.call("TITLEALERT", this.winid + " " + 1, this);
 	    }, this);
 
 	    tno.addListener("click", function(e) {
 		this.titlealert = 0;
 		
-		this.__srpc.callAsync(
-		    this.sendresult,
-		    "TITLEALERT", global_ids + this.winid + " " + 0);
+		this.rpc.call("TITLEALERT", this.winid + " " + 0, this);
 	    }, this);
 
 	    scomposite4.add(tyes);
@@ -1185,11 +1110,8 @@ qx.Class.define("client.UserWindow",
 	    }
 
 	    button2.addListener("execute", function (e) {
-		this.__srpc.callAsync(
-		    this.sendresult,
-		    "PW", global_ids +
-			this.winid + " " +
-			this.pwInput.getValue());		
+		this.rpc.call("PW", this.winid + " " + this.pwInput.getValue(),
+			     this);
 	    }, this);
 
 	    if (this.__type == 0)
@@ -1240,8 +1162,7 @@ qx.Class.define("client.UserWindow",
 		buttonOper.addListener("execute", function(e) {
 		    var userid = this.configListOper.getSelection()[0].userid;
 
-		    this.__srpc.callAsync(qx.lang.Function.bind(this.sendresult, this),
-					  "DEOP", global_ids + this.winid + " " + userid);
+		    this.rpc.call("DEOP", this.winid + " " + userid, this);
 		}, this);
 	    }
 
@@ -1272,9 +1193,8 @@ qx.Class.define("client.UserWindow",
 
 		buttonBan.addListener("execute", function(e) {
 		    var banid = this.configListBan.getSelection()[0].banid;
-
-		    this.__srpc.callAsync(qx.lang.Function.bind(this.sendresult, this),
-					  "UNBAN", global_ids + this.winid + " " + banid);
+		    
+		    this.rpc.call("UNBAN", this.winid + " " + banid, this);
 		}, this);
 	    }
 

@@ -8,19 +8,20 @@ qx.Class.define("client.MainScreen",
 {
     extend : qx.core.Object,
 
-    construct : function(rootItem)
+    construct : function(srpc, rootItem, logDialog, settings, infoDialog, anon_user)
     {
 	this.base(arguments);
 
 	this.windows = new Array();
-
-	// read "socket"
-	this.__rrpc = new qx.io.remote.Rpc("/ralph", "ralph");
-	this.__rrpc.setTimeout(30000);
+	this.rpc = srpc;
+	this.logDialog = logDialog;
+	this.infoDialog = infoDialog
+	this.settings = settings;
+	this.anon_user = anon_user;
 
 	//global because of call from LogDialog, not optimal
 	var d = new Date();
-	global_offset = d.getTimezoneOffset();
+	this.timezone = d.getTimezoneOffset();
 
         this.__timer = new qx.event.Timer(1000 * 60);
         this.__timer.start();
@@ -53,9 +54,7 @@ qx.Class.define("client.MainScreen",
 	this.__myapp = rootItem;
 
 	//Initial hello, send TZ info
-	this.__rrpc.callAsync(
-	    qx.lang.Function.bind(this.readresult, this), "HELLO",
-	    global_ids + this.seq + " " + global_offset);
+	this.rpc.read("HELLO", this.seq + " " + this.timezone, this, this.readresult);
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
 	    this.__blur = 0;
@@ -78,7 +77,7 @@ qx.Class.define("client.MainScreen",
 	    this.__blur = 1;
 	}, this);
 
-	FlashHelper =
+	this.FlashHelper =
 	    {
 		movieIsLoaded : function (theMovie)
 		{
@@ -108,12 +107,29 @@ qx.Class.define("client.MainScreen",
 
     members :
     {
-        __rrpc : 0,
+	manager : 0,
+	activewin : 0,
+	initdone : 0,
+	rootContainer : 0,
+	seq : 0,
+	windows : null,
+	showads : 1,
+	FlashHelper : 0,
+	desktop : 0,
+	contactsButton : 0,
+	rpc : 0,
+	globalflist : 0,
+	timezone : 0,
+	logDialog : 0,
+	infoDialog : 0,
+	settings : 0,
+	anon_user : 0,
+	nicks : 0,
+
 	__part2 : 0,
 	__part3 : 0,
 	__windowGroup : 0,
 	__error : 0,
-	manager : 0,
 	__myapp : 0,
         __timer : 0,
         __topictimer : 0,
@@ -124,62 +140,8 @@ qx.Class.define("client.MainScreen",
 	__firstrpc : 1,
 	__input1 : 0,
 	__topictimeractive : 0,
-	activewin : 0,
 	__prevwin : -1,
 	__msgvisible : 0,
-	initdone : 0,
-	rootContainer : 0,
-	seq : 0,
-	windows : null,
-	showads : 1,
-	desktop : 0,
-	contactsButton : 0,
-
-	sendresult : function(result, exc) 
-	{
-	    if (exc == null) 
-	    {
-		//Remove num of commands, should be always 1 to this case
-		//TODO: Common parts with readresult() should investigated
-		
-		//TODO: BIG HACK -> fix the protocol!!!
-		if (result.charAt(0) == "1")
-		{
-		    result = result.substr(2);
-		}
-
-                var pos = result.search(/ /);
-                var command = result.slice(0, pos);
-                var param = result.slice(pos+1);
-                
-		switch(command)
-		{
-		    
-		case "DIE" :
-		    infoDialog.showInfoWin("Session terminated. <p>Press OK to restart.",
-					   "OK", function () {
-					       qx.bom.Cookie.del("ProjectEvergreen");
-					       window.location.reload(true);
-					   });
-		    break;
-		    
-		case "OK" :
-		    break;
-
-		case "INFO" :
-		    infoDialog.showInfoWin(param, "OK");
-		    break;
-		}
-	    }
-	    else 
-	    {
-		infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
-
-		qx.event.Timer.once(function(e){
-		    window.location.reload(true);
-		}, this, 2000);
-	    }
-	},
 
 	readresult : function(result, exc) 
 	{
@@ -210,7 +172,7 @@ qx.Class.define("client.MainScreen",
 			    this.show();
 			}
 
-			infoDialog.showInfoWin("Connection error.<p>Trying to recover...");
+			this.infoDialog.showInfoWin("Connection error.<p>Trying to recover...");
 
 			qx.event.Timer.once(function(e){
 			    window.location.reload(true);
@@ -235,9 +197,7 @@ qx.Class.define("client.MainScreen",
 		    {
 
 		    case "COOKIE":
-			var options = param.split(" ");
-			global_tmpcookie = options.shift();
-			global_ids = global_id + " " + global_sec + " " + global_tmpcookie + " ";
+			this.rpc.cookie = param.split(" ").shift();
 			break;
 
 		    case "CREATE":
@@ -253,19 +213,18 @@ qx.Class.define("client.MainScreen",
 		    case "INITDONE":
 			this.initdone = 1;
 			var group = qx.bom.Cookie.get("ProjectEvergreenJoin");
-			var that = this;
 			if (group != null)
 			{
 			    var data = group.split("-");
 
 			    qx.bom.Cookie.del("ProjectEvergreenJoin");
-			    infoDialog.showInfoWin("Do you want to join the group " + data[0] + "?", "Yes", 
-						   function()
-						   {
-						       that.__rrpc.callAsync(
-							   qx.lang.Function.bind(that.sendresult, that), "JOIN",
-							   global_ids + data[0] + " MeetAndSpeak " + data[1]);
-						   }, "NO");
+			    this.infoDialog.showInfoWin(
+				"Do you want to join the group " + data[0] + "?", "Yes", 
+				function()
+				{
+				    this.rpc.call("JOIN", + data[0] + " MeetAndSpeak " + data[1],
+						  this);
+				}, "NO");
 			}
 			
 			break;
@@ -327,18 +286,14 @@ qx.Class.define("client.MainScreen",
 			    decline.setRich(true);
 
 			    accept.addListener("click", function () {
-				this.__rrpc.callAsync(
-				    qx.lang.Function.bind(this.sendresult, this),
-				    "OKF", global_ids +	friend_id);
+				this.rpc.call("OKF", friend_id);
 				//TODO: this relies on proper carbage collection
 				this.rootContainer.remove(this.msg);
 				this.__msgvisible = false;
 			    }, this);
 
 			    decline.addListener("click", function () {
-				this.__rrpc.callAsync(
-				    qx.lang.Function.bind(this.sendresult, this),
-				    "NOKF", global_ids + friend_id);
+				this.rpc.call("NOKF", friend_id);
 				//TODO: this relies on proper carbage collection
 				this.rootContainer.remove(this.msg);
 				this.__msgvisible = false;
@@ -397,7 +352,7 @@ qx.Class.define("client.MainScreen",
 			break;
 
 		    case "NICK":
-			global_nick = param.split(" ");
+			this.nicks = param.split(" ");
 			break;
 
 		    case "A":
@@ -417,7 +372,7 @@ qx.Class.define("client.MainScreen",
 			{
 			    this.show();
 			}
-			infoDialog.showInfoWin(
+			this.infoDialog.showInfoWin(
 			    "Protocol Error. <p>Press OK to login again.",
 			    "OK", 
 			    function () {
@@ -434,7 +389,7 @@ qx.Class.define("client.MainScreen",
 			}
 
 			//var reason = param.slice(pos+1);
-			infoDialog.showInfoWin(
+			this.infoDialog.showInfoWin(
 			    "Your session expired, you logged in from another location, or<br>the server was restarted.<p>Press OK to restart.",
 			    "OK", 
 			    function () {
@@ -447,7 +402,7 @@ qx.Class.define("client.MainScreen",
 			break;
 
 		    case "INFO" :
-			infoDialog.showInfoWin(param, "OK");
+			this.infoDialog.showInfoWin(param, "OK");
 			break;
 
 		    case "CLOSE":
@@ -458,11 +413,11 @@ qx.Class.define("client.MainScreen",
 			break;
 
 		    case "FLIST":
-			this.updateFriendsList(globalflist, param);
+			this.updateFriendsList(this.globalflist, param);
 			break;
 
 		    case "SET":
-			global_settings = new client.Settings(param);
+			this.settings.update(param);
 			//We have settings now, ready to draw main screen
 			this.show();
 			break;
@@ -471,9 +426,7 @@ qx.Class.define("client.MainScreen",
 
 		if (doitagain == true)
 		{
-		    this.__rrpc.callAsync(
-			qx.lang.Function.bind(this.readresult, this),
-			"HELLO", global_ids + this.seq);
+		    this.rpc.read("HELLO", this.seq, this, this.readresult);
 		}
 	    }
 	    else 
@@ -494,7 +447,7 @@ qx.Class.define("client.MainScreen",
 		    //if (this.__error > 15)
 		    //{
 		    //time to give up
-		    //infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
+		    //this.infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
 		    
 		    //qx.event.Timer.once(function(e){
 		    //	window.location.reload(true);
@@ -503,9 +456,7 @@ qx.Class.define("client.MainScreen",
 		//else
 		//{
 		    qx.event.Timer.once(function(e){
-			this.__rrpc.callAsync(
-			    qx.lang.Function.bind(this.readresult, this),
-			    "HELLO", global_ids + this.seq);
+			this.rpc.read("HELLO", this.seq, this, this.readresult);
 		    }, this, 2000); 
 		}
 		//}
@@ -542,9 +493,10 @@ qx.Class.define("client.MainScreen",
 	    if (create == true)
 	    {
 		var newWindow = 
-		    new client.UserWindow(this.desktop,
+		    new client.UserWindow(this.rpc, this.desktop,
 					  topic, nw, name, type, sound, titlealert,
-					  nw_id, usermode, password, new_msgs);
+					  nw_id, usermode, password, new_msgs, 
+					  this.infoDialog, this);
 
 		if (x < 0)
 		{
@@ -654,7 +606,7 @@ qx.Class.define("client.MainScreen",
 		myRe, 
 		function(m)
 		{
-		    var mytime = parseInt(m.substring(1, m.length-1)) - global_offset;
+		    var mytime = parseInt(m.substring(1, m.length-1)) - this.timezone;
 		    if (mytime < 0)
 		    {
 			mytime = 1440 + mytime;
@@ -730,10 +682,10 @@ qx.Class.define("client.MainScreen",
             
             friendContainer.add(friendsLabel);
 	    	    
-	    globalflist = new qx.ui.container.Composite(new qx.ui.layout.Grid());
-	    globalflist.setAllowGrowY(true);
+	    this.globalflist = new qx.ui.container.Composite(new qx.ui.layout.Grid());
+	    this.globalflist.setAllowGrowY(true);
 	    
-	    friendContainer.add(globalflist, {flex: 1});
+	    friendContainer.add(this.globalflist, {flex: 1});
 
 	    var addContainer = new qx.ui.container.Composite(
 		new qx.ui.layout.HBox());
@@ -754,9 +706,7 @@ qx.Class.define("client.MainScreen",
 	    friendContainer.add(addContainer);
 
 	    button1.addListener("execute", function (e) {
-		this.__rrpc.callAsync(
-		    this.sendresult,
-		    "ADDF", global_ids + this.__input1.getValue());
+		this.rpc.call("ADDF", this.__input1.getValue());
 		this.__input1.setValue("");
 	    }, this);
 
@@ -785,7 +735,7 @@ qx.Class.define("client.MainScreen",
 
 	    contactsPopup.add(friendScroll, {flex : 1});
 
-	    if (global_anon == false)
+	    if (this.anon_user == false)
 	    {
 		var contactsButton = new qx.ui.toolbar.CheckBox("<font color=\"#cccccc\">Show Contacts</font>");
 		contactsButton.setRich(true);
@@ -808,7 +758,8 @@ qx.Class.define("client.MainScreen",
 		}, middleSection);
 		
 		this.__timer.addListener(
-		    "interval", function(e) { this.updateIdleTimes(globalflist); },
+		    "interval", function(e) { this.updateIdleTimes(
+			this.globalflist); },
 		    this);
 	    
 	    	toolbar.add(this.__part3);
@@ -842,13 +793,10 @@ qx.Class.define("client.MainScreen",
 		    friend3.setRich(true);	
 		    friend3.setValue("<font color=\"green\">|M|</font>");
 		    friend3.nickname = columns[3];
-		    friend3.rrpc = this.__rrpc;
-		    friend3.result = this.sendresult;
+		    friend3.rrpc = this.rpc;
 		    
 		    friend3.addListener("click", function (e) {
-			this.rrpc.callAsync(
-			    this.result,
-			    "STARTCHAT", global_ids + "MeetAndSpeak " + this.nickname);
+			this.rrpc.call("STARTCHAT", "MeetAndSpeak " + this.nickname);
 		    }, friend3);
 		    
 		    friend3.addListener("mouseover", function (e) {
@@ -1130,7 +1078,7 @@ qx.Class.define("client.MainScreen",
 	    var logoutMenu = new qx.ui.menubar.Button("Log Out", null,
 						      this.getLogoutMenu());
 
-	    if (global_anon == false)
+	    if (this.anon_user == false)
 	    {
 		menubar.add(forumMenu);
 		menubar.add(viewMenu);
@@ -1202,7 +1150,7 @@ qx.Class.define("client.MainScreen",
 	    var menu = new qx.ui.menu.Menu;
 	    var sslButton = new qx.ui.menu.CheckBox("Always use HTTPS");
 
-	    if (global_settings.getSslEnabled() == 1)
+	    if (this.settings.getSslEnabled() == 1)
 	    {
 		sslButton.setValue(true);
 	    }
@@ -1226,22 +1174,22 @@ qx.Class.define("client.MainScreen",
 
 	_joinIRCCommand : function(app)
 	{
-	    infoDialog.getJoinNewChannelWin(this.__myapp, 1);
+	    this.infoDialog.getJoinNewChannelWin(this.__myapp, 1);
 	},
 
 	_logsCommand : function(app)
 	{
-	    logDialog.show(this.__myapp, this.desktop.getBounds());
+	    this.logDialog.show(this.__myapp, this.desktop.getBounds());
 	},
 
 	_joinForumCommand : function(app)
 	{
-	    infoDialog.getJoinNewChannelWin(this.__myapp, 0);
+	    this.infoDialog.getJoinNewChannelWin(this.__myapp, 0);
 	},
 
 	_createForumCommand : function()
 	{
-	    infoDialog.getCreateNewGroupWin(this.__myapp, 0);
+	    this.infoDialog.getCreateNewGroupWin(this.__myapp, 0);
 	},
 
 	_sslCommand : function(e)
@@ -1250,26 +1198,26 @@ qx.Class.define("client.MainScreen",
 
 	    if (usessl == true)
 	    {
-		global_settings.setSslEnabled(1);
+		this.settings.setSslEnabled(1);
 		qx.bom.Cookie.set("UseSSL", "Yep", 100, "/");
 	    }
 	    else
 	    {
-		global_settings.setSslEnabled(0);
+		this.settings.setSslEnabled(0);
 		qx.bom.Cookie.del("UseSSL");
 	    }
 
-	    infoDialog.showInfoWin("The application is now being reloaded to activate<br> the change.", "OK", function() {
+	    this.infoDialog.showInfoWin("The application is now being reloaded to activate<br> the change.", "OK", function() {
 		window.location.reload(true);
 	    });
 	},
 
 	_logoutCommand : function()
 	{
-	    this.__rrpc.callAsync(function() {
-		qx.bom.Cookie.del("ProjectEvergreen");
-		window.location.reload(true);
-	    }, "LOGOUT", global_ids);
+	    this.rpc.call("LOGOUT", "");
+
+	    qx.bom.Cookie.del("ProjectEvergreen");
+	    window.location.reload(true);
 	},
 
 	_manualCommand : function()
@@ -1280,13 +1228,13 @@ qx.Class.define("client.MainScreen",
 
 	_aboutCommand : function()
 	{
-	    infoDialog.showInfoWin("<b>MeetAndSpeak Client SW 12.7.3</b><p>&copy; 2010 MeetAndSpeak. All rights reserved.", "OK");
+	    this.infoDialog.showInfoWin("<b>MeetAndSpeak Client SW 12.7.3</b><p>&copy; 2010 MeetAndSpeak. All rights reserved.", "OK");
 	},
 	
 	player_start : function()
 	{
-	    var obj = FlashHelper.getMovie('niftyPlayer1');
-	    if (!FlashHelper.movieIsLoaded(obj)) 
+	    var obj = this.FlashHelper.getMovie('niftyPlayer1');
+	    if (!this.FlashHelper.movieIsLoaded(obj)) 
 	    {
 		return;
 	    }
@@ -1295,8 +1243,8 @@ qx.Class.define("client.MainScreen",
 
 	player_stop : function()
 	{
-	    var obj = FlashHelper.getMovie(name);
-	    if (!FlashHelper.movieIsLoaded(obj))
+	    var obj = this.FlashHelper.getMovie(name);
+	    if (!this.FlashHelper.movieIsLoaded(obj))
 	    {
 		return;
 	    }
@@ -1305,8 +1253,8 @@ qx.Class.define("client.MainScreen",
 
 	player_pause : function()
 	{
-	    var obj = FlashHelper.getMovie(name);
-	    if (!FlashHelper.movieIsLoaded(obj))
+	    var obj = this.FlashHelper.getMovie(name);
+	    if (!this.FlashHelper.movieIsLoaded(obj))
 	    {
 		return;
 	    }
@@ -1315,8 +1263,8 @@ qx.Class.define("client.MainScreen",
 	
 	player_load : function(url)
 	{
-	    var obj = FlashHelper.getMovie(name);
-	    if (!FlashHelper.movieIsLoaded(obj))
+	    var obj = this.FlashHelper.getMovie(name);
+	    if (!this.FlashHelper.movieIsLoaded(obj))
 	    {
 		return;
 	    }
@@ -1326,7 +1274,7 @@ qx.Class.define("client.MainScreen",
 	    
 	player_get_state : function ()
 	{
-	    //var obj = FlashHelper.getMovie(name);
+	    //var obj = this.FlashHelper.getMovie(name);
 	    //var ps = obj.GetVariable('playingState');
 	    //var ls = obj.GetVariable('loadingState');
 		
@@ -1341,7 +1289,6 @@ qx.Class.define("client.MainScreen",
 	    // if (ps == 'playing')
 	    //	if (ls == 'loaded') return ps;
 	    //   else return ls;
-	    
 	    //  if (ps == 'stopped')
 	    //		if (ls == 'empty') return ls;
 	    //    if (ls == 'error') return ls;

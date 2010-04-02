@@ -18,12 +18,20 @@ qx.Class.define("client.Application",
 	
 	    qx.log.appender.Console;
 
-	    infoDialog = new client.InfoDialog();
-	    logDialog = new client.LogDialog();
+	    this.getRoot().removeAll();
+	    var start_label = new qx.ui.basic.Label("Initializing...").set({
+		font : new qx.bom.Font(12, ["Arial", "sans-serif"])});
+	    
+	    start_label.setMargin(20,20,20,20);
+	    this.getRoot().add(start_label, {flex : 1});
 
-	    global_settings = new client.Settings("");
-	    global_tmpcookie = 0;
+	    var srpc = new client.RpcManager();
+	    var infoDialog = new client.InfoDialog(srpc);
+	    srpc.InfoDialog = infoDialog;
 
+	    var settings = new client.Settings(srpc, "");
+	    var logDialog = new client.LogDialog(srpc, settings);
+	    
 	    var cookie = qx.bom.Cookie.get("ProjectEvergreen");
 
 	    if (cookie == null)
@@ -33,26 +41,23 @@ qx.Class.define("client.Application",
 	    }
 
 	    var idstring = cookie.split("-");
-	   
-	    global_id = idstring[0]; 
-	    global_sec = idstring[1];
-	    global_ids = global_id + " " + global_sec + " " + global_tmpcookie + " ";
+	    srpc.id = idstring[0];
+	    srpc.sec = idstring[1];
+
+	    var anon_user = false;
 
 	    if (idstring[2] == "a")
 	    {
-		global_anon = true;
+		anon_user = true;
 	    }
-	    else
-	    {
-		global_anon = false;
-	    }
-
-	    this.getRoot().removeAll();
 
 	    var label = new qx.ui.embed.Html("<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0\" width=\"0\" height=\"0\" id=\"niftyPlayer1\" align=\"\"><param name=movie value=\"/moescript/niftyplayer.swf?file=/moescript/betty.mp3\"><param name=quality value=high><embed src=\"/moescript/niftyplayer.swf?file=/moescript/betty.mp3\" quality=high bgcolor=#FFFFFF width=\"0\" height=\"0\" name=\"niftyPlayer1\" align=\"\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.macromedia.com/go/getflashplayer\"></embed></object>");
 	    this.getRoot().add(label);
 
-	    MainScreenObj = new client.MainScreen(this.getRoot());
+	    var MainScreenObj = new client.MainScreen(srpc, this.getRoot(), logDialog,
+						      settings, infoDialog, anon_user);
+	    infoDialog.mainscreen = MainScreenObj;
+	    logDialog.mainscreen = MainScreenObj;
 	}
     }
 });

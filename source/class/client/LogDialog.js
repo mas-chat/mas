@@ -9,26 +9,29 @@ qx.Class.define("client.LogDialog",
 {
     extend : qx.core.Object,
 
-    construct : function(desktop, system, name)
+    construct : function(srpc, settings)
     {
 	this.base(arguments);
 
-	this.__rrpc = new qx.io.remote.Rpc("/ralph", "ralph");
-	this.__rrpc2 = new qx.io.remote.Rpc("/lisa/jsonrpc.pl", "lisa.main");
+	this.rpc = srpc;
+	this.settings = settings;
+	this.__rpclisa = new qx.io.remote.Rpc("/lisa/jsonrpc.pl", "lisa.main");
     },
 
     members :
     {
-	//common
-	__window : 0,
-	__rrpc : 0,
-	__rrpc2 : 0,
-	__pos : 0,
+	rpc : 0,
 	today : 0,
 	weeks : 0,
 	searchstring : "",
 	searchInput : 0,
+	settings : 0,
+	mainscreen : null,
 
+	__window : 0,
+	__rpclisa : 0,
+	__pos : 0,
+	
 	show : function(text, dim)
 	{
 	    if (this.__window == 0)
@@ -225,7 +228,7 @@ qx.Class.define("client.LogDialog",
 		
 		var manager = new qx.ui.form.RadioGroup(logon, logoff);
 		
-		if (global_settings.getLoggingEnabled() == 1)
+		if (this.settings.getLoggingEnabled() == 1)
 		{
 		    logon.setValue(true);
 		}
@@ -235,16 +238,16 @@ qx.Class.define("client.LogDialog",
 		}
 
 		logon.addListener("click", function(e) {
-		    global_settings.setLoggingEnabled(1);
+		    this.settings.setLoggingEnabled(1);
 		}, this);
 
 		logoff.addListener("click", function(e) {
-		    global_settings.setLoggingEnabled(0);
+		    this.settings.setLoggingEnabled(0);
 		}, this);
 
 		this.__window.setModal(true);
 	    
-		MainScreenObj.desktop.add(this.__window);
+		this.mainscreen.desktop.add(this.__window);
 	    }
 
 	    this.__window.center();
@@ -272,7 +275,7 @@ qx.Class.define("client.LogDialog",
 	    if (doit == true)
 	    {
 		this.atom.setLabel("Searching...");
-		this.__rrpc2.callAsync(
+		this.__rpclisa.callAsync(
 		    qx.lang.Function.bind(this.__searchresult, this),
 		    "search", input);
 	    }
@@ -300,7 +303,7 @@ qx.Class.define("client.LogDialog",
 		{
 		    var tmp = new qx.ui.form.ListItem(channels[i]);
 		    tmp.atom = this.atom		    
-		    tmp.data = MainScreenObj.adjustTime(channels[i+1]);
+		    tmp.data = this.mainscreen.adjustTime(channels[i+1]);
 
 		    tmp.addListener("click", function (e) {
 			this.atom.setLabel(this.data);
@@ -316,7 +319,7 @@ qx.Class.define("client.LogDialog",
 
 		if (channels.length > 1)
 		{
-		    this.atom.setLabel(MainScreenObj.adjustTime(channels[1]));
+		    this.atom.setLabel(this.mainscreen.adjustTime(channels[1]));
 		}
 
 		this.b1.setEnabled(true);
@@ -378,7 +381,7 @@ qx.Class.define("client.LogDialog",
 			var tmp = new qx.ui.form.ListItem("Hit " + (i / 2 + 1));
 			tmp.channel = item[1];
 			tmp.date = item[0];
-			tmp.rrpc = this.__rrpc2;
+			tmp.rrpc = this.__rpclisa;
 			tmp.logdialog = this;
 			tmp.atom = this.atom;
 			tmp.list = this.list;
@@ -389,7 +392,9 @@ qx.Class.define("client.LogDialog",
 			    this.rrpc.callAsync(
 				qx.lang.Function.bind(
 				    this.logdialog.__showdayresult, this.logdialog),
-				"get_day", this.date, global_id, this.channel);
+				"get_day", this.date, this.rpc.id + " " +
+				    this.rpc.sec + " " + this.rpc.cookie,
+				this.channel);
 			}, tmp);
 			
 			this.list.add(tmp);
@@ -401,10 +406,11 @@ qx.Class.define("client.LogDialog",
 
 		    this.atom.setLabel("Downloading the first matching log file. Please wait...");
 		    this.list.setEnabled(false);
-		    this.__rrpc2.callAsync(
+		    this.__rpclisa.callAsync(
 			qx.lang.Function.bind(
 			    this.__showdayresult, this),
-			"get_day", firstitem[0], global_id, firstitem[1]);
+			"get_day", firstitem[0], this.rpc.id + " " + this.rpc.sec +
+			    " " + this.rpc.cookie, firstitem[1]);
 		}
 	    }
 	    else
@@ -427,7 +433,7 @@ qx.Class.define("client.LogDialog",
 		var re = new RegExp("(" + words.join("|") + ")", "ig"); 
 		result = result.replace(re, "<b style=\"background-color: #FF0000\">$1</b>");
 		   
-		this.atom.setLabel(MainScreenObj.adjustTime(result));
+		this.atom.setLabel(this.mainscreen.adjustTime(result));
 	    }
 	    else
 	    {
@@ -456,10 +462,7 @@ qx.Class.define("client.LogDialog",
 	    this.b5.setEnabled(false);
 	    this.b6.setEnabled(false);
 
-	    this.__rrpc.callAsync(
-		qx.lang.Function.bind(this.__sendresult, this),
-		"GETLOG", global_ids +
-		    this.__pos);
+	    this.rpc.read("GETLOG", this.__pos, this, this.__sendresult);
 	}
     }
 });

@@ -9,10 +9,11 @@ qx.Class.define("client.InfoDialog",
 {
     extend : qx.core.Object,
 
-    construct : function()
+    construct : function(srpc)
     {
 	this.base(arguments);
 
+	this.rpc = srpc;
 	this.__window = new qx.ui.window.Window("X");
 	this.__window.setAppearance("aie-mtsk-window");
 	this.__window.setLayout(new qx.ui.layout.VBox(10));
@@ -50,13 +51,13 @@ qx.Class.define("client.InfoDialog",
 	this.__input2 = new qx.ui.form.TextField("").set({
 		maxLength: 25
 	});
-
-	this.__rrpc = new qx.io.remote.Rpc("/ralph", "ralph");
     },
 
     members :
     {
-	//common
+	rpc : 0,
+	mainscreen : null,
+
 	__window : 0,
 	__message : 0,
 	__message2 : 0,
@@ -73,7 +74,6 @@ qx.Class.define("client.InfoDialog",
 	__input2 : 0,
 	__combo : 0,
 	__nwselection : "MeetAndSpeak",
-	__rrpc : 0,
 	__winvisible : 0,
 	__queue : [],
 
@@ -159,10 +159,10 @@ qx.Class.define("client.InfoDialog",
 	    }
 
 	    this.__window.setModal(true);
-	    MainScreenObj.desktop.add(this.__window);
+	    this.mainscreen.desktop.add(this.__window);
 	    this.__window.center();
 	    this.__window.open();
-	    MainScreenObj.manager.bringToFront(this.__window);
+	    this.mainscreen.manager.bringToFront(this.__window);
 	},
 
 	getJoinNewChannelWin : function(rootItem, mode)
@@ -244,10 +244,8 @@ qx.Class.define("client.InfoDialog",
 
 		if (input !== "")
 		{
-		    this.__rrpc.callAsync(this.__sendresult, "JOIN",
-					  global_ids +
-					  input + " " + this.__nwselection + " " +
-					  this.__input2.getValue());
+		    this.rpc.call("JOIN", input + " " + this.__nwselection + " " +
+				  this.__input2.getValue());
 		}
 		this.__window.close();
 	    }, this);
@@ -339,16 +337,9 @@ qx.Class.define("client.InfoDialog",
 
 	    if (input !== "")
 	    {
-		this.__rrpc.callAsync(this.__sendresult, "CREATE",
-				      global_ids +
-				      input + " " + input2);
+		this.rpc.call("CREATE", input + " " + input2);
 	    }
 	    this.__window.close();
-	},
-
-	__sendresult : function(result, exc) 
-	{
-	    MainScreenObj.sendresult(result, exc);
 	}
     }
 });
