@@ -27,7 +27,7 @@ qx.Class.define("client.Application",
 
 	    var srpc = new client.RpcManager();
 	    var infoDialog = new client.InfoDialog(srpc);
-	    srpc.InfoDialog = infoDialog;
+	    srpc.infoDialog = infoDialog;
 
 	    var settings = new client.Settings(srpc, "");
 	    var logDialog = new client.LogDialog(srpc, settings);

@@ -16,6 +16,9 @@ qx.Class.define("client.RpcManager",
 	// write "socket"
 	this.__srpc = new qx.io.remote.Rpc("/ralph", "ralph");
 	this.__srpc.setTimeout(10000);
+
+	this.__rrpc = new qx.io.remote.Rpc("/ralph", "ralph");
+	this.__rrpc.setTimeout(30000);
     },
 
     members :
@@ -26,6 +29,7 @@ qx.Class.define("client.RpcManager",
 	infoDialog : 0,
 
 	__srpc : 0,
+	__rrpc : 0,
 	
 	call : function(command, parameters, context)
 	{
@@ -37,7 +41,7 @@ qx.Class.define("client.RpcManager",
 
 	read : function(command, parameters, context, callback)
 	{
-	    this.__srpc.callAsync(
+	    this.__rrpc.callAsync(
 		qx.lang.Function.bind(callback, context),
 		command, this.id + " " + this.sec + " " + this.cookie + " " +
 		    parameters);

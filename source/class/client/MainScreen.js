@@ -438,29 +438,21 @@ qx.Class.define("client.MainScreen",
 		}
 		else
 		{
-
-		    //Wait a little and try again. This is to make sure
-		    //that we don't loop and consume all CPU cycles if
-		    //there is no connection.
-		    this.__error++;
-		    
-		    //TODO: Does not work, long idle time, no errors and we are here
-		    //if (this.__error > 15)
-		    //{
-		    //time to give up
-		    //this.infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
-		    
-		    //qx.event.Timer.once(function(e){
-		    //	window.location.reload(true);
-		    //   }, this, 2000);
-		    //}
-		//else
-		//{
-		    qx.event.Timer.once(function(e){
+		    if (exc.code == qx.io.remote.Rpc.localError.timeout)
+		    {
+			//Make next request immediately
 			this.rpc.read("HELLO", this.seq, this, this.readresult);
-		    }, this, 2000); 
+		    }
+		    else
+		    {
+			//Wait a little and try again. This is to make sure
+			//that we don't loop and consume all CPU cycles if
+			//there is no connection.
+			qx.event.Timer.once(function(e){
+			    this.rpc.read("HELLO", this.seq, this, this.readresult);
+			}, this, 2000); 
+		    }
 		}
-		//}
 	    }
 	},
 
