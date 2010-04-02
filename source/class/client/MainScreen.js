@@ -70,8 +70,6 @@ qx.Class.define("client.MainScreen",
 	    {
 		this.windows[this.activewin].activatewin();
 	    }
-
-	    document.title = "MeetAndSpeak";
 	}, this);
 
 	qx.bom.Element.addListener(window, "blur", function(e) { 
@@ -239,13 +237,15 @@ qx.Class.define("client.MainScreen",
 			usertext = this.adjustTime(usertext);
 			this.windows[window_id].addline(usertext);
 
-			if (this.windows[window_id].sound == 1 && this.__ack != 1)
+			if (this.windows[window_id].sound == 1 && this.__ack != 1 &&
+			    type == 2)
 			{
 			    this.player_start();
 			}
 
 			if (this.__blur == 1 && this.windows[window_id].titlealert == 1 &&
-			    this.__topictimer.getEnabled() == false && this.__ack != 1)
+			    this.__topictimer.getEnabled() == false && this.__ack != 1 &&
+			    type == 2)
 			{
 			    this.__topictimeractive = true;
 			    this.__topictimer.start();
