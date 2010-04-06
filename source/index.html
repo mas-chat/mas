@@ -1,42 +1,15 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>MeetAndSpeak</title>
-  <script type="text/javascript">
-
-function loadjscssfile(filename, filetype){
-  var fileref=document.createElement('script')
-  fileref.setAttribute("type","text/javascript")
-  fileref.setAttribute("src", filename)
-
- if (typeof fileref!="undefined")
-  document.getElementsByTagName("head")[0].appendChild(fileref)
-}
-
-   function detectBrowser()
-   {
-       var browser=navigator.appName;
-       var b_version=navigator.appVersion;
-       var version=parseFloat(b_version);
-
-       if (browser=="Microsoft Internet Explorer")
-       {
-//            var w ="<p><font color=\"red\">Your are using Internet Explorer. Because of IE performance problems, it might look like the browser stops responding sometimes when using this service. In such cases just wait patiently.<p> You might also want to reconsider upgrading you broser to Mozilla Firefox, Google Chore, Apple Safari or Opera 10</font> ";
-//            var content = document.createTextNode(w);     
-//            var scr = document.getElementById('foo'); 
-//            scr.parentNode.insertBefore(content, scr); 
-       }
-   }
-  </script>
-<script type="text/javascript" defer src="/moescript/client.js"></script>
-
+  <script type="text/javascript" defer src="/moescript/client.js"></script>
 </head>
-<body onload="detectBrowser()">
 
-<p style="font-family:Arial, Times, serif; font-size:12px;">Loading... Please wait</p>
+<body>
 
-<p id="foo">
+<div style="position: absolute; top: 10px; left: 10px; font-family:Arial, Times, serif; font-size:14px;">Loading... Please wait</div>
 
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
@@ -46,6 +19,8 @@ document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.
 try {
 var pageTracker = _gat._getTracker("UA-12303323-1");
 pageTracker._trackPageview();
-} catch(err) {}</script>
+} catch(err) {}
+</script>
+
 </body>
 </html>

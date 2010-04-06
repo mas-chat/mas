@@ -529,7 +529,7 @@ qx.Class.define("client.UserWindow",
 		    e.preventDefault();
 		    this.urlButton.setValue(false);
 		}
-		else if (closeok == 0)
+		else if (closeok == 0 && this.nameslist.length > 0)
 		{
 		    e.preventDefault();
 
@@ -563,6 +563,13 @@ qx.Class.define("client.UserWindow",
 	getName : function()
 	{
 	    return this.__name;
+	},
+
+	expandMOTD : function()
+	{
+	    this.__channelText = this.__channelText.replace(/(<!--|-->|Click here to see details and MOTD\.)/g, "");
+
+	    this.addline("");
 	},
 
 	addline : function(line)

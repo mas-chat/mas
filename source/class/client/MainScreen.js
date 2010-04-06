@@ -319,22 +319,30 @@ qx.Class.define("client.MainScreen",
 		    case "NAMES":
 			// "clever" sort hack
 		    	var usertext = param.slice(pos+1).replace(/\@/g, "*");
-			this.windows[window_id].nameslist = usertext.split(" ").sort(function(x,y){ 
-			    var a = String(x).toUpperCase(); 
-			    var b = String(y).toUpperCase(); 
-			    if (a > b)
-			    { 
-				return 1;
-			    }
-			    else if (a < b) 
-			    {
-				return -1; 
-			    }
-			    else
-			    {
-				return 0; 
-			    }
-			}); 
+		
+			if (usertext != "")
+			{
+			    this.windows[window_id].nameslist = usertext.split(" ").sort(function(x,y){ 
+				var a = String(x).toUpperCase(); 
+				var b = String(y).toUpperCase(); 
+				if (a > b)
+				{ 
+				    return 1;
+				}
+				else if (a < b) 
+				{
+				    return -1; 
+				}
+				else
+				{
+				    return 0; 
+				}
+			    }); 
+			}
+			else
+			{
+			    this.windows[window_id].nameslist = [];
+			}
 
 			this.windows[window_id].addnames(true);
 			break;
@@ -435,6 +443,14 @@ qx.Class.define("client.MainScreen",
 		if (this.__firstrpc == 1)
 		{
 		    alert("MeetAndSpeak is having some technical problems. Sorry!\n\nYou can try to reload this page in a few moments to see if the service is back online.\n\nWe are trying to address the situation as quickly as possible.");
+
+		    this.__myapp.removeAll();
+		    
+		    var problem_label = new qx.ui.basic.Label("Connection to MeetAndSpeak backend servers failed.").set({
+			font : new qx.bom.Font(14, ["Arial", "sans-serif"])});
+	    
+		    problem_label.setMargin(10,10,10,10);
+		    this.__myapp.add(problem_label, {flex : 1});
 		}
 		else
 		{
@@ -763,8 +779,6 @@ qx.Class.define("client.MainScreen",
 	    this.__myapp.add(this.rootContainer, {flex : 1, edge: 0}); //, {padding : 10});	    
 
 	    this.__windowGroup = new client.RadioManager();
-//	    this.__windowGroup.addListener("changeSelection",
-//					   this.switchToWindow, this);
 	},
 
 	updateFriendsList : function(parentFList, allFriends)
@@ -831,6 +845,11 @@ qx.Class.define("client.MainScreen",
 
 	    this.printIdleTimes(parentFList);
         }, 
+
+	expandMOTD : function()
+	{
+	    this.windows[this.activewin].expandMOTD();
+	},
 
         printIdleTimes : function(parentFList)
         {
@@ -982,6 +1001,8 @@ qx.Class.define("client.MainScreen",
 		item.mainscreenobj = this;
 
 		item.addListener("click", function () {
+		    this.windows[winid].setNormal();
+		    
 		    if (winid != this.__prevwin)
 		    {
 			this.switchToWindow(winid);
@@ -1038,15 +1059,12 @@ qx.Class.define("client.MainScreen",
 
 	switchToWindow : function(e)
 	{
-//	    var i = (e.getData()[0]).winid;
-	    var i = e;
-
-	    if (this.windows[i])
+	    if (this.windows[e])
 	    {
-		this.windows[i].show();
-		this.windows[i].setNormal();
-		this.activewin = i;
-		this.windows[i].activatewin();
+		this.windows[e].show();
+		this.windows[e].setNormal();
+		this.activewin = e;
+		this.windows[e].activatewin();
 	    }
 	},
 

@@ -19,8 +19,10 @@ qx.Class.define("client.Application",
 	    qx.log.appender.Console;
 
 	    this.getRoot().removeAll();
+	    this.getRoot().set({backgroundColor: "#FFFFFF"});
+
 	    var start_label = new qx.ui.basic.Label("Initializing...").set({
-		font : new qx.bom.Font(12, ["Arial", "sans-serif"])});
+		font : new qx.bom.Font(14, ["Arial", "sans-serif"])});
 	    
 	    start_label.setMargin(10,10,10,10);
 	    this.getRoot().add(start_label, {flex : 1});
@@ -56,6 +58,9 @@ qx.Class.define("client.Application",
 
 	    var MainScreenObj = new client.MainScreen(srpc, this.getRoot(), logDialog,
 						      settings, infoDialog, anon_user);
+
+	    main = MainScreenObj;
+
 	    infoDialog.mainscreen = MainScreenObj;
 	    logDialog.mainscreen = MainScreenObj;
 	}
