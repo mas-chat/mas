@@ -579,7 +579,7 @@ qx.Class.define("client.UserWindow",
 	    this.__lines++;
 
 	    // limit lines
-	    if (this.__lines > 100)
+	    if (this.__lines > 200)
 	    {
 		var pos = this.__channelText.search(/<br>/i)
 		this.__channelText = this.__channelText.substr(pos + 4);
