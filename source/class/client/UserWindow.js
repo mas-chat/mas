@@ -510,6 +510,7 @@ qx.Class.define("client.UserWindow",
 		}
 		//this.activatewin();
 		this.mainscreen.activewin = this.winid;
+		this.setNormal();
 	    }, this);
 
 	    this.window.addListener("close", this.handleClose, this);

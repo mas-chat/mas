@@ -702,6 +702,7 @@ qx.Class.define("client.MainScreen",
 
 	    this.__input1 = new qx.ui.form.TextField();
 	    this.__input1.setPlaceholder("<nickname>");
+	    this.__input1.setMarginTop(10);
 	    this.__input1.setMarginBottom(8);
 	    this.__input1.setMarginLeft(8);
 
