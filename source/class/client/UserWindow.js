@@ -529,14 +529,18 @@ qx.Class.define("client.UserWindow",
 		    e.preventDefault();
 		    this.urlButton.setValue(false);
 		}
-		else if (closeok == 0 && this.nameslist.length > 0)
+		else if (closeok == 0 && this.__list.hasChildren() == true)
 		{
 		    e.preventDefault();
 
-		    this.infoDialog.showInfoWin("Are you sure?<p>You need to close windows only when you<br>wish to permanently stop following the discussion", "Yes", function() {
-			closeok = 1;
-			mywindow.close();
-		    }, "NO");
+		    this.infoDialog.showInfoWin(
+			"Are you sure?<p>You need to close windows only when" +
+			    "you<br>wish to permanently stop following the discussion", "Yes",
+			function() 
+			{
+			    closeok = 1;
+			    mywindow.close();
+			}, "NO");
 		}
 	    }, this);
 	},
