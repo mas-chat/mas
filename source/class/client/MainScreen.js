@@ -287,14 +287,14 @@ qx.Class.define("client.MainScreen",
 			    decline.setRich(true);
 
 			    accept.addListener("click", function () {
-				this.rpc.call("OKF", friend_id);
+				this.rpc.call("OKF", friend_id, this);
 				//TODO: this relies on proper carbage collection
 				this.rootContainer.remove(this.msg);
 				this.__msgvisible = false;
 			    }, this);
 
 			    decline.addListener("click", function () {
-				this.rpc.call("NOKF", friend_id);
+				this.rpc.call("NOKF", friend_id, this);
 				//TODO: this relies on proper carbage collection
 				this.rootContainer.remove(this.msg);
 				this.__msgvisible = false;
@@ -716,7 +716,7 @@ qx.Class.define("client.MainScreen",
 	    friendContainer.add(addContainer);
 
 	    button1.addListener("execute", function (e) {
-		this.rpc.call("ADDF", this.__input1.getValue());
+		this.rpc.call("ADDF", this.__input1.getValue(), this);
 		this.__input1.setValue("");
 	    }, this);
 
@@ -804,7 +804,7 @@ qx.Class.define("client.MainScreen",
 		    friend3.rrpc = this.rpc;
 		    
 		    friend3.addListener("click", function (e) {
-			this.rrpc.call("STARTCHAT", "MeetAndSpeak " + this.nickname);
+			this.rrpc.call("STARTCHAT", "MeetAndSpeak " + this.nickname, this);
 		    }, friend3);
 		    
 		    friend3.addListener("mouseover", function (e) {
@@ -1226,7 +1226,7 @@ qx.Class.define("client.MainScreen",
 
 	_logoutCommand : function()
 	{
-	    this.rpc.call("LOGOUT", "");
+	    this.rpc.call("LOGOUT", "", this);
 
 	    qx.bom.Cookie.del("ProjectEvergreen");
 	    window.location.reload(true);
