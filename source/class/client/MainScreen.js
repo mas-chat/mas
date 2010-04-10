@@ -1226,10 +1226,10 @@ qx.Class.define("client.MainScreen",
 
 	_logoutCommand : function()
 	{
-	    this.rpc.call("LOGOUT", "", this);
-
-	    qx.bom.Cookie.del("ProjectEvergreen");
-	    window.location.reload(true);
+	    this.rpc.read("LOGOUT", "", this, function(exc) { 
+		qx.bom.Cookie.del("ProjectEvergreen");
+		window.location.reload(true);
+	    });
 	},
 
 	_manualCommand : function()
