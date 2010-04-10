@@ -15,7 +15,7 @@ qx.Class.define("client.RpcManager",
 	
 	// write "socket"
 	this.__srpc = new qx.io.remote.Rpc("/ralph", "ralph");
-	this.__srpc.setTimeout(10000);
+	this.__srpc.setTimeout(15000);
 
 	this.__rrpc = new qx.io.remote.Rpc("/ralph", "ralph");
 	this.__rrpc.setTimeout(30000);
@@ -107,7 +107,7 @@ qx.Class.define("client.RpcManager",
 	    }
 	    else 
 	    {
-		this.infoDialog.showInfoWin("Lost connection to server.<p>Trying to recover...");
+		this.infoDialog.showInfoWin("Lost connection to server. (" + exc + ")<p>Trying to recover...");
 
 		qx.event.Timer.once(
 		    function(e) { window.location.reload(true); }, this, 2000);
