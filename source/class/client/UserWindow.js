@@ -1152,11 +1152,11 @@ qx.Class.define("client.UserWindow",
 
 	    var scroll1 = new qx.ui.container.Scroll();
 	    this.configListOper = new qx.ui.form.List;
-	    this.configListOper.set({ maxHeight: 30, selectionMode : "single" });
+	    this.configListOper.set({ maxHeight: 90, selectionMode : "single" });
 	    scroll1.add(this.configListOper);
 	    scroll1.set({
 		scrollbarX : "auto",
-		scrollbarY : "auto"
+		scrollbarY : "auto", maxHeight: 90
 	    });
 
 	    if (this.__usermode == 2)
@@ -1183,12 +1183,13 @@ qx.Class.define("client.UserWindow",
 	    var scroll2 = new qx.ui.container.Scroll();
 	    this.configListBan = new qx.ui.form.List;
 	    this.configListBan.setAllowGrowX(true);
-	    this.configListBan.set({ maxHeight: 30, minWidth: 900, width: 1000, selectionMode : "single" });
+	    this.configListBan.set({ maxHeight: 90, minWidth: 900, width: 1000, selectionMode : "single" });
 	    scroll2.add(this.configListBan);
 	    scroll2.set({
 		scrollbarX : "auto",
 		scrollbarY : "auto",
-		marginBottom : 15
+		marginBottom : 15,
+		maxHeight: 90
 	    });
 
 	    if (this.__usermode != 0)
