@@ -735,7 +735,7 @@ qx.Class.define("client.MainScreen",
 
 	    //popup
 	    var contactsPopup = new qx.ui.popup.Popup(new qx.ui.layout.HBox(5));
-	    contactsPopup.set({ autoHide : false, height : 500, width : 250 });
+	    contactsPopup.set({ autoHide : false, height : 400, width : 250 });
 
 	    friendScroll.add(friendContainer);
 	    friendScroll.set({
@@ -869,7 +869,7 @@ qx.Class.define("client.MainScreen",
                 else if (idle < 60)
                 {			
                     result = "<font color=\"blue\">Last activity: " + idle +
-			" minutes ago</font>";
+			" mins ago</font>";
                 }
 		else if (idle < 60 * 24)
                 {  
