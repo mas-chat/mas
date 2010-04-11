@@ -710,6 +710,7 @@ qx.Class.define("client.MainScreen",
 	    addContainer.add(new qx.ui.core.Spacer(8));
 
 	    var button1 = new qx.ui.form.Button("Add");
+	    button1.setMarginTop(10);
 	    button1.setMarginBottom(8);
 	    button1.setMarginRight(8);
 	    addContainer.add(button1);
