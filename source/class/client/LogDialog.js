@@ -264,10 +264,9 @@ qx.Class.define("client.LogDialog",
 
 	    for (var i=0; i < input.length; i++) 
 	    {
-		if (input.charCodeAt(0) > 127) 
+		if (input.charCodeAt(i) > 127) 
 		{
-		    //glimpse supports only ascii (utf7 is a real solution)
-		    this.atom.setLabel("Your search string contains unsupported special character(s).");
+		    //glimpse supports only ascii (utf7 is a real workaround solution :) )
 		    doit = false;
 		}
 	    }
@@ -278,6 +277,10 @@ qx.Class.define("client.LogDialog",
 		this.__rpclisa.callAsync(
 		    qx.lang.Function.bind(this.__searchresult, this),
 		    "search", input);
+	    }
+	    else
+	    {
+		this.atom.setLabel("Your search string contains unsupported special character(s).");
 	    }
 	},
 	
