@@ -551,7 +551,8 @@ qx.Class.define("client.UserWindow",
 		    e.preventDefault();
 		    this.urlButton.setValue(false);
 		}
-		else if (closeok == 0 && this.__list.hasChildren() == true)
+		else if (closeok == 0 && (this.__type != 0 ||
+					  this.__list.hasChildren() == true))
 		{
 		    e.preventDefault();
 
