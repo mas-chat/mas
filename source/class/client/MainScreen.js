@@ -211,6 +211,7 @@ qx.Class.define("client.MainScreen",
 
 		    case "INITDONE":
 			this.initdone = 1;
+			this.updateFonts();
 			var group = qx.bom.Cookie.get("ProjectEvergreenJoin");
 			if (group != null)
 			{
@@ -1163,14 +1164,22 @@ qx.Class.define("client.MainScreen",
 	{
 	    var menu = new qx.ui.menu.Menu;
 	    var sslButton = new qx.ui.menu.CheckBox("Always use HTTPS");
+	    var fontButton = new qx.ui.menu.CheckBox("Large fonts");
 
 	    if (this.settings.getSslEnabled() == 1)
 	    {
 		sslButton.setValue(true);
 	    }
+	    if (this.settings.getLargeFonts() == 1)
+	    {
+		fontButton.setValue(true);
+	    }
 
 	    sslButton.addListener("changeValue", this._sslCommand, this);
+	    fontButton.addListener("changeValue", this._fontCommand, this);
+	    
 	    menu.add(sslButton);
+	    menu.add(fontButton);
 
 	    return menu;
 	},
@@ -1224,6 +1233,34 @@ qx.Class.define("client.MainScreen",
 	    this.infoDialog.showInfoWin("The application is now being reloaded to activate<br> the change.", "OK", function() {
 		window.location.reload(true);
 	    });
+	},
+
+
+	_fontCommand : function(e)
+	{
+	    var largefonts = e.getData();
+
+	    if (largefonts == true)
+	    {
+		this.settings.setLargeFonts(1);
+	    }
+	    else
+	    {
+		this.settings.setLargeFonts(0);
+	    }
+	    
+	    this.updateFonts();
+	},
+
+	updateFonts : function()
+	{
+	    for (var i=0; i < this.windows.length; i++)
+	    {
+		if (typeof(this.windows[i]) != 'undefined')
+		{
+		    this.windows[i].setFonts(this.settings.getLargeFonts());
+		}
+	    }
 	},
 
 	_logoutCommand : function()

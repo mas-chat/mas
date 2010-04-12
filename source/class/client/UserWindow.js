@@ -487,6 +487,27 @@ qx.Class.define("client.UserWindow",
 	    }
 	},
 
+	setFonts : function(large)
+	{
+	    var size = ((qx.bom.client.System.WINVISTA || qx.bom.client.System.WIN7) ? 12 : 11) + (large * 2);
+
+	    this.__atom.setFont(new qx.bom.Font(
+		size, 
+		qx.bom.client.Platform.MAC ? [ "Lucida Grande" ] :
+		    (qx.bom.client.System.WINVISTA || qx.bom.client.System.WIN7) ?
+		    [ "Segoe UI", "Candara" ] :
+		    [ "Tahoma", "Liberation Sans", "Arial", "sans-serif" ] ));
+
+	    this.__input1.setFont(new qx.bom.Font(
+		size, 
+		qx.bom.client.Platform.MAC ? [ "Lucida Grande" ] :
+		    (qx.bom.client.System.WINVISTA || qx.bom.client.System.WIN7) ?
+		    [ "Segoe UI", "Candara" ] :
+		    [ "Tahoma", "Liberation Sans", "Arial", "sans-serif" ] ));
+
+	    this.__scroll.scrollToY(200000);
+	},
+
 	activatewin : function()
 	{
 	    if (this.__viewmode == 0)
