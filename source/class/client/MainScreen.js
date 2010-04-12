@@ -417,7 +417,6 @@ qx.Class.define("client.MainScreen",
 
 		    case "CLOSE":
 			var window_id = param.slice(pos+1);
-			this.removeWindowButton(window_id);			
 			//TODO: call destructor?
 			delete this.windows[window_id];
 			break;

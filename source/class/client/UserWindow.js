@@ -565,6 +565,11 @@ qx.Class.define("client.UserWindow",
 			    mywindow.close();
 			}, "NO");
 		}
+		else
+		{
+		    //closing for real.
+		    this.mainscreen.removeWindowButton(this.winid);
+		}
 	    }, this);
 	},
 
