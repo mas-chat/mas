@@ -131,7 +131,7 @@ qx.Class.define("client.UserWindow",
 		    
 		    if (input.substr(0,1) != "/")
 		    {
-			this.addline(hour + ":" + min + mynick + input + "</font><br>");
+			this.addline(hour + ":" + min + mynick + input + "</font><br><!-- x -->");
 		    }
 		}
 	    }
