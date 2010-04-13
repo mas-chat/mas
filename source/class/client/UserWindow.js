@@ -49,7 +49,17 @@ qx.Class.define("client.UserWindow",
 	}
 
 	this.__box1 = new qx.ui.container.Composite(layout);
-	this.__box1.set({backgroundColor: "#F2F5FE", padding:10, margin: 0});
+	this.__box1.set({padding:10, margin: 0});
+
+	if (type == 0)
+	{
+	    this.__box1.set({backgroundColor: "#F2F5FE"});
+	}
+	else
+	{
+	    this.__box1.set({backgroundColor: "#F7FAC9"});
+	}
+
 	wm1.add(this.__box1, {flex:1});
 
 	// create scroll container
@@ -81,7 +91,16 @@ qx.Class.define("client.UserWindow",
 	
 	this.__atom = new qx.ui.basic.Label(channelText);
 	this.__atom.setRich(true);
-	this.__atom.set({ backgroundColor: "#F2F5FE", selectable: true, nativeContextMenu : true});
+	this.__atom.set({ selectable: true, nativeContextMenu : true});
+
+	if (type == 0)
+	{
+	    this.__atom.set({backgroundColor: "#F2F5FE"});
+	}
+	else
+	{
+	    this.__atom.set({backgroundColor: "#F7FAC9"});
+	}
 
 	this.__scroll.add(this.__atom);		       
 	this.__box1.add(this.__scroll, {row: 0, column: 0, flex: 1});
