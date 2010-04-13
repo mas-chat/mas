@@ -1096,9 +1096,15 @@ qx.Class.define("client.MainScreen",
 	    {
 		menubar.add(forumMenu);
 		menubar.add(viewMenu);
-		menubar.add(settingsMenu);
+	    }
+
+	    menubar.add(settingsMenu);
+
+	    if (this.anon_user == false)
+	    {
 		menubar.add(advancedMenu);
 	    }
+
 	    menubar.add(helpMenu);
 	    menubar.add(logoutMenu);
 
@@ -1177,7 +1183,10 @@ qx.Class.define("client.MainScreen",
 	    sslButton.addListener("changeValue", this._sslCommand, this);
 	    fontButton.addListener("changeValue", this._fontCommand, this);
 	    
-	    menu.add(sslButton);
+	    if (this.anon_user == false)
+	    {
+		menu.add(sslButton);
+	    }
 	    menu.add(fontButton);
 
 	    return menu;

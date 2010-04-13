@@ -21,7 +21,7 @@ qx.Class.define("client.Application",
 	    this.getRoot().removeAll();
 	    this.getRoot().set({backgroundColor: "#FFFFFF"});
 
-	    var start_label = new qx.ui.basic.Label("Loading conversations...").set({
+	    var start_label = new qx.ui.basic.Label("Loading content...").set({
 		font : new qx.bom.Font(14, ["Arial", "sans-serif"])});
 	    
 	    start_label.setMargin(10,10,10,10);
