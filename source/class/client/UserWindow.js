@@ -499,10 +499,12 @@ qx.Class.define("client.UserWindow",
 	    if (large == 1)
 	    {
 		this.__atom.setFont("defaultlarge");
+		this.__input1.setFont("defaultlarge");
 	    }
 	    else
 	    {
 		this.__atom.setFont("default");
+		this.__input1.setFont("default");
 	    }
 
 	    this.__scroll.scrollToY(200000);
