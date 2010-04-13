@@ -43,6 +43,11 @@ qx.Class.define("client.UserWindow",
 	wm1.setResizeSensitivity(10);
 	wm1.set({contentPadding: [0,0,0,0]});
 
+	if (this.mainscreen.anon_user == true)
+	{
+	    wm1.setShowClose(false);
+	}
+
 	this.__box1 = new qx.ui.container.Composite(layout);
 	this.__box1.set({backgroundColor: "#F2F5FE", padding:10, margin: 0});
 	wm1.add(this.__box1, {flex:1});
@@ -94,6 +99,7 @@ qx.Class.define("client.UserWindow",
 
 	    if (e.getKeyIdentifier() == "Enter")
 	    {
+		this.setNormal();
 		var input = this.__input1.getValue();
 	    
 		if (input !== "" && input !== null)
@@ -489,21 +495,15 @@ qx.Class.define("client.UserWindow",
 
 	setFonts : function(large)
 	{
-	    var size = ((qx.bom.client.System.WINVISTA || qx.bom.client.System.WIN7) ? 12 : 11) + (large * 2);
 
-	    this.__atom.setFont(new qx.bom.Font(
-		size, 
-		qx.bom.client.Platform.MAC ? [ "Lucida Grande" ] :
-		    (qx.bom.client.System.WINVISTA || qx.bom.client.System.WIN7) ?
-		    [ "Segoe UI", "Candara" ] :
-		    [ "Tahoma", "Liberation Sans", "Arial", "sans-serif" ] ));
-
-	    this.__input1.setFont(new qx.bom.Font(
-		size, 
-		qx.bom.client.Platform.MAC ? [ "Lucida Grande" ] :
-		    (qx.bom.client.System.WINVISTA || qx.bom.client.System.WIN7) ?
-		    [ "Segoe UI", "Candara" ] :
-		    [ "Tahoma", "Liberation Sans", "Arial", "sans-serif" ] ));
+	    if (large == 1)
+	    {
+		this.__atom.setFont("defaultlarge");
+	    }
+	    else
+	    {
+		this.__atom.setFont("default");
+	    }
 
 	    this.__scroll.scrollToY(200000);
 	},
