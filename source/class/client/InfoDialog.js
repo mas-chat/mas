@@ -112,21 +112,13 @@ qx.Class.define("client.InfoDialog",
 		}
 
 		this.__yeslistenerid = this.__yesbutton.addListener("execute", function(e) {
-		    this.__window.close();
+		    
 
 		    if (typeof(callbackok) != "undefined")
 		    {
 			callbackok();
 		    }
-
-		    this.__winvisible = 0;		    
-		    
-		    if (this.__queue.length > 0)
-		    {
-			var obj = this.__queue.shift();
-			this.showInfoWin(obj.text, obj.showok, obj.callbackok,
-					 obj.showno, obj.callbackno);
-		    }
+		    this.closeInfoWindow();
 		}, this);
 	    }
 
@@ -140,21 +132,13 @@ qx.Class.define("client.InfoDialog",
 		}
 
 		this.__nolistenerid = this.__nobutton.addListener("execute", function(e) {
-		    this.__window.close();
-		    
+
 		    if (typeof(callbackno) != "undefined")
 		    {
 			callbackno();
 		    }
+		    this.closeInfoWindow();
 
-		    this.__winvisible = 0;		    
-
-		    if (this.__queue.length > 0)
-		    {
-			var obj = this.__queue.shift();
-			this.showInfoWin(obj.text, obj.showok, obj.callbackok,
-					 obj.showno, obj.callbackno);
-		    }
 		}, this);
 	    }
 
@@ -163,6 +147,19 @@ qx.Class.define("client.InfoDialog",
 	    this.__window.center();
 	    this.__window.open();
 	    this.mainscreen.manager.bringToFront(this.__window);
+	},
+
+	closeInfoWindow : function ()
+	{
+	    this.__window.close();
+	    this.__winvisible = 0;		    
+
+	    if (this.__queue.length > 0)
+	    {
+		var obj = this.__queue.shift();
+		this.showInfoWin(obj.text, obj.showok, obj.callbackok,
+				 obj.showno, obj.callbackno);
+	    }
 	},
 
 	getJoinNewChannelWin : function(rootItem, mode)

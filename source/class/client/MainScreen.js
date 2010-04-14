@@ -70,6 +70,11 @@ qx.Class.define("client.MainScreen",
 	    {
 		this.windows[this.activewin].activatewin();
 	    }
+
+	    qx.event.Timer.once(function(e){
+		document.title = "MeetAndSpeak";
+	    }, this, 500); 
+	    
 	}, this);
 
 	qx.bom.Element.addListener(window, "blur", function(e) { 
