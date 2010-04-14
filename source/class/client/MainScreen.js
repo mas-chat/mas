@@ -1172,13 +1172,13 @@ qx.Class.define("client.MainScreen",
 	{
 	    var menu = new qx.ui.menu.Menu;
 	    var sslButton = new qx.ui.menu.CheckBox("Always use HTTPS");
-	    var fontButton = new qx.ui.menu.CheckBox("Large fonts");
+	    var fontButton = new qx.ui.menu.CheckBox("Small font");
 
 	    if (this.settings.getSslEnabled() == 1)
 	    {
 		sslButton.setValue(true);
 	    }
-	    if (this.settings.getLargeFonts() == 1)
+	    if (this.settings.getLargeFonts() == 0)
 	    {
 		fontButton.setValue(true);
 	    }
@@ -1249,15 +1249,15 @@ qx.Class.define("client.MainScreen",
 
 	_fontCommand : function(e)
 	{
-	    var largefonts = e.getData();
+	    var smallfonts = e.getData();
 
-	    if (largefonts == true)
+	    if (smallfonts == true)
 	    {
-		this.settings.setLargeFonts(1);
+		this.settings.setLargeFonts(0);
 	    }
 	    else
 	    {
-		this.settings.setLargeFonts(0);
+		this.settings.setLargeFonts(1);
 	    }
 	    
 	    this.updateFonts();
