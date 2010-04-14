@@ -204,7 +204,7 @@ qx.Class.define("client.MainScreen",
 
 		    case "CREATE":
 			var options = param.split(" ");
-			this.create_or_update_window(options, true);
+			this.create_or_update_window(options, true);			
 			break;
 
 		    case "UPDATE":
@@ -214,7 +214,6 @@ qx.Class.define("client.MainScreen",
 
 		    case "INITDONE":
 			this.initdone = 1;
-			this.updateFonts();
 			var group = qx.bom.Cookie.get("ProjectEvergreenJoin");
 			if (group != null)
 			{
@@ -608,6 +607,8 @@ qx.Class.define("client.MainScreen",
 			nw_id, usermode, password);
 		}
 	    }
+
+	    this.windows[window_id].setFonts(this.settings.getLargeFonts());
 	},
 
 	adjustTime : function(text)
