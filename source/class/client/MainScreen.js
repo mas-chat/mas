@@ -57,7 +57,10 @@ qx.Class.define("client.MainScreen",
 	this.rpc.read("HELLO", this.seq + " " + this.timezone, this, this.readresult);
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
-	    document.title = "MeetAndSpeak";
+
+	    qx.event.Timer.once(function(e){
+		document.title = "MeetAndSpeak";
+	    }, this, 500); 
 	    this.__blur = 0;
 
 	    if (this.__topictimeractive == true)
@@ -69,12 +72,7 @@ qx.Class.define("client.MainScreen",
 	    if (this.windows[this.activewin])
 	    {
 		this.windows[this.activewin].activatewin();
-	    }
-
-	    qx.event.Timer.once(function(e){
-		document.title = "MeetAndSpeak";
-	    }, this, 500); 
-	    
+	    }	    
 	}, this);
 
 	qx.bom.Element.addListener(window, "blur", function(e) { 
