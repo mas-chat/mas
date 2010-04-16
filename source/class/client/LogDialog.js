@@ -395,8 +395,8 @@ qx.Class.define("client.LogDialog",
 			    this.rrpc.callAsync(
 				qx.lang.Function.bind(
 				    this.logdialog.__showdayresult, this.logdialog),
-				"get_day", this.date, this.rpc.id + " " +
-				    this.rpc.sec + " " + this.rpc.cookie,
+				"get_day", this.date, this.rrpc.id + " " +
+				    this.rrpc.sec + " " + this.rrpc.cookie,
 				this.channel);
 			}, tmp);
 			
