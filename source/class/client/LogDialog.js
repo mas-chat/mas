@@ -385,6 +385,7 @@ qx.Class.define("client.LogDialog",
 			tmp.channel = item[1];
 			tmp.date = item[0];
 			tmp.rrpc = this.__rpclisa;
+			tmp.rpc = this.rpc;
 			tmp.logdialog = this;
 			tmp.atom = this.atom;
 			tmp.list = this.list;
@@ -395,8 +396,8 @@ qx.Class.define("client.LogDialog",
 			    this.rrpc.callAsync(
 				qx.lang.Function.bind(
 				    this.logdialog.__showdayresult, this.logdialog),
-				"get_day", this.date, this.rrpc.id + " " +
-				    this.rrpc.sec + " " + this.rrpc.cookie,
+				"get_day", this.date, this.rpc.id + " " +
+				    this.rpc.sec + " " + this.rpc.cookie,
 				this.channel);
 			}, tmp);
 			
