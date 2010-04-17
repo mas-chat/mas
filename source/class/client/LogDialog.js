@@ -398,11 +398,13 @@ qx.Class.define("client.LogDialog",
 			tmp.atom = this.atom;
 			tmp.list = this.list;
 			tmp.iframe = this.iframe;
+			tmp.tz = this.mainscreen.timezone;
 
 			tmp.addListener("click", function (e) {
 			    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 						  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
-						  "&date=" + this.date + "&chan=" + this.channel);
+						  "&date=" + this.date + "&chan=" + this.channel +
+						  "&tz=" + this.tz);
 			}, tmp);
 			
 			this.list.add(tmp);
@@ -415,7 +417,8 @@ qx.Class.define("client.LogDialog",
 		    //auto load first item
 		    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 					  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
-					  "&date=" + firstitem[0] + "&chan=" +  firstitem[1].replace(/\#/g, "%23"));
+					  "&date=" + firstitem[0] + "&chan=" +  firstitem[1].replace(/\#/g, "%23") +
+					  "&tz=" + this.mainscreen.timezone); 
 		}
 	    }
 	    else
