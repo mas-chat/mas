@@ -390,13 +390,13 @@ qx.Class.define("client.LogDialog",
 			var item = hits[i].split("|");
 			
 			var tmp = new qx.ui.form.ListItem("Hit " + (i / 2 + 1));
-			var date = item[0];
-			var chan = escape(item[1]);
+			tmp.date = item[0];
+			tmp.chan = escape(item[1]);
 
 			tmp.addListener("click", function (e) {
 			    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 						  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
-						  "&date=" + date + "&chan=" + chan +
+						  "&date=" + tmp.date + "&chan=" + tmp.chan +
 						  "&tz=" + this.mainscreen.timezone + "&st=" +
 						  escape(this.searchstring));
 			}, this);
