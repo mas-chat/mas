@@ -284,7 +284,7 @@ qx.Class.define("client.LogDialog",
 		this.atom.setLabel("Searching...");
 		this.__rpclisa.callAsync(
 		    qx.lang.Function.bind(this.__searchresult, this),
-		    "search", input);
+		    "search", input, this.rpc.id);
 	    }
 	    else
 	    {
