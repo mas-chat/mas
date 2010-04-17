@@ -396,7 +396,7 @@ qx.Class.define("client.LogDialog",
 						  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
 						  "&date=" + item[0] + "&chan=" + escape(item[1]) +
 						  "&tz=" + this.mainscreen.timezone + "&st=" +
-						  escape(this.searchstring);
+						  escape(this.searchstring));
 			}, this);
 			
 			this.list.add(tmp);
@@ -410,7 +410,8 @@ qx.Class.define("client.LogDialog",
 		    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 					  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
 					  "&date=" + firstitem[0] + "&chan=" +  escape(firstitem[1]) +
-					  "&tz=" + this.mainscreen.timezone + "&st=" + escape(this.searchstring); 
+					  "&tz=" + this.mainscreen.timezone + "&st=" + 
+					  escape(this.searchstring)); 
 		}
 	    }
 	    else
