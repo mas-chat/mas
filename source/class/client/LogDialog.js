@@ -395,6 +395,7 @@ qx.Class.define("client.LogDialog",
 			tmp.rpc = this.rpc;
 			tmp.tz = this.mainscreen.timezone;
 			tmp.st = escape(this.searchstring);
+			tmp.iframe = this.iframe;
 
 			tmp.addListener("click", function (e) {
 			    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
