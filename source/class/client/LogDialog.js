@@ -173,7 +173,8 @@ qx.Class.define("client.LogDialog",
 		this.list.setAllowGrowY(true);
 
 		var scroll = new qx.ui.container.Scroll();
-	    
+		scroll.setAlignY("top");
+
 		scroll.set({
 		    minWidth: 100,
 		    minHeight: 50,
