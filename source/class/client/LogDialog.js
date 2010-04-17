@@ -45,8 +45,8 @@ qx.Class.define("client.LogDialog",
 		this.__window.setModal(true);
 		this.__window.setShowClose(true);
 
-		var width = 700;
-		var height = 400;
+		var width = 800;
+		var height = 600;
 
 		if (dim.width < 700 + 40 + 40)
 		{
@@ -63,7 +63,7 @@ qx.Class.define("client.LogDialog",
 
 		var modearea = new qx.ui.container.Composite(new qx.ui.layout.HBox(10, "left"));
 	     
-		var rbSearch = new qx.ui.form.RadioButton("Search (beta)");
+		var rbSearch = new qx.ui.form.RadioButton("Search");
 		var rbBrowse = new qx.ui.form.RadioButton("Browse");
 
 		modearea.add(rbBrowse);
@@ -193,7 +193,7 @@ qx.Class.define("client.LogDialog",
 				    {
 					var label = (e.getData()[0]).getLabel();
 
-					if (label == "Search (beta)")
+					if (label == "Search")
 					{
 					    this.__window.remove(navarea);
 					    this.__window.addAt(searcharea, 1);
