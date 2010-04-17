@@ -397,6 +397,8 @@ qx.Class.define("client.LogDialog",
 			tmp.st = escape(this.searchstring);
 
 			tmp.addListener("click", function (e) {
+			    alert("changing");
+			    
 			    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 						  "&sec=" + ths.rpc.sec + "&cookie=" + this.rpc.cookie +
 						  "&date=" + this.date + "&chan=" + this.chan +
