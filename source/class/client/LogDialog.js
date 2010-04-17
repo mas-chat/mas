@@ -390,7 +390,7 @@ qx.Class.define("client.LogDialog",
 			var item = hits[i].split("|");
 			
 			var tmp = new qx.ui.form.ListItem("Hit " + (i / 2 + 1));
-			tmp.channel = item[1];
+			tmp.channel = item[1].replace(/\#/g, "%23");
 			tmp.date = item[0];
 			tmp.rrpc = this.__rpclisa;
 			tmp.rpc = this.rpc;
@@ -412,9 +412,10 @@ qx.Class.define("client.LogDialog",
 			}
 		    }
 
+		    //auto load first item
 		    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 					  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
-					  "&date=" + firstitem[0] + "&chan=" +  firstitem[1]);
+					  "&date=" + firstitem[0] + "&chan=" +  firstitem[1]..replace(/\#/g, "%23"));
 		}
 	    }
 	    else
