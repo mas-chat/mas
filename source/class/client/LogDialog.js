@@ -415,7 +415,7 @@ qx.Class.define("client.LogDialog",
 		    //auto load first item
 		    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 					  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
-					  "&date=" + firstitem[0] + "&chan=" +  firstitem[1]..replace(/\#/g, "%23"));
+					  "&date=" + firstitem[0] + "&chan=" +  firstitem[1].replace(/\#/g, "%23"));
 		}
 	    }
 	    else
