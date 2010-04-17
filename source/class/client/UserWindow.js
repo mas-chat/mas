@@ -176,7 +176,7 @@ qx.Class.define("client.UserWindow",
 	    {
 		this.mainscreen.activateNextWin("up");
 	    }
-	    else if (e.getKeyIdentifier() == "Tab" && this.__type == 0)
+	    else if (e.getKeyIdentifier() == "Tab" && this.type == 0)
 	    {
 		var input2 = this.__input1.getValue();
 
@@ -267,7 +267,7 @@ qx.Class.define("client.UserWindow",
 	}
 
 	this.window = wm1;
-	this.__type = type;
+	this.type = type;
 	this.__name = name;
 	this.__settings = this.getSettingsView();		    
 	this.__urls = this.getUrlsView();
@@ -297,7 +297,7 @@ qx.Class.define("client.UserWindow",
 		}
 
 		this.__box1.remove(this.__scroll);
-		if (this.__type == 0)
+		if (this.type == 0)
 		{
 		    this.__box1.remove(this.__list);
 		    this.__box1.add(this.__settings, {row : 0, column : 0, colSpan : 2 });
@@ -322,7 +322,7 @@ qx.Class.define("client.UserWindow",
 		this.updateUrls();
 
 		this.__box1.remove(this.__scroll);
-		if (this.__type == 0)
+		if (this.type == 0)
 		{
 		    this.__box1.remove(this.__list);
 		    this.__box1.add(this.__urls, {row : 0, column : 0, colSpan : 2 });
@@ -363,6 +363,7 @@ qx.Class.define("client.UserWindow",
 	isRed : false,
 	infoDialog : 0,
 	mainscreen : 0,
+	type : 0,
 
 	__input1 : 0,
 	__urllabel : 0,
@@ -377,7 +378,6 @@ qx.Class.define("client.UserWindow",
 	__box1 : 0,
 	__nw : 0,
 	__nw_id : 0,
-	__type : 0,
 	__topic : 0,
 	__taskbarButtonColor : "cccccc",
 	__name : 0,
@@ -467,7 +467,7 @@ qx.Class.define("client.UserWindow",
 	{
 	    var name = this.getName();
 	    
-	    if (this.__type == 0 && this.__nw_id == 0)
+	    if (this.type == 0 && this.__nw_id == 0)
 	    {
 		name = name.substr(1);
 		name = name.substr(0, 1).toUpperCase() + name.substr(1);
@@ -572,7 +572,7 @@ qx.Class.define("client.UserWindow",
 		    e.preventDefault();
 		    this.urlButton.setValue(false);
 		}
-		else if (closeok == 0 && (this.__type != 0 ||
+		else if (closeok == 0 && (this.type != 0 ||
 					  this.__list.hasChildren() == true))
 		{
 		    e.preventDefault();
@@ -658,17 +658,17 @@ qx.Class.define("client.UserWindow",
 		line = "Topic not set.";
 	    }
 
-	    if (this.__nw_id == 0 && this.__type == 0)
+	    if (this.__nw_id == 0 && this.type == 0)
 	    {
 		cname = cname.substr(1, 1).toUpperCase() + cname.substr(2);
 		nw = "Group: ";
 	    }
-	    else if (this.__nw_id == 0 && this.__type == 1)
+	    else if (this.__nw_id == 0 && this.type == 1)
 	    {
 		nw = "";
 	    }
 
-	    if (this.__type == 0)
+	    if (this.type == 0)
 	    {
 		this.window.setCaption(nw + cname + " : " + line);
 	    }
@@ -680,7 +680,7 @@ qx.Class.define("client.UserWindow",
 
 	addnames : function(firstround)
 	{
-	    if (this.__type == 0)
+	    if (this.type == 0)
 	    {
 		if (firstround == true)
 		{
@@ -731,7 +731,7 @@ qx.Class.define("client.UserWindow",
 	{
 	    var insert = -1;
 
-	    if (this.__type == 0)
+	    if (this.type == 0)
 	    {
 		var childs = this.__list.getChildren();
 
@@ -805,7 +805,7 @@ qx.Class.define("client.UserWindow",
 	{
 	    var found = false;
 
-	    if (this.__type == 0)
+	    if (this.type == 0)
 	    {
 		var childs = this.__list.getChildren();
 		
@@ -851,7 +851,7 @@ qx.Class.define("client.UserWindow",
 	    this.__box1.remove(this.__settings);
 	    this.__box1.add(this.__scroll, { row:0, column :0});
 
-	    if (this.__type == 0)
+	    if (this.type == 0)
 	    {
 		this.__box1.add(this.__list, { row:0, column :1});
 	    }
@@ -865,7 +865,7 @@ qx.Class.define("client.UserWindow",
 	    this.__box1.remove(this.__urls);
 	    
 	    this.__box1.add(this.__scroll, { row:0, column :0});
-	    if (this.__type == 0)
+	    if (this.type == 0)
 	    {
 		this.__box1.add(this.__list, { row:0, column :1});
 	    }
@@ -1036,7 +1036,7 @@ qx.Class.define("client.UserWindow",
 
 	    //TOPIC
 
-	    if (this.__type == 0)
+	    if (this.type == 0)
 	    {
 		var ltitle = new qx.ui.basic.Label("Topic:");
 		composite.add(ltitle, {row:0, column: 0})
@@ -1063,7 +1063,7 @@ qx.Class.define("client.UserWindow",
 			     this);
 	    }, this);
 
-	    if (this.__type == 0)
+	    if (this.type == 0)
 	    {
 	    	composite.add(scomposite1, {row: 0, column: 1});
 	    }
@@ -1146,7 +1146,7 @@ qx.Class.define("client.UserWindow",
 
 	    //PASSWORD
 
-	    if (this.__type == 0)
+	    if (this.type == 0)
 	    {
 		composite.add(new qx.ui.basic.Label("Password:"), {row:3, column: 0})
 	    }
@@ -1174,14 +1174,14 @@ qx.Class.define("client.UserWindow",
 			     this);
 	    }, this);
 
-	    if (this.__type == 0)
+	    if (this.type == 0)
 	    {
 		composite.add(scomposite3, {row: 3, column: 1});
 	    }
 
 	    //Group URL:
 
-	    if (this.__type == 0 && this.__nw_id == 0)
+	    if (this.type == 0 && this.__nw_id == 0)
 	    {
 		composite.add(new qx.ui.basic.Label("Participation link:"), {row:4, column: 0});
 	    }
@@ -1191,7 +1191,7 @@ qx.Class.define("client.UserWindow",
 	    link.setWidth(250);
 	    link.setValue("http://meetandspeak.com/join/" + this.__name.substr(1));
 
-	    if (this.__type == 0 && this.__nw_id == 0)
+	    if (this.type == 0 && this.__nw_id == 0)
 	    {
 		composite.add(link, {row: 4, column: 1});
 	    }

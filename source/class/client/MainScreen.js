@@ -228,7 +228,7 @@ qx.Class.define("client.MainScreen",
 						  this);
 				}, "NO");
 			}
-			
+			this.showMsgWindows();			
 			break;
 
 		    case "ADDTEXT":
@@ -1271,6 +1271,17 @@ qx.Class.define("client.MainScreen",
 		if (typeof(this.windows[i]) != 'undefined')
 		{
 		    this.windows[i].setFonts(this.settings.getLargeFonts());
+		}
+	    }
+	},
+
+	showMsgWindows : function()
+	{
+	    for (var i=0; i < this.windows.length; i++)
+	    {
+		if (typeof(this.windows[i]) != 'undefined' && this.windows[i].type == 1)
+		{
+		    this.manager.bringToFront(windows[i].window);
 		}
 	    }
 	},
