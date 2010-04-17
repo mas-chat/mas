@@ -392,14 +392,16 @@ qx.Class.define("client.LogDialog",
 			var tmp = new qx.ui.form.ListItem("Hit " + (i / 2 + 1));
 			tmp.date = item[0];
 			tmp.chan = escape(item[1]);
+			tmp.rpc = this.rpc;
+			tmp.tz = this.mainscreen.timezone;
+			tmp.st = escape(this.searchstring);
 
 			tmp.addListener("click", function (e) {
 			    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
-						  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
-						  "&date=" + tmp.date + "&chan=" + tmp.chan +
-						  "&tz=" + this.mainscreen.timezone + "&st=" +
-						  escape(this.searchstring));
-			}, this);
+						  "&sec=" + ths.rpc.sec + "&cookie=" + this.rpc.cookie +
+						  "&date=" + this.date + "&chan=" + this.chan +
+						  "&tz=" + this.tz + "&st=" + this.st);
+			}, tmp);
 			
 			this.list.add(tmp);
 			if (i == 0)
