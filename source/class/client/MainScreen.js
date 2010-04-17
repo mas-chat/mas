@@ -1281,7 +1281,7 @@ qx.Class.define("client.MainScreen",
 	    {
 		if (typeof(this.windows[i]) != 'undefined' && this.windows[i].type == 1)
 		{
-		    this.manager.bringToFront(windows[i].window);
+		    this.manager.bringToFront(this.windows[i].window);
 		}
 	    }
 	},
