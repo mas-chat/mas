@@ -390,22 +390,14 @@ qx.Class.define("client.LogDialog",
 			var item = hits[i].split("|");
 			
 			var tmp = new qx.ui.form.ListItem("Hit " + (i / 2 + 1));
-			tmp.channel = item[1].replace(/\#/g, "%23");
-			tmp.date = item[0];
-			tmp.rrpc = this.__rpclisa;
-			tmp.rpc = this.rpc;
-			tmp.logdialog = this;
-			tmp.atom = this.atom;
-			tmp.list = this.list;
-			tmp.iframe = this.iframe;
-			tmp.tz = this.mainscreen.timezone;
 
 			tmp.addListener("click", function (e) {
 			    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 						  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
-						  "&date=" + this.date + "&chan=" + this.channel +
-						  "&tz=" + this.tz);
-			}, tmp);
+						  "&date=" + item[0] + "&chan=" + escape(item[1]) +
+						  "&tz=" + this.mainscreen.timezone + "&st=" +
+						  escape(this.searchstring);
+			}, this);
 			
 			this.list.add(tmp);
 			if (i == 0)
@@ -417,8 +409,8 @@ qx.Class.define("client.LogDialog",
 		    //auto load first item
 		    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 					  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
-					  "&date=" + firstitem[0] + "&chan=" +  firstitem[1].replace(/\#/g, "%23") +
-					  "&tz=" + this.mainscreen.timezone); 
+					  "&date=" + firstitem[0] + "&chan=" +  escape(firstitem[1]) +
+					  "&tz=" + this.mainscreen.timezone + "&st=" + escape(this.searchstring); 
 		}
 	    }
 	    else
