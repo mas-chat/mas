@@ -400,9 +400,6 @@ qx.Class.define("client.LogDialog",
 			tmp.iframe = this.iframe;
 
 			tmp.addListener("click", function (e) {
-			    this.list.setEnabled(false);
-			    this.atom.setLabel("Downloading the matching log file. Please wait...");
-
 			    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 						  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
 						  "&date=" + this.date + "&chan=" + this.channel);
@@ -414,9 +411,6 @@ qx.Class.define("client.LogDialog",
 			    this.list.setSelection([tmp]);
 			}
 		    }
-
-		    this.atom.setLabel("Downloading the first matching log file. Please wait...");
-		    this.list.setEnabled(false);
 
 		    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 					  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
