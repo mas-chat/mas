@@ -184,7 +184,7 @@ qx.Class.define("client.LogDialog",
 		this.atom = new qx.ui.basic.Atom("");
 		this.atom.setRich(true);
 		this.atom.setAllowGrowX(true);
-		this.atom.setAllowGrowY(true);
+		this.atom.setAllowGrowY(false);
 		this.atom.setAlignY("top");
 		scroll.add(this.atom);
 
@@ -194,7 +194,11 @@ qx.Class.define("client.LogDialog",
 		this.__window.add(infoarea, { flex : 1});
 
 		this.weeks = new qx.ui.basic.Label();
-		this.weeks.setMarginRight(15);
+		this.weeks.setMarginRight(35);
+		this.weeks.setMarginTop(3);
+
+		var logging = new qx.ui.basic.Label("Logging:");
+		logging.setMarginTop(3);
 
 		manager.addListener("changeSelection", function (e)
 				    {
@@ -233,11 +237,14 @@ qx.Class.define("client.LogDialog",
 			this.__window.close();
 		    }, this);
 
+		close.setMarginLeft(20);
+
 		var logbox = new qx.ui.container.Composite(new qx.ui.layout.HBox());
 		logbox.add(this.weeks);
-//		logbox.add(logon);
-//		logbox.add(logoff);
 		logbox.add(new qx.ui.core.Spacer(50), {flex : 1});
+		//logbox.add(logging);
+		//logbox.add(logon);
+		//logbox.add(logoff);
 		logbox.add(close);
 
 		this.__window.add(logbox);
@@ -440,7 +447,7 @@ qx.Class.define("client.LogDialog",
 	    var firstDate = new Date('2/1/2010 0:00');
 	    var now = new Date();
 	    var numWeeks = (now.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24 * 7);
-	    numWeeks =  Math.round(numWeeks*Math.pow(10,7))/Math.pow(10,7);
+	    numWeeks =  Math.round(numWeeks*Math.pow(10,3))/Math.pow(10,3);
 
 	    this.weeks.setValue("The logs contain conversations from the last " + numWeeks + " weeks.");
 	},
