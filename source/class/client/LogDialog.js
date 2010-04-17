@@ -28,6 +28,7 @@ qx.Class.define("client.LogDialog",
 	settings : 0,
 	mainscreen : null,
 	iframe : 0,
+        errormsg : 0,
 
 	__window : 0,
 	__rpclisa : 0,
@@ -157,6 +158,11 @@ qx.Class.define("client.LogDialog",
 	    
 		this.__window.add(modearea);
 		this.__window.add(navarea);
+
+		this.errormsg = new qx.ui.basic.Label();
+	        this.errormsg.setRich(true);
+		this.__window.add(this.errormsg);
+
 		this.seek(0);
 		
 		var infoarea = new qx.ui.container.Composite(
@@ -207,6 +213,7 @@ qx.Class.define("client.LogDialog",
 					{
 					    this.__window.remove(searcharea);
 					    this.__window.addAt(navarea, 1);
+                                            this.errormsg.setValue("");
 					    this.seek(0);
 					    infoarea.remove(iframe);
 					    infoarea.add(scroll, { flex : 1});
@@ -268,7 +275,9 @@ qx.Class.define("client.LogDialog",
 	    var input = this.searchInput.getValue();
 	    var doit = true;
 
+	    this.errormsg.setValue("");
 	    this.searchstring = input;
+ 	    this.iframe.setSource("/tools/blank.pl");
 
 	    for (var i=0; i < input.length; i++) 
 	    {
@@ -288,7 +297,7 @@ qx.Class.define("client.LogDialog",
 	    }
 	    else
 	    {
-		this.atom.setLabel("Your search string contains unsupported special character(s).");
+		this.errormsg.setValue("<font color=\"#FF0000\">Your search string contains unsupported special character(s).</font>");
 	    }
 	},
 	
@@ -379,7 +388,7 @@ qx.Class.define("client.LogDialog",
 
 		if (result == "")
 		{
-		    this.atom.setLabel("Your search did not match any log files.");
+		    this.errormsg.setValue("<font color=\"#FF0000\">Your search did not match any log files.</font>");
 		}
 		else
 		{
@@ -421,7 +430,7 @@ qx.Class.define("client.LogDialog",
 	    }
 	    else
 	    {
-		alert("!!! Connection error, please reload the application: " + exc);
+                this.errormsg.setValue("<font color=\"#FF0000\">Connection error. Please try again.</font>");
 	    }
 	},
 
