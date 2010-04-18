@@ -9,13 +9,14 @@ qx.Class.define("client.LogDialog",
 {
     extend : qx.core.Object,
 
-    construct : function(srpc, settings)
+    construct : function(srpc, settings, infodialog)
     {
 	this.base(arguments);
 
 	this.rpc = srpc;
 	this.settings = settings;
 	this.__rpclisa = new qx.io.remote.Rpc("/lisa/jsonrpc.pl", "lisa.main");
+	this.__infodialog = infodialog;
     },
 
     members :
@@ -33,6 +34,7 @@ qx.Class.define("client.LogDialog",
 	__window : 0,
 	__rpclisa : 0,
 	__pos : 0,
+	__infodialog : 0,
 	
 	show : function(text, dim)
 	{
@@ -162,8 +164,6 @@ qx.Class.define("client.LogDialog",
 		this.errormsg = new qx.ui.basic.Label();
 	        this.errormsg.setRich(true);
 		this.__window.add(this.errormsg);
-
-		this.seek(0);
 		
 		var infoarea = new qx.ui.container.Composite(
 		    new qx.ui.layout.HBox(10, "left"));
@@ -171,25 +171,9 @@ qx.Class.define("client.LogDialog",
 		this.list = new qx.ui.form.List;
 		this.list.add(new qx.ui.form.ListItem(""));
 		this.list.setAllowGrowY(true);
-
-		var scroll = new qx.ui.container.Scroll();
-		scroll.setAlignY("top");
-
-		scroll.set({
-		    minWidth: 100,
-		    minHeight: 50,
-		    scrollbarY : "auto"
-		});
 	    
-		this.atom = new qx.ui.basic.Atom("");
-		this.atom.setRich(true);
-		this.atom.setAllowGrowX(true);
-		this.atom.setAllowGrowY(false);
-		this.atom.setAlignY("top");
-		scroll.add(this.atom);
-
 		infoarea.add(this.list);
-		infoarea.add(scroll, { flex : 1});
+		infoarea.add(iframe, { flex : 1});
 	    
 		this.__window.add(infoarea, { flex : 1});
 
@@ -197,37 +181,34 @@ qx.Class.define("client.LogDialog",
 		this.weeks.setMarginRight(35);
 		this.weeks.setMarginTop(3);
 
-		var logging = new qx.ui.basic.Label("Logging:");
-		logging.setMarginTop(3);
+		var logging = new qx.ui.basic.Label("Keep logs: ");
+		logging.setMarginTop(4);
+		logging.setMarginRight(15);
 
 		manager.addListener("changeSelection", function (e)
 				    {
 					var label = (e.getData()[0]).getLabel();
+					this.errormsg.setValue("");
+					this.list.removeAll();
+ 					this.iframe.setSource("/tools/blank.pl");
 
 					if (label == "Search")
 					{
 					    this.__window.remove(navarea);
 					    this.__window.addAt(searcharea, 1);
 					    this.searchInput.focus();
-					    this.list.removeAll();
-					    this.atom.setLabel("");
-					    infoarea.remove(scroll);
-					    infoarea.add(iframe, { flex : 1});
 					}
 					else
 					{
 					    this.__window.remove(searcharea);
 					    this.__window.addAt(navarea, 1);
-                                            this.errormsg.setValue("");
 					    this.seek(0);
-					    infoarea.remove(iframe);
-					    infoarea.add(scroll, { flex : 1});
 					}
 				    }, this);
 		
-		var logon = new qx.ui.form.RadioButton("Enabled");
-		logon.setMarginRight(10);
-		var logoff = new qx.ui.form.RadioButton("Disabled");
+		var logshort = new qx.ui.form.RadioButton("for last 7 days");
+		logshort.setMarginRight(10);
+		var loglong = new qx.ui.form.RadioButton("maximum time (currently forever)");
 
 		var close = new qx.ui.form.Button("Close");
 		close.setAlignX("right");
@@ -242,35 +223,48 @@ qx.Class.define("client.LogDialog",
 		var logbox = new qx.ui.container.Composite(new qx.ui.layout.HBox());
 		logbox.add(this.weeks);
 		logbox.add(new qx.ui.core.Spacer(50), {flex : 1});
-		//logbox.add(logging);
-		//logbox.add(logon);
-		//logbox.add(logoff);
+		logbox.add(logging);
+		logbox.add(logshort);
+		logbox.add(loglong);
 		logbox.add(close);
 
 		this.__window.add(logbox);
 		
-		var manager = new qx.ui.form.RadioGroup(logon, logoff);
+		var manager = new qx.ui.form.RadioGroup(logshort, loglong);
 		
-		if (this.settings.getLoggingEnabled() == 1)
+		if (this.settings.getLoggingEnabled() == 0)
 		{
-		    logon.setValue(true);
+		    logshort.setValue(true);
 		}
 		else
 		{
-		    logoff.setValue(true);
+		    loglong.setValue(true);
 		}
 
-		logon.addListener("click", function(e) {
+		var settings = this.settings;
+
+		logshort.addListener("click", function(e) {
+		    this.__infodialog.showInfoWin(
+			"Are you absolutely sure? All your log files older<br>than 7 days will be deleted!",
+			"OK", 
+			function () {
+			    settings.setLoggingEnabled(0);
+			},
+			"Cancel",
+			function () {
+			    loglong.setValue(true);
+			}
+		    );
+		}, this);
+
+		loglong.addListener("click", function(e) {
 		    this.settings.setLoggingEnabled(1);
 		}, this);
 
-		logoff.addListener("click", function(e) {
-		    this.settings.setLoggingEnabled(0);
-		}, this);
-
 		this.__window.setModal(true);
-	    
-		this.mainscreen.desktop.add(this.__window);
+
+		this.seek(0);
+	    	this.mainscreen.desktop.add(this.__window);
 	    }
 
 	    this.__window.center();
@@ -298,7 +292,6 @@ qx.Class.define("client.LogDialog",
 
 	    if (doit == true)
 	    {
-		this.atom.setLabel("Searching...");
 		this.__rpclisa.callAsync(
 		    qx.lang.Function.bind(this.__searchresult, this),
 		    "search", input, this.rpc.id);
@@ -327,27 +320,45 @@ qx.Class.define("client.LogDialog",
 		var channels = data.split("<>");
 		this.list.removeAll();
 
-		for (var i=0; i < channels.length; i = i + 2)
+		if (channels[0] == "No groups")
 		{
-		    var tmp = new qx.ui.form.ListItem(channels[i]);
-		    tmp.atom = this.atom		    
-		    tmp.data = this.mainscreen.adjustTime(channels[i+1]);
-
-		    tmp.addListener("click", function (e) {
-			this.atom.setLabel(this.data);
-		    }, tmp);
-
-		    this.list.add(tmp);
-
-		    if (i == 0)
-		    {
-			this.list.setSelection([tmp]);
-		    }
+		    this.iframe.setSource(
+			"/tools/blank.pl?t=" + 
+			    escape("Nothing has been logged during this day."));
 		}
-
-		if (channels.length > 1)
+		else
 		{
-		    this.atom.setLabel(this.mainscreen.adjustTime(channels[1]));
+		    for (var i=0; i < channels.length; i = i + 3)
+		    {
+			var tmp = new qx.ui.form.ListItem(channels[i]);
+			tmp.chan = escape(channels[i+1]);
+			tmp.date = channels[i+2];
+			tmp.rpc = this.rpc;
+			tmp.tz = this.mainscreen.timezone;
+			tmp.st = "";
+			tmp.iframe = this.iframe;
+			
+			tmp.addListener("click", function (e) {
+			    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
+						  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
+						  "&date=" + this.date + "&chan=" + this.chan +
+						  "&tz=" + this.tz + "&st=" + this.st);
+			}, tmp);
+			
+			this.list.add(tmp);
+
+			if (i == 0)
+			{
+			    this.list.setSelection([tmp]);
+			}
+		    }
+
+		    //auto load first item
+		    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
+					  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
+					  "&date=" + channels[2] + "&chan=" +  escape(channels[1]) +
+					  "&tz=" + this.mainscreen.timezone + "&st=" + 
+					  escape("")); 
 		}
 
 		this.b1.setEnabled(true);
@@ -449,7 +460,8 @@ qx.Class.define("client.LogDialog",
 	    var numWeeks = (now.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24 * 7);
 	    numWeeks =  Math.round(numWeeks*Math.pow(10,3))/Math.pow(10,3);
 
-	    this.weeks.setValue("The logs contain conversations from the last " + numWeeks + " weeks.");
+	    //this.weeks.setValue("The logs contain conversations from the last " + numWeeks + " weeks.");
+	    this.weeks.setValue("");
 	},
 	
 	seek : function(days)

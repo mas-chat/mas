@@ -32,7 +32,7 @@ qx.Class.define("client.Application",
 	    srpc.infoDialog = infoDialog;
 
 	    var settings = new client.Settings(srpc, "");
-	    var logDialog = new client.LogDialog(srpc, settings);
+	    var logDialog = new client.LogDialog(srpc, settings, infoDialog);
 	    
 	    var cookie = qx.bom.Cookie.get("ProjectEvergreen");
 
