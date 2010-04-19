@@ -1286,7 +1286,7 @@ qx.Class.define("client.MainScreen",
 		    }
 
 		    this.windows[i].setWidth(width);
-
+		    this.windows[i].scrollToBottom();
 		    cx++;
 
 		    if (cx == x[amount])

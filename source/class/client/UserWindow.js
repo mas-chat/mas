@@ -642,8 +642,13 @@ qx.Class.define("client.UserWindow",
 
 	    if (this.scrollLock == false)
 	    {
-		this.__scroll.scrollToY(100000);
+		this.scrollToBottom();
 	    }
+	},
+
+	scrollToBottom : function ()
+	{
+	    this.__scroll.scrollToY(100000);
 	},
 
 	changetopic : function(line)
