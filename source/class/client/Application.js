@@ -15,7 +15,7 @@ qx.Class.define("client.Application",
 	main : function()
 	{
 	    this.base(arguments);
-	
+
 	    qx.log.appender.Console;
 
 	    this.getRoot().removeAll();

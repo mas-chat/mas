@@ -127,6 +127,7 @@ qx.Class.define("client.MainScreen",
 	settings : 0,
 	anon_user : 0,
 	nicks : 0,
+	blocker : 0,
 
 	__part2 : 0,
 	__part3 : 0,
@@ -669,6 +670,9 @@ qx.Class.define("client.MainScreen",
 	    middleContainer.addListener("resize", this.checkLimits,this);
 
 	    this.desktop = middleContainer;
+	    this.blocker = new qx.ui.core.Blocker(middleContainer);
+	    this.blocker.setOpacity(0.7);
+	    this.blocker.setColor("black");
 
 	    middleContainer.set({decorator: "background2",
 				 backgroundColor: "#DFE5E5"});
@@ -1240,62 +1244,68 @@ qx.Class.define("client.MainScreen",
 	    var y=[0,1,1,1,2,2,2,3,3,3,3,3,4];
 	    var amount = 0;
 
-	    for (var i=0; i < this.windows.length; i++)
-	    {
-		if (typeof(this.windows[i]) != 'undefined' &&
-		   this.windows[i].hidden == false)
+	    this.blocker.block();
+
+	    qx.event.Timer.once(function(e){
+		for (var i=0; i < this.windows.length; i++)
 		{
-		    amount++;
-		}
-	    }
-
-	    if (amount == 0 || amount > 12)
-	    {
-		return;
-	    }
-
-	    var dim = this.desktop.getBounds();		
-
-	    if (!dim)
-	    {
-		// ???
-		return;
-	    }
-
-	    var width = Math.floor((dim.width - (6 * (x[amount] + 1))) / x[amount]);
-	    var height = Math.floor((dim.height - (6 * (y[amount] + 1))) / y[amount]);
-
-	    var cx = 0;
-	    var cy = 0;
-	    var current = 0;
-
-	    for (var i=0; i < this.windows.length; i++)
-	    {
-		if (typeof(this.windows[i]) != 'undefined' &&
-		   this.windows[i].hidden == false)
-		{
-		    current++;
-
-		    this.windows[i].moveTo(6 * (cx + 1) + cx * width, 6 * (cy + 1) + cy * height);	
-		    this.windows[i].setHeight(height);
-
-		    if (current == amount)
+		    if (typeof(this.windows[i]) != 'undefined' &&
+			this.windows[i].hidden == false)
 		    {
-			var missing = x[amount] * y[amount] - amount;
-			width = width + missing * width + 6 * missing;
-		    }
-
-		    this.windows[i].setWidth(width);
-		    this.windows[i].scrollToBottom();
-		    cx++;
-
-		    if (cx == x[amount])
-		    {
-			cx = 0;
-			cy++;
+			amount++;
 		    }
 		}
-	    }
+		
+		if (amount == 0 || amount > 12)
+		{
+		    return;
+		}
+		
+		var dim = this.desktop.getBounds();		
+		
+		if (!dim)
+		{
+		    // ???
+		    return;
+		}
+		
+		var width = Math.floor((dim.width - (6 * (x[amount] + 1))) / x[amount]);
+		var height = Math.floor((dim.height - (6 * (y[amount] + 1))) / y[amount]);
+		
+		var cx = 0;
+		var cy = 0;
+		var current = 0;
+		
+		for (var i=0; i < this.windows.length; i++)
+		{
+		    if (typeof(this.windows[i]) != 'undefined' &&
+			this.windows[i].hidden == false)
+		    {
+			current++;
+			
+			this.windows[i].moveTo(6 * (cx + 1) + cx * width, 6 * (cy + 1) + cy * height);	
+			this.windows[i].setHeight(height);
+			
+			if (current == amount)
+			{
+			    var missing = x[amount] * y[amount] - amount;
+			    width = width + missing * width + 6 * missing;
+			}
+			
+			this.windows[i].setWidth(width);
+			this.windows[i].scrollToBottom();
+			cx++;
+			
+			if (cx == x[amount])
+			{
+			    cx = 0;
+			    cy++;
+			}
+		    }
+		}
+
+		this.blocker.unblock();
+	    }, this, 10);
 	},
 
 	_sslCommand : function(e)
