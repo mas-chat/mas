@@ -1063,6 +1063,7 @@ qx.Class.define("client.MainScreen",
 	{
 	    var i = 0; // agains bugs
 	    var cur = 0;
+	    var previous = this.activewin;
 
 	    do
 	    {
@@ -1079,7 +1080,10 @@ qx.Class.define("client.MainScreen",
 	    }
 	    while (i != 30 && this.windows[cur].hidden == true);
 
-	    this.__windowGroup.getSelection()[0].execute();
+	    if (cur != previous)
+	    {
+		this.__windowGroup.getSelection()[0].execute();
+	    }
 	},
 
 	switchToWindow : function(e)
@@ -1276,17 +1280,13 @@ qx.Class.define("client.MainScreen",
 			amount++;
 		    }
 		}
-		
-		if (amount == 0 || amount > 12)
-		{
-		    return;
-		}
-		
+				
 		var dim = this.desktop.getBounds();		
 		
-		if (!dim)
+		if (!dim || amount == 0 || amount > 12)
 		{
-		    // ???
+		    // !dim is ???
+		    this.blocker.unblock();
 		    return;
 		}
 		
