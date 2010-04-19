@@ -1099,9 +1099,9 @@ qx.Class.define("client.MainScreen",
 	    if (this.anon_user == false)
 	    {
 		menubar.add(forumMenu);
-		menubar.add(viewMenu);
 	    }
 
+	    menubar.add(viewMenu);
 	    menubar.add(settingsMenu);
 
 	    if (this.anon_user == false)
@@ -1161,10 +1161,16 @@ qx.Class.define("client.MainScreen",
 	{
 	    var menu = new qx.ui.menu.Menu;
 	    var logsButton = new qx.ui.menu.Button("Log history...");
+	    var arrangeButton = new qx.ui.menu.Button("Arrange windows");
 
 	    logsButton.addListener("execute", this._logsCommand, this);
+	    arrangeButton.addListener("execute", this._arrangeCommand, this);
 
-	    menu.add(logsButton);
+	    if (this.anon_user == false)
+	    {
+		menu.add(logsButton);
+	    }
+	    menu.add(arrangeButton);
 
 	    return menu;
 	},
@@ -1186,7 +1192,8 @@ qx.Class.define("client.MainScreen",
 
 	    sslButton.addListener("changeValue", this._sslCommand, this);
 	    fontButton.addListener("changeValue", this._fontCommand, this);
-	    
+
+
 	    if (this.anon_user == false)
 	    {
 		menu.add(sslButton);
@@ -1225,6 +1232,70 @@ qx.Class.define("client.MainScreen",
 	_createForumCommand : function()
 	{
 	    this.infoDialog.getCreateNewGroupWin(this.__myapp, 0);
+	},
+
+	_arrangeCommand : function()
+	{
+	    var x=[0,1,2,3,2,3,3,3,3,3,4,4,4];
+	    var y=[0,1,1,1,2,2,2,3,3,3,3,3,4];
+	    var amount = 0;
+
+	    for (var i=0; i < this.windows.length; i++)
+	    {
+		if (typeof(this.windows[i]) != 'undefined' &&
+		   this.windows[i].hidden == false)
+		{
+		    amount++;
+		}
+	    }
+
+	    if (amount == 0 || amount > 12)
+	    {
+		return;
+	    }
+
+	    var dim = this.desktop.getBounds();		
+
+	    if (!dim)
+	    {
+		// ???
+		return;
+	    }
+
+	    var width = Math.floor((dim.width - (6 * (x[amount] + 1))) / x[amount]);
+	    var height = Math.floor((dim.height - (6 * (y[amount] + 1))) / y[amount]);
+
+	    var cx = 0;
+	    var cy = 0;
+	    var current = 0;
+
+	    for (var i=0; i < this.windows.length; i++)
+	    {
+		if (typeof(this.windows[i]) != 'undefined' &&
+		   this.windows[i].hidden == false)
+		{
+		    current++;
+
+		    this.windows[i].moveTo(6 * (cx + 1) + cx * width, 6 * (cy + 1) + cy * height);	
+		    this.windows[i].setHeight(height);
+
+		    if (current == amount)
+		    {
+			var missing = x[amount] * y[amount] - amount;
+			width = width + missing * width + 6 * missing;
+		    }
+
+		    this.windows[i].setWidth(width);
+
+		    cx++;
+
+		    if (cx == x[amount])
+		    {
+			cx = 0;
+			cy++;
+		    }
+		}
+	    }
 	},
 
 	_sslCommand : function(e)
