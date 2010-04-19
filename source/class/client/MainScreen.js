@@ -1179,7 +1179,7 @@ qx.Class.define("client.MainScreen",
 	getViewMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
-	    var logsButton = new qx.ui.menu.Button("Log history...");
+	    var logsButton = new qx.ui.menu.Button("Show logs...");
 	    var arrangeButton = new qx.ui.menu.Button("Arrange windows");
 
 	    logsButton.addListener("execute", this._logsCommand, this);
