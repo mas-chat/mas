@@ -1061,14 +1061,23 @@ qx.Class.define("client.MainScreen",
 
 	activateNextWin : function(direction)
 	{
-	    if (direction == "up")
+	    var i = 0; // agains bugs
+	    var cur = 0;
+
+	    do
 	    {
-		this.__windowGroup.selectNext();
+		if (direction == "up")
+		{
+		    this.__windowGroup.selectNext();
+		}
+		else
+		{
+		    this.__windowGroup.selectPrevious();
+		}
+		i++;
+		cur = this.__windowGroup.getSelection()[0].winid;
 	    }
-	    else
-	    {
-		this.__windowGroup.selectPrevious();
-	    }
+	    while (i != 30 && this.windows[cur].hidden == true);
 
 	    this.__windowGroup.getSelection()[0].execute();
 	},
