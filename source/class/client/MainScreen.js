@@ -229,7 +229,11 @@ qx.Class.define("client.MainScreen",
 						  this);
 				}, "NO");
 			}
-			this.showMsgWindows();			
+			this.showMsgWindows();
+			if (this.settings.getAutoArrange() == 1)
+			{
+			    this._arrangeCommand();
+			}
 			break;
 
 		    case "ADDTEXT":
@@ -671,7 +675,7 @@ qx.Class.define("client.MainScreen",
 
 	    this.desktop = middleContainer;
 	    this.blocker = new qx.ui.core.Blocker(middleContainer);
-	    this.blocker.setOpacity(0.7);
+	    this.blocker.setOpacity(0.5);
 	    this.blocker.setColor("black");
 
 	    middleContainer.set({decorator: "background2",
@@ -1010,7 +1014,7 @@ qx.Class.define("client.MainScreen",
 		item.winid = winid;
 		item.mainscreenobj = this;
 
-		item.addListener("click", function () {
+		item.addListener("execute", function () {
 		    this.windows[winid].setNormal();
 		    
 		    if (winid != this.__prevwin)
@@ -1065,6 +1069,8 @@ qx.Class.define("client.MainScreen",
 	    {
 		this.__windowGroup.selectPrevious();
 	    }
+
+	    this.__windowGroup.getSelection()[0].execute();
 	},
 
 	switchToWindow : function(e)
@@ -1184,6 +1190,7 @@ qx.Class.define("client.MainScreen",
 	    var menu = new qx.ui.menu.Menu;
 	    var sslButton = new qx.ui.menu.CheckBox("Always use HTTPS");
 	    var fontButton = new qx.ui.menu.CheckBox("Small font");
+	    var arrangeButton = new qx.ui.menu.CheckBox("Auto arrange windows at startup");
 
 	    if (this.settings.getSslEnabled() == 1)
 	    {
@@ -1193,16 +1200,21 @@ qx.Class.define("client.MainScreen",
 	    {
 		fontButton.setValue(true);
 	    }
+	    if (this.settings.getAutoArrange() == 1)
+	    {
+		arrangeButton.setValue(true);
+	    }
 
 	    sslButton.addListener("changeValue", this._sslCommand, this);
 	    fontButton.addListener("changeValue", this._fontCommand, this);
-
+	    arrangeButton.addListener("changeValue", this._autoArrangeCommand, this);
 
 	    if (this.anon_user == false)
 	    {
 		menu.add(sslButton);
 	    }
 	    menu.add(fontButton);
+	    menu.add(arrangeButton);
 
 	    return menu;
 	},
@@ -1343,6 +1355,20 @@ qx.Class.define("client.MainScreen",
 	    }
 	    
 	    this.updateFonts();
+	},
+
+	_autoArrangeCommand : function(e)
+	{
+	    var autoarrange = e.getData();
+
+	    if (autoarrange == true)
+	    {
+		this.settings.setAutoArrange(1);
+	    }
+	    else
+	    {
+		this.settings.setAutoArrange(0);
+	    }
 	},
 
 	updateFonts : function()

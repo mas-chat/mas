@@ -21,7 +21,8 @@ qx.Class.define("client.Settings",
 	firstTime : { init : 1, apply : "_applyFirstTime" },
 	loggingEnabled : { init : 1, apply : "_applyLoggingEnabled" },
 	sslEnabled : { init : 0, apply : "_applySslEnabled" },
-	largeFonts : { init : 0, apply : "_applyLargeFonts" }
+	largeFonts : { init : 0, apply : "_applyLargeFonts" },
+	autoArrange : { init : 0, apply : "_applyAutoArrange" }
     },
 
     members :
@@ -44,6 +45,10 @@ qx.Class.define("client.Settings",
 		{
 		case "firstTime":
 		    this.setFirstTime(value);
+		    break;
+
+		case "autoArrange":
+		    this.setAutoArrange(value);
 		    break;
 
 		case "largeFonts":
@@ -80,6 +85,11 @@ qx.Class.define("client.Settings",
 	_applyLargeFonts : function(value)
 	{
 	    this.send("largeFonts", value);
+	},
+
+	_applyAutoArrange : function(value)
+	{
+	    this.send("autoArrange", value);
 	},
 
 	send : function(name, value)
