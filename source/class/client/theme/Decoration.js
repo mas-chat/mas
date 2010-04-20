@@ -6,6 +6,8 @@
 
    Authors:
 
+#asset(client/*)
+
 ************************************************************************ */
 
 qx.Theme.define("client.theme.Decoration",
@@ -20,7 +22,7 @@ qx.Theme.define("client.theme.Decoration",
  
 	  style :
 	  {
-              backgroundImage  : "/i/bg.jpg",
+              backgroundImage  : "client/bg.jpg",
               backgroundRepeat : "repeat"
 	  }
       },
@@ -31,10 +33,8 @@ qx.Theme.define("client.theme.Decoration",
 
       style :
       {
-          backgroundImage  : "/i/menu-background.png",
+          backgroundImage  : "client/menu-background.png",
 	  backgroundRepeat : "scale",
-
-//	  backgroundColor : "#266FB0",
 
           width : 1,
           color : "border-main",
@@ -48,7 +48,7 @@ qx.Theme.define("client.theme.Decoration",
 
       style :
       {
-        backgroundImage : "/i/toolbar-gradient2.png",
+        backgroundImage : "client/toolbar-gradient2.png",
         backgroundRepeat : "scale"
       }
     },
@@ -61,7 +61,7 @@ qx.Theme.define("client.theme.Decoration",
       {
         outerColor : "#b6b6b6",
         innerColor : "#f8f8f8",
-        backgroundImage : "/i/button-c.png",
+        backgroundImage : "client/button-c.png",
         backgroundRepeat : "scale"
       }
     },
@@ -74,7 +74,7 @@ qx.Theme.define("client.theme.Decoration",
       {
         outerColor : "#b6b6b6",
         innerColor : "#f8f8f8",
-        backgroundImage : "/i/button-checked-c.png",
+        backgroundImage : "client/button-checked-c.png",
         backgroundRepeat : "scale"
       }
     },
@@ -85,7 +85,7 @@ qx.Theme.define("client.theme.Decoration",
 
       style :
       {
-        backgroundImage  : "/i/toolbar-part.gif",
+        backgroundImage  : "client/toolbar-part.gif",
         backgroundRepeat : "repeat-y"
       }
     }
