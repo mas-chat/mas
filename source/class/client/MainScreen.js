@@ -1153,12 +1153,15 @@ qx.Class.define("client.MainScreen",
 	{
 	    var menu = new qx.ui.menu.Menu;
 	    var manualButton = new qx.ui.menu.Button("Support Web site");
+	    var keyButton = new qx.ui.menu.Button("Keyboard shortcuts...");
 	    var aboutButton = new qx.ui.menu.Button("About...");
 
 	    manualButton.addListener("execute", this._manualCommand, this);
 	    aboutButton.addListener("execute", this._aboutCommand, this);
+	    keyButton.addListener("execute", this._keyCommand, this);
 
 	    menu.add(manualButton);
+	    menu.add(keyButton);
 	    menu.addSeparator();
 	    menu.add(aboutButton);
 
@@ -1419,6 +1422,11 @@ qx.Class.define("client.MainScreen",
 	_aboutCommand : function()
 	{
 	    this.infoDialog.showInfoWin("<b>MeetAndSpeak Client SW 12.7.3</b><p>&copy; 2010 MeetAndSpeak. All rights reserved.", "OK");
+	},
+
+	_keyCommand : function()
+	{
+	    this.infoDialog.showInfoWin("<b>Keyboard shortcuts:</b><p>[TAB] = nick name completion<br>[Arrow Up] = Switch to next visible window<br>[Arrow Down] = Switch to previous visible windows<p>See also available command by typing<br>'/help' in any of the windows.", "OK");
 	},
 	
 	player_start : function()
