@@ -531,6 +531,8 @@ qx.Class.define("client.UserWindow",
 
 	activatewin : function()
 	{
+	    this.window.activate();
+
 	    if (this.__viewmode == 0)
 	    {
 		this.__input1.focus();
@@ -560,7 +562,7 @@ qx.Class.define("client.UserWindow",
 	    var closeok = 0;
 
 	    this.window.addListener("focus", function(e) {
-		this.__input1.focus();
+		this.activatewin();
 	    }, this);
 
 	    this.window.addListener("beforeClose", function(e) {
