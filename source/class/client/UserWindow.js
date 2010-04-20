@@ -559,6 +559,10 @@ qx.Class.define("client.UserWindow",
 
 	    var closeok = 0;
 
+	    this.window.addListener("focus", function(e) {
+		this.__input1.focus();
+	    }, this);
+
 	    this.window.addListener("beforeClose", function(e) {
 		var mywindow = this.window;
 		
