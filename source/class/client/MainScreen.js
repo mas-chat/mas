@@ -1426,7 +1426,7 @@ qx.Class.define("client.MainScreen",
 
 	_keyCommand : function()
 	{
-	    this.infoDialog.showInfoWin("<b>Keyboard shortcuts:</b><p>[TAB] = nick name completion<br>[Arrow Up] = Switch to next visible window<br>[Arrow Down] = Switch to previous visible windows<p>See also available command by typing<br>'/help' in any of the windows.", "OK");
+	    this.infoDialog.showInfoWin("<b>Keyboard shortcuts:</b><p><table border=0><tr><td>[TAB]</td><td>= nick name completion</td></tr><tr><td>[Arrow Up]</td><td>= Switch to next visible window</td></tr><tr><td>[Arrow Down]</td><td>= Switch to previous visible windows</td></tr></table><p>See also available commands by typing<br>'/help' in any of the windows.", "OK");
 	},
 	
 	player_start : function()
