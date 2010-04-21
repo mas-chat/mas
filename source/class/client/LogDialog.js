@@ -429,7 +429,7 @@ qx.Class.define("client.LogDialog",
 			    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 						  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
 						  "&date=" + this.date + "&chan=" + this.chan +
-						  "&tz=" + this.tz + "&st=" + this.st);
+						  "&tz=" + this.tz + "&showall=yes&st=" + this.st);
 			}, tmp);
 			
 			this.list.add(tmp);
@@ -443,7 +443,7 @@ qx.Class.define("client.LogDialog",
 		    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 					  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
 					  "&date=" + firstitem[0] + "&chan=" +  escape(firstitem[1]) +
-					  "&tz=" + this.mainscreen.timezone + "&st=" + 
+					  "&tz=" + this.mainscreen.timezone + "&showall=yes&st=" + 
 					  escape(this.searchstring)); 
 		}
 	    }
