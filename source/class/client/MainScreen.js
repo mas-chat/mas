@@ -273,6 +273,14 @@ qx.Class.define("client.MainScreen",
 			}
 			break;
 
+		    case "ADDNTF":
+			var options = param.split(" ");
+			var window_id = parseInt(options.shift());
+			var note_id = options.shift();
+			var usertext = options.join(" ");
+			this.windows[window_id].addntf(note_id, usertext);
+			break;
+
 		    case "REQF":
 			var options = param.split(" ");
 		    	var friend_id = parseInt(options.shift());

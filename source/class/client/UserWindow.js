@@ -48,19 +48,19 @@ qx.Class.define("client.UserWindow",
 	    wm1.setShowClose(false);
 	}
 
-	this.__box1 = new qx.ui.container.Composite(layout);
-	this.__box1.set({padding:10, margin: 0});
+	this.__box = new qx.ui.container.Composite(layout);
+	this.__box.set({padding:10, margin: 0});
 
 	if (type == 0)
 	{
-	    this.__box1.set({backgroundColor: "#F2F5FE"});
+	    this.__box.set({backgroundColor: "#F2F5FE"});
 	}
 	else
 	{
-	    this.__box1.set({backgroundColor: "#F7FAC9"});
+	    this.__box.set({backgroundColor: "#F7FAC9"});
 	}
 
-	wm1.add(this.__box1, {flex:1});
+	wm1.add(this.__box, {flex:1});
 
 	// create scroll container
 	this.__scroll = new client.Scroll();
@@ -88,7 +88,11 @@ qx.Class.define("client.UserWindow",
 	});
 
 	var channelText = "Please wait...<br>";
-	
+
+	this.__textcomposite = new qx.ui.container.Composite(new qx.ui.layout.VBox(2));
+
+	this.__ntftooltip = new qx.ui.tooltip.ToolTip("Double-click to close this sticky message.");
+
 	this.__atom = new qx.ui.basic.Label(channelText);
 	this.__atom.setRich(true);
 	this.__atom.set({ selectable: true, nativeContextMenu : true});
@@ -102,8 +106,11 @@ qx.Class.define("client.UserWindow",
 	    this.__atom.set({backgroundColor: "#F7FAC9"});
 	}
 
-	this.__scroll.add(this.__atom);		       
-	this.__box1.add(this.__scroll, {row: 0, column: 0, flex: 1});
+	this.__scroll.add(this.__atom);       
+
+	this.__textcomposite.add(this.__scroll, {flex: 1});
+
+	this.__box.add(this.__textcomposite, {row: 0, column: 0, flex: 1});
 	
 	this.__input1 = new qx.ui.form.TextField();
 	this.__input1.set({ maxLength: 400 });
@@ -125,37 +132,41 @@ qx.Class.define("client.UserWindow",
 		{
 		    this.rpc.call("SEND", this.winid + " " + input, this);
 
-		    this.__input1.setValue("");
-
 		    input = input.replace(/</g, "&lt;");
 		    input = input.replace(/>/g, "&gt;");
 
-		    var currentTime = new Date();
-		    var hour = currentTime.getHours();
-		    var min = currentTime.getMinutes();
+		    this.__input1.setValue("");
 
-		    if (min < 10)
+		    if (input.substr(0,1) == "/")
 		    {
-			min = "0" + min;
+			//do nothing
 		    }
+		    else
+		    {
+			var currentTime = new Date();
+			var hour = currentTime.getHours();
+			var min = currentTime.getMinutes();
+			
+			if (min < 10)
+			{
+			    min = "0" + min;
+			}
 
-		    if (hour < 10)
-		    {
-			hour = "0" + hour;
-		    }
-		 
-		    var mynick = " <font color=\"blue\"><b>&lt;" +
-			this.mainscreen.nicks[this.__nw_id] + "&gt;</b> ";
-
-		    if (input.substr(0,4) == "/me ")
-		    {
-			input = input.substr(4);
-			mynick = " <font color=\"blue\"><b>* " +
-			    this.mainscreen.nicks[this.__nw_id] + "</b> ";
-		    }
+			if (hour < 10)
+			{
+			    hour = "0" + hour;
+			}
+			
+			var mynick = " <font color=\"blue\"><b>&lt;" +
+			    this.mainscreen.nicks[this.__nw_id] + "&gt;</b> ";
+			
+			if (input.substr(0,4) == "/me ")
+			{
+			    input = input.substr(4);
+			    mynick = " <font color=\"blue\"><b>* " +
+				this.mainscreen.nicks[this.__nw_id] + "</b> ";
+			}
 		    
-		    if (input.substr(0,1) != "/")
-		    {
 			this.addline(hour + ":" + min + mynick + input + "</font><br><!-- x -->");
 		    }
 		}
@@ -239,7 +250,7 @@ qx.Class.define("client.UserWindow",
 	var icomposite = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
 	icomposite.add(this.__input1, { flex : 1 });
 
-	this.__box1.add(icomposite, {row: 1, column: 0});
+	this.__box.add(icomposite, {row: 1, column: 0});
 
 	this.prefButton = new qx.ui.form.ToggleButton("Settings");
 	this.urlButton = new qx.ui.form.ToggleButton("L");
@@ -258,8 +269,8 @@ qx.Class.define("client.UserWindow",
 
 	if (type == 0)
 	{
-	    this.__box1.add(this.getList(), {row: 0, column: 1, flex:1});
-	    this.__box1.add(buttons, {row: 1, column: 1});
+	    this.__box.add(this.getList(), {row: 0, column: 1, flex:1});
+	    this.__box.add(buttons, {row: 1, column: 1});
 	}
 	else
 	{
@@ -296,15 +307,15 @@ qx.Class.define("client.UserWindow",
 		    this.rpc.call("GETBANS", this.winid, this);
 		}
 
-		this.__box1.remove(this.__scroll);
+		this.__box.remove(this.__textcomposite);
 		if (this.type == 0)
 		{
-		    this.__box1.remove(this.__list);
-		    this.__box1.add(this.__settings, {row : 0, column : 0, colSpan : 2 });
+		    this.__box.remove(this.__list);
+		    this.__box.add(this.__settings, {row : 0, column : 0, colSpan : 2 });
 		}
 		else
 		{
-		    this.__box1.add(this.__settings, {row : 0, column : 0});
+		    this.__box.add(this.__settings, {row : 0, column : 0});
 		}
 
 		this.__viewmode = 1;
@@ -321,15 +332,15 @@ qx.Class.define("client.UserWindow",
 		this.prefButton.setEnabled(false);
 		this.updateUrls();
 
-		this.__box1.remove(this.__scroll);
+		this.__box.remove(this.__textcomposite);
 		if (this.type == 0)
 		{
-		    this.__box1.remove(this.__list);
-		    this.__box1.add(this.__urls, {row : 0, column : 0, colSpan : 2 });
+		    this.__box.remove(this.__list);
+		    this.__box.add(this.__urls, {row : 0, column : 0, colSpan : 2 });
 		}
 		else
 		{
-		    this.__box1.add(this.__urls, {row : 0, column : 0 });
+		    this.__box.add(this.__urls, {row : 0, column : 0 });
 		}
 
 		this.__viewmode = 2;
@@ -375,7 +386,7 @@ qx.Class.define("client.UserWindow",
 	__settings : 0,
 	__urls : 0,
 	__viewmode : 0,
-	__box1 : 0,
+	__box : 0,
 	__nw : 0,
 	__nw_id : 0,
 	__topic : 0,
@@ -385,6 +396,8 @@ qx.Class.define("client.UserWindow",
 	__usermode : 0,
 	__newmsgsatstart : 0,
 	__urllist : null,
+	__ntftooltip : 0,
+	__textcomposite : 0,
 
 	updateValues : function(topic, nw, name, type, sound, titlealert,
 				nw_id, usermode, password)
@@ -631,6 +644,26 @@ qx.Class.define("client.UserWindow",
 	    this.addline("");
 	},
 
+	addntf : function (noteid, text)
+	{
+	    var notification = new qx.ui.basic.Label(text);
+	    notification.set({rich: true, backgroundColor: "#FFA6A6", allowGrowX:true, marginRight:2});
+	    notification.setToolTip(this.__ntftooltip);
+	    notification.noteid = noteid;
+
+	    notification.addListener("dblclick", function(e) {
+		this.__textcomposite.remove(notification);
+		this.rpc.call("DELNTF", this.winid + " " + notification.noteid, this);
+	    }, this);
+
+	    this.__textcomposite.addAt(notification, 0);
+
+	    if (this.scrollLock == false)
+	    {
+		this.scrollToBottom();
+	    }
+	},
+
 	addline : function(line)
 	{
 	    this.__channelText = this.__channelText + line;
@@ -859,12 +892,12 @@ qx.Class.define("client.UserWindow",
 	getBackFromSettingsMode : function()
 	{
 	    this.prefButton.setLabel("Settings");
-	    this.__box1.remove(this.__settings);
-	    this.__box1.add(this.__scroll, { row:0, column :0});
+	    this.__box.remove(this.__settings);
+	    this.__box.add(this.__textcomposite, { row:0, column :0});
 
 	    if (this.type == 0)
 	    {
-		this.__box1.add(this.__list, { row:0, column :1});
+		this.__box.add(this.__list, { row:0, column :1});
 	    }
 
 	    this.__viewmode = 0;
@@ -873,12 +906,12 @@ qx.Class.define("client.UserWindow",
 
 	getBackFromUrlMode : function()
 	{
-	    this.__box1.remove(this.__urls);
+	    this.__box.remove(this.__urls);
 	    
-	    this.__box1.add(this.__scroll, { row:0, column :0});
+	    this.__box.add(this.__textcomposite, { row:0, column :0});
 	    if (this.type == 0)
 	    {
-		this.__box1.add(this.__list, { row:0, column :1});
+		this.__box.add(this.__list, { row:0, column :1});
 	    }
 	    
 	    this.__viewmode = 0;
@@ -910,7 +943,6 @@ qx.Class.define("client.UserWindow",
 		
 		var userwindow = 
 		    this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
-
 		
 		userwindow.rpc.call("STARTCHAT", userwindow.__nw + " " + name,
 				    userwindow);
