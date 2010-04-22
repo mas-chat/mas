@@ -1161,7 +1161,7 @@ qx.Class.define("client.MainScreen",
 	{
 	    var menu = new qx.ui.menu.Menu;
 	    var manualButton = new qx.ui.menu.Button("Support Web site");
-	    var keyButton = new qx.ui.menu.Button("Keyboard shortcuts...");
+	    var keyButton = new qx.ui.menu.Button("Keyboard commands and shortcuts...");
 	    var aboutButton = new qx.ui.menu.Button("About...");
 
 	    manualButton.addListener("execute", this._manualCommand, this);
@@ -1429,12 +1429,12 @@ qx.Class.define("client.MainScreen",
 
 	_aboutCommand : function()
 	{
-	    this.infoDialog.showInfoWin("<b>MeetAndSpeak Client SW 12.7.3</b><p>&copy; 2010 MeetAndSpeak. All rights reserved.", "OK");
+	    this.infoDialog.showInfoWin("<b>MeetAndSpeak Client SW 1.0.438</b><p>&copy; 2010 MeetAndSpeak. All rights reserved.", "OK");
 	},
 
 	_keyCommand : function()
 	{
-	    this.infoDialog.showInfoWin("<b>Keyboard shortcuts:</b><p><table border=0><tr><td>[TAB]</td><td>= nick name completion</td></tr><tr><td>[Arrow Up]</td><td>= Switch to next visible window</td></tr><tr><td>[Arrow Down]</td><td>= Switch to previous visible windows</td></tr></table><p>See also available commands by typing<br>'/help' in any of the windows.", "OK");
+	    this.infoDialog.showInfoWin("<b>Keyboard shortcuts:</b><p><table border=0><tr><td>[TAB]</td><td>= nick name completion</td></tr><tr><td>[Arrow Up]</td><td>= Switch to next visible window</td></tr><tr><td>[Arrow Down]</td><td>= Switch to previous visible windows</td></tr></table><p>To send a notification to others in the group, start your line<br>with an escalation mark '!'. You can delete received<br>notifications whenever you like by double-clicking them.<p>Notifications are handy as they stay always visible. You can<br>be sure that everyone will see them.<p>See other available commands by typing<br>'/help' in any of the windows.", "OK");
 	},
 	
 	player_start : function()
