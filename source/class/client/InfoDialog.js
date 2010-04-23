@@ -218,6 +218,7 @@ qx.Class.define("client.InfoDialog",
 	    this.__box.removeAll();
 	    this.__box2.removeAll();
 
+	    this.__box.add(this.__spacer, {flex: 1});
 	    this.__yesbutton.setLabel("OK");
 	    this.__box.add(this.__yesbutton);
 	    this.__nobutton.setLabel("Cancel");
@@ -299,6 +300,7 @@ qx.Class.define("client.InfoDialog",
 	    this.__box.removeAll();
 	    this.__box2.removeAll();
 
+	    this.__box.add(this.__spacer, {flex: 1});
 	    this.__yesbutton.setLabel("OK");
 	    this.__box.add(this.__yesbutton);
 	    this.__nobutton.setLabel("Cancel");
