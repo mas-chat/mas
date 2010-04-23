@@ -594,16 +594,23 @@ qx.Class.define("client.UserWindow",
 		else if (closeok == 0 && (this.type != 0 ||
 					  this.__list.hasChildren() == true))
 		{
-		    e.preventDefault();
+		    if (this.mainscreen.settings.getShowCloseWarn() == 1)
+		    {
+			e.preventDefault();
 
-		    this.infoDialog.showInfoWin(
-			"Are you sure?<p>You need to close windows only when " +
-			    "you<br>wish to permanently stop following the discussion", "Yes",
-			function() 
-			{
-			    closeok = 1;
-			    mywindow.close();
-			}, "NO");
+			this.infoDialog.showInfoWin(
+			    "Are you sure?<p>You need to close windows only when " +
+				"you<br>wish to permanently stop following the discussion", "Yes",
+			    function() 
+			    {
+				closeok = 1;
+				mywindow.close();
+			    }, "NO", function () {}, true);
+		    }
+		    else
+		    {
+			this.mainscreen.removeWindowButton(this.winid);
+		    }
 		}
 		else
 		{
@@ -647,7 +654,7 @@ qx.Class.define("client.UserWindow",
 	addntf : function (noteid, text)
 	{
 	    var notification = new qx.ui.basic.Label(text);
-	    notification.set({rich: true, backgroundColor: "#FFA6A6", allowGrowX:true, marginRight:2});
+	    notification.set({rich: true, backgroundColor: "#D6B6D6", allowGrowX:true, marginRight:2});
 	    notification.setToolTip(this.__ntftooltip);
 	    notification.noteid = noteid;
 
@@ -937,6 +944,7 @@ qx.Class.define("client.UserWindow",
 
 	    var chatButton = new qx.ui.menu.Button("Start private chat with");
 
+
 	    chatButton.addListener("execute", function(e) {
 		// huh!
 		var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
@@ -965,6 +973,26 @@ qx.Class.define("client.UserWindow",
 		});
 
 		menu.add(whoisButton);
+	    }
+	    else
+	    {
+		var friendButton = new qx.ui.menu.Button("Add to contact list");
+
+		friendButton.addListener("execute", function(e) {
+		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
+	    
+		    if(name.charAt(0) == "@" || name.charAt(0) ==  "+")
+		    {
+			//TODO: get rid of @ and + in realname if possible
+			name = name.substr(1);
+		    }
+		    
+		    var userwindow = 
+			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
+		    userwindow.rpc.call("ADDF", name, userwindow);
+		});
+
+		menu.add(friendButton);
 	    }
 
 	    if (this.__usermode != 0 || this.__nw_id != 0)

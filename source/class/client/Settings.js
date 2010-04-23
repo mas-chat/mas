@@ -22,7 +22,8 @@ qx.Class.define("client.Settings",
 	loggingEnabled : { init : 1, apply : "_applyLoggingEnabled" },
 	sslEnabled : { init : 0, apply : "_applySslEnabled" },
 	largeFonts : { init : 0, apply : "_applyLargeFonts" },
-	autoArrange : { init : 0, apply : "_applyAutoArrange" }
+	autoArrange : { init : 0, apply : "_applyAutoArrange" },
+	showCloseWarn : { init : 1, apply : "_applyShowCloseWarn" }
     },
 
     members :
@@ -62,9 +63,18 @@ qx.Class.define("client.Settings",
 		case "sslEnabled":
 		    this.setSslEnabled(value);
 		    break;
+
+		case "showCloseWarn":
+		    this.setShowCloseWarn(value);
+		    break;
 		}
 	    }
 	    this.initdone = 1;
+	},
+
+	_applyShowCloseWarn : function(value) 
+	{
+	    this.send("showCloseWarn", value);
 	},
 
 	_applyFirstTime : function(value) 

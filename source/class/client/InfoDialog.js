@@ -32,8 +32,11 @@ qx.Class.define("client.InfoDialog",
 	this.__message3 = new qx.ui.basic.Atom("", "");
 	this.__message3.setRich(true);
 
+	this.__message4 = new qx.ui.form.CheckBox("Don't show again");
+
 	this.__box = new qx.ui.container.Composite;
-	this.__box.setLayout(new qx.ui.layout.HBox(10, "right"));
+	this.__box.setLayout(new qx.ui.layout.HBox(10, "left"));
+	this.__spacer = new qx.ui.core.Spacer(30);
 
 	this.__combo = new qx.ui.form.ComboBox();
 
@@ -56,12 +59,15 @@ qx.Class.define("client.InfoDialog",
     members :
     {
 	rpc : 0,
+	settings : 0,
 	mainscreen : null,
 
 	__window : 0,
 	__message : 0,
 	__message2 : 0,
 	__message3 : 0,
+	__message4 : 0,
+	__spacer : 0,
 	__box : 0,
 	__box2 : 0,
 	__yesbutton : 0,
@@ -77,7 +83,7 @@ qx.Class.define("client.InfoDialog",
 	__winvisible : 0,
 	__queue : [],
 
-	showInfoWin : function(text, showok, callbackok, showno, callbackno)
+	showInfoWin : function(text, showok, callbackok, showno, callbackno, allowavoid)
 	{
 	    if (this.__winvisible == 1)
 	    {
@@ -101,6 +107,13 @@ qx.Class.define("client.InfoDialog",
 	    this.__window.setCaption("Info");
 
 	    this.__window.add(this.__box);
+	    
+	    if (allowavoid == true)
+	    {
+		this.__box.add(this.__message4);
+		this.__message4.setValue(false);
+	    }
+	    this.__box.add(this.__spacer, {flex: 1});
 
 	    if (typeof(showok) != "undefined")
 	    {
@@ -113,11 +126,16 @@ qx.Class.define("client.InfoDialog",
 
 		this.__yeslistenerid = this.__yesbutton.addListener("execute", function(e) {
 		    
-
 		    if (typeof(callbackok) != "undefined")
 		    {
 			callbackok();
 		    }
+
+		    if (this.__message4.getValue() == true)
+		    {
+			this.settings.setShowCloseWarn(0);
+		    }
+
 		    this.closeInfoWindow();
 		}, this);
 	    }
@@ -137,6 +155,12 @@ qx.Class.define("client.InfoDialog",
 		    {
 			callbackno();
 		    }
+
+		    if (this.__message4.getValue() == true)
+		    {
+			this.settings.setShowCloseWarn(0);
+		    }
+
 		    this.closeInfoWindow();
 
 		}, this);
