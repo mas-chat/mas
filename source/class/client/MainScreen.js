@@ -393,18 +393,8 @@ qx.Class.define("client.MainScreen",
 			break;
 
 		    case "DIE":
-		    	if (this.desktop === 0)
-			{
-			    this.show();
-			}
-			this.infoDialog.showInfoWin(
-			    "Protocol Error. <p>Press OK to login again.",
-			    "OK", 
-			    function () {
-				qx.bom.Cookie.del("ProjectEvergreen");
-				window.location.reload(true);
-			    });
-			doitagain = false;
+			qx.bom.Cookie.del("ProjectEvergreen");
+			window.location.reload(true);
 			break;
 						
 		    case "EXPIRE":
