@@ -407,7 +407,7 @@ qx.Class.define("client.LogDialog",
 
 		if (result == "")
 		{
-		    this.errormsg.setValue("<font color=\"#FF0000\">Your search did not match any log files.</font>");
+		    this.errormsg.setValue("<font color=\"#FF0000\">Your search did not match any log files. (Notice that it takes up to 24 hours to index new content.)</font>");
 		}
 		else
 		{

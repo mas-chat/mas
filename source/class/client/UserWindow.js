@@ -87,13 +87,10 @@ qx.Class.define("client.UserWindow",
 	    scrollbarY : "on"
 	});
 
-	var channelText = "Please wait...<br>";
-
 	this.__textcomposite = new qx.ui.container.Composite(new qx.ui.layout.VBox(2));
+	this.__ntftooltip = new qx.ui.tooltip.ToolTip("Double-click to close this notification.");
 
-	this.__ntftooltip = new qx.ui.tooltip.ToolTip("Double-click to close this sticky message.");
-
-	this.__atom = new qx.ui.basic.Label(channelText);
+	this.__atom = new qx.ui.basic.Label("Please wait...<br>");
 	this.__atom.setRich(true);
 	this.__atom.set({ selectable: true, nativeContextMenu : true});
 
