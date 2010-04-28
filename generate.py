@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/local/bin/python2.6
 ################################################################################
 #
 #  qooxdoo - the new era of web development
@@ -24,8 +24,8 @@
 
 import sys, os, re, subprocess
 
-CMD_PYTHON = 'python'
-QOOXDOO_PATH = '/opt/qooxdoo-1.0.1-sdk'
+CMD_PYTHON = '/usr/local/bin/python2.6'
+QOOXDOO_PATH = '/opt/qooxdoo-1.1-sdk'
 
 def getQxPath():
     path = QOOXDOO_PATH
