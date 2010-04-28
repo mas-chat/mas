@@ -16,8 +16,8 @@ qx.Class.define("client.Application",
 	{
 	    this.base(arguments);
 
-	    qx.log.appender.Console;
-
+	    //qx.log.appender.Console;
+	    
 	    this.getRoot().removeAll();
 	    this.getRoot().set({backgroundColor: "#FFFFFF"});
 
