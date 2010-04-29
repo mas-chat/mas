@@ -1337,12 +1337,12 @@ qx.Class.define("client.MainScreen",
 	    if (usessl == true)
 	    {
 		this.settings.setSslEnabled(1);
-		qx.bom.Cookie.set("UseSSL", "Yep", 100, "/");
+		qx.bom.Cookie.set("UseSSL", "yes", 100, "/");
 	    }
 	    else
 	    {
 		this.settings.setSslEnabled(0);
-		qx.bom.Cookie.del("UseSSL");
+		qx.bom.Cookie.set("UseSSL", "no", 100, "/");
 	    }
 
 	    this.infoDialog.showInfoWin("The application is now being reloaded to activate<br> the change.", "OK", function() {
