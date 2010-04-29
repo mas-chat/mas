@@ -324,7 +324,7 @@ qx.Class.define("client.LogDialog",
 		{
 		    this.iframe.setSource(
 			"/tools/blank.pl?t=" + 
-			    escape("Nothing has been logged during this day."));
+			    escape("Nothing has been logged for this day."));
 		}
 		else
 		{

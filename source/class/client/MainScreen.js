@@ -1204,7 +1204,7 @@ qx.Class.define("client.MainScreen",
 	    var menu = new qx.ui.menu.Menu;
 	    var sslButton = new qx.ui.menu.CheckBox("Always use HTTPS");
 	    var fontButton = new qx.ui.menu.CheckBox("Small font");
-	    var arrangeButton = new qx.ui.menu.CheckBox("Auto arrange windows at startup");
+	    var arrangeButton = new qx.ui.menu.CheckBox("Auto-arrange windows at startup");
 
 	    if (this.settings.getSslEnabled() == 1)
 	    {
