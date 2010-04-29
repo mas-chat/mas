@@ -989,7 +989,10 @@ qx.Class.define("client.UserWindow",
 		    userwindow.rpc.call("ADDF", name, userwindow);
 		});
 
-		menu.add(friendButton);
+		if (this.mainscreen.anon_user == false)
+		{
+		    menu.add(friendButton);
+		}
 	    }
 
 	    if (this.__usermode != 0 || this.__nw_id != 0)
