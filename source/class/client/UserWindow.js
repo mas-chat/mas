@@ -1077,7 +1077,7 @@ qx.Class.define("client.UserWindow",
 	    {
 		text = text + 
 		  "<br><br><br><center>No links detected yet in conversation.<br><br>" + 
-		    "Press the U-button again to return normal view.</center>";
+		    "Press the L-button again to return normal view.</center>";
 	    }
 	    else
 	    {
