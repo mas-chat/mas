@@ -395,7 +395,7 @@ qx.Class.define("client.MainScreen",
 		    case "DIE":
 			qx.bom.Cookie.del("ProjectEvergreen");
 			window.location.reload(true);
-			break;
+	                break;
 						
 		    case "EXPIRE":
 		    	if (this.desktop === 0)
