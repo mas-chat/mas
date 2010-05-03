@@ -643,7 +643,7 @@ qx.Class.define("client.UserWindow",
 
 	expandMOTD : function()
 	{
-	    this.__channelText = this.__channelText.replace(/(<!--|-->|Click here to see details and MOTD\.)/g, "");
+	    this.__channelText = this.__channelText.replace(/(<span style\="display\:none">|<\/span>|Click here to see details and MOTD\.)/g, "");
 
 	    this.addline("");
 	},

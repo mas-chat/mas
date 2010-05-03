@@ -395,7 +395,19 @@ qx.Class.define("client.MainScreen",
 		    case "DIE":
 			qx.bom.Cookie.del("ProjectEvergreen");
 			window.location.reload(true);
-	                break;
+                        if (this.desktop === 0)
+                        {
+                            this.show();
+                        }
+                        this.infoDialog.showInfoWin(
+                            "Session expired. <p>Press OK to login again.",
+                            "OK", 
+                            function () {
+                                qx.bom.Cookie.del("ProjectEvergreen");
+                                window.location.reload(true);
+                            });
+                        doitagain = false;
+                        break;
 						
 		    case "EXPIRE":
 		    	if (this.desktop === 0)
