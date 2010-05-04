@@ -225,8 +225,8 @@ qx.Class.define("client.MainScreen",
 				"Do you want to join the group " + data[0] + "?", "Yes", 
 				function()
 				{
-				    this.rpc.call("JOIN", + data[0] + " MeetAndSpeak " + data[1],
-						  this);
+				    main.rpc.call("JOIN", data[0] + " MeetAndSpeak " + data[1],
+						  main);
 				}, "NO");
 			}
 			this.showMsgWindows();
