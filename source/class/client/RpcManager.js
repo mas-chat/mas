@@ -60,8 +60,15 @@ qx.Class.define("client.RpcManager",
 		var pos = result.search(/ /);
 		var command = result.slice(0, pos);
 		
-		if (command == "OPERLIST")
+		if (command == "KEY")
 		{
+		    //context UserWindow
+		    result = result.slice(pos+1);
+		    this.apikey.setValue(result);    
+		}
+		else if (command == "OPERLIST")
+		{
+		    //context UserWindow
 		    result = result.slice(pos+1);
 		    var opers = result.split("<<>>"); 
 		    
@@ -77,6 +84,7 @@ qx.Class.define("client.RpcManager",
 		}
 		else if (command == "BANLIST")
 		{
+		    //context UserWindow
 		    result = result.slice(pos+1);
 		    var bans = result.split("<<>>"); 
 		    

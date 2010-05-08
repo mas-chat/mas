@@ -372,6 +372,7 @@ qx.Class.define("client.UserWindow",
 	infoDialog : 0,
 	mainscreen : 0,
 	type : 0,
+	apikey : 0,
 
 	__input1 : 0,
 	__urllabel : 0,
@@ -1107,27 +1108,17 @@ qx.Class.define("client.UserWindow",
 
 	    //TOPIC
 
-	    if (this.type == 0)
-	    {
-		var ltitle = new qx.ui.basic.Label("Topic:");
-		composite.add(ltitle, {row:0, column: 0})
-	    }
-
-	    var scomposite1 = new qx.ui.container.Composite(
-		new qx.ui.layout.HBox(10));
+	    var ltitle = new qx.ui.basic.Label("Topic:");
 	    
 	    this.topicInput = new qx.ui.form.TextField();
 	    this.topicInput.set({ maxLength: 200 });
-	    this.topicInput.setWidth(250);
-	    scomposite1.add(this.topicInput);
 
 	    var button1 = new qx.ui.form.Button("Change");
-	    if (this.__nw_id != 0 || this.__usermode != 2)
+
+	    if (this.__nw_id != 0 || this.__usermode == 0)
 	    {
 		button1.setEnabled(false);
 	    }
-
-	    scomposite1.add(button1);
 
 	    button1.addListener("execute", function (e) {
 		this.rpc.call("TOPIC", this.winid + " " + this.topicInput.getValue(),
@@ -1136,7 +1127,9 @@ qx.Class.define("client.UserWindow",
 
 	    if (this.type == 0)
 	    {
-	    	composite.add(scomposite1, {row: 0, column: 1});
+		composite.add(ltitle, {row:0, column: 0})
+	    	composite.add(this.topicInput, {row: 0, column: 1});
+		composite.add(button1, {row: 0, column: 2});
 	    }
 
 	    //SOUNDS
@@ -1216,24 +1209,12 @@ qx.Class.define("client.UserWindow",
 	    composite.add(scomposite4, {row:2, column: 1})
 
 	    //PASSWORD
-
-	    if (this.type == 0)
-	    {
-		composite.add(new qx.ui.basic.Label("Password:"), {row:3, column: 0})
-	    }
-
-	    var scomposite3 = new qx.ui.container.Composite(
-		new qx.ui.layout.HBox(10));
-	    
 	    this.pwInput = new qx.ui.form.TextField();
 	    this.pwInput.set({ maxLength: 20 });
 	    this.pwInput.setWidth(250);
 	    this.pwInput.setPlaceholder("<not set>");
-	    
-	    scomposite3.add(this.pwInput);
-	    
+	    	    
 	    var button2 = new qx.ui.form.Button("Change");
-	    scomposite3.add(button2);
 	    
 	    if (this.__nw_id != 0 || this.__usermode != 2)
 	    {
@@ -1247,7 +1228,9 @@ qx.Class.define("client.UserWindow",
 
 	    if (this.type == 0)
 	    {
-		composite.add(scomposite3, {row: 3, column: 1});
+		composite.add(new qx.ui.basic.Label("Password:"), {row:3, column: 0})
+		composite.add(this.pwInput, {row: 3, column: 1});
+		composite.add(button2, {row: 3, column: 2});
 	    }
 
 	    //Group URL:
@@ -1255,18 +1238,11 @@ qx.Class.define("client.UserWindow",
 	    if (this.type == 0 && this.__nw_id == 0)
 	    {
 		composite.add(new qx.ui.basic.Label("Participation link:"), {row:4, column: 0});
+		var urltext = new qx.ui.basic.Label("http://meetandspeak.com/join/" + this.__name.substr(1));
+		composite.add(urltext, {row:4, column: 1});
+		urltext.set({ selectable: true, nativeContextMenu : true });
 	    }
 	    
-	    var link = new qx.ui.form.TextField();
-	    link.set({ maxLength: 200 });
-	    link.setWidth(250);
-	    link.setValue("http://meetandspeak.com/join/" + this.__name.substr(1));
-
-	    if (this.type == 0 && this.__nw_id == 0)
-	    {
-		composite.add(link, {row: 4, column: 1});
-	    }
-
 	    //OPER LIST
 
 	    if (this.__usermode == 2)
@@ -1330,6 +1306,27 @@ qx.Class.define("client.UserWindow",
 		}, this);
 	    }
 
+	    //Group API key
+
+	    if (this.type == 0 && this.__nw_id == 0 && this.__usermode == 2)
+	    {
+		composite.add(new qx.ui.basic.Label("Group API key:"), {row:7, column: 0});
+		this.apikey = new qx.ui.basic.Label("Refreshing2...");
+		this.apikey.set({ selectable: true, nativeContextMenu : true });
+
+		this.rpc.call("GETKEY", this.winid, this);
+		composite.add(this.apikey, {row: 7, column: 1});
+
+	    	var buttonKey = new qx.ui.form.Button("Generate new key");
+		buttonKey.setAllowStretchY(false);
+		composite.add(buttonKey, {row: 7, column: 2});
+
+		buttonKey.addListener("execute", function(e) {
+		    this.rpc.call("SETKEY", this.winid, this);
+		}, this);
+
+	    }
+	    
 	    return composite;
 	}
     }
