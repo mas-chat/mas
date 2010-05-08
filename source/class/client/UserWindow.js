@@ -1311,18 +1311,18 @@ qx.Class.define("client.UserWindow",
 	    if (this.type == 0 && this.__nw_id == 0 && this.__usermode == 2)
 	    {
 		composite.add(new qx.ui.basic.Label("Group API key:"), {row:7, column: 0});
-		this.apikey = new qx.ui.basic.Label("Refreshing2...");
+		this.apikey = new qx.ui.basic.Label("(coming)");
 		this.apikey.set({ selectable: true, nativeContextMenu : true });
 
-		this.rpc.call("GETKEY", this.winid, this);
+//		this.rpc.call("GETKEY", this.winid, this);
 		composite.add(this.apikey, {row: 7, column: 1});
 
 	    	var buttonKey = new qx.ui.form.Button("Generate new key");
 		buttonKey.setAllowStretchY(false);
-		composite.add(buttonKey, {row: 7, column: 2});
+//		composite.add(buttonKey, {row: 7, column: 2});
 
 		buttonKey.addListener("execute", function(e) {
-		    this.rpc.call("SETKEY", this.winid, this);
+//		    this.rpc.call("SETKEY", this.winid, this);
 		}, this);
 
 	    }
