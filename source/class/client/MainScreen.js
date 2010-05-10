@@ -522,7 +522,7 @@ qx.Class.define("client.MainScreen",
 		    new client.UserWindow(this.rpc, this.desktop,
 					  topic, nw, name, type, sound, titlealert,
 					  nw_id, usermode, password, new_msgs, 
-					  this.infoDialog, this);
+					  this.infoDialog, window_id, this);
 
 		if (x < 0)
 		{
@@ -595,7 +595,6 @@ qx.Class.define("client.MainScreen",
 		newWindow.setHeight(height);
 		newWindow.setWidth(width);
 
-		newWindow.winid = window_id;
 		this.windows[window_id] = newWindow;
 
 		this.addWindowButton(window_id, new_msgs);
