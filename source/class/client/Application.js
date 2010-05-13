@@ -21,10 +21,13 @@ qx.Class.define("client.Application",
 	    this.getRoot().removeAll();
 	    this.getRoot().set({backgroundColor: "#FFFFFF"});
 
-	    var start_label = new qx.ui.basic.Label("Loading content...").set({
-		font : new qx.bom.Font(14, ["Arial", "sans-serif"])});
+	    var start_label = new qx.ui.basic.Label("<center><img src=\"/i/ajax-loader.gif\"><br><br><br>Loading content...</center>").set({
+		font : new qx.bom.Font(14, ["Arial", "sans-serif"]), width:300, height:150, rich: true});
+
+	    var margin_x = Math.round(qx.bom.Viewport.getWidth()/2)-300/2;
+	    var margin_y = Math.round(qx.bom.Viewport.getHeight()/2);
 	    
-	    start_label.setMargin(10,10,10,10);
+	    start_label.setMargin(margin_y,10,10,margin_x);
 	    this.getRoot().add(start_label, {flex : 1});
 
 	    var srpc = new client.RpcManager();

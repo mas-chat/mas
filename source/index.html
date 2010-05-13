@@ -5,11 +5,28 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>MeetAndSpeak</title>
   <script type="text/javascript" defer src="/moescript/client.js"></script>
+
+  <style type="text/css" media="screen"> 
+html, body {margin: 0; padding: 0; height: 100%;} 
+#content { 
+text-align: center; 
+position: absolute; 
+top: 50%;
+font-family: Arial, Times, serif;
+font-size:14px; 
+left: 50%; 
+margin-left: -77px; 
+} 
+</style> 
+
 </head>
 
 <body>
 
-<div style="position: absolute; top: 10px; left: 10px; font-family:Arial, Times, serif; font-size:14px;">Loading the application... Please wait</div>
+<div id="content"> 
+<img src="/i/ajax-loader.gif">
+<br><br><br>Loading the application...
+</div> 
 
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
@@ -24,3 +41,6 @@ pageTracker._trackPageview();
 
 </body>
 </html>
+
+
+
