@@ -705,7 +705,8 @@ qx.Class.define("client.MainScreen",
 		new qx.ui.layout.VBox());
 	    friendContainer.set({ backgroundColor: "#F2F5FE"}); 
 	    
-	    var friendsLabel = new qx.ui.basic.Label("<b>Contact list:</b>");
+	    var friendsLabel = new qx.ui.basic.Label("<b>Contact list:</b>").set({
+                font : new qx.bom.Font(14, ["Arial", "sans-serif"])});
             friendsLabel.setRich(true);
 	    friendsLabel.setPaddingTop(10);
 	    friendsLabel.setPaddingBottom(10);
@@ -713,8 +714,11 @@ qx.Class.define("client.MainScreen",
             
             friendContainer.add(friendsLabel);
 	    	    
-	    this.globalflist = new qx.ui.container.Composite(new qx.ui.layout.Grid());
+            var fgrid = new qx.ui.layout.Grid();
+	    this.globalflist = new qx.ui.container.Composite(fgrid);
 	    this.globalflist.setAllowGrowY(true);
+	    this.globalflist.setAllowGrowX(true);
+	    fgrid.setColumnWidth(0, 200);
 	    
 	    friendContainer.add(this.globalflist, {flex: 1});
 
@@ -819,8 +823,8 @@ qx.Class.define("client.MainScreen",
                     var friend = new qx.ui.basic.Label("<b>" + columns[1] +
 						       "</b> (" + columns[3] + ")");
                     var friend2 = new qx.ui.basic.Label();
-                    
                     var friend3 = new qx.ui.basic.Label();
+
 		    friend3.setRich(true);	
 		    friend3.setValue("<font color=\"green\">|M|</font>");
 		    friend3.nickname = columns[3];
