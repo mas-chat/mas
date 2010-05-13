@@ -703,10 +703,10 @@ qx.Class.define("client.MainScreen",
 
 	    var friendContainer = new qx.ui.container.Composite(
 		new qx.ui.layout.VBox());
-	    friendContainer.set({ backgroundColor: "#F2F5FE"}); 
+	    friendContainer.set({ backgroundColor: "#e2e5eE"}); 
 	    
 	    var friendsLabel = new qx.ui.basic.Label("<b>Contact list:</b>").set({
-                font : new qx.bom.Font(14, ["Arial", "sans-serif"])});
+                font : new qx.bom.Font(14, ["Arial", "sans-serif"]), textColor: "#cc448b"});
             friendsLabel.setRich(true);
 	    friendsLabel.setPaddingTop(10);
 	    friendsLabel.setPaddingBottom(10);
@@ -718,7 +718,7 @@ qx.Class.define("client.MainScreen",
 	    this.globalflist = new qx.ui.container.Composite(fgrid);
 	    this.globalflist.setAllowGrowY(true);
 	    this.globalflist.setAllowGrowX(true);
-	    fgrid.setColumnWidth(0, 200);
+	    fgrid.setColumnWidth(0, 185);
 	    
 	    friendContainer.add(this.globalflist, {flex: 1});
 
