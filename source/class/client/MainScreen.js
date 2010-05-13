@@ -459,15 +459,15 @@ qx.Class.define("client.MainScreen",
 	    {
 		if (this.__firstrpc == 1)
 		{
-		    alert("MeetAndSpeak is having some technical problems. Sorry!\n\nYou can try to reload this page in a few moments to see if the service is back online.\n\nWe are trying to address the situation as quickly as possible.");
+		    var problem_label = new qx.ui.basic.Label("<center>MeetAndSpeak is having some technical problems. Sorry!<br><br>You can try to reload this page in a few moments to see if the service is back online.<br><br>We are trying to address the situation as quickly as possible.</center>").set({
+			font : new qx.bom.Font(14, ["Arial", "sans-serif"]), width:500, height:150, rich: true});
 
-		    this.__myapp.removeAll();
-		    
-		    var problem_label = new qx.ui.basic.Label("Connection to MeetAndSpeak backend servers failed.").set({
-			font : new qx.bom.Font(14, ["Arial", "sans-serif"])});
+		    var margin_x = Math.round(qx.bom.Viewport.getWidth()/2)-500/2;
+		    var margin_y = Math.round(qx.bom.Viewport.getHeight()/2) - 100;
 	    
-		    problem_label.setMargin(10,10,10,10);
-		    this.__myapp.add(problem_label, {flex : 1});
+		    problem_label.setMargin(margin_y,10,10,margin_x);
+		    this.__myapp.removeAll();
+	    	    this.__myapp.add(problem_label, {flex : 1});
 		}
 		else
 		{
