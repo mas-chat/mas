@@ -833,7 +833,7 @@ qx.Class.define("client.MainScreen",
                     var friend3 = new qx.ui.basic.Label();
 
 		    friend3.setRich(true);	
-		    friend3.setValue("<font color=\"green\">|MSG|</font>");
+		    friend3.setValue("<font color=\"green\">|chat|</font>");
 		    friend3.nickname = columns[3];
 		    friend3.rrpc = this.rpc;
                     friend3.waiting = false;		    
@@ -848,14 +848,14 @@ qx.Class.define("client.MainScreen",
 		    friend3.addListener("mouseover", function (e) {
                         if (this.waiting == false)
                         {
-			    this.setValue("<font color=\"green\"><u>|MSG|<u></font>");
+			    this.setValue("<font color=\"green\"><u>|chat|<u></font>");
                         }
 		    }, friend3);
 		    
 		    friend3.addListener("mouseout", function (e) {
                         if (this.waiting == false)
                         {
-		            this.setValue("<font color=\"green\">|MSG|</font>");
+		            this.setValue("<font color=\"green\">|chat|</font>");
                         }
 		    }, friend3);
 
@@ -1040,7 +1040,7 @@ qx.Class.define("client.MainScreen",
             {
 		if (children[i].nickname == nick)
                 {
-		    children[i].setValue("<font color=\"green\">|MSG|</font>");
+		    children[i].setValue("<font color=\"green\">|chat|</font>");
                 }
             }	
         },
