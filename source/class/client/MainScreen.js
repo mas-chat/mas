@@ -205,7 +205,7 @@ qx.Class.define("client.MainScreen",
 
 		    case "CREATE":
 			var options = param.split(" ");
-			this.create_or_update_window(options, true);			
+			this.create_or_update_window(options, true);
 			break;
 
 		    case "UPDATE":
@@ -524,6 +524,11 @@ qx.Class.define("client.MainScreen",
 					  nw_id, usermode, password, new_msgs, 
 					  this.infoDialog, window_id, this);
 
+		if (type != 0 && this.initdone == 1)
+                {
+	            this.removeWaitText(this.globalflist, name);
+                }
+
 		if (x < 0)
 		{
 		    x = 0;
@@ -700,6 +705,8 @@ qx.Class.define("client.MainScreen",
 	    }
 
 	    var friendScroll = new qx.ui.container.Scroll();
+            friendScroll.setPadding(0,0,15,0);
+	    friendScroll.set({ backgroundColor: "#e2e5eE"}); 
 
 	    var friendContainer = new qx.ui.container.Composite(
 		new qx.ui.layout.VBox());
@@ -762,7 +769,7 @@ qx.Class.define("client.MainScreen",
 
 	    //popup
 	    var contactsPopup = new qx.ui.popup.Popup(new qx.ui.layout.HBox(5));
-	    contactsPopup.set({ autoHide : false, height : 400, width : 250 });
+	    contactsPopup.set({ autoHide : true, height : 400, width : 250 });
 
 	    friendScroll.add(friendContainer);
 	    friendScroll.set({
@@ -788,11 +795,11 @@ qx.Class.define("client.MainScreen",
 			contactsPopup.placeToWidget(contactsButton);
 			contactsPopup.show();
 		    }
-		    else
-		    {
-			contactsPopup.hide();
-		    } 
 		}, middleSection);
+
+  	        contactsPopup.addListener("disappear", function (e) {
+                    contactsButton.setValue(false);   
+	        });
 		
 		this.__timer.addListener(
 		    "interval", function(e) { this.updateIdleTimes(
@@ -826,20 +833,29 @@ qx.Class.define("client.MainScreen",
                     var friend3 = new qx.ui.basic.Label();
 
 		    friend3.setRich(true);	
-		    friend3.setValue("<font color=\"green\">|M|</font>");
+		    friend3.setValue("<font color=\"green\">|MSG|</font>");
 		    friend3.nickname = columns[3];
 		    friend3.rrpc = this.rpc;
-		    
+                    friend3.waiting = false;		    
+
 		    friend3.addListener("click", function (e) {
 			this.rrpc.call("STARTCHAT", "MeetAndSpeak " + this.nickname, this);
+                        this.setValue("<font color=\"green\">Wait..</font>");
+                        this.waiting = true;
 		    }, friend3);
 		    
 		    friend3.addListener("mouseover", function (e) {
-			this.setValue("<font color=\"green\"><b>|M|<b></font>");
+                        if (this.waiting == false)
+                        {
+			    this.setValue("<font color=\"green\"><u>|MSG|<u></font>");
+                        }
 		    }, friend3);
 		    
 		    friend3.addListener("mouseout", function (e) {
-		    this.setValue("<font color=\"green\">|M|</font>");
+                        if (this.waiting == false)
+                        {
+		            this.setValue("<font color=\"green\">|MSG|</font>");
+                        }
 		    }, friend3);
 
 		    friend3.setToolTip(this.__tt);
@@ -1008,6 +1024,24 @@ qx.Class.define("client.MainScreen",
             }	
 
 	    this.printIdleTimes(parentFList);
+        },
+	    
+        removeWaitText : function(parentFList, nick)
+        {
+            if (!parentFList)
+            {
+                return;
+            }
+
+            var children = parentFList.getChildren();
+	    
+            for (var i=2; i < children.length; i = i + 3)
+            {
+		if (children[i].nickname == nick)
+                {
+		    children[i].setValue("<font color=\"green\">|MSG|</font>");
+                }
+            }	
         },
 
 	removeWindowButton : function(winid)

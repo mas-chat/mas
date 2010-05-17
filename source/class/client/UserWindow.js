@@ -135,7 +135,7 @@ qx.Class.define("client.UserWindow",
 
 		    this.__input1.setValue("");
 
-		    if (input.substr(0,1) == "/")
+		    if (input.substr(0,1) == "/" && input.substr(0,4) != "/me ")
 		    {
 			//do nothing
 		    }
@@ -165,7 +165,7 @@ qx.Class.define("client.UserWindow",
 				this.mainscreen.nicks[this.__nw_id] + "</b> ";
 			}
 		    
-			this.addline(hour + ":" + min + mynick + input + "</font><br><!-- x -->");
+			this.addline(hour + ":" + min + mynick + this.linkify(input) + "</font><br><!-- x -->");
 		    }
 		}
 	    }
@@ -1329,6 +1329,19 @@ qx.Class.define("client.UserWindow",
 	    }
 	    
 	    return composite;
-	}
+	},
+
+        linkify : function (inputText) 
+        {
+            //URLs starting with http://, https://, or ftp://
+            var replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+            var replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+
+            //Change email addresses to mailto:: links
+            var replacePattern3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/gim;
+            var replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+            return replacedText
+        }
     }
 });
