@@ -523,7 +523,7 @@ qx.Class.define("client.MainScreen",
 					  topic, nw, name, type, sound, titlealert,
 					  nw_id, usermode, password, new_msgs, 
 					  this.infoDialog, window_id, this);
-
+		
 		if (type != 0 && this.initdone == 1)
                 {
 	            this.removeWaitText(this.globalflist, name);
@@ -705,7 +705,7 @@ qx.Class.define("client.MainScreen",
 	    }
 
 	    var friendScroll = new qx.ui.container.Scroll();
-            friendScroll.setPadding(0,0,15,0);
+            friendScroll.setPadding(0,0,5,0);
 	    friendScroll.set({ backgroundColor: "#e2e5eE"}); 
 
 	    var friendContainer = new qx.ui.container.Composite(
@@ -837,9 +837,10 @@ qx.Class.define("client.MainScreen",
 		    friend3.nickname = columns[3];
 		    friend3.rrpc = this.rpc;
                     friend3.waiting = false;		    
+		    friend3.mainscreen = this;
 
 		    friend3.addListener("click", function (e) {
-			this.rrpc.call("STARTCHAT", "MeetAndSpeak " + this.nickname, this);
+			this.rrpc.call("STARTCHAT", "MeetAndSpeak " + this.nickname, this.mainscreen);
                         this.setValue("<font color=\"green\">Wait..</font>");
                         this.waiting = true;
 		    }, friend3);

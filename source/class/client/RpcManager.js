@@ -9,7 +9,7 @@ qx.Class.define("client.RpcManager",
 {
     extend : qx.core.Object,
 
-    construct : function(desktop, system, name)
+    construct : function()
     {
 	this.base(arguments);
 	
@@ -110,6 +110,14 @@ qx.Class.define("client.RpcManager",
 		else if (command == "INFO")
 		{
                     var param = result.slice(pos+1);
+
+		    //TODO: big bad hack, fix: proper protocol
+		    if (param.substr(0, 30) == "You are already chatting with ")
+		    {
+			//context mainscreen
+			this.removeWaitText(this.globalflist, param.substr(30));
+		    }
+
 		    this.infoDialog.showInfoWin(param, "OK");
 		}
 	    }
