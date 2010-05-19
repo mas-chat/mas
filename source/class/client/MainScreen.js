@@ -1469,7 +1469,7 @@ qx.Class.define("client.MainScreen",
 
 	_aboutCommand : function()
 	{
-	    this.infoDialog.showInfoWin("<img src=\"/i/mas_logo_small.png\"><p><b><h2 style=\"color: #000022;\">MeetAndSpeak Web Client</h2></b><p>Version: 1.0.__MOE_VERSION__</b><p><br><br>&copy; 2010 MeetAndSpeak Ltd. All rights reserved.", "OK");
+	    this.infoDialog.showInfoWin("<img src=\"/i/mas_logo_small.png\"><p><b><h2 style=\"color: #000022;\">MeetAndSpeak Web Client</h2></b><p>Version: 1.__MOE_VERSION__.szyslak</b><p><br><br>&copy; 2010 <a href=\"/about.html\">MeetAndSpeak Ltd</a>. All rights reserved.<br><br>", "OK");
 	},
 
 	_keyCommand : function()
