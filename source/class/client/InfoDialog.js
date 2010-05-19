@@ -171,8 +171,8 @@ qx.Class.define("client.InfoDialog",
 
 	    this.__window.setModal(true);
 	    this.mainscreen.desktop.add(this.__window);
-	    this.__window.center();
 	    this.__window.open();
+	    this.__window.center();
 	    this.mainscreen.manager.bringToFront(this.__window);
 	},
 
