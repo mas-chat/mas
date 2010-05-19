@@ -598,6 +598,7 @@ qx.Class.define("client.UserWindow",
 			e.preventDefault();
 
 			this.infoDialog.showInfoWin(
+                            "Confirm",
 			    "Are you sure?<p>You need to close windows only when " +
 				"you<br>wish to permanently stop following the discussion", "Yes",
 			    function() 

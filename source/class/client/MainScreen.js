@@ -175,7 +175,7 @@ qx.Class.define("client.MainScreen",
 			    this.show();
 			}
 
-			this.infoDialog.showInfoWin("Connection error.<p>Trying to recover...");
+			this.infoDialog.showInfoWin("Error", "Connection error.<p>Trying to recover...");
 
 			qx.event.Timer.once(function(e){
 			    window.location.reload(true);
@@ -222,6 +222,7 @@ qx.Class.define("client.MainScreen",
 
 			    qx.bom.Cookie.del("ProjectEvergreenJoin");
 			    this.infoDialog.showInfoWin(
+				"Confirm", 
 				"Do you want to join the group " + data[0] + "?", "Yes", 
 				function()
 				{
@@ -400,6 +401,7 @@ qx.Class.define("client.MainScreen",
                             this.show();
                         }
                         this.infoDialog.showInfoWin(
+			    "Error",
                             "Session expired. <p>Press OK to login again.",
                             "OK", 
                             function () {
@@ -417,6 +419,7 @@ qx.Class.define("client.MainScreen",
 
 			//var reason = param.slice(pos+1);
 			this.infoDialog.showInfoWin(
+			    "Error",	
 			    "Your session expired, you logged in from another location, or<br>the server was restarted.<p>Press OK to restart.",
 			    "OK", 
 			    function () {
@@ -429,7 +432,7 @@ qx.Class.define("client.MainScreen",
 			break;
 
 		    case "INFO" :
-			this.infoDialog.showInfoWin(param, "OK");
+			this.infoDialog.showInfoWin("Info", param, "OK");
 			break;
 
 		    case "CLOSE":
@@ -1395,7 +1398,7 @@ qx.Class.define("client.MainScreen",
 		qx.bom.Cookie.set("UseSSL", "no", 100, "/");
 	    }
 
-	    this.infoDialog.showInfoWin("The application is now being reloaded to activate<br> the change.", "OK", function() {
+	    this.infoDialog.showInfoWin("Info", "The application is now being reloaded to activate<br> the change.", "OK", function() {
 		window.location.reload(true);
 	    });
 	},
@@ -1469,12 +1472,12 @@ qx.Class.define("client.MainScreen",
 
 	_aboutCommand : function()
 	{
-	    this.infoDialog.showInfoWin("<img src=\"/i/mas_logo_small.png\"><p><b><h2 style=\"color: #000022;\">MeetAndSpeak Web Client</h2></b><p>Version: 1.__MOE_VERSION__.szyslak</b><p><br><br>&copy; 2010 <a href=\"/about.html\">MeetAndSpeak Ltd</a>. All rights reserved.<br><br>", "OK");
+	    this.infoDialog.showInfoWin("About", "<br><br><br><center><img src=\"/i/mas_logo_small.png\"></center><p><b><br><br><center><h2 style=\"color: #000022;\">MeetAndSpeak Web Client</center></h2></b><p><center>Version: 1.0.__MOE_VERSION__.szyslak</center><br><p style=\"padding-bottom:1px;\">&copy; 2010 <a href=\"/about.html\">MeetAndSpeak Ltd</a>. All rights reserved.</p><br><br>", "OK");
 	},
 
 	_keyCommand : function()
 	{
-	    this.infoDialog.showInfoWin("<b>Keyboard shortcuts:</b><p><table border=0><tr><td>[TAB]</td><td>= nick name completion</td></tr><tr><td>[Arrow Up]</td><td>= Switch to next visible window</td></tr><tr><td>[Arrow Down]</td><td>= Switch to previous visible windows</td></tr></table><p>To send a notification to others in the group, start your line<br>with an exclamation mark '!'. You can delete received<br>notifications whenever you like by double-clicking them.<p>Notifications are handy as they stay always visible. You can<br>be sure that everyone will see them.<p>See other available commands by typing<br>'/help' in any of the windows.", "OK");
+	    this.infoDialog.showInfoWin("Shortcuts", "<b>Keyboard shortcuts:</b><p><table border=0><tr><td>[TAB]</td><td>= nick name completion</td></tr><tr><td>[Arrow Up]</td><td>= Switch to next visible window</td></tr><tr><td>[Arrow Down]</td><td>= Switch to previous visible windows</td></tr></table><p>To send a notification to others in the group, start your line<br>with an exclamation mark '!'. You can delete received<br>notifications whenever you like by double-clicking them.<p>Notifications are handy as they stay always visible. You can<br>be sure that everyone will see them.<p>See other available commands by typing<br>'/help' in any of the windows.", "OK");
 	},
 	
 	player_start : function()

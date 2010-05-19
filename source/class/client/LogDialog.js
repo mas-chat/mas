@@ -244,7 +244,7 @@ qx.Class.define("client.LogDialog",
 		var settings = this.settings;
 
 		logshort.addListener("click", function(e) {
-		    this.__infodialog.showInfoWin(
+		    this.__infodialog.showInfoWin("Confirmation", 
 			"Are you absolutely sure? All your log files older<br>than 7 days will be deleted!",
 			"OK", 
 			function () {

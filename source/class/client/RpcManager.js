@@ -101,6 +101,7 @@ qx.Class.define("client.RpcManager",
 		else if (command == "DIE")
 		{
 		    this.infoDialog.showInfoWin(
+                        "Error",
 			"Session terminated. <p>Press OK to restart.",
 			"OK", function () {
 			    qx.bom.Cookie.del("ProjectEvergreen");
@@ -118,12 +119,12 @@ qx.Class.define("client.RpcManager",
 			this.removeWaitText(this.globalflist, param.substr(30));
 		    }
 
-		    this.infoDialog.showInfoWin(param, "OK");
+		    this.infoDialog.showInfoWin("Info", param, "OK");
 		}
 	    }
 	    else 
 	    {
-		this.infoDialog.showInfoWin("Lost connection to server. (" + exc + ")<p>Trying to recover...");
+		this.infoDialog.showInfoWin("Error", "Lost connection to server. (" + exc + ")<p>Trying to recover...");
 
 		qx.event.Timer.once(
 		    function(e) { window.location.reload(true); }, this, 2000);

@@ -21,6 +21,8 @@ qx.Class.define("client.InfoDialog",
 
 	this.__window.setModal(true);
 	this.__window.setShowClose(false);
+        this.__window.setShowMinimize(false);
+        this.__window.setShowMaximize(false);
 	this.__window.moveTo(400, 300);
 
 	this.__message = new qx.ui.basic.Atom("", "");
@@ -43,9 +45,9 @@ qx.Class.define("client.InfoDialog",
 	this.__box2 = new qx.ui.container.Composite;
 	this.__box2.setLayout(new qx.ui.layout.HBox(10, "left"));
 	
-	this.__yesbutton = new qx.ui.form.Button("Yes", "icon/16/actions/dialog-ok.png");
+	this.__yesbutton = new qx.ui.form.Button("Yes");
 	
-	this.__nobutton = new qx.ui.form.Button("No", "icon/16/actions/dialog-cancel.png");
+	this.__nobutton = new qx.ui.form.Button("No");
 
 	this.__input = new qx.ui.form.TextField("").set({
 		maxLength: 25
@@ -83,11 +85,12 @@ qx.Class.define("client.InfoDialog",
 	__winvisible : 0,
 	__queue : [],
 
-	showInfoWin : function(text, showok, callbackok, showno, callbackno, allowavoid)
+	showInfoWin : function(topic, text, showok, callbackok, showno, callbackno, allowavoid)
 	{
 	    if (this.__winvisible == 1)
 	    {
 		var obj = new Object();
+		obj.topic = topic;
 		obj.text = text;
 		obj.showok = showok;
 		obj.callbackok = callbackok;
@@ -104,7 +107,7 @@ qx.Class.define("client.InfoDialog",
 	    this.__window.add(this.__message);
 
 	    this.__message.setLabel(text);
-	    this.__window.setCaption("Info");
+	    this.__window.setCaption(topic);
 
 	    this.__window.add(this.__box);
 	    
@@ -181,7 +184,7 @@ qx.Class.define("client.InfoDialog",
 	    if (this.__queue.length > 0)
 	    {
 		var obj = this.__queue.shift();
-		this.showInfoWin(obj.text, obj.showok, obj.callbackok,
+		this.showInfoWin(obj.topic, obj.text, obj.showok, obj.callbackok,
 				 obj.showno, obj.callbackno);
 	    }
 	},
