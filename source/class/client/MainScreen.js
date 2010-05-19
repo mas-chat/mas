@@ -1469,7 +1469,7 @@ qx.Class.define("client.MainScreen",
 
 	_aboutCommand : function()
 	{
-	    this.infoDialog.showInfoWin("<b>MeetAndSpeak Client SW 1.0.438</b><p>&copy; 2010 MeetAndSpeak. All rights reserved.", "OK");
+	    this.infoDialog.showInfoWin("<b><h2 style=\"color: #000022;\">MeetAndSpeak Client SW</h2></b><p>Version: 1.0.__MOE_VERSION__</b><p><br><br>&copy; 2010 MeetAndSpeak Ltd. All rights reserved.", "OK");
 	},
 
 	_keyCommand : function()
