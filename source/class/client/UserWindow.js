@@ -404,6 +404,10 @@ qx.Class.define("client.UserWindow",
 	    this.__password = password;
 	    this.__usermode = usermode;
 	    this.__topic = topic;
+	    this.__name = name;
+
+	    //show potential name or topic change
+	    this.changetopic(topic);
 
 	    if (this.__viewmode == 1)
 	    {
