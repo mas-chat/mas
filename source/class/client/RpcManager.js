@@ -15,7 +15,7 @@ qx.Class.define("client.RpcManager",
 	
 	// write "socket"
 	this.__srpc = new qx.io.remote.Rpc("/ralph", "ralph");
-	this.__srpc.setTimeout(15000);
+	this.__srpc.setTimeout(45000); //experimental
 
 	this.__rrpc = new qx.io.remote.Rpc("/ralph", "ralph");
 	this.__rrpc.setTimeout(30000);
