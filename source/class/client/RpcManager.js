@@ -26,17 +26,38 @@ qx.Class.define("client.RpcManager",
 	id : 0,
 	sec : 0,
 	cookie : 0,
+	mainscreen : 0,
 	infoDialog : 0,
-
+	errormode : false,
+	__sendqueue : [],
 	__srpc : 0,
 	__rrpc : 0,
 	
 	call : function(command, parameters, context)
 	{
+	    var obj = new Object();
+	    obj.command = command;
+	    obj.parameters = parameters;
+	    obj.context = context;
+	    this.__sendqueue.push(obj);
+
+	    if (this.__sendqueue.length == 1)
+	    {
+		this.__sendCallRequest(obj);
+	    }
+	},
+
+	__sendCallRequest : function(obj)
+	{
+	    if (this.errormode == false) 
+	    {
+		this.mainscreen.setStatusText("L");
+	    }
+
 	    this.__srpc.callAsync(
-		qx.lang.Function.bind(this.__sendresult, context),
-		command, this.id + " " + this.sec + " " + this.cookie + " " +
-		    parameters);
+		qx.lang.Function.bind(this.__sendresult, obj.context),
+		obj.command, this.id + " " + this.sec + " " + this.cookie + " " +
+		    obj.parameters);
 	},
 
 	read : function(command, parameters, context, callback)
@@ -112,7 +133,7 @@ qx.Class.define("client.RpcManager",
 		{
                     var param = result.slice(pos+1);
 
-		    //TODO: big bad hack, fix: proper protocol
+	            //TODO: big bad hack, fix: proper protocol
 		    if (param.substr(0, 30) == "You are already chatting with ")
 		    {
 			//context mainscreen
@@ -121,13 +142,24 @@ qx.Class.define("client.RpcManager",
 
 		    this.infoDialog.showInfoWin("Info", param, "OK");
 		}
+		
+		rpcmanager.__sendqueue.shift();
+		rpcmanager.errormode = false;
 	    }
 	    else 
 	    {
-		this.infoDialog.showInfoWin("Error", "Lost connection to server. (" + exc + ")<p>Trying to recover...");
+		rpcmanager.mainscreen.setStatusText("<font color=\"#ff0000\">Connection to server lost, recovering...</font>");
+		rpcmanager.errormode = true;
+	    }
 
-		qx.event.Timer.once(
-		    function(e) { window.location.reload(true); }, this, 2000);
+	    if (rpcmanager.__sendqueue.length > 0)
+	    {
+		var obj = rpcmanager.__sendqueue[0];
+		rpcmanager.__sendCallRequest(obj);
+	    }
+	    else
+	    {
+		rpcmanager.mainscreen.setStatusText("");
 	    }
 	}
     }

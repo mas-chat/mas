@@ -65,9 +65,11 @@ qx.Class.define("client.Application",
 						      settings, infoDialog, anon_user);
 
 	    main = MainScreenObj;
+	    rpcmanager = srpc;
 
 	    infoDialog.mainscreen = MainScreenObj;
 	    logDialog.mainscreen = MainScreenObj;
+	    srpc.mainscreen = MainScreenObj;
 	}
     }
 });

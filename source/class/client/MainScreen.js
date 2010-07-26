@@ -128,6 +128,7 @@ qx.Class.define("client.MainScreen",
 	anon_user : 0,
 	nicks : 0,
 	blocker : 0,
+	statusMenu : 0,
 
 	__part2 : 0,
 	__part3 : 0,
@@ -1170,6 +1171,9 @@ qx.Class.define("client.MainScreen",
 	    var logoutMenu = new qx.ui.menubar.Button("Log Out", null,
 						      this.getLogoutMenu());
 
+	    this.statusMenu = new qx.ui.menubar.Button("", null);
+	    this.statusMenu.setRich(true);
+
 	    if (this.anon_user == false)
 	    {
 		menubar.add(forumMenu);
@@ -1186,7 +1190,15 @@ qx.Class.define("client.MainScreen",
 	    menubar.add(helpMenu);
 	    menubar.add(logoutMenu);
 
+	    menubar.addSpacer();
+	    menubar.add(this.statusMenu);
+
 	    return frame;
+	},
+
+	setStatusText : function(text)
+	{
+	    this.statusMenu.setLabel(text);
 	},
 
 	getLogoutMenu : function()
@@ -1458,10 +1470,13 @@ qx.Class.define("client.MainScreen",
 
 	_logoutCommand : function()
 	{
-	    this.rpc.read("LOGOUT", "", this, function(exc) { 
+	    this.rpc.call("LOGOUT", "", this);
+
+	    //TODO: create LOGOUTOK response and move this to there: 
+	    qx.event.Timer.once(function(e){
 		qx.bom.Cookie.del("ProjectEvergreen");
 		window.location.reload(true);
-	    });
+	    }, this, 1500); 
 	},
 
 	_manualCommand : function()
