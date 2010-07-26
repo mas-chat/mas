@@ -195,7 +195,7 @@ qx.Class.define("client.MainScreen",
 		    pos = param.search(/ /);
 		    var window_id = param.slice(0, pos);
 		    
-		    //alert ("handling:" + command + param);
+		    //console.log("handling:" + command + param);
 
 		    switch(command)
 		    {
