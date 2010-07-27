@@ -28,6 +28,7 @@ qx.Class.define("client.RpcManager",
 	cookie : 0,
 	mainscreen : 0,
 	infoDialog : 0,
+	seq : 1,
 	errormode : false,
 	__sendqueue : [],
 	__srpc : 0,
@@ -57,7 +58,7 @@ qx.Class.define("client.RpcManager",
 	    this.__srpc.callAsync(
 		qx.lang.Function.bind(this.__sendresult, obj.context),
 		obj.command, this.id + " " + this.sec + " " + this.cookie + " " +
-		    obj.parameters);
+		    this.seq + " " + obj.parameters);
 	},
 
 	read : function(command, parameters, context, callback)
@@ -65,7 +66,7 @@ qx.Class.define("client.RpcManager",
 	    this.__rrpc.callAsync(
 		qx.lang.Function.bind(callback, context),
 		command, this.id + " " + this.sec + " " + this.cookie + " " +
-		    parameters);
+		    "0" + " " + parameters);
 	},
 	
 	__sendresult : function(result, exc)
@@ -144,6 +145,7 @@ qx.Class.define("client.RpcManager",
 		}
 		
 		rpcmanager.__sendqueue.shift();
+		rpcmanager.seq++;
 		rpcmanager.errormode = false;
 	    }
 	    else 

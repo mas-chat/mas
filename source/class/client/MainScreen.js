@@ -176,7 +176,7 @@ qx.Class.define("client.MainScreen",
 			    this.show();
 			}
 
-			this.infoDialog.showInfoWin("Error", "Connection error.<p>Trying to recover...");
+			this.infoDialog.showInfoWin("Error", "Connection error. (" + this.__ack + "," + ack + ")<p>Trying to recover...");
 
 			qx.event.Timer.once(function(e){
 			    window.location.reload(true);
@@ -247,8 +247,8 @@ qx.Class.define("client.MainScreen",
 			usertext = this.adjustTime(usertext);
 			this.windows[window_id].addline(usertext);
 
-			if (this.windows[window_id].sound == 1 && this.__ack != 1 &&
-			    type == 2)
+			if (this.windows[window_id].sound == 1 &&
+			    type == 2 && this.initdone == 1)
 			{
 			    this.player_start();
 			}
@@ -395,8 +395,6 @@ qx.Class.define("client.MainScreen",
 			break;
 
 		    case "DIE":
-			qx.bom.Cookie.del("ProjectEvergreen");
-			window.location.reload(true);
                         if (this.desktop === 0)
                         {
                             this.show();
