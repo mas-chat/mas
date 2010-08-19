@@ -14,9 +14,9 @@ qx.Class.define("client.Application",
 	
 	main : function()
 	{
-	    this.base(arguments);
+	    this.base(arguments); 
 
-	    //qx.log.appender.Console;
+	    qx.log.appender.Console; //disable someday
 	    
 	    this.getRoot().removeAll();
 	    this.getRoot().set({backgroundColor: "#FFFFFF"});
