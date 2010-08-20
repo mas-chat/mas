@@ -165,6 +165,7 @@ qx.Class.define("client.MainScreen",
 		if (ack == 1)
 		{
 		    this.__ack = 1;
+	            debug.print("ack is 1");
 		}
 		else
 		{
@@ -176,13 +177,20 @@ qx.Class.define("client.MainScreen",
 			    this.show();
 			}
 
-			this.infoDialog.showInfoWin("Error", "Connection error. (" + this.__ack + "," + ack + ")<p>Trying to recover...");
+			this.infoDialog.showInfoWin("Error", "Connection error. (" + this.__ack + "," + ack + ")<p>Press reload in your web browser to recover...");
+
+	                debug.print("ack mismatch: " + this.__ack + " vs. " + ack);
 
 			qx.event.Timer.once(function(e){
-			    window.location.reload(true);
+			 //   window.location.reload(true);
 			}, this, 2000);
 		    }
 		}
+
+		if (ack != 1)
+                {
+	            debug.print("received: " + allcommands);
+                }
 
 		var commands = allcommands.split("<>");
 
@@ -480,6 +488,8 @@ qx.Class.define("client.MainScreen",
 		    }
 		    else
 		    {
+         	        debug.print("unusual error code: " + exc.code);
+
 			//Wait a little and try again. This is to make sure
 			//that we don't loop and consume all CPU cycles if
 			//there is no connection.
@@ -1172,6 +1182,13 @@ qx.Class.define("client.MainScreen",
 	    this.statusMenu = new qx.ui.menubar.Button("", null);
 	    this.statusMenu.setRich(true);
 
+	    var motdMenu = new qx.ui.menubar.Button("<a target=\"_blank\" href=\"http://getsatisfaction.com/meetandspeak/\"><font color=\"yellow\">Got an improvement idea? Click here!</font></a>", null);
+	    motdMenu.setRich(true);
+
+            qx.event.Timer.once(function(e){
+		motdMenu.setLabel("");
+	    }, this, 1000 * 30); 
+
 	    if (this.anon_user == false)
 	    {
 		menubar.add(forumMenu);
@@ -1189,8 +1206,10 @@ qx.Class.define("client.MainScreen",
 	    menubar.add(logoutMenu);
 
 	    menubar.addSpacer();
+	
+	    menubar.add(motdMenu);
 	    menubar.add(this.statusMenu);
-
+	
 	    return frame;
 	},
 
@@ -1533,7 +1552,7 @@ qx.Class.define("client.MainScreen",
 	    obj.SetVariable('currentSong', url);
 	    obj.TCallLabel('/','load');
 	},
-	    
+  
 	player_get_state : function ()
 	{
 	    //var obj = this.FlashHelper.getMovie(name);

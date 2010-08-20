@@ -41,6 +41,8 @@ qx.Class.define("client.RpcManager",
 	    obj.parameters = parameters;
 	    obj.context = context;
 	    this.__sendqueue.push(obj);
+	    
+	    debug.print("call: buffered: " + command + ": " + parameters + ", queue len: " + this.__sendqueue.length);
 
 	    if (this.__sendqueue.length == 1)
 	    {
@@ -55,6 +57,8 @@ qx.Class.define("client.RpcManager",
 		this.mainscreen.setStatusText("L");
 	    }
 
+	    debug.print("call: sent: " + obj.command );
+
 	    this.__srpc.callAsync(
 		qx.lang.Function.bind(this.__sendresult, obj.context),
 		obj.command, this.id + " " + this.sec + " " + this.cookie + " " +
@@ -63,6 +67,8 @@ qx.Class.define("client.RpcManager",
 
 	read : function(command, parameters, context, callback)
 	{
+	    debug.print("read sent: " + command + ": " + parameters);
+
 	    this.__rrpc.callAsync(
 		qx.lang.Function.bind(callback, context),
 		command, this.id + " " + this.sec + " " + this.cookie + " " +
@@ -73,6 +79,9 @@ qx.Class.define("client.RpcManager",
 	{
 	    if (exc == null) 
 	    {
+                var now = new Date();
+                debug.print("call: answer: " + result);
+
 		//TODO: BIG HACK -> fix the protocol!!!
 		if (result.charAt(0) == "1")
 		{
@@ -150,6 +159,8 @@ qx.Class.define("client.RpcManager",
 	    }
 	    else 
 	    {
+	        debug.print("rpcmanager: didnt get reply, code: " + exc.code);
+
 		rpcmanager.mainscreen.setStatusText("<font color=\"#ff0000\">Connection to server lost, recovering...</font>");
 		rpcmanager.errormode = true;
 	    }

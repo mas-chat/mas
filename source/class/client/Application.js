@@ -21,6 +21,8 @@ qx.Class.define("client.Application",
 	    this.getRoot().removeAll();
 	    this.getRoot().set({backgroundColor: "#FFFFFF"});
 
+	    debug = new client.Debug();
+
 	    var start_label = new qx.ui.basic.Label("<center><img src=\"/i/ajax-loader.gif\"><br><br><br>Loading content...</center>").set({
 		font : new qx.bom.Font(14, ["Arial", "sans-serif"]), width:300, height:150, rich: true});
 
