@@ -475,7 +475,7 @@ qx.Class.define("client.LogDialog",
 	    this.b5.setEnabled(false);
 	    this.b6.setEnabled(false);
 
-	    this.rpc.read("GETLOG", this.__pos, this, this.__sendresult);
+	    this.rpc.call("GETLOG", this.__pos, this, this.__sendresult);
 	}
     }
 });
