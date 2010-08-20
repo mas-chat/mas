@@ -34,12 +34,13 @@ qx.Class.define("client.RpcManager",
 	__srpc : 0,
 	__rrpc : 0,
 	
-	call : function(command, parameters, context)
+	call : function(command, parameters, context, callback)
 	{
 	    var obj = new Object();
 	    obj.command = command;
 	    obj.parameters = parameters;
 	    obj.context = context;
+	    obj.callback = callback;
 	    this.__sendqueue.push(obj);
 	    
 	    debug.print("call: buffered: " + command + ": " + parameters + ", queue len: " + this.__sendqueue.length);
@@ -52,6 +53,8 @@ qx.Class.define("client.RpcManager",
 
 	__sendCallRequest : function(obj)
 	{
+	    var cb = obj.callback;
+
 	    if (this.errormode == false) 
 	    {
 		this.mainscreen.setStatusText("L");
@@ -59,8 +62,13 @@ qx.Class.define("client.RpcManager",
 
 	    debug.print("call: sent: " + obj.command );
 
+	    if (!cb)
+	    {
+		cb = this.__sendresult;
+	    }
+
 	    this.__srpc.callAsync(
-		qx.lang.Function.bind(this.__sendresult, obj.context),
+		qx.lang.Function.bind(cb, obj.context),
 		obj.command, this.id + " " + this.sec + " " + this.cookie + " " +
 		    this.seq + " " + obj.parameters);
 	},
