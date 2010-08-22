@@ -481,7 +481,8 @@ qx.Class.define("client.MainScreen",
 		}
 		else
 		{
-		    if (exc.code == qx.io.remote.Rpc.localError.timeout)
+		    if (exc.code == qx.io.remote.Rpc.localError.timeout ||
+			exc.code == 500)
 		    {
 			//Make next request immediately
 			this.rpc.read("HELLO", this.seq, this, this.readresult);

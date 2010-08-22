@@ -18,7 +18,7 @@ qx.Class.define("client.RpcManager",
 	this.__srpc.setTimeout(20000);
 
 	this.__rrpc = new qx.io.remote.Rpc("/ralph", "ralph");
-	this.__rrpc.setTimeout(30000);
+	this.__rrpc.setTimeout(35000);
     },
 
     members :
