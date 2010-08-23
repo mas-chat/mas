@@ -53,8 +53,10 @@ qx.Class.define("client.MainScreen",
 	this.__tt = new qx.ui.tooltip.ToolTip("Send Message");
 	this.__myapp = rootItem;
 
-	//Initial hello, send TZ info
-	this.rpc.read("HELLO", this.seq + " " + this.timezone, this, this.readresult);
+	//Initial hello, send TZ info, with timer we don't see rotating circle in chrome
+	qx.event.Timer.once(function(e){
+	    this.rpc.read("HELLO", this.seq + " " + this.timezone, this, this.readresult);
+	}, this, 150); 
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
 
