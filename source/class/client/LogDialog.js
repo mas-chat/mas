@@ -391,10 +391,12 @@ qx.Class.define("client.LogDialog",
 		{
 		    this.b6.setEnabled(true);
 		}
+
+		rpcmanager.request_done(true);
 	    } 
 	    else 
 	    {
-		alert("!!! Connection error, please reload this page: " + exc);
+		rpcmanager.request_done(false);
 	    }
 	},
 
@@ -446,12 +448,10 @@ qx.Class.define("client.LogDialog",
 					  "&tz=" + this.mainscreen.timezone + "&showall=yes&st=" + 
 					  escape(this.searchstring)); 
 		}
-
-		rpcmanager.request_done(true);
 	    }
 	    else
 	    {
-		rpcmanager.request_done(false);
+		this.errormsg.setValue("<font color=\"#FF0000\">Connection error. Please try again.</font>");
 	    }
 	},
 
