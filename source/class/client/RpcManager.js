@@ -161,26 +161,38 @@ qx.Class.define("client.RpcManager",
 		    this.infoDialog.showInfoWin("Info", param, "OK");
 		}
 		
-		rpcmanager.__sendqueue.shift();
-		rpcmanager.seq++;
-		rpcmanager.errormode = false;
+		rpcmanager.request_done(true);
 	    }
 	    else 
 	    {
-	        debug.print("rpcmanager: didnt get reply, code: " + exc.code);
-
-		rpcmanager.mainscreen.setStatusText("<font color=\"#ff0000\">Connection to server lost, recovering...</font>");
-		rpcmanager.errormode = true;
+		rpcmanager.request_done(false);
 	    }
+	},
 
-	    if (rpcmanager.__sendqueue.length > 0)
+	request_done : function(success)
+	{
+	    if (success == true)
 	    {
-		var obj = rpcmanager.__sendqueue[0];
-		rpcmanager.__sendCallRequest(obj);
+		this.__sendqueue.shift();
+		this.seq++;
+		this.errormode = false;
 	    }
 	    else
 	    {
-		rpcmanager.mainscreen.setStatusText("");
+	        debug.print("rpcmanager: didnt get reply, code: " + exc.code);
+
+		this.mainscreen.setStatusText("<font color=\"#ff0000\">Connection to server lost, recovering...</font>");
+		this.errormode = true;
+	    }
+
+	    if (this.__sendqueue.length > 0)
+	    {
+		var obj = this.__sendqueue[0];
+		this.__sendCallRequest(obj);
+	    }
+	    else
+	    {
+		this.mainscreen.setStatusText("");
 	    }
 	}
     }

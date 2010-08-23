@@ -446,10 +446,12 @@ qx.Class.define("client.LogDialog",
 					  "&tz=" + this.mainscreen.timezone + "&showall=yes&st=" + 
 					  escape(this.searchstring)); 
 		}
+
+		rpcmanager.request_done(true);
 	    }
 	    else
 	    {
-                this.errormsg.setValue("<font color=\"#FF0000\">Connection error. Please try again.</font>");
+		rpcmanager.request_done(false);
 	    }
 	},
 
