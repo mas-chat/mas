@@ -56,7 +56,7 @@ qx.Class.define("client.MainScreen",
 	//Initial hello, send TZ info, with timer we don't see rotating circle in chrome
 	qx.event.Timer.once(function(e){
 	    this.rpc.read("HELLO", this.seq + " " + this.timezone, this, this.readresult);
-	}, this, 150); 
+	}, this, 250); 
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
 
