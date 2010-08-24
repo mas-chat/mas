@@ -751,24 +751,7 @@ qx.Class.define("client.UserWindow",
 
 		for (var i=0; i < amount; i++)
 		{
-		    var display = this.nameslist[i];
-		    var realnick;
-
-		    if(display.charAt(0) == "*")
-		    {
-			display = "<b>" + display.substr(1) + "</b>"; 
-			realnick = "@" + this.nameslist[i].substr(1);
-		    }
-		    else
-		    {
-			realnick = this.nameslist[i];
-		    }
-
-		    var tmp = new qx.ui.form.ListItem(display).set(
-			{ rich : true });
-		    tmp.realnick = realnick;
-
-		    this.__list.add(tmp);
+		    this.insertNameItem(this.nameslist[i]);
 		}
 
 		this.nameslist.splice(0, amount);
@@ -782,6 +765,37 @@ qx.Class.define("client.UserWindow",
 	    }
 	},
 
+	insertNameItem : function (nick, place)
+	{
+	    var realnick = nick;
+
+	    if ((nick.charAt(0) == "@" || nick.charAt(0) == "*") && this.__nw_id == 0)
+	    {
+		//TODO: not perfect, sorting is still wrong if this happens
+		nick = nick.substr(1);
+		realnick = "@" + nick.substr(1);
+	    }
+	    else if ((nick.charAt(0) == "@" || nick.charAt(0) == "*") && this.__nw_id != 0)
+	    {
+		nick = "<b>" + nick.substr(1) + "</b>";
+ 		realnick = "@" + nick.substr(1);
+	    }
+
+	    var tmp = new qx.ui.form.ListItem(nick).set(
+		{ rich : true });
+	    tmp.realnick = realnick;
+	    tmp.online = 0; // unknown
+
+	    if (typeof place  == "undefined")
+	    {
+		this.__list.add(tmp);
+	    }
+	    else
+	    {
+		this.__list.addAt(tmp, place);
+	    }
+	}, 
+
 	addname : function(nick)
 	{
 	    var insert = -1;
@@ -789,21 +803,21 @@ qx.Class.define("client.UserWindow",
 	    if (this.type == 0)
 	    {
 		var childs = this.__list.getChildren();
+		var newnick = nick;
+
+		if (newnick.charAt(0) == "@")
+		{
+		    newnick = "*" + newnick.substr(1);
+		}
 
 		for (var i=0; i < childs.length; i++)
 		{
 		    var listnick = childs[i].realnick;
-		    var newnick = nick;
 
 		    //trick to sort @ before +
 		    if (listnick.charAt(0) == "@")
 		    {
 			listnick = "*" + listnick.substr(1);
-		    }
-
-		    if (newnick.charAt(0) == "@")
-		    {
-			newnick = "*" + newnick.substr(1);
 		    }
 
 		    if (newnick.toLowerCase() < listnick.toLowerCase())
@@ -820,19 +834,7 @@ qx.Class.define("client.UserWindow",
 
 		if (insert != -1)
 		{
-		    //place found
-		    var display = nick;
-
-		    if(nick.charAt(0) == "@")
-		    {
-			display = "<b>" + nick.substr(1) + "</b>"; 
-		    }
-
-		    var tmp = new qx.ui.form.ListItem(display).set(
-			{ rich : true });
-		    tmp.realnick = nick;
-
-		    this.__list.addAt(tmp, insert);
+		    this.insertNameItem(nick, insert);
 		}
 		else
 		{
@@ -896,6 +898,65 @@ qx.Class.define("client.UserWindow",
 			    this.nameslist.splice(i, 1);
 			}
 		    }
+		}
+	    }
+	},
+
+	setUserStatus : function (name, online)
+	{
+	    //online: 0 = unknown, 1 = online, 2 = offline
+
+	    //These must have same length!!
+	    var onlinetext =  " <span title=\"Friend is online\" id=\"green\"> &#9679;</span>";
+	    var offlinetext = " <span title=\"Friend is offline\"  id=\"red\"> &#9679;</span>";
+
+	    if (this.type == 0)
+	    {
+		var childs = this.__list.getChildren();
+		
+		for (var i=0; i < childs.length; i++)
+		{
+		    var nick = childs[i].realnick;
+		    
+		    if (nick.charAt(0) == "@")
+		    {
+			//TODO: To be sure, make realnick consistent
+			nick = nick.substr(1);
+		    }
+
+		    if (nick == name && !(childs[i].online == online))
+		    {
+			if (childs[i].online != 0)
+			{
+			    var current = childs[i].getLabel();
+			    childs[i].setLabel(current.substr(0, current.length - onlinetext.length));
+			}
+
+			if (online == 1)
+			{
+			    // add green circle
+			    childs[i].setLabel(childs[i].getLabel() + onlinetext);
+			}
+			else
+			{
+			    // add yellow circle
+			    childs[i].setLabel(childs[i].getLabel() + offlinetext);
+			}
+			
+			childs[i].online = online;
+		    }
+		}
+	    }
+	    else 
+	    {
+		//TODO: duplicate code:
+		if (name == this.__name && this.__nw_id == 0 && online == 1)
+		{
+		    this.window.setCaption("*** Private conversation with " + this.__name + " (online)");
+		}
+		else if (name == this.__name && this.__nw_id == 0 && online == 2)
+		{
+		    this.window.setCaption("*** Private conversation with " + this.__name + " (offline)");
 		}
 	    }
 	},

@@ -891,13 +891,29 @@ qx.Class.define("client.MainScreen",
                     parentFList.add(friend, {row: 2*i, column: 0});
                     parentFList.add(friend2, {row: 2*i+1, column: 0, colSpan : 2});
                     parentFList.add(friend3, {row: 2*i, column: 1});
+
+		    var online = 2;
+
+		    if(columns[0] == 0)
+		    {
+			online = 1;
+		    }
+
+		    //update groups also
+		    for (var i=0; i < this.windows.length; i++)
+		    {
+			if (typeof(this.windows[i]) != 'undefined')
+			{
+			    this.windows[i].setUserStatus(columns[3], online);
+			}
+		    }
 		}
 	    }
 	    else
 	    {
 		var nofriends = new qx.ui.basic.Label("No friends added<p>You can add new contacts by<br> using the field below<br>or by right-clicking <br>a name in any group window.<p>You can send messages <br>and see status information<br> of your friends.");
 		nofriends.setRich(true);
-
+		
 		nofriends.setPaddingLeft(10);
 		parentFList.add(nofriends, {row: 0, column: 0});
 	    }
