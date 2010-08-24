@@ -900,11 +900,11 @@ qx.Class.define("client.MainScreen",
 		    }
 
 		    //update groups also
-		    for (var i=0; i < this.windows.length; i++)
+		    for (var ii=0; ii < this.windows.length; ii++)
 		    {
-			if (typeof(this.windows[i]) != 'undefined')
+			if (typeof(this.windows[ii]) != 'undefined')
 			{
-			    this.windows[i].setUserStatus(columns[3], online);
+			    this.windows[ii].setUserStatus(columns[3], online);
 			}
 		    }
 		}
