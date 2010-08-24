@@ -950,11 +950,11 @@ qx.Class.define("client.UserWindow",
 	    else 
 	    {
 		//TODO: duplicate code:
-		if (name == this.__name && this.__nw_id == 0 && online == 1)
+		if (name.toLowerCase() == this.__name.toLowerCase() && this.__nw_id == 0 && online == 1)
 		{
 		    this.window.setCaption("*** Private conversation with " + this.__name + " (online)");
 		}
-		else if (name == this.__name && this.__nw_id == 0 && online == 2)
+		else if (name.toLowerCase() == this.__name.toLowerCase() && this.__nw_id == 0 && online == 2)
 		{
 		    this.window.setCaption("*** Private conversation with " + this.__name + " (offline)");
 		}
