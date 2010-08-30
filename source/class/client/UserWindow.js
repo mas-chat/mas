@@ -777,8 +777,8 @@ qx.Class.define("client.UserWindow",
 	    }
 	    else if ((nick.charAt(0) == "@" || nick.charAt(0) == "*") && this.__nw_id != 0)
 	    {
+		realnick = "@" + nick.substr(1);	
 		nick = "<b>" + nick.substr(1) + "</b>";
- 		realnick = "@" + nick.substr(1);
 	    }
 
 	    var tmp = new qx.ui.form.ListItem(nick).set(
@@ -910,6 +910,8 @@ qx.Class.define("client.UserWindow",
 	    var onlinetext =  " <span title=\"Friend is online\" id=\"green\"> &#9679;</span>";
 	    var offlinetext = " <span title=\"Friend is offline\"  id=\"red\"> &#9679;</span>";
 
+	    name = name.toLowerCase();
+
 	    if (this.type == 0)
 	    {
 		var childs = this.__list.getChildren();
@@ -924,7 +926,7 @@ qx.Class.define("client.UserWindow",
 			nick = nick.substr(1);
 		    }
 
-		    if (nick == name && !(childs[i].online == online))
+		    if (nick.toLowerCase() == name && childs[i].online != online)
 		    {
 			if (childs[i].online != 0)
 			{
@@ -950,7 +952,7 @@ qx.Class.define("client.UserWindow",
 	    else 
 	    {
 		//TODO: duplicate code:
-		if (name.toLowerCase() == this.__name.toLowerCase() && this.__nw_id == 0 && online == 1)
+		if (name == this.__name.toLowerCase() && this.__nw_id == 0 && online == 1)
 		{
 		    this.window.setCaption("*** Private conversation with " + this.__name + " (online)");
 		}

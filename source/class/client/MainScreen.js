@@ -451,7 +451,12 @@ qx.Class.define("client.MainScreen",
 			break;
 
 		    case "FLIST":
-			this.updateFriendsList(this.globalflist, param);
+			//TODO: hack to make sure nameslist is populated, doesn't work in gigantic
+			//channels, 10s is not enough
+			var myparam = param;
+			qx.event.Timer.once(function(e){
+			    this.updateFriendsList(this.globalflist, myparam);
+			}, this, 10000);
 			break;
 
 		    case "SET":
@@ -907,7 +912,7 @@ qx.Class.define("client.MainScreen",
 			    this.windows[ii].setUserStatus(columns[3], online);
 			}
 		    }
-		}
+		} 
 	    }
 	    else
 	    {
@@ -1367,8 +1372,8 @@ qx.Class.define("client.MainScreen",
 
 	_arrangeCommand : function()
 	{
-	    var x=[0,1,2,3,2,3,3,3,3,3,4,4,4];
-	    var y=[0,1,1,1,2,2,2,3,3,3,3,3,4];
+	    var x=[0,1,2,3,2,3,3,3,3,3,4,4,4,4,4,4,4];
+	    var y=[0,1,1,1,2,2,2,3,3,3,3,3,4,4,4,4,4];
 	    var amount = 0;
 
 	    this.blocker.block();
@@ -1385,10 +1390,11 @@ qx.Class.define("client.MainScreen",
 				
 		var dim = this.desktop.getBounds();		
 		
-		if (!dim || amount == 0 || amount > 12)
+		if (!dim || amount == 0 || amount > 16)
 		{
 		    // !dim is ???
 		    this.blocker.unblock();
+		    debug.print("unkown dim");
 		    return;
 		}
 		
