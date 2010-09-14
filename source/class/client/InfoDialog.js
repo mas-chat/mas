@@ -235,6 +235,7 @@ qx.Class.define("client.InfoDialog",
 		//TODO: configuration system needed, now UPDATE THIS manually!	    
 		this.__combo.add(new qx.ui.form.ListItem("IRCNet"));
 		this.__combo.add(new qx.ui.form.ListItem("FreeNode"));
+		this.__combo.add(new qx.ui.form.ListItem("W3C"));
 		//this.__combo.add(new qx.ui.form.ListItem("W3C")); This one you just need to know
 	    
 		this.__combo.setValue("IRCNet");
