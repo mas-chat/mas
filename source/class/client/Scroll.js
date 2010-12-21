@@ -1,10 +1,4 @@
 
-/* ************************************************************************
-
-#asset(projectx/*)
-
-************************************************************************ */
-
 qx.Class.define("client.Scroll",
 {
   extend : qx.ui.core.scroll.AbstractScrollArea,
@@ -114,5 +108,3 @@ qx.Class.define("client.Scroll",
     }
   }
 });
-
-

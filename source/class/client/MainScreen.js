@@ -1,8 +1,3 @@
-/* ************************************************************************
-
-#asset(projectx/*)
-
-************************************************************************ */
 
 qx.Class.define("client.MainScreen",
 {
@@ -205,7 +200,7 @@ qx.Class.define("client.MainScreen",
 		    pos = param.search(/ /);
 		    var window_id = param.slice(0, pos);
 		    
-		    //console.log("handling:" + command + param);
+		    //debug.print("handling:" + command + param);
 
 		    switch(command)
 		    {
@@ -345,34 +340,15 @@ qx.Class.define("client.MainScreen",
 			break;
 
 		    case "NAMES":
-			// "clever" sort hack
-		    	var usertext = param.slice(pos+1).replace(/\@/g, "*");
-		
+		    	var usertext = param.slice(pos+1);
+			var nameslist = [];
+
 			if (usertext != "")
 			{
-			    this.windows[window_id].nameslist = usertext.split(" ").sort(function(x,y){ 
-				var a = String(x).toUpperCase(); 
-				var b = String(y).toUpperCase(); 
-				if (a > b)
-				{ 
-				    return 1;
-				}
-				else if (a < b) 
-				{
-				    return -1; 
-				}
-				else
-				{
-				    return 0; 
-				}
-			    }); 
-			}
-			else
-			{
-			    this.windows[window_id].nameslist = [];
+			    nameslist = usertext.split(" ");
 			}
 
-			this.windows[window_id].addnames(true);
+			this.windows[window_id].addnames(nameslist);
 			break;
 
 		    case "ADDNAME":
@@ -451,12 +427,8 @@ qx.Class.define("client.MainScreen",
 			break;
 
 		    case "FLIST":
-			//TODO: hack to make sure nameslist is populated, doesn't work in gigantic
-			//channels, 10s is not enough
 			var myparam = param;
-			qx.event.Timer.once(function(e){
-			    this.updateFriendsList(this.globalflist, myparam);
-			}, this, 10000);
+			this.updateFriendsList(this.globalflist, myparam);
 			break;
 
 		    case "SET":
@@ -1245,8 +1217,7 @@ qx.Class.define("client.MainScreen",
 	getLogoutMenu : function()
 	{
 	    var menu = new qx.ui.menu.Menu;
-	    var logoutButton = new qx.ui.menu.Button("Log out",
-						     "icon/16/actions/edit-undo.png");
+	    var logoutButton = new qx.ui.menu.Button("Log out");
 	    menu.add(logoutButton);
 	    logoutButton.addListener("execute", this._logoutCommand, this);
 

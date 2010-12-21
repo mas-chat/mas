@@ -1,7 +1,6 @@
 /* ************************************************************************
 
-#asset(projectx/*)
-5B5B#require(qx.util.StringSplit)
+#require(qx.util.StringSplit)
 
 ************************************************************************ */
 
@@ -13,8 +12,9 @@ qx.Class.define("client.UserWindow",
 			 nw_id, usermode, password, new_msgs, infoDialog, id, mainscreen)
     {
 	this.base(arguments);
+
 	this.__urllist = new Array();
-	this.nameslist = new Array();
+	this.nameslist = new qx.data.Array();
 	this.rpc = srpc;
 	this.mainscreen = mainscreen;
 	this.infoDialog = infoDialog;
@@ -91,9 +91,8 @@ qx.Class.define("client.UserWindow",
 	this.__textcomposite = new qx.ui.container.Composite(new qx.ui.layout.VBox(2));
 	this.__ntftooltip = new qx.ui.tooltip.ToolTip("Double-click to close this notification.");
 
-	this.__atom = new qx.ui.basic.Label("Please wait...<br>");
-	this.__atom.setRich(true);
-	this.__atom.set({ selectable: true, nativeContextMenu : true});
+	this.__atom = new qx.ui.basic.Label("Please wait...<br>").set({
+	    rich: true, selectable: true, nativeContextMenu : true});
 
 	if (type == 0)
 	{
@@ -120,12 +119,10 @@ qx.Class.define("client.UserWindow",
 	var extendedsearch = false;
 
 	this.__input1.addListener("keypress", function(e) {
-
 	    if (e.getKeyIdentifier() == "Enter")
 	    {
 		this.setNormal();
 		var input = this.__input1.getValue();
-	    
 		if (input !== "" && input !== null)
 		{
 		    this.rpc.call("SEND", this.winid + " " + input, this);
@@ -196,8 +193,6 @@ qx.Class.define("client.UserWindow",
 
 		if (input2.length == 0 || input2.search(/^\S+\s*$/) != -1)
 		{
-		    var names = this.__list.getChildren();
-
 		    if (extendedsearch == false)
 		    {
 			extendedsearch = true;
@@ -206,16 +201,10 @@ qx.Class.define("client.UserWindow",
 
 		    var found = false;
 
-		    for (var i=searchstart; i < names.length; i++)
+		    for (var i=searchstart; i < this.nameslist.getLength(); i++)
 		    {
-			var name = names[i].realnick;	
-	    
-			if(name.charAt(0) == "@" || name.charAt(0) ==  "+")
-			{
-			    //TODO: get rid of @ and + in realname if possible
-			    name = name.substr(1);
-			}
-
+			var name = this.nameslist.getItem(i).getName();
+			
 			if (name.substr(0, searchstring.length).toLowerCase() == searchstring.toLowerCase())
 			{
 			    this.__input1.setValue(name + ": ");
@@ -595,7 +584,7 @@ qx.Class.define("client.UserWindow",
 		    this.urlButton.setValue(false);
 		}
 		else if (closeok == 0 && (this.type != 0 ||
-					  this.__list.hasChildren() == true))
+					  this.nameslist.getLength() > 0))
 		{
 		    if (this.mainscreen.settings.getShowCloseWarn() == 1)
 		    {
@@ -733,233 +722,86 @@ qx.Class.define("client.UserWindow",
 	    }
 	},
 
-	addnames : function(firstround)
+	addnames : function(namesarray)
 	{
-	    if (this.type == 0)
+	    if (this.type != 0)
 	    {
-		if (firstround == true)
-		{
-		    this.__list.removeAll();
-		}
+		return;
+	    }
 
-		var amount = this.nameslist.length;
-
-		if (this.nameslist.length > 3)
-		{
-		    amount = 3;
-		}
-
-		for (var i=0; i < amount; i++)
-		{
-		    this.insertNameItem(this.nameslist[i]);
-		}
-
-		this.nameslist.splice(0, amount);
-
-		if (this.nameslist.length > 0)
-		{
-		    qx.event.Timer.once(function(e){
-			this.addnames(false);
-		    }, this, 1000); 
-		}
+	    for (var i = 0; i < namesarray.length; i++) 
+	    {
+		this.nameslist.push(this.createParticipant(namesarray[i]));
 	    }
 	},
 
-	insertNameItem : function (nick, place)
+	createParticipant : function(name)
 	{
-	    var realnick = nick;
+	    var person = new client.Participant();
+	    
+	    if (name.charAt(0) == "@")
+	    {
+		name = name.substr(1);		    
+		person.setOp(true);
+	    }
+	    else if (name.charAt(0) == "+")
+	    {
+		name = name.substr(1);		    
+		person.setVoice(true);
+	    }
 
-	    if ((nick.charAt(0) == "@" || nick.charAt(0) == "*") && this.__nw_id == 0)
-	    {
-		//TODO: not perfect, sorting is still wrong if this happens
-		nick = nick.substr(1);
-		realnick = "@" + nick.substr(1);
-	    }
-	    else if ((nick.charAt(0) == "@" || nick.charAt(0) == "*") && this.__nw_id != 0)
-	    {
-		realnick = "@" + nick.substr(1);	
-		nick = "<b>" + nick.substr(1) + "</b>";
-	    }
+	    person.setName(name);
+	    person.setOnline(0); // Unknown
 
-	    var tmp = new qx.ui.form.ListItem(nick).set(
-		{ rich : true });
-	    tmp.realnick = realnick;
-	    tmp.online = 0; // unknown
-
-	    if (typeof place  == "undefined")
-	    {
-		this.__list.add(tmp);
-	    }
-	    else
-	    {
-		this.__list.addAt(tmp, place);
-	    }
-	}, 
+	    return person;
+	},
 
 	addname : function(nick)
 	{
-	    var insert = -1;
-
-	    if (this.type == 0)
-	    {
-		var childs = this.__list.getChildren();
-		var newnick = nick;
-
-		if (newnick.charAt(0) == "@")
-		{
-		    newnick = "*" + newnick.substr(1);
-		}
-
-		for (var i=0; i < childs.length; i++)
-		{
-		    var listnick = childs[i].realnick;
-
-		    //trick to sort @ before +
-		    if (listnick.charAt(0) == "@")
-		    {
-			listnick = "*" + listnick.substr(1);
-		    }
-
-		    if (newnick.toLowerCase() < listnick.toLowerCase())
-		    {
-			insert = i;
-			break;
-		    }
-		}
-
-		if (insert == -1 && this.nameslist.length == 0)
-		{
-		    insert = childs.length;
-		}
-
-		if (insert != -1)
-		{
-		    this.insertNameItem(nick, insert);
-		}
-		else
-		{
-		    //List construction is still ongoing
-		    for (var i=0; i < this.nameslist.length; i++)
-		    {
-			if (nick.toLowerCase() < this.nameslist[i].toLowerCase())
-			{
-			    insert = i;
-			    break;
-			}
-		    }
-		    
-		    if (insert == -1)
-		    {
-			insert = this.nameslist.length;
-		    }
-
-		    this.nameslist.splice(insert, 0, nick);
-		}
-	    }
+	    this.nameslist.push(this.createParticipant(nick));
 	},
 
 	delname : function(nick)
 	{
-	    var found = false;
+	    nick = nick.toLowerCase();
 
-	    if (this.type == 0)
-	    {
-		var childs = this.__list.getChildren();
-		
-		for (var i=0; i < childs.length; i++)
+	    this.nameslist.forEach(function(item) {
+		if (item.getName().toLowerCase() == nick)
 		{
-		    var nickname = childs[i].realnick;
-
-		    if(nickname.charAt(0) == "@" || nickname.charAt(0) == "+")
-		    {
-			nickname = nickname.substr(1);
-		    }
-
-		    if(nickname == nick)
-		    {
-			found = true;
-			this.__list.remove(childs[i]);
-		    }
+		    this.nameslist.remove(item);
 		}
-
-		if (!found)
-		{
-		    for (var i=0; i < this.nameslist.length; i++)
-		    {
-			var nickname = this.nameslist[i];
-
-			if(nickname.charAt(0) == "@" || nickname.charAt(0) == "+")
-			{
-			    nickname = nickname.substr(1);
-			}
-
-			if (nickname == nick)
-			{
-			    this.nameslist.splice(i, 1);
-			}
-		    }
-		}
-	    }
+	    }, this);
 	},
-
-	setUserStatus : function (name, online)
+	
+	setUserStatus : function (nick, online)
 	{
+	    nick = nick.toLowerCase();
+
 	    //online: 0 = unknown, 1 = online, 2 = offline
 
-	    //These must have same length!!
-	    var onlinetext =  " <span title=\"Friend is online\" id=\"green\"> &#9679;</span>";
-	    var offlinetext = " <span title=\"Friend is offline\"  id=\"red\"> &#9679;</span>";
-
-	    name = name.toLowerCase();
-
 	    if (this.type == 0)
 	    {
-		var childs = this.__list.getChildren();
-		
-		for (var i=0; i < childs.length; i++)
-		{
-		    var nick = childs[i].realnick;
-		    
-		    if (nick.charAt(0) == "@")
+		this.nameslist.forEach(function(item) {
+		    if (item.getName().toLowerCase() == nick && item.getOnline() != online)
 		    {
-			//TODO: To be sure, make realnick consistent
-			nick = nick.substr(1);
+			item.setOnline(online);
 		    }
-
-		    if (nick.toLowerCase() == name && childs[i].online != online)
-		    {
-			if (childs[i].online != 0)
-			{
-			    var current = childs[i].getLabel();
-			    childs[i].setLabel(current.substr(0, current.length - onlinetext.length));
-			}
-
-			if (online == 1)
-			{
-			    // add green circle
-			    childs[i].setLabel(childs[i].getLabel() + onlinetext);
-			}
-			else
-			{
-			    // add yellow circle
-			    childs[i].setLabel(childs[i].getLabel() + offlinetext);
-			}
-			
-			childs[i].online = online;
-		    }
-		}
+		}, this);
 	    }
-	    else 
+	    else if (this.__nw_id == 0) 
 	    {
-		//TODO: duplicate code:
-		if (name == this.__name.toLowerCase() && this.__nw_id == 0 && online == 1)
+		var privstatus = "";
+
+		if (nick == this.__name.toLowerCase() && online == 1)
 		{
-		    this.window.setCaption("*** Private conversation with " + this.__name + " (online)");
+		    privstatus = "online";
 		}
-		else if (name.toLowerCase() == this.__name.toLowerCase() && this.__nw_id == 0 && online == 2)
+		else if (nick == this.__name.toLowerCase() && online == 2)
 		{
-		    this.window.setCaption("*** Private conversation with " + this.__name + " (offline)");
+		    privstatus = "offline";
 		}
+
+		this.window.setCaption("*** Private conversation with " + this.__name + " (" + privstatus + ")");
 	    }
 	},
 
@@ -994,12 +836,51 @@ qx.Class.define("client.UserWindow",
 
 	getList : function()
 	{
-	    var list = new qx.ui.form.List;
+	    var list = new qx.ui.list.List(this.nameslist);
 	    list.setFocusable(false);
 	    list.setContextMenu(this.getContextMenu());
 
-	    list.add(new qx.ui.form.ListItem("Wait..."));
 	    list.setAllowGrowY(true);
+		     
+	    var delegate = {
+		//Less than 0: Sort "x" to be a lower index than "y"
+		sorter : function(x, y) {
+		    if (x.getOp() && !y.getOp())
+			return -1;
+		    else if (!x.getOp() && y.getOp())
+			return 1;
+
+		    if (x.getVoice() && !y.getVoice())
+			return -1;
+		    else if (!x.getVoice() && y.getVoice())
+			return 1;
+
+		    var a = String(x.getName()).toUpperCase().replace(/[^A-Za-z]/g, "");
+		    var b = String(y.getName()).toUpperCase().replace(/[^A-Za-z]/g, "");
+
+		    if (a > b)
+			return 1;
+		    else if (a < b) 
+			return -1; 
+		    else
+			return 0; 
+		},
+
+		configureItem : function(item) {
+		    item.setPadding(3);
+		},
+		createItem : function() {
+		    return new client.ListItem();
+		},
+		bindItem : function(controller, item, id) {
+		    controller.bindProperty("name", "nick", null, item, id);
+		    controller.bindProperty("op", "op", null, item, id);
+		    controller.bindProperty("voice", "voice", null, item, id);
+		    controller.bindProperty("online", "online", null, item, id);
+		}
+	    };
+
+	    list.setDelegate(delegate);
 	    this.__list = list;
 
 	    return list;
@@ -1011,17 +892,12 @@ qx.Class.define("client.UserWindow",
 
 	    var chatButton = new qx.ui.menu.Button("Start private chat with");
 
-
 	    chatButton.addListener("execute", function(e) {
-		// huh!
-		var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
+		var name = this.__list.getSelection().getItem(0).getName();
 		
-		var userwindow = 
-		    this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
-		
-		userwindow.rpc.call("STARTCHAT", userwindow.__nw + " " + name,
-				    userwindow);
-	    });
+		this.rpc.call("STARTCHAT", this.__nw + " " + name,
+			      this);
+	    }, this);
 
 	    menu.add(chatButton);
 
@@ -1031,13 +907,11 @@ qx.Class.define("client.UserWindow",
 		var whoisButton = new qx.ui.menu.Button("Whois");
 
 		whoisButton.addListener("execute", function(e) {
-		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
-		    var userwindow = 
-			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
+		    var name = this.__list.getSelection().getItem(0).getName();
 		    
-		    userwindow.rpc.call("WHOIS", userwindow.winid + " " + name,
-				       userwindow);
-		});
+		    this.rpc.call("WHOIS", this.winid + " " + name,
+				  this);
+		}, this);
 
 		menu.add(whoisButton);
 	    }
@@ -1046,18 +920,10 @@ qx.Class.define("client.UserWindow",
 		var friendButton = new qx.ui.menu.Button("Add to contact list");
 
 		friendButton.addListener("execute", function(e) {
-		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
-	    
-		    if(name.charAt(0) == "@" || name.charAt(0) ==  "+")
-		    {
-			//TODO: get rid of @ and + in realname if possible
-			name = name.substr(1);
-		    }
-		    
-		    var userwindow = 
-			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
-		    userwindow.rpc.call("ADDF", name, userwindow);
-		});
+		    var name = this.__list.getSelection().getItem(0).getName();
+
+		    this.rpc.call("ADDF", name, this);
+		}, this);
 
 		if (this.mainscreen.anon_user == false)
 		{
@@ -1071,26 +937,22 @@ qx.Class.define("client.UserWindow",
 		var kickButton = new qx.ui.menu.Button("Kick");
 
 		kickButton.addListener("execute", function(e) {
-		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
-		    var userwindow = 
-			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
-		    
-		    userwindow.rpc.call("KICK", userwindow.winid + " " + name,
-					userwindow);
-		});
+		    var name = this.__list.getSelection().getItem(0).getName();
+		   		    
+		    this.rpc.call("KICK", this.winid + " " + name,
+				  this);
+		}, this);
 
 		menu.add(kickButton);
 		
 		var banButton = new qx.ui.menu.Button("Kick and ban");
 		
 		banButton.addListener("execute", function(e) {
-		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
-		    var userwindow = 
-			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
+		    var name = this.__list.getSelection().getItem(0).getName();
 		    
-		    userwindow.rpc.call("BAN", userwindow.winid + " " + name,
-				       userwindow);
-		});
+		    this.rpc.call("BAN", this.winid + " " + name,
+				  this);
+		}, this);
 
 		menu.add(banButton);
 	    }
@@ -1100,13 +962,11 @@ qx.Class.define("client.UserWindow",
 		var opButton = new qx.ui.menu.Button("Give operator rights");
 
 		opButton.addListener("execute", function(e) {
-		    var name = this.getLayoutParent().getOpener().getSelection()[0].realnick;
-		    var userwindow = 
-			this.getLayoutParent().getOpener().getLayoutParent().getLayoutParent().getLayoutParent().userWindowRef;
+		    var name = this.__list.getSelection().getItem(0).getName();
 		    
-		    userwindow.rpc.call("OP", userwindow.winid + " " + name,
-				       userwindow);
-		});
+		    this.rpc.call("OP", this.winid + " " + name,
+				  this);
+		}, this);
 
 		menu.add(opButton);
 	    }
@@ -1383,7 +1243,7 @@ qx.Class.define("client.UserWindow",
 		this.apikey = new qx.ui.basic.Label("Refreshing...");
 		this.apikey.set({ selectable: true, nativeContextMenu : true });
 
-		this.rpc.call("GETKEY", this.winid, this);
+		this.rpc.call("GETKEY", this.winid, this);xxx
 		composite.add(this.apikey, {row: 7, column: 1});
 
 	    	var buttonKey = new qx.ui.form.Button("Generate new key");
