@@ -1,12 +1,7 @@
 
-qx.Class.define("client.Debug",
+qx.Class.define("debug",
 {
-    extend : qx.core.Object,
-
-    construct : function()
-    {
-	this.base(arguments);
-    },
+    type : "static"
 
     members :
     {
