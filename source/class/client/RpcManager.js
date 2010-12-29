@@ -41,15 +41,15 @@ qx.Class.define("client.RpcManager",
 	__helloseq : 0,
 	__sendseq : 1,
 	
-	call : function(command, parameters, callback)
+	call : function(command, parameters)
 	{
 	    var obj = new Object();
 	    obj.command = command;
 	    obj.parameters = parameters;
-	    obj.callback = callback; // Only used by LodDialog
 	    this.__sendqueue.push(obj);
 	    
-	    debug.print("call: buffered: " + command + ": " + parameters + ", queue len: " + this.__sendqueue.length);
+	    debug.print("call: buffered: " + command + ": " + parameters + ", queue len: " +
+			this.__sendqueue.length);
 
 	    if (this.__sendqueue.length == 1)
 	    {
@@ -59,8 +59,6 @@ qx.Class.define("client.RpcManager",
 
 	__sendCallRequest : function(obj)
 	{
-	    var cb = obj.callback;
-
 	    if (this.__errormode == false) 
 	    {
 		this.mainscreen.setStatusText("L");
@@ -68,13 +66,8 @@ qx.Class.define("client.RpcManager",
 
 	    debug.print("call: sent: " + obj.command );
 
-	    if (!cb)
-	    {
-		cb = this.__sendresult;
-	    }
-
 	    this.__srpc.callAsync(
-		qx.lang.Function.bind(cb, this),
+		qx.lang.Function.bind(this.__sendresult, this),
 		obj.command, this.id + " " + this.sec + " " + this.cookie + " " +
 		    this.__sendseq + " " + obj.parameters);
 	},
@@ -90,11 +83,11 @@ qx.Class.define("client.RpcManager",
 
 		this.mainscreen.handleCommand(command, options);
 				
-		this.request_done(true, exc);
+		this.__requestDone(true, exc);
 	    }
 	    else 
 	    {
-		this.request_done(false, exc);
+		this.__requestDone(false, exc);
 	    }
 	},
 
@@ -178,7 +171,7 @@ qx.Class.define("client.RpcManager",
 	    }
 	},
 
-	request_done : function(success, exc)
+	__requestDone : function(success, exc)
 	{
 	    if (success == true)
 	    {

@@ -265,7 +265,7 @@ qx.Class.define("client.InfoDialog",
 		if (input !== "")
 		{
 		    this.rpc.call("JOIN", input + " " + this.__nwselection + " " +
-				  this.__input2.getValue(), this.rpc);
+				  this.__input2.getValue());
 		}
 		this.__window.close();
 	    }, this);
@@ -358,7 +358,7 @@ qx.Class.define("client.InfoDialog",
 
 	    if (input !== "")
 	    {
-		this.rpc.call("CREATE", input + " " + input2, this.rpc);
+		this.rpc.call("CREATE", input + " " + input2);
 	    }
 	    this.__window.close();
 	}

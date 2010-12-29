@@ -5,8 +5,6 @@ qx.Class.define("client.Application",
 
     members :
     {
-	__rpc : 0,
-	
 	main : function()
 	{
 	    this.base(arguments); 
@@ -27,11 +25,10 @@ qx.Class.define("client.Application",
 
 	    var rpcmanager = new client.RpcManager();
 	    var infoDialog = new client.InfoDialog(rpcmanager);
-
 	    var settings = new client.Settings(rpcmanager, "");
-	    infoDialog.settings = settings;
-
 	    var logDialog = new client.LogDialog(rpcmanager, settings, infoDialog);
+
+	    infoDialog.settings = settings;
 	    
 	    var cookie = qx.bom.Cookie.get("ProjectEvergreen");
 
@@ -57,7 +54,6 @@ qx.Class.define("client.Application",
 
 	    var MainScreenObj = new client.MainScreen(rpcmanager, this.getRoot(), logDialog,
 						      settings, infoDialog, anon_user);
-	    rpcmanager = rpcmanager;
 
 	    infoDialog.mainscreen = MainScreenObj;
 	    logDialog.mainscreen = MainScreenObj;

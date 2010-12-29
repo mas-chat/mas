@@ -206,8 +206,7 @@ qx.Class.define("client.MainScreen",
 			"Do you want to join the group " + data[0] + "?", "Yes", 
 			function()
 			{
-			    main.rpc.call("JOIN", data[0] + " MeetAndSpeak " + data[1],
-					  main);
+			    main.rpc.call("JOIN", data[0] + " MeetAndSpeak " + data[1]);
 			}, "NO");
 		}
 		this.showMsgWindows();
@@ -281,14 +280,14 @@ qx.Class.define("client.MainScreen",
 		    decline.setRich(true);
 		    
 		    accept.addListener("click", function () {
-			this.rpc.call("OKF", friend_id, this);
+			this.rpc.call("OKF", friend_id);
 			//TODO: this relies on proper carbage collection
 			this.rootContainer.remove(this.msg);
 			this.__msgvisible = false;
 		    }, this);
 		    
 		    decline.addListener("click", function () {
-			this.rpc.call("NOKF", friend_id, this);
+			this.rpc.call("NOKF", friend_id);
 			//TODO: this relies on proper carbage collection
 			this.rootContainer.remove(this.msg);
 			this.__msgvisible = false;
@@ -441,6 +440,10 @@ qx.Class.define("client.MainScreen",
 		    tmpList.banid = tmp[1];
 		    this.windows[window_id].configListBan.add(tmpList);
 		}
+		break;
+
+	    case "LOGS":
+		this.logDialog.sendresult(options);
 		break;
 	    }
 
@@ -708,7 +711,7 @@ qx.Class.define("client.MainScreen",
 	    friendContainer.add(addContainer);
 
 	    button1.addListener("execute", function (e) {
-		this.rpc.call("ADDF", this.__input1.getValue(), this);
+		this.rpc.call("ADDF", this.__input1.getValue());
 		this.__input1.setValue("");
 	    }, this);
 
@@ -798,7 +801,7 @@ qx.Class.define("client.MainScreen",
 		    friend3.mainscreen = this;
 
 		    friend3.addListener("click", function (e) {
-			this.rrpc.call("STARTCHAT", "MeetAndSpeak " + this.nickname, this.mainscreen);
+			this.rrpc.call("STARTCHAT", "MeetAndSpeak " + this.nickname);
                         this.setValue("<font color=\"green\">Wait..</font>");
                         this.waiting = true;
 		    }, friend3);
@@ -1449,7 +1452,7 @@ qx.Class.define("client.MainScreen",
 
 	_logoutCommand : function()
 	{
-	    this.rpc.call("LOGOUT", "", this);
+	    this.rpc.call("LOGOUT", "");
 
 	    //TODO: create LOGOUTOK response and move this to there: 
 	    qx.event.Timer.once(function(e){

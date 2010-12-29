@@ -296,101 +296,92 @@ qx.Class.define("client.LogDialog",
 	    }
 	},
 	
-	__sendresult : function(result, exc) 
+	sendresult : function(result)
 	{
-	    if (exc == null) 
+	    var pos = result.search(/></);
+	    var date = result.slice(0, pos);
+	    var data = result.slice(pos+2);
+	    
+	    if (this.__pos == 0)
 	    {
-		var pos = result.search(/<>/);
-		var date = result.slice(0, pos);
-		var data = result.slice(pos+2);
-		
-		if (this.__pos == 0)
+		date = "Today";
+	    }
+	    
+	    this.today.setValue(date);
+	    
+	    var channels = data.split("><");
+	    this.list.removeAll();
+	    
+	    if (channels[0] == "No groups")
+	    {
+		this.iframe.setSource(
+		    "/tools/blank.pl?t=" + 
+			escape("Nothing has been logged for this day."));
+	    }
+	    else
+	    {
+		for (var i=0; i < channels.length; i = i + 3)
 		{
-		    date = "Today";
-		}
-		
-		this.today.setValue(date);
-		
-		var channels = data.split("<>");
-		this.list.removeAll();
-
-		if (channels[0] == "No groups")
-		{
-		    this.iframe.setSource(
-			"/tools/blank.pl?t=" + 
-			    escape("Nothing has been logged for this day."));
-		}
-		else
-		{
-		    for (var i=0; i < channels.length; i = i + 3)
+		    var tmp = new qx.ui.form.ListItem(channels[i]);
+		    tmp.chan = escape(channels[i+1]);
+		    tmp.date = channels[i+2];
+		    tmp.rpc = this.rpc;
+		    tmp.tz = this.rpc.timezone;
+		    tmp.st = "";
+		    tmp.iframe = this.iframe;
+		    
+		    tmp.addListener("click", function (e) {
+			this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
+					      "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
+					      "&date=" + this.date + "&chan=" + this.chan +
+					      "&tz=" + this.tz + "&st=" + this.st);
+		    }, tmp);
+		    
+		    this.list.add(tmp);
+		    
+		    if (i == 0)
 		    {
-			var tmp = new qx.ui.form.ListItem(channels[i]);
-			tmp.chan = escape(channels[i+1]);
-			tmp.date = channels[i+2];
-			tmp.rpc = this.rpc;
-			tmp.tz = this.rpc.timezone;
-			tmp.st = "";
-			tmp.iframe = this.iframe;
-			
-			tmp.addListener("click", function (e) {
-			    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
-						  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
-						  "&date=" + this.date + "&chan=" + this.chan +
-						  "&tz=" + this.tz + "&st=" + this.st);
-			}, tmp);
-			
-			this.list.add(tmp);
-
-			if (i == 0)
-			{
-			    this.list.setSelection([tmp]);
-			}
+			this.list.setSelection([tmp]);
 		    }
-
-		    //auto load first item
-		    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
-					  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
-					  "&date=" + channels[2] + "&chan=" +  escape(channels[1]) +
-					  "&tz=" + this.rpc.timezone + "&st=" + 
-					  escape("")); 
-		}
-
-		this.b1.setEnabled(true);
-		this.b2.setEnabled(true);
-		this.b3.setEnabled(true);
- 
-		if (this.__pos == 0)
-		{
-		    this.b4.setEnabled(false);
-		}
-		else
-		{
-		    this.b4.setEnabled(true);
 		}
 		
-		if (this.__pos < 28)
-		{
-		    this.b5.setEnabled(false);
-		}
-		else
-		{
-		    this.b5.setEnabled(true);
-		}
-		
-		if (this.__pos < 365)
-		{
-		    this.b6.setEnabled(false);
-		}
-		else
-		{
-		    this.b6.setEnabled(true);
-		}
+		//auto load first item
+		this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
+				      "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
+				      "&date=" + channels[2] + "&chan=" +  escape(channels[1]) +
+				      "&tz=" + this.rpc.timezone + "&st=" + 
+				      escape("")); 
+	    }
 
-		rpcmanager.request_done(true);
-	    } 
-	    else 
+	    this.b1.setEnabled(true);
+	    this.b2.setEnabled(true);
+	    this.b3.setEnabled(true);
+	    
+	    if (this.__pos == 0)
 	    {
-		rpcmanager.request_done(false);
+		this.b4.setEnabled(false);
+	    }
+	    else
+	    {
+		this.b4.setEnabled(true);
+	    }
+	    
+	    if (this.__pos < 28)
+	    {
+		this.b5.setEnabled(false);
+	    }
+	    else
+	    {
+		this.b5.setEnabled(true);
+	    }
+	    
+	    if (this.__pos < 365)
+	    {
+		this.b6.setEnabled(false);
+	    }
+	    else
+	    {
+		this.b6.setEnabled(true);
 	    }
 	},
 
@@ -471,7 +462,7 @@ qx.Class.define("client.LogDialog",
 	    this.b5.setEnabled(false);
 	    this.b6.setEnabled(false);
 
-	    this.rpc.call("GETLOG", this.__pos, this, this.__sendresult);
+	    this.rpc.call("GETLOG", this.__pos);
 	}
     }
 });
