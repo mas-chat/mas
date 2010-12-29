@@ -93,8 +93,8 @@ qx.Class.define("client.RpcManager",
 
 	__read : function()
 	{
-	    debug.print("read sent: " + command + ": " + parameters);
-	    tz = ""
+	    debug.print("Hello SENT, seq " + this.__helloseq);
+	    var tz = ""
 
 	    if (this.__firstrpc == true)
 	    {

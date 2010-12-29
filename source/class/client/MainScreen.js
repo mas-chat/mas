@@ -124,7 +124,7 @@ qx.Class.define("client.MainScreen",
         __timer : 0,
         __topictimer : 0,
 	__topicstate : 0,
-	__ack : 0,
+	__expectedAck : 1,
 	__tt : 0,
 	__blur : 0,
 	__input1 : 0,
@@ -159,25 +159,27 @@ qx.Class.define("client.MainScreen",
 	    case "ACK":
 		//TODO: RPC manager should process ack...
 		var ack = parseInt(options.shift());
-		if (this.__ack != ack)
+		if (this.__expectedAck != ack)
 		{
 		    if (this.desktop === 0)
 		    {
+			this.showads = 0;
 			this.show();
 		    }
 		    
 		    this.infoDialog.showInfoWin(
 			"Error", "Connection error. (" +
-			    this.__ack + "," + ack +
+			    this.__expectedAck + "," + ack +
 			    ")<p>Press reload in your web browser to recover...");
 
-	            debug.print("ack mismatch: " + this.__ack + " vs. " + ack);
+	            debug.print("ack mismatch: " + this.__expectedAck + " vs. " + ack);
 		    
 		    qx.event.Timer.once(function(e){
 			//   window.location.reload(true);
 		    }, this, 2000);
 		    return;   
 		}
+		this.__expectedAck++;
 		break;
 		
 	    case "COOKIE":
@@ -231,7 +233,7 @@ qx.Class.define("client.MainScreen",
 		}
 		
 		if (this.__blur == 1 && this.windows[window_id].titlealert == 1 &&
-		    this.__topictimer.getEnabled() == false && this.__ack != 1 &&
+		    this.__topictimer.getEnabled() == false && this.__expectedAck != 1 &&
 		    type == 2)
 		{
 		    this.__topictimeractive = true;
@@ -360,6 +362,7 @@ qx.Class.define("client.MainScreen",
 	    case "EXPIRE":
 		if (this.desktop === 0)
 		{
+		    this.showads = 0;
 		    this.show();
 		}
 		
