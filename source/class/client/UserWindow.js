@@ -1243,7 +1243,7 @@ qx.Class.define("client.UserWindow",
 		this.apikey = new qx.ui.basic.Label("Refreshing...");
 		this.apikey.set({ selectable: true, nativeContextMenu : true });
 
-		this.rpc.call("GETKEY", this.winid, this);xxx
+		this.rpc.call("GETKEY", this.winid, this);
 		composite.add(this.apikey, {row: 7, column: 1});
 
 	    	var buttonKey = new qx.ui.form.Button("Generate new key");

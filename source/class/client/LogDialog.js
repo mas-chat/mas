@@ -328,7 +328,7 @@ qx.Class.define("client.LogDialog",
 			tmp.chan = escape(channels[i+1]);
 			tmp.date = channels[i+2];
 			tmp.rpc = this.rpc;
-			tmp.tz = this.mainscreen.timezone;
+			tmp.tz = this.rpc.timezone;
 			tmp.st = "";
 			tmp.iframe = this.iframe;
 			
@@ -351,7 +351,7 @@ qx.Class.define("client.LogDialog",
 		    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 					  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
 					  "&date=" + channels[2] + "&chan=" +  escape(channels[1]) +
-					  "&tz=" + this.mainscreen.timezone + "&st=" + 
+					  "&tz=" + this.rpc.timezone + "&st=" + 
 					  escape("")); 
 		}
 
@@ -417,7 +417,7 @@ qx.Class.define("client.LogDialog",
 			tmp.date = item[0];
 			tmp.chan = escape(item[1]);
 			tmp.rpc = this.rpc;
-			tmp.tz = this.mainscreen.timezone;
+			tmp.tz = this.rpc.timezone;
 			tmp.st = escape(this.searchstring);
 			tmp.iframe = this.iframe;
 
@@ -439,7 +439,7 @@ qx.Class.define("client.LogDialog",
 		    this.iframe.setSource("/tools/get_day.pl?id=" +  this.rpc.id +
 					  "&sec=" + this.rpc.sec + "&cookie=" + this.rpc.cookie +
 					  "&date=" + firstitem[0] + "&chan=" +  escape(firstitem[1]) +
-					  "&tz=" + this.mainscreen.timezone + "&showall=yes&st=" + 
+					  "&tz=" + this.rpc.timezone + "&showall=yes&st=" + 
 					  escape(this.searchstring)); 
 		}
 	    }

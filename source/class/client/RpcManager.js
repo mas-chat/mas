@@ -13,6 +13,16 @@ qx.Class.define("client.RpcManager",
 
 	this.__rrpc = new qx.io.remote.Rpc("/ralph", "ralph");
 	this.__rrpc.setTimeout(35000);
+
+	//global because of call from LogDialog, not optimal
+	var d = new Date();
+	this.timezone = d.getTimezoneOffset();
+
+	//Initial hello, send TZ info, with timer we don't see rotating
+	//circle in chrome
+	qx.event.Timer.once(function(e){
+	    this.__read();
+	}, this, 250); 
     },
 
     members :
@@ -20,21 +30,23 @@ qx.Class.define("client.RpcManager",
 	id : 0,
 	sec : 0,
 	cookie : 0,
+	timezone : 0,
 	mainscreen : 0,
-	infoDialog : 0,
-	seq : 1,
-	errormode : false,
+
+	__errormode : false,
 	__sendqueue : [],
 	__srpc : 0,
 	__rrpc : 0,
+	__firstrpc : true,
+	__helloseq : 0,
+	__sendseq : 1,
 	
-	call : function(command, parameters, context, callback)
+	call : function(command, parameters, callback)
 	{
 	    var obj = new Object();
 	    obj.command = command;
 	    obj.parameters = parameters;
-	    obj.context = context;
-	    obj.callback = callback;
+	    obj.callback = callback; // Only used by LodDialog
 	    this.__sendqueue.push(obj);
 	    
 	    debug.print("call: buffered: " + command + ": " + parameters + ", queue len: " + this.__sendqueue.length);
@@ -49,7 +61,7 @@ qx.Class.define("client.RpcManager",
 	{
 	    var cb = obj.callback;
 
-	    if (this.errormode == false) 
+	    if (this.__errormode == false) 
 	    {
 		this.mainscreen.setStatusText("L");
 	    }
@@ -62,121 +74,124 @@ qx.Class.define("client.RpcManager",
 	    }
 
 	    this.__srpc.callAsync(
-		qx.lang.Function.bind(cb, obj.context),
+		qx.lang.Function.bind(cb, this),
 		obj.command, this.id + " " + this.sec + " " + this.cookie + " " +
-		    this.seq + " " + obj.parameters);
+		    this.__sendseq + " " + obj.parameters);
 	},
 
-	read : function(command, parameters, context, callback)
-	{
-	    debug.print("read sent: " + command + ": " + parameters);
-
-	    this.__rrpc.callAsync(
-		qx.lang.Function.bind(callback, context),
-		command, this.id + " " + this.sec + " " + this.cookie + " " +
-		    "0" + " " + parameters);
-	},
-	
 	__sendresult : function(result, exc)
 	{
 	    if (exc == null) 
 	    {
-                var now = new Date();
                 debug.print("call: answer: " + result);
 
-		//TODO: BIG HACK -> fix the protocol!!!
-		if (result.charAt(0) == "1")
-		{
-		    result = result.substr(2);
-		}
+		var options = result.split(" ");
+		var command = options.shift();
 
-		var pos = result.search(/ /);
-		var command = result.slice(0, pos);
-		
-		if (command == "KEY")
-		{
-		    //context UserWindow
-		    result = result.slice(pos+1);
-		    this.apikey.setValue(result);    
-		}
-		else if (command == "OPERLIST")
-		{
-		    //context UserWindow
-		    result = result.slice(pos+1);
-		    var opers = result.split("<<>>"); 
-		    
-		    this.configListOper.removeAll();
-		    
-		    for (var i=0; i < opers.length; i++)
-		    {
-			var tmp = opers[i].split("<>");
-			var tmpList = new qx.ui.form.ListItem(tmp[1]);
-			tmpList.userid = tmp[0];
-			this.configListOper.add(tmpList);
-		    }
-		}
-		else if (command == "BANLIST")
-		{
-		    //context UserWindow
-		    result = result.slice(pos+1);
-		    var bans = result.split("<<>>"); 
-		    
-		    this.configListBan.removeAll();
-
-		    for (var i=0; i < bans.length; i++)
-		    {
-			var tmp = bans[i].split("<>");
-			var tmpList = new qx.ui.form.ListItem(tmp[0]);
-			tmpList.banid = tmp[1];
-			this.configListBan.add(tmpList);
-		    }
-		}
-		else if (command == "DIE")
-		{
-		    this.infoDialog.showInfoWin(
-                        "Error",
-			"Session terminated. <p>Press OK to restart.",
-			"OK", function () {
-			    qx.bom.Cookie.del("ProjectEvergreen");
-			    window.location.reload(true);
-			});
-		}
-		else if (command == "INFO")
-		{
-                    var param = result.slice(pos+1);
-
-	            //TODO: big bad hack, fix: proper protocol
-		    if (param.substr(0, 30) == "You are already chatting with ")
-		    {
-			//context mainscreen
-			this.removeWaitText(this.globalflist, param.substr(30));
-		    }
-
-		    this.infoDialog.showInfoWin("Info", param, "OK");
-		}
-		
-		rpcmanager.request_done(true);
+		this.mainscreen.handleCommand(command, options);
+				
+		this.request_done(true, exc);
 	    }
 	    else 
 	    {
-		rpcmanager.request_done(false);
+		this.request_done(false, exc);
 	    }
 	},
 
-	request_done : function(success)
+	__read : function()
+	{
+	    debug.print("read sent: " + command + ": " + parameters);
+	    tz = ""
+
+	    if (this.__firstrpc == true)
+	    {
+		tz = this.timezone;
+	    }
+
+	    this.__rrpc.callAsync(
+		qx.lang.Function.bind(this.__readresult, this),
+		"HELLO", this.id + " " + this.sec + " " + this.cookie + " " +
+		    "0" + " " + this.__helloseq + " " + tz);
+	},
+	
+	__readresult : function(data, exc) 
+	{
+	    this.__helloseq++;
+
+	    if (exc == null) 
+	    {
+		if (!this.__firstrpc)
+		{
+		    //First response is too big to be printed
+	            debug.print("received: " + data);
+                }
+		else
+		{
+		    this.__firstrpc = false;
+		}
+
+		var commands = data.split("<>");
+
+		for (var i=0; i < commands.length; i++)
+		{
+		    var options = commands[i].split(" ");
+		    var command = options.shift();
+
+		    //debug.print("handling:" + command + options.join(" "));
+
+		    var result = this.mainscreen.handleCommand(command, options);
+
+		    if (result == false)
+		    {
+			//Permanent error, bail out without making a new RPC request
+			return;
+		    }
+		}
+		
+		this.__read();
+	    }
+	    else 
+	    {
+		if (this.__firstrpc == true)
+		{
+		    this.mainscreen.handleRpcError();
+		}
+		else
+		{
+		    if (exc.code == qx.io.remote.Rpc.localError.timeout)
+		    {
+			//Make next request immediately
+			this.__read();
+		    }
+		    else
+		    {
+         	        debug.print("unusual error code: " + exc.code);
+
+			//Wait a little and try again. This is to make sure
+			//that we don't loop and consume all CPU cycles if
+			//there is no connection.
+			qx.event.Timer.once(function(e){
+			    this.__read();
+			}, this, 2000); 
+		    }
+		}
+	    }
+	},
+
+	request_done : function(success, exc)
 	{
 	    if (success == true)
 	    {
 		this.__sendqueue.shift();
-		this.seq++;
-		this.errormode = false;
+		this.__sendseq++;
+		this.__errormode = false;
 	    }
 	    else
 	    {
 	        debug.print("rpcmanager: didnt get reply, code: " + exc.code);
 
 		this.mainscreen.setStatusText("<font color=\"#ff0000\">Connection to server lost, recovering...</font>");
-		this.errormode = true;
+		this.__errormode = true;
 	    }
 
 	    if (this.__sendqueue.length > 0)

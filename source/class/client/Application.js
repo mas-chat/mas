@@ -16,8 +16,6 @@ qx.Class.define("client.Application",
 	    this.getRoot().removeAll();
 	    this.getRoot().set({backgroundColor: "#FFFFFF"});
 
-	    debug = new client.Debug();
-
 	    var start_label = new qx.ui.basic.Label("<center><img src=\"/i/ajax-loader.gif\"><br><br><br>Loading content...</center>").set({
 		font : new qx.bom.Font(14, ["Arial", "sans-serif"]), width:300, height:150, rich: true});
 
@@ -27,14 +25,13 @@ qx.Class.define("client.Application",
 	    start_label.setMargin(margin_y,10,10,margin_x);
 	    this.getRoot().add(start_label, {flex : 1});
 
-	    var srpc = new client.RpcManager();
-	    var infoDialog = new client.InfoDialog(srpc);
-	    srpc.infoDialog = infoDialog;
+	    var rpcmanager = new client.RpcManager();
+	    var infoDialog = new client.InfoDialog(rpcmanager);
 
-	    var settings = new client.Settings(srpc, "");
+	    var settings = new client.Settings(rpcmanager, "");
 	    infoDialog.settings = settings;
 
-	    var logDialog = new client.LogDialog(srpc, settings, infoDialog);
+	    var logDialog = new client.LogDialog(rpcmanager, settings, infoDialog);
 	    
 	    var cookie = qx.bom.Cookie.get("ProjectEvergreen");
 
@@ -45,8 +42,8 @@ qx.Class.define("client.Application",
 	    }
 
 	    var idstring = cookie.split("-");
-	    srpc.id = idstring[0];
-	    srpc.sec = idstring[1];
+	    rpcmanager.id = idstring[0];
+	    rpcmanager.sec = idstring[1];
 
 	    var anon_user = false;
 
@@ -58,15 +55,13 @@ qx.Class.define("client.Application",
 	    var label = new qx.ui.embed.Html("<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0\" width=\"0\" height=\"0\" id=\"niftyPlayer1\" align=\"\"><param name=movie value=\"/moescript/niftyplayer.swf?file=/moescript/betty.mp3\"><param name=quality value=high><embed src=\"/moescript/niftyplayer.swf?file=/moescript/betty.mp3\" quality=high bgcolor=#FFFFFF width=\"0\" height=\"0\" name=\"niftyPlayer1\" align=\"\"></embed></object>");
 	    this.getRoot().add(label);
 
-	    var MainScreenObj = new client.MainScreen(srpc, this.getRoot(), logDialog,
+	    var MainScreenObj = new client.MainScreen(rpcmanager, this.getRoot(), logDialog,
 						      settings, infoDialog, anon_user);
-
-	    main = MainScreenObj;
-	    rpcmanager = srpc;
+	    rpcmanager = rpcmanager;
 
 	    infoDialog.mainscreen = MainScreenObj;
 	    logDialog.mainscreen = MainScreenObj;
-	    srpc.mainscreen = MainScreenObj;
+	    rpcmanager.mainscreen = MainScreenObj;
 	}
     }
 });

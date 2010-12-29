@@ -14,10 +14,6 @@ qx.Class.define("client.MainScreen",
 	this.settings = settings;
 	this.anon_user = anon_user;
 
-	//global because of call from LogDialog, not optimal
-	var d = new Date();
-	this.timezone = d.getTimezoneOffset();
-
         this.__timer = new qx.event.Timer(1000 * 60);
         this.__timer.start();
 
@@ -47,11 +43,6 @@ qx.Class.define("client.MainScreen",
 
 	this.__tt = new qx.ui.tooltip.ToolTip("Send Message");
 	this.__myapp = rootItem;
-
-	//Initial hello, send TZ info, with timer we don't see rotating circle in chrome
-	qx.event.Timer.once(function(e){
-	    this.rpc.read("HELLO", this.seq + " " + this.timezone, this, this.readresult);
-	}, this, 250); 
 
 	qx.bom.Element.addListener(window, "focus", function(e) { 
 
@@ -110,7 +101,6 @@ qx.Class.define("client.MainScreen",
 	activewin : 0,
 	initdone : 0,
 	rootContainer : 0,
-	seq : 0,
 	windows : null,
 	showads : 1,
 	FlashHelper : 0,
@@ -118,7 +108,7 @@ qx.Class.define("client.MainScreen",
 	contactsButton : 0,
 	rpc : 0,
 	globalflist : 0,
-	timezone : 0,
+
 	logDialog : 0,
 	infoDialog : 0,
 	settings : 0,
@@ -130,7 +120,6 @@ qx.Class.define("client.MainScreen",
 	__part2 : 0,
 	__part3 : 0,
 	__windowGroup : 0,
-	__error : 0,
 	__myapp : 0,
         __timer : 0,
         __topictimer : 0,
@@ -138,349 +127,326 @@ qx.Class.define("client.MainScreen",
 	__ack : 0,
 	__tt : 0,
 	__blur : 0,
-	__firstrpc : 1,
 	__input1 : 0,
 	__topictimeractive : 0,
 	__prevwin : -1,
 	__msgvisible : 0,
 
-	readresult : function(result, exc) 
+	handleRpcError : function()
+	{
+	    var problem_label = new qx.ui.basic.Label(
+		"<center>MeetAndSpeak is having some technical problems. Sorry!<br><br>You " +
+		    "can try to reload this page in a few moments to see if the service is " + 
+		    "back online.<br><br>We are trying to address the situation as quickly " +
+		    "as possible.</center>").set({
+			font : new qx.bom.Font(14, ["Arial", "sans-serif"]), width:500,
+			height:150, rich: true});
+	    
+	    var margin_x = Math.round(qx.bom.Viewport.getWidth()/2)-500/2;
+	    var margin_y = Math.round(qx.bom.Viewport.getHeight()/2) - 100;
+	    
+	    problem_label.setMargin(margin_y,10,10,margin_x);
+	    this.__myapp.removeAll();
+	    this.__myapp.add(problem_label, {flex : 1});
+	},
+
+	handleCommand : function(command, options)
 	{
 	    var doitagain = true;
 
-	    this.seq++;
-
-	    if (exc == null) 
+	    switch(command)
 	    {
-		this.__error = 0;
-		this.__firstrpc = 0;
-
-		var initialpos = result.search(/ /);
-		var ack = result.slice(0, initialpos);
-		var allcommands = result.slice(initialpos+1);
-
-		if (ack == 1)
+	    case "ACK":
+		//TODO: RPC manager should process ack...
+		var ack = parseInt(options.shift());
+		if (this.__ack != ack)
 		{
-		    this.__ack = 1;
-	            debug.print("ack is 1");
-		}
-		else
-		{
-		    this.__ack++;
-		    if (this.__ack != ack)
+		    if (this.desktop === 0)
 		    {
-			if (this.desktop === 0)
-			{
-			    this.show();
-			}
-
-			this.infoDialog.showInfoWin("Error", "Connection error. (" + this.__ack + "," + ack + ")<p>Press reload in your web browser to recover...");
-
-	                debug.print("ack mismatch: " + this.__ack + " vs. " + ack);
-
-			qx.event.Timer.once(function(e){
-			 //   window.location.reload(true);
-			}, this, 2000);
-		    }
-		}
-
-		if (ack != 1)
-                {
-	            debug.print("received: " + allcommands);
-                }
-
-		var commands = allcommands.split("<>");
-
-		for (var i=0; i < commands.length; i++)
-		{
-		    var pos = commands[i].search(/ /);
-		    var command = commands[i].slice(0, pos);
-		    var param = commands[i].slice(pos+1);
-
-		    pos = param.search(/ /);
-		    var window_id = param.slice(0, pos);
-		    
-		    //debug.print("handling:" + command + param);
-
-		    switch(command)
-		    {
-
-		    case "COOKIE":
-			this.rpc.cookie = param.split(" ").shift();
-			break;
-
-		    case "CREATE":
-			var options = param.split(" ");
-			this.create_or_update_window(options, true);
-			break;
-
-		    case "UPDATE":
-			var options = param.split(" ");
-			this.create_or_update_window(options, false);
-			break;
-
-		    case "INITDONE":
-			this.initdone = 1;
-			var group = qx.bom.Cookie.get("ProjectEvergreenJoin");
-			if (group != null)
-			{
-			    var data = group.split("-");
-
-			    qx.bom.Cookie.del("ProjectEvergreenJoin");
-			    this.infoDialog.showInfoWin(
-				"Confirm", 
-				"Do you want to join the group " + data[0] + "?", "Yes", 
-				function()
-				{
-				    main.rpc.call("JOIN", data[0] + " MeetAndSpeak " + data[1],
-						  main);
-				}, "NO");
-			}
-			this.showMsgWindows();
-			if (this.settings.getAutoArrange() == 1)
-			{
-			    this._arrangeCommand();
-			}
-			break;
-
-		    case "ADDTEXT":
-			var options = param.split(" ");
-			var window_id = parseInt(options.shift());
-			var type = parseInt(options.shift());
-			var usertext = options.join(" ");
-
-			usertext = this.adjustTime(usertext);
-			this.windows[window_id].addline(usertext);
-
-			if (this.windows[window_id].sound == 1 &&
-			    type == 2 && this.initdone == 1)
-			{
-			    this.player_start();
-			}
-
-			if (this.__blur == 1 && this.windows[window_id].titlealert == 1 &&
-			    this.__topictimer.getEnabled() == false && this.__ack != 1 &&
-			    type == 2)
-			{
-			    this.__topictimeractive = true;
-			    this.__topictimer.start();
-			} 
-
-			if (this.activewin.winid != window_id && this.initdone == 1)
-			{
-			    if (type == 1 && this.windows[window_id].isRed == false)
-			    {
-				this.windows[window_id].setGreen();
-			    }
-			    else if (type == 2)
-			    {
-				this.windows[window_id].setRed();
-			    }
-			    //else don't change color
-			}
-			break;
-
-		    case "ADDNTF":
-			var options = param.split(" ");
-			var window_id = parseInt(options.shift());
-			var note_id = options.shift();
-			var usertext = options.join(" ");
-			this.windows[window_id].addntf(note_id, usertext);
-			break;
-
-		    case "REQF":
-			var options = param.split(" ");
-		    	var friend_id = parseInt(options.shift());
-			var friend_nick = options.shift();
-			var friend_name = options.join(" ");
-
-			if (this.__msgvisible == false)
-			{
-			    this.msg = new qx.ui.container.Composite(
-				new qx.ui.layout.HBox(8));
-			    this.msg.setPadding(5, 15, 5, 15);
-			    this.msg.set({ backgroundColor: "yellow"});
-
-			    this.msg.add(new qx.ui.basic.Label(
-				friend_name + " (" + friend_nick + ") wants to be your friend. Is this OK?"));
-
-			    var accept = new qx.ui.basic.Label("<font color=\"blue\">ACCEPT</font>");
-			    var decline = new qx.ui.basic.Label("<font color=\"blue\">DECLINE</font>");
-			    accept.setRich(true);
-			    decline.setRich(true);
-
-			    accept.addListener("click", function () {
-				this.rpc.call("OKF", friend_id, this);
-				//TODO: this relies on proper carbage collection
-				this.rootContainer.remove(this.msg);
-				this.__msgvisible = false;
-			    }, this);
-
-			    decline.addListener("click", function () {
-				this.rpc.call("NOKF", friend_id, this);
-				//TODO: this relies on proper carbage collection
-				this.rootContainer.remove(this.msg);
-				this.__msgvisible = false;
-			    }, this);
-
-			    this.msg.add(accept);
-			    this.msg.add(decline);
-			    
-			    this.__msgvisible = true;
-
-			    this.rootContainer.addAt(this.msg, 1, {flex:0});
-			}
-			// else ignore command
-
-			break;
-   
-		    case "TOPIC":
-		    	var usertext = param.slice(pos+1);
-			this.windows[window_id].changetopic(usertext);
-			break;
-
-		    case "NAMES":
-		    	var usertext = param.slice(pos+1);
-			var nameslist = [];
-
-			if (usertext != "")
-			{
-			    nameslist = usertext.split(" ");
-			}
-
-			this.windows[window_id].addnames(nameslist);
-			break;
-
-		    case "ADDNAME":
-			var options = param.split(" ");
-		    	var windowid = parseInt(options.shift());
-		    	options.shift(); // obsolete parameter
-		    	var nick = options.shift();
-			this.windows[windowid].addname(nick);
-			break;
-
-		    case "DELNAME":
-		    	var usertext = param.slice(pos+1);
-			this.windows[window_id].delname(usertext);
-			break;
-
-		    case "NICK":
-			this.nicks = param.split(" ");
-			break;
-
-		    case "A":
-			var options = param.split(" ");
-			this.showads = options.shift();
-			break;
-
-		    case "ADDURL":
-			var options = param.split(" ");
-		    	var windowid = parseInt(options.shift());
-			var url = options.shift();
-			this.windows[windowid].addUrl(url);
-			break;
-
-		    case "DIE":
-                        if (this.desktop === 0)
-                        {
-                            this.show();
-                        }
-                        this.infoDialog.showInfoWin(
-			    "Error",
-                            "Session expired. <p>Press OK to login again.",
-                            "OK", 
-                            function () {
-                                qx.bom.Cookie.del("ProjectEvergreen");
-                                window.location.reload(true);
-                            });
-                        doitagain = false;
-                        break;
-						
-		    case "EXPIRE":
-		    	if (this.desktop === 0)
-			{
-			    this.show();
-			}
-
-			//var reason = param.slice(pos+1);
-			this.infoDialog.showInfoWin(
-			    "Error",	
-			    "Your session expired, you logged in from another location, or<br>the server was restarted.<p>Press OK to restart.",
-			    "OK", 
-			    function () {
-				window.location.reload(true);
-			    });
-			doitagain = false;
-			break;
-
-		    case "OK" :
-			break;
-
-		    case "INFO" :
-			this.infoDialog.showInfoWin("Info", param, "OK");
-			break;
-
-		    case "CLOSE":
-			var window_id = param.slice(pos+1);
-			//TODO: call destructor?
-			delete this.windows[window_id];
-			break;
-
-		    case "FLIST":
-			var myparam = param;
-			this.updateFriendsList(this.globalflist, myparam);
-			break;
-
-		    case "SET":
-			this.settings.update(param);
-			//We have settings now, ready to draw main screen
 			this.show();
-			break;
 		    }
-		}
+		    
+		    this.infoDialog.showInfoWin(
+			"Error", "Connection error. (" +
+			    this.__ack + "," + ack +
+			    ")<p>Press reload in your web browser to recover...");
 
-		if (doitagain == true)
-		{
-		    this.rpc.read("HELLO", this.seq, this, this.readresult);
+	            debug.print("ack mismatch: " + this.__ack + " vs. " + ack);
+		    
+		    qx.event.Timer.once(function(e){
+			//   window.location.reload(true);
+		    }, this, 2000);
+		    return;   
 		}
-	    }
-	    else 
-	    {
-		if (this.__firstrpc == 1)
+		break;
+		
+	    case "COOKIE":
+		this.rpc.cookie = options.shift();
+		break;
+		
+	    case "CREATE":
+		this.create_or_update_window(options, true);
+		break;
+		
+	    case "UPDATE":
+		this.create_or_update_window(options, false);
+		break;
+		
+	    case "INITDONE":
+		this.initdone = 1;
+		var group = qx.bom.Cookie.get("ProjectEvergreenJoin");
+		if (group != null)
 		{
-		    var problem_label = new qx.ui.basic.Label("<center>MeetAndSpeak is having some technical problems. Sorry!<br><br>You can try to reload this page in a few moments to see if the service is back online.<br><br>We are trying to address the situation as quickly as possible.</center>").set({
-			font : new qx.bom.Font(14, ["Arial", "sans-serif"]), width:500, height:150, rich: true});
+		    var data = group.split("-");
+		    var main = this;
 
-		    var margin_x = Math.round(qx.bom.Viewport.getWidth()/2)-500/2;
-		    var margin_y = Math.round(qx.bom.Viewport.getHeight()/2) - 100;
-	    
-		    problem_label.setMargin(margin_y,10,10,margin_x);
-		    this.__myapp.removeAll();
-	    	    this.__myapp.add(problem_label, {flex : 1});
+		    qx.bom.Cookie.del("ProjectEvergreenJoin");
+		    this.infoDialog.showInfoWin(
+			"Confirm", 
+			"Do you want to join the group " + data[0] + "?", "Yes", 
+			function()
+			{
+			    main.rpc.call("JOIN", data[0] + " MeetAndSpeak " + data[1],
+					  main);
+			}, "NO");
 		}
-		else
+		this.showMsgWindows();
+		if (this.settings.getAutoArrange() == 1)
 		{
-		    if (exc.code == qx.io.remote.Rpc.localError.timeout ||
-			exc.code == 500)
+		    this._arrangeCommand();
+		}
+		break;
+		
+	    case "ADDTEXT":
+		var window_id = parseInt(options.shift());
+		var type = parseInt(options.shift());
+		var usertext = options.join(" ");
+		
+		usertext = this.adjustTime(usertext);
+		this.windows[window_id].addline(usertext);
+		
+		if (this.windows[window_id].sound == 1 &&
+		    type == 2 && this.initdone == 1)
+		{
+		    this.player_start();
+		}
+		
+		if (this.__blur == 1 && this.windows[window_id].titlealert == 1 &&
+		    this.__topictimer.getEnabled() == false && this.__ack != 1 &&
+		    type == 2)
+		{
+		    this.__topictimeractive = true;
+		    this.__topictimer.start();
+		} 
+		
+		if (this.activewin.winid != window_id && this.initdone == 1)
+		{
+		    if (type == 1 && this.windows[window_id].isRed == false)
 		    {
-			//Make next request immediately
-			this.rpc.read("HELLO", this.seq, this, this.readresult);
+			this.windows[window_id].setGreen();
 		    }
-		    else
+		    else if (type == 2)
 		    {
-         	        debug.print("unusual error code: " + exc.code);
-
-			//Wait a little and try again. This is to make sure
-			//that we don't loop and consume all CPU cycles if
-			//there is no connection.
-			qx.event.Timer.once(function(e){
-			    this.rpc.read("HELLO", this.seq, this, this.readresult);
-			}, this, 2000); 
+			this.windows[window_id].setRed();
 		    }
+		    //else don't change color
 		}
+		break;
+		
+	    case "ADDNTF":
+		var window_id = parseInt(options.shift());
+		var note_id = options.shift();
+		var usertext = options.join(" ");
+		this.windows[window_id].addntf(note_id, usertext);
+		break;
+		
+	    case "REQF":
+		var friend_id = parseInt(options.shift());
+		var friend_nick = options.shift();
+		var friend_name = options.join(" ");
+		
+		if (this.__msgvisible == false)
+		{
+		    this.msg = new qx.ui.container.Composite(
+			new qx.ui.layout.HBox(8));
+		    this.msg.setPadding(5, 15, 5, 15);
+		    this.msg.set({ backgroundColor: "yellow"});
+		    
+		    this.msg.add(new qx.ui.basic.Label(
+			friend_name + " (" + friend_nick + ") wants to be your friend. Is this OK?"));
+		    
+		    var accept = new qx.ui.basic.Label("<font color=\"blue\">ACCEPT</font>");
+		    var decline = new qx.ui.basic.Label("<font color=\"blue\">DECLINE</font>");
+		    accept.setRich(true);
+		    decline.setRich(true);
+		    
+		    accept.addListener("click", function () {
+			this.rpc.call("OKF", friend_id, this);
+			//TODO: this relies on proper carbage collection
+			this.rootContainer.remove(this.msg);
+			this.__msgvisible = false;
+		    }, this);
+		    
+		    decline.addListener("click", function () {
+			this.rpc.call("NOKF", friend_id, this);
+			//TODO: this relies on proper carbage collection
+			this.rootContainer.remove(this.msg);
+			this.__msgvisible = false;
+		    }, this);
+		    
+		    this.msg.add(accept);
+		    this.msg.add(decline);
+		    
+		    this.__msgvisible = true;
+		    
+		    this.rootContainer.addAt(this.msg, 1, {flex:0});
+		}
+		// else ignore command		
+		break;
+		
+	    case "TOPIC":
+		var window_id = parseInt(options.shift());
+		var usertext = options.join(" ");
+		this.windows[window_id].changetopic(usertext);
+		break;
+		
+	    case "NAMES":
+		var window_id = parseInt(options.shift());
+		this.windows[window_id].addnames(options);
+		break;
+		
+	    case "ADDNAME":
+		var window_id = parseInt(options.shift());
+		options.shift(); // obsolete parameter
+		var nick = options.shift();
+		this.windows[window_id].addname(nick);
+		break;
+		
+	    case "DELNAME":
+		var window_id = parseInt(options.shift());
+		var nick = options.shift();
+		this.windows[window_id].delname(nick);
+		break;
+		
+	    case "NICK":
+		this.nicks = options;
+		break;
+		
+	    case "A":
+		this.showads = options.shift();
+		break;
+		
+	    case "ADDURL":
+		var window_id = parseInt(options.shift());
+		var url = options.shift();
+		this.windows[window_id].addUrl(url);
+		break;
+		
+	    case "DIE":
+                if (this.desktop === 0)
+                {
+                    this.show();
+                }
+                this.infoDialog.showInfoWin(
+		    "Error",
+                    "Session expired. <p>Press OK to login again.",
+                    "OK", 
+                    function () {
+                        qx.bom.Cookie.del("ProjectEvergreen");
+                        window.location.reload(true);
+                    });
+                doitagain = false;
+                break;
+		
+	    case "EXPIRE":
+		if (this.desktop === 0)
+		{
+		    this.show();
+		}
+		
+		//var reason = param.slice(pos+1);
+		this.infoDialog.showInfoWin(
+		    "Error",	
+		    "Your session expired, you logged in from another location, or<br>the server was restarted.<p>Press OK to restart.",
+		    "OK", 
+		    function () {
+			window.location.reload(true);
+		    });
+		doitagain = false;
+		break;
+		
+	    case "OK" :
+		break;
+		
+	    case "INFO" :
+                var param = options.join(" ");;
+
+	        //TODO: big bad hack, fix: proper protocol
+		if (param.substr(0, 30) == "You are already chatting with ")
+		{
+		    this.removeWaitText(this.globalflist, param.substr(30));
+		}
+
+		this.infoDialog.showInfoWin("Info", param, "OK");
+		break;
+		
+	    case "CLOSE":
+		var window_id = parseInt(options.shift());
+		//TODO: call destructor?
+		delete this.windows[window_id];
+		break;
+		
+	    case "FLIST":
+		this.updateFriendsList(this.globalflist, options.join(" "));
+		break;
+		
+	    case "SET":
+		this.settings.update(options.join(" "));
+		//We have settings now, ready to draw main screen
+		this.show();
+		break;
+
+	    case "KEY":
+		var window_id = parseInt(options.shift());
+		this.windows[window_id].apikey.setValue(options.shift());
+		break;
+
+	    case "OPERLIST":
+		var window_id = parseInt(options.shift());
+		var result = options.join(" ");
+		var opers = result.split("<<>>"); 
+		
+		this.windows[window_id].configListOper.removeAll();
+		
+		for (var i=0; i < opers.length; i++)
+		{
+		    var tmp = opers[i].split("<>");
+		    var tmpList = new qx.ui.form.ListItem(tmp[1]);
+		    tmpList.userid = tmp[0];
+		    this.windows[window_id].configListOper.add(tmpList);
+		}
+		break;
+
+	    case "BANLIST":
+		var window_id = parseInt(options.shift());
+		var result = options.join(" ");
+		var bans = result.split("<<>>"); 
+		
+		this.windows[window_id].configListBan.removeAll();
+		
+		for (var i=0; i < bans.length; i++)
+		{
+		    var tmp = bans[i].split("<>");
+		    var tmpList = new qx.ui.form.ListItem(tmp[0]);
+		    tmpList.banid = tmp[1];
+		    this.windows[window_id].configListBan.add(tmpList);
+		}
+		break;
 	    }
+
+	    return doitagain;
 	},
-
+	
 	create_or_update_window : function(options, create)
 	{
 	    var window_id = options.shift();
@@ -625,7 +591,7 @@ qx.Class.define("client.MainScreen",
 	adjustTime : function(text)
 	{
 	    var myRe = /<(\d+)>/g;
-	    var timezone = this.timezone;
+	    var timezone = this.rpc.timezone;
 
 	    return text.replace(
 		myRe, 
@@ -1551,28 +1517,6 @@ qx.Class.define("client.MainScreen",
   
 	player_get_state : function ()
 	{
-	    //var obj = this.FlashHelper.getMovie(name);
-	    //var ps = obj.GetVariable('playingState');
-	    //var ls = obj.GetVariable('loadingState');
-		
-	    // returns
-	    //   'empty' if no file is loaded
-	    //   'loading' if file is loading
-	    //   'playing' if user has pressed play AND file has loaded
-	    //   'stopped' if not empty and file is stopped
-	    //   'paused' if file is paused
-	    //   'finished' if file has finished playing
-	    //   'error' if an error occurred
-	    // if (ps == 'playing')
-	    //	if (ls == 'loaded') return ps;
-	    //   else return ls;
-	    //  if (ps == 'stopped')
-	    //		if (ls == 'empty') return ls;
-	    //    if (ls == 'error') return ls;
-	    //   else return ps;
-	    
-	    //    return ps;
-		
 	}
     }
 });
