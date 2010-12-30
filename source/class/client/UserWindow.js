@@ -787,15 +787,15 @@ qx.Class.define("client.UserWindow",
 		    }
 		}, this);
 	    }
-	    else if (this.__nw_id == 0) 
+	    else if (this.__nw_id == 0 && nick == this.__name.toLowerCase()) 
 	    {
 		var privstatus = "";
 
-		if (nick.toLowerCase() == this.__name.toLowerCase() && online == 1)
+		if (online == 1)
 		{
 		    privstatus = "(online)";
 		}
-		else if (nick.toLowerCase() == this.__name.toLowerCase() && online == 2)
+		else if (online == 2)
 		{
 		    privstatus = "(offline)";
 		}
