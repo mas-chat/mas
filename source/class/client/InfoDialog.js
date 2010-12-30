@@ -207,6 +207,7 @@ qx.Class.define("client.InfoDialog",
 	    this.__message3.setLabel("Password, if needed:");
 	    this.__window.add(this.__message3);
 
+	    this.__input2.setValue("");
 	    this.__window.add(this.__input2);
 
 	    this.__window.add(this.__box2);
