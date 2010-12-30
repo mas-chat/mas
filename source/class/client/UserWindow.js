@@ -791,16 +791,16 @@ qx.Class.define("client.UserWindow",
 	    {
 		var privstatus = "";
 
-		if (nick == this.__name.toLowerCase() && online == 1)
+		if (nick.toLowerCase() == this.__name.toLowerCase() && online == 1)
 		{
-		    privstatus = "online";
+		    privstatus = "(online)";
 		}
-		else if (nick == this.__name.toLowerCase() && online == 2)
+		else if (nick.toLowerCase() == this.__name.toLowerCase() && online == 2)
 		{
-		    privstatus = "offline";
+		    privstatus = "(offline)";
 		}
 
-		this.window.setCaption("*** Private conversation with " + this.__name + " (" + privstatus + ")");
+		this.window.setCaption("*** Private conversation with " + this.__name + " " + privstatus);
 	    }
 	},
 
