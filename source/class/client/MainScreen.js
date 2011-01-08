@@ -446,7 +446,8 @@ qx.Class.define("client.MainScreen",
 		break;
 
 	    case "LOGS":
-		this.logDialog.sendresult(options);
+		var result = options.join(" ");
+		this.logDialog.sendresult(result);
 		break;
 	    }
 
