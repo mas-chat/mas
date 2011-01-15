@@ -124,7 +124,7 @@ qx.Class.define("client.MainScreen",
         __timer : 0,
         __topictimer : 0,
 	__topicstate : 0,
-	__expectedAck : 1,
+	__firstCommand : 1,
 	__tt : 0,
 	__blur : 0,
 	__input1 : 0,
@@ -156,32 +156,6 @@ qx.Class.define("client.MainScreen",
 
 	    switch(command)
 	    {
-	    case "ACK":
-		//TODO: RPC manager should process ack...
-		var ack = parseInt(options.shift());
-		if (this.__expectedAck != ack)
-		{
-		    if (this.desktop === 0)
-		    {
-			this.showads = 0;
-			this.show();
-		    }
-		    
-		    this.infoDialog.showInfoWin(
-			"Error", "Connection error. (" +
-			    this.__expectedAck + "," + ack +
-			    ")<p>Press reload in your web browser to recover...");
-
-	            debug.print("ack mismatch: " + this.__expectedAck + " vs. " + ack);
-		    
-		    qx.event.Timer.once(function(e){
-			//   window.location.reload(true);
-		    }, this, 2000);
-		    return;   
-		}
-		this.__expectedAck++;
-		break;
-		
 	    case "COOKIE":
 		this.rpc.cookie = options.shift();
 		break;
@@ -233,7 +207,7 @@ qx.Class.define("client.MainScreen",
 		}
 		
 		if (this.__blur == 1 && this.windows[window_id].titlealert == 1 &&
-		    this.__topictimer.getEnabled() == false && this.__expectedAck != 1 &&
+		    this.__topictimer.getEnabled() == false && this.__firstCommand != 1 &&
 		    type == 2)
 		{
 		    this.__topictimeractive = true;
@@ -451,6 +425,7 @@ qx.Class.define("client.MainScreen",
 		break;
 	    }
 
+	    this.__firstCommand = 0;
 	    return doitagain;
 	},
 	
@@ -1473,12 +1448,12 @@ qx.Class.define("client.MainScreen",
 
 	_aboutCommand : function()
 	{
-	    this.infoDialog.showInfoWin("About", "<br><br><br><center><img src=\"/i/mas_logo_small.png\"></center><p><b><br><br><center><h2 style=\"color: #000022;\">MeetAndSpeak Web Client</center></h2></b><p><center>Version: 1.0.__MOE_VERSION__.szyslak</center><br><p style=\"padding-bottom:1px;\">&copy; 2010 <a href=\"/about.html\">MeetAndSpeak Ltd</a>. All rights reserved.</p><br><br>", "OK");
+	    this.infoDialog.showInfoWin("About", "<br><br><br><center><img src=\"/i/mas_logo_small.png\"></center><p><b><br><br><center><h2 style=\"color: #000022;\">MeetAndSpeak Web Client</center></h2></b><p><center>Version: 1.0.__MOE_VERSION__.szyslak</center><br><p style=\"padding-bottom:1px;\">&copy; 2010-2011 <a href=\"/about.html\">MeetAndSpeak Ltd</a>. All rights reserved.</p><br><br>", "OK");
 	},
 
 	_keyCommand : function()
 	{
-	    this.infoDialog.showInfoWin("Shortcuts", "<b>Keyboard shortcuts:</b><p><table border=0><tr><td>[TAB]</td><td>= nick name completion</td></tr><tr><td>[Arrow Up]</td><td>= Switch to next visible window</td></tr><tr><td>[Arrow Down]</td><td>= Switch to previous visible windows</td></tr></table><p>To send a notification to others in the group, start your line<br>with an exclamation mark '!'. You can delete received<br>notifications whenever you like by double-clicking them.<p>Notifications are handy as they stay always visible. You can<br>be sure that everyone will see them.<p>See other available commands by typing<br>'/help' in any of the windows.", "OK");
+	    this.infoDialog.showInfoWin("Shortcuts", "<b>Keyboard shortcuts:</b><p><table border=0><tr><td>[TAB]</td><td>= nick name completion</td></tr><tr><td>[Arrow Up]</td><td>= Switch to next visible window</td></tr><tr><td>[Arrow Down]</td><td>= Switch to previous visible windows</td></tr></table><p>To send a notification to others in the group, start your line<br>with an exclamation mark '!' followed by a space character. You can delete received<br>notifications whenever you like by double-clicking them.<p>Notifications are handy as they stay always visible. You can<br>be sure that everyone will see them.<p>See other available commands by typing<br>'/help' in any of the windows.", "OK");
 	},
 	
 	player_start : function()

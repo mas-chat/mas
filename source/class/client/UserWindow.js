@@ -728,6 +728,8 @@ qx.Class.define("client.UserWindow",
 		return;
 	    }
 
+	    this.nameslist.removeAll();
+
 	    for (var i = 0; i < namesarray.length; i++) 
 	    {
 		this.nameslist.push(this.createParticipant(namesarray[i]));

@@ -104,15 +104,15 @@ qx.Class.define("client.RpcManager",
 	    this.__rrpc.callAsync(
 		qx.lang.Function.bind(this.__readresult, this),
 		"HELLO", this.id + " " + this.sec + " " + this.cookie + " " +
-		    "0" + " " + this.__helloseq + " " + tz);
+		    this.__helloseq + " " + tz);
 	},
 	
 	__readresult : function(data, exc) 
 	{
-	    this.__helloseq++;
-
 	    if (exc == null) 
 	    {
+		this.__helloseq++;
+
 		if (!this.__firstrpc)
 		{
 		    //First response is too big to be printed
