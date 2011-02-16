@@ -768,7 +768,7 @@ qx.Class.define("client.MainScreen",
 	            var columns = myfriends[i].split("|");
 		    
                     var friend = new qx.ui.basic.Label("<b>" + columns[1] +
-						       "</b> (" + columns[3] + ")");
+						       "</b>&nbsp;(" + columns[3] + ")");
                     var friend2 = new qx.ui.basic.Label();
                     var friend3 = new qx.ui.basic.Label();
 
@@ -868,8 +868,8 @@ qx.Class.define("client.MainScreen",
                 }
                 else if (idle < 60)
                 {			
-                    result = "<font color=\"blue\">Last activity: " + idle +
-			" mins ago</font>";
+                    result = "<font color=\"blue\">Last&nbsp;activity:&nbsp;" + idle +
+			"&nbsp;mins&nbsp;ago</font>";
                 }
 		else if (idle < 60 * 24)
                 {  
@@ -879,8 +879,8 @@ qx.Class.define("client.MainScreen",
 			idle = 1;
 		    }
 
-                    result = "<font color=\"blue\">Last activity: " + idle +
-			" hours ago</font>";
+                    result = "<font color=\"blue\">Last&nbsp;activity:&nbsp;" + idle +
+			"&nbsp;hours&nbsp;ago</font>";
                 }
 		else if (idle < 5000000)
                 {  
@@ -890,12 +890,12 @@ qx.Class.define("client.MainScreen",
 			idle = 1;
 		    }
 
-                    result = "<font color=\"blue\">Last activity: " + idle +
-			" days ago</font>";
+                    result = "<font color=\"blue\">Last&nbsp;activity:&nbsp;" + idle +
+			"&nbsp;days&nbsp;ago</font>";
                 }
 		else
 		{
-		    result = "<font color=\"blue\">Last activity:</font> Unknown";
+		    result = "<font color=\"blue\">Last&nbsp;activity:</font>&nbsp;Unknown";
 		}
 		
 		children[i].setValue(result);
@@ -1040,6 +1040,7 @@ qx.Class.define("client.MainScreen",
 		this.windows[winid].taskbarButton = item;
 		this.windows[winid].taskbarControl = this.__windowGroup;
 		item.setRich(true);
+		item.setMarginRight(4);
 		
 		this.__part2.add(item);
 		this.__windowGroup.add(item);
@@ -1126,7 +1127,7 @@ qx.Class.define("client.MainScreen",
 	    this.statusMenu = new qx.ui.menubar.Button("", null);
 	    this.statusMenu.setRich(true);
 
-	    var motdMenu = new qx.ui.menubar.Button("<a target=\"_blank\" href=\"http://getsatisfaction.com/meetandspeak/\"><font color=\"yellow\">Got an improvement idea? Click here!</font></a>", null);
+	    var motdMenu = new qx.ui.menubar.Button("<a target=\"_blank\" href=\"http://getsatisfaction.com/meetandspeak/\"><font color=\"yellow\">Got&nbsp;an&nbsp;improvement&nbsp;idea?&nbsp;Click&nbsp;here!</font></a>", null);
 	    motdMenu.setRich(true);
 
             qx.event.Timer.once(function(e){

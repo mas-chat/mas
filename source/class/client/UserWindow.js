@@ -109,20 +109,23 @@ qx.Class.define("client.UserWindow",
 
 	this.__box.add(this.__textcomposite, {row: 0, column: 0, flex: 1});
 	
-	this.__input1 = new qx.ui.form.TextField();
-	this.__input1.set({ maxLength: 400 });
-	this.__input1.setMarginTop(2);
-	this.__input1.focus();
+	this.__inputline = new qx.ui.form.TextField();
+	this.__inputline.set({ maxLength: 400 });
+	this.__inputline.setMarginTop(2);
+	this.__inputline.focus();
 
 	var searchstart = 0;
 	var searchstring = "";
 	var extendedsearch = false;
 
-	this.__input1.addListener("keypress", function(e) {
-	    if (e.getKeyIdentifier() == "Enter")
+	this.__inputline.addListener("keydown", function(e) {
+	    var key = e.getKeyIdentifier();
+
+	    if (key == "Enter")
 	    {
-		this.setNormal();
-		var input = this.__input1.getValue();
+		debug.print("enter pressed");
+
+		var input = this.__inputline.getValue();
 		if (input !== "" && input !== null)
 		{
 		    this.rpc.call("SEND", this.winid + " " + input);
@@ -130,7 +133,7 @@ qx.Class.define("client.UserWindow",
 		    input = input.replace(/</g, "&lt;");
 		    input = input.replace(/>/g, "&gt;");
 
-		    this.__input1.setValue("");
+		    this.__inputline.setValue("");
 
 		    if (input.substr(0,1) == "/" && input.substr(0,4) != "/me ")
 		    {
@@ -165,26 +168,27 @@ qx.Class.define("client.UserWindow",
 			this.addline(hour + ":" + min + mynick + this.linkify(input) + "</font><br><!-- x -->");
 		    }
 		}
+		this.setNormal();
 	    }
-	    else if (e.getKeyIdentifier() == "PageUp")
+	    else if (key == "PageUp")
 	    {
 		this.__scroll.scrollByY((this.__scroll.getHeight() - 30) * - 1);
 	    }
-	    else if (e.getKeyIdentifier() == "PageDown")
+	    else if (key == "PageDown")
 	    {
 		this.__scroll.scrollByY(this.__scroll.getHeight() - 30);
 	    }
-	    else if (e.getKeyIdentifier() == "Down")
+	    else if (key == "Down")
 	    {
 		this.mainscreen.activateNextWin("down");
 	    }
-	    else if (e.getKeyIdentifier() == "Up")
+	    else if (key == "Up")
 	    {
 		this.mainscreen.activateNextWin("up");
 	    }
-	    else if (e.getKeyIdentifier() == "Tab" && this.type == 0)
+	    else if (key == "Tab" && this.type == 0)
 	    {
-		var input2 = this.__input1.getValue();
+		var input2 = this.__inputline.getValue();
 
 		if (input2 == null)
 		{
@@ -207,8 +211,8 @@ qx.Class.define("client.UserWindow",
 			
 			if (name.substr(0, searchstring.length).toLowerCase() == searchstring.toLowerCase())
 			{
-			    this.__input1.setValue(name + ": ");
-			    this.__input1.setTextSelection(100,100);
+			    this.__inputline.setValue(name + ": ");
+			    this.__inputline.setTextSelection(100,100);
 			    searchstart = i + 1;
 			    found = true;
 			    break;
@@ -225,7 +229,7 @@ qx.Class.define("client.UserWindow",
 		e.preventDefault();
 	    }
 
-	    if (e.getKeyIdentifier() != "Tab")
+	    if (key != "Tab")
 	    {
 		searchstart = 0;
 		searchstring = "";
@@ -235,7 +239,7 @@ qx.Class.define("client.UserWindow",
 	}, this);
 
 	var icomposite = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
-	icomposite.add(this.__input1, { flex : 1 });
+	icomposite.add(this.__inputline, { flex : 1 });
 
 	this.__box.add(icomposite, {row: 1, column: 0});
 
@@ -364,7 +368,8 @@ qx.Class.define("client.UserWindow",
 	type : 0,
 	apikey : 0,
 
-	__input1 : 0,
+	__notes : 0,
+	__inputline : 0,
 	__urllabel : 0,
 	__list : 0,
 	__atom : 0,
@@ -477,9 +482,9 @@ qx.Class.define("client.UserWindow",
 		name = name.substr(0, 1).toUpperCase() + name.substr(1);
 	    }
 	    
-	    this.taskbarButton.setLabel("<font color=\"#" + this.__taskbarButtonColor + "\">" + name +
-					(this.hidden == true ?
-					 " <font color=\"#ccaacc\">M</font>" : "<span style=\"visibility:hidden;\"> M</span>") + "</font>");	    
+	    this.taskbarButton.setLabel("<span style=\"color:#" + this.__taskbarButtonColor + "\">" + name +
+					"</span>&nbsp;<span style=\"color:#cc99cc\">" 
+					+ (this.hidden == true ? "M" : "&nbsp;") + "</span>");
 	},
 
 	handleMove : function(e)
@@ -522,12 +527,12 @@ qx.Class.define("client.UserWindow",
 	    if (large == 1)
 	    {
 		this.__atom.setFont("defaultlarge");
-		this.__input1.setFont("defaultlarge");
+		this.__inputline.setFont("defaultlarge");
 	    }
 	    else
 	    {
 		this.__atom.setFont("default");
-		this.__input1.setFont("default");
+		this.__inputline.setFont("default");
 	    }
 
 	    this.__scroll.scrollToY(200000);
@@ -539,7 +544,7 @@ qx.Class.define("client.UserWindow",
 
 	    if (this.__viewmode == 0)
 	    {
-		this.__input1.focus();
+		this.__inputline.focus();
 	    }
 	},
 
@@ -645,12 +650,17 @@ qx.Class.define("client.UserWindow",
 
 	addntf : function (noteid, text)
 	{
+	    if (this.__notes > 10)
+		return;
+
 	    var notification = new qx.ui.basic.Label(text);
 	    notification.set({rich: true, backgroundColor: "#D6B6D6", allowGrowX:true, marginRight:2});
 	    notification.setToolTip(this.__ntftooltip);
 	    notification.noteid = noteid;
+	    this.__notes++;
 
 	    notification.addListener("dblclick", function(e) {
+		this.__notes--;
 		this.__textcomposite.remove(notification);
 		this.rpc.call("DELNTF", this.winid + " " + notification.noteid);
 	    }, this);
