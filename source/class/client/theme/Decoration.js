@@ -88,7 +88,54 @@ qx.Theme.define("client.theme.Decoration",
         backgroundImage  : "client/toolbar-part.gif",
         backgroundRepeat : "repeat-y"
       }
-    }
+    },
 
+    "toolbar-css" :
+    {
+      decorator : qx.ui.decoration.Background,
+
+      style :
+      {
+        backgroundImage : "client/toolbar-gradient2.png",
+        backgroundRepeat : "scale"
+      }
+    },
+
+    "toolbar-button-hovered-css" :
+    {
+      decorator : qx.ui.decoration.Beveled,
+
+      style :
+      {
+        outerColor : "#b6b6b6",
+        innerColor : "#f8f8f8",
+        backgroundImage : "client/button-c.png",
+        backgroundRepeat : "scale"
+      }
+    },
+
+    "toolbar-button-checked-css" :
+    {
+      decorator : qx.ui.decoration.Beveled,
+
+      style :
+      {
+        outerColor : "#b6b6b6",
+        innerColor : "#f8f8f8",
+        backgroundImage : "client/button-checked-c.png",
+        backgroundRepeat : "scale"
+      }
+    },
+
+    "toolbar-part-css" :
+    {
+      decorator : qx.ui.decoration.Background,
+
+      style :
+      {
+        backgroundImage  : "client/toolbar-part.gif",
+        backgroundRepeat : "repeat-y"
+      }
+    }
   }
 });
