@@ -67,32 +67,28 @@ qx.Class.define("client.MainScreen",
 	    this.__blur = 1;
 	}, this);
 
-	this.FlashHelper =
-	    {
-		movieIsLoaded : function (theMovie)
-		{
-		    if (typeof(theMovie) != "undefined" && typeof(theMovie.PercentLoaded) == "function")
-		    {
-			return theMovie.PercentLoaded() == 100;
-		    }
-		    else 
-		    {
-			return false;
-		    }
-		},
+	var soundFormat = "none"; 
+	var detectAudio = new qx.bom.media.Audio();
 
-		getMovie : function (movieName)
-		{
-		    if (navigator.appName.indexOf ("Microsoft") !=-1)
-		    {
-			return window[movieName];
-		    }
-		    else
-		    {
-			return document[movieName];
-		    }
-		}
-	    };
+	if (detectAudio.canPlayType("audio/mpeg") != "")
+	{
+	    soundFormat = "mp3";	
+	}	
+	else if (detectAudio.canPlayType("audio/ogg") != "")
+	{
+	    soundFormat = "ogg";
+	}
+	else if (detectAudio.canPlayType("audio/wave") != "")
+	{
+	    soundFormat = "wav";
+	}
+
+        if (soundFormat != "none")
+	{
+	    this.__audio = new qx.bom.media.Audio("/moescript/betty." + soundFormat);
+	}
+	
+	debug.print("Sound support: " + soundFormat);
     },
 
     members :
@@ -118,6 +114,7 @@ qx.Class.define("client.MainScreen",
 	statusMenu : 0,
 
 	__part2 : 0,
+	__audio : 0,
 	__part3 : 0,
 	__windowGroup : 0,
 	__myapp : 0,
@@ -203,7 +200,8 @@ qx.Class.define("client.MainScreen",
 		if (this.windows[window_id].sound == 1 &&
 		    type == 2 && this.initdone == 1)
 		{
-		    this.player_start();
+		    //this.__audio.setCurrentTime(0);
+		    this.__audio.play();
 		}
 		
 		if (this.__blur == 1 && this.windows[window_id].titlealert == 1 &&
@@ -1455,51 +1453,6 @@ qx.Class.define("client.MainScreen",
 	_keyCommand : function()
 	{
 	    this.infoDialog.showInfoWin("Shortcuts", "<b>Keyboard shortcuts:</b><p><table border=0><tr><td>[TAB]</td><td>= nick name completion</td></tr><tr><td>[Arrow Up]</td><td>= Switch to next visible window</td></tr><tr><td>[Arrow Down]</td><td>= Switch to previous visible windows</td></tr></table><p>To send a notification to others in the group, start your line<br>with an exclamation mark '!' followed by a space character. You can delete received<br>notifications whenever you like by double-clicking them.<p>Notifications are handy as they stay always visible. You can<br>be sure that everyone will see them.<p>See other available commands by typing<br>'/help' in any of the windows.", "OK");
-	},
-	
-	player_start : function()
-	{
-	    var obj = this.FlashHelper.getMovie('niftyPlayer1');
-	    if (!this.FlashHelper.movieIsLoaded(obj)) 
-	    {
-		return;
-	    }
-	    obj.TCallLabel('/','play');
-	},
-
-	player_stop : function()
-	{
-	    var obj = this.FlashHelper.getMovie(name);
-	    if (!this.FlashHelper.movieIsLoaded(obj))
-	    {
-		return;
-	    }
-	    obj.TCallLabel('/','stop');
-	},
-
-	player_pause : function()
-	{
-	    var obj = this.FlashHelper.getMovie(name);
-	    if (!this.FlashHelper.movieIsLoaded(obj))
-	    {
-		return;
-	    }
-	    obj.TCallLabel('/','reset');
-	},
-	
-	player_load : function(url)
-	{
-	    var obj = this.FlashHelper.getMovie(name);
-	    if (!this.FlashHelper.movieIsLoaded(obj))
-	    {
-		return;
-	    }
-	    obj.SetVariable('currentSong', url);
-	    obj.TCallLabel('/','load');
-	},
-  
-	player_get_state : function ()
-	{
 	}
     }
 });

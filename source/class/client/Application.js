@@ -49,9 +49,6 @@ qx.Class.define("client.Application",
 		anon_user = true;
 	    }
 
-	    var label = new qx.ui.embed.Html("<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0\" width=\"0\" height=\"0\" id=\"niftyPlayer1\" align=\"\"><param name=movie value=\"/moescript/niftyplayer.swf?file=/moescript/betty.mp3\"><param name=quality value=high><embed src=\"/moescript/niftyplayer.swf?file=/moescript/betty.mp3\" quality=high bgcolor=#FFFFFF width=\"0\" height=\"0\" name=\"niftyPlayer1\" align=\"\"></embed></object>");
-	    this.getRoot().add(label);
-
 	    var MainScreenObj = new client.MainScreen(rpcmanager, this.getRoot(), logDialog,
 						      settings, infoDialog, anon_user);
 
