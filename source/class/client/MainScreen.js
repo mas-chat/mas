@@ -200,7 +200,7 @@ qx.Class.define("client.MainScreen",
 		if (this.windows[window_id].sound == 1 &&
 		    type == 2 && this.initdone == 1)
 		{
-		    //this.__audio.setCurrentTime(0);
+		    this.__audio.setCurrentTime(0);
 		    this.__audio.play();
 		}
 		
