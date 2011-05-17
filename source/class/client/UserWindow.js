@@ -129,10 +129,6 @@ qx.Class.define("client.UserWindow",
 		if (input !== "" && input !== null)
 		{
 		    this.rpc.call("SEND", this.winid + " " + input);
-
-		    input = input.replace(/</g, "&lt;");
-		    input = input.replace(/>/g, "&gt;");
-
 		    this.__inputline.setValue("");
 
 		    if (input.substr(0,1) == "/" && input.substr(0,4) != "/me ")
