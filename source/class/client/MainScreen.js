@@ -67,27 +67,34 @@ qx.Class.define("client.MainScreen",
 	    this.__blur = 1;
 	}, this);
 
-	var soundFormat = "none"; 
-	var detectAudio = new qx.bom.media.Audio();
+	var soundFormat = "none";
 
-	if (detectAudio.canPlayType("audio/mpeg") != "")
+	//If statement is a hack to prevent running qooxdoo audio code on IE
+	//feature detection is missing from Qooxdoo framework
+
+	if (!!document.createElement('audio').canPlayType)
 	{
-	    soundFormat = "mp3";	
-	}	
-	else if (detectAudio.canPlayType("audio/ogg") != "")
-	{
-	    soundFormat = "ogg";
-	}
-	else if (detectAudio.canPlayType("audio/wave") != "")
-	{
-	    soundFormat = "wav";
+	    var detectAudio = new qx.bom.media.Audio();
+
+	    if (detectAudio.canPlayType("audio/mpeg") != "")
+	    {
+		soundFormat = "mp3";	
+	    }	
+	    else if (detectAudio.canPlayType("audio/ogg") != "")
+	    {
+		soundFormat = "ogg";
+	    }
+	    else if (detectAudio.canPlayType("audio/wave") != "")
+	    {
+		soundFormat = "wav";
+	    }
+
+            if (soundFormat != "none")
+	    {
+		this.__audio = new qx.bom.media.Audio("/moescript/betty." + soundFormat);
+	    }
 	}
 
-        if (soundFormat != "none")
-	{
-	    this.__audio = new qx.bom.media.Audio("/moescript/betty." + soundFormat);
-	}
-	
 	debug.print("Sound support: " + soundFormat);
     },
 
@@ -200,8 +207,11 @@ qx.Class.define("client.MainScreen",
 		if (this.windows[window_id].sound == 1 &&
 		    type == 2 && this.initdone == 1)
 		{
-		    this.__audio.setCurrentTime(0);
-		    this.__audio.play();
+		    if (this.__audio)
+		    {
+			this.__audio.setCurrentTime(0);
+			this.__audio.play();
+		    }
 		}
 		
 		if (this.__blur == 1 && this.windows[window_id].titlealert == 1 &&
