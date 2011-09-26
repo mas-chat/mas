@@ -30,7 +30,7 @@
   "let" :
   {
     "APPLICATION"  : "client",
-    "QOOXDOO_PATH" : "/opt/qooxdoo-1.4-sdk",
+    "QOOXDOO_PATH" : "/opt/qooxdoo-1.5-sdk",
     "QXTHEME"      : "client.theme.Theme",
     "API_EXCLUDE"  : ["qx.legacy.*","qx.test.*"],
     "LOCALES"      : [ "en" ],
