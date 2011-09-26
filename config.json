@@ -51,9 +51,6 @@
     {
       "library" :
       [
-        {
-          "manifest" : "../aie/Manifest.json"
-        }
       ]
     }
   }

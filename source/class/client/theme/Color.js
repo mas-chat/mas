@@ -10,9 +10,10 @@
 
 qx.Theme.define("client.theme.Color",
 {
-    extend : aie.theme.mtsk.Color,
+    extend : qx.theme.simple.Color,
 
     colors :
     {
+	"link" : "#bbbbbb"
     }
 });

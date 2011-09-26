@@ -23,12 +23,11 @@ qx.Class.define("client.UserWindow",
 	var layout = new qx.ui.layout.Grid();
 	layout.setRowFlex(0, 1); // make row 0 flexible
 	layout.setColumnFlex(0, 1); // make column 0 flexible
-	layout.setColumnWidth(1, 100); // set with of column 1 to 200 pixel
+	layout.setColumnWidth(1, 105); // set with of column 1 to 200 pixel
 	layout.setColumnAlign(1, "center", "middle");
 
 	var wm1 = new qx.ui.window.Window();
 	wm1.userWindowRef = this;
-	wm1.setAppearance("aie-mtsk-window");
 
 	this.__nw = nw;
 	this.__nw_id = nw_id;
@@ -446,21 +445,21 @@ qx.Class.define("client.UserWindow",
 
 	setRed : function()
 	{
-	    this.__taskbarButtonColor = "ffaaaa";
+	    this.__taskbarButtonColor = "ff3333";
 	    this.updateButton();
 	    this.isRed = true;
 	},
 
 	setGreen : function()
 	{
-	    this.__taskbarButtonColor = "aaffaa";
+	    this.__taskbarButtonColor = "33ff33";
 	    this.updateButton();
 	    this.isRed = false;
 	},
 
 	setNormal : function()
 	{ 
-	    this.__taskbarButtonColor = "cccccc";
+	    this.__taskbarButtonColor = "000000";
 	    this.updateButton();
 	    this.isRed = false;
 
@@ -482,7 +481,7 @@ qx.Class.define("client.UserWindow",
 	    }
 	    
 	    this.taskbarButton.setLabel("<span style=\"color:#" + this.__taskbarButtonColor + "\">" + name +
-					"</span>&nbsp;<span style=\"color:#cc99cc\">" 
+					"</span>&nbsp;<span style=\"color:#339933\">" 
 					+ (this.hidden == true ? "M" : "&nbsp;") + "</span>");
 	},
 

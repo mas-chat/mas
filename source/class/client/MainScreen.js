@@ -620,7 +620,7 @@ qx.Class.define("client.MainScreen",
 	    this.rootContainer = new qx.ui.container.Composite(
 		new qx.ui.layout.VBox(0));
 
-	    this.rootContainer.set({ backgroundColor: "#717172", padding:10});
+	    this.rootContainer.set({ backgroundColor: "#717172", padding:0});
 	    this.rootContainer.add(this.getMenuBar());
 	    
 	    /* middle */
@@ -729,8 +729,9 @@ qx.Class.define("client.MainScreen",
 
 	    if (this.anon_user == false)
 	    {
-		var contactsButton = new qx.ui.toolbar.CheckBox("<font color=\"#cccccc\">Show Contacts</font>");
+		var contactsButton = new qx.ui.toolbar.CheckBox();
 		contactsButton.setRich(true);
+		contactsButton.setLabel("<span style=\"color:#000000\">Show Contacts</span>");
 		this.contactsButton = contactsButton;
 
 		this.__part3.add(contactsButton);	
@@ -916,7 +917,7 @@ qx.Class.define("client.MainScreen",
 		onlineText = " (Online: " + online + ")";
 	    }
 
-	    this.contactsButton.setLabel("<font color=\"#cccccc\">Show contacts" + onlineText + "</font>"); 
+	    this.contactsButton.setLabel("<span style=\"color:#000000\">Show Contacts" + onlineText + "</span>"); 
         },
 
 	checkLimits : function(e)

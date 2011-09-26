@@ -9,7 +9,6 @@ qx.Class.define("client.InfoDialog",
 
 	this.rpc = srpc;
 	this.__window = new qx.ui.window.Window("X");
-	this.__window.setAppearance("aie-mtsk-window");
 	this.__window.setLayout(new qx.ui.layout.VBox(10));
 	this.__window.set({contentPadding: [13,13,13,13]});
 

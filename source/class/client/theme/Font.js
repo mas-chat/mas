@@ -10,7 +10,7 @@
 
 qx.Theme.define("client.theme.Font",
 {
-    extend : aie.theme.mtsk.Font,
+    extend : qx.theme.simple.Font,
 
     fonts :
     {
