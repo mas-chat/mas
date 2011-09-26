@@ -621,7 +621,6 @@ qx.Class.define("client.MainScreen",
 		new qx.ui.layout.VBox(0));
 
 	    this.rootContainer.set({ backgroundColor: "#717172", padding:0});
-	    this.rootContainer.add(this.getMenuBar());
 	    
 	    /* middle */
 	    var windowManager = new qx.ui.window.Manager();
@@ -727,13 +726,15 @@ qx.Class.define("client.MainScreen",
 
 	    contactsPopup.add(friendScroll, {flex : 1});
 
+	    var menuButton = new qx.ui.toolbar.MenuButton("Menu", null,
+							  this.getMainMenu());
+	    this.__part3.add(menuButton);
+
 	    if (this.anon_user == false)
 	    {
-		var contactsButton = new qx.ui.toolbar.CheckBox();
+		var contactsButton = new qx.ui.toolbar.CheckBox("<span style=\"color:#000000\">Show Contacts</span>");
 		contactsButton.setRich(true);
-		contactsButton.setLabel("<span style=\"color:#000000\">Show Contacts</span>");
 		this.contactsButton = contactsButton;
-
 		this.__part3.add(contactsButton);	
     
 		contactsButton.setValue(false);
@@ -1049,7 +1050,7 @@ qx.Class.define("client.MainScreen",
 		this.windows[winid].taskbarButton = item;
 		this.windows[winid].taskbarControl = this.__windowGroup;
 		item.setRich(true);
-		item.setMarginRight(4);
+		item.setMarginRight(0);
 		
 		this.__part2.add(item);
 		this.__windowGroup.add(item);
@@ -1111,65 +1112,57 @@ qx.Class.define("client.MainScreen",
 	    }
 	},
 
-	getMenuBar : function()
+	getMainMenu : function()
 	{
-	    var frame = new qx.ui.container.Composite(new qx.ui.layout.Grow);
+	    var menu = new qx.ui.menu.Menu;
 
-	    var menubar = new qx.ui.menubar.MenuBar;
-	    menubar.setAllowGrowX(true);
-	    menubar.set({decorator: "menu2", textColor : "#cccccc"});
-
-	    frame.add(menubar);
-
-	    var forumMenu = new qx.ui.menubar.Button("Groups", null,
+	    var forumMenu = new qx.ui.menu.Button("Groups", null, null,
 						     this.getForumMenu());
-	    var viewMenu = new qx.ui.menubar.Button("View", null,
+	    var viewMenu = new qx.ui.menu.Button("View", null, null,
 						    this.getViewMenu());
-	    var settingsMenu = new qx.ui.menubar.Button("Settings", null,
+	    var settingsMenu = new qx.ui.menu.Button("Settings", null, null,
 						    this.getSettingsMenu());
-	    var advancedMenu = new qx.ui.menubar.Button("Advanced", null,
+	    var advancedMenu = new qx.ui.menu.Button("Advanced", null, null,
 							this.getAdvancedMenu());
-	    var helpMenu = new qx.ui.menubar.Button("Help", null, this.getHelpMenu());
-	    var logoutMenu = new qx.ui.menubar.Button("Log Out", null,
+	    var helpMenu = new qx.ui.menu.Button("Help", null, null, 
+						 this.getHelpMenu());
+	    var logoutMenu = new qx.ui.menu.Button("Log Out", null, null,
 						      this.getLogoutMenu());
 
-	    this.statusMenu = new qx.ui.menubar.Button("", null);
-	    this.statusMenu.setRich(true);
+	    //this.statusMenu = new qx.ui.menubar.Button("", null);
+	    //this.statusMenu.setRich(true);
 
-	    var motdMenu = new qx.ui.menubar.Button("<a target=\"_blank\" href=\"http://getsatisfaction.com/meetandspeak/\"><font color=\"yellow\">Got&nbsp;an&nbsp;improvement&nbsp;idea?&nbsp;Click&nbsp;here!</font></a>", null);
-	    motdMenu.setRich(true);
+	    //var motdMenu = new qx.ui.menubar.Button("<a target=\"_blank\" href=\"http://getsatisfaction.com/meetandspeak/\"><font color=\"yellow\">Got&nbsp;an&nbsp;improvement&nbsp;idea?&nbsp;Click&nbsp;here!</font></a>", null);
+	    //motdMenu.setRich(true);
 
-            qx.event.Timer.once(function(e){
-		motdMenu.setLabel("");
-	    }, this, 1000 * 30); 
-
-	    if (this.anon_user == false)
-	    {
-		menubar.add(forumMenu);
-	    }
-
-	    menubar.add(viewMenu);
-	    menubar.add(settingsMenu);
+            //qx.event.Timer.once(function(e){
+		//motdMenu.setLabel("");
+	    //}, this, 1000 * 30); 
 
 	    if (this.anon_user == false)
 	    {
-		menubar.add(advancedMenu);
+		menu.add(forumMenu);
 	    }
 
-	    menubar.add(helpMenu);
-	    menubar.add(logoutMenu);
+	    menu.add(viewMenu);
+	    menu.add(settingsMenu);
 
-	    menubar.addSpacer();
+	    if (this.anon_user == false)
+	    {
+		menu.add(advancedMenu);
+	    }
+
+	    menu.add(helpMenu);
+	    menu.add(logoutMenu);
+	    //menubar.add(motdMenu);
+	    //menubar.add(this.statusMenu);
 	
-	    menubar.add(motdMenu);
-	    menubar.add(this.statusMenu);
-	
-	    return frame;
+	    return menu;
 	},
 
 	setStatusText : function(text)
 	{
-	    this.statusMenu.setLabel(text);
+	    //this.statusMenu.setLabel(text);
 	},
 
 	getLogoutMenu : function()
