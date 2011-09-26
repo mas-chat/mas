@@ -1055,7 +1055,8 @@ qx.Class.define("client.MainScreen",
 		this.windows[winid].taskbarButton = item;
 		this.windows[winid].taskbarControl = this.__windowGroup;
 		item.setRich(true);
-		item.setMarginRight(0);
+		item.setMarginLeft(0);
+		item.setMarginRight(2);
 		
 		this.__part2.add(item);
 		this.__windowGroup.add(item);

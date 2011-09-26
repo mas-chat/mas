@@ -44,7 +44,7 @@ qx.Theme.define("client.theme.Appearance",
 			    style : function(states)
 			    {
 				return {
-				    backgroundColor : "#2A7AC1",
+				    backgroundColor : "#4A9AE1",
 				    padding : 0
 				};
 			    }
