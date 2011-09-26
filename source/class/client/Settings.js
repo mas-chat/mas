@@ -17,7 +17,7 @@ qx.Class.define("client.Settings",
 	loggingEnabled : { init : 1, apply : "_applyLoggingEnabled" },
 	sslEnabled : { init : 0, apply : "_applySslEnabled" },
 	largeFonts : { init : 1, apply : "_applyLargeFonts" },
-	autoArrange : { init : 0, apply : "_applyAutoArrange" },
+	autoArrange : { init : 1, apply : "_applyAutoArrange" },
 	showCloseWarn : { init : 1, apply : "_applyShowCloseWarn" }
     },
 

@@ -445,14 +445,14 @@ qx.Class.define("client.UserWindow",
 
 	setRed : function()
 	{
-	    this.__taskbarButtonColor = "ff3333";
+	    this.__taskbarButtonColor = "ff1111";
 	    this.updateButton();
 	    this.isRed = true;
 	},
 
 	setGreen : function()
 	{
-	    this.__taskbarButtonColor = "33ff33";
+	    this.__taskbarButtonColor = "007700";
 	    this.updateButton();
 	    this.isRed = false;
 	},
