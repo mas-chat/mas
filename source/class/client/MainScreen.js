@@ -576,6 +576,11 @@ qx.Class.define("client.MainScreen",
 	    }
 
 	    this.windows[window_id].setFonts(this.settings.getLargeFonts());
+
+	    if (this.settings.getAutoArrange() == 1 && create == true)
+	    {
+		this._arrangeCommand();
+	    }
 	},
 
 	adjustTime : function(text)
@@ -918,7 +923,7 @@ qx.Class.define("client.MainScreen",
 		onlineText = " (Online: " + online + ")";
 	    }
 
-	    this.contactsButton.setLabel("<span style=\"color:#000000\">Show Contacts" + onlineText + "</span>"); 
+	    this.contactsButton.setLabel("<span style=\"color:#000000\">Contacts..." + onlineText + "</span>"); 
         },
 
 	checkLimits : function(e)
@@ -1320,8 +1325,8 @@ qx.Class.define("client.MainScreen",
 		    return;
 		}
 		
-		var width = Math.floor((dim.width - (6 * (x[amount] + 1))) / x[amount]);
-		var height = Math.floor((dim.height - (6 * (y[amount] + 1))) / y[amount]);
+		var width = Math.floor((dim.width - (3 * (x[amount] + 1))) / x[amount]);
+		var height = Math.floor((dim.height - (3 * (y[amount] + 1))) / y[amount]);
 		
 		var cx = 0;
 		var cy = 0;
@@ -1334,13 +1339,13 @@ qx.Class.define("client.MainScreen",
 		    {
 			current++;
 			
-			this.windows[i].moveTo(6 * (cx + 1) + cx * width, 6 * (cy + 1) + cy * height);	
+			this.windows[i].moveTo(3 * (cx + 1) + cx * width, 3 * (cy + 1) + cy * height);	
 			this.windows[i].setHeight(height);
 			
 			if (current == amount)
 			{
 			    var missing = x[amount] * y[amount] - amount;
-			    width = width + missing * width + 6 * missing;
+			    width = width + missing * width + 3 * missing;
 			}
 			
 			this.windows[i].setWidth(width);
