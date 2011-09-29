@@ -737,7 +737,7 @@ qx.Class.define("client.MainScreen",
 
 	    if (this.anon_user == false)
 	    {
-		var contactsButton = new qx.ui.toolbar.CheckBox("<span style=\"color:#000000\">Show Contacts</span>");
+		var contactsButton = new qx.ui.toolbar.CheckBox("<span style=\"color:#000000\">Contacts...</span>");
 		contactsButton.setRich(true);
 		this.contactsButton = contactsButton;
 		this.__part3.add(contactsButton);	
@@ -745,12 +745,12 @@ qx.Class.define("client.MainScreen",
 		contactsButton.setValue(false);
 
 		contactsButton.addListener("changeValue", function (e) {
-		    if (e.getData() == true)
+		    if (e.getData() == true && this.contactsButton.getValue() == true)
 		    {
 			contactsPopup.placeToWidget(contactsButton);
 			contactsPopup.show();
 		    }
-		}, middleSection);
+		}, this);
 
   	        contactsPopup.addListener("disappear", function (e) {
                     contactsButton.setValue(false);   
@@ -920,10 +920,11 @@ qx.Class.define("client.MainScreen",
 
 	    if (online > 0)
 	    {
-		onlineText = " (Online: " + online + ")";
+		onlineText = "<span style=\"color:#000000\">(</span><span style=\"color:#254117\">" +
+		    online + "</span><span style=\"color:#000000\">)</span>";
 	    }
 
-	    this.contactsButton.setLabel("<span style=\"color:#000000\">Contacts..." + onlineText + "</span>"); 
+	    this.contactsButton.setLabel("<span style=\"color:#000000\">Contacts...</span> " + onlineText); 
         },
 
 	checkLimits : function(e)
@@ -1056,7 +1057,7 @@ qx.Class.define("client.MainScreen",
 		this.windows[winid].taskbarControl = this.__windowGroup;
 		item.setRich(true);
 		item.setMarginLeft(0);
-		item.setMarginRight(2);
+		item.setMarginRight(-3);
 		
 		this.__part2.add(item);
 		this.__windowGroup.add(item);
@@ -1327,7 +1328,7 @@ qx.Class.define("client.MainScreen",
 		}
 		
 		var width = Math.floor((dim.width - (3 * (x[amount] + 1))) / x[amount]);
-		var height = Math.floor((dim.height - (3 * (y[amount] + 1))) / y[amount]);
+		var height = Math.floor(((dim.height - 10) - (3 * (y[amount] + 1))) / y[amount]);
 		
 		var cx = 0;
 		var cy = 0;
@@ -1340,7 +1341,7 @@ qx.Class.define("client.MainScreen",
 		    {
 			current++;
 			
-			this.windows[i].moveTo(3 * (cx + 1) + cx * width, 3 * (cy + 1) + cy * height);	
+			this.windows[i].moveTo(3 * (cx + 1) + cx * width, 3 * (cy + 1) + cy * height + 5);	
 			this.windows[i].setHeight(height);
 			
 			if (current == amount)

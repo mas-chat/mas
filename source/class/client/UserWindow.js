@@ -53,7 +53,7 @@ qx.Class.define("client.UserWindow",
 
 	if (type == 0)
 	{
-	    this.__box.set({backgroundColor: "#F2F5FE"});
+	    this.__box.set({backgroundColor: "#F2F3FC"});
 	}
 	else
 	{

@@ -20,21 +20,10 @@ qx.Theme.define("client.theme.Appearance",
 			    style : function(states)
 			    {
 				return {
-				    backgroundColor : states.active ? "#FFCCC0" : "#E0ECFF",
-				    padding : 4,
+				    backgroundColor : states.active ? "#E0ECFF" : "#eeeeee",
+				    padding : 3,
 				    font: "bold",
 				    decorator : "window-caption"
-				};
-			    }
-			},
-
-			"menubar" :
-			{
-			    style : function(states)
-			    {
-				return {
-				    backgroundColor : "#5C5C4D",
-				    padding: [4, 2]
 				};
 			    }
 			},
@@ -44,7 +33,7 @@ qx.Theme.define("client.theme.Appearance",
 			    style : function(states)
 			    {
 				return {
-				    backgroundColor : "#4A9AE1",
+				    backgroundColor : "#2C7CC3",
 				    padding : 0
 				};
 			    }
