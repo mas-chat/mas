@@ -424,6 +424,15 @@ qx.Class.define("client.UserWindow",
 	handleClose : function(e)
 	{
 	    this.rpc.call("CLOSE", this.winid);
+	    debug.print("works");
+
+	    qx.event.Timer.once(function(e){
+		if (this.mainscreen.settings.getAutoArrange() == 1)
+		{
+		    this.mainscreen.arrangeCommand();
+		}
+	    }, this, 1000);
+	    debug.print("works2");
 	},
 
 	//TODO: handle beforeclose -> remove from mainscreen array

@@ -192,7 +192,17 @@ qx.Class.define("client.MainScreen",
 		this.showMsgWindows();
 		if (this.settings.getAutoArrange() == 1)
 		{
-		    this._arrangeCommand();
+		    this.arrangeCommand();
+		}
+
+		var infocookie = qx.bom.Cookie.get("msg1");
+		if (infocookie == null)
+		{
+		    qx.bom.Cookie.set("msg1", "yes", 1000, "/");
+		    this.infoDialog.showInfoWin("Announcement",
+						"<b>Hello!</b><p>MeetAndSpeak now disconnects users from the IRC networks after three weeks of inactivity." +
+						"<br>Login more often than that to avoid problems. This change saves especially scarse IRCNET connections." +
+						"<p>Send all your comments to info@meetandspeak.com. Feedback is highly appreciated, it motivates<br> me to add new features.<p>-Ilkka, the admin", "Okay");
 		}
 		break;
 		
@@ -579,7 +589,7 @@ qx.Class.define("client.MainScreen",
 
 	    if (this.settings.getAutoArrange() == 1 && create == true)
 	    {
-		this._arrangeCommand();
+		this.arrangeCommand();
 	    }
 	},
 
@@ -1223,7 +1233,7 @@ qx.Class.define("client.MainScreen",
 	    var arrangeButton = new qx.ui.menu.Button("Arrange windows");
 
 	    logsButton.addListener("execute", this._logsCommand, this);
-	    arrangeButton.addListener("execute", this._arrangeCommand, this);
+	    arrangeButton.addListener("execute", this.arrangeCommand, this);
 
 	    if (this.anon_user == false)
 	    {
@@ -1299,7 +1309,7 @@ qx.Class.define("client.MainScreen",
 	    this.infoDialog.getCreateNewGroupWin(this.__myapp, 0);
 	},
 
-	_arrangeCommand : function()
+	arrangeCommand : function()
 	{
 	    var x=[0,1,2,3,2,3,3,3,3,3,4,4,4,4,4,4,4];
 	    var y=[0,1,1,1,2,2,2,3,3,3,3,3,4,4,4,4,4];
