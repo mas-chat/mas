@@ -105,7 +105,7 @@ qx.Class.define("client.MainScreen",
 	initdone : 0,
 	rootContainer : 0,
 	windows : null,
-	showads : 1,
+	showads : 0,
 	FlashHelper : 0,
 	desktop : 0,
 	contactsButton : 0,
@@ -326,7 +326,7 @@ qx.Class.define("client.MainScreen",
 		break;
 		
 	    case "A":
-		this.showads = options.shift();
+		this.showads = 0; //options.shift();
 		break;
 		
 	    case "ADDURL":

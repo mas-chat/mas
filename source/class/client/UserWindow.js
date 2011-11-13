@@ -130,8 +130,8 @@ qx.Class.define("client.UserWindow",
 		    this.rpc.call("SEND", this.winid + " " + input);
 		    this.__inputline.setValue("");
 
-                    input = input.replace(/</g, "&lt;");
-                    input = input.replace(/>/g, "&gt;");
+                    //input = input.replace(/</g, "&lt;");
+                    //input = input.replace(/>/g, "&gt;");
 
 		    if (input.substr(0,1) == "/" && input.substr(0,4) != "/me ")
 		    {
@@ -682,6 +682,13 @@ qx.Class.define("client.UserWindow",
 
 	addline : function(line)
 	{
+	    //show images
+	    //line = line.replace(/<A HREF=\"(\S*?\.(png|jpg|jpeg))\"(.*?)<\/A>/g, 
+		//		"<br><br><a href=\"$1\" target=\"_blank\">" + 
+			//	"<img border=\"0\" height=\"200\" style=\"max-width:500px;" +
+			//	"height:200px;\"" +
+			//	"src=\"$1\"></a> &nbsp;&nbsp;&nbsp;$&" );
+
 	    this.__channelText = this.__channelText + line;
 
 	    this.__lines++;
@@ -1274,11 +1281,11 @@ qx.Class.define("client.UserWindow",
         {
             //URLs starting with http://, https://, or ftp://
             var replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-            var replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+            var replacedText = inputText.replace(replacePattern1, '<A HREF="$1" target="_blank">$1</A>');
 
             //Change email addresses to mailto:: links
             var replacePattern3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/gim;
-            var replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+            var replacedText = replacedText.replace(replacePattern3, '<A HREF="mailto:$1">$1</A>');
 
             return replacedText
         }
