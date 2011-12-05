@@ -61,7 +61,7 @@ qx.Class.define("client.RpcManager",
 	{
 	    if (this.__errormode == false) 
 	    {
-		this.mainscreen.setStatusText("L");
+		//this.mainscreen.setStatusText("L");
 	    }
 
 	    debug.print("call: sent: " + obj.command );
@@ -183,7 +183,7 @@ qx.Class.define("client.RpcManager",
 	    {
 	        debug.print("rpcmanager: didnt get reply, code: " + exc.code);
 
-		this.mainscreen.setStatusText("<font color=\"#ff0000\">Connection to server lost, recovering...</font>");
+		this.mainscreen.setStatusText("Connection to MeetAndSpeak server lost, trying to reconnect...");
 		this.__errormode = true;
 	    }
 

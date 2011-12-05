@@ -118,8 +118,8 @@ qx.Class.define("client.MainScreen",
 	anon_user : 0,
 	nicks : 0,
 	blocker : 0,
-	statusMenu : 0,
 
+	__statusBar : 0,
 	__part2 : 0,
 	__audio : 0,
 	__part3 : 0,
@@ -195,14 +195,13 @@ qx.Class.define("client.MainScreen",
 		    this.arrangeCommand();
 		}
 
-		var infocookie = qx.bom.Cookie.get("msg1");
+		var infocookie = qx.bom.Cookie.get("msg2");
 		if (infocookie == null)
 		{
-		    qx.bom.Cookie.set("msg1", "yes", 1000, "/");
+		    qx.bom.Cookie.set("msg2", "yes", 1000, "/");
 		    this.infoDialog.showInfoWin("Announcement",
-						"<b>Hello!</b><p>MeetAndSpeak now disconnects users from the IRC networks after three weeks of inactivity." +
-						"<br>Login more often than that to avoid problems. This change saves especially scarse IRCNET connections." +
-						"<p>Send all your comments to info@meetandspeak.com. Feedback is highly appreciated, it motivates<br> me to add new features.<p>-Ilkka, the admin", "Okay");
+						"<b>Hi!</b><p>MeetAndSpeak is now advertisement free for everybody!" +
+						"<br>Spread the word if you like it. More users means more new features.<p>-Ilkka, the admin", "Okay");
 		}
 		break;
 		
@@ -777,6 +776,16 @@ qx.Class.define("client.MainScreen",
 	    this.rootContainer.add(toolbar);
 	    this.__myapp.add(this.rootContainer, {flex : 1, edge: 0}); //, {padding : 10});	    
 
+	    //Status bar
+	    this.__statusBar = new qx.ui.basic.Label("");
+	    this.__statusBar.set({ backgroundColor: "#ff0000",
+				   zIndex : 100,
+				   textColor: "#ffffff",
+				   font : new qx.bom.Font(23, ["Arial", "sans-serif"]),
+				   padding: 14});
+	    this.__statusBar.hide();
+	    this.__myapp.add(this.__statusBar, { left : 100, top: 0 });
+
 	    this.__windowGroup = new client.RadioManager();
 	},
 
@@ -1146,16 +1155,6 @@ qx.Class.define("client.MainScreen",
 	    var logoutMenu = new qx.ui.menu.Button("Log Out", null, null,
 						      this.getLogoutMenu());
 
-	    //this.statusMenu = new qx.ui.menubar.Button("", null);
-	    //this.statusMenu.setRich(true);
-
-	    //var motdMenu = new qx.ui.menubar.Button("<a target=\"_blank\" href=\"http://getsatisfaction.com/meetandspeak/\"><font color=\"yellow\">Got&nbsp;an&nbsp;improvement&nbsp;idea?&nbsp;Click&nbsp;here!</font></a>", null);
-	    //motdMenu.setRich(true);
-
-            //qx.event.Timer.once(function(e){
-		//motdMenu.setLabel("");
-	    //}, this, 1000 * 30); 
-
 	    if (this.anon_user == false)
 	    {
 		menu.add(forumMenu);
@@ -1171,15 +1170,21 @@ qx.Class.define("client.MainScreen",
 
 	    menu.add(helpMenu);
 	    menu.add(logoutMenu);
-	    //menubar.add(motdMenu);
-	    //menubar.add(this.statusMenu);
 	
 	    return menu;
 	},
 
 	setStatusText : function(text)
 	{
-	    //this.statusMenu.setLabel(text);
+	    if (text == "")
+	    {
+		this.__statusBar.hide();
+	    }
+	    else
+	    {
+		this.__statusBar.setValue(text);
+		this.__statusBar.show();
+	    }
 	},
 
 	getLogoutMenu : function()
