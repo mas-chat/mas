@@ -30,7 +30,7 @@
   "let" :
   {
     "APPLICATION"  : "client",
-    "QOOXDOO_PATH" : "/opt/qooxdoo-1.5-sdk",
+    "QOOXDOO_PATH" : "/opt/qooxdoo-1.6-sdk",
     "QXTHEME"      : "client.theme.Theme",
     "API_EXCLUDE"  : ["qx.legacy.*","qx.test.*"],
     "LOCALES"      : [ "en" ],
@@ -47,12 +47,6 @@
     // project; make sure to adapt the path to the Manifest.json; if you are
     // using a contrib: library, it will be downloaded into the path specified
     // by the 'cache/downloads' config key
-    "libraries" : 
-    {
-      "library" :
-      [
-      ]
-    }
   }
 }	
     /*

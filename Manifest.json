@@ -3,22 +3,22 @@
   {
     "name" : "client",
 
-    "summary" : "Custom Application",
-    "description" : "This is a skeleton for a custom application with qooxdoo.",
+    "summary" : "Chat Application",
+    "description" : "Meetandspeak client app",
     
-    "homepage" : "http://some.homepage.url/",
+    "homepage" : "http://www.meetandspeak.com/",
 
-    "license" : "SomeLicense",
+    "license" : "Proprietary",
     "authors" : 
     [
       {
-        "name" : "First Author (uid)",
-        "email" : "first.author@some.domain"
+        "name" : "Ilkka Oksanen",
+        "email" : "ilkka@meetandspeak.com"
       }
     ],
 
     "version" : "trunk",
-    "qooxdoo-versions": ["0.8.1"]
+    "qooxdoo-versions": ["1.6"]
   },
   
   "provides" : 

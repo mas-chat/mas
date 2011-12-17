@@ -48,7 +48,7 @@ qx.Class.define("client.RpcManager",
 	    obj.parameters = parameters;
 	    this.__sendqueue.push(obj);
 	    
-	    debug.print("call: buffered: " + command + ": " + parameters + ", queue len: " +
+	    client.debug.print("call: buffered: " + command + ": " + parameters + ", queue len: " +
 			this.__sendqueue.length);
 
 	    if (this.__sendqueue.length == 1)
@@ -64,7 +64,7 @@ qx.Class.define("client.RpcManager",
 		//this.mainscreen.setStatusText("L");
 	    }
 
-	    debug.print("call: sent: " + obj.command );
+	    client.debug.print("call: sent: " + obj.command );
 
 	    this.__srpc.callAsync(
 		qx.lang.Function.bind(this.__sendresult, this),
@@ -76,7 +76,7 @@ qx.Class.define("client.RpcManager",
 	{
 	    if (exc == null) 
 	    {
-                debug.print("call: answer: " + result);
+                client.debug.print("call: answer: " + result);
 
 		var options = result.split(" ");
 		var command = options.shift();
@@ -93,7 +93,7 @@ qx.Class.define("client.RpcManager",
 
 	__read : function()
 	{
-	    debug.print("Hello SENT, seq " + this.__helloseq);
+	    client.debug.print("Hello SENT, seq " + this.__helloseq);
 	    var tz = ""
 
 	    if (this.__firstrpc == true)
@@ -116,7 +116,7 @@ qx.Class.define("client.RpcManager",
 		if (!this.__firstrpc)
 		{
 		    //First response is too big to be printed
-	            debug.print("received: " + data);
+	            client.debug.print("received: " + data);
                 }
 		else
 		{
@@ -130,7 +130,7 @@ qx.Class.define("client.RpcManager",
 		    var options = commands[i].split(" ");
 		    var command = options.shift();
 
-		    //debug.print("handling:" + command + options.join(" "));
+		    //client.debug.print("handling:" + command + options.join(" "));
 
 		    var result = this.mainscreen.handleCommand(command, options);
 
@@ -158,7 +158,7 @@ qx.Class.define("client.RpcManager",
 		    }
 		    else
 		    {
-         	        debug.print("unusual error code: " + exc.code);
+         	        client.debug.print("unusual error code: " + exc.code);
 
 			//Wait a little and try again. This is to make sure
 			//that we don't loop and consume all CPU cycles if
@@ -181,7 +181,7 @@ qx.Class.define("client.RpcManager",
 	    }
 	    else
 	    {
-	        debug.print("rpcmanager: didnt get reply, code: " + exc.code);
+	        client.debug.print("rpcmanager: didnt get reply, code: " + exc.code);
 
 		this.mainscreen.setStatusText("Connection to MeetAndSpeak server lost, trying to reconnect...");
 		this.__errormode = true;

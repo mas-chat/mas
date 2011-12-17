@@ -95,7 +95,7 @@ qx.Class.define("client.MainScreen",
 	    }
 	}
 
-	debug.print("Sound support: " + soundFormat);
+	client.debug.print("Sound support: " + soundFormat);
     },
 
     members :
@@ -1338,7 +1338,7 @@ qx.Class.define("client.MainScreen",
 		{
 		    // !dim is ???
 		    this.blocker.unblock();
-		    debug.print("unkown dim");
+		    client.debug.print("unkown dim");
 		    return;
 		}
 		

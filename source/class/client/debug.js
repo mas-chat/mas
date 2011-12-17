@@ -1,5 +1,5 @@
 
-qx.Class.define("debug",
+qx.Class.define("client.debug",
 {
     type : "static",
 
