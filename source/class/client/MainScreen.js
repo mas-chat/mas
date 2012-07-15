@@ -3,7 +3,8 @@ qx.Class.define("client.MainScreen",
 {
     extend : qx.core.Object,
 
-    construct : function(srpc, rootItem, logDialog, settings, infoDialog, anon_user)
+    construct : function(srpc, rootItem, logDialog, settings, infoDialog, anon_user,
+			start_label)
     {
 	this.base(arguments);
 
@@ -11,6 +12,9 @@ qx.Class.define("client.MainScreen",
 	this.rpc = srpc;
 	this.logDialog = logDialog;
 	this.infoDialog = infoDialog
+
+	this.__startLabel = start_label;
+
 	this.settings = settings;
 	this.anon_user = anon_user;
 
@@ -120,6 +124,7 @@ qx.Class.define("client.MainScreen",
 	blocker : 0,
 
 	__statusBar : 0,
+	__startLabel : 0,
 	__part2 : 0,
 	__audio : 0,
 	__part3 : 0,
@@ -195,13 +200,13 @@ qx.Class.define("client.MainScreen",
 		    this.arrangeCommand();
 		}
 
-		var infocookie = qx.bom.Cookie.get("msg2");
+		var infocookie = qx.bom.Cookie.get("msg5");
 		if (infocookie == null)
 		{
-		    qx.bom.Cookie.set("msg2", "yes", 1000, "/");
-		    this.infoDialog.showInfoWin("Announcement",
-						"<b>Hi!</b><p>MeetAndSpeak is now advertisement free for everybody!" +
-						"<br>Spread the word if you like it. More users means more new features.<p>-Ilkka, the admin", "Okay");
+		    qx.bom.Cookie.set("msg5", "yes", 1000, "/");
+//		    this.infoDialog.showInfoWin("Announcement",
+//						"<b>Hi!</b><p>IRCNet access is again broken." +
+//						"<br>I estimate that the access will be restored on Monday.<br><br> We are on the mercy of IRCNet admins<br><br>-Ilkka", "Okay");
 		}
 		break;
 		
@@ -396,6 +401,7 @@ qx.Class.define("client.MainScreen",
 	    case "SET":
 		this.settings.update(options.join(" "));
 		//We have settings now, ready to draw main screen
+		this.__startLabel.setValue("<center><br><br><br>Rendering</center>");
 		this.show();
 		break;
 

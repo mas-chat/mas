@@ -50,7 +50,7 @@ qx.Class.define("client.Application",
 	    }
 
 	    var MainScreenObj = new client.MainScreen(rpcmanager, this.getRoot(), logDialog,
-						      settings, infoDialog, anon_user);
+						      settings, infoDialog, anon_user, start_label);
 
 	    infoDialog.mainscreen = MainScreenObj;
 	    logDialog.mainscreen = MainScreenObj;

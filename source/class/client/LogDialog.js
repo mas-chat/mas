@@ -393,7 +393,8 @@ qx.Class.define("client.LogDialog",
 
 		if (result == "")
 		{
-		    this.errormsg.setValue("<font color=\"#FF0000\">Your search did not match any log files. (Notice that it takes up to 24 hours to index new content.)</font>");
+		    //this.errormsg.setValue("<font color=\"#FF0000\">Your search did not match any log files. (Notice that it takes up to 24 hours to index new content.)</font>");
+		    this.errormsg.setValue("<font color=\"#FF0000\">Search feature is currently disabled. Existing solution did not scale.</font>");
 		}
 		else
 		{
