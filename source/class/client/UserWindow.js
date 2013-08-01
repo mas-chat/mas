@@ -551,7 +551,7 @@ qx.Class.define("client.UserWindow",
 
 	    if (this.__viewmode == 0)
 	    {
-		this.__inputline.focus();
+//		this.__inputline.focus();
 	    }
 	},
 
