@@ -8,7 +8,9 @@ qx.Class.define("client.debug",
         print : function(text)
         {
             var now = new Date();
-            qx.log.Logger.warn("[" + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() + "] " + text);
+
+            qx.log.Logger.warn("[" + now.getHours() + ":" + now.getMinutes() +
+                               ":" + now.getSeconds() + "] " + text);
         }
     }
 });

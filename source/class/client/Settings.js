@@ -5,104 +5,101 @@ qx.Class.define("client.Settings",
 
     construct : function(srpc, params)
     {
-	this.rpc = srpc;
-	this.update(params);
+        this.rpc = srpc;
+        this.update(params);
     },
 
     //TODO: write proper destructor
 
     properties :
     {
-	firstTime : { init : 1, apply : "_applyFirstTime" },
-	loggingEnabled : { init : 1, apply : "_applyLoggingEnabled" },
-	sslEnabled : { init : 0, apply : "_applySslEnabled" },
-	largeFonts : { init : 1, apply : "_applyLargeFonts" },
-	autoArrange : { init : 1, apply : "_applyAutoArrange" },
-	showCloseWarn : { init : 1, apply : "_applyShowCloseWarn" }
+        firstTime : { init : 1, apply : "_applyFirstTime" },
+        loggingEnabled : { init : 1, apply : "_applyLoggingEnabled" },
+        sslEnabled : { init : 0, apply : "_applySslEnabled" },
+        largeFonts : { init : 1, apply : "_applyLargeFonts" },
+        autoArrange : { init : 1, apply : "_applyAutoArrange" },
+        showCloseWarn : { init : 1, apply : "_applyShowCloseWarn" }
     },
 
     members :
     {
-	rpc : 0,
-	initdone : 0,
+        rpc : 0,
+        initdone : 0,
 
-	update : function(params)
-	{
-	    this.initdone = 0;
-	    
-	    var allsettings = params.split("||");
-	    
-	    for (var i=0; i < allsettings.length; i = i + 2)
-	    {
-		var key = allsettings[i];
-		var value = allsettings[i+1];
-		
-		switch(key)
-		{
-		case "firstTime":
-		    this.setFirstTime(value);
-		    break;
+        update : function(params)
+        {
+            this.initdone = 0;
 
-		case "autoArrange":
-		    this.setAutoArrange(value);
-		    break;
+            var allsettings = params.split("||");
 
-		case "largeFonts":
-		    this.setLargeFonts(value);
-		    break;
-		    
-		case "loggingEnabled":
-		    this.setLoggingEnabled(value);
-		    break;
-		    
-		case "sslEnabled":
-		    this.setSslEnabled(value);
-		    break;
+            for (var i=0; i < allsettings.length; i = i + 2) {
+                var key = allsettings[i];
+                var value = allsettings[i+1];
 
-		case "showCloseWarn":
-		    this.setShowCloseWarn(value);
-		    break;
-		}
-	    }
-	    this.initdone = 1;
-	},
+                switch(key) {
+                case "firstTime":
+                    this.setFirstTime(value);
+                    break;
 
-	_applyShowCloseWarn : function(value) 
-	{
-	    this.send("showCloseWarn", value);
-	},
+                case "autoArrange":
+                    this.setAutoArrange(value);
+                    break;
 
-	_applyFirstTime : function(value) 
-	{
-	    this.send("firstTime", value);
-	},
+                case "largeFonts":
+                    this.setLargeFonts(value);
+                    break;
 
-	_applyLoggingEnabled : function(value)
-	{
-	    this.send("loggingEnabled", value);
-	},
+                case "loggingEnabled":
+                    this.setLoggingEnabled(value);
+                    break;
 
-	_applySslEnabled : function(value)
-	{
-	    this.send("sslEnabled", value);
-	},
+                case "sslEnabled":
+                    this.setSslEnabled(value);
+                    break;
 
-	_applyLargeFonts : function(value)
-	{
-	    this.send("largeFonts", value);
-	},
+                case "showCloseWarn":
+                    this.setShowCloseWarn(value);
+                    break;
+                }
+            }
+            this.initdone = 1;
+        },
 
-	_applyAutoArrange : function(value)
-	{
-	    this.send("autoArrange", value);
-	},
+        _applyShowCloseWarn : function(value)
+        {
+            this.send("showCloseWarn", value);
+        },
 
-	send : function(name, value)
-	{
-	    if (this.initdone == 1)
-	    {
-		this.rpc.call("SET", name + " " + value);
-	    }
-	}
+        _applyFirstTime : function(value)
+        {
+            this.send("firstTime", value);
+        },
+
+        _applyLoggingEnabled : function(value)
+        {
+            this.send("loggingEnabled", value);
+        },
+
+        _applySslEnabled : function(value)
+        {
+            this.send("sslEnabled", value);
+        },
+
+        _applyLargeFonts : function(value)
+        {
+            this.send("largeFonts", value);
+        },
+
+        _applyAutoArrange : function(value)
+        {
+            this.send("autoArrange", value);
+        },
+
+        send : function(name, value)
+        {
+            if (this.initdone == 1) {
+                this.rpc.call("SET", name + " " + value);
+            }
+        }
     }
 });
