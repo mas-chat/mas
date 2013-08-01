@@ -1,4 +1,8 @@
 
+/*
+ * @asset(client/*)
+*/
+
 qx.Class.define("client.Application",
 {
     extend : qx.application.Standalone,
@@ -21,7 +25,7 @@ qx.Class.define("client.Application",
 	    var margin_y = Math.round(qx.bom.Viewport.getHeight()/2);
 	    
 	    start_label.setMargin(margin_y,10,10,margin_x);
-	    this.getRoot().add(start_label, {flex : 1});
+	    this.getRoot().add(start_label, { width: "100%", height: "100%" });
 
 	    var rpcmanager = new client.RpcManager();
 	    var infoDialog = new client.InfoDialog(rpcmanager);

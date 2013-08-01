@@ -106,7 +106,7 @@ qx.Class.define("client.UserWindow",
 
 	this.__textcomposite.add(this.__scroll, {flex: 1});
 
-	this.__box.add(this.__textcomposite, {row: 0, column: 0, flex: 1});
+	this.__box.add(this.__textcomposite, {row: 0, column: 0});
 	
 	this.__inputline = new qx.ui.form.TextField();
 	this.__inputline.set({ maxLength: 400 });

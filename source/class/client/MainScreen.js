@@ -780,7 +780,7 @@ qx.Class.define("client.MainScreen",
 	    }
 
 	    this.rootContainer.add(toolbar);
-	    this.__myapp.add(this.rootContainer, {flex : 1, edge: 0}); //, {padding : 10});	    
+	    this.__myapp.add(this.rootContainer, { width: "100%", height: "100%" }); //, {padding : 10});	    
 
 	    //Status bar
 	    this.__statusBar = new qx.ui.basic.Label("");
