@@ -1,15 +1,15 @@
 {
-  "info" : 
+  "info" :
   {
     "name" : "client",
 
     "summary" : "Chat Application",
     "description" : "Meetandspeak client app",
-    
+
     "homepage" : "http://www.meetandspeak.com/",
 
     "license" : "Proprietary",
-    "authors" : 
+    "authors" :
     [
       {
         "name" : "Ilkka Oksanen",
@@ -18,10 +18,10 @@
     ],
 
     "version" : "trunk",
-    "qooxdoo-versions": ["1.6"]
+    "qooxdoo-versions": ["3.0"]
   },
-  
-  "provides" : 
+
+  "provides" :
   {
     "namespace"   : "client",
     "encoding"    : "utf-8",
@@ -31,4 +31,3 @@
     "type"        : "application"
   }
 }
-
