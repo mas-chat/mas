@@ -14,9 +14,9 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define("client.debug",
+qx.Class.define('client.debug',
 {
-    type : "static",
+    type : 'static',
 
     statics :
     {
@@ -24,8 +24,8 @@ qx.Class.define("client.debug",
         {
             var now = new Date();
 
-            qx.log.Logger.warn("[" + now.getHours() + ":" + now.getMinutes() +
-                               ":" + now.getSeconds() + "] " + text);
+            qx.log.Logger.warn('[' + now.getHours() + ':' + now.getMinutes() +
+                               ':' + now.getSeconds() + '] ' + text);
         }
     }
 });

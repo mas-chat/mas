@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define("client.Settings",
+qx.Class.define('client.Settings',
 {
     extend : qx.core.Object,
 
@@ -28,12 +28,12 @@ qx.Class.define("client.Settings",
 
     properties :
     {
-        firstTime : { init : 1, apply : "_applyFirstTime" },
-        loggingEnabled : { init : 1, apply : "_applyLoggingEnabled" },
-        sslEnabled : { init : 0, apply : "_applySslEnabled" },
-        largeFonts : { init : 1, apply : "_applyLargeFonts" },
-        autoArrange : { init : 1, apply : "_applyAutoArrange" },
-        showCloseWarn : { init : 1, apply : "_applyShowCloseWarn" }
+        firstTime : { init : 1, apply : '_applyFirstTime' },
+        loggingEnabled : { init : 1, apply : '_applyLoggingEnabled' },
+        sslEnabled : { init : 0, apply : '_applySslEnabled' },
+        largeFonts : { init : 1, apply : '_applyLargeFonts' },
+        autoArrange : { init : 1, apply : '_applyAutoArrange' },
+        showCloseWarn : { init : 1, apply : '_applyShowCloseWarn' }
     },
 
     members :
@@ -45,34 +45,34 @@ qx.Class.define("client.Settings",
         {
             this.initdone = 0;
 
-            var allsettings = params.split("||");
+            var allsettings = params.split('||');
 
             for (var i=0; i < allsettings.length; i = i + 2) {
                 var key = allsettings[i];
                 var value = allsettings[i+1];
 
                 switch(key) {
-                case "firstTime":
+                case 'firstTime':
                     this.setFirstTime(value);
                     break;
 
-                case "autoArrange":
+                case 'autoArrange':
                     this.setAutoArrange(value);
                     break;
 
-                case "largeFonts":
+                case 'largeFonts':
                     this.setLargeFonts(value);
                     break;
 
-                case "loggingEnabled":
+                case 'loggingEnabled':
                     this.setLoggingEnabled(value);
                     break;
 
-                case "sslEnabled":
+                case 'sslEnabled':
                     this.setSslEnabled(value);
                     break;
 
-                case "showCloseWarn":
+                case 'showCloseWarn':
                     this.setShowCloseWarn(value);
                     break;
                 }
@@ -82,38 +82,38 @@ qx.Class.define("client.Settings",
 
         _applyShowCloseWarn : function(value)
         {
-            this.send("showCloseWarn", value);
+            this.send('showCloseWarn', value);
         },
 
         _applyFirstTime : function(value)
         {
-            this.send("firstTime", value);
+            this.send('firstTime', value);
         },
 
         _applyLoggingEnabled : function(value)
         {
-            this.send("loggingEnabled", value);
+            this.send('loggingEnabled', value);
         },
 
         _applySslEnabled : function(value)
         {
-            this.send("sslEnabled", value);
+            this.send('sslEnabled', value);
         },
 
         _applyLargeFonts : function(value)
         {
-            this.send("largeFonts", value);
+            this.send('largeFonts', value);
         },
 
         _applyAutoArrange : function(value)
         {
-            this.send("autoArrange", value);
+            this.send('autoArrange', value);
         },
 
         send : function(name, value)
         {
-            if (this.initdone == 1) {
-                this.rpc.call("SET", name + " " + value);
+            if (this.initdone === 1) {
+                this.rpc.call('SET', name + ' ' + value);
             }
         }
     }

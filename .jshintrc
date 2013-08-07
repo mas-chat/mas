@@ -82,6 +82,9 @@
     "white"         : false,    // true: Check against strict whitespace and indentation rules
 
     // Custom Globals
-    "globals"       : { "qx": true,
-                        "client": true }        // additional predefined global variables
+    "globals"       : {
+        "qx": true,
+        "client": true,
+        "escape": true
+    }        // additional predefined global variables
 }
