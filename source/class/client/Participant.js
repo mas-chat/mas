@@ -14,41 +14,41 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define("client.Participant",
+qx.Class.define('client.Participant',
 {
     extend : qx.core.Object,
 
     properties : {
         name : {
-            check : "String",
-            event : "changeName",
-            init : "",
+            check : 'String',
+            event : 'changeName',
+            init : '',
             nullable : true
         },
 
         op : {
-            check : "Boolean",
-            event : "changeOp",
+            check : 'Boolean',
+            event : 'changeOp',
             init : false
         },
 
         voice : {
-            check : "Boolean",
-            event : "changeVoice",
+            check : 'Boolean',
+            event : 'changeVoice',
             init : false
         },
 
         //online: 0 = unknown, 1 = online, 2 = offline
         online : {
-            check : "Number",
-            event : "changeOnline",
+            check : 'Number',
+            event : 'changeOnline',
             init : 0
         }
     },
 
     members : {
         toString: function() {
-            return "foobar";
+            return 'foobar';
         }
     }
 
