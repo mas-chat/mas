@@ -18,7 +18,9 @@
  * @asset(client/*)
 */
 
-qx.Class.define("client.Application",
+'use strict';
+
+qx.Class.define('client.Application',
 {
     extend : qx.application.Standalone,
 
@@ -31,43 +33,52 @@ qx.Class.define("client.Application",
             qx.log.appender.Native; //disable someday
 
             this.getRoot().removeAll();
-            this.getRoot().set({backgroundColor: "#FFFFFF"});
+            this.getRoot().set({ backgroundColor: '#FFFFFF' });
 
-            var start_label = new qx.ui.basic.Label("<center><img src=\"/i/ajax-loader.gif\"><br><br><br>Loading content...</center>").set({
-                font : new qx.bom.Font(14, ["Arial", "sans-serif"]), width:300, height:150, rich: true});
+            var startLabel = new qx.ui.basic.Label(
+                '<center><img src="/i/ajax-loader.gif"><br><br><br>' +
+                    'Loading content...</center>').set({
+                        font : new qx.bom.Font(14, [ 'Arial', 'sans-serif' ]),
+                        width: 300,
+                        height: 150,
+                        rich: true
+                    });
 
-            var margin_x = Math.round(qx.bom.Viewport.getWidth()/2)-300/2;
-            var margin_y = Math.round(qx.bom.Viewport.getHeight()/2);
+            var marginX = Math.round(qx.bom.Viewport.getWidth() / 2) - 300 / 2;
+            var marginY = Math.round(qx.bom.Viewport.getHeight() / 2);
 
-            start_label.setMargin(margin_y,10,10,margin_x);
-            this.getRoot().add(start_label, { width: "100%", height: "100%" });
+            startLabel.setMargin(marginY, 10, 10, marginX);
+            this.getRoot().add(startLabel, { width: '100%', height: '100%' });
 
             var rpcmanager = new client.RpcManager();
             var infoDialog = new client.InfoDialog(rpcmanager);
-            var settings = new client.Settings(rpcmanager, "");
-            var logDialog = new client.LogDialog(rpcmanager, settings, infoDialog);
+            var settings = new client.Settings(rpcmanager, '');
+            var logDialog = new client.LogDialog(rpcmanager, settings,
+                                                 infoDialog);
 
             infoDialog.settings = settings;
 
-            var cookie = qx.bom.Cookie.get("ProjectEvergreen");
+            var cookie = qx.bom.Cookie.get('ProjectEvergreen');
 
-            if (cookie == null) {
-                qx.bom.Cookie.del("ProjectEvergreen");
+            if (cookie === null) {
+                qx.bom.Cookie.del('ProjectEvergreen');
                 window.location.reload(true);
             }
 
-            var idstring = cookie.split("-");
+            var idstring = cookie.split('-');
             rpcmanager.id = idstring[0];
             rpcmanager.sec = idstring[1];
 
-            var anon_user = false;
+            var anonUser = false;
 
-            if (idstring[2] == "a") {
-                anon_user = true;
+            if (idstring[2] === 'a') {
+                anonUser = true;
             }
 
-            var MainScreenObj = new client.MainScreen(rpcmanager, this.getRoot(), logDialog,
-                                                      settings, infoDialog, anon_user, start_label);
+            var MainScreenObj = new client.MainScreen(rpcmanager,
+                                                      this.getRoot(), logDialog,
+                                                      settings, infoDialog,
+                                                      anonUser, startLabel);
 
             infoDialog.mainscreen = MainScreenObj;
             logDialog.mainscreen = MainScreenObj;
