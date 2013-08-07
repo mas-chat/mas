@@ -1,25 +1,18 @@
-/* ************************************************************************
 
-   Copyright:
-
-   License:
-
-   Authors:
-
-#asset(client/*)
-
-************************************************************************ */
+/**
+* @asset(client/*)
+*/
 
 qx.Theme.define("client.theme.Decoration",
 {
   extend : qx.theme.simple.Decoration,
-  
+
   decorations :
   {
       "background2" :
       {
 	  decorator : qx.ui.decoration.Background,
- 
+
 	  style :
 	  {
               backgroundImage  : "client/bg.jpg",
