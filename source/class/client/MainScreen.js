@@ -81,7 +81,7 @@ qx.Class.define("client.MainScreen",
             }
 
             if (soundFormat != "none") {
-                this.__audio = new qx.bom.media.Audio("/moescript/betty." + soundFormat);
+                this.__audio = new qx.bom.media.Audio("resource/client/new-msg." + soundFormat);
             }
         }
 

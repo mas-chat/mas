@@ -13,7 +13,7 @@ qx.Class.define("client.Application",
         {
             this.base(arguments);
 
-            qx.log.appender.Console; //disable someday
+            qx.log.appender.Native; //disable someday
 
             this.getRoot().removeAll();
             this.getRoot().set({backgroundColor: "#FFFFFF"});

@@ -11,7 +11,7 @@ qx.Class.define("client.Participant",
         },
 
         op : {
-            check : "String",
+            check : "Boolean",
             event : "changeOp",
             init : false
         },

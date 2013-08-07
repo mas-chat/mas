@@ -220,7 +220,7 @@ qx.Class.define("client.UserWindow",
         buttons.add(this.urlButton);
 
         if (type == 0) {
-            this.__box.add(this.getList(), {row: 0, column: 1, flex:1});
+            this.__box.add(this.getList(), {row: 0, column: 1});
             this.__box.add(buttons, {row: 1, column: 1});
         } else {
             icomposite.add(buttons);
