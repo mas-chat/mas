@@ -14,7 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+// Can't use strict because of Qooxdoo
+// 'use strict';
 
 qx.Class.define('client.InfoDialog',
 {

@@ -292,7 +292,7 @@ qx.Class.define('client.LogDialog',
                     'search', input, this.rpc.id);
             } else {
                 this.errormsg.setValue(
-                    '<font color=\"#FF0000\">Your search string contains' +
+                    '<font color="#FF0000">Your search string contains' +
                         ' unsupported special character(s).</font>');
             }
         },
@@ -419,7 +419,7 @@ qx.Class.define('client.LogDialog',
                 }
             } else {
                 this.errormsg.setValue(
-                    '<font color=\"#FF0000\">Connection error. Please try' +
+                    '<font color="#FF0000">Connection error. Please try' +
                         ' again.</font>');
             }
         },

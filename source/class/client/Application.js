@@ -18,7 +18,8 @@
  * @asset(client/*)
 */
 
-'use strict';
+// Can't use strict because of Qooxdoo
+// 'use strict';
 
 qx.Class.define('client.Application',
 {
