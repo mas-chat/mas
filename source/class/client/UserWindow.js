@@ -24,7 +24,7 @@ qx.Class.define('client.UserWindow',
     {
         this.base(arguments);
 
-        this.__urllist = {};
+        this.__urllist = [];
         this.nameslist = new qx.data.Array();
         this.rpc = srpc;
         this.mainscreen = mainscreen;
