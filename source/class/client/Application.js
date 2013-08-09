@@ -51,14 +51,6 @@ qx.Class.define('client.Application',
             startLabel.setMargin(marginY, 10, 10, marginX);
             this.getRoot().add(startLabel, { width: '100%', height: '100%' });
 
-            var rpcmanager = new client.RpcManager();
-            var infoDialog = new client.InfoDialog(rpcmanager);
-            var settings = new client.Settings(rpcmanager, '');
-            var logDialog = new client.LogDialog(rpcmanager, settings,
-                                                 infoDialog);
-
-            infoDialog.settings = settings;
-
             var cookie = qx.bom.Cookie.get('ProjectEvergreen');
 
             if (cookie === null) {
@@ -67,14 +59,19 @@ qx.Class.define('client.Application',
             }
 
             var idstring = cookie.split('-');
-            rpcmanager.id = idstring[0];
-            rpcmanager.sec = idstring[1];
-
             var anonUser = false;
 
             if (idstring[2] === 'a') {
                 anonUser = true;
             }
+
+            var rpcmanager = new client.RpcManager(idstring[0], idstring[1]);
+            var infoDialog = new client.InfoDialog(rpcmanager);
+            var settings = new client.Settings(rpcmanager, '');
+            var logDialog = new client.LogDialog(rpcmanager, settings,
+                                                 infoDialog);
+
+            infoDialog.settings = settings;
 
             var MainScreenObj = new client.MainScreen(rpcmanager,
                                                       this.getRoot(), logDialog,

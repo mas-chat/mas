@@ -24,7 +24,7 @@ qx.Class.define('client.debug',
         {
             var now = new Date();
 
-            qx.log.Logger.warn('[' + now.getHours() + ':' + now.getMinutes() +
+            qx.log.Logger.debug('[' + now.getHours() + ':' + now.getMinutes() +
                                ':' + now.getSeconds() + '] ' + text);
         }
     }

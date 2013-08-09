@@ -18,179 +18,172 @@ qx.Class.define('client.RpcManager',
 {
     extend : qx.core.Object,
 
-    construct : function()
-    {
+    construct : function(id, sec) {
         this.base(arguments);
 
-        // write 'socket'
-        this.__srpc = new qx.io.remote.Rpc('/ralph', 'ralph');
-        this.__srpc.setTimeout(20000);
+        this._id = id;
+        this._sec = sec;
 
-        this.__rrpc = new qx.io.remote.Rpc('/ralph', 'ralph');
-        this.__rrpc.setTimeout(35000);
+        // Long polling XMLHttpRequest that listens for incoming messages
+        this._pollMsgXhr = new qx.io.request.Xhr('/ralph');
+        this._pollMsgXhr.setTimeout(35000);
+        this._pollMsgXhr.addListener('success', this._pollMsgSuccess, this);
+        this._pollMsgXhr.addListener('fail', this._pollMsgFailure, this);
 
-        //global because of call from LogDialog, not optimal
-        var d = new Date();
-        this.timezone = d.getTimezoneOffset();
+        // Second XMLHttpRequest for sending messages
+        this._sendMsgXhr = new qx.io.request.Xhr('/ralph');
+        this._sendMsgXhr.setTimeout(15000);
+        this._sendMsgXhr.addListener('success', this._sendMsgSuccess, this);
+        this._sendMsgXhr.addListener('fail', this._sendMsgFailure, this);
 
-        //Initial hello, send TZ info, with timer we don't see rotating
-        //circle in chrome
-        qx.event.Timer.once(function(e) {
-            this.__read();
-        }, this, 250);
+        var date = new Date();
+        this.timezone = date.getTimezoneOffset();
+
+        // Make initial connection and start polling the server for incoming
+        // messages
+        this._pollMsgs();
     },
 
-    members :
-    {
-        id : 0,
-        sec : 0,
+    members : {
         cookie : 0,
-        timezone : 0,
+        timezone : 0, // TODO: Public because of call from LogDialog, fix.
         mainscreen : 0,
 
-        __errormode : false,
-        __sendqueue : [],
-        __srpc : 0,
-        __rrpc : 0,
-        __firstrpc : true,
-        __helloseq : 0,
-        __sendseq : 1,
+        _id : 0,
+        _sec : 0,
+        _state : false,
+        _sendQueue : [],
+        _rcvMsgXhr : 0,
+        _pollMsgXhr : 0,
+        _firstPoll : true,
+        _helloseq : 0,
+        _sendseq : 1,
 
-        call : function(command, parameters)
-        {
-            var obj = {};
-            obj.command = command;
-            obj.parameters = parameters;
-            this.__sendqueue.push(obj);
+        call : function(message) {
+            this._sendQueue.push(message);
 
-            client.debug.print('call: buffered: ' + command + ': ' +
-                               parameters + ', queue len: ' +
-                               this.__sendqueue.length);
+            client.debug.print(
+                'Outgoing msg buffered: ' + message + ', queue len: ' +
+                    this._sendQueue.length);
 
-            if (this.__sendqueue.length === 1) {
-                this.__sendCallRequest(obj);
+            if (this._sendQueue.length === 1) {
+                this._sendMsg(this._sendQueue[0]);
             }
         },
 
-        __sendCallRequest : function(obj)
-        {
-            //if (this.__errormode === false) {
-            //    this.mainscreen.setStatusText('L');
-            //}
+        _sendMsg : function(obj) {
+            this._sendMsgXhr.setUrl(
+                '/ralph/' + this._id + '/' + this._sec + '/' + this.cookie +
+                    '/' + this._sendseq);
+            this._sendMsgXhr.setRequestData(obj);
+            this._sendMsgXhr.send();
 
-            client.debug.print('call: sent: ' + obj.command);
-
-            this.__srpc.callAsync(
-                qx.lang.Function.bind(this.__sendresult, this),
-                obj.command, this.id + ' ' + this.sec + ' ' + this.cookie +
-                    ' ' + this.__sendseq + ' ' + obj.parameters);
+            client.debug.print('--> ' + obj.command + ' MSG');
         },
 
-        __sendresult : function(result, exc)
-        {
-            if (exc === null) {
-                client.debug.print('call: answer: ' + result);
+        _sendMsgSuccess : function(e) {
+            var resp = e.getTarget();
 
-                var options = result.split(' ');
-                var command = options.shift();
+            // Response parsed according to the server's
+            // response content type, e.g. JSON
+            client.debug.print(resp.getResponse());  //REMOVE
 
-                this.mainscreen.handleCommand(command, options);
+            client.debug.print('<-- Result: ' + resp.getResponse());
 
-                this.__requestDone(true, exc);
-            } else {
-                this.__requestDone(false, exc);
+            this.mainscreen.handleCommand(resp.getResponse());
+
+            this._sendQueue.shift();
+            this._sendseq++;
+
+            if (this._state === 'error') {
+                this._state = 'normal';
+                this.mainscreen.setStatusText('');
+            }
+
+            this._sendMsgFinished();
+        },
+
+        _sendMsgFailure : function(e) {
+            var resp = e.getTarget();
+            this._state = 'error';
+
+            client.debug.print(
+                'sendMsg: XHR failure, code: ' + resp.code);
+
+            this.mainscreen.setStatusText(
+                'Connection to MeetAndSpeak server lost, trying to' +
+                    'reconnect...');
+
+            this._sendMsgFinished();
+        },
+
+        _sendMsgFinished : function() {
+            if (this._sendQueue.length > 0) {
+                var obj = this._sendQueue[0];
+                this._sendMsg(obj);
             }
         },
 
-        __read : function()
-        {
-            client.debug.print('Hello SENT, seq ' + this.__helloseq);
+        _pollMsgs : function() {
             var tz = '';
 
-            if (this.__firstrpc === true) {
+            if (this._firstPoll === true) {
                 tz = this.timezone;
             }
 
-            this.__rrpc.callAsync(
-                qx.lang.Function.bind(this.__readresult, this),
-                'HELLO', this.id + ' ' + this.sec + ' ' + this.cookie + ' ' +
-                    this.__helloseq + ' ' + tz);
+            this._pollMsgXhr.setUrl(
+                '/ralph/' + this._id + '/' + this._sec + '/' + this.cookie +
+                    '/' + this._sendseq + '/' + tz);
+            this._pollMsgXhr.send();
+
+            client.debug.print('--> POLL MSG (seq ' + this._helloseq + ')');
         },
 
-        __readresult : function(data, exc)
-        {
-            if (exc === null) {
-                this.__helloseq++;
+        _pollMsgSuccess : function(e) {
+            var resp = e.getTarget();
 
-                if (!this.__firstrpc) {
-                    //First response is too big to be printed
-                    client.debug.print('received: ' + data);
-                } else {
-                    this.__firstrpc = false;
-                }
+            this._helloseq++;
 
-                var commands = data.split('<>');
+            if (this._firstPoll) {
+                this._firstPoll = false;
+            }
 
-                for (var i = 0; i < commands.length; i++) {
-                    var options = commands[i].split(' ');
-                    var command = options.shift();
+            for (var i = 0; i < resp.data.commands.length; i++) {
+                var command = resp.data.commands[i];
 
-                    // client.debug.print(
-                    // 'handling:' + command + options.join(' '));
+                client.debug.print('<-- ' + command + 'MSG');
+                var result = this.mainscreen.handleCommand(command);
 
-                    var result = this.mainscreen.handleCommand(command,
-                                                               options);
-
-                    if (result === false) {
-                        //Permanent error, bail out without making a new RPC
-                        //request
-                        return;
-                    }
-                }
-
-                this.__read();
-            } else {
-                if (this.__firstrpc === true) {
-                    this.mainscreen.handleRpcError();
-                } else {
-                    if (exc.code === qx.io.remote.Rpc.localError.timeout) {
-                        //Make next request immediately
-                        this.__read();
-                    } else {
-                        client.debug.print('unusual error code: ' + exc.code);
-
-                        //Wait a little and try again. This is to make sure
-                        //that we don't loop and consume all CPU cycles if
-                        //there is no connection.
-                        qx.event.Timer.once(function(e) {
-                            this.__read();
-                        }, this, 2000);
-                    }
+                if (result === false) {
+                    // Permanent error, bail out without making a new RPC
+                    // request
+                    return;
                 }
             }
+
+            this._pollMsgs();
         },
 
-        __requestDone : function(success, exc)
-        {
-            if (success === true) {
-                this.__sendqueue.shift();
-                this.__sendseq++;
-                this.__errormode = false;
-            } else {
-                client.debug.print('rpcmanager: didnt get reply, code: ' +
-                                   exc.code);
+        _pollMsgFailure : function(e) {
+            var resp = e.getTarget();
 
-                this.mainscreen.setStatusText(
-                    'Connection to MeetAndSpeak server lost, trying to ' +
-                        'reconnect...');
-                this.__errormode = true;
-            }
-
-            if (this.__sendqueue.length > 0) {
-                var obj = this.__sendqueue[0];
-                this.__sendCallRequest(obj);
+            if (this._firstPoll === true) {
+                this.mainscreen.handleRpcError();
             } else {
-                this.mainscreen.setStatusText('');
+                if (resp.code === qx.io.remote.Rpc.localError.timeout) {
+                    // Make next request immediately
+                    this._pollMsgs();
+                } else {
+                    client.debug.print(
+                        'pollMsg: XHR failure, code: ' + resp.code);
+
+                    // Wait a little and try again. This is to make sure
+                    // that we don't loop and consume all CPU cycles if
+                    // there is no connection.
+                    qx.event.Timer.once(function() {
+                        this._pollMsgs();
+                    }, this, 2000);
+                }
             }
         }
     }
