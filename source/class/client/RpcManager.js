@@ -18,21 +18,20 @@ qx.Class.define('client.RpcManager',
 {
     extend : qx.core.Object,
 
-    construct : function(id, sec) {
+    construct : function() {
         this.base(arguments);
-
-        this._id = id;
-        this._sec = sec;
 
         // Long polling XMLHttpRequest that listens for incoming messages
         this._pollMsgXhr = new qx.io.request.Xhr('/ralph');
         this._pollMsgXhr.setTimeout(35000);
-        this._pollMsgXhr.addListener('success', this._pollMsgSuccess, this);
+        this._pollMsgXhr.addListener('success', this._pollMsgsSuccess, this);
         this._pollMsgXhr.addListener('fail', this._pollMsgFailure, this);
 
         // Second XMLHttpRequest for sending messages
         this._sendMsgXhr = new qx.io.request.Xhr('/ralph');
         this._sendMsgXhr.setTimeout(15000);
+        this._sendMsgXhr.setMethod('POST');
+        this._sendMsgXhr.setRequestHeader('content-type', 'application/json');
         this._sendMsgXhr.addListener('success', this._sendMsgSuccess, this);
         this._sendMsgXhr.addListener('fail', this._sendMsgFailure, this);
 
@@ -45,55 +44,53 @@ qx.Class.define('client.RpcManager',
     },
 
     members : {
-        cookie : 0,
+        sessionId : 0,
         timezone : 0, // TODO: Public because of call from LogDialog, fix.
         mainscreen : 0,
 
-        _id : 0,
-        _sec : 0,
         _state : false,
         _sendQueue : [],
         _rcvMsgXhr : 0,
         _pollMsgXhr : 0,
         _firstPoll : true,
-        _helloseq : 0,
-        _sendseq : 1,
+        _pollSeq : 0,
+        _sendSeq : 1,
 
-        call : function(message) {
+        call : function(command, params) {
+            var message = {};
+            message.command = command;
+            message.params = params;
+
             this._sendQueue.push(message);
 
             client.debug.print(
-                'Outgoing msg buffered: ' + message + ', queue len: ' +
-                    this._sendQueue.length);
+                'Outgoing message buffered: ' + command + ' (Queue len: ' +
+                    this._sendQueue.length + ')');
 
             if (this._sendQueue.length === 1) {
                 this._sendMsg(this._sendQueue[0]);
             }
         },
 
-        _sendMsg : function(obj) {
+        _sendMsg : function(message) {
             this._sendMsgXhr.setUrl(
-                '/ralph/' + this._id + '/' + this._sec + '/' + this.cookie +
-                    '/' + this._sendseq);
-            this._sendMsgXhr.setRequestData(obj);
+                '/ralph/' + this.sessionId + '/' + this._sendSeq);
+            this._sendMsgXhr.setRequestData(JSON.stringify(message));
             this._sendMsgXhr.send();
 
-            client.debug.print('--> ' + obj.command + ' MSG');
+            client.debug.print('--> MSG: ' + message.command);
         },
 
-        _sendMsgSuccess : function(e) {
-            var resp = e.getTarget();
+        _sendMsgSuccess : function() {
+            var resp = this._sendMsgXhr.getResponse();
 
-            // Response parsed according to the server's
-            // response content type, e.g. JSON
-            client.debug.print(resp.getResponse());  //REMOVE
-
-            client.debug.print('<-- Result: ' + resp.getResponse());
-
-            this.mainscreen.handleCommand(resp.getResponse());
+            if (this._processCommands(resp.commands, true) === false) {
+                // Stop prossing the queue
+                return;
+            }
 
             this._sendQueue.shift();
-            this._sendseq++;
+            this._sendSeq++;
 
             if (this._state === 'error') {
                 this._state = 'normal';
@@ -103,12 +100,12 @@ qx.Class.define('client.RpcManager',
             this._sendMsgFinished();
         },
 
-        _sendMsgFailure : function(e) {
-            var resp = e.getTarget();
+        _sendMsgFailure : function() {
+            var code = this._sendMsgXhr.getStatus();
             this._state = 'error';
 
             client.debug.print(
-                'sendMsg: XHR failure, code: ' + resp.code);
+                'sendMsg: XHR request failed, code: ' + code);
 
             this.mainscreen.setStatusText(
                 'Connection to MeetAndSpeak server lost, trying to' +
@@ -128,62 +125,76 @@ qx.Class.define('client.RpcManager',
             var tz = '';
 
             if (this._firstPoll === true) {
-                tz = this.timezone;
+                tz = '/' + this.timezone;
             }
 
             this._pollMsgXhr.setUrl(
-                '/ralph/' + this._id + '/' + this._sec + '/' + this.cookie +
-                    '/' + this._sendseq + '/' + tz);
+                '/ralph/' + this.sessionId + '/' + this._pollSeq + tz);
             this._pollMsgXhr.send();
 
-            client.debug.print('--> POLL MSG (seq ' + this._helloseq + ')');
+            client.debug.print(
+                '--> Polling request sent (seq ' + this._pollSeq + ')');
         },
 
-        _pollMsgSuccess : function(e) {
-            var resp = e.getTarget();
+        _pollMsgsSuccess : function() {
+            var resp = this._pollMsgXhr.getResponse();
 
-            this._helloseq++;
+            this._pollSeq++;
 
             if (this._firstPoll) {
                 this._firstPoll = false;
             }
 
-            for (var i = 0; i < resp.data.commands.length; i++) {
-                var command = resp.data.commands[i];
+            client.debug.print('<-- Response to polling request');
 
-                client.debug.print('<-- ' + command + 'MSG');
+            if (this._processCommands(resp.commands, false) === true) {
+                this._pollMsgs();
+            }
+        },
+
+        _processCommands : function(commands, solicited) {
+            for (var i = 0; i < commands.length; i++) {
+                var command = commands[i];
+
+                var prefix = '<-- MSG: ';
+                if (!solicited) {
+                    // This is a response to polling request, it can contain
+                    // multiple messages
+                    prefix = '  |- MSG: ';
+                }
+
+                client.debug.print(prefix + command);
                 var result = this.mainscreen.handleCommand(command);
 
                 if (result === false) {
                     // Permanent error, bail out without making a new RPC
                     // request
-                    return;
+                    return false;
                 }
             }
 
-            this._pollMsgs();
+            return true;
         },
 
-        _pollMsgFailure : function(e) {
-            var resp = e.getTarget();
+        _pollMsgFailure : function() {
+            var code = this._pollMsgXhr.getStatus();
+            var phase = this._pollMsgXhr.getPhase();
 
             if (this._firstPoll === true) {
                 this.mainscreen.handleRpcError();
+            } else if (phase === 'timeout') {
+                // Make next request immediately
+                this._pollMsgs();
             } else {
-                if (resp.code === qx.io.remote.Rpc.localError.timeout) {
-                    // Make next request immediately
-                    this._pollMsgs();
-                } else {
-                    client.debug.print(
-                        'pollMsg: XHR failure, code: ' + resp.code);
+                client.debug.print(
+                    'pollMsg: XHR request failed, code: ' + code);
 
-                    // Wait a little and try again. This is to make sure
-                    // that we don't loop and consume all CPU cycles if
-                    // there is no connection.
-                    qx.event.Timer.once(function() {
-                        this._pollMsgs();
-                    }, this, 2000);
-                }
+                // Wait a little and try again. This is to make sure
+                // that we don't loop and consume all CPU cycles if
+                // there is no connection.
+                qx.event.Timer.once(function() {
+                    this._pollMsgs();
+                }, this, 2000);
             }
         }
     }

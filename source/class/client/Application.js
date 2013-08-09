@@ -58,14 +58,13 @@ qx.Class.define('client.Application',
                 window.location.reload(true);
             }
 
-            var idstring = cookie.split('-');
             var anonUser = false;
 
-            if (idstring[2] === 'a') {
+            if (cookie.split('-')[2] === 'a') {
                 anonUser = true;
             }
 
-            var rpcmanager = new client.RpcManager(idstring[0], idstring[1]);
+            var rpcmanager = new client.RpcManager();
             var infoDialog = new client.InfoDialog(rpcmanager);
             var settings = new client.Settings(rpcmanager, '');
             var logDialog = new client.LogDialog(rpcmanager, settings,

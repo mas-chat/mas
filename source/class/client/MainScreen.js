@@ -161,16 +161,19 @@ qx.Class.define('client.MainScreen',
 
             problemLabel.setMargin(marginY, 10, 10, marginX);
             this.__myapp.removeAll();
-            this.__myapp.add(problemLabel, { flex : 1 });
+            this.__myapp.add(problemLabel);
         },
 
-        handleCommand : function(command, options)
+        handleCommand : function(message)
         {
+            var options = message.split(' ');
+            var command = options.shift();
+
             var doitagain = true;
 
             switch(command) {
             case 'COOKIE':
-                this.rpc.cookie = options.shift();
+                this.rpc.sessionId = options.shift();
                 break;
 
             case 'CREATE':
