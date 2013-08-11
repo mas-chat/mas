@@ -149,17 +149,15 @@ qx.Class.define('client.UserWindow',
                             hour = '0' + hour;
                         }
 
-                        var mynick = ' <font color="blue"><b>&lt;' +
-                            this.mainscreen.nicks[this.__nwId] + '&gt;</b> ';
+                        var mynick = this.mainscreen.nicks[this.__nwId];
 
+                        var cat = 'mymsg';
                         if (input.substr(0,4) === '/me ') {
-                            input = input.substr(4);
-                            mynick = ' <font color="blue"><b>* ' +
-                                this.mainscreen.nicks[this.__nwId] + '</b> ';
+                            cat = 'action';
                         }
 
                         this.addline(0,
-                                     'mymsg',
+                                     cat,
                                      this.linkify(input),
                                      mynick,
                                      hour + ':' + min);
@@ -500,7 +498,7 @@ qx.Class.define('client.UserWindow',
         setFonts : function(large)
         {
 
-            if (large === 1) {
+            if (large === '1') {
                 this.__atom.setFont('defaultlarge');
                 this.__inputline.setFont('defaultlarge');
             } else {
@@ -633,13 +631,13 @@ qx.Class.define('client.UserWindow',
             var nickText = '';
 
             if (nick) {
-                nickText = '&lt;' + nick + '&gt; ';
+                nickText = '<b>&lt;' + nick + '&gt;</b> ';
             }
 
             var color;
             var prefix = '';
 
-            switch (type) {
+            switch (cat) {
             case 'msg':
                 color = 'black';
                 break;
@@ -680,6 +678,12 @@ qx.Class.define('client.UserWindow',
                 this.__channelText = this.__channelText.substr(pos + 3);
             }
 
+            if (this.mainscreen.initdone === 1) {
+                this.updateWindowContent();
+            }
+        },
+
+        updateWindowContent : function() {
             this.__atom.setValue(this.__channelText);
 
             if (this.scrollLock === false) {

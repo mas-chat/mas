@@ -85,13 +85,11 @@ qx.Class.define('client.RpcManager',
             var resp = this._sendMsgXhr.getResponse();
 
             if (resp.status !== 'OK') {
-                //TODO: ACT Accordingly
-                //Must be die, expire situation then?
-            }
-
-            if (this._processMessages(resp.commands, true) === false) {
-                // Stop prossing the queue
+                this.mainscreen.handleError(resp.status);
+                // Stop prossessing the queue
                 return;
+            } else {
+                this._processMessages(resp.commands, true);
             }
 
             this._sendQueue.shift();
@@ -116,7 +114,10 @@ qx.Class.define('client.RpcManager',
                 'Connection to MeetAndSpeak server lost, trying to' +
                     'reconnect...');
 
-            this._sendMsgFinished();
+            // Stay optimistic and keep trying
+            qx.event.Timer.once(function() {
+                this._sendMsgFinished();
+            }, this, 2000);
         },
 
         _sendMsgFinished : function() {
@@ -152,7 +153,10 @@ qx.Class.define('client.RpcManager',
 
             client.debug.print('<-- Response to polling request');
 
-            if (this._processMessages(resp.commands, false) === true) {
+            if (resp.status !== 'OK') {
+                this.mainscreen.handleError(resp.status);
+            } else {
+                this._processMessages(resp.commands, false);
                 this._pollMsgs();
             }
         },

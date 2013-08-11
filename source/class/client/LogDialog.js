@@ -36,8 +36,6 @@ qx.Class.define('client.LogDialog',
         rpc : 0,
         today : 0,
         weeks : 0,
-        searchstring : '',
-        searchInput : 0,
         settings : 0,
         mainscreen : null,
         iframe : 0,
@@ -75,13 +73,10 @@ qx.Class.define('client.LogDialog',
                 var modearea = new qx.ui.container.Composite(
                     new qx.ui.layout.HBox(10, 'left'));
 
-                var rbSearch = new qx.ui.form.RadioButton('Search');
                 var rbBrowse = new qx.ui.form.RadioButton('Browse');
 
                 modearea.add(rbBrowse);
-                modearea.add(rbSearch);
-
-                var manager = new qx.ui.form.RadioGroup(rbBrowse, rbSearch);
+                var manager = new qx.ui.form.RadioGroup(rbBrowse);
 
                 var hbox = new qx.ui.layout.HBox(10, 'left');
                 hbox.setAlignX('center');
@@ -90,30 +85,9 @@ qx.Class.define('client.LogDialog',
 
                 var hbox2 = new qx.ui.layout.HBox(10, 'left');
                 hbox2.setAlignX('center');
-                var searcharea = new qx.ui.container.Composite(hbox2);
-                searcharea.setPaddingBottom(4);
-
-                this.searchInput = new qx.ui.form.TextField();
-                this.searchInput.set({ maxLength: 200, width: 350 });
-                searcharea.add(this.searchInput);
 
                 var iframe = new qx.ui.embed.Iframe();
                 this.iframe = iframe;
-
-                this.searchInput.addListener('keypress', function(e) {
-                    if (e.getKeyIdentifier() === 'Enter') {
-                        var input = this.searchInput.getValue();
-
-                        if (input !== '' && input !== null) {
-                            this.__startSearch();
-                        }
-                    }
-                }, this);
-
-                var button1 = new qx.ui.form.Button('Search');
-                searcharea.add(button1);
-
-                button1.addListener('execute', this.__startSearch, this);
 
                 this.b1 = new qx.ui.form.Button('Prev year');
                 this.b2 = new qx.ui.form.Button('Prev month');
@@ -198,15 +172,8 @@ qx.Class.define('client.LogDialog',
                     this.list.removeAll();
                     this.iframe.setSource('/tools/blank.pl');
 
-                    if (label === 'Search') {
-                        this.__window.remove(navarea);
-                        this.__window.addAt(searcharea, 1);
-                        this.searchInput.focus();
-                    } else {
-                        this.__window.remove(searcharea);
-                        this.__window.addAt(navarea, 1);
-                        this.seek(0);
-                    }
+                    this.__window.addAt(navarea, 1);
+                    this.seek(0);
                 }, this);
 
                 var logshort = new qx.ui.form.RadioButton('for last 7 days');
@@ -277,31 +244,9 @@ qx.Class.define('client.LogDialog',
             this.__window.open();
         },
 
-        __startSearch : function()
+        sendresult : function(message)
         {
-            var input = this.searchInput.getValue();
-            var doit = true;
-
-            this.errormsg.setValue('');
-            this.searchstring = input;
-            this.iframe.setSource('/tools/blank.pl');
-
-            if (doit === true) {
-                this.__rpclisa.callAsync(
-                    qx.lang.Function.bind(this.__searchresult, this),
-                    'search', input, this.rpc.id);
-            } else {
-                this.errormsg.setValue(
-                    '<font color="#FF0000">Your search string contains' +
-                        ' unsupported special character(s).</font>');
-            }
-        },
-
-        sendresult : function(result)
-        {
-            var pos = result.search(/></);
-            var date = result.slice(0, pos);
-            var data = result.slice(pos+2);
+            var date = message.date;
 
             if (this.__pos === 0) {
                 date = 'Today';
@@ -309,45 +254,38 @@ qx.Class.define('client.LogDialog',
 
             this.today.setValue(date);
 
-            var channels = data.split('><');
+            var channels = message.windows;
             this.list.removeAll();
 
-            if (channels[0] === 'No groups') {
+            if (channels.length === 0) {
                 this.iframe.setSource(
                     '/tools/blank.pl?t=' +
                         escape('Nothing has been logged for this day.'));
             } else {
-                for (var i=0; i < channels.length; i = i + 3) {
-                    var tmp = new qx.ui.form.ListItem(channels[i]);
-                    tmp.chan = escape(channels[i+1]);
-                    tmp.date = channels[i+2];
+                for (var i=0; i < channels.length; i++) {
+                    var tmp = new qx.ui.form.ListItem(channels[i].name);
+                    tmp.chan = escape(channels[i].file);
+                    tmp.date = channels[i].epochday;
                     tmp.rpc = this.rpc;
                     tmp.tz = this.rpc.timezone;
                     tmp.st = '';
                     tmp.iframe = this.iframe;
 
-                    tmp.addListener('click', function (e) {
+                    tmp.addListener('click', function () {
                         this.iframe.setSource(
-                            '/tools/get_day.pl?id=' +  this.rpc.id + '&sec=' +
-                                this.rpc.sec + '&cookie=' + this.rpc.cookie +
-                                '&date=' + this.date + '&chan=' + this.chan +
-                                '&tz=' + this.tz + '&st=' + this.st);
+                            '/tools/get_day.pl?date=' + this.date + '&chan=' +
+                                this.chan + '&tz=' + this.tz + '&st=');
                     }, tmp);
 
                     this.list.add(tmp);
-
-                    if (i === 0) {
-                        this.list.setSelection([tmp]);
-                    }
+                    this.list.setSelection([tmp]);
                 }
 
                 //auto load first item
                 this.iframe.setSource(
-                    '/tools/get_day.pl?id=' +  this.rpc.id + '&sec=' +
-                        this.rpc.sec + '&cookie=' + this.rpc.cookie +
-                        '&date=' + channels[2] + '&chan=' +
-                        escape(channels[1]) + '&tz=' + this.rpc.timezone +
-                        '&st=' + escape(''));
+                    '/tools/get_day.pl?date=' + channels[0].epochday +
+                        '&chan=' + escape(channels[0].file) + '&tz=' +
+                        this.rpc.timezone + '&st=');
             }
 
             this.b1.setEnabled(true);
@@ -370,57 +308,6 @@ qx.Class.define('client.LogDialog',
                 this.b6.setEnabled(false);
             } else {
                 this.b6.setEnabled(true);
-            }
-        },
-
-        __searchresult : function(result, exc)
-        {
-            if (exc === null) {
-                var hits = result.split('||');
-                this.list.removeAll();
-
-                if (result !== '') {
-                    var firstitem = hits[0].split('|');
-
-                    for (var i=0; i < hits.length; i = i + 2) {
-                        var item = hits[i].split('|');
-
-                        var tmp = new qx.ui.form.ListItem('Hit ' + (i / 2 + 1));
-                        tmp.date = item[0];
-                        tmp.chan = escape(item[1]);
-                        tmp.rpc = this.rpc;
-                        tmp.tz = this.rpc.timezone;
-                        tmp.st = escape(this.searchstring);
-                        tmp.iframe = this.iframe;
-
-                        tmp.addListener('click', function (e) {
-                            this.iframe.setSource(
-                                '/tools/get_day.pl?id=' +  this.rpc.id +
-                                    '&sec=' + this.rpc.sec + '&cookie=' +
-                                    this.rpc.cookie + '&date=' + this.date +
-                                    '&chan=' + this.chan + '&tz=' + this.tz +
-                                    '&showall=yes&st=' + this.st);
-                        }, tmp);
-
-                        this.list.add(tmp);
-
-                        if (i === 0) {
-                            this.list.setSelection([tmp]);
-                        }
-                    }
-
-                    //auto load first item
-                    this.iframe.setSource(
-                        '/tools/get_day.pl?id=' +  this.rpc.id + '&sec=' +
-                            this.rpc.sec + '&cookie=' + this.rpc.cookie +
-                            '&date=' + firstitem[0] + '&chan=' +
-                            escape(firstitem[1]) + '&tz=' + this.rpc.timezone +
-                            '&showall=yes&st=' + escape(this.searchstring));
-                }
-            } else {
-                this.errormsg.setValue(
-                    '<font color="#FF0000">Connection error. Please try' +
-                        ' again.</font>');
             }
         },
 
@@ -448,6 +335,7 @@ qx.Class.define('client.LogDialog',
             this.b5.setEnabled(false);
             this.b6.setEnabled(false);
 
+            client.debug.print('Seeking logs: ' + this.__pos);
             this.rpc.call('GETLOG', this.__pos);
         }
     }

@@ -163,10 +163,41 @@ qx.Class.define('client.MainScreen',
             this.__myapp.add(problemLabel);
         },
 
+        handleError : function(code)
+        {
+
+            if (code === 'DIE') {
+                if (this.desktop === 0) {
+                    this.show();
+                }
+                this.infoDialog.showInfoWin(
+                    'Error',
+                    'Session expired. <p>Press OK to login again.',
+                    'OK',
+                    function () {
+                        qx.bom.Cookie.del('ProjectEvergreen');
+                        window.location.reload(true);
+                    });
+            } else if (code ===  'EXPIRE') {
+                if (this.desktop === 0) {
+                    this.show();
+                }
+
+                //var reason = param.slice(pos+1);
+                this.infoDialog.showInfoWin(
+                    'Error',
+                    'Your session expired, you logged in from another ' +
+                        'location, or<br>the server was restarted.<p>Press ' +
+                        'OK to restart.',
+                    'OK',
+                    function() {
+                        window.location.reload(true);
+                    });
+            }
+        },
+
         handleCommand : function(message)
         {
-            var doitagain = true;
-
             switch(message.id) {
             case 'SESSONID':
                 this.rpc.sessionId = message.sessionId;
@@ -182,6 +213,13 @@ qx.Class.define('client.MainScreen',
 
             case 'INITDONE':
                 this.initdone = 1;
+
+                for (var i=0; i < this.windows.length; i++) {
+                    if (typeof(this.windows[i]) !== 'undefined') {
+                        this.windows[i].updateWindowContent();
+                    }
+                }
+
                 var group = qx.bom.Cookie.get('ProjectEvergreenJoin');
 
                 if (group !== null) {
@@ -255,16 +293,14 @@ qx.Class.define('client.MainScreen',
                 break;
 
             case 'ADDNTF':
-                windowId = parseInt(options.shift(), 10);
-                var noteId = options.shift();
-                usertext = options.join(' ');
-                this.windows[windowId].addntf(noteId, usertext);
+                this.windows[message.window].addntf(
+                    message.noteId, message.body);
                 break;
 
             case 'REQF':
-                var friendId = parseInt(options.shift(), 10);
-                var friendNick = options.shift();
-                var friendName = options.join(' ');
+                var friendId = message.friendId;
+                var friendNick = message.friendNick;
+                var friendName = message.friendName;
 
                 if (this.__msgvisible === false) {
                     this.msg = new qx.ui.container.Composite(
@@ -308,91 +344,47 @@ qx.Class.define('client.MainScreen',
                 break;
 
             case 'TOPIC':
-                windowId = parseInt(options.shift(), 10);
-                usertext = options.join(' ');
-                this.windows[windowId].changetopic(usertext);
+                this.windows[message.window].changetopic(message.topic);
                 break;
 
             case 'NAMES':
-                windowId = parseInt(options.shift(), 10);
-                this.windows[windowId].addnames(options);
+                this.windows[message.window].addnames(message.names);
                 break;
 
             case 'ADDNAME':
-                windowId = parseInt(options.shift(), 10);
-                options.shift(); // obsolete parameter
-                var nick = options.shift();
-                this.windows[windowId].addname(nick);
+                this.windows[message.window].addname(message.nick);
                 break;
 
             case 'DELNAME':
-                windowId = parseInt(options.shift(), 10);
-                nick = options.shift();
-                this.windows[windowId].delname(nick);
+                this.windows[message.window].delname(message.nick);
                 break;
 
             case 'NICK':
-                this.nicks = options;
+                this.nicks = message.nicks;
                 break;
 
             case 'ADDURL':
-                windowId = parseInt(options.shift(), 10);
-                var url = options.shift();
-                this.windows[windowId].addUrl(url);
-                break;
-
-            case 'DIE':
-                if (this.desktop === 0) {
-                    this.show();
-                }
-                this.infoDialog.showInfoWin(
-                    'Error',
-                    'Session expired. <p>Press OK to login again.',
-                    'OK',
-                    function () {
-                        qx.bom.Cookie.del('ProjectEvergreen');
-                        window.location.reload(true);
-                    });
-                doitagain = false;
-                break;
-
-            case 'EXPIRE':
-                if (this.desktop === 0) {
-                    this.show();
-                }
-
-                //var reason = param.slice(pos+1);
-                this.infoDialog.showInfoWin(
-                    'Error',
-                    'Your session expired, you logged in from another ' +
-                        'location, or<br>the server was restarted.<p>Press ' +
-                        'OK to restart.',
-                    'OK',
-                    function() {
-                        window.location.reload(true);
-                    });
-                doitagain = false;
+                this.windows[message.window].addUrl(message.url);
                 break;
 
             case 'INFO' :
-                var param = options.join(' ');
+                var text = message.text;
 
                 //TODO: big bad hack, fix: proper protocol
-                if (param.substr(0, 30) === 'You are already chatting with ') {
-                    this.removeWaitText(this.globalflist, param.substr(30));
+                if (text.substr(0, 30) === 'You are already chatting with ') {
+                    this.removeWaitText(this.globalflist, text.substr(30));
                 }
 
-                this.infoDialog.showInfoWin('Info', param, 'OK');
+                this.infoDialog.showInfoWin('Info', text, 'OK');
                 break;
 
             case 'CLOSE':
-                windowId = parseInt(options.shift(), 10);
                 //TODO: call destructor?
-                delete this.windows[windowId];
+                delete this.windows[message.window];
                 break;
 
             case 'FLIST':
-                this.updateFriendsList(this.globalflist, options.join(' '));
+                this.updateFriendsList(this.globalflist, message);
                 break;
 
             case 'SET':
@@ -408,43 +400,34 @@ qx.Class.define('client.MainScreen',
                 break;
 
             case 'OPERLIST':
-                windowId = parseInt(options.shift(), 10);
-                var result = options.join(' ');
-                var opers = result.split('<<>>');
-
+                windowId = message.window;
                 this.windows[windowId].configListOper.removeAll();
 
-                for (var i=0; i < opers.length; i++) {
-                    var tmp = opers[i].split('<>');
-                    var tmpList = new qx.ui.form.ListItem(tmp[1]);
-                    tmpList.userid = tmp[0];
-                    this.windows[windowId].configListOper.add(tmpList);
+                for (var i=0; i < message.list.length; i++) {
+                    var operList = new qx.ui.form.ListItem(
+                        message.list[i].nick);
+                    operList.userid = message.list[i].userId;
+                    this.windows[windowId].configListOper.add(operList);
                 }
                 break;
 
             case 'BANLIST':
-                windowId = parseInt(options.shift(), 10);
-                result = options.join(' ');
-                var bans = result.split('<<>>');
-
+                windowId = message.window;
                 this.windows[windowId].configListBan.removeAll();
 
-                for (var i = 0; i < bans.length; i++) {
-                    var tmp = bans[i].split('<>');
-                    var tmpList = new qx.ui.form.ListItem(tmp[0]);
-                    tmpList.banid = tmp[1];
-                    this.windows[windowId].configListBan.add(tmpList);
+                for (i = 0; i < message.list.length; i++) {
+                    var banList = new qx.ui.form.ListItem(message.list[i].info);
+                    banList.banid = message.list[i].banId;
+                    this.windows[windowId].configListBan.add(banList);
                 }
                 break;
 
             case 'LOGS':
-                result = options.join(' ');
-                this.logDialog.sendresult(result);
+                this.logDialog.sendresult(message);
                 break;
             }
 
             this.__firstCommand = 0;
-            return doitagain;
         },
 
         createOrUpdateWindow : function(message, create)
@@ -747,24 +730,23 @@ qx.Class.define('client.MainScreen',
             this.__windowGroup = new client.RadioManager();
         },
 
-        updateFriendsList : function(parentFList, allFriends)
+        updateFriendsList : function(parentFList, message)
         {
             parentFList.removeAll();
 
-            var myfriends = allFriends.split('||');
-
-            if (allFriends !== '') {
-                for (var i = 0; i < myfriends.length; i++) {
-                    var columns = myfriends[i].split('|');
+            if (message.list.length !== 0) {
+                for (var i = 0; i < message.list.length; i++) {
+                    var friendData = message.list[i];
 
                     var friend = new qx.ui.basic.Label(
-                        '<b>' + columns[1] + '</b>&nbsp;(' + columns[3] + ')');
+                        '<b>' + friendData.name + '</b>&nbsp;(' +
+                            friendData.nick + ')');
                     var friend2 = new qx.ui.basic.Label();
                     var friend3 = new qx.ui.basic.Label();
 
                     friend3.setRich(true);
                     friend3.setValue('<font color="green">|chat|</font>');
-                    friend3.nickname = columns[3];
+                    friend3.nickname = friendData.nick;
                     friend3.rrpc = this.rpc;
                     friend3.waiting = false;
                     friend3.mainscreen = this;
@@ -801,7 +783,7 @@ qx.Class.define('client.MainScreen',
                     friend2.setPaddingLeft(20);
                     friend3.setPaddingLeft(10);
                     friend.setPaddingLeft(10);
-                    friend2.idleTime = columns[0];
+                    friend2.idleTime = friendData.idleTime;
 
                     parentFList.add(friend, { row: 2*i, column: 0 });
                     parentFList.add(friend2, { row: 2 * i + 1, column: 0,
@@ -810,14 +792,15 @@ qx.Class.define('client.MainScreen',
 
                     var online = 2;
 
-                    if(columns[0] === 0) {
+                    if(friendData.idleTime === 0) {
                         online = 1;
                     }
 
                     //update groups also
                     for (var ii=0; ii < this.windows.length; ii++) {
                         if (typeof(this.windows[ii]) !== 'undefined') {
-                            this.windows[ii].setUserStatus(columns[3], online);
+                            this.windows[ii].setUserStatus(friendData.nick,
+                                                           online);
                         }
                     }
                 }
@@ -1167,7 +1150,7 @@ qx.Class.define('client.MainScreen',
             if (this.settings.getSslEnabled() === 1) {
                 sslButton.setValue(true);
             }
-            if (this.settings.getLargeFonts() === 0) {
+            if (this.settings.getLargeFonts() === '0') {
                 fontButton.setValue(true);
             }
             if (this.settings.getAutoArrange() === 1) {
@@ -1309,9 +1292,9 @@ qx.Class.define('client.MainScreen',
             var smallfonts = e.getData();
 
             if (smallfonts === true) {
-                this.settings.setLargeFonts(0);
+                this.settings.setLargeFonts('0');
             } else {
-                this.settings.setLargeFonts(1);
+                this.settings.setLargeFonts('1');
             }
 
             this.updateFonts();
