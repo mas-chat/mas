@@ -110,7 +110,6 @@ qx.Class.define('client.MainScreen',
         initdone : 0,
         rootContainer : 0,
         windows : null,
-        showads : 0,
         FlashHelper : 0,
         desktop : 0,
         contactsButton : 0,
@@ -166,22 +165,19 @@ qx.Class.define('client.MainScreen',
 
         handleCommand : function(message)
         {
-            var options = message.split(' ');
-            var command = options.shift();
-
             var doitagain = true;
 
-            switch(command) {
-            case 'COOKIE':
-                this.rpc.sessionId = options.shift();
+            switch(message.id) {
+            case 'SESSONID':
+                this.rpc.sessionId = message.sessionId;
                 break;
 
             case 'CREATE':
-                this.createOrUpdateWindow(options, true);
+                this.createOrUpdateWindow(message, true);
                 break;
 
             case 'UPDATE':
-                this.createOrUpdateWindow(options, false);
+                this.createOrUpdateWindow(message, false);
                 break;
 
             case 'INITDONE':
@@ -221,12 +217,14 @@ qx.Class.define('client.MainScreen',
                 break;
 
             case 'ADDTEXT':
-                var windowId = parseInt(options.shift(), 10);
-                var type = parseInt(options.shift(), 10);
-                var usertext = options.join(' ');
-
-                usertext = this.adjustTime(usertext);
-                this.windows[windowId].addline(usertext);
+                var windowId = message.window;
+                var type = message.type;
+                var ts = this.adjustTime(message.ts);
+                this.windows[windowId].addline(message.type,
+                                               message.cat,
+                                               message.body,
+                                               message.nick,
+                                               ts);
 
                 if (this.windows[windowId].sound === 1 &&
                     type === 2 && this.initdone === 1) {
@@ -337,10 +335,6 @@ qx.Class.define('client.MainScreen',
                 this.nicks = options;
                 break;
 
-            case 'A':
-                this.showads = 0; //options.shift();
-                break;
-
             case 'ADDURL':
                 windowId = parseInt(options.shift(), 10);
                 var url = options.shift();
@@ -364,7 +358,6 @@ qx.Class.define('client.MainScreen',
 
             case 'EXPIRE':
                 if (this.desktop === 0) {
-                    this.showads = 0;
                     this.show();
                 }
 
@@ -379,9 +372,6 @@ qx.Class.define('client.MainScreen',
                         window.location.reload(true);
                     });
                 doitagain = false;
-                break;
-
-            case 'OK' :
                 break;
 
             case 'INFO' :
@@ -406,7 +396,7 @@ qx.Class.define('client.MainScreen',
                 break;
 
             case 'SET':
-                this.settings.update(options.join(' '));
+                this.settings.update(message.settings);
                 //We have settings now, ready to draw the main screen
                 this.__startLabel.setValue(
                     '<center><br><br><br>Rendering</center>');
@@ -414,8 +404,7 @@ qx.Class.define('client.MainScreen',
                 break;
 
             case 'KEY':
-                windowId = parseInt(options.shift(), 10);
-                this.windows[windowId].apikey.setValue(options.shift());
+                this.windows[message.window].apikey.setValue(message.key);
                 break;
 
             case 'OPERLIST':
@@ -458,31 +447,24 @@ qx.Class.define('client.MainScreen',
             return doitagain;
         },
 
-        createOrUpdateWindow : function(options, create)
+        createOrUpdateWindow : function(message, create)
         {
-            var windowId = options.shift();
-            var x = parseInt(options.shift(), 10);
-            var y = parseInt(options.shift(), 10);
-            var width = parseInt(options.shift(), 10);
-            var height = parseInt(options.shift(), 10);
-            var nw = options.shift();
-            var nwId = options.shift();
-            var name = options.shift();
-            var type = parseInt(options.shift(), 10);
-            var sound = parseInt(options.shift(), 10);
-            var titlealert = parseInt(options.shift(), 10);
-            var usermode = parseInt(options.shift(), 10);
-            var visible = parseInt(options.shift(), 10);
-            var newMsgs = parseInt(options.shift(), 10);
-            var pwset = parseInt(options.shift(), 10);
-
-            var password = '';
-
-            if (pwset === 1) {
-                password = options.shift();
-            }
-
-            var topic = options.join(' ');
+            var windowId = message.window;
+            var x = message.x;
+            var y = message.y;
+            var width = message.width;
+            var height = message.height;
+            var nw = message.nwName;
+            var nwId = message.nwId;
+            var name = message.chanName;
+            var type = message.chanType;
+            var sound = message.sounds;
+            var titlealert = message.titleAlert;
+            var usermode = message.userMode;
+            var visible = message.visible;
+            var newMsgs = message.newMsgs;
+            var password = message.password;
+            var topic = message.topic;
 
             if (create === true) {
                 var newWindow =
@@ -583,38 +565,30 @@ qx.Class.define('client.MainScreen',
             }
         },
 
-        adjustTime : function(text)
+        adjustTime : function(time)
         {
-            var myRe = /<(\d+)>/g;
-            var timezone = this.rpc.timezone;
+            var mytime = time - this.rpc.timezone;
 
-            return text.replace(
-                myRe,
-                function(m) {
-                    var mytime = parseInt(m.substring(1, m.length-1), 10) -
-                            timezone;
+            if (mytime < 0) {
+                mytime = 1440 + mytime;
+            }
 
-                    if (mytime < 0) {
-                        mytime = 1440 + mytime;
-                    }
+            if (mytime > 1440) {
+                mytime = mytime - 1440;
+            }
 
-                    if (mytime > 1440) {
-                        mytime = mytime - 1440;
-                    }
+            var hour = Math.floor(mytime / 60);
+            var min = mytime % 60;
 
-                    var hour = Math.floor(mytime / 60);
-                    var min = mytime % 60;
+            if (min < 10) {
+                min = '0' + min;
+            }
 
-                    if (min < 10) {
-                        min = '0' + min;
-                    }
+            if (hour < 10) {
+                hour = '0' + hour;
+            }
 
-                    if (hour < 10) {
-                        hour = '0' + hour;
-                    }
-
-                    return hour + ':' + min;
-                });
+            return hour + ':' + min;
         },
 
         show : function()
@@ -645,15 +619,6 @@ qx.Class.define('client.MainScreen',
             middleContainer.set({ decorator: 'background2',
                                   backgroundColor: '#DFE5E5' });
             middleSection.add(middleContainer, { flex:1 });
-
-            //ads
-            if (this.showads === 1) {
-                var iframe = new qx.ui.embed.Iframe(
-                    '/iframe_part_from_google.html');
-                iframe.set({ alignY: 'middle', height: 605, width: 120,
-                             decorator : null });
-                middleSection.add(iframe);
-            }
 
             var friendScroll = new qx.ui.container.Scroll();
             friendScroll.setPadding(0, 0, 5, 0);

@@ -45,11 +45,8 @@ qx.Class.define('client.Settings',
         {
             this.initdone = 0;
 
-            var allsettings = params.split('||');
-
-            for (var i=0; i < allsettings.length; i = i + 2) {
-                var key = allsettings[i];
-                var value = allsettings[i+1];
+            for(var key in params) {
+                var value = params[key];
 
                 switch(key) {
                 case 'firstTime':

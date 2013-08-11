@@ -158,9 +158,11 @@ qx.Class.define('client.UserWindow',
                                 this.mainscreen.nicks[this.__nwId] + '</b> ';
                         }
 
-                        this.addline(hour + ':' + min + mynick +
-                                     this.linkify(input) +
-                                     '</font><br><!-- x -->');
+                        this.addline(0,
+                                     'mymsg',
+                                     this.linkify(input),
+                                     mynick,
+                                     hour + ':' + min);
                     }
                 }
                 this.setNormal();
@@ -600,14 +602,6 @@ qx.Class.define('client.UserWindow',
             return this.__name;
         },
 
-        expandMOTD : function()
-        {
-            this.__channelText = this.__channelText.replace(
-                    /(<span style\="display\:none">|<\/span>|Click here to see details and MOTD\.)/g, '');
-
-            this.addline('');
-        },
-
         addntf : function (noteid, text)
         {
             if (this.__notes > 10) {
@@ -634,23 +628,56 @@ qx.Class.define('client.UserWindow',
             }
         },
 
-        addline : function(line)
+        addline : function(type, cat, body, nick, ts)
         {
-            //show images
-            // line =
-            // line.replace(/<A HREF=\"(\S*?\.(png|jpg|jpeg))\"(.*?)<\/A>/g,
-            // "<br><br><a href=\"$1\" target=\"_blank\">" +
-            // "<img border=\"0\" height=\"200\" style=\"max-width:500px;" +
-            // "height:200px;\"" +
-            // "src=\"$1\"></a> &nbsp;&nbsp;&nbsp;$&" );
+            var nickText = '';
 
-            this.__channelText = this.__channelText + line;
+            if (nick) {
+                nickText = '&lt;' + nick + '&gt; ';
+            }
+
+            var color;
+            var prefix = '';
+
+            switch (type) {
+            case 'msg':
+                color = 'black';
+                break;
+            case 'info':
+                color = 'green';
+                prefix = '*** ';
+                break;
+            case 'notice':
+                color = 'grey';
+                prefix = '';
+                break;
+            case 'error':
+                color = 'red';
+                prefix = '*** ';
+                break;
+            case 'mymsg':
+                color = 'blue';
+                break;
+            case 'mention':
+                color = 'cyan';
+                break;
+            case 'action':
+                color = 'black';
+                prefix = ' * ';
+                break;
+            case 'robot':
+                color = 'brown';
+            }
+
+            this.__channelText = this.__channelText + '<span style="color:' +
+                color + '">' + ts + ' ' + prefix + nickText + body +
+                '<span><br>';
             this.__lines++;
 
             // limit lines
             if (this.__lines > 200) {
-                var pos = this.__channelText.search(/<\!-- x -->/i);
-                this.__channelText = this.__channelText.substr(pos + 11);
+                var pos = this.__channelText.search(/<br>/i);
+                this.__channelText = this.__channelText.substr(pos + 3);
             }
 
             this.__atom.setValue(this.__channelText);

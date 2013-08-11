@@ -84,7 +84,12 @@ qx.Class.define('client.RpcManager',
         _sendMsgSuccess : function() {
             var resp = this._sendMsgXhr.getResponse();
 
-            if (this._processCommands(resp.commands, true) === false) {
+            if (resp.status !== 'OK') {
+                //TODO: ACT Accordingly
+                //Must be die, expire situation then?
+            }
+
+            if (this._processMessages(resp.commands, true) === false) {
                 // Stop prossing the queue
                 return;
             }
@@ -147,14 +152,14 @@ qx.Class.define('client.RpcManager',
 
             client.debug.print('<-- Response to polling request');
 
-            if (this._processCommands(resp.commands, false) === true) {
+            if (this._processMessages(resp.commands, false) === true) {
                 this._pollMsgs();
             }
         },
 
-        _processCommands : function(commands, solicited) {
-            for (var i = 0; i < commands.length; i++) {
-                var command = commands[i];
+        _processMessages : function(messages, solicited) {
+            for (var i = 0; i < messages.length; i++) {
+                var message = messages[i];
 
                 var prefix = '<-- MSG: ';
                 if (!solicited) {
@@ -163,8 +168,9 @@ qx.Class.define('client.RpcManager',
                     prefix = '  |- MSG: ';
                 }
 
-                client.debug.print(prefix + command);
-                var result = this.mainscreen.handleCommand(command);
+                var debug = JSON.stringify(message);
+                client.debug.print(prefix + debug);
+                var result = this.mainscreen.handleCommand(message);
 
                 if (result === false) {
                     // Permanent error, bail out without making a new RPC
