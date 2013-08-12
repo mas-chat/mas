@@ -33,8 +33,10 @@ qx.Class.define('client.Application',
 
             qx.log.appender.Native; //disable someday
 
-            this.getRoot().removeAll();
-            this.getRoot().set({ backgroundColor: '#FFFFFF' });
+            var root = this.getRoot();
+
+            root.removeAll();
+            root.set({ backgroundColor: '#FFFFFF' });
 
             var startLabel = new qx.ui.basic.Label(
                 '<center><img src="/i/ajax-loader.gif"><br><br><br>' +
@@ -49,37 +51,9 @@ qx.Class.define('client.Application',
             var marginY = Math.round(qx.bom.Viewport.getHeight() / 2);
 
             startLabel.setMargin(marginY, 10, 10, marginX);
-            this.getRoot().add(startLabel, { width: '100%', height: '100%' });
+            root.add(startLabel, { width: '100%', height: '100%' });
 
-            var cookie = qx.bom.Cookie.get('ProjectEvergreen');
-
-            if (cookie === null) {
-                qx.bom.Cookie.del('ProjectEvergreen');
-                window.location.reload(true);
-            }
-
-            var anonUser = false;
-
-            if (cookie.split('-')[2] === 'a') {
-                anonUser = true;
-            }
-
-            var rpcmanager = new client.RpcManager();
-            var infoDialog = new client.InfoDialog(rpcmanager);
-            var settings = new client.Settings(rpcmanager, '');
-            var logDialog = new client.LogDialog(rpcmanager, settings,
-                                                 infoDialog);
-
-            infoDialog.settings = settings;
-
-            var MainScreenObj = new client.MainScreen(rpcmanager,
-                                                      this.getRoot(), logDialog,
-                                                      settings, infoDialog,
-                                                      anonUser, startLabel);
-
-            infoDialog.mainscreen = MainScreenObj;
-            logDialog.mainscreen = MainScreenObj;
-            rpcmanager.mainscreen = MainScreenObj;
+            new client.Controller(startLabel, root);
         }
     }
 });

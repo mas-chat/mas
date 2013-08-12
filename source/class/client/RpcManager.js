@@ -18,8 +18,16 @@ qx.Class.define('client.RpcManager',
 {
     extend : qx.core.Object,
 
-    construct : function() {
+    construct : function(ctx, processMessageCb, handleErrorCb,
+                         handleRpcErrorCb, setStatusTextCb) {
         this.base(arguments);
+
+        // Set callbacks
+        this._processMessageCb = processMessageCb;
+        this._handleErrorCb = handleErrorCb;
+        this._handleRpcErrorCb = handleRpcErrorCb;
+        this._setStatusTextCb = setStatusTextCb;
+        this._cbCtx = ctx;
 
         // Long polling XMLHttpRequest that listens for incoming messages
         this._pollMsgXhr = new qx.io.request.Xhr('/ralph');
@@ -35,19 +43,19 @@ qx.Class.define('client.RpcManager',
         this._sendMsgXhr.addListener('success', this._sendMsgSuccess, this);
         this._sendMsgXhr.addListener('fail', this._sendMsgFailure, this);
 
-        var date = new Date();
-        this.timezone = date.getTimezoneOffset();
-
         // Make initial connection and start polling the server for incoming
         // messages
         this._pollMsgs();
     },
 
     members : {
-        sessionId : 0,
-        timezone : 0, // TODO: Public because of call from LogDialog, fix.
-        mainscreen : 0,
+        _processMessageCb : null,
+        _handleErrorCb : null,
+        _handleRpcErrorCb : null,
+        _setStatusTextCb : null,
+        _cbCtx : null,
 
+        _sessionId : 0,
         _state : false,
         _sendQueue : [],
         _rcvMsgXhr : 0,
@@ -74,7 +82,7 @@ qx.Class.define('client.RpcManager',
 
         _sendMsg : function(message) {
             this._sendMsgXhr.setUrl(
-                '/ralph/' + this.sessionId + '/' + this._sendSeq);
+                '/ralph/' + this._sessionId + '/' + this._sendSeq);
             this._sendMsgXhr.setRequestData(JSON.stringify(message));
             this._sendMsgXhr.send();
 
@@ -85,7 +93,8 @@ qx.Class.define('client.RpcManager',
             var resp = this._sendMsgXhr.getResponse();
 
             if (resp.status !== 'OK') {
-                this.mainscreen.handleError(resp.status);
+
+                this._handleErrorCb.call(this._cbCtx, resp.status);
                 // Stop prossessing the queue
                 return;
             } else {
@@ -97,7 +106,7 @@ qx.Class.define('client.RpcManager',
 
             if (this._state === 'error') {
                 this._state = 'normal';
-                this.mainscreen.setStatusText('');
+                this._.setStatusTextCb.call(this._cbCtx, '');
             }
 
             this._sendMsgFinished();
@@ -110,7 +119,7 @@ qx.Class.define('client.RpcManager',
             client.debug.print(
                 'sendMsg: XHR request failed, code: ' + code);
 
-            this.mainscreen.setStatusText(
+            this._setStatusTextCb.call(this._cbCtx,
                 'Connection to MeetAndSpeak server lost, trying to' +
                     'reconnect...');
 
@@ -131,11 +140,12 @@ qx.Class.define('client.RpcManager',
             var tz = '';
 
             if (this._firstPoll === true) {
-                tz = '/' + this.timezone;
+                var date = new Date();
+                tz = '/' + date.getTimezoneOffset();
             }
 
             this._pollMsgXhr.setUrl(
-                '/ralph/' + this.sessionId + '/' + this._pollSeq + tz);
+                '/ralph/' + this._sessionId + '/' + this._pollSeq + tz);
             this._pollMsgXhr.send();
 
             client.debug.print(
@@ -154,7 +164,7 @@ qx.Class.define('client.RpcManager',
             client.debug.print('<-- Response to polling request');
 
             if (resp.status !== 'OK') {
-                this.mainscreen.handleError(resp.status);
+                this._handleError(resp.status);
             } else {
                 this._processMessages(resp.commands, false);
                 this._pollMsgs();
@@ -174,12 +184,18 @@ qx.Class.define('client.RpcManager',
 
                 var debug = JSON.stringify(message);
                 client.debug.print(prefix + debug);
-                var result = this.mainscreen.handleCommand(message);
 
-                if (result === false) {
-                    // Permanent error, bail out without making a new RPC
-                    // request
-                    return false;
+                if (message.id === 'SESSONID')
+                {
+                    this._sessionId = message.sessionId;
+                } else {
+                    var result = this._processMessageCb.call(this._cbCtx, message);
+
+                    if (result === false) {
+                        // Permanent error, bail out without making a new RPC
+                        // request
+                        return false;
+                    }
                 }
             }
 
@@ -191,7 +207,7 @@ qx.Class.define('client.RpcManager',
             var phase = this._pollMsgXhr.getPhase();
 
             if (this._firstPoll === true) {
-                this.mainscreen.handleRpcError();
+                this._handleRpcErrorCb.call(this._cbCtx);
             } else if (phase === 'timeout') {
                 // Make next request immediately
                 this._pollMsgs();

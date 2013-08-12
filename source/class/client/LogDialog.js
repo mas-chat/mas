@@ -262,12 +262,15 @@ qx.Class.define('client.LogDialog',
                     '/tools/blank.pl?t=' +
                         escape('Nothing has been logged for this day.'));
             } else {
+                var dateObj = new Date();
+                var timezone = dateObj.getTimezoneOffset();
+
                 for (var i=0; i < channels.length; i++) {
                     var tmp = new qx.ui.form.ListItem(channels[i].name);
                     tmp.chan = escape(channels[i].file);
                     tmp.date = channels[i].epochday;
                     tmp.rpc = this.rpc;
-                    tmp.tz = this.rpc.timezone;
+                    tmp.tz = timezone;
                     tmp.st = '';
                     tmp.iframe = this.iframe;
 
@@ -285,7 +288,7 @@ qx.Class.define('client.LogDialog',
                 this.iframe.setSource(
                     '/tools/get_day.pl?date=' + channels[0].epochday +
                         '&chan=' + escape(channels[0].file) + '&tz=' +
-                        this.rpc.timezone + '&st=');
+                        timezone + '&st=');
             }
 
             this.b1.setEnabled(true);

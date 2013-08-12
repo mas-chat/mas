@@ -20,16 +20,16 @@ qx.Class.define('client.UserWindow',
 
     construct : function(srpc, desktop, topic, nw, name, type, sound,
                          titlealert, nwId, usermode, password, newMsgs,
-                         infoDialog, id, mainscreen)
+                         infoDialog, id, controller)
     {
         this.base(arguments);
 
         this.__urllist = [];
         this.nameslist = new qx.data.Array();
         this.rpc = srpc;
-        this.mainscreen = mainscreen;
         this.infoDialog = infoDialog;
         this.winid = id;
+        this._controller = controller;
 
         var layout = new qx.ui.layout.Grid();
         layout.setRowFlex(0, 1); // make row 0 flexible
@@ -51,10 +51,11 @@ qx.Class.define('client.UserWindow',
         wm1.setModal(false);
         wm1.setLayout(new qx.ui.layout.VBox(0));
         wm1.setAllowMaximize(true);
+        wm1.setAllowMinimize(false);
         wm1.setResizeSensitivity(10);
         wm1.set({contentPadding: [0,0,0,0]});
 
-        if (this.mainscreen.anonUser === true) {
+        if (this._controller.anonUser === true) {
             wm1.setShowClose(false);
         }
 
@@ -149,18 +150,16 @@ qx.Class.define('client.UserWindow',
                             hour = '0' + hour;
                         }
 
-                        var mynick = this.mainscreen.nicks[this.__nwId];
+                        var fakeMsg = {
+                            type: 0,
+                            cat: input.substr(0,4) === '/me ' ?
+                                'mymsg' : 'action',
+                            nick: this._controller.nicks[this.__nwId],
+                            body: this.linkify(input),
+                            ts: hour * 60 + min
+                        };
 
-                        var cat = 'mymsg';
-                        if (input.substr(0,4) === '/me ') {
-                            cat = 'action';
-                        }
-
-                        this.addline(0,
-                                     cat,
-                                     this.linkify(input),
-                                     mynick,
-                                     hour + ':' + min);
+                        this.addline(fakeMsg, false);
                     }
                 }
                 this.setNormal();
@@ -169,10 +168,6 @@ qx.Class.define('client.UserWindow',
             }
             else if (key === 'PageDown') {
                 this.__scroll.scrollByY(this.__scroll.getHeight() - 30);
-            } else if (key === 'Down') {
-                this.mainscreen.activateNextWin('down');
-            } else if (key === 'Up') {
-                this.mainscreen.activateNextWin('up');
             } else if (key === 'Tab' && this.type === 0) {
                 var input2 = this.__inputline.getValue();
 
@@ -313,8 +308,6 @@ qx.Class.define('client.UserWindow',
             }
         }, this);
 
-        desktop.add(wm1);
-
         this.changetopic(topic);
     },
 
@@ -322,10 +315,8 @@ qx.Class.define('client.UserWindow',
     members :
     {
         window : 0,
-        hidden : false,
         winid : 0,
         rpc : 0,
-        taskbarControl : 0,
         titlealert : 0,
         sound : 0,
         configListBan : 0,
@@ -333,12 +324,11 @@ qx.Class.define('client.UserWindow',
         nameslist : null,
         closeok : 0,
         scrollLock : false,
-        isRed : false,
         infoDialog : 0,
-        mainscreen : 0,
         type : 0,
         apikey : 0,
 
+        _controller : null,
         __notes : 0,
         __inputline : 0,
         __urllabel : 0,
@@ -354,7 +344,6 @@ qx.Class.define('client.UserWindow',
         __nw : 0,
         __nwId : 0,
         __topic : 0,
-        __taskbarButtonColor : 'cccccc',
         __name : 0,
         __password : 0,
         __usermode : 0,
@@ -387,21 +376,18 @@ qx.Class.define('client.UserWindow',
             var width = data.width;
             var height = data.height;
 
-            if (this.mainscreen.initdone === 1) {
+            if (this._controller.initdone === 1) {
                 this.rpc.call('RESIZE', this.winid + ' ' + width + ' ' +
                               height);
             }
         },
 
-        handleClose : function(e)
+        handleClose : function()
         {
             this.rpc.call('CLOSE', this.winid);
-            client.debug.print('works');
 
-            qx.event.Timer.once(function(e) {
-                if (this.mainscreen.settings.getAutoArrange() === 1) {
-                    this.mainscreen.arrangeCommand();
-                }
+            qx.event.Timer.once(function() {
+                this._controller.tileWindows();
             }, this, 1000);
             client.debug.print('works2');
         },
@@ -423,45 +409,14 @@ qx.Class.define('client.UserWindow',
             return this.window.getBounds();
         },
 
-        setRed : function()
-        {
-            this.__taskbarButtonColor = 'ff1111';
-            this.updateButton();
-            this.isRed = true;
-        },
-
-        setGreen : function()
-        {
-            this.__taskbarButtonColor = '007700';
-            this.updateButton();
-            this.isRed = false;
-        },
-
         setNormal : function()
         {
             this.__taskbarButtonColor = '000000';
-            this.updateButton();
-            this.isRed = false;
 
             if (this.__newmsgsatstart !== 0) {
                 this.__newmsgsatstart = 0;
                 this.rpc.call('SEEN', this.winid);
             }
-        },
-
-        updateButton : function()
-        {
-            var name = this.getName();
-
-            if (this.type === 0 && this.__nwId === 0) {
-                name = name.substr(1);
-                name = name.substr(0, 1).toUpperCase() + name.substr(1);
-            }
-
-            this.taskbarButton.setLabel(
-                '<span style="color:#' + this.__taskbarButtonColor + '">' +
-                    name + '</span>&nbsp;<span style="color:#339933">' +
-                    (this.hidden === true ? 'M' : '&nbsp;') + '</span>');
         },
 
         handleMove : function(e)
@@ -470,28 +425,8 @@ qx.Class.define('client.UserWindow',
             var x = data.left;
             var y = data.top;
 
-            if (this.mainscreen.initdone === 1) {
+            if (this._controller.initdone === 1) {
                 this.rpc.call('MOVE', this.winid + ' ' + x + ' ' + y);
-            }
-        },
-
-        handleMinimize : function(e)
-        {
-            this.hidden = true;
-            this.updateButton();
-
-            if (this.mainscreen.initdone === 1) {
-                this.rpc.call('HIDE', this.winid);
-            }
-        },
-
-        handleRestore : function(e)
-        {
-            this.hidden = false;
-            this.updateButton();
-
-            if (this.mainscreen.initdone === 1) {
-                this.rpc.call('REST', this.winid);
             }
         },
 
@@ -509,28 +444,38 @@ qx.Class.define('client.UserWindow',
             this.__scroll.scrollToY(200000);
         },
 
+        updateOperList : function(message) {
+            this.configListOper.removeAll();
+
+            for (var i=0; i < message.list.length; i++) {
+                var operList = new qx.ui.form.ListItem(
+                    message.list[i].nick);
+                operList.userid = message.list[i].userId;
+                this.configListOper.add(operList);
+            }
+        },
+
+        updateBanList : function(message) {
+            this.configListBan.removeAll();
+
+            for (var i = 0; i < message.list.length; i++) {
+                var banList = new qx.ui.form.ListItem(message.list[i].info);
+                banList.banid = message.list[i].banId;
+                this.configListBan.add(banList);
+            }
+        },
+
         activatewin : function()
         {
             this.window.activate();
-
-            // if (this.__viewmode === 0) {
-            //     this.__inputline.focus();
-            //}
         },
 
         addHandlers : function()
         {
             this.window.addListener('resize', this.handleResize, this);
             this.window.addListener('move', this.handleMove, this);
-            this.window.addListener('minimize', this.handleMinimize, this);
-            this.window.addListener('appear', this.handleRestore, this);
 
-            this.window.addListener('click', function(e) {
-                if (this.taskbarControl) {
-                    this.taskbarControl.setSelection([this.taskbarButton]);
-                }
-                //this.activatewin();
-                this.mainscreen.activewin = this.winid;
+            this.window.addListener('click', function() {
                 this.setNormal();
             }, this);
 
@@ -554,7 +499,8 @@ qx.Class.define('client.UserWindow',
                 }
                 else if (closeok === 0 && (this.type !== 0 ||
                                           this.nameslist.getLength() > 0)) {
-                    if (this.mainscreen.settings.getShowCloseWarn() === 1) {
+                    //FIX ME
+                    //if (this.mainscreen.settings.getShowCloseWarn() === 1) {
                         e.preventDefault();
 
                         this.infoDialog.showInfoWin(
@@ -566,12 +512,11 @@ qx.Class.define('client.UserWindow',
                                 closeok = 1;
                                 mywindow.close();
                             }, 'NO', function () {}, true);
-                    } else {
-                        this.mainscreen.removeWindowButton(this.winid);
-                    }
+                    //} else {
+                    //    this.mainscreen.removeWindowButton(this.winid);
+                    //}
                 } else {
                     //closing for real.
-                    this.mainscreen.removeWindowButton(this.winid);
                 }
             }, this);
         },
@@ -584,15 +529,6 @@ qx.Class.define('client.UserWindow',
         show : function()
         {
             this.window.open();
-            this.hidden = false;
-            this.updateButton();
-        },
-
-        hide : function()
-        {
-            this.window.minimize();
-            this.hidden = true;
-            this.updateButton();
         },
 
         getName : function()
@@ -626,18 +562,19 @@ qx.Class.define('client.UserWindow',
             }
         },
 
-        addline : function(type, cat, body, nick, ts)
+        addline : function(message, tsConversion)
         {
             var nickText = '';
+            var ts = this._adjustTime(message.ts, tsConversion);
 
-            if (nick) {
-                nickText = '<b>&lt;' + nick + '&gt;</b> ';
+            if (message.nick) {
+                nickText = '<b>&lt;' + message.nick + '&gt;</b> ';
             }
 
             var color;
             var prefix = '';
 
-            switch (cat) {
+            switch (message.cat) {
             case 'msg':
                 color = 'black';
                 break;
@@ -668,7 +605,7 @@ qx.Class.define('client.UserWindow',
             }
 
             this.__channelText = this.__channelText + '<span style="color:' +
-                color + '">' + ts + ' ' + prefix + nickText + body +
+                color + '">' + ts + ' ' + prefix + nickText + message.body +
                 '<span><br>';
             this.__lines++;
 
@@ -678,12 +615,12 @@ qx.Class.define('client.UserWindow',
                 this.__channelText = this.__channelText.substr(pos + 3);
             }
 
-            if (this.mainscreen.initdone === 1) {
-                this.updateWindowContent();
+            if (this._controller.initdone === 1) {
+                this.displayWindowContent();
             }
         },
 
-        updateWindowContent : function() {
+        displayWindowContent : function() {
             this.__atom.setValue(this.__channelText);
 
             if (this.scrollLock === false) {
@@ -795,6 +732,36 @@ qx.Class.define('client.UserWindow',
                 this.window.setCaption('*** Private conversation with ' +
                                        this.__name + ' ' + privstatus);
             }
+        },
+
+        _adjustTime : function(time, tsConversion)
+        {
+            var date = new Date();
+
+            if (tsConversion) {
+                time = time - date.getTimezoneOffset();
+            }
+
+            if (time < 0) {
+                time = 1440 + time;
+            }
+
+            if (time > 1440) {
+                time = time - 1440;
+            }
+
+            var hour = Math.floor(time / 60);
+            var min = time % 60;
+
+            if (min < 10) {
+                min = '0' + min;
+            }
+
+            if (hour < 10) {
+                hour = '0' + hour;
+            }
+
+            return hour + ':' + min;
         },
 
         getBackFromSettingsMode : function()
@@ -915,9 +882,10 @@ qx.Class.define('client.UserWindow',
                     this.rpc.call('ADDF', name);
                 }, this);
 
-                if (this.mainscreen.anonUser === false) {
+                //Fix me
+                //if (this._controller.anonUser === false) {
                     menu.add(friendButton);
-                }
+                //}
             }
 
             if (this.__usermode !== 0 || this.__nwId !== 0) {
@@ -981,11 +949,11 @@ qx.Class.define('client.UserWindow',
         {
             var text = '<b>Link Catcher</b><p>';
 
-            if (this.mainscreen.anonUser === true) {
-                text = text +
-                    '(If you register, links are not lost when you log out.)' +
-                    '<p>';
-            }
+            //if (this.mainscreen.anonUser === true) {
+            //    text = text +
+            //        '(If you register, links are not lost when you log out.)' +
+            //        '<p>';
+            //}
 
             if (this.__urllist.length === 0) {
                 text = text +
