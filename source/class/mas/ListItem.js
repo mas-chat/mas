@@ -17,7 +17,7 @@
 // Can't use strict because of Qooxdoo
 // 'use strict';
 
-qx.Class.define('client.ListItem',
+qx.Class.define('mas.ListItem',
 {
     extend : qx.ui.form.ListItem,
 

@@ -17,7 +17,7 @@
 // There can be only one Controller. Otherwise some instance members would be
 // shared
 
-qx.Class.define('client.Controller',
+qx.Class.define('mas.Controller',
 {
     extend : qx.core.Object,
 
@@ -29,20 +29,20 @@ qx.Class.define('client.Controller',
         }
 
         // Utilities
-        this._rpcManager = new client.RpcManager(
+        this._rpcManager = new mas.RpcManager(
             this, this.processMessage, this.handleError, this.handleRpcError,
             this.setStatusText);
-        this._audio = new client.Audio();
-        this._settings = new client.Settings(this._rpcManager, '');
+        this._audio = new mas.Audio();
+        this._settings = new mas.Settings(this._rpcManager, '');
 
         // Views
-        this._infoDialog = new client.InfoDialog(this._rpcManager);
-        this._logDialog = new client.LogDialog(
+        this._infoDialog = new mas.InfoDialog(this._rpcManager);
+        this._logDialog = new mas.LogDialog(
             this._prcManager, this._settings, this._infoDialog);
-        this._mainScreen = new client.MainScreen(
+        this._mainScreen = new mas.MainScreen(
             this.rpcManager, root, this._logDialog, this._settings,
             this._infoDialog, this._anonUser, this);
-        this._friendsPopUp = new client.FriendsPopUp();
+        this._friendsPopUp = new mas.FriendsPopUp();
 
         // TODO: Get rid of these links
         this._infoDialog.settings = this._settings;
@@ -180,7 +180,7 @@ qx.Class.define('client.Controller',
                 break;
 
             default:
-                client.debug.print('ERROR: Unknown command.');
+                mas.debug.print('ERROR: Unknown command.');
                 break;
             }
 
@@ -285,7 +285,7 @@ qx.Class.define('client.Controller',
             var topic = message.topic;
 
             if (create === true) {
-                var newWindow = new client.UserWindow(
+                var newWindow = new mas.UserWindow(
                     this._rpcManager, this.desktop, topic, nw, name, type,
                     sound, titlealert, nwId, usermode, password, newMsgs,
                     this.infoDialog, windowId, this);
@@ -425,7 +425,7 @@ qx.Class.define('client.Controller',
                 if (!dim || amount === 0 || amount > 16) {
                     // !dim is ???
                     this._mainScreen.blocker.unblock();
-                    client.debug.print('unkown dim');
+                    mas.debug.print('unkown dim');
                     return;
                 }
 

@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('client.UserWindow',
+qx.Class.define('mas.UserWindow',
 {
     extend : qx.core.Object,
 
@@ -71,7 +71,7 @@ qx.Class.define('client.UserWindow',
         wm1.add(this.__box, {flex:1});
 
         // create scroll container
-        this.__scroll = new client.Scroll();
+        this.__scroll = new mas.Scroll();
 
         this.__scroll.addListener('scrollLock', function(e) {
 
@@ -126,7 +126,7 @@ qx.Class.define('client.UserWindow',
             var key = e.getKeyIdentifier();
 
             if (key === 'Enter') {
-                client.debug.print('enter pressed');
+                mas.debug.print('enter pressed');
 
                 var input = this.__inputline.getValue();
                 if (input !== '' && input !== null) {
@@ -389,7 +389,7 @@ qx.Class.define('client.UserWindow',
             qx.event.Timer.once(function() {
                 this._controller.tileWindows();
             }, this, 1000);
-            client.debug.print('works2');
+            mas.debug.print('works2');
         },
 
         //TODO: handle beforeclose -> remove from mainscreen array
@@ -674,7 +674,7 @@ qx.Class.define('client.UserWindow',
 
         createParticipant : function(name)
         {
-            var person = new client.Participant();
+            var person = new mas.Participant();
 
             if (name.charAt(0) === '@') {
                 name = name.substr(1);
@@ -832,7 +832,7 @@ qx.Class.define('client.UserWindow',
                     item.setPadding(3);
                 },
                 createItem : function() {
-                    return new client.ListItem();
+                    return new mas.ListItem();
                 },
                 bindItem : function(controller, item, id) {
                     controller.bindProperty('name', 'nick', null, item, id);

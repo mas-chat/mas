@@ -14,14 +14,17 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Theme.define("client.theme.Theme",
-{
-  meta :
-  {
-    color : client.theme.Color,
-    decoration : client.theme.Decoration,
-    font : client.theme.Font,
-    icon : qx.theme.icon.Tango,
-    appearance : client.theme.Appearance
-  }
+qx.Theme.define('mas.theme.Decoration', {
+    extend: qx.theme.simple.Decoration,
+
+    decorations: {
+        'background2': {
+            decorator: qx.ui.decoration.Background,
+
+            style: {
+                backgroundImage: 'mas/bg.jpg',
+                backgroundRepeat: 'repeat'
+            }
+        }
+    }
 });

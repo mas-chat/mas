@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('client.MainScreen',
+qx.Class.define('mas.MainScreen',
 {
     extend : qx.core.Object,
 
@@ -155,8 +155,8 @@ qx.Class.define('client.MainScreen',
                 contactsButton.addListener('changeValue', function (e) {
                     if (e.getData() === true &&
                         this.contactsButton.getValue() === true) {
-                        contactsPopup.placeToWidget(contactsButton);
-                        contactsPopup.show();
+                        this.contactsPopup.placeToWidget(contactsButton);
+                        this.contactsPopup.show();
                     }
                 }, this);
 

@@ -17,7 +17,7 @@
 // Can't use strict because of Qooxdoo
 // 'use strict';
 
-qx.Class.define('client.LogDialog',
+qx.Class.define('mas.LogDialog',
 {
     extend : qx.core.Object,
 
@@ -338,7 +338,7 @@ qx.Class.define('client.LogDialog',
             this.b5.setEnabled(false);
             this.b6.setEnabled(false);
 
-            client.debug.print('Seeking logs: ' + this.__pos);
+            mas.debug.print('Seeking logs: ' + this.__pos);
             this.rpc.call('GETLOG', this.__pos);
         }
     }

@@ -15,13 +15,13 @@
 //
 
 /**
- * @asset(client/*)
+ * @asset(mas/*)
 */
 
 // Can't use strict because of Qooxdoo
 // 'use strict';
 
-qx.Class.define('client.Application',
+qx.Class.define('mas.Application',
 {
     extend : qx.application.Standalone,
 
@@ -53,7 +53,7 @@ qx.Class.define('client.Application',
             startLabel.setMargin(marginY, 10, 10, marginX);
             root.add(startLabel, { width: '100%', height: '100%' });
 
-            new client.Controller(startLabel, root);
+            new mas.Controller(startLabel, root);
         }
     }
 });

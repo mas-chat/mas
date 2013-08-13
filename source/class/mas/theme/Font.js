@@ -14,37 +14,21 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Theme.define("client.theme.Appearance",
-		{
-		    extend : qx.theme.simple.Appearance,
+var themeOsName = qx.core.Environment.get('os.name');
+var themeOsVersion = qx.core.Environment.get('os.version');
 
-		    appearances :
-		    {
+qx.Theme.define('mas.theme.Font', {
+    extend: qx.theme.simple.Font,
 
-			"window/captionbar" :
-			{
-			    style : function(states)
-			    {
-				return {
-				    backgroundColor : states.active ? "#E0ECFF" : "#eeeeee",
-				    padding : 3,
-				    font: "bold",
-				    decorator : "window-caption"
-				};
-			    }
-			},
-
-			"toolbar" :
-			{
-			    style : function(states)
-			    {
-				return {
-				    backgroundColor : "#2C7CC3",
-				    padding : 0
-				};
-			    }
-			}
-
-
-		    }
-		});
+    fonts: {
+        'defaultlarge': {
+            size:13,
+            lineHeight: 1.4,
+            family: (themeOsName === 'osx') ? [ 'Lucida Grande' ] :
+                (themeOsName === 'win' && (themeOsVersion === 'vista') ||
+                 themeOsVersion === '7') ?
+                [ 'Segoe UI', 'Candara' ] :
+                [ 'Arial', 'Liberation Sans', 'Tahoma', 'sans-serif' ]
+        }
+    }
+});

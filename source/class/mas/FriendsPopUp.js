@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('client.FriendsPopUp',
+qx.Class.define('mas.FriendsPopUp',
 {
     extend : qx.core.Object,
 
@@ -86,7 +86,8 @@ qx.Class.define('client.FriendsPopUp',
         contactsPopup.add(friendScroll, { flex: 1 });
 
         contactsPopup.addListener('disappear', function (e) {
-            contactsButton.setValue(false);
+            //Fix
+            //contactsButton.setValue(false);
         });
 
         this._timer = new qx.event.Timer(1000 * 60);

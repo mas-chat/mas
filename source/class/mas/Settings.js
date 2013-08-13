@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('client.Settings',
+qx.Class.define('mas.Settings',
 {
     extend : qx.core.Object,
 

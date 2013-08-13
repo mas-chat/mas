@@ -14,27 +14,12 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('client.RadioManager',
-{
-    extend : qx.ui.form.RadioGroup,
-
-    construct : function(content)
-    {
-        this.base(arguments);
-    },
-
-    members :
-    {
-        _onItemChangeChecked : function(e)
-        {
-            var item = e.getTarget();
-
-            if (item.getValue()) {
-                this.setSelection([item]);
-            } else if (this.getSelection()[0] === item) {
-                item.setValue(true);
-                this.setSelection([item]);
-            }
-        }
+qx.Theme.define('mas.theme.Theme', {
+    meta: {
+        color: mas.theme.Color,
+        decoration: mas.theme.Decoration,
+        font: mas.theme.Font,
+        icon: qx.theme.icon.Tango,
+        appearance: mas.theme.Appearance
     }
 });

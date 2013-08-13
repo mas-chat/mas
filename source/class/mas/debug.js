@@ -14,12 +14,18 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Theme.define("client.theme.Color",
+qx.Class.define('mas.debug',
 {
-    extend : qx.theme.simple.Color,
+    type : 'static',
 
-    colors :
+    statics :
     {
-	"link" : "#bbbbbb"
+        print : function(text)
+        {
+            var now = new Date();
+
+            qx.log.Logger.debug('[' + now.getHours() + ':' + now.getMinutes() +
+                               ':' + now.getSeconds() + '] ' + text);
+        }
     }
 });

@@ -17,7 +17,7 @@
 // Can't use strict because of Qooxdoo
 // 'use strict';
 
-qx.Class.define('client.InfoDialog',
+qx.Class.define('mas.InfoDialog',
 {
     extend : qx.core.Object,
 

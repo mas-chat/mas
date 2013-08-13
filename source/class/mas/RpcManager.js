@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('client.RpcManager',
+qx.Class.define('mas.RpcManager',
 {
     extend : qx.core.Object,
 
@@ -71,7 +71,7 @@ qx.Class.define('client.RpcManager',
 
             this._sendQueue.push(message);
 
-            client.debug.print(
+            mas.debug.print(
                 'Outgoing message buffered: ' + command + ' (Queue len: ' +
                     this._sendQueue.length + ')');
 
@@ -86,7 +86,7 @@ qx.Class.define('client.RpcManager',
             this._sendMsgXhr.setRequestData(JSON.stringify(message));
             this._sendMsgXhr.send();
 
-            client.debug.print('--> MSG: ' + message.command);
+            mas.debug.print('--> MSG: ' + message.command);
         },
 
         _sendMsgSuccess : function() {
@@ -116,7 +116,7 @@ qx.Class.define('client.RpcManager',
             var code = this._sendMsgXhr.getStatus();
             this._state = 'error';
 
-            client.debug.print(
+            mas.debug.print(
                 'sendMsg: XHR request failed, code: ' + code);
 
             this._setStatusTextCb.call(this._cbCtx,
@@ -148,7 +148,7 @@ qx.Class.define('client.RpcManager',
                 '/ralph/' + this._sessionId + '/' + this._pollSeq + tz);
             this._pollMsgXhr.send();
 
-            client.debug.print(
+            mas.debug.print(
                 '--> Polling request sent (seq ' + this._pollSeq + ')');
         },
 
@@ -161,7 +161,7 @@ qx.Class.define('client.RpcManager',
                 this._firstPoll = false;
             }
 
-            client.debug.print('<-- Response to polling request');
+            mas.debug.print('<-- Response to polling request');
 
             if (resp.status !== 'OK') {
                 this._handleError(resp.status);
@@ -183,7 +183,7 @@ qx.Class.define('client.RpcManager',
                 }
 
                 var debug = JSON.stringify(message);
-                client.debug.print(prefix + debug);
+                mas.debug.print(prefix + debug);
 
                 if (message.id === 'SESSONID')
                 {
@@ -212,7 +212,7 @@ qx.Class.define('client.RpcManager',
                 // Make next request immediately
                 this._pollMsgs();
             } else {
-                client.debug.print(
+                mas.debug.print(
                     'pollMsg: XHR request failed, code: ' + code);
 
                 // Wait a little and try again. This is to make sure

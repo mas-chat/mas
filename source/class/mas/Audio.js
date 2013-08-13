@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('client.Audio',
+qx.Class.define('mas.Audio',
 {
     extend : qx.core.Object,
 
@@ -37,11 +37,11 @@ qx.Class.define('client.Audio',
 
             if (soundFormat !== 'none') {
                 this._audio = new qx.bom.media.Audio(
-                    'resource/client/new-msg.' + soundFormat);
+                    'resource/mas/new-msg.' + soundFormat);
             }
         }
 
-        client.debug.print('Sound support: ' + soundFormat);
+        mas.debug.print('Sound support: ' + soundFormat);
     },
 
     members : {

@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('client.Scroll',
+qx.Class.define('mas.Scroll',
 {
     extend : qx.ui.core.scroll.AbstractScrollArea,
     include : [qx.ui.core.MContentPadding],

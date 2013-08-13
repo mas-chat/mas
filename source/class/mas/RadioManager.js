@@ -14,18 +14,27 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('client.debug',
+qx.Class.define('mas.RadioManager',
 {
-    type : 'static',
+    extend : qx.ui.form.RadioGroup,
 
-    statics :
+    construct : function(content)
     {
-        print : function(text)
-        {
-            var now = new Date();
+        this.base(arguments);
+    },
 
-            qx.log.Logger.debug('[' + now.getHours() + ':' + now.getMinutes() +
-                               ':' + now.getSeconds() + '] ' + text);
+    members :
+    {
+        _onItemChangeChecked : function(e)
+        {
+            var item = e.getTarget();
+
+            if (item.getValue()) {
+                this.setSelection([item]);
+            } else if (this.getSelection()[0] === item) {
+                item.setValue(true);
+                this.setSelection([item]);
+            }
         }
     }
 });
