@@ -85,6 +85,7 @@
     "globals"       : {
         "qx": true,
         "mas": true,
+        "debug": true,
         "escape": true
     }
 }
