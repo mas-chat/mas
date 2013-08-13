@@ -29,7 +29,7 @@ qx.Class.define('mas.Controller',
         }
 
         // Utilities
-        this._rpcManager = new mas.RpcManager(
+        this._rpcManager = new mas.XHR(
             this, this.processMessage, this.handleError, this.handleRpcError,
             this.setStatusText);
         this._audio = new mas.Audio();

@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('mas.RpcManager',
+qx.Class.define('mas.XHR',
 {
     extend : qx.core.Object,
 
