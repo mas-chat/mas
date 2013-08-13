@@ -84,7 +84,7 @@
     // Custom Globals
     "globals"       : {
         "qx": true,
-        "client": true,
+        "mas": true,
         "escape": true
-    }        // additional predefined global variables
+    }
 }
