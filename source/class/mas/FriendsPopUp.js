@@ -18,8 +18,7 @@ qx.Class.define('mas.FriendsPopUp',
 {
     extend : qx.core.Object,
 
-    construct : function(srpc, rootItem, logDialog, settings, infoDialog,
-                         anonUser)
+    construct : function()
     {
         this.base(arguments);
 

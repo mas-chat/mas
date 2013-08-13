@@ -412,7 +412,7 @@ qx.Class.define('mas.Controller',
 
             this._mainScreen.blocker.block();
 
-            qx.event.Timer.once(function(e){
+            qx.event.Timer.once(function(){
                 for (var i = 0; i < this._windows.length; i++) {
                     if (typeof(this._windows[i]) !== 'undefined' &&
                         this._windows[i].hidden === false) {

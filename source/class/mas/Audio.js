@@ -18,7 +18,7 @@ qx.Class.define('mas.Audio',
 {
     extend : qx.core.Object,
 
-    construct : function(startLabel) {
+    construct : function() {
         var soundFormat = 'none';
 
         //If statement is a hack to prevent running qooxdoo audio code on IE

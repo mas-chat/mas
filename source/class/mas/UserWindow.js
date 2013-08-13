@@ -483,7 +483,7 @@ qx.Class.define('mas.UserWindow',
 
             var closeok = 0;
 
-            this.window.addListener('focus', function(e) {
+            this.window.addListener('focus', function() {
                 this.activatewin();
             }, this);
 
@@ -515,8 +515,8 @@ qx.Class.define('mas.UserWindow',
                     //} else {
                     //    this.mainscreen.removeWindowButton(this.winid);
                     //}
-                } else {
-                    //closing for real.
+                //} else {
+                //    closing for real.
                 }
             }, this);
         },
@@ -549,7 +549,7 @@ qx.Class.define('mas.UserWindow',
             notification.noteid = noteid;
             this.__notes++;
 
-            notification.addListener('dblclick', function(e) {
+            notification.addListener('dblclick', function() {
                 this.__notes--;
                 this.__textcomposite.remove(notification);
                 this.rpc.call('DELNTF', this.winid + ' ' + notification.noteid);
@@ -854,7 +854,7 @@ qx.Class.define('mas.UserWindow',
 
             var chatButton = new qx.ui.menu.Button('Start private chat with');
 
-            chatButton.addListener('execute', function(e) {
+            chatButton.addListener('execute', function() {
                 var name = this.__list.getSelection().getItem(0).getName();
 
                 this.rpc.call('STARTCHAT', this.__nw + ' ' + name);
@@ -866,7 +866,7 @@ qx.Class.define('mas.UserWindow',
 
                 var whoisButton = new qx.ui.menu.Button('Whois');
 
-                whoisButton.addListener('execute', function(e) {
+                whoisButton.addListener('execute', function() {
                     var name = this.__list.getSelection().getItem(0).getName();
 
                     this.rpc.call('WHOIS', this.winid + ' ' + name);
@@ -876,7 +876,7 @@ qx.Class.define('mas.UserWindow',
             } else {
                 var friendButton = new qx.ui.menu.Button('Add to contact list');
 
-                friendButton.addListener('execute', function(e) {
+                friendButton.addListener('execute', function() {
                     var name = this.__list.getSelection().getItem(0).getName();
 
                     this.rpc.call('ADDF', name);
@@ -892,7 +892,7 @@ qx.Class.define('mas.UserWindow',
 
                 var kickButton = new qx.ui.menu.Button('Kick');
 
-                kickButton.addListener('execute', function(e) {
+                kickButton.addListener('execute', function() {
                     var name = this.__list.getSelection().getItem(0).getName();
 
                     this.rpc.call('KICK', this.winid + ' ' + name);
@@ -902,7 +902,7 @@ qx.Class.define('mas.UserWindow',
 
                 var banButton = new qx.ui.menu.Button('Kick and ban');
 
-                banButton.addListener('execute', function(e) {
+                banButton.addListener('execute', function() {
                     var name = this.__list.getSelection().getItem(0).getName();
 
                     this.rpc.call('BAN', this.winid + ' ' + name);
@@ -914,7 +914,7 @@ qx.Class.define('mas.UserWindow',
             if (this.__nwId !== 0 || this.__usermode === 2) {
                 var opButton = new qx.ui.menu.Button('Give operator rights');
 
-                opButton.addListener('execute', function(e) {
+                opButton.addListener('execute', function() {
                     var name = this.__list.getSelection().getItem(0).getName();
 
                     this.rpc.call('OP', this.winid + ' ' + name);
@@ -951,8 +951,8 @@ qx.Class.define('mas.UserWindow',
 
             //if (this.mainscreen.anonUser === true) {
             //    text = text +
-            //        '(If you register, links are not lost when you log out.)' +
-            //        '<p>';
+            //     '(If you register, links are not lost when you log out.)' +
+            //     '<p>';
             //}
 
             if (this.__urllist.length === 0) {
@@ -997,7 +997,7 @@ qx.Class.define('mas.UserWindow',
                 button1.setEnabled(false);
             }
 
-            button1.addListener('execute', function (e) {
+            button1.addListener('execute', function () {
                 this.rpc.call('TOPIC', this.winid + ' ' +
                               this.topicInput.getValue());
             }, this);
@@ -1027,13 +1027,13 @@ qx.Class.define('mas.UserWindow',
                 syes.setValue(true);
             }
 
-            syes.addListener('click', function(e) {
+            syes.addListener('click', function() {
                 this.sound = 1;
 
                 this.rpc.call('SOUND', this.winid + ' ' + 1);
             }, this);
 
-            sno.addListener('click', function(e) {
+            sno.addListener('click', function() {
                 this.sound = 0;
 
                 this.rpc.call('SOUND', this.winid + ' ' + 0);
@@ -1063,13 +1063,13 @@ qx.Class.define('mas.UserWindow',
                 tyes.setValue(true);
             }
 
-            tyes.addListener('click', function(e) {
+            tyes.addListener('click', function() {
                 this.titlealert = 1;
 
                 this.rpc.call('TITLEALERT', this.winid + ' ' + 1);
             }, this);
 
-            tno.addListener('click', function(e) {
+            tno.addListener('click', function() {
                 this.titlealert = 0;
 
                 this.rpc.call('TITLEALERT', this.winid + ' ' + 0);
@@ -1092,7 +1092,7 @@ qx.Class.define('mas.UserWindow',
                 button2.setEnabled(false);
             }
 
-            button2.addListener('execute', function (e) {
+            button2.addListener('execute', function () {
                 this.rpc.call('PW', this.winid + ' ' + this.pwInput.getValue());
             }, this);
 
@@ -1138,7 +1138,7 @@ qx.Class.define('mas.UserWindow',
                 buttonOper.setAllowStretchY(false);
                 composite.add(buttonOper, { row: 5, column: 2 });
 
-                buttonOper.addListener('execute', function(e) {
+                buttonOper.addListener('execute', function() {
                     var userid = this.configListOper.getSelection()[0].userid;
 
                     this.rpc.call('DEOP', this.winid + ' ' + userid);
@@ -1175,7 +1175,7 @@ qx.Class.define('mas.UserWindow',
                 buttonBan.setAllowStretchY(false);
                 composite.add(buttonBan, {row: 6, column: 2});
 
-                buttonBan.addListener('execute', function(e) {
+                buttonBan.addListener('execute', function() {
                     var banid = this.configListBan.getSelection()[0].banid;
 
                     this.rpc.call('UNBAN', this.winid + ' ' + banid);
@@ -1197,7 +1197,7 @@ qx.Class.define('mas.UserWindow',
                 buttonKey.setAllowStretchY(false);
                 composite.add(buttonKey, { row: 7, column: 2 });
 
-                buttonKey.addListener('execute', function(e) {
+                buttonKey.addListener('execute', function() {
                     this.rpc.call('SETKEY', this.winid);
                 }, this);
 

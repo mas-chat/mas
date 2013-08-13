@@ -136,7 +136,7 @@ qx.Class.define('mas.InfoDialog',
                 }
 
                 this.__yeslistenerid = this.__yesbutton.addListener(
-                    'execute', function(e) {
+                    'execute', function() {
                         if (typeof(callbackOk) !== 'undefined') {
                             callbackOk();
                         }
@@ -158,7 +158,7 @@ qx.Class.define('mas.InfoDialog',
                 }
 
                 this.__nolistenerid = this.__nobutton.addListener(
-                    'execute', function(e) {
+                    'execute', function() {
                         if (typeof(callbackNo) !== 'undefined') {
                             callbackNo();
                         }
@@ -255,7 +255,7 @@ qx.Class.define('mas.InfoDialog',
             }
 
             this.__nolistenerid = this.__nobutton.addListener(
-                'execute', function(e) {
+                'execute', function() {
                     this.__window.close();
                 }, this);
 
@@ -264,7 +264,7 @@ qx.Class.define('mas.InfoDialog',
             }
 
             this.__yeslistenerid = this.__yesbutton.addListener(
-                'execute', function(e) {
+                'execute', function() {
                     var input = this.__input.getValue();
 
                     if (input !== '') {
@@ -281,7 +281,7 @@ qx.Class.define('mas.InfoDialog',
             this.__window.center();
         },
 
-        getCreateNewGroupWin : function(rootItem, mode)
+        getCreateNewGroupWin : function(rootItem)
         {
             this.__window.removeAll();
             this.__box.removeAll();
@@ -316,7 +316,7 @@ qx.Class.define('mas.InfoDialog',
             }
 
             this.__nolistenerid = this.__nobutton.addListener(
-                'execute', function(e) {
+                'execute', function() {
                     this.__window.close();
                 }, this);
 
@@ -325,7 +325,7 @@ qx.Class.define('mas.InfoDialog',
             }
 
             this.__yeslistenerid = this.__yesbutton.addListener(
-                'execute', function(e) {
+                'execute', function() {
                     this.__process();
                 }, this);
 

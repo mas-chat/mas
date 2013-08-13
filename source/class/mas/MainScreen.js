@@ -32,7 +32,7 @@ qx.Class.define('mas.MainScreen',
 
         this.__topictimer = new qx.event.Timer(1000);
         this.__topictimer.addListener(
-            'interval', function(e) {
+            'interval', function() {
                 //there seems to be bug in qooxdoo, one event can come after the
                 //timer is stopped
                 if (this.__topictimeractive === true) {
@@ -51,8 +51,8 @@ qx.Class.define('mas.MainScreen',
         this.__tt = new qx.ui.tooltip.ToolTip('Send Message');
         this.__myapp = rootItem;
 
-        qx.bom.Element.addListener(window, 'focus', function(e) {
-            qx.event.Timer.once(function(e){
+        qx.bom.Element.addListener(window, 'focus', function() {
+            qx.event.Timer.once(function(){
                 document.title = 'MeetAndSpeak';
             }, this, 500);
             this.__blur = 0;
@@ -395,7 +395,7 @@ qx.Class.define('mas.MainScreen',
 
         _createForumCommand : function()
         {
-            this.infoDialog.getCreateNewGroupWin(this.__myapp, 0);
+            this.infoDialog.getCreateNewGroupWin(this.__myapp);
         },
 
         _sslCommand : function(e)

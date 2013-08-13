@@ -116,8 +116,7 @@ qx.Class.define('mas.XHR',
             var code = this._sendMsgXhr.getStatus();
             this._state = 'error';
 
-            debug.print(
-                'sendMsg: XHR request failed, code: ' + code);
+            debug.print('sendMsg: XHR request failed, code: ' + code);
 
             this._setStatusTextCb.call(this._cbCtx,
                 'Connection to MeetAndSpeak server lost, trying to' +
@@ -148,8 +147,7 @@ qx.Class.define('mas.XHR',
                 '/ralph/' + this._sessionId + '/' + this._pollSeq + tz);
             this._pollMsgXhr.send();
 
-            debug.print(
-                '--> Polling request sent (seq ' + this._pollSeq + ')');
+            debug.print('--> Polling request sent (seq ' + this._pollSeq + ')');
         },
 
         _pollMsgsSuccess : function() {
@@ -188,7 +186,8 @@ qx.Class.define('mas.XHR',
                 {
                     this._sessionId = message.sessionId;
                 } else {
-                    var result = this._processMessageCb.call(this._cbCtx, message);
+                    var result = this._processMessageCb.call(
+                        this._cbCtx, message);
 
                     if (result === false) {
                         // Permanent error, bail out without making a new RPC

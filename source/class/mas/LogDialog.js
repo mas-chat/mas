@@ -97,32 +97,32 @@ qx.Class.define('mas.LogDialog',
                 this.b6 = new qx.ui.form.Button('Next year');
 
                 this.b1.addListener(
-                    'execute', function(e) {
+                    'execute', function() {
                         this.seek(365);
                     }, this);
 
                 this.b2.addListener(
-                    'execute', function(e) {
+                    'execute', function() {
                         this.seek(28);
                     }, this);
 
                 this.b3.addListener(
-                    'execute', function(e) {
+                    'execute', function() {
                         this.seek(1);
                     }, this);
 
                 this.b4.addListener(
-                    'execute', function(e) {
+                    'execute', function() {
                         this.seek(-1);
                     }, this);
 
                 this.b5.addListener(
-                    'execute', function(e) {
+                    'execute', function() {
                         this.seek(-28);
                     }, this);
 
                 this.b6.addListener(
-                    'execute', function(e) {
+                    'execute', function() {
                         this.seek(-365);
                     }, this);
 
@@ -185,7 +185,7 @@ qx.Class.define('mas.LogDialog',
                 close.setAlignX('right');
 
                 close.addListener(
-                    'execute', function(e) {
+                    'execute', function() {
                         this.__window.close();
                     }, this);
 
@@ -213,7 +213,7 @@ qx.Class.define('mas.LogDialog',
 
                 var settings = this.settings;
 
-                logshort.addListener('click', function(e) {
+                logshort.addListener('click', function() {
                     this.__infodialog.showInfoWin(
                         'Confirmation',
                         'Are you absolutely sure? All your log files older' +
@@ -229,7 +229,7 @@ qx.Class.define('mas.LogDialog',
                     );
                 }, this);
 
-                loglong.addListener('click', function(e) {
+                loglong.addListener('click', function() {
                     this.settings.setLoggingEnabled(1);
                 }, this);
 
