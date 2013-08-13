@@ -126,7 +126,7 @@ qx.Class.define('mas.UserWindow',
             var key = e.getKeyIdentifier();
 
             if (key === 'Enter') {
-                mas.debug.print('enter pressed');
+                debug.print('enter pressed');
 
                 var input = this.__inputline.getValue();
                 if (input !== '' && input !== null) {
@@ -389,7 +389,7 @@ qx.Class.define('mas.UserWindow',
             qx.event.Timer.once(function() {
                 this._controller.tileWindows();
             }, this, 1000);
-            mas.debug.print('works2');
+            debug.print('works2');
         },
 
         //TODO: handle beforeclose -> remove from mainscreen array

@@ -41,7 +41,7 @@ qx.Class.define('mas.Audio',
             }
         }
 
-        mas.debug.print('Sound support: ' + soundFormat);
+        debug.print('Sound support: ' + soundFormat);
     },
 
     members : {

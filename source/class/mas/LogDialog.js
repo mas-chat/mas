@@ -338,7 +338,7 @@ qx.Class.define('mas.LogDialog',
             this.b5.setEnabled(false);
             this.b6.setEnabled(false);
 
-            mas.debug.print('Seeking logs: ' + this.__pos);
+            debug.print('Seeking logs: ' + this.__pos);
             this.rpc.call('GETLOG', this.__pos);
         }
     }

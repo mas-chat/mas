@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('mas.debug',
+qx.Class.define('debug',
 {
     type : 'static',
 

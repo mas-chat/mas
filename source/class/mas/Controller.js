@@ -180,7 +180,7 @@ qx.Class.define('mas.Controller',
                 break;
 
             default:
-                mas.debug.print('ERROR: Unknown command.');
+                debug.print('ERROR: Unknown command.');
                 break;
             }
 
@@ -425,7 +425,7 @@ qx.Class.define('mas.Controller',
                 if (!dim || amount === 0 || amount > 16) {
                     // !dim is ???
                     this._mainScreen.blocker.unblock();
-                    mas.debug.print('unkown dim');
+                    debug.print('unkown dim');
                     return;
                 }
 

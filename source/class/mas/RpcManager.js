@@ -71,7 +71,7 @@ qx.Class.define('mas.RpcManager',
 
             this._sendQueue.push(message);
 
-            mas.debug.print(
+            debug.print(
                 'Outgoing message buffered: ' + command + ' (Queue len: ' +
                     this._sendQueue.length + ')');
 
@@ -86,7 +86,7 @@ qx.Class.define('mas.RpcManager',
             this._sendMsgXhr.setRequestData(JSON.stringify(message));
             this._sendMsgXhr.send();
 
-            mas.debug.print('--> MSG: ' + message.command);
+            debug.print('--> MSG: ' + message.command);
         },
 
         _sendMsgSuccess : function() {
@@ -116,7 +116,7 @@ qx.Class.define('mas.RpcManager',
             var code = this._sendMsgXhr.getStatus();
             this._state = 'error';
 
-            mas.debug.print(
+            debug.print(
                 'sendMsg: XHR request failed, code: ' + code);
 
             this._setStatusTextCb.call(this._cbCtx,
@@ -148,7 +148,7 @@ qx.Class.define('mas.RpcManager',
                 '/ralph/' + this._sessionId + '/' + this._pollSeq + tz);
             this._pollMsgXhr.send();
 
-            mas.debug.print(
+            debug.print(
                 '--> Polling request sent (seq ' + this._pollSeq + ')');
         },
 
@@ -161,7 +161,7 @@ qx.Class.define('mas.RpcManager',
                 this._firstPoll = false;
             }
 
-            mas.debug.print('<-- Response to polling request');
+            debug.print('<-- Response to polling request');
 
             if (resp.status !== 'OK') {
                 this._handleError(resp.status);
@@ -182,8 +182,7 @@ qx.Class.define('mas.RpcManager',
                     prefix = '  |- MSG: ';
                 }
 
-                var debug = JSON.stringify(message);
-                mas.debug.print(prefix + debug);
+                debug.print(prefix + JSON.stringify(message));
 
                 if (message.id === 'SESSONID')
                 {
@@ -212,8 +211,7 @@ qx.Class.define('mas.RpcManager',
                 // Make next request immediately
                 this._pollMsgs();
             } else {
-                mas.debug.print(
-                    'pollMsg: XHR request failed, code: ' + code);
+                debug.print('pollMsg: XHR request failed, code: ' + code);
 
                 // Wait a little and try again. This is to make sure
                 // that we don't loop and consume all CPU cycles if
