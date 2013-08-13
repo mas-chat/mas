@@ -4,6 +4,61 @@ MAS REST API
 
 Work in progress.
 
+MAS protocol is server driven. Overall approach is:
+
+1. The client sends a HTTP GET / to server
+2. The server responds with N messages
+   - If the server doesn't have anything to send, HTTP connection is
+     blocked up to 30 seconds. If 30 seconds is reached, the server
+     closes the connection and responds with status "OK" and empty commands list.
+3. The client builds or updates the UI by processing all the messages (if any)
+4. The client immediately goes back to step 1.
+   - In case of any XHR error, client SHALL wait some seconds and go to step 1.
+
+Overal server response format is:
+
+```JSON
+{
+   "status":"OK",
+   "commands":[
+      {
+         "id":"ADDTEXT"
+         "body":"How are you?",
+         "cat":"msg",
+         "window":2,
+         "ts":341,
+         "nick":"neo",
+         "type":1,
+      },
+      {
+         "id":"ADDTEXT"
+         "body":"Good, thanks.",
+         "cat":"notice",
+         "window":2,
+         "ts":348,
+         "nick":"morpheus",
+         "type":1,
+      },
+
+      ...
+
+   ]
+}
+```
+
+When the user a triggers an action, e.g. wants to join a new channel,
+client creates a second HTTP connection to send a message. Server
+responds to this message immedetially.
+
+-DETAILS TO BE ADDED-
+
+Client Message descriptions
+===========================
+
+Messages that MAS client can sent to a server.
+
+-TO BE ADDED-
+
 Server Message descriptions
 ===========================
 
@@ -30,7 +85,7 @@ ADDTEXT
 
 Add a messge to window.
 
-```
+```JSON
 {
    "id":"ADDTEXT"
 
@@ -64,15 +119,13 @@ CREATE
 
 Create new window.
 
-```
+```JSON
 {
    "id":"CREATE",
 
    "width":476,
    "window":1,
    "x":453,
-
-
    "newMsgs":2,
    "chanType":0,
    "titlealert":0,
@@ -142,7 +195,17 @@ NAMES
 
 Update window participant list.
 
-```
+```JSON
+{
+   "id":"NAMES"
+
+   "names":[
+      "ilkka",
+      "neo",
+      "morpheus",
+   ],
+   "window":"1",
+}
 ```
 
 NICK
@@ -169,12 +232,37 @@ Show a friend request.
 ```
 ```
 
+SESSIONID
+---------
+
+Set session ID.
+
+```JSON
+{
+   "id":"SESSIONID"
+
+   "sessionId":856821,
+}
+```
+
 SET
 ---
 
 Update settings.
 
-```
+```JSON
+{
+   "id":"SET",
+
+   "settings":{
+      "largeFonts":"0",
+      "showFriendBar":"1",
+      "tz":"4",
+      "firstTime":"0",
+      "sslEnabled":"0",
+      "loggingEnabled":"0"
+   }
+}
 ```
 
 TOPIC
