@@ -70,15 +70,43 @@ ADDNAME
 
 Add a new nick to window participant list.
 
+```JSON
+{
+   "id":"ADDNAME",
+
+   "window":1,
+   "nick":"@zorro"
+}
+```
+
 ADDNTF
 ------
 
 Add a new sticky message to window.
 
+```JSON
+{
+   "id":"ADDURL",
+
+   "window":1,
+   "noteid":42,
+   "body":"Next meeting tomorrow at 4PM"
+}
+```
+
 ADDURL
 ------
 
-Add a new UEL to window url list.
+Add a new url to window url list.
+
+```JSON
+{
+   "id":"ADDURL",
+
+   "window":1,
+   "url":"http://google.com"
+}
+```
 
 ADDTEXT
 -------
@@ -87,14 +115,14 @@ Add a messge to window.
 
 ```JSON
 {
-   "id":"ADDTEXT"
+   "id":"ADDTEXT",
 
+   "window":1,
    "body":"Hello worlds!",
    "cat":"notice",
-   "window":1,
    "ts":"209",
    "nick":"ilkka2",
-   "type":0,
+   "type":0
 }
 ```
 
@@ -112,6 +140,11 @@ CLOSE
 Close window.
 
 ```
+{
+   "id":"CLOSE",
+
+    "window":1
+}
 ```
 
 CREATE
@@ -123,8 +156,8 @@ Create new window.
 {
    "id":"CREATE",
 
-   "width":476,
    "window":1,
+   "width":476,
    "x":453,
    "newMsgs":2,
    "chanType":0,
@@ -239,7 +272,7 @@ Set session ID.
 
 ```JSON
 {
-   "id":"SESSIONID"
+   "id":"SESSIONID",
 
    "sessionId":856821,
 }
