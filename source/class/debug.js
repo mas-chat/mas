@@ -14,18 +14,16 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('debug',
-{
+qx.Class.define('debug', {
     type : 'static',
 
-    statics :
-    {
-        print : function(text)
-        {
+    statics : {
+        print : function(text) {
             var now = new Date();
 
-            qx.log.Logger.debug('[' + now.getHours() + ':' + now.getMinutes() +
-                               ':' + now.getSeconds() + '] ' + text);
+            qx.log.Logger.debug(
+                '[' + now.getHours() + ':' + now.getMinutes() + ':' +
+                    now.getSeconds() + '] ' + text);
         }
     }
 });
