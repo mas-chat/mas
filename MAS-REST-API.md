@@ -52,15 +52,15 @@ responds to this message immedetially.
 
 -DETAILS TO BE ADDED-
 
-Client Message descriptions
-===========================
+Client Originated Messages
+==========================
 
 Messages that MAS client can sent to a server.
 
 -TO BE ADDED-
 
-Server Message descriptions
-===========================
+Server Originated Messages
+==========================
 
 Messages that MAS server can send to a client. A message is always a
 request for client to take some action.
@@ -131,7 +131,16 @@ BANLIST
 
 Update window ban list.
 
-```
+```JSON
+{
+   "id":"BANLIST",
+
+   "window":1,
+   "list":[
+      "banId":42,
+      "info":"IP range 192.168.0.0./16, reason: join flood."
+   ]
+}
 ```
 
 CLOSE
@@ -180,7 +189,13 @@ DELNAME
 
 Remove a nick from window participant list.
 
-```
+```JSON
+{
+   "id":"DELNAME",
+
+   "window":1,
+   "nick":"ilkka"
+}
 ```
 
 FLIST
@@ -188,7 +203,25 @@ FLIST
 
 Update information about the user's contacts (friends).
 
-```
+```JSON
+{
+   "id":"FLIST",
+
+   "list":[
+      {
+         "idleTime":0,
+         "name":"Ilkka Oksanen",
+         "nick":"ilkka",
+         "label":"|OK|"
+      },
+      {
+         "idleTime":3464,
+         "name":"Somebody Else",
+         "nick":"else",
+         "label":"|OK|"
+      }
+   ]
+}
 ```
 
 INFO
@@ -196,7 +229,12 @@ INFO
 
 Show a generic info message.
 
-```
+```JSON
+{
+   "id":"INFO",
+
+   "text":"You can't join group Secret. Wrong password."
+}
 ```
 
 INITDONE
@@ -204,7 +242,10 @@ INITDONE
 
 Initialization is complete.
 
-```
+```JSON
+{
+   "id":"INITDONE"
+}
 ```
 
 KEY
