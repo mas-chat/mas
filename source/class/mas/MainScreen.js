@@ -80,8 +80,8 @@ qx.Class.define('mas.MainScreen',
         settings : 0,
         anonUser : 0,
         blocker : 0,
+        manager : 0,
 
-        _manager : 0,
         __statusBar : 0,
         __startLabel : 0,
         __part2 : 0,
@@ -106,8 +106,8 @@ qx.Class.define('mas.MainScreen',
                                      padding: 0 });
 
             // middle desktop
-            this._manager = new qx.ui.window.Manager();
-            var middleContainer = new qx.ui.window.Desktop(this._manager);
+            this.manager = new qx.ui.window.Manager();
+            var middleContainer = new qx.ui.window.Desktop(this.manager);
 
             middleContainer.addListener(
                 'resize',

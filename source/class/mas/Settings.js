@@ -39,42 +39,41 @@ qx.Class.define('mas.Settings',
     members :
     {
         rpc : 0,
-        initdone : 0,
+        _initDone : false,
 
         update : function(params)
         {
-            this.initdone = 0;
-
             for(var key in params) {
                 var value = params[key];
 
                 switch(key) {
                 case 'firstTime':
-                    this.setFirstTime(value);
+                    this.setFirstTime(parseInt(value, 10));
                     break;
 
                 case 'autoArrange':
-                    this.setAutoArrange(value);
+                    this.setAutoArrange(parseInt(value, 10));
                     break;
 
                 case 'largeFonts':
-                    this.setLargeFonts(value);
+                    this.setLargeFonts(parseInt(value, 10));
                     break;
 
                 case 'loggingEnabled':
-                    this.setLoggingEnabled(value);
+                    this.setLoggingEnabled(parseInt(value, 10));
                     break;
 
                 case 'sslEnabled':
-                    this.setSslEnabled(value);
+                    this.setSslEnabled(parseInt(value, 10));
                     break;
 
                 case 'showCloseWarn':
-                    this.setShowCloseWarn(value);
+                    this.setShowCloseWarn(parseInt(value, 10));
                     break;
                 }
             }
-            this.initdone = 1;
+
+            this._initDone = true;
         },
 
         _applyShowCloseWarn : function(value)
@@ -109,7 +108,7 @@ qx.Class.define('mas.Settings',
 
         send : function(name, value)
         {
-            if (this.initdone === 1) {
+            if (this._initDone === true) {
                 this.rpc.call('SET', name + ' ' + value);
             }
         }

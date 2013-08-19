@@ -182,7 +182,7 @@ qx.Class.define('mas.XHR',
 
                 debug.print(prefix + JSON.stringify(message));
 
-                if (message.id === 'SESSONID')
+                if (message.id === 'SESSIONID')
                 {
                     this._sessionId = message.sessionId;
                 } else {

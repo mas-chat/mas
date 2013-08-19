@@ -14,9 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-// There can be only one Controller. Otherwise some instance members would be
-// shared
-
 qx.Class.define('mas.Controller',
 {
     extend : qx.core.Object,
@@ -38,7 +35,7 @@ qx.Class.define('mas.Controller',
         // Views
         this._infoDialog = new mas.InfoDialog(this._rpcManager);
         this._logDialog = new mas.LogDialog(
-            this._prcManager, this._settings, this._infoDialog);
+            this, this._settings, this._infoDialog, this.handleLogSeek);
         this._mainScreen = new mas.MainScreen(
             this.rpcManager, root, this._logDialog, this._settings,
             this._infoDialog, this._anonUser, this);
@@ -47,7 +44,6 @@ qx.Class.define('mas.Controller',
         // TODO: Get rid of these links
         this._infoDialog.settings = this._settings;
         this._infoDialog.mainscreen = this._mainScreen;
-        this._logDialog.mainscreen = this._mainScreen;
     },
 
     members :
@@ -176,11 +172,11 @@ qx.Class.define('mas.Controller',
                 break;
 
             case 'LOGS':
-                this.logDialog.sendresult(message);
+                this._logDialog.sendresult(message);
                 break;
 
             default:
-                debug.print('ERROR: Unknown command.');
+                debug.print('ERROR: Unknown command: ' + message);
                 break;
             }
 
@@ -268,6 +264,12 @@ qx.Class.define('mas.Controller',
                 // this.infoDialog.showInfoWin('Announcement',
                 // '<b>Hi!</b><p>....', 'Okay');
             }
+        },
+
+        handleLogSeek : function(pos) {
+            debug.print('Seeking logs: ' + pos);
+            this._rpcManager.call('GETLOG', pos);
+
         },
 
         createOrUpdateWindow : function(message, create) {
@@ -412,54 +414,48 @@ qx.Class.define('mas.Controller',
 
             this._mainScreen.blocker.block();
 
-            qx.event.Timer.once(function(){
-                for (var i = 0; i < this._windows.length; i++) {
-                    if (typeof(this._windows[i]) !== 'undefined' &&
-                        this._windows[i].hidden === false) {
-                        amount++;
-                    }
+            qx.event.Timer.once(function() {
+                for (var window in this._windows) {
+                    amount++;
                 }
 
                 var dim = this._mainScreen.desktop.getBounds();
 
-                if (!dim || amount === 0 || amount > 16) {
-                    // !dim is ???
+                if (amount === 0 || amount > 16) {
                     this._mainScreen.blocker.unblock();
-                    debug.print('unkown dim');
+                    debug.print('Can\'t tile windows');
                     return;
                 }
 
-                var width = Math.floor((dim.width - (3 * (x[amount] + 1))) /
-                                       x[amount]);
-                var height = Math.floor(((dim.height - 10) -
-                                         (3 * (y[amount] + 1))) / y[amount]);
+                var width = Math.floor(
+                    (dim.width - (3 * (x[amount] + 1))) / x[amount]);
+                var height = Math.floor(
+                    ((dim.height - 10) - (3 * (y[amount] + 1))) / y[amount]);
 
                 var cx = 0;
                 var cy = 0;
                 var current = 0;
 
-                for (i = 0; i < this._windows.length; i++) {
-                    if (typeof(this._windows[i]) !== 'undefined' &&
-                        this._windows[i].hidden === false) {
-                        current++;
+                for (var window in this._windows) {
+                    current++;
 
-                        this._windows[i].moveTo(3 * (cx + 1) + cx * width, 3 *
-                                               (cy + 1) + cy * height + 5);
-                        this._windows[i].setHeight(height);
+                    this._windows[window].moveTo(
+                        3 * (cx + 1) + cx * width, 3 * (cy + 1) + cy *
+                            height + 5);
+                    this._windows[window].setHeight(height);
 
-                        if (current === amount) {
-                            var missing = x[amount] * y[amount] - amount;
-                            width = width + missing * width + 3 * missing;
-                        }
+                    if (current === amount) {
+                        var missing = x[amount] * y[amount] - amount;
+                        width = width + missing * width + 3 * missing;
+                    }
 
-                        this._windows[i].setWidth(width);
-                        this._windows[i].scrollToBottom();
-                        cx++;
+                    this._windows[window].setWidth(width);
+                    this._windows[window].scrollToBottom();
+                    cx++;
 
-                        if (cx === x[amount]) {
-                            cx = 0;
-                            cy++;
-                        }
+                    if (cx === x[amount]) {
+                        cx = 0;
+                        cy++;
                     }
                 }
 
