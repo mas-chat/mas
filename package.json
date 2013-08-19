@@ -1,0 +1,26 @@
+{
+  "name": "mas-webclient",
+  "version": "0.1.0",
+  "description": "MeetAndSpeak HTML client",
+  "main": "index.js",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.6.3",
+    "grunt-shell": "~0.3.1"
+  },
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ilkkao/mas-webclient.git"
+  },
+  "keywords": [
+    "chat"
+  ],
+  "author": "Ilkka Oksanen",
+  "license": "Apache",
+  "bugs": {
+    "url": "https://github.com/ilkkao/mas-webclient/issues"
+  }
+}
