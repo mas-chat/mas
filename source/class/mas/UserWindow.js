@@ -29,7 +29,14 @@ qx.Class.define('mas.UserWindow',
         this.rpc = srpc;
         this.infoDialog = infoDialog;
         this.winid = id;
+        this.__nw = nw;
+        this.__nwId = nwId;
         this._controller = controller;
+        this.sound = sound;
+        this.titlealert = titlealert;
+        this.__usermode = usermode;
+        this.__password = password;
+        this.__newmsgsatstart = newMsgs;
 
         var layout = new qx.ui.layout.Grid();
         layout.setRowFlex(0, 1); // make row 0 flexible
@@ -37,44 +44,39 @@ qx.Class.define('mas.UserWindow',
         layout.setColumnWidth(1, 105); // set with of column 1 to 200 pixel
         layout.setColumnAlign(1, 'center', 'middle');
 
-        var wm1 = new qx.ui.window.Window();
-        wm1.userWindowRef = this;
+        var wm1 = new qx.ui.window.Window().set({
+            modal: false,
+            allowMaximize: true,
+            allowMinimize: false,
+            resizeSensitivity: 10,
+            contentPadding: [0,0,0,0]
+        });
 
-        this.__nw = nw;
-        this.__nwId = nwId;
-        this.sound = sound;
-        this.titlealert = titlealert;
-        this.__usermode = usermode;
-        this.__password = password;
-        this.__newmsgsatstart = newMsgs;
-
-        wm1.setModal(false);
         wm1.setLayout(new qx.ui.layout.VBox(0));
-        wm1.setAllowMaximize(true);
-        wm1.setAllowMinimize(false);
-        wm1.setResizeSensitivity(10);
-        wm1.set({contentPadding: [0,0,0,0]});
+        wm1.userWindowRef = this;
 
         if (this._controller.anonUser === true) {
             wm1.setShowClose(false);
         }
 
-        this.__box = new qx.ui.container.Composite(layout);
-        this.__box.set({padding:10, margin: 0});
+        var color = (type === 0) ? '#F2F3FC' : '#F7FAC9';
 
-        if (type === 0) {
-            this.__box.set({backgroundColor: '#F2F3FC'});
-        } else {
-            this.__box.set({backgroundColor: '#F7FAC9'});
-        }
+        this.__box = new qx.ui.container.Composite(layout).set({
+            padding:10,
+            margin: 0,
+            backgroundColor: color
+        });
 
-        wm1.add(this.__box, {flex:1});
+        wm1.add(this.__box, { flex: 1 });
 
         // create scroll container
-        this.__scroll = new mas.Scroll();
+        this.__scroll = new mas.Scroll().set({
+            minWidth: 100,
+            minHeight: 50,
+            scrollbarY : 'on'
+        });
 
         this.__scroll.addListener('scrollLock', function(e) {
-
             var caption = this.window.getCaption();
 
             if (e.getData() === true) {
@@ -87,133 +89,31 @@ qx.Class.define('mas.UserWindow',
             }
         }, this);
 
-        this.__scroll.set({
-            minWidth: 100,
-            minHeight: 50,
-            scrollbarY : 'on'
-        });
-
         this.__textcomposite = new qx.ui.container.Composite(
             new qx.ui.layout.VBox(2));
         this.__ntftooltip = new qx.ui.tooltip.ToolTip(
             'Double-click to close this notification.');
 
-        this.__atom = new qx.ui.basic.Label('Please wait...<br>').set({
-            rich: true, selectable: true, nativeContextMenu : true});
+        color = (type === 0) ? '#F2F5FE' : '#F7FAC9';
 
-        if (type === 0) {
-            this.__atom.set({backgroundColor: '#F2F5FE'});
-        } else {
-            this.__atom.set({backgroundColor: '#F7FAC9'});
-        }
+        this.__atom = new qx.ui.basic.Label('Please wait...<br>').set({
+            rich: true,
+            selectable: true,
+            nativeContextMenu : true,
+            backgroundColor: color
+        });
 
         this.__scroll.add(this.__atom);
+        this.__textcomposite.add(this.__scroll, { flex: 1 });
+        this.__box.add(this.__textcomposite, { row: 0, column: 0 });
 
-        this.__textcomposite.add(this.__scroll, {flex: 1});
+        this.__inputline = new qx.ui.form.TextField().set({
+            maxLength: 400,
+            marginTop: 2
+        });
 
-        this.__box.add(this.__textcomposite, {row: 0, column: 0});
-
-        this.__inputline = new qx.ui.form.TextField();
-        this.__inputline.set({ maxLength: 400 });
-        this.__inputline.setMarginTop(2);
         this.__inputline.focus();
-
-        var searchstart = 0;
-        var searchstring = '';
-        var extendedsearch = false;
-
-        this.__inputline.addListener('keydown', function(e) {
-            var key = e.getKeyIdentifier();
-
-            if (key === 'Enter') {
-                debug.print('enter pressed');
-
-                var input = this.__inputline.getValue();
-                if (input !== '' && input !== null) {
-                    this.rpc.call('SEND', this.winid + ' ' + input);
-                    this.__inputline.setValue('');
-
-                    input = input.replace(/</g, '&lt;');
-                    input = input.replace(/>/g, '&gt;');
-
-                    if (!(input.substr(0,1) === '/' &&
-                        input.substr(0,4) !== '/me ')) {
-                        var currentTime = new Date();
-                        var hour = currentTime.getHours();
-                        var min = currentTime.getMinutes();
-
-                        if (min < 10) {
-                            min = '0' + min;
-                        }
-
-                        if (hour < 10) {
-                            hour = '0' + hour;
-                        }
-
-                        var fakeMsg = {
-                            type: 0,
-                            cat: input.substr(0,4) === '/me ' ?
-                                'mymsg' : 'action',
-                            nick: this._controller.nicks[this.__nwId],
-                            body: this.linkify(input),
-                            ts: hour * 60 + min
-                        };
-
-                        this.addline(fakeMsg, false);
-                    }
-                }
-                this.setNormal();
-            } else if (key === 'PageUp') {
-                this.__scroll.scrollByY((this.__scroll.getHeight() - 30) * - 1);
-            }
-            else if (key === 'PageDown') {
-                this.__scroll.scrollByY(this.__scroll.getHeight() - 30);
-            } else if (key === 'Tab' && this.type === 0) {
-                var input2 = this.__inputline.getValue();
-
-                if (input2 === null) {
-                    input2 = '';
-                }
-
-                if (input2.length === 0 || input2.search(/^\S+\s*$/) !== -1) {
-                    if (extendedsearch === false) {
-                        extendedsearch = true;
-                        searchstring = input2;
-                    }
-
-                    var found = false;
-
-                    for (var i = searchstart; i < this.nameslist.getLength();
-                         i++) {
-                        var name = this.nameslist.getItem(i).getName();
-
-                        if (name.substr(
-                            0, searchstring.length).toLowerCase() ===
-                            searchstring.toLowerCase()) {
-                            this.__inputline.setValue(name + ': ');
-                            this.__inputline.setTextSelection(100,100);
-                            searchstart = i + 1;
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found) {
-                        searchstart = 0;
-                    }
-                }
-
-                e.stopPropagation();
-                e.preventDefault();
-            }
-
-            if (key !== 'Tab') {
-                searchstart = 0;
-                searchstring = '';
-                extendedsearch = false;
-            }
-
-        }, this);
+        this.__inputline.addListener('keydown', this.handleKeyPress, this);
 
         var icomposite = new qx.ui.container.Composite(
             new qx.ui.layout.HBox(5));
@@ -297,7 +197,7 @@ qx.Class.define('mas.UserWindow',
                 if (this.type === 0) {
                     this.__box.remove(this.__list);
                     this.__box.add(this.__urls,
-                                   { row : 0, column : 0, colSpan : 2 } );
+                                   { row : 0, column : 0, colSpan : 2 });
                 } else {
                     this.__box.add(this.__urls, {row : 0, column : 0 });
                 }
@@ -327,6 +227,10 @@ qx.Class.define('mas.UserWindow',
         infoDialog : 0,
         type : 0,
         apikey : 0,
+
+        _searchstart: 0,
+        _searchstring: '',
+        _extendedsearch: false,
 
         _controller : null,
         __notes : 0,
@@ -393,6 +297,98 @@ qx.Class.define('mas.UserWindow',
         },
 
         //TODO: handle beforeclose -> remove from mainscreen array
+
+        handleKeyPress : function(e) {
+            var key = e.getKeyIdentifier();
+
+            if (key === 'Enter') {
+                debug.print('enter pressed');
+
+                var input = this.__inputline.getValue();
+                if (input !== '' && input !== null) {
+                    this.rpc.call('SEND', this.winid + ' ' + input);
+                    this.__inputline.setValue('');
+
+                    input = input.replace(/</g, '&lt;');
+                    input = input.replace(/>/g, '&gt;');
+
+                    if (!(input.substr(0,1) === '/' &&
+                        input.substr(0,4) !== '/me ')) {
+                        var currentTime = new Date();
+                        var hour = currentTime.getHours();
+                        var min = currentTime.getMinutes();
+
+                        if (min < 10) {
+                            min = '0' + min;
+                        }
+
+                        if (hour < 10) {
+                            hour = '0' + hour;
+                        }
+
+                        var fakeMsg = {
+                            type: 0,
+                            cat: input.substr(0,4) === '/me ' ?
+                                'mymsg' : 'action',
+                            nick: this._controller.nicks[this.__nwId],
+                            body: this.linkify(input),
+                            ts: hour * 60 + min
+                        };
+
+                        this.addline(fakeMsg, false);
+                    }
+                }
+                this.setNormal();
+            } else if (key === 'PageUp') {
+                this.__scroll.scrollByY((this.__scroll.getHeight() - 30) * - 1);
+            }
+            else if (key === 'PageDown') {
+                this.__scroll.scrollByY(this.__scroll.getHeight() - 30);
+            } else if (key === 'Tab' && this.type === 0) {
+                var input2 = this.__inputline.getValue();
+
+                if (input2 === null) {
+                    input2 = '';
+                }
+
+                if (input2.length === 0 || input2.search(/^\S+\s*$/) !== -1) {
+                    if (this._extendedsearch === false) {
+                        this._extendedsearch = true;
+                        this._searchstring = input2;
+                    }
+
+                    var found = false;
+
+                    for (var i = this._searchstart; i <
+                                 this.nameslist.getLength(); i++) {
+                        var name = this.nameslist.getItem(i).getName();
+
+                        if (name.substr(
+                            0, this._searchstring.length).toLowerCase() ===
+                            this._searchstring.toLowerCase()) {
+                            this.__inputline.setValue(name + ': ');
+                            this.__inputline.setTextSelection(100,100);
+                            this._searchstart = i + 1;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        this._searchstart = 0;
+                    }
+                }
+
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            if (key !== 'Tab') {
+                this._searchstart = 0;
+                this._searchstring = '';
+                this._extendedsearch = false;
+            }
+        },
 
         setHeight : function(e)
         {
@@ -542,10 +538,14 @@ qx.Class.define('mas.UserWindow',
                 return;
             }
 
-            var notification = new qx.ui.basic.Label(text);
-            notification.set({rich: true, backgroundColor: '#D6B6D6',
-                              allowGrowX:true, marginRight:2});
-            notification.setToolTip(this.__ntftooltip);
+            var notification = new qx.ui.basic.Label(text).set({
+                rich: true,
+                backgroundColor: '#D6B6D6',
+                allowGrowX: true,
+                marginRight: 2,
+                toolTip: this.__ntftooltip
+            });
+
             notification.noteid = noteid;
             this.__notes++;
 
@@ -928,17 +928,16 @@ qx.Class.define('mas.UserWindow',
 
         getUrlsView : function()
         {
-            var scroll = new qx.ui.container.Scroll();
-
-            scroll.set({
+            var scroll = new qx.ui.container.Scroll().set({
                 scrollbarY : 'auto'
             });
 
-            this.__urllabel = new qx.ui.basic.Label('');
-            this.__urllabel.setRich(true);
-            this.__urllabel.setAllowGrowX(true);
-            this.__urllabel.setAllowGrowY(true);
-            this.__urllabel.setAlignY('top');
+            this.__urllabel = new qx.ui.basic.Label('').set({
+                rich: true,
+                allowGrowX: true,
+                allowGrowY: true,
+                alignY: 'top'
+            });
 
             scroll.add(this.__urllabel);
 
@@ -988,8 +987,9 @@ qx.Class.define('mas.UserWindow',
 
             var ltitle = new qx.ui.basic.Label('Topic:');
 
-            this.topicInput = new qx.ui.form.TextField();
-            this.topicInput.set({ maxLength: 200 });
+            this.topicInput = new qx.ui.form.TextField().set({
+                maxLength: 200
+            });
 
             var button1 = new qx.ui.form.Button('Change');
 
@@ -1081,8 +1081,9 @@ qx.Class.define('mas.UserWindow',
             composite.add(scomposite4, {row:2, column: 1});
 
             //PASSWORD
-            this.pwInput = new qx.ui.form.TextField();
-            this.pwInput.set({ maxLength: 20 });
+            this.pwInput = new qx.ui.form.TextField().set({
+                maxLength: 20
+            });
             this.pwInput.setWidth(250);
             this.pwInput.setPlaceholder('<not set>');
 
@@ -1107,11 +1108,16 @@ qx.Class.define('mas.UserWindow',
 
             if (this.type === 0 && this.__nwId === 0) {
                 composite.add(new qx.ui.basic.Label('Participation link:'),
-                              { row:4, column: 0 });
+                              { row: 4, column: 0 });
+
                 var urltext = new qx.ui.basic.Label(
-                    'http://meetandspeak.com/join/' + this.__name.substr(1));
-                composite.add(urltext, {row:4, column: 1});
-                urltext.set({ selectable: true, nativeContextMenu : true });
+                    'http://meetandspeak.com/join/' +
+                        this.__name.substr(1)).set({
+                            selectable: true,
+                            nativeContextMenu : true
+                        });
+                composite.add(urltext, { row: 4, column: 1 });
+
             }
 
             //OPER LIST
@@ -1121,16 +1127,18 @@ qx.Class.define('mas.UserWindow',
                               { row:5, column: 0 });
             }
 
-            this.configListOper = new qx.ui.form.List();
-            this.configListOper.set(
-                { maxHeight: 90, selectionMode : 'single' });
-
-            var scroll1 = new qx.ui.container.Scroll();
-            scroll1.add(this.configListOper);
-            scroll1.set({
-                scrollbarX : 'auto',
-                scrollbarY : 'auto', maxHeight: 90
+            this.configListOper = new qx.ui.form.List().set({
+                maxHeight: 90,
+                selectionMode: 'single'
             });
+
+            var scroll1 = new qx.ui.container.Scroll().set({
+                scrollbarX: 'auto',
+                scrollbarY: 'auto',
+                maxHeight: 90
+            });
+
+            scroll1.add(this.configListOper);
 
             if (this.__usermode === 2) {
                 composite.add(scroll1, { row: 5, column: 1 });
@@ -1152,22 +1160,22 @@ qx.Class.define('mas.UserWindow',
                               { row:6, column: 0 });
             }
 
-            var scroll2 = new qx.ui.container.Scroll();
-            this.configListBan = new qx.ui.form.List();
-            this.configListBan.setAllowGrowX(true);
-            this.configListBan.set({
+            var scroll2 = new qx.ui.container.Scroll().set({
+                scrollbarX: 'auto',
+                scrollbarY: 'auto',
+                marginBottom: 15,
+                maxHeight: 90
+            });
+
+            this.configListBan = new qx.ui.form.List().set({
                 maxHeight: 90,
                 minWidth: 900,
                 width: 1000,
-                selectionMode : 'single' });
+                selectionMode : 'single',
+                allowGrowX: true
+            });
 
             scroll2.add(this.configListBan);
-            scroll2.set({
-                scrollbarX : 'auto',
-                scrollbarY : 'auto',
-                marginBottom : 15,
-                maxHeight: 90
-            });
 
             if (this.__usermode !== 0) {
                 composite.add(scroll2, {row: 6, column: 1});
@@ -1187,14 +1195,17 @@ qx.Class.define('mas.UserWindow',
             if (this.type === 0 && this.__nwId === 0 && this.__usermode === 2) {
                 composite.add(new qx.ui.basic.Label('Group API key:'),
                               { row:7, column: 0 });
-                this.apikey = new qx.ui.basic.Label('Refreshing...');
-                this.apikey.set({ selectable: true, nativeContextMenu : true });
+                this.apikey = new qx.ui.basic.Label('Refreshing...').set({
+                    selectable: true,
+                    nativeContextMenu: true
+                });
 
                 this.rpc.call('GETKEY', this.winid);
                 composite.add(this.apikey, { row: 7, column: 1 });
 
-                var buttonKey = new qx.ui.form.Button('Generate new key');
-                buttonKey.setAllowStretchY(false);
+                var buttonKey = new qx.ui.form.Button('Generate new key').set({
+                    allowStretchY: false
+                });
                 composite.add(buttonKey, { row: 7, column: 2 });
 
                 buttonKey.addListener('execute', function() {
