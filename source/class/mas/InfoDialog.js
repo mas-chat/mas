@@ -14,26 +14,26 @@
 //   governing permissions and limitations under the License.
 //
 
-// Can't use strict because of Qooxdoo
-// 'use strict';
-
 qx.Class.define('mas.InfoDialog',
 {
     extend : qx.core.Object,
 
-    construct : function(srpc)
+    construct : function(srpc, settings)
     {
         this.base(arguments);
 
-        this.rpc = srpc;
-        this.__window = new qx.ui.window.Window();
-        this.__window.setLayout(new qx.ui.layout.VBox(10));
-        this.__window.set({ contentPadding: [13, 13, 13, 13] });
+        this.__rpc = srpc;
+        this.__settings = settings;
 
-        this.__window.setModal(true);
-        this.__window.setShowClose(false);
-        this.__window.setShowMinimize(false);
-        this.__window.setShowMaximize(false);
+        this.__window = new qx.ui.window.Window().set({
+            contentPadding: [13, 13, 13, 13],
+            modal: true,
+            showClose: false,
+            showMinimize: false,
+            showMaximize: false
+        });
+
+        this.__window.setLayout(new qx.ui.layout.VBox(10));
         this.__window.moveTo(400, 300);
 
         this.__message = new qx.ui.basic.Atom();
@@ -69,10 +69,8 @@ qx.Class.define('mas.InfoDialog',
 
     members :
     {
-        rpc : 0,
-        settings : 0,
-        mainscreen : null,
-
+        __rpc : 0,
+        __settings : 0,
         __window : 0,
         __message : 0,
         __message2 : 0,
@@ -172,10 +170,8 @@ qx.Class.define('mas.InfoDialog',
             }
 
             this.__window.setModal(true);
-            this.mainscreen.desktop.add(this.__window);
             this.__window.open();
             this.__window.center();
-            this.mainscreen.manager.bringToFront(this.__window);
         },
 
         closeInfoWindow : function ()
@@ -268,7 +264,7 @@ qx.Class.define('mas.InfoDialog',
                     var input = this.__input.getValue();
 
                     if (input !== '') {
-                        this.rpc.call('JOIN', input + ' ' + this.__nwselection +
+                        this.__rpc.call('JOIN', input + ' ' + this.__nwselection +
                                       ' ' + this.__input2.getValue());
                     }
 
@@ -366,7 +362,7 @@ qx.Class.define('mas.InfoDialog',
             var input2 = this.__input2.getValue();
 
             if (input !== '') {
-                this.rpc.call('CREATE', input + ' ' + input2);
+                this.__rpc.call('CREATE', input + ' ' + input2);
             }
             this.__window.close();
         }

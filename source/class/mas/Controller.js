@@ -26,24 +26,20 @@ qx.Class.define('mas.Controller',
         }
 
         // Utilities
-        this._rpcManager = new mas.XHR(
+        this._xhr = new mas.XHR(
             this, this.processMessage, this.handleError, this.handleRpcError,
             this.setStatusText);
         this._audio = new mas.Audio();
-        this._settings = new mas.Settings(this._rpcManager, '');
+        this._settings = new mas.Settings(this._xhr, '');
 
         // Views
-        this._infoDialog = new mas.InfoDialog(this._rpcManager);
+        this._infoDialog = new mas.InfoDialog(this._xhr, this._settings);
         this._logDialog = new mas.LogDialog(
             this, this._settings, this._infoDialog, this.handleLogSeek);
         this._mainScreen = new mas.MainScreen(
-            this.rpcManager, root, this._logDialog, this._settings,
+            this.xhr, root, this._logDialog, this._settings,
             this._infoDialog, this._anonUser, this);
         this._friendsPopUp = new mas.FriendsPopUp();
-
-        // TODO: Get rid of these links
-        this._infoDialog.settings = this._settings;
-        this._infoDialog.mainscreen = this._mainScreen;
     },
 
     members :
@@ -54,7 +50,7 @@ qx.Class.define('mas.Controller',
         _startLabel : 0,
         _anonUser : false,
 
-        _rpcManager : null,
+        _xhr : null,
         _audio : null,
         _settings : null,
 
@@ -139,7 +135,7 @@ qx.Class.define('mas.Controller',
                     this.removeWaitText(text.substr(30));
                 }
 
-                this.infoDialog.showInfoWin('Info', text, 'OK');
+                this._infoDialog.showInfoWin('Info', text, 'OK');
                 break;
 
             case 'CLOSE':
@@ -209,7 +205,7 @@ qx.Class.define('mas.Controller',
                 if (this.desktop === 0) {
                     this.show();
                 }
-                this.infoDialog.showInfoWin(
+                this._infoDialog.showInfoWin(
                     'Error',
                     'Session expired. <p>Press OK to login again.',
                     'OK',
@@ -223,7 +219,7 @@ qx.Class.define('mas.Controller',
                 }
 
                 //var reason = param.slice(pos+1);
-                this.infoDialog.showInfoWin(
+                this._infoDialog.showInfoWin(
                     'Error',
                     'Your session expired, you logged in from another ' +
                         'location, or<br>the server was restarted.<p>Press ' +
@@ -251,7 +247,7 @@ qx.Class.define('mas.Controller',
                 this._infoDialog.showInfoWin(
                     'Confirm', 'Do you want to join the group ' + data[0] + '?',
                     'Yes', function() {
-                        this._rpcManager.call(
+                        this._xhr.call(
                             'JOIN', data[0] + ' MeetAndSpeak ' + data[1]);
                     }, 'NO');
             }
@@ -261,14 +257,14 @@ qx.Class.define('mas.Controller',
             // Temporary announcement system
             if (qx.bom.Cookie.get('msg5') === null) {
                 qx.bom.Cookie.set('msg5', 'yes', 1000, '/');
-                // this.infoDialog.showInfoWin('Announcement',
+                // this._infoDialog.showInfoWin('Announcement',
                 // '<b>Hi!</b><p>....', 'Okay');
             }
         },
 
         handleLogSeek : function(pos) {
             debug.print('Seeking logs: ' + pos);
-            this._rpcManager.call('GETLOG', pos);
+            this._xhr.call('GETLOG', pos);
 
         },
 
@@ -288,9 +284,9 @@ qx.Class.define('mas.Controller',
 
             if (create === true) {
                 var newWindow = new mas.UserWindow(
-                    this._rpcManager, this.desktop, topic, nw, name, type,
+                    this._xhr, this.desktop, topic, nw, name, type,
                     sound, titlealert, nwId, usermode, password, newMsgs,
-                    this.infoDialog, windowId, this);
+                    this._infoDialog, windowId, this);
                 //TODO: Inherit UserWindow from Window.
                 this._mainScreen.desktop.add(newWindow.window);
 
