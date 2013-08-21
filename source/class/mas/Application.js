@@ -31,7 +31,7 @@ qx.Class.define('mas.Application',
         {
             this.base(arguments);
 
-            qx.log.appender.Native; //disable someday
+            qx.log.appender.Native; // Disable someday
 
             var root = this.getRoot();
 

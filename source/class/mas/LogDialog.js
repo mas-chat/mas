@@ -21,12 +21,11 @@ qx.Class.define('mas.LogDialog',
 {
     extend : qx.core.Object,
 
-    construct : function(ctx, settings, infodialog, seekCb)
+    construct : function(ctx, settings, seekCb)
     {
         this.base(arguments);
 
         this._settings = settings;
-        this._infoDialog = infodialog;
         this._seekCb = seekCb;
         this._cbCtx = ctx;
     },
@@ -40,7 +39,6 @@ qx.Class.define('mas.LogDialog',
         _settings : 0,
         _window : 0,
         _pos : 0,
-        _infoDialog : 0,
         _seekCb : null,
         _cbCtx: null,
 
@@ -207,19 +205,19 @@ qx.Class.define('mas.LogDialog',
                 var settings = this._settings;
 
                 logshort.addListener('click', function() {
-                    this._infoDialog.showInfoWin(
-                        'Confirmation',
-                        'Are you absolutely sure? All your log files older' +
-                            '<br>than 7 days will be deleted!',
-                        'OK',
-                        function () {
+                    new mas.Dialog().set({
+                        caption: 'Confirmation',
+                        text: 'Are you absolutely sure? All your log files ' +
+                            'older<br>than 7 days will be deleted!',
+                        yesLabel: 'OK',
+                        yesCb: function () {
                             settings.setLoggingEnabled(0);
                         },
-                        'Cancel',
-                        function () {
+                        noLabel: 'Cancel',
+                        noCb: function () {
                             loglong.setValue(true);
                         }
-                    );
+                    }).open();
                 }, this);
 
                 loglong.addListener('click', function() {

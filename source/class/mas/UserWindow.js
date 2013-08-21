@@ -19,15 +19,14 @@ qx.Class.define('mas.UserWindow',
     extend : qx.core.Object,
 
     construct : function(srpc, desktop, topic, nw, name, type, sound,
-                         titlealert, nwId, usermode, password, newMsgs,
-                         infoDialog, id, controller)
+                         titlealert, nwId, usermode, password, newMsgs, id,
+                         controller)
     {
         this.base(arguments);
 
         this.__urllist = [];
         this.nameslist = new qx.data.Array();
         this.rpc = srpc;
-        this.infoDialog = infoDialog;
         this.winid = id;
         this.__nw = nw;
         this.__nwId = nwId;
@@ -224,7 +223,6 @@ qx.Class.define('mas.UserWindow',
         nameslist : null,
         closeok : 0,
         scrollLock : false,
-        infoDialog : 0,
         type : 0,
         apikey : 0,
 
@@ -499,15 +497,23 @@ qx.Class.define('mas.UserWindow',
                     //if (this.mainscreen.settings.getShowCloseWarn() === 1) {
                         e.preventDefault();
 
-                        this.infoDialog.showInfoWin(
-                            'Confirm',
-                            'Are you sure?<p>You need to close windows only ' +
-                                'when you<br>wish to permanently stop ' +
-                                'following the discussion', 'Yes',
-                            function() {
-                                closeok = 1;
-                                mywindow.close();
-                            }, 'NO', function () {}, true);
+                    new mas.Dialog().set({
+                        caption: 'Confirm',
+                        text: 'Are you sure?<p>You need to close windows ' +
+                            'only when you<br>wish to permanently stop ' +
+                            'following the discussion',
+                        yesLabel: 'Yes',
+                        yesCb: function() {
+                            closeok = 1;
+                            mywindow.close();
+                        },
+                        noLabel: 'No',
+                        allowIgnore: true,
+                        ignoreCb: function() {
+                            // FIX
+                            // this.settings.setShowCloseWarn(0);
+                        }
+                    }).open();
                     //} else {
                     //    this.mainscreen.removeWindowButton(this.winid);
                     //}

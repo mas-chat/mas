@@ -162,7 +162,7 @@ qx.Class.define('mas.XHR',
             debug.print('<-- Response to polling request');
 
             if (resp.status !== 'OK') {
-                this._handleError(resp.status);
+                this._handleErrorCb(resp.status);
             } else {
                 this._processMessages(resp.commands, false);
                 this._pollMsgs();

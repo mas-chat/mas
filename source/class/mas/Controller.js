@@ -20,8 +20,13 @@ qx.Class.define('mas.Controller',
 
     construct : function(startLabel, root) {
         this._startLabel = startLabel;
+        this._root = root;
 
-        if (qx.bom.Cookie.get('ProjectEvergreen').split('-')[2] === 'a') {
+        var cookie = qx.bom.Cookie.get('ProjectEvergreen');
+
+        if (!cookie) {
+            window.location = '/';
+        } else if (cookie.split('-')[2] === 'a') {
             this._anonUser = true;
         }
 
@@ -33,12 +38,11 @@ qx.Class.define('mas.Controller',
         this._settings = new mas.Settings(this._xhr, '');
 
         // Views
-        this._infoDialog = new mas.InfoDialog(this._xhr, this._settings);
         this._logDialog = new mas.LogDialog(
-            this, this._settings, this._infoDialog, this.handleLogSeek);
+            this, this._settings, this.handleLogSeek);
         this._mainScreen = new mas.MainScreen(
-            this.xhr, root, this._logDialog, this._settings,
-            this._infoDialog, this._anonUser, this);
+            this._xhr, root, this._logDialog, this._settings, this._anonUser,
+            this);
         this._friendsPopUp = new mas.FriendsPopUp();
     },
 
@@ -48,13 +52,13 @@ qx.Class.define('mas.Controller',
         initdone : false,
 
         _startLabel : 0,
+        _root: null,
         _anonUser : false,
 
         _xhr : null,
         _audio : null,
         _settings : null,
 
-        _infoDialog : null,
         _logDialog : null,
         _mainScreen : null,
         _friendsPopUp : null,
@@ -135,7 +139,11 @@ qx.Class.define('mas.Controller',
                     this.removeWaitText(text.substr(30));
                 }
 
-                this._infoDialog.showInfoWin('Info', text, 'OK');
+                new mas.Dialog().set({
+                    caption: 'Info',
+                    text: text,
+                    yesLabel: 'OK'
+                }).open();
                 break;
 
             case 'CLOSE':
@@ -196,8 +204,8 @@ qx.Class.define('mas.Controller',
             var marginY = Math.round(qx.bom.Viewport.getHeight() / 2) - 100;
 
             problemLabel.setMargin(marginY, 10, 10, marginX);
-            this.__myapp.removeAll();
-            this.__myapp.add(problemLabel);
+            this._root.removeAll();
+            this._root.add(problemLabel);
         },
 
         handleError : function(code) {
@@ -205,29 +213,32 @@ qx.Class.define('mas.Controller',
                 if (this.desktop === 0) {
                     this.show();
                 }
-                this._infoDialog.showInfoWin(
-                    'Error',
-                    'Session expired. <p>Press OK to login again.',
-                    'OK',
-                    function () {
-                        qx.bom.Cookie.del('ProjectEvergreen');
-                        window.location.reload(true);
-                    });
+
+                new mas.Dialog().set({
+                    caption: 'Error',
+                    text: 'Session expired. <p>Press OK to login again.',
+                    yesLabel: 'OK',
+                    yesCb: function () {
+                        qx.bom.Cookie.del('ProjectEvergreen', '/');
+                        window.location = '/';
+                    }
+                }).open();
             } else if (code ===  'EXPIRE') {
                 if (this.desktop === 0) {
                     this.show();
                 }
 
                 //var reason = param.slice(pos+1);
-                this._infoDialog.showInfoWin(
-                    'Error',
-                    'Your session expired, you logged in from another ' +
+                new mas.Dialog().set({
+                    caption: 'Error',
+                    text: 'Your session expired, you logged in from another ' +
                         'location, or<br>the server was restarted.<p>Press ' +
                         'OK to restart.',
-                    'OK',
-                    function() {
-                        window.location.reload(true);
-                    });
+                    yesLabel: 'OK',
+                    yesCb: function() {
+                        window.location = '/';
+                    }
+                }).open();
             }
         },
 
@@ -242,14 +253,18 @@ qx.Class.define('mas.Controller',
 
             if (groupCookie !== null) {
                 var data = groupCookie.split('-');
-                qx.bom.Cookie.del('ProjectEvergreenJoin');
+                qx.bom.Cookie.del('ProjectEvergreenJoin', '/');
 
-                this._infoDialog.showInfoWin(
-                    'Confirm', 'Do you want to join the group ' + data[0] + '?',
-                    'Yes', function() {
+                new mas.Dialog().set({
+                    caption: 'Confirm',
+                    text: 'Do you want to join the group ' + data[0] + '?',
+                    yesLabel: 'Yes',
+                    yesCb: function() {
                         this._xhr.call(
                             'JOIN', data[0] + ' MeetAndSpeak ' + data[1]);
-                    }, 'NO');
+                    },
+                    noLabel: 'No'
+                }).open();
             }
 
             this.tileWindows();
@@ -257,8 +272,7 @@ qx.Class.define('mas.Controller',
             // Temporary announcement system
             if (qx.bom.Cookie.get('msg5') === null) {
                 qx.bom.Cookie.set('msg5', 'yes', 1000, '/');
-                // this._infoDialog.showInfoWin('Announcement',
-                // '<b>Hi!</b><p>....', 'Okay');
+                //new mas.Dialog()...
             }
         },
 
@@ -286,7 +300,7 @@ qx.Class.define('mas.Controller',
                 var newWindow = new mas.UserWindow(
                     this._xhr, this.desktop, topic, nw, name, type,
                     sound, titlealert, nwId, usermode, password, newMsgs,
-                    this._infoDialog, windowId, this);
+                    windowId, this);
                 //TODO: Inherit UserWindow from Window.
                 this._mainScreen.desktop.add(newWindow.window);
 
@@ -335,12 +349,6 @@ qx.Class.define('mas.Controller',
 
                 this._windows[windowId] = newWindow;
                 newWindow.show();
-
-                // Keep these two last
-                if (visible === 0) {
-                    // Qooxdoo bug propably, therefore first show and then hide.
-                    newWindow.hide();
-                }
 
                 newWindow.addHandlers();
             } else {

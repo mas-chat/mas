@@ -18,14 +18,13 @@ qx.Class.define('mas.MainScreen',
 {
     extend : qx.core.Object,
 
-    construct : function(srpc, rootItem, logDialog, settings, infoDialog,
-                         anonUser, controller)
+    construct : function(
+        srpc, rootItem, logDialog, settings, anonUser, controller)
     {
         this.base(arguments);
 
         this.rpc = srpc;
         this.logDialog = logDialog;
-        this.infoDialog = infoDialog;
         this.settings = settings;
         this.anonUser = anonUser;
         this._controller = controller;
@@ -410,14 +409,15 @@ qx.Class.define('mas.MainScreen',
                 qx.bom.Cookie.set('UseSSL', 'no', 100, '/');
             }
 
-            this.infoDialog.showInfoWin(
-                'Info',
-                'The application is now being reloaded to activate<br> the ' +
-                    'change.',
-                'OK',
-                function() {
+            new mas.Dialog().set({
+                caption: 'Info',
+                text: 'The application is now being reloaded to activate<br>' +
+                    'the change.',
+                yesLabel: 'OK',
+                yesCb: function() {
                     window.location.reload(true);
-                });
+                }
+            }).open();
         },
 
         _fontCommand : function(e)
@@ -459,7 +459,7 @@ qx.Class.define('mas.MainScreen',
 
             //TODO: create LOGOUTOK response and move this to there:
             qx.event.Timer.once(function() {
-                qx.bom.Cookie.del('ProjectEvergreen');
+                qx.bom.Cookie.del('ProjectEvergreen', '/');
                 window.location.reload(true);
             }, this, 1500);
         },
@@ -472,22 +472,24 @@ qx.Class.define('mas.MainScreen',
 
         _aboutCommand : function()
         {
-            this.infoDialog.showInfoWin(
-                'About',
-                '<br><br><br><center><img src="/i/mas_logo_small.png">' +
+            new mas.Dialog().set({
+                caption: 'About',
+                text: '<br><br><br><center><img src="/i/mas_logo_small.png">' +
                     '</center><p><b><br><br><center><h2 style="color: ' +
                     '#000022;">MeetAndSpeak Web Client</center></h2></b>' +
                     '<p><center>Version: __MOE_VERSION__</center><br>' +
-                    '<p style="padding-bottom:1px;">&copy; 2010-2012 ' +
+                    '<p style="padding-bottom:1px;">&copy; 2010-2013 ' +
                     '<a href="/about.html">MeetAndSpeak Ltd</a>. All ' +
-                    'rights reserved.</p><br><br>', 'OK');
+                    'rights reserved.</p><br><br>',
+                yesLabel: 'OK'
+            }).open();
         },
 
         _keyCommand : function()
         {
-            this.infoDialog.showInfoWin(
-                'Shortcuts',
-                '<b>Keyboard shortcuts:</b><p><table border=0><tr><td>' +
+            new mas.Dialog().set({
+                caption: 'Shortcuts',
+                text: '<b>Keyboard shortcuts:</b><p><table border=0><tr><td>' +
                     '[TAB]</td><td>= nick name completion</td></tr><tr><td>' +
                     '[Arrow Up]</td><td>= Switch to next visible window</td>' +
                     '</tr><tr><td>[Arrow Down]</td><td>= Switch to previous ' +
@@ -499,7 +501,9 @@ qx.Class.define('mas.MainScreen',
                     'Notifications are handy as they stay always visible. ' +
                     'You can<br>be sure that everyone will see them.<p>' +
                     'See other available commands by typing<br>"/help" in ' +
-                    'any of the windows.', 'OK');
+                    'any of the windows.',
+                yesLabel: 'OK'
+            }).open();
         }
     }
 });
