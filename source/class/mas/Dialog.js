@@ -14,11 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('mas.Dialog',
-{
-    extend : qx.ui.window.Window,
+qx.Class.define('mas.Dialog', {
+    extend: qx.ui.window.Window,
 
-    construct : function() {
+    construct: function() {
         this.base(arguments);
 
         this.set({
@@ -56,11 +55,10 @@ qx.Class.define('mas.Dialog',
         }
     },
 
-    members :
-    {
-        _ignoreCheckBox : null,
+    members: {
+        _ignoreCheckBox: null,
 
-        open : function() {
+        open: function() {
             var text = new qx.ui.basic.Label(this.getText()).set({
                 rich: true
             });

@@ -379,7 +379,14 @@ qx.Class.define('mas.MainScreen',
 
         _joinIRCCommand : function()
         {
-            this.infoDialog.getJoinNewChannelWin(this.__myapp, 1);
+            var that = this;
+
+            new mas.JoinDialog().set({
+                joinCb: function(name, pw, selectedNw) {
+                    that.rpc.call('JOIN', name + ' ' + selectedNw + ' ' + pw);
+                },
+                mode: 'IRC'
+            }).open();
         },
 
         _logsCommand : function()
@@ -389,7 +396,14 @@ qx.Class.define('mas.MainScreen',
 
         _joinForumCommand : function()
         {
-            this.infoDialog.getJoinNewChannelWin(this.__myapp, 0);
+            var that = this;
+
+            new mas.JoinDialog().set({
+                joinCb: function(name, pw, selectedNw) {
+                    that.rpc.call('JOIN', name + ' ' + selectedNw + ' ' + pw);
+                },
+                mode: 'MASGROUP'
+            }).open();
         },
 
         _createForumCommand : function()
