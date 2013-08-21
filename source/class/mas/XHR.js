@@ -14,15 +14,14 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('mas.XHR',
-{
+qx.Class.define('mas.XHR', {
     extend : qx.core.Object,
 
-    construct : function(ctx, processMessageCb, handleErrorCb,
-                         handleRpcErrorCb, setStatusTextCb) {
+    construct: function(ctx, processMessageCb, handleErrorCb, handleRpcErrorCb,
+                        setStatusTextCb) {
         this.base(arguments);
 
-        // Set callbacks
+        // Set the callbacks
         this._processMessageCb = processMessageCb;
         this._handleErrorCb = handleErrorCb;
         this._handleRpcErrorCb = handleRpcErrorCb;
@@ -48,23 +47,23 @@ qx.Class.define('mas.XHR',
         this._pollMsgs();
     },
 
-    members : {
-        _processMessageCb : null,
-        _handleErrorCb : null,
-        _handleRpcErrorCb : null,
-        _setStatusTextCb : null,
-        _cbCtx : null,
+    members: {
+        _processMessageCb: null,
+        _handleErrorCb: null,
+        _handleRpcErrorCb: null,
+        _setStatusTextCb: null,
+        _cbCtx: null,
 
-        _sessionId : 0,
-        _state : false,
-        _sendQueue : [],
-        _rcvMsgXhr : 0,
-        _pollMsgXhr : 0,
-        _firstPoll : true,
-        _pollSeq : 0,
-        _sendSeq : 1,
+        _sessionId: 0,
+        _state: false,
+        _sendQueue: [],
+        _rcvMsgXhr: 0,
+        _pollMsgXhr: 0,
+        _firstPoll: true,
+        _pollSeq: 0,
+        _sendSeq: 1,
 
-        call : function(command, params) {
+        call: function(command, params) {
             var message = {};
             message.command = command;
             message.params = params;
@@ -80,7 +79,7 @@ qx.Class.define('mas.XHR',
             }
         },
 
-        _sendMsg : function(message) {
+        _sendMsg: function(message) {
             this._sendMsgXhr.setUrl(
                 '/ralph/' + this._sessionId + '/' + this._sendSeq);
             this._sendMsgXhr.setRequestData(JSON.stringify(message));
@@ -89,11 +88,10 @@ qx.Class.define('mas.XHR',
             debug.print('--> MSG: ' + message.command);
         },
 
-        _sendMsgSuccess : function() {
+        _sendMsgSuccess: function() {
             var resp = this._sendMsgXhr.getResponse();
 
             if (resp.status !== 'OK') {
-
                 this._handleErrorCb.call(this._cbCtx, resp.status);
                 // Stop prossessing the queue
                 return;
@@ -112,15 +110,15 @@ qx.Class.define('mas.XHR',
             this._sendMsgFinished();
         },
 
-        _sendMsgFailure : function() {
+        _sendMsgFailure: function() {
             var code = this._sendMsgXhr.getStatus();
             this._state = 'error';
 
             debug.print('sendMsg: XHR request failed, code: ' + code);
 
-            this._setStatusTextCb.call(this._cbCtx,
-                'Connection to MeetAndSpeak server lost, trying to' +
-                    'reconnect...');
+            this._setStatusTextCb.call(
+                this._cbCtx, 'Connection to MeetAndSpeak server lost,' +
+                    'trying to reconnect...');
 
             // Stay optimistic and keep trying
             qx.event.Timer.once(function() {
@@ -128,14 +126,14 @@ qx.Class.define('mas.XHR',
             }, this, 2000);
         },
 
-        _sendMsgFinished : function() {
+        _sendMsgFinished: function() {
             if (this._sendQueue.length > 0) {
                 var obj = this._sendQueue[0];
                 this._sendMsg(obj);
             }
         },
 
-        _pollMsgs : function() {
+        _pollMsgs: function() {
             var tz = '';
 
             if (this._firstPoll === true) {
@@ -150,7 +148,7 @@ qx.Class.define('mas.XHR',
             debug.print('--> Polling request sent (seq ' + this._pollSeq + ')');
         },
 
-        _pollMsgsSuccess : function() {
+        _pollMsgsSuccess: function() {
             var resp = this._pollMsgXhr.getResponse();
 
             this._pollSeq++;
@@ -169,7 +167,7 @@ qx.Class.define('mas.XHR',
             }
         },
 
-        _processMessages : function(messages, solicited) {
+        _processMessages: function(messages, solicited) {
             for (var i = 0; i < messages.length; i++) {
                 var message = messages[i];
 
@@ -182,8 +180,7 @@ qx.Class.define('mas.XHR',
 
                 debug.print(prefix + JSON.stringify(message));
 
-                if (message.id === 'SESSIONID')
-                {
+                if (message.id === 'SESSIONID') {
                     this._sessionId = message.sessionId;
                 } else {
                     var result = this._processMessageCb.call(
@@ -200,7 +197,7 @@ qx.Class.define('mas.XHR',
             return true;
         },
 
-        _pollMsgFailure : function() {
+        _pollMsgFailure: function() {
             var code = this._pollMsgXhr.getStatus();
             var phase = this._pollMsgXhr.getPhase();
 
