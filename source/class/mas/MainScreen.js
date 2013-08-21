@@ -408,7 +408,13 @@ qx.Class.define('mas.MainScreen',
 
         _createForumCommand : function()
         {
-            this.infoDialog.getCreateNewGroupWin(this.__myapp);
+            var that = this;
+
+            new mas.CreateDialog().set({
+                createCb: function(name, pw) {
+                    that.rpc.call('CREATE', name + ' ' + pw);
+                }
+            }).open();
         },
 
         _sslCommand : function(e)

@@ -15,102 +15,63 @@
 //
 
 qx.Class.define('mas.CreateDialog', {
-    extend : qx.core.Object,
+    extend: mas.Dialog,
 
-    construct : function(srpc, settings) {
-
+    construct: function() {
+        this.base(arguments);
     },
 
-    members : {
-        __rpc : 0,
+    properties: {
+        createCb: {
+            init: null
+        }
+    },
 
-        getCreateNewGroupWin : function(rootItem)
-        {
-            this.__window.removeAll();
-            this.__box.removeAll();
+    members: {
+        open: function() {
+            var nameField = new qx.ui.form.TextField().set({
+                maxLength: 25
+            });
+            var pwField = new qx.ui.form.TextField().set({
+                maxLength: 25
+            });
 
-            this.__window.setCaption('Create new group');
-            this.__message.setLabel(
-                'Type the name of the group you wish to create:');
-            this.__message2.setLabel('Password (optional):');
+            this.setYesLabel('OK');
+            this.setNoLabel('Cancel');
 
-            this.__window.add(this.__message);
-            this.__input.setValue('');
-            this.__window.add(this.__input);
+            this.setCaption('Create new group');
+            this.setText('Type the name of the group you wish to create:');
 
-            this.__window.add(this.__message2);
-            this.__window.add(this.__input2);
+            var that = this;
 
-            this.__window.add(this.__box2);
-            this.__window.add(this.__box);
+            var process = function() {
+                var name = nameField.getValue();
+                var pw = pwField.getValue();
 
-            this.__box.removeAll();
-            this.__box2.removeAll();
+                if (name !== '') {
+                    that.getCreateCb()(name, pw);
+                }
+            };
 
-            this.__box.add(this.__spacer, {flex: 1});
-            this.__yesbutton.setLabel('OK');
-            this.__box.add(this.__yesbutton);
-            this.__nobutton.setLabel('Cancel');
-            this.__box.add(this.__nobutton);
+            this.setYesCb(function() {
+                process();
+            });
 
+            this.base(arguments);
 
-            if (this.__nolistenerid !== 0) {
-                this.__nobutton.removeListenerById(this.__nolistenerid);
-            }
+            // Add more fields
+            this.addAt(nameField, 1);
+            this.addAt(new qx.ui.basic.Label('Password (optional):'), 2);
+            this.addAt(pwField, 3);
 
-            this.__nolistenerid = this.__nobutton.addListener(
-                'execute', function() {
-                    this.__window.close();
-                }, this);
+            var keyPressed = function(e) {
+                if (e.getKeyIdentifier() === 'Enter') {
+                    process();
+                }
+            };
 
-            if (this.__yeslistenerid !== 0) {
-                this.__yesbutton.removeListenerById(this.__yeslistenerid);
-            }
-
-            this.__yeslistenerid = this.__yesbutton.addListener(
-                'execute', function() {
-                    this.__process();
-                }, this);
-
-            if (this.__inputlistenerid !== 0) {
-                this.__input.removeListenerById(this.__inputlistenerid);
-            }
-
-
-            if (this.__input2listenerid !== 0) {
-                this.__input2.removeListenerById(this.__input2listenerid);
-            }
-
-            this.__inputlistenerid = this.__input.addListener(
-                'keypress', function(e) {
-                    if (e.getKeyIdentifier() === 'Enter')
-                    {
-                        this.__process();
-                    }
-                }, this);
-
-            this.__input2listenerid = this.__input2.addListener(
-                'keypress', function(e) {
-                    if (e.getKeyIdentifier() === 'Enter') {
-                        this.__process();
-                    }
-            }, this);
-
-            rootItem.add(this.__window);
-
-            this.__window.open();
-            this.__input.focus();
-            this.__window.center();
-        },
-
-        __process : function() {
-            var input = this.__input.getValue();
-            var input2 = this.__input2.getValue();
-
-            if (input !== '') {
-                this.__rpc.call('CREATE', input + ' ' + input2);
-            }
-            this.__window.close();
+            nameField.addListener('keypress', keyPressed);
+            pwField.addListener('keypress', keyPressed);
         }
     }
 });

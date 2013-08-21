@@ -44,6 +44,7 @@ qx.Class.define('mas.JoinDialog', {
             this.setNoLabel('Cancel');
 
             var that = this;
+
             this.setYesCb(function() {
                 var name = nameField.getValue();
                 var selectedNw = that.getMode() === 'MASGROUP' ?
