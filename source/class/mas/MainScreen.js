@@ -19,7 +19,7 @@ qx.Class.define('mas.MainScreen',
     extend : qx.core.Object,
 
     construct : function(
-        srpc, rootItem, logDialog, settings, anonUser, controller)
+        srpc, rootItem, logDialog, settings, anonUser, friendsPopUp, controller)
     {
         this.base(arguments);
 
@@ -28,6 +28,7 @@ qx.Class.define('mas.MainScreen',
         this.settings = settings;
         this.anonUser = anonUser;
         this._controller = controller;
+        this._friendsPopUp = friendsPopUp;
 
         this.__topictimer = new qx.event.Timer(1000);
         this.__topictimer.addListener(
@@ -71,7 +72,6 @@ qx.Class.define('mas.MainScreen',
     {
         rootContainer : 0,
         desktop : 0,
-        contactsButton : 0,
         rpc : 0,
 
         logDialog : 0,
@@ -81,6 +81,8 @@ qx.Class.define('mas.MainScreen',
         blocker : 0,
         manager : 0,
 
+        _friendsPopUp : null,
+        _contactsButton : 0,
         __statusBar : 0,
         __startLabel : 0,
         __part2 : 0,
@@ -94,7 +96,7 @@ qx.Class.define('mas.MainScreen',
         __input1 : 0,
         __topictimeractive : 0,
         __prevwin : -1,
-        __msgvisible : 0,
+        __msgvisible : false,
 
         show : function()
         {
@@ -143,19 +145,17 @@ qx.Class.define('mas.MainScreen',
             this.__part3.add(menuButton);
 
             if (this.anonUser === false) {
-                var contactsButton = new qx.ui.toolbar.CheckBox(
+                this._contactsButton = new qx.ui.toolbar.CheckBox(
                     '<span style="color:#000000">Contacts...</span>');
-                contactsButton.setRich(true);
-                this.contactsButton = contactsButton;
-                this.__part3.add(contactsButton);
+                this._contactsButton.setRich(true);
+                this.__part3.add(this._contactsButton);
 
-                contactsButton.setValue(false);
-
-                contactsButton.addListener('changeValue', function (e) {
-                    if (e.getData() === true &&
-                        this.contactsButton.getValue() === true) {
-                        this.contactsPopup.placeToWidget(contactsButton);
-                        this.contactsPopup.show();
+                this._contactsButton.addListener('changeValue', function (e) {
+                    if (e.getData() === true) {
+                        this._friendsPopUp.show();
+                        this._friendsPopUp.placeToWidget(this._contactsButton);
+                    } else {
+                        this._friendsPopUp.hide();
                     }
                 }, this);
 
@@ -179,8 +179,21 @@ qx.Class.define('mas.MainScreen',
             this.__myapp.add(this.__statusBar, { left: 100, top: 0 });
         },
 
-        getMainMenu : function()
-        {
+        updateContactsLabel : function(value) {
+            var onlineText = '';
+
+            if (value > 0) {
+                onlineText = '<span style="color:#000000">(</span>' +
+                    '<span style="color:#254117">' + 999 +
+                    '</span><span style="color:#000000">)</span>';
+            }
+
+            this._contactsButton.setLabel(
+                '<span style="color:#000000">Contacts...</span> ' +
+                    onlineText);
+        },
+
+        getMainMenu : function() {
             var menu = new qx.ui.menu.Menu();
 
             var forumMenu = new qx.ui.menu.Button('Groups', null, null,

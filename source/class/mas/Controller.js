@@ -34,16 +34,21 @@ qx.Class.define('mas.Controller',
         this._xhr = new mas.XHR(
             this, this.processMessage, this.handleError, this.handleRpcError,
             this.setStatusText);
+
         this._audio = new mas.Audio();
+
         this._settings = new mas.Settings(this._xhr, '');
 
         // Views
         this._logDialog = new mas.LogDialog(
             this, this._settings, this.handleLogSeek);
+
+        this._friendsPopUp = new mas.FriendsPopUp(
+            this.handleAddContact, this.handleStartChat, this);
+
         this._mainScreen = new mas.MainScreen(
             this._xhr, root, this._logDialog, this._settings, this._anonUser,
-            this);
-        this._friendsPopUp = new mas.FriendsPopUp();
+            this._friendsPopUp, this);
     },
 
     members :
@@ -132,16 +137,9 @@ qx.Class.define('mas.Controller',
                 break;
 
             case 'INFO' :
-                var text = message.text;
-
-                //TODO: big bad hack, fix: proper protocol
-                if (text.substr(0, 30) === 'You are already chatting with ') {
-                    this.removeWaitText(text.substr(30));
-                }
-
                 new mas.Dialog().set({
                     caption: 'Info',
-                    text: text,
+                    text: message.text,
                     yesLabel: 'OK'
                 }).open();
                 break;
@@ -153,7 +151,17 @@ qx.Class.define('mas.Controller',
 
             case 'FLIST':
                 this._friendsPopUp.updateFriendsList(message);
+                this._mainScreen.updateContactsLabel(999);
+
+                // FIX: Move to Conttoller: Update groups also
+                //for (var ii=0; ii < this.windows.length; ii++) {
+                //    if (typeof(this.windows[ii]) !== 'undefined') {
+                //        this.windows[ii].setUserStatus(
+                //            contact.nick, online);
+                //    }
+                //}
                 break;
+
 
             case 'SET':
                 this._settings.update(message.settings);
@@ -276,10 +284,17 @@ qx.Class.define('mas.Controller',
             }
         },
 
-        handleLogSeek : function(pos) {
+        handleLogSeek: function(pos) {
             debug.print('Seeking logs: ' + pos);
             this._xhr.call('GETLOG', pos);
+        },
 
+        handleAddContact: function(nick) {
+            this._xhr.call('ADDF', nick);
+        },
+
+        handleStartChat: function(nick) {
+            this._xhr.call('STARTCHAT', 'MeetAndSpeak ' + nick);
         },
 
         createOrUpdateWindow : function(message, create) {
@@ -303,10 +318,6 @@ qx.Class.define('mas.Controller',
                     windowId, this);
                 //TODO: Inherit UserWindow from Window.
                 this._mainScreen.desktop.add(newWindow.window);
-
-                if (type !== 0 && this.initdone === 1) {
-                    this.removeWaitText(name);
-                }
 
                 if (message.x < 0) {
                     message.x = 0;
