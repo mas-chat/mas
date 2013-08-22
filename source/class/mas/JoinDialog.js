@@ -32,41 +32,41 @@ qx.Class.define('mas.JoinDialog', {
 
     members: {
         open: function() {
-            var comboBox = new qx.ui.form.ComboBox();
-            var nameField = new qx.ui.form.TextField().set({
-                maxLength: 25
-            });
-            var pwField = new qx.ui.form.TextField().set({
-                maxLength: 25
-            });
+            var caption = 'Join existing group';
+            var text = 'Type the name of the group you wish to join:';
 
-            this.setYesLabel('OK');
-            this.setNoLabel('Cancel');
+            if (this.getMode() !== 'MASGROUP') {
+                caption = 'Join IRC channel';
+                text = 'Type the name of the IRC channel you wish to join:';
+            }
 
             var that = this;
 
-            this.setYesCb(function() {
-                var name = nameField.getValue();
-                var selectedNw = that.getMode() === 'MASGROUP' ?
-                        'MeetAndSpeak' : comboBox.getValue();
+            // Configure the base object
+            this.set({
+                caption: caption,
+                text: text,
+                yesLabel: 'OK',
+                yesCb: function() {
+                    var name = nameField.getValue();
+                    var selectedNw = that.getMode() === 'MASGROUP' ?
+                            'MeetAndSpeak' : comboBox.getValue();
 
-                if (name !== '') {
-                    that.getJoinCb()(name, pwField.getValue(), selectedNw);
-                }
+                    if (name !== '') {
+                        that.getJoinCb()(name, pwField.getValue(), selectedNw);
+                    }
+                },
+                noLabel: 'Cancel'
             });
-
-            if (this.getMode() === 'MASGROUP') {
-                this.setCaption('Join existing group');
-                this.setText('Type the name of the group you wish to join:');
-            } else {
-                this.setCaption('Join IRC channel');
-                this.setText(
-                    'Type the name of the IRC channel you wish to join:');
-            }
 
             this.base(arguments);
 
             // Add more fields
+            var fieldProperties = { maxLength: 25 };
+            var comboBox = new qx.ui.form.ComboBox();
+            var nameField = new qx.ui.form.TextField().set(fieldProperties);
+            var pwField = new qx.ui.form.TextField().set(fieldProperties);
+
             this.addAt(nameField, 1);
             this.addAt(new qx.ui.basic.Label('Password, if needed:'), 2);
             this.addAt(pwField, 3);
