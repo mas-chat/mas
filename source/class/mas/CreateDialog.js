@@ -29,32 +29,29 @@ qx.Class.define('mas.CreateDialog', {
 
     members: {
         open: function() {
-            var nameField = new qx.ui.form.TextField().set({
-                maxLength: 25
-            });
-            var pwField = new qx.ui.form.TextField().set({
-                maxLength: 25
-            });
-
-            this.setYesLabel('OK');
-            this.setNoLabel('Cancel');
-
-            this.setCaption('Create new group');
-            this.setText('Type the name of the group you wish to create:');
+            var fieldProperties = { maxLength: 25 };
+            var nameField = new qx.ui.form.TextField().set(fieldProperties);
+            var pwField = new qx.ui.form.TextField().set(fieldProperties);
 
             var that = this;
 
             var process = function() {
                 var name = nameField.getValue();
-                var pw = pwField.getValue();
 
                 if (name !== '') {
-                    that.getCreateCb()(name, pw);
+                    that.getCreateCb()(name, pwField.getValue());
                 }
             };
 
-            this.setYesCb(function() {
-                process();
+            // Configure the base object
+            this.set({
+                caption: 'Create new group',
+                text: 'Type the name of the group you wish to create:',
+                yesLabel: 'OK',
+                yesCb: function() {
+                    process();
+                },
+                noLabel: 'Cancel'
             });
 
             this.base(arguments);
