@@ -184,7 +184,7 @@ qx.Class.define('mas.MainScreen',
 
             if (value > 0) {
                 onlineText = '<span style="color:#000000">(</span>' +
-                    '<span style="color:#254117">' + 999 +
+                    '<span style="color:#254117">' + value +
                     '</span><span style="color:#000000">)</span>';
             }
 

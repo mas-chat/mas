@@ -716,6 +716,12 @@ qx.Class.define('mas.UserWindow',
         {
             nick = nick.toLowerCase();
 
+            if (online) {
+                online = 1;
+            } else{
+                online = 2;
+            }
+
             //online: 0 = unknown, 1 = online, 2 = offline
 
             if (this.type === 0) {

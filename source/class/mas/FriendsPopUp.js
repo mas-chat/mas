@@ -38,7 +38,6 @@ qx.Class.define('mas.FriendsPopUp', {
             scrollbarY: 'auto'
         });
 
-
         var friendContainer = new qx.ui.container.Composite(
             new qx.ui.layout.VBox()).set({
                 backgroundColor: '#e2e5eE'
@@ -54,24 +53,23 @@ qx.Class.define('mas.FriendsPopUp', {
 
         friendContainer.add(friendsLabel);
 
-        var fgrid = new qx.ui.layout.Grid();
-        this._flist = new qx.ui.container.Composite(fgrid).set({
+        var fgrid = new qx.ui.layout.Grid().setColumnWidth(0, 185);
+        this._friendList = new qx.ui.container.Composite(fgrid).set({
             allowGrowX: true,
             allowGrowY: true
         });
-        fgrid.setColumnWidth(0, 185);
 
-        friendContainer.add(this._flist, { flex: 1 });
+        friendContainer.add(this._friendList, { flex: 1 });
 
         var addContainer = new qx.ui.container.Composite(
             new qx.ui.layout.HBox());
 
-        this.__input1 = new qx.ui.form.TextField().set({
+        var friendNameField = new qx.ui.form.TextField().set({
             placeholder: '<nickname>',
             margin: [10, 0, 8, 8]
         });
 
-        addContainer.add(this.__input1, { flex: 1 });
+        addContainer.add(friendNameField, { flex: 1 });
         addContainer.add(new qx.ui.core.Spacer(8));
 
         var addButton = new qx.ui.form.Button('Add').set({
@@ -82,30 +80,32 @@ qx.Class.define('mas.FriendsPopUp', {
         friendContainer.add(addContainer);
 
         addButton.addListener('execute', function () {
-            this._addContactCb.call(this._cbCtx, this.__input1.getValue());
-            this.__input1.setValue('');
+            this._addContactCb.call(this._cbCtx, friendNameField.getValue());
+            friendNameField.setValue('');
         }, this);
 
         friendScroll.add(friendContainer);
         this.add(friendScroll, { flex: 1 });
 
-        this._timer = new qx.event.Timer(1000 * 60);
-        this._timer.addListener(
-            'interval', function() {
-                this.updateIdleTimes(this._flist);
-            }, this);
-        this._timer.start();
+        var timer = new qx.event.Timer(1000 * 60);
+        timer.start();
+
+        timer.addListener('interval', function() {
+            this.updateIdleTimes(this._friendList);
+        }, this);
     },
 
     members: {
-        _timer: null,
-        _flist: null,
+        _friendList: null,
         _addContactCb: null,
         _startChatCb: null,
         _cbCtx: null,
 
+        // TODO: Create real model and update it from controller. Make this view
+        // just to follow the changes in the model.
+
         updateIdleTimes : function() {
-            var children = this._flist.getChildren();
+            var children = this._friendList.getChildren();
 
             for (var i = 1; i < children.length; i = i + 3) {
                 if (children[i].idleTime !== 0) {
@@ -117,7 +117,7 @@ qx.Class.define('mas.FriendsPopUp', {
         },
 
         updateFriendsList : function(model) {
-            this._flist.removeAll();
+            this._friendList.removeAll();
 
             if (model.list.length === 0) {
                 var nofriends = new qx.ui.basic.Label(
@@ -129,7 +129,7 @@ qx.Class.define('mas.FriendsPopUp', {
                             paddingLeft: 10
                         });
 
-                this._flist.add(nofriends, { row: 0, column: 0 });
+                this._friendList.add(nofriends, { row: 0, column: 0 });
             }
 
             var that = this;
@@ -178,16 +178,10 @@ qx.Class.define('mas.FriendsPopUp', {
 
                 idleInfo.idleTime = model.list[i].idleTime;
 
-                this._flist.add(name, { row: 2 * row, column: 0 });
-                this._flist.add(idleInfo, { row: 2 * row + 1, column: 0,
-                                           colSpan : 2 });
-                this._flist.add(chatButton, { row: 2 * row, column: 1 });
-
-                var online = 2;
-
-                if(idleInfo.idleTime === 0) {
-                    online = 1;
-                }
+                this._friendList.add(name, { row: 2 * row, column: 0 });
+                this._friendList.add(
+                    idleInfo, { row: 2 * row + 1, column: 0, colSpan: 2 });
+                this._friendList.add(chatButton, { row: 2 * row, column: 1 });
 
                 row++;
             }
@@ -196,7 +190,7 @@ qx.Class.define('mas.FriendsPopUp', {
         },
 
         printIdleTimes : function() {
-            var children = this._flist.getChildren();
+            var children = this._friendList.getChildren();
 
             for (var i = 1; i < children.length; i = i + 3) {
                 var idle = children[i].idleTime;

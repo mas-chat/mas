@@ -151,17 +151,24 @@ qx.Class.define('mas.Controller',
 
             case 'FLIST':
                 this._friendsPopUp.updateFriendsList(message);
-                this._mainScreen.updateContactsLabel(999);
+                var onlineAmount = 0;
 
-                // FIX: Move to Conttoller: Update groups also
-                //for (var ii=0; ii < this.windows.length; ii++) {
-                //    if (typeof(this.windows[ii]) !== 'undefined') {
-                //        this.windows[ii].setUserStatus(
-                //            contact.nick, online);
-                //    }
-                //}
+                for (var i in message.list) {
+                    var online = false;
+
+                    if (message.list[i].idleTime === 0) {
+                        online = true;
+                        onlineAmount++;
+                    }
+
+                    for (var window in this._windows) {
+                        this._windows[window].setUserStatus(
+                            message.list[i].nick, online);
+                    }
+                }
+
+                this._mainScreen.updateContactsLabel(onlineAmount);
                 break;
-
 
             case 'SET':
                 this._settings.update(message.settings);
