@@ -14,103 +14,64 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('mas.Settings',
-{
-    extend : qx.core.Object,
+qx.Class.define('mas.Settings', {
+    extend: qx.core.Object,
 
-    construct : function(srpc, params)
-    {
-        this.rpc = srpc;
-        this.update(params);
+    construct: function(cbCtx, announceSettingCb) {
+        this._cbCtx = cbCtx;
+        this._announceSettingCb = announceSettingCb;
     },
 
-    //TODO: write proper destructor
-
-    properties :
-    {
-        firstTime : { init : 1, apply : '_applyFirstTime' },
-        loggingEnabled : { init : 1, apply : '_applyLoggingEnabled' },
-        sslEnabled : { init : 0, apply : '_applySslEnabled' },
-        largeFonts : { init : 1, apply : '_applyLargeFonts' },
-        autoArrange : { init : 1, apply : '_applyAutoArrange' },
-        showCloseWarn : { init : 1, apply : '_applyShowCloseWarn' }
+    properties : {
+        firstTime : {
+            init: 1,
+            apply: '_announce'
+        },
+        loggingEnabled: {
+            init: 1,
+            apply: '_announce'
+        },
+        sslEnabled: {
+            init: 0,
+            apply: '_announce'
+        },
+        largeFonts: {
+            init: 1,
+            apply: '_announce'
+        },
+        autoArrange: {
+            init: 1,
+            apply: '_announce'
+        },
+        showCloseWarn: {
+            init : 1,
+            apply: '_announce'
+        }
     },
 
-    members :
-    {
-        rpc : 0,
-        _initDone : false,
+    members: {
+        _cbCtx: null,
+        _announceSettingCb: null,
 
-        update : function(params)
-        {
+        updateFromServer: function(params) {
             for(var key in params) {
-                var value = params[key];
+                var param = {};
 
-                switch(key) {
-                case 'firstTime':
-                    this.setFirstTime(parseInt(value, 10));
-                    break;
+                // All settings are currently numbers
+                param[key] = parseInt(params[key], 10);
 
-                case 'autoArrange':
-                    this.setAutoArrange(parseInt(value, 10));
-                    break;
-
-                case 'largeFonts':
-                    this.setLargeFonts(parseInt(value, 10));
-                    break;
-
-                case 'loggingEnabled':
-                    this.setLoggingEnabled(parseInt(value, 10));
-                    break;
-
-                case 'sslEnabled':
-                    this.setSslEnabled(parseInt(value, 10));
-                    break;
-
-                case 'showCloseWarn':
-                    this.setShowCloseWarn(parseInt(value, 10));
-                    break;
+                try {
+                    this.set(param);
+                } catch (e) {
+                    debug.print(
+                        'Unknown setting received from the server: ' +
+                            e.message);
                 }
             }
-
-            this._initDone = true;
         },
 
-        _applyShowCloseWarn : function(value)
-        {
-            this.send('showCloseWarn', value);
-        },
-
-        _applyFirstTime : function(value)
-        {
-            this.send('firstTime', value);
-        },
-
-        _applyLoggingEnabled : function(value)
-        {
-            this.send('loggingEnabled', value);
-        },
-
-        _applySslEnabled : function(value)
-        {
-            this.send('sslEnabled', value);
-        },
-
-        _applyLargeFonts : function(value)
-        {
-            this.send('largeFonts', value);
-        },
-
-        _applyAutoArrange : function(value)
-        {
-            this.send('autoArrange', value);
-        },
-
-        send : function(name, value)
-        {
-            if (this._initDone === true) {
-                this.rpc.call('SET', name + ' ' + value);
-            }
+        _announce: function(value, oldValue, name) {
+            this._announceSettingCb.call(this._cbCtx, name, value);
         }
     }
 });

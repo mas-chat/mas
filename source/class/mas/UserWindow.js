@@ -1232,6 +1232,8 @@ qx.Class.define('mas.UserWindow',
         linkify : function (inputText)
         {
             //URLs starting with http://, https://, or ftp://
+
+            //jshint maxlen:120
             var replacePattern1 =
                     /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
             var replacedText = inputText.replace(

@@ -256,6 +256,12 @@ qx.Class.define('mas.LogDialog',
                 var dateObj = new Date();
                 var timezone = dateObj.getTimezoneOffset();
 
+                var click = function() {
+                    this.iframe.setSource(
+                        '/tools/get_day.pl?date=' + this.date + '&chan=' +
+                            this.chan + '&tz=' + this.tz + '&st=');
+                };
+
                 for (var i=0; i < channels.length; i++) {
                     var tmp = new qx.ui.form.ListItem(channels[i].name);
                     tmp.chan = escape(channels[i].file);
@@ -263,12 +269,7 @@ qx.Class.define('mas.LogDialog',
                     tmp.tz = timezone;
                     tmp.st = '';
                     tmp.iframe = this._iframe;
-
-                    tmp.addListener('click', function () {
-                        this.iframe.setSource(
-                            '/tools/get_day.pl?date=' + this.date + '&chan=' +
-                                this.chan + '&tz=' + this.tz + '&st=');
-                    }, tmp);
+                    tmp.addListener('click', click, tmp);
 
                     this.list.add(tmp);
                     this.list.setSelection([tmp]);

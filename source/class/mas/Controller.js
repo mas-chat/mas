@@ -23,21 +23,22 @@ qx.Class.define('mas.Controller',
         this._root = root;
 
         var cookie = qx.bom.Cookie.get('ProjectEvergreen');
+        var anonUser = false;
 
         if (!cookie) {
             window.location = '/';
         } else if (cookie.split('-')[2] === 'a') {
-            this._anonUser = true;
+            anonUser = true;
         }
 
         // Utilities
+        this._audio = new mas.Audio();
+
+        this._settings = new mas.Settings(this, this.handleAnnounceSetting);
+
         this._xhr = new mas.XHR(
             this, this.processMessage, this.handleError, this.handleRpcError,
             this.setStatusText);
-
-        this._audio = new mas.Audio();
-
-        this._settings = new mas.Settings(this._xhr, '');
 
         // Views
         this._logDialog = new mas.LogDialog(
@@ -47,7 +48,7 @@ qx.Class.define('mas.Controller',
             this.handleAddContact, this.handleStartChat, this);
 
         this._mainScreen = new mas.MainScreen(
-            this._xhr, root, this._logDialog, this._settings, this._anonUser,
+            this._xhr, root, this._logDialog, this._settings, anonUser,
             this._friendsPopUp, this);
     },
 
@@ -58,7 +59,6 @@ qx.Class.define('mas.Controller',
 
         _startLabel : 0,
         _root: null,
-        _anonUser : false,
 
         _xhr : null,
         _audio : null,
@@ -171,7 +171,7 @@ qx.Class.define('mas.Controller',
                 break;
 
             case 'SET':
-                this._settings.update(message.settings);
+                this._settings.updateFromServer(message.settings);
                 // We have settings now, update the status message
                 this._startLabel.setValue(
                     '<center><br><br><br>Rendering</center>');
@@ -304,6 +304,13 @@ qx.Class.define('mas.Controller',
             this._xhr.call('STARTCHAT', 'MeetAndSpeak ' + nick);
         },
 
+        handleAnnounceSetting: function(name, value) {
+            if (this.initDone === true) {
+                debug.print('Setting "' + name + '" changed, informing server');
+                this._xhr.call('SET', name + ' ' + value);
+            }
+        },
+
         createOrUpdateWindow : function(message, create) {
             var windowId = message.window;
             var nw = message.nwName;
@@ -313,7 +320,6 @@ qx.Class.define('mas.Controller',
             var sound = message.sounds;
             var titlealert = message.titleAlert;
             var usermode = message.userMode;
-            var visible = message.visible;
             var newMsgs = message.newMsgs;
             var password = message.password;
             var topic = message.topic;
@@ -458,7 +464,7 @@ qx.Class.define('mas.Controller',
                 var cy = 0;
                 var current = 0;
 
-                for (var window in this._windows) {
+                for (window in this._windows) {
                     current++;
 
                     this._windows[window].moveTo(
