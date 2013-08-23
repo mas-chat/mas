@@ -55,17 +55,19 @@ qx.Class.define('mas.Settings', {
 
         updateFromServer: function(params) {
             for(var key in params) {
-                var param = {};
+                if (params.hasOwnProperty(key)) {
+                    var param = {};
 
-                // All settings are currently numbers
-                param[key] = parseInt(params[key], 10);
+                    // All settings are currently numbers
+                    param[key] = parseInt(params[key], 10);
 
-                try {
-                    this.set(param);
-                } catch (e) {
-                    debug.print(
-                        'Unknown setting received from the server: ' +
-                            e.message);
+                    try {
+                        this.set(param);
+                    } catch (e) {
+                        debug.print(
+                            'Unknown setting received from the server: ' +
+                                e.message);
+                    }
                 }
             }
         },

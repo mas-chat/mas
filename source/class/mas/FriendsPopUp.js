@@ -150,40 +150,43 @@ qx.Class.define('mas.FriendsPopUp', {
             var row = 0;
 
             for (var i in model.list) {
-                var name = new qx.ui.basic.Label(
-                    '<b>' + model.list[i].name + '</b>&nbsp;(' +
-                        model.list[i].nick + ')').set({
+                if (model.list.hasOwnProperty(i)) {
+                    var name = new qx.ui.basic.Label(
+                        '<b>' + model.list[i].name + '</b>&nbsp;(' +
+                            model.list[i].nick + ')').set({
+                                rich: true,
+                                padding: [7, 0, 0, 10]
+                            });
+
+                    var idleInfo = new qx.ui.basic.Label().set({
+                        rich: true,
+                        padding: [0, 0, 0, 20]
+                    });
+
+                    var chatButton = new qx.ui.basic.Label(
+                        '<font color="green">|chat|</font>').set({
                             rich: true,
+                            toolTip: toolTip,
                             padding: [7, 0, 0, 10]
                         });
 
-                var idleInfo = new qx.ui.basic.Label().set({
-                    rich: true,
-                    padding: [0, 0, 0, 20]
-                });
+                    chatButton.nickname = model.list[i].nick;
+                    chatButton.mainscreen = this;
 
-                var chatButton = new qx.ui.basic.Label(
-                    '<font color="green">|chat|</font>').set({
-                        rich: true,
-                        toolTip: toolTip,
-                        padding: [7, 0, 0, 10]
-                    });
+                    chatButton.addListener('click', click, chatButton);
+                    chatButton.addListener('mouseover', mouseOver, chatButton);
+                    chatButton.addListener('mouseout', mouseOut, chatButton);
 
-                chatButton.nickname = model.list[i].nick;
-                chatButton.mainscreen = this;
+                    idleInfo.idleTime = model.list[i].idleTime;
 
-                chatButton.addListener('click', click, chatButton);
-                chatButton.addListener('mouseover', mouseOver, chatButton);
-                chatButton.addListener('mouseout', mouseOut, chatButton);
+                    this._friendList.add(name, { row: 2 * row, column: 0 });
+                    this._friendList.add(
+                        idleInfo, { row: 2 * row + 1, column: 0, colSpan: 2 });
+                    this._friendList.add(
+                        chatButton, { row: 2 * row, column: 1 });
 
-                idleInfo.idleTime = model.list[i].idleTime;
-
-                this._friendList.add(name, { row: 2 * row, column: 0 });
-                this._friendList.add(
-                    idleInfo, { row: 2 * row + 1, column: 0, colSpan: 2 });
-                this._friendList.add(chatButton, { row: 2 * row, column: 1 });
-
-                row++;
+                    row++;
+                }
             }
 
             this.printIdleTimes();

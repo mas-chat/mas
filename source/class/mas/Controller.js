@@ -154,16 +154,18 @@ qx.Class.define('mas.Controller',
                 var onlineAmount = 0;
 
                 for (var i in message.list) {
-                    var online = false;
+                    if (message.list.hasOwnProperty(i)) {
+                        var online = false;
 
-                    if (message.list[i].idleTime === 0) {
-                        online = true;
-                        onlineAmount++;
-                    }
+                        if (message.list[i].idleTime === 0) {
+                            online = true;
+                            onlineAmount++;
+                        }
 
-                    for (var window in this._windows) {
-                        this._windows[window].setUserStatus(
-                            message.list[i].nick, online);
+                        for (var window in this._windows) {
+                            this._windows[window].setUserStatus(
+                                message.list[i].nick, online);
+                        }
                     }
                 }
 
