@@ -14,42 +14,36 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('mas.Participant',
-{
-    extend : qx.core.Object,
+qx.Class.define('mas.Participant', {
+    extend: qx.core.Object,
 
-    properties : {
-        name : {
-            check : 'String',
-            event : 'changeName',
-            init : '',
-            nullable : true
+    properties: {
+        name: {
+            check: 'String',
+            event: 'changeName',
+            init: '',
+            nullable: true
         },
-
-        op : {
-            check : 'Boolean',
-            event : 'changeOp',
-            init : false
+        op: {
+            check: 'Boolean',
+            event: 'changeOp',
+            init: false
         },
-
-        voice : {
-            check : 'Boolean',
-            event : 'changeVoice',
-            init : false
+        voice: {
+            check: 'Boolean',
+            event: 'changeVoice',
+            init: false
         },
-
-        //online: 0 = unknown, 1 = online, 2 = offline
-        online : {
-            check : 'Number',
-            event : 'changeOnline',
-            init : 0
+        online: {
+            check: 'Number',
+            event: 'changeOnline',
+            init: 0 // online: 0 = unknown, 1 = online, 2 = offline
         }
     },
 
-    members : {
+    members: {
         toString: function() {
             return 'foobar';
         }
     }
-
 });

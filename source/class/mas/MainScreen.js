@@ -14,13 +14,12 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('mas.MainScreen',
-{
-    extend : qx.core.Object,
+qx.Class.define('mas.MainScreen', {
+    extend: qx.core.Object,
 
-    construct : function(
-        srpc, rootItem, logDialog, settings, anonUser, friendsPopUp, controller)
-    {
+    construct: function(
+        srpc, rootItem, logDialog, settings, anonUser, friendsPopUp,
+        controller) {
         this.base(arguments);
 
         this.rpc = srpc;
@@ -68,38 +67,36 @@ qx.Class.define('mas.MainScreen',
         }, this);
     },
 
-    members :
-    {
-        rootContainer : 0,
-        desktop : 0,
-        rpc : 0,
+    members: {
+        rootContainer: 0,
+        desktop: 0,
+        rpc: 0,
 
-        logDialog : 0,
-        infoDialog : 0,
-        settings : 0,
-        anonUser : 0,
-        blocker : 0,
-        manager : 0,
+        logDialog: 0,
+        infoDialog: 0,
+        settings: 0,
+        anonUser: 0,
+        blocker: 0,
+        manager: 0,
 
-        _friendsPopUp : null,
-        _contactsButton : 0,
-        __statusBar : 0,
-        __startLabel : 0,
-        __part2 : 0,
-        __part3 : 0,
-        __windowGroup : 0,
-        __myapp : 0,
-        __topictimer : 0,
-        __topicstate : 0,
-        __tt : 0,
-        __blur : 0,
-        __input1 : 0,
-        __topictimeractive : 0,
-        __prevwin : -1,
-        __msgvisible : false,
+        _friendsPopUp: null,
+        _contactsButton: 0,
+        __statusBar: 0,
+        __startLabel: 0,
+        __part2: 0,
+        __part3: 0,
+        __windowGroup: 0,
+        __myapp: 0,
+        __topictimer: 0,
+        __topicstated: 0,
+        __tt: 0,
+        __blur: 0,
+        __input1: 0,
+        __topictimeractive: 0,
+        __prevwin: -1,
+        __msgvisible: false,
 
-        show : function()
-        {
+        show : function() {
             // Root widget
             this.rootContainer = new qx.ui.container.Composite(
                 new qx.ui.layout.VBox(0));
@@ -179,7 +176,7 @@ qx.Class.define('mas.MainScreen',
             this.__myapp.add(this.__statusBar, { left: 100, top: 0 });
         },
 
-        updateContactsLabel : function(value) {
+        updateContactsLabel: function(value) {
             var onlineText = '';
 
             if (value > 0) {
@@ -193,7 +190,7 @@ qx.Class.define('mas.MainScreen',
                     onlineText);
         },
 
-        getMainMenu : function() {
+        getMainMenu: function() {
             var menu = new qx.ui.menu.Menu();
 
             var forumMenu = new qx.ui.menu.Button('Groups', null, null,
@@ -226,8 +223,7 @@ qx.Class.define('mas.MainScreen',
             return menu;
         },
 
-        setStatusText : function(text)
-        {
+        setStatusText: function(text) {
             if (text === '') {
                 this.__statusBar.hide();
             } else {
@@ -236,8 +232,7 @@ qx.Class.define('mas.MainScreen',
             }
         },
 
-        showFriendRequest : function(message)
-        {
+        showFriendRequest: function(message) {
             var friendId = message.friendId;
             var friendNick = message.friendNick;
             var friendName = message.friendName;
@@ -282,8 +277,7 @@ qx.Class.define('mas.MainScreen',
             // else ignore command
         },
 
-        getLogoutMenu : function()
-        {
+        getLogoutMenu: function() {
             var menu = new qx.ui.menu.Menu();
             var logoutButton = new qx.ui.menu.Button('Log out');
             menu.add(logoutButton);
@@ -292,8 +286,7 @@ qx.Class.define('mas.MainScreen',
             return menu;
         },
 
-        getHelpMenu : function()
-        {
+        getHelpMenu: function() {
             var menu = new qx.ui.menu.Menu();
             var manualButton = new qx.ui.menu.Button('Support Web site');
             var keyButton = new qx.ui.menu.Button(
@@ -312,8 +305,7 @@ qx.Class.define('mas.MainScreen',
             return menu;
         },
 
-        getForumMenu : function()
-        {
+        getForumMenu: function() {
             var menu = new qx.ui.menu.Menu();
             var createButton = new qx.ui.menu.Button('Create new group...');
             var joinButton = new qx.ui.menu.Button('Join existing group...');
@@ -327,8 +319,7 @@ qx.Class.define('mas.MainScreen',
             return menu;
         },
 
-        getViewMenu : function()
-        {
+        getViewMenu: function() {
             var menu = new qx.ui.menu.Menu();
             var logsButton = new qx.ui.menu.Button('Show logs...');
             var arrangeButton = new qx.ui.menu.Button('Tile windows');
@@ -347,8 +338,7 @@ qx.Class.define('mas.MainScreen',
             return menu;
         },
 
-        getSettingsMenu : function()
-        {
+        getSettingsMenu: function() {
             var menu = new qx.ui.menu.Menu();
             var sslButton = new qx.ui.menu.CheckBox('Always use HTTPS');
             var fontButton = new qx.ui.menu.CheckBox('Small font');
@@ -379,8 +369,7 @@ qx.Class.define('mas.MainScreen',
             return menu;
         },
 
-        getAdvancedMenu : function()
-        {
+        getAdvancedMenu: function() {
             var menu = new qx.ui.menu.Menu();
             var joinButton = new qx.ui.menu.Button('Join IRC channel...');
 
@@ -390,8 +379,7 @@ qx.Class.define('mas.MainScreen',
             return menu;
         },
 
-        _joinIRCCommand : function()
-        {
+        _joinIRCCommand: function() {
             var that = this;
 
             new mas.JoinDialog().set({
@@ -402,13 +390,11 @@ qx.Class.define('mas.MainScreen',
             }).open();
         },
 
-        _logsCommand : function()
-        {
+        _logsCommand: function() {
             this.logDialog.show(this.__myapp, this.desktop.getBounds());
         },
 
-        _joinForumCommand : function()
-        {
+        _joinForumCommand: function() {
             var that = this;
 
             new mas.JoinDialog().set({
@@ -419,8 +405,7 @@ qx.Class.define('mas.MainScreen',
             }).open();
         },
 
-        _createForumCommand : function()
-        {
+        _createForumCommand: function() {
             var that = this;
 
             new mas.CreateDialog().set({
@@ -430,8 +415,7 @@ qx.Class.define('mas.MainScreen',
             }).open();
         },
 
-        _sslCommand : function(e)
-        {
+        _sslCommand: function(e) {
             var usessl = e.getData();
 
             if (usessl === true) {
@@ -453,8 +437,7 @@ qx.Class.define('mas.MainScreen',
             }).open();
         },
 
-        _fontCommand : function(e)
-        {
+        _fontCommand: function(e) {
             var smallfonts = e.getData();
 
             if (smallfonts === true) {
@@ -466,8 +449,7 @@ qx.Class.define('mas.MainScreen',
             this.updateFonts();
         },
 
-        _autoArrangeCommand : function(e)
-        {
+        _autoArrangeCommand: function(e) {
             var autoarrange = e.getData();
 
             if (autoarrange === true) {
@@ -477,8 +459,7 @@ qx.Class.define('mas.MainScreen',
             }
         },
 
-        updateFonts : function()
-        {
+        updateFonts: function() {
             for (var i = 0; i < this.windows.length; i++) {
                 if (typeof(this.windows[i]) !== 'undefined') {
                     this.windows[i].setFonts(this.settings.getLargeFonts());
@@ -486,8 +467,7 @@ qx.Class.define('mas.MainScreen',
             }
         },
 
-        _logoutCommand : function()
-        {
+        _logoutCommand: function() {
             this.rpc.call('LOGOUT', '');
 
             //TODO: create LOGOUTOK response and move this to there:
@@ -497,14 +477,12 @@ qx.Class.define('mas.MainScreen',
             }, this, 1500);
         },
 
-        _manualCommand : function()
-        {
+        _manualCommand: function() {
             var newWindow = window.open('/support.html', '_blank');
             newWindow.focus();
         },
 
-        _aboutCommand : function()
-        {
+        _aboutCommand: function() {
             new mas.Dialog().set({
                 caption: 'About',
                 text: '<br><br><br><center><img src="/i/mas_logo_small.png">' +
@@ -518,8 +496,7 @@ qx.Class.define('mas.MainScreen',
             }).open();
         },
 
-        _keyCommand : function()
-        {
+        _keyCommand: function() {
             new mas.Dialog().set({
                 caption: 'Shortcuts',
                 text: '<b>Keyboard shortcuts:</b><p><table border=0><tr><td>' +

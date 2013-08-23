@@ -17,28 +17,39 @@
 // Can't use strict because of Qooxdoo
 // 'use strict';
 
-qx.Class.define('mas.ListItem',
-{
-    extend : qx.ui.form.ListItem,
+qx.Class.define('mas.ListItem', {
+    extend: qx.ui.form.ListItem,
 
-    construct : function(label, icon, model)
-    {
-        this.base(arguments, label, icon, model);
+    construct: function(label, icon, model) {
+        this.base(arguments);
         this.setRich(true);
     },
 
-    properties :
-    {
-        nick : { check: 'String', apply : 'updateLabel', init : ''},
-        op : { check : 'Boolean', apply : 'updateLabel', init : false },
-        voice : { check : 'Boolean', apply : 'updateLabel', init : false },
-        online : { check : 'Number', apply : 'updateLabel', init : 0 }
+    properties: {
+        nick: {
+            check: 'String',
+            apply: 'updateLabel',
+            init: ''
+        },
+        op: {
+            check: 'Boolean',
+            apply: 'updateLabel',
+            init: false
+        },
+        voice: {
+            check: 'Boolean',
+            apply: 'updateLabel',
+            init: false
+        },
+        online: {
+            check: 'Number',
+            apply: 'updateLabel',
+            init: 0
+        }
     },
 
-    members :
-    {
-        updateLabel : function()
-        {
+    members: {
+        updateLabel: function() {
             var opStart = '';
             var opEnd = '';
 

@@ -14,11 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('mas.UserWindow',
-{
-    extend : qx.core.Object,
+qx.Class.define('mas.UserWindow', {
+    extend: qx.core.Object,
 
-    construct : function(srpc, desktop, topic, nw, name, type, sound,
+    construct: function(srpc, desktop, topic, nw, name, type, sound,
                          titlealert, nwId, usermode, password, newMsgs, id,
                          controller)
     {
@@ -48,7 +47,7 @@ qx.Class.define('mas.UserWindow',
             allowMaximize: true,
             allowMinimize: false,
             resizeSensitivity: 10,
-            contentPadding: [0,0,0,0]
+            contentPadding: [0, 0, 0, 0]
         });
 
         wm1.setLayout(new qx.ui.layout.VBox(0));
@@ -61,7 +60,7 @@ qx.Class.define('mas.UserWindow',
         var color = (type === 0) ? '#F2F3FC' : '#F7FAC9';
 
         this.__box = new qx.ui.container.Composite(layout).set({
-            padding:10,
+            padding: 10,
             margin: 0,
             backgroundColor: color
         });
@@ -72,7 +71,7 @@ qx.Class.define('mas.UserWindow',
         this.__scroll = new mas.Scroll().set({
             minWidth: 100,
             minHeight: 50,
-            scrollbarY : 'on'
+            scrollbarY: 'on'
         });
 
         this.__scroll.addListener('scrollLock', function(e) {
@@ -98,7 +97,7 @@ qx.Class.define('mas.UserWindow',
         this.__atom = new qx.ui.basic.Label('Please wait...<br>').set({
             rich: true,
             selectable: true,
-            nativeContextMenu : true,
+            nativeContextMenu: true,
             backgroundColor: color
         });
 
@@ -117,7 +116,7 @@ qx.Class.define('mas.UserWindow',
         var icomposite = new qx.ui.container.Composite(
             new qx.ui.layout.HBox(5));
 
-        icomposite.add(this.__inputline, { flex : 1 });
+        icomposite.add(this.__inputline, { flex: 1 });
 
         this.__box.add(icomposite, {row: 1, column: 0});
 
@@ -176,9 +175,9 @@ qx.Class.define('mas.UserWindow',
                 if (this.type === 0) {
                     this.__box.remove(this.__list);
                     this.__box.add(this.__settings,
-                                   { row : 0, column : 0, colSpan : 2 });
+                                   { row: 0, column: 0, colSpan: 2 });
                 } else {
-                    this.__box.add(this.__settings, { row : 0, column : 0 });
+                    this.__box.add(this.__settings, { row: 0, column: 0 });
                 }
 
                 this.__viewmode = 1;
@@ -196,9 +195,9 @@ qx.Class.define('mas.UserWindow',
                 if (this.type === 0) {
                     this.__box.remove(this.__list);
                     this.__box.add(this.__urls,
-                                   { row : 0, column : 0, colSpan : 2 });
+                                   { row: 0, column: 0, colSpan: 2 });
                 } else {
-                    this.__box.add(this.__urls, {row : 0, column : 0 });
+                    this.__box.add(this.__urls, {row: 0, column: 0 });
                 }
 
                 this.__viewmode = 2;
@@ -211,50 +210,50 @@ qx.Class.define('mas.UserWindow',
     },
 
     //TODO: write proper destructor
-    members :
+    members:
     {
-        window : 0,
-        winid : 0,
-        rpc : 0,
-        titlealert : 0,
-        sound : 0,
-        configListBan : 0,
-        configListOper : 0,
-        nameslist : null,
-        closeok : 0,
-        scrollLock : false,
-        type : 0,
-        apikey : 0,
+        window: 0,
+        winid: 0,
+        rpc: 0,
+        titlealert: 0,
+        sound: 0,
+        configListBan: 0,
+        configListOper: 0,
+        nameslist: null,
+        closeok: 0,
+        scrollLock: false,
+        type: 0,
+        apikey: 0,
 
         _searchstart: 0,
         _searchstring: '',
         _extendedsearch: false,
 
-        _controller : null,
-        __notes : 0,
-        __inputline : 0,
-        __urllabel : 0,
-        __list : 0,
-        __atom : 0,
-        __channelText : '',
-        __scroll : 0,
-        __lines : 0,
-        __settings : 0,
-        __urls : 0,
-        __viewmode : 0,
-        __box : 0,
-        __nw : 0,
-        __nwId : 0,
-        __topic : 0,
-        __name : 0,
-        __password : 0,
-        __usermode : 0,
-        __newmsgsatstart : 0,
-        __urllist : null,
-        __ntftooltip : 0,
-        __textcomposite : 0,
+        _controller: null,
+        __notes: 0,
+        __inputline: 0,
+        __urllabel: 0,
+        __list: 0,
+        __atom: 0,
+        __channelText: '',
+        __scroll: 0,
+        __lines: 0,
+        __settings: 0,
+        __urls: 0,
+        __viewmode: 0,
+        __box: 0,
+        __nw: 0,
+        __nwId: 0,
+        __topic: 0,
+        __name: 0,
+        __password: 0,
+        __usermode: 0,
+        __newmsgsatstart: 0,
+        __urllist: null,
+        __ntftooltip: 0,
+        __textcomposite: 0,
 
-        updateValues : function(topic, nw, name, type, sound, titlealert,
+        updateValues: function(topic, nw, name, type, sound, titlealert,
                                 nwId, usermode, password)
         {
             this.__password = password;
@@ -272,7 +271,7 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        handleResize : function(e)
+        handleResize: function(e)
         {
             var data = e.getData();
             var width = data.width;
@@ -284,7 +283,7 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        handleClose : function()
+        handleClose: function()
         {
             this.rpc.call('CLOSE', this.winid);
 
@@ -296,7 +295,7 @@ qx.Class.define('mas.UserWindow',
 
         //TODO: handle beforeclose -> remove from mainscreen array
 
-        handleKeyPress : function(e) {
+        handleKeyPress: function(e) {
             var key = e.getKeyIdentifier();
 
             if (key === 'Enter') {
@@ -388,22 +387,22 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        setHeight : function(e)
+        setHeight: function(e)
         {
             this.window.setHeight(e);
         },
 
-        setWidth : function(e)
+        setWidth: function(e)
         {
             this.window.setWidth(e);
         },
 
-        getBounds : function()
+        getBounds: function()
         {
             return this.window.getBounds();
         },
 
-        setNormal : function()
+        setNormal: function()
         {
             this.__taskbarButtonColor = '000000';
 
@@ -413,7 +412,7 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        handleMove : function(e)
+        handleMove: function(e)
         {
             var data = e.getData();
             var x = data.left;
@@ -424,7 +423,7 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        setFonts : function(large)
+        setFonts: function(large)
         {
 
             if (large === '1') {
@@ -438,7 +437,7 @@ qx.Class.define('mas.UserWindow',
             this.__scroll.scrollToY(200000);
         },
 
-        updateOperList : function(message) {
+        updateOperList: function(message) {
             this.configListOper.removeAll();
 
             for (var i=0; i < message.list.length; i++) {
@@ -449,7 +448,7 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        updateBanList : function(message) {
+        updateBanList: function(message) {
             this.configListBan.removeAll();
 
             for (var i = 0; i < message.list.length; i++) {
@@ -459,12 +458,12 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        activatewin : function()
+        activatewin: function()
         {
             this.window.activate();
         },
 
-        addHandlers : function()
+        addHandlers: function()
         {
             this.window.addListener('resize', this.handleResize, this);
             this.window.addListener('move', this.handleMove, this);
@@ -523,22 +522,22 @@ qx.Class.define('mas.UserWindow',
             }, this);
         },
 
-        moveTo : function(x,y)
+        moveTo: function(x,y)
         {
             this.window.moveTo(x, y);
         },
 
-        show : function()
+        show: function()
         {
             this.window.open();
         },
 
-        getName : function()
+        getName: function()
         {
             return this.__name;
         },
 
-        addntf : function (noteid, text)
+        addntf: function (noteid, text)
         {
             if (this.__notes > 10) {
                 return;
@@ -568,7 +567,7 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        addline : function(message, tsConversion)
+        addline: function(message, tsConversion)
         {
             var nickText = '';
             var ts = this._adjustTime(message.ts, tsConversion);
@@ -626,7 +625,7 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        displayWindowContent : function() {
+        displayWindowContent: function() {
             this.__atom.setValue(this.__channelText);
 
             if (this.scrollLock === false) {
@@ -634,12 +633,12 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        scrollToBottom : function ()
+        scrollToBottom: function ()
         {
             this.__scroll.scrollToY(100000);
         },
 
-        changetopic : function(line)
+        changetopic: function(line)
         {
             var nw = '(' + this.__nw + ' channel) ';
             var cname = this.__name;
@@ -665,7 +664,7 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        addnames : function(namesarray)
+        addnames: function(namesarray)
         {
             if (this.type !== 0) {
                 return;
@@ -678,7 +677,7 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        createParticipant : function(name)
+        createParticipant: function(name)
         {
             var person = new mas.Participant();
 
@@ -696,12 +695,12 @@ qx.Class.define('mas.UserWindow',
             return person;
         },
 
-        addname : function(nick)
+        addname: function(nick)
         {
             this.nameslist.push(this.createParticipant(nick));
         },
 
-        delname : function(nick)
+        delname: function(nick)
         {
             nick = nick.toLowerCase();
 
@@ -712,7 +711,7 @@ qx.Class.define('mas.UserWindow',
             }, this);
         },
 
-        setUserStatus : function (nick, online)
+        setUserStatus: function (nick, online)
         {
             nick = nick.toLowerCase();
 
@@ -746,7 +745,7 @@ qx.Class.define('mas.UserWindow',
             }
         },
 
-        _adjustTime : function(time, tsConversion)
+        _adjustTime: function(time, tsConversion)
         {
             var date = new Date();
 
@@ -776,34 +775,34 @@ qx.Class.define('mas.UserWindow',
             return hour + ':' + min;
         },
 
-        getBackFromSettingsMode : function()
+        getBackFromSettingsMode: function()
         {
             this.prefButton.setLabel('Settings');
             this.__box.remove(this.__settings);
-            this.__box.add(this.__textcomposite, { row:0, column :0 });
+            this.__box.add(this.__textcomposite, { row: 0, column: 0 });
 
             if (this.type === 0) {
-                this.__box.add(this.__list, { row:0, column :1 });
+                this.__box.add(this.__list, { row: 0, column: 1 });
             }
 
             this.__viewmode = 0;
             this.urlButton.setEnabled(true);
         },
 
-        getBackFromUrlMode : function()
+        getBackFromUrlMode: function()
         {
             this.__box.remove(this.__urls);
 
-            this.__box.add(this.__textcomposite, { row:0, column :0 });
+            this.__box.add(this.__textcomposite, { row: 0, column: 0 });
             if (this.type === 0) {
-                this.__box.add(this.__list, { row:0, column :1 });
+                this.__box.add(this.__list, { row: 0, column: 1 });
             }
 
             this.__viewmode = 0;
             this.prefButton.setEnabled(true);
         },
 
-        getList : function()
+        getList: function()
         {
             var list = new qx.ui.list.List(this.nameslist);
             list.setFocusable(false);
@@ -813,7 +812,7 @@ qx.Class.define('mas.UserWindow',
 
             var delegate = {
                 //Less than 0: Sort 'x' to be a lower index than 'y'
-                sorter : function(x, y) {
+                sorter: function(x, y) {
                     if (x.getOp() && !y.getOp()) {
                         return -1;
                     } else if (!x.getOp() && y.getOp()) {
@@ -840,13 +839,13 @@ qx.Class.define('mas.UserWindow',
                     }
                 },
 
-                configureItem : function(item) {
+                configureItem: function(item) {
                     item.setPadding(3);
                 },
-                createItem : function() {
+                createItem: function() {
                     return new mas.ListItem();
                 },
-                bindItem : function(controller, item, id) {
+                bindItem: function(controller, item, id) {
                     controller.bindProperty('name', 'nick', null, item, id);
                     controller.bindProperty('op', 'op', null, item, id);
                     controller.bindProperty('voice', 'voice', null, item, id);
@@ -860,7 +859,7 @@ qx.Class.define('mas.UserWindow',
             return list;
         },
 
-        getContextMenu : function()
+        getContextMenu: function()
         {
             var menu = new qx.ui.menu.Menu();
 
@@ -938,10 +937,10 @@ qx.Class.define('mas.UserWindow',
             return menu;
         },
 
-        getUrlsView : function()
+        getUrlsView: function()
         {
             var scroll = new qx.ui.container.Scroll().set({
-                scrollbarY : 'auto'
+                scrollbarY: 'auto'
             });
 
             this.__urllabel = new qx.ui.basic.Label('').set({
@@ -956,7 +955,7 @@ qx.Class.define('mas.UserWindow',
             return scroll;
         },
 
-        updateUrls : function()
+        updateUrls: function()
         {
             var text = '<b>Link Catcher</b><p>';
 
@@ -985,12 +984,12 @@ qx.Class.define('mas.UserWindow',
             this.__urllabel.setValue(text);
         },
 
-        addUrl : function(url)
+        addUrl: function(url)
         {
             this.__urllist.push(url);
         },
 
-        getSettingsView : function()
+        getSettingsView: function()
         {
             var composite = new qx.ui.container.Composite(
                 new qx.ui.layout.Grid(12,12));
@@ -1015,7 +1014,7 @@ qx.Class.define('mas.UserWindow',
             }, this);
 
             if (this.type === 0) {
-                composite.add(ltitle, { row:0, column: 0 });
+                composite.add(ltitle, { row: 0, column: 0 });
                 composite.add(this.topicInput, { row: 0, column: 1 });
                 composite.add(button1, { row: 0, column: 2 });
             }
@@ -1023,7 +1022,7 @@ qx.Class.define('mas.UserWindow',
             //SOUNDS
 
             var lsounds = new qx.ui.basic.Label('Audible alert:');
-            composite.add(lsounds, { row:1, column: 0 });
+            composite.add(lsounds, { row: 1, column: 0 });
 
             var scomposite2 = new qx.ui.container.Composite(
                 new qx.ui.layout.HBox(10));
@@ -1054,12 +1053,12 @@ qx.Class.define('mas.UserWindow',
             scomposite2.add(syes);
             scomposite2.add(sno);
 
-            composite.add(scomposite2, {row:1, column: 1});
+            composite.add(scomposite2, {row: 1, column: 1});
 
             //TITLE ALERT
 
             var ltitles = new qx.ui.basic.Label('Visual alert:');
-            composite.add(ltitles, {row:2, column: 0});
+            composite.add(ltitles, {row: 2, column: 0});
 
             var scomposite4 = new qx.ui.container.Composite(
                 new qx.ui.layout.HBox(10));
@@ -1090,7 +1089,7 @@ qx.Class.define('mas.UserWindow',
             scomposite4.add(tyes);
             scomposite4.add(tno);
 
-            composite.add(scomposite4, {row:2, column: 1});
+            composite.add(scomposite4, {row: 2, column: 1});
 
             //PASSWORD
             this.pwInput = new qx.ui.form.TextField().set({
@@ -1126,7 +1125,7 @@ qx.Class.define('mas.UserWindow',
                     'http://meetandspeak.com/join/' +
                         this.__name.substr(1)).set({
                             selectable: true,
-                            nativeContextMenu : true
+                            nativeContextMenu: true
                         });
                 composite.add(urltext, { row: 4, column: 1 });
 
@@ -1136,7 +1135,7 @@ qx.Class.define('mas.UserWindow',
 
             if (this.__usermode === 2) {
                 composite.add(new qx.ui.basic.Label('Operators:'),
-                              { row:5, column: 0 });
+                              { row: 5, column: 0 });
             }
 
             this.configListOper = new qx.ui.form.List().set({
@@ -1169,7 +1168,7 @@ qx.Class.define('mas.UserWindow',
 
             if (this.__usermode !== 0) {
                 composite.add(new qx.ui.basic.Label('Ban list:'),
-                              { row:6, column: 0 });
+                              { row: 6, column: 0 });
             }
 
             var scroll2 = new qx.ui.container.Scroll().set({
@@ -1183,7 +1182,7 @@ qx.Class.define('mas.UserWindow',
                 maxHeight: 90,
                 minWidth: 900,
                 width: 1000,
-                selectionMode : 'single',
+                selectionMode: 'single',
                 allowGrowX: true
             });
 
@@ -1206,7 +1205,7 @@ qx.Class.define('mas.UserWindow',
 
             if (this.type === 0 && this.__nwId === 0 && this.__usermode === 2) {
                 composite.add(new qx.ui.basic.Label('Group API key:'),
-                              { row:7, column: 0 });
+                              { row: 7, column: 0 });
                 this.apikey = new qx.ui.basic.Label('Refreshing...').set({
                     selectable: true,
                     nativeContextMenu: true
@@ -1229,7 +1228,7 @@ qx.Class.define('mas.UserWindow',
             return composite;
         },
 
-        linkify : function (inputText)
+        linkify: function (inputText)
         {
             //URLs starting with http://, https://, or ftp://
 

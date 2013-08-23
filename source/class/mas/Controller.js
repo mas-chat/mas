@@ -14,11 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('mas.Controller',
-{
-    extend : qx.core.Object,
+qx.Class.define('mas.Controller', {
+    extend: qx.core.Object,
 
-    construct : function(startLabel, root) {
+    construct: function(startLabel, root) {
         this._startLabel = startLabel;
         this._root = root;
 
@@ -52,25 +51,24 @@ qx.Class.define('mas.Controller',
             this._friendsPopUp, this);
     },
 
-    members :
-    {
-        nicks : [],
-        initdone : false,
+    members: {
+        nicks: [],
+        initdone: false,
 
-        _startLabel : 0,
+        _startLabel: 0,
         _root: null,
 
-        _xhr : null,
-        _audio : null,
-        _settings : null,
+        _xhr: null,
+        _audio: null,
+        _settings: null,
 
-        _logDialog : null,
-        _mainScreen : null,
-        _friendsPopUp : null,
+        _logDialog: null,
+        _mainScreen: null,
+        _friendsPopUp: null,
 
-        _windows : {},
+        _windows: {},
 
-        processMessage : function(message) {
+        processMessage: function(message) {
             switch(message.id) {
             case 'CREATE':
                 this.createOrUpdateWindow(message, true);
@@ -204,7 +202,7 @@ qx.Class.define('mas.Controller',
             this.__firstCommand = 0;
         },
 
-        handleRpcError : function() {
+        handleRpcError: function() {
             var problemLabel = new qx.ui.basic.Label(
                 '<center>MeetAndSpeak is having some technical problems. ' +
                     'Sorry!<br><br>You can try to reload this page in a few ' +
@@ -225,7 +223,7 @@ qx.Class.define('mas.Controller',
             this._root.add(problemLabel);
         },
 
-        handleError : function(code) {
+        handleError: function(code) {
             if (code === 'DIE') {
                 if (this.desktop === 0) {
                     this.show();
@@ -259,7 +257,7 @@ qx.Class.define('mas.Controller',
             }
         },
 
-        handleInitDone : function() {
+        handleInitDone: function() {
             this.initdone = 1;
 
             for (var window in this._windows) {
@@ -313,7 +311,7 @@ qx.Class.define('mas.Controller',
             }
         },
 
-        createOrUpdateWindow : function(message, create) {
+        createOrUpdateWindow: function(message, create) {
             var windowId = message.window;
             var nw = message.nwName;
             var nwId = message.nwId;
@@ -392,7 +390,7 @@ qx.Class.define('mas.Controller',
             }
         },
 
-        checkLimits : function(e) {
+        checkLimits: function(e) {
             for (var window in this._windows) {
                 var wbounds = this._windows[window].getBounds();
                 var dim = e.getData();
@@ -433,7 +431,7 @@ qx.Class.define('mas.Controller',
             }
         },
 
-        tileWindows : function() {
+        tileWindows: function() {
             if (this._settings.getAutoArrange() === 0) {
                 return;
             }
@@ -493,7 +491,7 @@ qx.Class.define('mas.Controller',
             }, this, 10);
         },
 
-        setStatusText : function(text) {
+        setStatusText: function(text) {
             this._mainscreen.setStatusText(text);
         }
     }

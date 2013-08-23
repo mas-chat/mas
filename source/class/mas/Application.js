@@ -21,36 +21,32 @@
 // Can't use strict because of Qooxdoo
 // 'use strict';
 
-qx.Class.define('mas.Application',
-{
-    extend : qx.application.Standalone,
+qx.Class.define('mas.Application', {
+    extend: qx.application.Standalone,
 
-    members :
-    {
-        main : function()
-        {
+    members: {
+        main: function() {
             this.base(arguments);
 
             qx.log.appender.Native; // Disable someday
 
-            var root = this.getRoot();
-
-            root.removeAll();
-            root.set({ backgroundColor: '#FFFFFF' });
-
-            var startLabel = new qx.ui.basic.Label(
-                '<center><img src="/i/ajax-loader.gif"><br><br><br>' +
-                    'Loading content...</center>').set({
-                        font : new qx.bom.Font(14, [ 'Arial', 'sans-serif' ]),
-                        width: 300,
-                        height: 150,
-                        rich: true
-                    });
+            var root = this.getRoot().set({
+                backgroundColor: '#FFFFFF'
+            });
 
             var marginX = Math.round(qx.bom.Viewport.getWidth() / 2) - 300 / 2;
             var marginY = Math.round(qx.bom.Viewport.getHeight() / 2);
 
-            startLabel.setMargin(marginY, 10, 10, marginX);
+            var startLabel = new qx.ui.basic.Label(
+                '<center><img src="/i/ajax-loader.gif"><br><br><br>' +
+                    'Loading content...</center>').set({
+                        font: new qx.bom.Font(14, [ 'Arial', 'sans-serif' ]),
+                        width: 300,
+                        height: 150,
+                        rich: true,
+                        margin: [marginY, 10, 10, marginX]
+                    });
+
             root.add(startLabel, { width: '100%', height: '100%' });
 
             new mas.Controller(startLabel, root);

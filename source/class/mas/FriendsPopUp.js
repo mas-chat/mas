@@ -104,7 +104,7 @@ qx.Class.define('mas.FriendsPopUp', {
         // TODO: Create real model and update it from controller. Make this view
         // just to follow the changes in the model.
 
-        updateIdleTimes : function() {
+        updateIdleTimes: function() {
             var children = this._friendList.getChildren();
 
             for (var i = 1; i < children.length; i = i + 3) {
@@ -116,7 +116,7 @@ qx.Class.define('mas.FriendsPopUp', {
             this.printIdleTimes();
         },
 
-        updateFriendsList : function(model) {
+        updateFriendsList: function(model) {
             this._friendList.removeAll();
 
             if (model.list.length === 0) {
@@ -192,7 +192,7 @@ qx.Class.define('mas.FriendsPopUp', {
             this.printIdleTimes();
         },
 
-        printIdleTimes : function() {
+        printIdleTimes: function() {
             var children = this._friendList.getChildren();
 
             for (var i = 1; i < children.length; i = i + 3) {

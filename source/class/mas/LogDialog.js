@@ -17,12 +17,10 @@
 // Can't use strict because of Qooxdoo
 // 'use strict';
 
-qx.Class.define('mas.LogDialog',
-{
-    extend : qx.core.Object,
+qx.Class.define('mas.LogDialog', {
+    extend: qx.core.Object,
 
-    construct : function(ctx, settings, seekCb)
-    {
+    construct: function(ctx, settings, seekCb) {
         this.base(arguments);
 
         this._settings = settings;
@@ -30,20 +28,18 @@ qx.Class.define('mas.LogDialog',
         this._cbCtx = ctx;
     },
 
-    members :
-    {
-        _today : 0,
-        _weeks : 0,
-        _errorMsg : 0,
-        _iframe : 0,
-        _settings : 0,
-        _window : 0,
-        _pos : 0,
-        _seekCb : null,
+    members: {
+        _today: 0,
+        _weeks: 0,
+        _errorMsg: 0,
+        _iframe: 0,
+        _settings: 0,
+        _window: 0,
+        _pos: 0,
+        _seekCb: null,
         _cbCtx: null,
 
-        show : function(text, dim)
-        {
+        show: function(text, dim) {
             if (this._window === 0) {
                 var width = 800;
                 var height = 600;
@@ -235,8 +231,7 @@ qx.Class.define('mas.LogDialog',
             this._window.open();
         },
 
-        sendresult : function(message)
-        {
+        sendresult: function(message) {
             var date = message.date;
 
             if (this._pos === 0) {
@@ -305,8 +300,7 @@ qx.Class.define('mas.LogDialog',
             }
         },
 
-        updateLogLength : function()
-        {
+        updateLogLength: function() {
             var firstDate = new Date('2/1/2010 0:00');
             var now = new Date();
             var numWeeks = (now.getTime() - firstDate.getTime()) /
@@ -316,8 +310,7 @@ qx.Class.define('mas.LogDialog',
             this.weeks.setValue('');
         },
 
-        seek : function(days)
-        {
+        seek: function(days) {
             this._pos = this._pos + days;
 
             this.b1.setEnabled(false);

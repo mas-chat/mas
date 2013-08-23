@@ -14,11 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-qx.Class.define('mas.Audio',
-{
-    extend : qx.core.Object,
+qx.Class.define('mas.Audio', {
+    extend: qx.core.Object,
 
-    construct : function() {
+    construct: function() {
         var soundFormat = 'none';
 
         //If statement is a hack to prevent running qooxdoo audio code on IE
@@ -44,10 +43,10 @@ qx.Class.define('mas.Audio',
         debug.print('Sound support: ' + soundFormat);
     },
 
-    members : {
-        _audio : 0,
+    members: {
+        _audio: 0,
 
-        play : function() {
+        play: function() {
             if (this._audio) {
                 this._audio.setCurrentTime(0);
                 this._audio.play();
