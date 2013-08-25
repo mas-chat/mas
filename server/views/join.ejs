@@ -1,0 +1,341 @@
+    <script type="text/javascript" charset="utf-8">
+       var pw_needed = false;
+       var channel = "<grp>";
+       var openidmode = false;
+
+		function send_openid(openidurl) {
+                    $.cookie("ProjectEvergreenJoin", channel + "-" + $("#password_group").val(),
+			     { path: '/', expires: null });				    
+
+		    $.ajax({
+                        type: "POST",
+                        url: "/tools/openid.pl",
+			cache: false,
+                        data:  {url: openidurl},
+                        success: function(data) {
+			   var param = data.split(" ");
+
+			if (param[0] == 1)
+                        {
+                           alert("Invalid OpenID URL. (error: " + data + ")");
+                        }
+			else
+                        {
+                           window.location = param[1];
+                        }   
+
+                        },
+			failure: function() {
+			    alert("Network problem");
+			    $('#loading').hide();				    
+			}
+                    });
+                }
+
+
+	function send() {
+ 	    $('#loading').show();				    
+
+	    var dataString = '{"service":"lisa.main","method":"alogin","id":1,"params":["' +
+		   $("#a_username").val() + '","' + $("#a_realname").val() + '","' +
+		$("#a_password").val() + '","<grp>"]}';
+	    
+            $.ajax({
+                type: "POST",
+                url: "/lisa/jsonrpc.pl",
+		cache: false,
+		contentType: "application/json",
+                data: dataString,
+                success: function(data) {
+		    var options = $.evalJSON(data).result.split(" ");
+                    var id = options.shift();
+                    var sec = options.shift();
+                    var loc = options.shift();
+		    
+                    if (id == 0)
+                    {
+			if (sec == 1)
+			    alert("Group doesn't exist");
+			else if (sec == 2)
+			    alert("Group is password protected. Your password is not correct.");
+			else if (sec == 3)
+			    alert("Invalid nick: min 3 chars, max 14 chars, cant start with " +
+				  "number or dash. Valid characters: A-Z, 0-9, [, ], \\, `, _, ^, {, |, }");
+		        else
+			    alert("Unknown error");
+		    }
+                    else
+                    {
+		        $.cookie("UseSSL", "no", { path: '/', expires: 100 });
+			$.cookie("ProjectEvergreen", id + "-" + sec + "-a",
+				 { path: '/', expires: null });
+			$.cookie("Location", loc, { path: '/', expires: 100 });
+			
+                        window.location = "http://meetandspeak.com/?" + Math.floor(Math.random()*1000000000);
+	            }
+		},
+		failure: function() {
+		    alert("Network problem");
+		}
+	    });
+	}
+
+              $(document).ready(function(){
+ 	        $('#loading').hide();				    
+                $('#forgottext').hide();	   
+         	$('#topic2').hide();
+		
+		if (pw_needed == false)
+		{
+		    $('#a_pwlabel').hide();
+		    $('#a_password').hide();
+		    $('#a_pwdesc').hide();
+		    
+		    $('#password_group').hide();
+		    $('#pw_group_label').hide();
+		}
+
+		    $('#googlelogin').click(function(event) {
+                        event.preventDefault();
+                        send_openid("https://www.google.com/accounts/o8/id");
+                    });
+
+		    $('#yahoologin').click(function(event) {
+                        event.preventDefault();
+                        send_openid("http://www.flickr.com");
+                    });
+
+		    $('#openidlogin').click(function(event) {
+                        openidmode = true;
+                        event.preventDefault();
+			$('#topic').hide();
+			$('#topic2').show();
+			$('#password').hide();
+			$('#pwlabel').hide();
+			$('#forgottext').show();
+			$('#login').val("Login");
+			$('#username').val(null);
+			$('#nicklabel').text("OpenID URL");
+			$('#openidlogin').hide();
+                     });
+
+		    $('#forgottext').click(function(event) {
+                        openidmode = false;
+                        event.preventDefault();
+			$('#topic').show();
+			$('#topic2').hide();
+			$('#password').show();
+			$('#pwlabel').show();
+			$('#forgottext').hide();
+			$('#login').val("Login");
+			$('#username').val(null);
+			$('#nicklabel').text("Nickname");
+			$('#openidlogin').show();
+                     });
+		
+		$('#a_username').keydown (function(event) {
+		    if (event.keyCode == 13) {
+			event.preventDefault();
+		    }  
+		});
+		
+		$('#a_realname').keydown (function(event) {
+		    if (event.keyCode == 13) {
+			event.preventDefault();
+		    }  
+
+		    if (event.keyCode == 13 && !$('#a_password').is(":visible")) {
+			send();
+		    }
+		});
+
+		$('#a_password').keydown (function(event) {
+		    if (event.keyCode == 13) {
+			send();
+			event.preventDefault();
+		    }  
+		});
+
+                $('#a_login').click (function(event) {
+		    send();
+  		    event.preventDefault();	
+		});
+
+		$('#login').click(function() {
+		    $.cookie("ProjectEvergreenJoin", channel + "-" + $("#password_group").val(),
+			     { path: '/', expires: null });				    
+		    
+		    var dataString = '{"service":"lisa.main","method":"login","id":1,"params":["' +
+			$("#username").val() + '","' + $("#password").val() + '",0]}';
+
+	            if (openidmode == true)
+                    {
+                        send_openid($("#username").val());
+                        return; 
+                    }		
+
+		    $.ajax({
+			type: "POST",
+			url: "/lisa/jsonrpc.pl",
+			cache: false,
+			contentType: "application/json",
+			data: dataString,
+			success: function(data) {
+			    var options = $.evalJSON(data).result.split(" ");
+			    var id = options.shift();
+			    var sec = options.shift();		
+			    var cookie = options.shift();
+			    var reason = options.shift();
+			    var usessl = options.shift();
+			    var loc = options.shift();
+			    
+			    if (id == 0)
+			    {
+				alert("Wrong password");
+				$.cookie("ProjectEvergreen", null);
+			    }
+			    else
+			    {
+				var expiresdate = null;
+				if (cookie == 1)
+				    expiresdate = 14;
+				
+				$.cookie("ProjectEvergreen", id + "-" + sec + "-n",
+					 { path: '/', expires: expiresdate });				    
+				
+				if (usessl == 1)
+				    $.cookie("UseSSL", "yes", { path: '/', expires: 100 });
+				else
+				    $.cookie("UseSSL", "no", { path: '/', expires: 100 });
+				
+				$.cookie("Location", loc, { path: '/', expires: 100 });
+			
+				if (location.pathname == "/")
+                                    window.location.reload(true);
+                                else
+                                    window.location.pathname = "/";
+			    }
+			},
+			failure: function() {
+			    alert("Network problem");
+			}
+		    });
+		});
+
+		$('#a_username').focus();
+	    });	
+	    </script>
+
+<div id="content-bgr"><!-- Content -->
+	<div class="container">
+		<div class="row"><!-- Row 1 -->
+		
+			<div class="column wrap"><!-- Column 1 -->
+		<!--	<div class="column wrap"> --><!-- Column 1 -->
+				
+				<!-- Menu 2 --><!--  
+				<ul id="menu-2">
+		 			<li><a href="">Toisen tason otsikko &nbsp;&nbsp;&#124;&nbsp;&nbsp;</a></li>
+		 			<li><a href="">Toisen tason otsikko</a></li> 						
+				</ul>
+				 --><!-- Menu 2 END -->
+				
+<p>You are about to visit the MeetAndSpeak group</p><p><span style="margin-left: auto; margin-right: auto;font-size:30px;color: #667755;" id=\"name-info\"><b><grp></b></span></p>
+
+<p>If you want to follow just a single group, it is enough to fill in the two fields below. You are not required to register.
+
+<p>But if you already have a MeetAndSpeak account, please log in now, using the box at right, and the group '<grp>' will be added to your session.</p> </p>
+
+					<form accept-charset="utf-8">
+						<fieldset>
+							<p>
+								<label id="a_nicklabel" for="a_username">Nick (mandatory)</label><br/>
+								<input type="text" autocomplete="off" name="a_username" value="" id="a_username"/>
+                                                                <small>Example: JohnS. (Don't worry about the uniqueness.)</small>
+							</p>
+                                                  
+							<p>
+								<label id="a_realnamelabel" for="a_realname">Real Name (mandatory)</label><br/>
+								<input autocomplete="off" type="text" name="a_realname" value="" id="a_realname"/>
+                                                                <small>Example: John Smith.</small>
+							</p>
+
+							<p>
+								<label id="a_pwlabel" for="a_password">Password (mandatory)</label><br />
+								<input id="a_password" type="password" name="a_password" value=""/>
+                                                                <small id="a_pwdesc">The group is password protected.</small>
+							</p>
+
+    <p><!-- Loading. -->
+    <strong id="loading" style="color:green;font-size:12px;margin-top:-4px;">Loading...</strong>
+    </p>
+							
+						</fieldset>
+						<input type="button" id="a_login" value="Visit" class="greysubmitbutton"/>
+					</form>
+								
+			</div><!-- Column 1 END-->
+		
+                	<div class="column wrap content-image"><!-- Column 2 -->
+
+
+				<div class="form_area"><!-- Login form -->
+					<div class="form_area_top"></div>
+					<div class="form_area_content">	
+					<div class="body"><h2 id="topic" class="form">Log in to MeetAndSpeak and join the group <font color="#99AA88"><grp></font></h2><h2 id="topic2" class="form">Enter Your OpenID URL</h2></div>
+					<form accept-charset="utf-8">
+						<fieldset>
+							<p>
+								<label id="nicklabel" for="username">Nick</label><br/>
+								<input type="text" name="username" value="" id="username"/>
+							</p>
+							<p>
+								<label id="pwlabel" for="password">Your Password</label><br />
+								<input id="password" type="password" name="password" value=""/>
+							</p>
+                                                        <p>
+								<label id="pw_group_label" for="password">Group Password (mandatory)</label><br />
+								<input id="password_group" type="password" name="password" value=""/>
+							</p>
+							<p class="forgot">
+
+    <div class="openidcontainer">
+
+  <div class="forgot">
+  <a tabindex="5" id="forgottext" href="">Back to normal login</a>
+  </div>
+
+  <div class="right-element">
+  <a href="" title="Register and log in using your Yahoo! ID" id="yahoologin"><img style="background-color:white;border-style:solid;border-width:1px;border-color:black;opacity:0.5;filter:alpha(opacity=50);" onmouseover="this.style.opacity=1;this.filters.alpha.opacity=100" onmouseout="this.style.opacity=0.5;this.filters.alpha.opacity=50" alt="Yahoo! login" src="/i/yahoo.png"></a> 
+  <a href="" title="Register and log in using your Google account" id="googlelogin"><img style="border-style:solid;border-width:1px;border-color:black;opacity:0.5;filter:alpha(opacity=50);" onmouseover="this.style.opacity=1;this.filters.alpha.opacity=100" onmouseout="this.style.opacity=0.5;this.filters.alpha.opacity=50" alt="Google login" src="/i/google.png"></a>
+  <a href="" title="Register and log in using your OpenID URL" id="openidlogin"><img style="border-style:solid;border-width:1px;border-color:black;opacity:0.5;filter:alpha(opacity=50)" onmouseover="this.style.opacity=1;this.filters.alpha.opacity=100" onmouseout="this.style.opacity=0.5;this.filters.alpha.opacity=50" alt="OpenID login" src="/i/openid-16x16.gif"></a>  
+</div>
+
+</div>
+							</p>
+														
+						</fieldset>
+						<input type="button" id="login" value="Log in" class="submitbutton"/>
+					</form>
+					</div>
+					<div class="form_area_bottom"></div>
+				</div>			
+
+<br><br>
+<h2>Benefits of registration:</h2>
+
+<ul style="list-style-type: disc; padding: 0px 10px 10px 30px;">
+<li>Follow multiple groups simultaneously</li>
+<li>Create and manage your own groups</li>
+<li>Have always-on sessions</li>
+</ul>
+
+<p>Register a MeetAndSpeak account <a href="https://meetandspeak.com/register.html">here</a>. It's free.
+
+<br><br><br><br><br><br><br><br><br><br>
+
+    </div><!-- Column 2 END-->
+		</div>
+	
+	</div>
+</div><!-- Content END -->
