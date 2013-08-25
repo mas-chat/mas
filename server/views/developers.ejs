@@ -1,0 +1,127 @@
+<% include header %>
+
+<div id="content-bgr"><!-- Content -->
+	<div class="container">
+		<div class="row"  style="width:700px;margin-left: auto;margin-right: auto;"><!-- Row 1 -->
+
+			<div class="column"><!-- Column 1 -->
+				<!-- Menu 2 --><!--
+				<ul id="menu-2">
+		 			<li><a href="">Toisen tason otsikko &nbsp;&nbsp;&#124;&nbsp;&nbsp;</a></li>
+		 			<li><a href="">Toisen tason otsikko</a></li>
+				</ul>
+				 --><!-- Menu 2 END -->
+
+				<h4>MeetAndSpeak REST API</h4>
+
+<br>
+<p>The MeetAndSpeak API for developers is currently very simple yet
+powerful. It allows 3rd party services, scripts, and applications to
+send messages to MeetAndSpeak groups by using <a href="http://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods">a HTTP GET request</a>. Source of the messages is not
+restricted. For example, messages can originate from Twitter or an
+internal project reporting tool. You can find the API description below.
+
+<h3>Example</h3>
+<p>
+<pre>GET http://api.meetandspeak.com/send?<b style="color:red">key</b>=6QwdkmgtmbQxRSmJS3DW&<b style="color:red">group</b>=
+example_group&<b style="color:red">msg</b>=From+twitter%3A+How+I+Optimized+Google+Adsense+to+
+Earn+More+http%3A%2F%2Fbit.ly%2Fcm8m0r HTTP/1.1</pre>
+<p>
+
+<h3>Result</h3>
+
+<p><p>
+<img src="/i/api_example.png">
+<p>
+
+<h3>Schema, hostname, and path part</h3>
+
+<p><p><pre>http://api.meetandspeak.com/send</pre><p>
+
+<h3>Parameters in the query string</h3>
+
+<p><p><b>key</b> = Group authorization key. (mandatory)
+<br><b>group</b> = Group name in lower case. (mandatory)
+<br><b>msg</b> = Message to be send. (mandatory)
+<p>
+
+<h3>Description</h3> <p> <p> <p>The API supports currently only HTTP protocol. HTTPS support is planned.
+<p> Owner of the group can find authorization key from the
+group settings view. By default group doesn't have authorization
+key. Group without generated key can't receive messages through this API. The
+owner is able to generate authorization key at any time. If there is
+an existing key, it will be deleted during the generation
+process. At that time any 3rd party service still using the old key stops
+working.
+
+<p>Maximum size of the message is 200 characters. Character set shall
+be UTF-8.
+
+<p>The API is rate limited. Single group can receive up to four
+messages per minute. The script is recommended to wait at least 20-40
+seconds before íssuing a new HTTP get request if the return
+value of the API call indicates that the limit is reached.
+
+<p>
+
+<h3>Return values</h3>
+<p><p>
+One of the following digits is returned in the HTTP response body.
+<p>
+<p><b>0</b> = Message accepted for delivery.
+<br><b>1</b> = The group doesn't exists.
+<br><b>2</b> = Incorrect authorization key.
+<br><b>3</b> = No authorization key generated for the group.
+<br><b>4</b> = Temporary internal error.
+<br><b>5</b> = Missing parameters.
+<br><b>6</b> = Rate limit exceeded.
+<br><b>7</b> = Message too long.
+
+<h3>Sample script</h3>
+
+<p><p>This simple example, made using Ruby programming language,
+forwards all tweets that mention word 'meetandspeak' to the MeetAndSpeak
+group 'example'. It is based on Ruby <a
+href="http://intridea.com/2009/9/22/tweetstream-ruby-access-to-the-twitter-streaming-api?blog=company">TweetStream</a>
+library. The example lacks proper error and rate limit handling.<p>
+
+<pre>
+require 'rubygems'
+require 'tweetstream'
+require 'net/http'
+
+key = '6QwdkmgtmbQxRSmJS3DW';
+group = 'example'
+searchword = 'meetandspeak'
+
+twitterusername = '&lt;username&gt;'
+twitterpw = '&lt;password&gt;'
+
+# Infinite loop
+TweetStream::Client.new(twitterusername, twitterpw).track(searchword) do |status|
+    message = CGI::escape('From twitter: ' + status.text);
+
+    url = URI.parse('http://api.meetandspeak.com/send?key=' +
+         key + '&group=' + group + '&msg=' + message)
+    req = Net::HTTP::Get.new(url.request_uri)
+    res = Net::HTTP.start(url.host, url.port) {|http|
+      http.request(req)
+    }
+
+    if res == '0'
+       puts "tweet forwarded: #{status.text}"
+    else
+       puts "tweet forwarding failed."
+    end
+end
+</pre>
+<br><br><br><br>
+			</div><!-- Column 1 END-->
+
+
+		</div>
+
+	</div>
+</div><!-- Content END -->
+
+<% include footer %>

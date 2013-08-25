@@ -1,0 +1,468 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta http-equiv="Cache-control" content="no-cache"/>
+        <meta http-equiv="Expires" content="0"/>
+        <meta http-equiv="X-XRDS-Location" content="http://meetandspeak.com/xrds.xrds"/>
+
+	<title>MeetAndSpeak - An advanced web based chat tool for groups.</title>
+
+	<meta name="description" content="MeetAndSpeak is an advanced web based chat tool for groups."/>
+	<meta name="keywords" content="MeetAndSpeak, chat, irc, group"/>
+
+	<link rel="shortcut icon" type="image/ico" href="favicon.ico" />
+	<link href="/stylesheets/reset.css" type="text/css" rel="stylesheet" media="screen"/>
+	<link href="/stylesheets/style.css" type="text/css" rel="stylesheet" media="screen"/>
+	<link href="/stylesheets/jquery.tweet.css" type="text/css" rel="stylesheet" media="screen"/>
+
+	<!--[if IE 6]><link rel="stylesheet" href="css/ie6.css" type="text/css" media="all" /><![endif]-->
+
+	<script src="/javascripts/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/javascripts/jquery.infieldlabel.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/javascripts/jquery.json-2.2.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/javascripts/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/javascripts/jquery.tweet.js" type="text/javascript" charset="utf-8"></script>
+
+	<script type="text/javascript" charset="utf-8">
+	        /*
+	         *jQuery Timer plugin v0.1
+	         *Matt Schmidt [http://www.mattptr.net]
+	         *Licensed under the BSD License:
+	         */
+
+                jQuery.timer = function (interval, callback)
+	        {
+		    var interval = interval || 100;
+		    if (!callback)
+			return false;
+
+		    _timer = function (interval, callback) {
+			this.stop = function () {
+			    clearInterval(self.id);
+			};
+			this.internalCallback = function () {
+			    callback(self);
+			};
+
+			this.reset = function (val) {
+			    if (self.id)
+				clearInterval(self.id);
+
+			    var val = val || 100;
+			    this.id = setInterval(this.internalCallback, val);
+			};
+			this.interval = interval;
+			this.id = setInterval(this.internalCallback, this.interval);
+
+			var self = this;
+		    };
+		    return new _timer(interval, callback);
+		};
+
+                var mode = 0;
+
+		$(function(){ $("label").inFieldLabels(); });
+
+                function changeMode(newmode)
+                {
+		    if (newmode == 1)
+		    {
+			mode = 1;
+			$('#topic').text("Enter Your Email Address");
+			$('#password').hide();
+			$('#pwlabel').hide();
+			$('#rememberme').hide();
+			$('#remembermeLabel').hide();
+			$('#forgottext').text("Back to Login");
+			$('#login').val("Proceed");
+			$('#username').val(null);
+			$('#nicklabel').text("Email Address");
+			$('#openidlogin').hide();
+		    }
+		    else if (newmode == 0)
+		    {
+			mode = 0;
+			$('#topic').text("Login to MeetAndSpeak");
+			$('#password').show();
+			$('#pwlabel').show();
+			$('#rememberme').show();
+			$('#remembermeLabel').show();
+			$('#forgottext').text("Forgot password?");
+			$('#login').val("Login");
+			$('#username').val(null);
+			$('#nicklabel').text("Nick");
+			$('#openidlogin').show();
+		    }
+		    else if (newmode == 2)
+                    {
+			mode = 2;
+			$('#topic').text("Enter Your OpenID URL");
+			$('#password').hide();
+			$('#pwlabel').hide();
+			$('#rememberme').show();
+			$('#remembermeLabel').show();
+			$('#forgottext').text("Back to Password Login");
+			$('#login').val("Login");
+			$('#username').val(null);
+			$('#nicklabel').text("OpenID URL");
+			$('#openidlogin').hide();
+                    }
+		}
+
+                function send() {
+		    $('#error').hide();
+		    $('#loading').show();
+
+		    if (mode == 0 || mode == 1)
+		    {
+		        send_lisa();
+                    }
+		    else if (mode == 2)
+		    {
+			if ($("#rememberme").val() == "on")
+                        {
+			    $.cookie("OIDrem", "yes",
+			      { path: '/', expires: 14 });
+                        }
+                        else
+			{
+			    $.cookie("OIDrem", "no",
+			      { path: '/', expires: 14 });
+			}
+
+		        send_openid($("#username").val());
+                    }
+                }
+
+		function send_openid(openidurl) {
+		    $.ajax({
+                        type: "POST",
+                        url: "/tools/openid.pl",
+			cache: false,
+                        data:  {url: openidurl},
+                        success: function(data) {
+			   var param = data.split(" ");
+
+			if (param[0] == 1)
+                        {
+                           alert("Invalid OpenID URL. (error: " + data + ")");
+                        }
+			else
+                        {
+                           window.location = param[1];
+                        }
+
+                        },
+			failure: function() {
+			    alert("Network problem");
+			    $('#loading').hide();
+			}
+                    });
+                }
+
+		function send_lisa() {
+		    var rememberme = 0
+		    if (mode == 0 && $("#rememberme").val() == "on")
+			rememberme = 1;
+
+                    var dataString;
+
+		    if (mode == 0)
+			dataString = {
+                            emailOrNick: $("#username").val(),
+                            password: $("#password").val(),
+                            rememberMe: rememberme
+		    else
+			dataString = {
+                            oper: "resetpw",
+                            emailOrNick: $("#username").val()
+                        }
+                    $.ajax({
+                        type: "POST",
+                        url: "/login",
+			cache: false,
+			contentType: "application/json",
+                        data: dataString,
+                        success: function(data) {
+			    if (mode == 0)
+			    {
+				var options = $.evalJSON(data).result.split(" ");
+				var id = options.shift();
+				var sec = options.shift();
+				var cookie = options.shift();
+				var reason = options.shift();
+				var usessl = options.shift();
+                                var loc = options.shift();
+
+				if (id == 0)
+				{
+				    $('#error').show();
+		                    $('#loading').hide();
+				    $.cookie("ProjectEvergreen", null);
+				}
+				else
+				{
+				    var expiresdate = null;
+				    if (cookie == 1)
+					expiresdate = 14;
+
+				    $.cookie("ProjectEvergreen", id + "-" + sec + "-n",
+					     { path: '/', expires: expiresdate });
+
+				    if (usessl == 1)
+					$.cookie("UseSSL", "yes", { path: '/', expires: 100 });
+				    else
+					$.cookie("UseSSL", "no", { path: '/', expires: 100 });
+
+				    $.cookie("Location", loc, { path: '/', expires: 100 });
+
+				    if (location.pathname == "/")
+					window.location.reload(true);
+				    else
+				    	window.location.pathname = "/";
+				}
+			    }
+			    else
+			    {
+				$('#loading').hide();
+				alert("You will get password recovery mail soon if the email address " +
+				      "you provided is found from the database ");
+				changeMode(0);
+			    }
+                        },
+			failure: function() {
+			    alert("Network problem");
+			    $('#loading').hide();
+			}
+                    });
+		}
+
+                $(document).ready(function(){
+		    $(".tweet").tweet({
+			username: "masupdates",
+			join_text: "auto",
+			avatar_size: 15,
+			count: 3,
+			auto_join_text_default: ":",
+			auto_join_text_ed: "we",
+			auto_join_text_ing: "we were",
+			auto_join_text_reply: "we replied to",
+			auto_join_text_url: "we were checking out",
+			loading_text: ""
+		    });
+
+		    $('#error').hide();
+		    $('#loading').hide();
+
+		    if (!($.browser.mozilla == true && $.browser.version == '2.0' ))
+		    {
+			$('#fferror').hide();
+		    }
+
+		    $('#forgottext').click(function(event) {
+			event.preventDefault();
+			if (mode == 0)
+			    changeMode(1);
+			else
+			    changeMode(0);
+		    });
+
+		    $('#openidlogin').click(function(event) {
+                        event.preventDefault();
+			changeMode(2);
+                    });
+
+		    $('#googlelogin').click(function(event) {
+                        event.preventDefault();
+                        send_openid("https://www.google.com/accounts/o8/id");
+                    });
+
+		    $('#yahoologin').click(function(event) {
+                        event.preventDefault();
+                        send_openid("http://www.flickr.com");
+                    });
+
+                    $('#register').click(function() {
+			window.location = "register.html";
+		    });
+
+		    $('#password').keydown (function(event) {
+			if (event.keyCode == 13) {
+			    event.preventDefault();
+			    $('#login').trigger('click');
+			}
+		    });
+
+                    $('#login').click (function(event) {
+			send();
+			event.preventDefault();
+		    });
+
+		    $('#username').focus();
+
+		    $.timer(100, function (timer) {
+			if ($("#username").val() != "" || $("#password").val() != "")
+			{
+			    $('#nicklabel').hide();
+			    $('#pwlabel').hide();
+			}
+		    });
+		});
+
+	</script>
+
+</head>
+<body>
+
+<div id="header-bgr"><!-- Header -->
+	<div class="container">
+		<div class="row">
+			<div class="column header">
+				<h1><a href="/" title="MeetAndSpeak"><img src="/images/header_meetandspeak.jpg" height="128" width="900" alt="MeetAndSpeak"/></a><br/><a href="/" title="MeetAndSpeak">MeetAndSpeak - MeetAndSpeak is an advanced web based chat tool for groups.</a></h1>
+			</div>
+		</div>
+	</div>
+</div><!-- Header END -->
+
+<div id="content-bgr"><!-- Content -->
+	<div class="container">
+		<div class="row"><!-- Row 1 -->
+			<div class="column wrap"><!-- Column 1 -->
+
+    <strong id="fferror" style="color:red;font-size:12px;margin-top:-4px;"></strong>
+
+<noscript>
+    <div style="color: red; font-size: 13px">
+        Your browser does not support JavaScript. Use of the MeetAndSpeak Web application is not possible when JavaScript is not enabled!
+    </div>
+</noscript>
+
+				<img src="/images/image_app_1.jpg" border="0" style="margin-top: 10px;" alt="MeetAndSpeak"/>
+			</div><!-- Column 1 END-->
+
+			<div class="column wrap"><!-- Column 2 -->
+
+
+				<div class="form_area"><!-- Login form -->
+					<div class="form_area_top"></div>
+					<div class="form_area_content">
+					<div class="body"><h2 id="topic" class="form">Login to MeetAndSpeak</h2></div>
+					<form accept-charset="utf-8" action="">
+						<fieldset>
+							<p>
+								<label id="nicklabel" for="username">Nick or Email</label><br/>
+								<input tabindex="1" autocomplete="on" type="text" name="username" value="" id="username"/>
+							</p>
+							<p>
+								<label id="pwlabel" for="password">Password</label><br />
+								<input tabindex="2" autocomplete="on" id="password" type="password" name="password" value=""/>
+							</p>
+							<p><!-- Wrong nick/password. -->
+    <strong id="error" style="color:red;font-size:12px;margin-top:-4px;">Incorrect nickname or password.</strong>
+							</p>
+    <p><!-- Loading. -->
+    </p>
+							<p class="forgot">
+
+
+    <div class="openidcontainer">
+
+  <div class="forgot">
+  <a tabindex="5" id="forgottext" href="">Forgot your password?</a>
+  </div>
+
+  <div class="right-element">
+  <a href="" title="Register and log in using your Yahoo! ID" id="yahoologin"><img style="background-color:white;border-style:solid;border-width:1px;border-color:black;opacity:0.5;filter:alpha(opacity=50);" onmouseover="this.style.opacity=1;this.filters.alpha.opacity=100" onmouseout="this.style.opacity=0.5;this.filters.alpha.opacity=50" alt="Yahoo! login" src="/images/yahoo.png"></a>
+  <a href="" title="Register and log in using your Google account" id="googlelogin"><img style="border-style:solid;border-width:1px;border-color:black;opacity:0.5;filter:alpha(opacity=50);" onmouseover="this.style.opacity=1;this.filters.alpha.opacity=100" onmouseout="this.style.opacity=0.5;this.filters.alpha.opacity=50" alt="Google login" src="/images/google.png"></a>
+  <a href="" title="Register and log in using your OpenID URL" id="openidlogin"><img style="border-style:solid;border-width:1px;border-color:black;opacity:0.5;filter:alpha(opacity=50)" onmouseover="this.style.opacity=1;this.filters.alpha.opacity=100" onmouseout="this.style.opacity=0.5;this.filters.alpha.opacity=50" alt="OpenID login" src="/images/openid-16x16.gif"></a>
+</div>
+
+</div>
+
+
+							</p>
+
+							<input tabindex="3" id="rememberme" name="rememberme" type="checkbox"/>
+				            <label id="remembermeLabel" for="rememberme"><span></span>Remember me</label>
+
+						</fieldset>
+						<input tabindex="4" type="submit" id="login" value="Login" class="submitbutton"/>
+    <p><!-- Loading. -->
+    <strong id="loading" style="color:white;font-size:12px;margin-top:-4px;">Loading...</strong>
+    </p>
+
+
+					</form>
+					</div>
+					<div class="form_area_bottom"></div>
+				</div>
+
+				<div class="form_area"><!-- Register box -->
+					<div class="form_area_top"></div>
+					<div class="form_area_content">
+					<div class="body"><h2 class="form">Don't have an account yet?</h2></div>
+                                        <form action="register.html" method="get" accept-charset="utf-8">
+					<p class="form_desc">Register here. It's quick and free.</p>
+						<input id="register" type="button" value="Register" class="textbutton"/>
+					</form>
+					</div>
+					<div class="form_area_bottom"></div>
+				</div>
+
+
+			</div><!-- Column 2 END-->
+
+		</div>
+
+		<div class="row" style="margin-top: 15px;"><!-- Row 2 -->
+
+			<div class="column wrap"><!-- Column 1 -->
+				<h2>No cost ad-free IRC like chat service</h2>
+					<ul class="coverpage-list">
+ 						<li class="symbol_1">Register.</li>
+ 						<li class="symbol_2">Create a group for your team, project, or friends.</li>
+ 						<li class="symbol_3">Ask others in your team to register too, or share the link for registration-free participation. Up to 200 people can join the group.</li>
+ 						<li class="symbol_4">Interact non-stop, using a modern Web-based UI, no browser plugins required.</li>
+					</ul>
+			</div><!-- Column 1 END-->
+
+			<div class="column wrap"><!-- Column 2 -->
+				<h2>Registered users have</h2>
+					<ul class="coverpage-list">
+                                                <li class="symbol_7">The power to create and manage new groups.</li>
+ 						<li class="symbol_5">Always-online sessions. Never miss conversations.</li>
+ 						<li class="symbol_6">Searchable conversation logs.</li>
+
+					</ul>
+					<a href="/features.html">More features...</a>
+			</div><!-- Column 2 END-->
+		</div>
+
+  <div class="row" style="margin-top: 15px;"><!-- Row 3 -->
+<!--			<div class="column">
+				<h2>News (from Twitter)</h2>
+<div class="tweet"></div>
+  </div> -->
+  </div>
+
+
+	</div>
+
+</div><!-- Content END -->
+
+<div id="footer"><!-- Footer -->
+	<div id="footer-container">
+		<ul id="footer-list">
+ 			<li><a href="/privacy_and_tou.html">Privacy &amp; Terms of Use</a></li>
+ 			<li><a href="/about.html">About Us</a></li>
+ 			<li><a href="/developers.html">Developers</a></li>
+		</ul>
+	</div>
+</div><!-- Footer END -->
+
+
+
+</body>
+</html>
