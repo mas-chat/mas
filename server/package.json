@@ -1,0 +1,29 @@
+{
+    "name": "mas-server",
+    "version": "0.0.1",
+    "private": true,
+    "description": "MeetAndSpeak Server",
+    "main": "server.js",
+    "dependencies": {
+        "express": "3.3.5",
+        "jade": "*"
+    },
+    "devDependencies": {
+    },
+    "scripts": {
+        "test": "echo \"No tests specified\" && exit 1",
+        "start": "node app.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/ilkkao/mas-webclient.git"
+    },
+    "keywords": [
+        "chat"
+    ],
+    "author": "Ilkka Oksanen",
+    "license": "Apache",
+    "bugs": {
+        "url": "https://github.com/ilkkao/mas-webclient/issues"
+    }
+}
