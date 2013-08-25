@@ -1,0 +1,11 @@
+
+/* Forms
+---------------------------*/
+
+form label {
+		background: #fff;
+}
+
+#remembermeLabel{
+		background: url(../i/form_bgr.jpg) repeat;
+}
