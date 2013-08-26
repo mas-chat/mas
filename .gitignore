@@ -1,0 +1,4 @@
+#Ignore emacs temporary files
+*~
+[#]*[#]
+.\#*
