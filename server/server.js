@@ -20,8 +20,8 @@ var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 
-var chat = require('./src/chat');
-var login = require('./src/login');
+var chat = require('./lib/chat');
+var login = require('./lib/login');
 
 var app = express();
 
@@ -47,8 +47,8 @@ if (app.get('env') === 'development') {
   app.use(express.errorHandler());
 }
 
-app.get('/wiki/:id/edit', chat.edit);
-app.post('/login', login.checkCredentials);
+app.get('/ralph/:sessionId/:sendSeq/:timezone', chat.handleLongPoll);
+app.post('/login', login.handleLogin);
 app.get('/', routes.index);
 app.get(/.html$/, routes.html);
 
