@@ -47,8 +47,10 @@ qx.Class.define('mas.Controller', {
             this.handleAddContact, this.handleStartChat, this);
 
         this._mainScreen = new mas.MainScreen(
-            this._xhr, root, this._logDialog, this._settings, anonUser,
+            this._xhr, this._logDialog, this._settings, anonUser,
             this._friendsPopUp, this);
+
+        root.add(this._mainScreen);
     },
 
     members: {

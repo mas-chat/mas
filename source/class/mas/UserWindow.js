@@ -493,7 +493,7 @@ qx.Class.define('mas.UserWindow', {
                 else if (closeok === 0 && (this.type !== 0 ||
                                           this.nameslist.getLength() > 0)) {
                     //FIX ME
-                    //if (this.mainscreen.settings.getShowCloseWarn() === 1) {
+                    //if (settings.getShowCloseWarn() === 1) {
                         e.preventDefault();
 
                     new mas.Dialog().set({
@@ -959,7 +959,7 @@ qx.Class.define('mas.UserWindow', {
         {
             var text = '<b>Link Catcher</b><p>';
 
-            //if (this.mainscreen.anonUser === true) {
+            //if (this._controller.anonUser === true) {
             //    text = text +
             //     '(If you register, links are not lost when you log out.)' +
             //     '<p>';

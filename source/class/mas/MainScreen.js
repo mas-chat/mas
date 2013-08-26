@@ -15,137 +15,115 @@
 //
 
 qx.Class.define('mas.MainScreen', {
-    extend: qx.core.Object,
+    extend: qx.ui.core.Widget,
 
     construct: function(
-        srpc, rootItem, logDialog, settings, anonUser, friendsPopUp,
-        controller) {
+        xhr, logDialog, settings, anonUser, friendsPopUp, controller) {
         this.base(arguments);
 
-        this.rpc = srpc;
-        this.logDialog = logDialog;
-        this.settings = settings;
-        this.anonUser = anonUser;
+        this._xhr = xhr;
+        this._logDialog = logDialog;
+        this._settings = settings;
+        this._anonUser = anonUser;
         this._controller = controller;
         this._friendsPopUp = friendsPopUp;
 
         this.__topictimer = new qx.event.Timer(1000);
-        this.__topictimer.addListener(
-            'interval', function() {
-                //there seems to be bug in qooxdoo, one event can come after the
-                //timer is stopped
-                if (this.__topictimeractive === true) {
-                    if (this.__topicstate === 0) {
-                        document.title = '[NEW] MeetAndSpeak';
-                        this.__topicstate = 1;
-                    } else {
-                        document.title = '[MSG] MeetAndSpeak';
-                        this.__topicstate = 0;
-                    }
+        this.__topictimer.addListener('interval', function() {
+            // There seems to be a bug in qooxdoo, one event can come after the
+            // timer is stopped
+            if (this.__topictimeractive === true) {
+                if (this.__topicstate === 0) {
+                    document.title = '[NEW] MeetAndSpeak';
+                    this.__topicstate = 1;
                 } else {
-                    document.title = 'MeetAndSpeak';
+                    document.title = '[MSG] MeetAndSpeak';
+                    this.__topicstate = 0;
                 }
-            }, this);
-
-        this.__tt = new qx.ui.tooltip.ToolTip('Send Message');
-        this.__myapp = rootItem;
+            } else {
+                document.title = 'MeetAndSpeak';
+            }
+        }, this);
 
         qx.bom.Element.addListener(window, 'focus', function() {
             qx.event.Timer.once(function(){
                 document.title = 'MeetAndSpeak';
             }, this, 500);
-            this.__blur = 0;
 
             if (this.__topictimeractive === true) {
                 this.__topictimer.stop();
                 this.__topictimeractive = false;
             }
         }, this);
-
-        qx.bom.Element.addListener(window, 'blur', function() {
-            this.__blur = 1;
-        }, this);
     },
 
     members: {
-        rootContainer: 0,
         desktop: 0,
-        rpc: 0,
-
-        logDialog: 0,
-        infoDialog: 0,
-        settings: 0,
-        anonUser: 0,
         blocker: 0,
-        manager: 0,
 
+        _xhr: 0,
+        _settings: 0,
+        _logDialog: null,
+        _anonUser: 0,
         _friendsPopUp: null,
         _contactsButton: 0,
+        _rootContainer: 0,
+
         __statusBar: 0,
-        __startLabel: 0,
-        __part2: 0,
-        __part3: 0,
-        __windowGroup: 0,
-        __myapp: 0,
         __topictimer: 0,
-        __topicstated: 0,
-        __tt: 0,
-        __blur: 0,
-        __input1: 0,
+        __topicstate: 0,
         __topictimeractive: 0,
-        __prevwin: -1,
         __msgvisible: false,
 
-        show : function() {
+        show: function() {
             // Root widget
-            this.rootContainer = new qx.ui.container.Composite(
-                new qx.ui.layout.VBox(0));
-            this.rootContainer.set({ backgroundColor: '#717172',
-                                     padding: 0 });
+            this._rootContainer = new qx.ui.container.Composite(
+                new qx.ui.layout.VBox(0)).set({
+                backgroundColor: '#717172',
+                padding: 0
+            });
 
-            // middle desktop
-            this.manager = new qx.ui.window.Manager();
-            var middleContainer = new qx.ui.window.Desktop(this.manager);
+            // Desktop
+            this.desktop = new qx.ui.window.Desktop(
+                new qx.ui.window.Manager()).set({
+                decorator: 'background2',
+                backgroundColor: '#DFE5E5'
+            });
 
-            middleContainer.addListener(
-                'resize',
-                this._controller.checkLimits,
-                this);
+            this.desktop.addListener(
+                'resize', this._controller.checkLimits, this);
 
             var middleSection = new qx.ui.container.Composite(
                 new qx.ui.layout.HBox(0));
+            middleSection.add(this.desktop, { flex: 1 });
+            this._rootContainer.add(middleSection, { flex: 1 });
 
-            this.desktop = middleContainer;
-            this.blocker = new qx.ui.core.Blocker(middleContainer);
-            this.blocker.setOpacity(0.5);
-            this.blocker.setColor('black');
+            this.blocker = new qx.ui.core.Blocker(this.desktop).set({
+                opacity: 0.5,
+                color: 'black'
+            });
 
-            middleContainer.set({ decorator: 'background2',
-                                  backgroundColor: '#DFE5E5' });
-            middleSection.add(middleContainer, { flex:1 });
+            // Toolbar
+            var toolbar = new qx.ui.toolbar.ToolBar().set({
+                maxHeight: 40,
+                spacing: 30
+            });
 
-            this.rootContainer.add(middleSection, { flex: 1 });
+            var part2 = new qx.ui.toolbar.Part();
+            var part3 = new qx.ui.toolbar.Part();
 
-            // create the toolbar
-            var toolbar = new qx.ui.toolbar.ToolBar();
-            toolbar.set({ maxHeight : 40, spacing : 30 });
-
-            // create and add Part 1 to the toolbar
-            this.__part2 = new qx.ui.toolbar.Part();
-            this.__part3 = new qx.ui.toolbar.Part();
-
-            toolbar.add(this.__part2);
+            toolbar.add(part2);
             toolbar.addSpacer();
 
-            var menuButton = new qx.ui.toolbar.MenuButton('Menu', null,
-                                                          this.getMainMenu());
-            this.__part3.add(menuButton);
+            var menuButton = new qx.ui.toolbar.MenuButton(
+                'Menu', null, this.getMainMenu());
+            part3.add(menuButton);
 
-            if (this.anonUser === false) {
+            if (this._anonUser === false) {
                 this._contactsButton = new qx.ui.toolbar.CheckBox(
                     '<span style="color:#000000">Contacts...</span>');
                 this._contactsButton.setRich(true);
-                this.__part3.add(this._contactsButton);
+                part3.add(this._contactsButton);
 
                 this._contactsButton.addListener('changeValue', function (e) {
                     if (e.getData() === true) {
@@ -156,24 +134,23 @@ qx.Class.define('mas.MainScreen', {
                     }
                 }, this);
 
-                toolbar.add(this.__part3);
+                toolbar.add(part3);
             }
 
-            this.rootContainer.add(toolbar);
-            this.__myapp.add(this.rootContainer,
-                             { width: '100%', height: '100%' });
-                             //, {padding : 10});
+            this._rootContainer.add(toolbar);
+            this.add(this._rootContainer, { width: '100%', height: '100%' });
 
             //Status bar
-            this.__statusBar = new qx.ui.basic.Label('');
-            this.__statusBar.set({ backgroundColor: '#ff0000',
-                                   zIndex: 100,
-                                   textColor: '#ffffff',
-                                   font: new qx.bom.Font(23, ['Arial',
-                                                               'sans-serif']),
-                                   padding: 14});
+            this.__statusBar = new qx.ui.basic.Label('').set({
+                backgroundColor: '#ff0000',
+                zIndex: 100,
+                textColor: '#ffffff',
+                font: new qx.bom.Font(23, ['Arial', 'sans-serif']),
+                padding: 14
+            });
+
             this.__statusBar.hide();
-            this.__myapp.add(this.__statusBar, { left: 100, top: 0 });
+            this.add(this.__statusBar, { left: 100, top: 0 });
         },
 
         updateContactsLabel: function(value) {
@@ -193,27 +170,27 @@ qx.Class.define('mas.MainScreen', {
         getMainMenu: function() {
             var menu = new qx.ui.menu.Menu();
 
-            var forumMenu = new qx.ui.menu.Button('Groups', null, null,
-                                                     this.getForumMenu());
-            var viewMenu = new qx.ui.menu.Button('View', null, null,
-                                                    this.getViewMenu());
-            var settingsMenu = new qx.ui.menu.Button('Settings', null, null,
-                                                    this.getSettingsMenu());
-            var advancedMenu = new qx.ui.menu.Button('Advanced', null, null,
-                                                        this.getAdvancedMenu());
-            var helpMenu = new qx.ui.menu.Button('Help', null, null,
-                                                 this.getHelpMenu());
-            var logoutMenu = new qx.ui.menu.Button('Log Out', null, null,
-                                                      this.getLogoutMenu());
+            var forumMenu = new qx.ui.menu.Button(
+                'Groups', null, null, this.getForumMenu());
+            var viewMenu = new qx.ui.menu.Button(
+                'View', null, null, this.getViewMenu());
+            var settingsMenu = new qx.ui.menu.Button(
+                'Settings', null, null, this.getSettingsMenu());
+            var advancedMenu = new qx.ui.menu.Button(
+                'Advanced', null, null, this.getAdvancedMenu());
+            var helpMenu = new qx.ui.menu.Button(
+                'Help', null, null, this.getHelpMenu());
+            var logoutMenu = new qx.ui.menu.Button(
+                'Log Out', null, null, this.getLogoutMenu());
 
-            if (this.anonUser === false) {
+            if (this._anonUser === false) {
                 menu.add(forumMenu);
             }
 
             menu.add(viewMenu);
             menu.add(settingsMenu);
 
-            if (this.anonUser === false) {
+            if (this._anonUser === false) {
                 menu.add(advancedMenu);
             }
 
@@ -239,9 +216,10 @@ qx.Class.define('mas.MainScreen', {
 
             if (this.__msgvisible === false) {
                 this.msg = new qx.ui.container.Composite(
-                    new qx.ui.layout.HBox(8));
-                this.msg.setPadding(5, 15, 5, 15);
-                this.msg.set({ backgroundColor: 'yellow'});
+                    new qx.ui.layout.HBox(8)).set({
+                    padding: [5, 15, 5, 15],
+                    backgroundColor: 'yellow'
+                });
 
                 this.msg.add(new qx.ui.basic.Label(
                     friendName + ' (' + friendNick +
@@ -255,16 +233,14 @@ qx.Class.define('mas.MainScreen', {
                 decline.setRich(true);
 
                 accept.addListener('click', function () {
-                    this.rpc.call('OKF', friendId);
-                    //TODO: this relies on proper carbage collection
-                    this.rootContainer.remove(this.msg);
+                    this._xhr.call('OKF', friendId);
+                    this._rootContainer.remove(this.msg);
                     this.__msgvisible = false;
                 }, this);
 
                 decline.addListener('click', function () {
-                    this.rpc.call('NOKF', friendId);
-                    //TODO: this relies on proper carbage collection
-                    this.rootContainer.remove(this.msg);
+                    this._xhr.call('NOKF', friendId);
+                    this._rootContainer.remove(this.msg);
                     this.__msgvisible = false;
                 }, this);
 
@@ -272,7 +248,7 @@ qx.Class.define('mas.MainScreen', {
                 this.msg.add(decline);
                 this.__msgvisible = true;
 
-                this.rootContainer.addAt(this.msg, 1, {flex:0});
+                this._rootContainer.addAt(this.msg, 1, {flex:0});
             }
             // else ignore command
         },
@@ -330,7 +306,7 @@ qx.Class.define('mas.MainScreen', {
                 this._controller.tileWindows,
                 this._controller);
 
-            if (this.anonUser === false) {
+            if (this._anonUser === false) {
                 menu.add(logsButton);
             }
             menu.add(arrangeButton);
@@ -345,13 +321,13 @@ qx.Class.define('mas.MainScreen', {
             var arrangeButton = new qx.ui.menu.CheckBox(
                 'Auto-arrange windows at startup');
 
-            if (this.settings.getSslEnabled() === 1) {
+            if (this._settings.getSslEnabled() === 1) {
                 sslButton.setValue(true);
             }
-            if (this.settings.getLargeFonts() === '0') {
+            if (this._settings.getLargeFonts() === '0') {
                 fontButton.setValue(true);
             }
-            if (this.settings.getAutoArrange() === 1) {
+            if (this._settings.getAutoArrange() === 1) {
                 arrangeButton.setValue(true);
             }
 
@@ -360,7 +336,7 @@ qx.Class.define('mas.MainScreen', {
             arrangeButton.addListener('changeValue', this._autoArrangeCommand,
                                       this);
 
-            if (this.anonUser === false) {
+            if (this._anonUser === false) {
                 menu.add(sslButton);
             }
             menu.add(fontButton);
@@ -384,14 +360,15 @@ qx.Class.define('mas.MainScreen', {
 
             new mas.JoinDialog().set({
                 joinCb: function(name, pw, selectedNw) {
-                    that.rpc.call('JOIN', name + ' ' + selectedNw + ' ' + pw);
+                    that._xhr.call('JOIN', name + ' ' + selectedNw + ' ' + pw);
                 },
                 mode: 'IRC'
             }).open();
         },
 
         _logsCommand: function() {
-            this.logDialog.show(this.__myapp, this.desktop.getBounds());
+            // Fix me
+            //this._logDialog.show(this.__myapp, this.desktop.getBounds());
         },
 
         _joinForumCommand: function() {
@@ -399,7 +376,7 @@ qx.Class.define('mas.MainScreen', {
 
             new mas.JoinDialog().set({
                 joinCb: function(name, pw, selectedNw) {
-                    that.rpc.call('JOIN', name + ' ' + selectedNw + ' ' + pw);
+                    that._xhr.call('JOIN', name + ' ' + selectedNw + ' ' + pw);
                 },
                 mode: 'MASGROUP'
             }).open();
@@ -410,7 +387,7 @@ qx.Class.define('mas.MainScreen', {
 
             new mas.CreateDialog().set({
                 createCb: function(name, pw) {
-                    that.rpc.call('CREATE', name + ' ' + pw);
+                    that._xhr.call('CREATE', name + ' ' + pw);
                 }
             }).open();
         },
@@ -419,10 +396,10 @@ qx.Class.define('mas.MainScreen', {
             var usessl = e.getData();
 
             if (usessl === true) {
-                this.settings.setSslEnabled(1);
+                this._settings.setSslEnabled(1);
                 qx.bom.Cookie.set('UseSSL', 'yes', 100, '/');
             } else {
-                this.settings.setSslEnabled(0);
+                this._settings.setSslEnabled(0);
                 qx.bom.Cookie.set('UseSSL', 'no', 100, '/');
             }
 
@@ -441,9 +418,9 @@ qx.Class.define('mas.MainScreen', {
             var smallfonts = e.getData();
 
             if (smallfonts === true) {
-                this.settings.setLargeFonts('0');
+                this._settings.setLargeFonts('0');
             } else {
-                this.settings.setLargeFonts('1');
+                this._settings.setLargeFonts('1');
             }
 
             this.updateFonts();
@@ -453,22 +430,22 @@ qx.Class.define('mas.MainScreen', {
             var autoarrange = e.getData();
 
             if (autoarrange === true) {
-                this.settings.setAutoArrange(1);
+                this._settings.setAutoArrange(1);
             } else {
-                this.settings.setAutoArrange(0);
+                this._settings.setAutoArrange(0);
             }
         },
 
         updateFonts: function() {
             for (var i = 0; i < this.windows.length; i++) {
                 if (typeof(this.windows[i]) !== 'undefined') {
-                    this.windows[i].setFonts(this.settings.getLargeFonts());
+                    this.windows[i].setFonts(this._settings.getLargeFonts());
                 }
             }
         },
 
         _logoutCommand: function() {
-            this.rpc.call('LOGOUT', '');
+            this._xhr.call('LOGOUT', '');
 
             //TODO: create LOGOUTOK response and move this to there:
             qx.event.Timer.once(function() {

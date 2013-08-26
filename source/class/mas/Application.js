@@ -38,7 +38,7 @@ qx.Class.define('mas.Application', {
             var marginY = Math.round(qx.bom.Viewport.getHeight() / 2);
 
             var startLabel = new qx.ui.basic.Label(
-                '<center><img src="/i/ajax-loader.gif"><br><br><br>' +
+                '<center><img src="/images/ajax-loader.gif"><br><br><br>' +
                     'Loading content...</center>').set({
                         font: new qx.bom.Font(14, [ 'Arial', 'sans-serif' ]),
                         width: 300,
