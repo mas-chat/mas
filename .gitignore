@@ -2,3 +2,8 @@
 *~
 [#]*[#]
 .\#*
+
+#Ignore generated directories
+build/
+node_modules/
+server/node_modules/
