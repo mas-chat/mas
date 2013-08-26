@@ -1,11 +1,7 @@
 MAS server and web client
 =========================
 
-MAS web client is a web application that implements MAS REST API. It is used at [meetandspeak.com][] to provide a web UI.
-
-MAS server is a Node.js application that is the other half of MeetAndSpeak.com service.
-
-MeetAndSpeak is a free advanced chat tool for groups.
+MAS server and web client form together an advanced web chat application. Both the server and client implement MAS REST API. [Meetandspeak.com][] is an instanse of this application.
 
 Installation
 ------------
