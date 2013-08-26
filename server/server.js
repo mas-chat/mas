@@ -21,20 +21,26 @@ var http = require('http');
 var path = require('path');
 
 var chat = require('./src/chat');
+var login = require('./src/login');
 
 var app = express();
 
 // All environments
 app.set('port', process.env.PORT || 3000);
+
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
+
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(app.router);
 app.use(require('less-middleware')({ src: __dirname + '/public' }));
+
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/main', express.static( path.join(__dirname, '/..')));
+app.use('/opt/qooxdoo', express.static('/opt/qooxdoo'));
 
 // Development only
 if (app.get('env') === 'development') {
@@ -42,7 +48,7 @@ if (app.get('env') === 'development') {
 }
 
 app.get('/wiki/:id/edit', chat.edit);
-
+app.post('/login', login.checkCredentials);
 app.get('/', routes.index);
 app.get(/.html$/, routes.html);
 
