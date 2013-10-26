@@ -14,14 +14,17 @@
 //   governing permissions and limitations under the License.
 //
 
-var express = require('express');
-var routes = require('./routes');
-var user = require('./routes/user');
-var http = require('http');
-var path = require('path');
+var express = require('express'),
+	exphbs  = require('express3-handlebars'),
+	expressValidator = require('express-validator'),
+	routes = require('./routes'),
+	user = require('./routes/user'),
+	http = require('http'),
+	path = require('path');
 
-var chat = require('./lib/chat');
-var login = require('./lib/login');
+var chat = require('./lib/chat'),
+	login = require('./lib/login'),
+	register = require('./lib/register');
 
 var app = express();
 
@@ -29,11 +32,14 @@ var app = express();
 app.set('port', process.env.PORT || 3000);
 
 app.set('views', __dirname + '/views');
-app.set('view engine', 'ejs');
+
+app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
+app.set('view engine', 'handlebars');
 
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
+app.use(expressValidator);
 app.use(express.methodOverride());
 app.use(app.router);
 app.use(require('less-middleware')({ src: __dirname + '/public' }));
@@ -47,8 +53,12 @@ if (app.get('env') === 'development') {
   app.use(express.errorHandler());
 }
 
+// Rest API
 app.get('/ralph/:sessionId/:sendSeq/:timezone', chat.handleLongPoll);
 app.post('/login', login.handleLogin);
+app.post('/register', register.handleRegister);
+
+// Web pages
 app.get('/', routes.index);
 app.get(/.html$/, routes.html);
 
