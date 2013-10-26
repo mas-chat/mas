@@ -33,13 +33,19 @@ app.set('port', process.env.PORT || 3000);
 
 app.set('views', __dirname + '/views');
 
-app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
+app.engine('handlebars', exphbs({ 
+	defaultLayout: 'main',
+	helpers: {
+		getPageJSFile: function (object) { return this.page + '.js'; }
+	}
+}));
+
 app.set('view engine', 'handlebars');
 
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
-app.use(expressValidator);
+app.use(expressValidator());
 app.use(express.methodOverride());
 app.use(app.router);
 app.use(require('less-middleware')({ src: __dirname + '/public' }));

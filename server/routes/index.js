@@ -16,5 +16,5 @@ exports.html = function(req, res){
     console.log(req);
 
     var page = req.url.replace(/\/(.*)\.html/, '$1');
-    res.render(page, { title: 'MeetAndSpeak' });
+    res.render(page, { page: page, title: 'MeetAndSpeak' });
 };
