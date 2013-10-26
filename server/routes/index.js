@@ -7,6 +7,11 @@ exports.index = function(req, res){
     res.render('index', { title: 'MeetAndSpeak' });
 };
 
+
+//exports.index_new = function(req, res){
+//    res.render('index_new', { title: 'MeetAndSpeak' });
+//};
+
 exports.html = function(req, res){
     console.log(req);
 
