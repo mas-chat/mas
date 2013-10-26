@@ -14,14 +14,75 @@
 //   governing permissions and limitations under the License.
 //
 
-var expressValidator = require('express-validator');
+var expressValidator = require('express-validator'),
+	mysql = require('mysql'),
+	crypto = require('crypto');
 
 exports.handleRegister = function(req, res) {
+	var body = req.body;
+
 	req.assert('email', 'required').notEmpty();
 	req.assert('email', 'valid email required').isEmail();
 	req.assert('password', '6 to 20 characters required').len(6, 20);
 
-	var mappedErrors = req.validationErrors(true);
+	var mappedErrors = req.validationErrors(true); //kayta tata
 
-	res.send(200, "Hello World\n" + errors.toString);
+	if (0) {
+		res.send(200, { 
+			success: false,
+			msg: 'Form error.'
+		});
+		return;
+	}
+
+    // Checks done, all is good
+
+    var password = req.body.password;
+    var passwordSha =
+            crypto.createHash('sha256').update(password, 'utf8').digest('hex');
+
+	var connection = mysql.createConnection({
+		host: 'localhost',
+		user: 'ircuser',
+		password: 'zeppelin',
+		database: 'milhouse'
+	});
+
+	connection.query(
+		'INSERT INTO users VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())', [
+		body.name,
+		'-',
+		body.email,
+		1,
+		null,
+		passwordSha,
+		body.nick,
+		1, //gender
+		'TDB:token',
+		'',
+		0,
+		':',
+		':',
+		'NA',
+		1, //hasinvite
+		'',
+		'TBD:ip',
+		1,
+		1,
+		4,
+		''],
+		function(err, rows) {
+			if (err) {
+				console.log(err);
+				console.log('Rows: ' + rows)
+				res.send(200, { 
+					success: false,
+					msg: 'Database error. Please contact support.'
+				});
+			} else {
+				res.send(200, { 
+					success: true
+				});
+			}
+		});
 };
