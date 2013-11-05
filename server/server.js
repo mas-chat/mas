@@ -18,7 +18,6 @@ var express = require('express'),
 	exphbs  = require('express3-handlebars'),
 	expressValidator = require('express-validator'),
 	routes = require('./routes'),
-	user = require('./routes/user'),
 	http = require('http'),
 	path = require('path');
 
@@ -33,7 +32,7 @@ app.set('port', process.env.PORT || 3000);
 
 app.set('views', __dirname + '/views');
 
-app.engine('handlebars', exphbs({ 
+app.engine('handlebars', exphbs({
 	defaultLayout: 'main',
 	helpers: {
 		getPageJSFile: function (object) { return this.page + '.js'; }
