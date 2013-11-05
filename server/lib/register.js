@@ -28,7 +28,7 @@ exports.handleRegister = function(req, res) {
 	var mappedErrors = req.validationErrors(true); //kayta tata
 
 	if (0) {
-		res.send(200, { 
+		res.send(200, {
 			success: false,
 			msg: 'Form error.'
 		});
@@ -75,12 +75,12 @@ exports.handleRegister = function(req, res) {
 			if (err) {
 				console.log(err);
 				console.log('Rows: ' + rows)
-				res.send(200, { 
+				res.json({
 					success: false,
 					msg: 'Database error. Please contact support.'
 				});
 			} else {
-				res.send(200, { 
+				res.json({
 					success: true
 				});
 			}

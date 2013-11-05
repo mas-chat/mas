@@ -2,7 +2,7 @@
 require(["/vendor/javascripts/jqBootstrapValidation.js"], function(validation) {
 
 	$(function() {
-		$("input,select,textarea").not("[type=submit]").jqBootstrapValidation({
+		$("#register-form input, #register-form select, #register-form textarea").not("[type=submit]").jqBootstrapValidation({
 			preventSubmit: true,
 			submitError: function($form, event, errors) {
 				alert("NOT OK");
