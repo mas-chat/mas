@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta http-equiv="Cache-control" content="no-cache"/>
+        <meta http-equiv="Expires" content="0"/>
+        <meta http-equiv="X-XRDS-Location" content="http://meetandspeak.com/xrds.xrds"/>
+
+	<title>MeetAndSpeak - An advanced web based chat tool for groups.</title>
+
+	<meta name="description" content="MeetAndSpeak is an advanced web based chat tool for groups."/>
+	<meta name="keywords" content="MeetAndSpeak, chat, irc, group"/>
+
+	<link rel="shortcut icon" type="image/ico" href="favicon.ico" />
+	<link href="/stylesheets/reset.css" type="text/css" rel="stylesheet" media="screen"/>
+	<link href="/stylesheets/style.css" type="text/css" rel="stylesheet" media="screen"/>
+	<link href="/stylesheets/jquery.tweet.css" type="text/css" rel="stylesheet" media="screen"/>
+
+	<!--[if IE 6]><link rel="stylesheet" href="css/ie6.css" type="text/css" media="all" /><![endif]-->
+
+	<script src="/javascripts/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/javascripts/jquery.infieldlabel.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/javascripts/jquery.json-2.2.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/javascripts/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/javascripts/jquery.tweet.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="/javascripts/login.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+
+<div id="header-bgr"><!-- Header -->
+	<div class="container">
+		<div class="row">
+			<div class="column header">
+				<h1><a href="/" title="MeetAndSpeak"><img src="/images/header_meetandspeak.jpg" height="128" width="900" alt="MeetAndSpeak"/></a><br/><a href="/" title="MeetAndSpeak">MeetAndSpeak - MeetAndSpeak is an advanced web based chat tool for groups.</a></h1>
+			</div>
+		</div>
+	</div>
+</div><!-- Header END -->
+
+<div id="content-bgr"><!-- Content -->
+	<div class="container">
+		<div class="row"><!-- Row 1 -->
+			<div class="column wrap"><!-- Column 1 -->
+
+    <strong id="fferror" style="color:red;font-size:12px;margin-top:-4px;"></strong>
+
+<noscript>
+    <div style="color: red; font-size: 13px">
+        Your browser does not support JavaScript. Use of the MeetAndSpeak Web application is not possible when JavaScript is not enabled!
+    </div>
+</noscript>
+
+				<img src="/images/image_app_1.jpg" border="0" style="margin-top: 10px;" alt="MeetAndSpeak"/>
+			</div><!-- Column 1 END-->
+
+			<div class="column wrap"><!-- Column 2 -->
+
+
+				<div class="form_area"><!-- Login form -->
+					<div class="form_area_top"></div>
+					<div class="form_area_content">
+					<div class="body"><h2 id="topic" class="form">Login to MeetAndSpeak</h2></div>
+					<form accept-charset="utf-8" action="">
+						<fieldset>
+							<p>
+								<label id="nicklabel" for="username">Nick or Email</label><br/>
+								<input tabindex="1" autocomplete="on" type="text" name="username" value="" id="username"/>
+							</p>
+							<p>
+								<label id="pwlabel" for="password">Password</label><br />
+								<input tabindex="2" autocomplete="on" id="password" type="password" name="password" value=""/>
+							</p>
+							<p><!-- Wrong nick/password. -->
+    <strong id="error" style="color:red;font-size:12px;margin-top:-4px;">Incorrect nickname or password.</strong>
+							</p>
+    <p><!-- Loading. -->
+    </p>
+							<p class="forgot">
+
+
+    <div class="openidcontainer">
+
+  <div class="forgot">
+  <a tabindex="5" id="forgottext" href="">Forgot your password?</a>
+  </div>
+
+  <div class="right-element">
+  <a href="" title="Register and log in using your Yahoo! ID" id="yahoologin"><img style="background-color:white;border-style:solid;border-width:1px;border-color:black;opacity:0.5;filter:alpha(opacity=50);" onmouseover="this.style.opacity=1;this.filters.alpha.opacity=100" onmouseout="this.style.opacity=0.5;this.filters.alpha.opacity=50" alt="Yahoo! login" src="/images/yahoo.png"></a>
+  <a href="" title="Register and log in using your Google account" id="googlelogin"><img style="border-style:solid;border-width:1px;border-color:black;opacity:0.5;filter:alpha(opacity=50);" onmouseover="this.style.opacity=1;this.filters.alpha.opacity=100" onmouseout="this.style.opacity=0.5;this.filters.alpha.opacity=50" alt="Google login" src="/images/google.png"></a>
+  <a href="" title="Register and log in using your OpenID URL" id="openidlogin"><img style="border-style:solid;border-width:1px;border-color:black;opacity:0.5;filter:alpha(opacity=50)" onmouseover="this.style.opacity=1;this.filters.alpha.opacity=100" onmouseout="this.style.opacity=0.5;this.filters.alpha.opacity=50" alt="OpenID login" src="/images/openid-16x16.gif"></a>
+</div>
+
+</div>
+
+
+							</p>
+
+							<input tabindex="3" id="rememberme" name="rememberme" type="checkbox"/>
+				            <label id="remembermeLabel" for="rememberme"><span></span>Remember me</label>
+
+						</fieldset>
+						<input tabindex="4" type="submit" id="login" value="Login" class="submitbutton"/>
+    <p><!-- Loading. -->
+    <strong id="loading" style="color:white;font-size:12px;margin-top:-4px;">Loading...</strong>
+    </p>
+
+
+					</form>
+					</div>
+					<div class="form_area_bottom"></div>
+				</div>
+
+				<div class="form_area"><!-- Register box -->
+					<div class="form_area_top"></div>
+					<div class="form_area_content">
+					<div class="body"><h2 class="form">Don't have an account yet?</h2></div>
+                                        <form action="register.html" method="get" accept-charset="utf-8">
+					<p class="form_desc">Register here. It's quick and free.</p>
+						<input id="register" type="button" value="Register" class="textbutton"/>
+					</form>
+					</div>
+					<div class="form_area_bottom"></div>
+				</div>
+
+
+			</div><!-- Column 2 END-->
+
+		</div>
+
+		<div class="row" style="margin-top: 15px;"><!-- Row 2 -->
+
+			<div class="column wrap"><!-- Column 1 -->
+				<h2>No cost ad-free IRC like chat service</h2>
+					<ul class="coverpage-list">
+ 						<li class="symbol_1">Register.</li>
+ 						<li class="symbol_2">Create a group for your team, project, or friends.</li>
+ 						<li class="symbol_3">Ask others in your team to register too, or share the link for registration-free participation. Up to 200 people can join the group.</li>
+ 						<li class="symbol_4">Interact non-stop, using a modern Web-based UI, no browser plugins required.</li>
+					</ul>
+			</div><!-- Column 1 END-->
+
+			<div class="column wrap"><!-- Column 2 -->
+				<h2>Registered users have</h2>
+					<ul class="coverpage-list">
+                                                <li class="symbol_7">The power to create and manage new groups.</li>
+ 						<li class="symbol_5">Always-online sessions. Never miss conversations.</li>
+ 						<li class="symbol_6">Searchable conversation logs.</li>
+
+					</ul>
+					<a href="/features.html">More features...</a>
+			</div><!-- Column 2 END-->
+		</div>
+
+  <div class="row" style="margin-top: 15px;"><!-- Row 3 -->
+<!--			<div class="column">
+				<h2>News (from Twitter)</h2>
+<div class="tweet"></div>
+  </div> -->
+  </div>
+
+
+</div>
+
+</div><!-- Content END -->
+
+<div id="footer"><!-- Footer -->
+	<div id="footer-container">
+		<ul id="footer-list">
+ 			<li><a href="/privacy_and_tou.html">Privacy &amp; Terms of Use</a></li>
+ 			<li><a href="/about.html">About Us</a></li>
+ 			<li><a href="/developers.html">Developers</a></li>
+		</ul>
+	</div>
+</div><!-- Footer END -->
+
+
+
+</body>
+</html>
