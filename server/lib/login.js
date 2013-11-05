@@ -14,8 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
-var crypto = require('crypto');
-var mysql = require('mysql');
+var crypto = require('crypto'),
+    mysql = require('mysql');
 
 var connection = mysql.createConnection({
     host: 'localhost',
@@ -45,16 +45,22 @@ exports.handleLogin = function(req, res) {
             'server FROM users WHERE ' + searchUsing + ' = ?', [name],
         function(err, rows) {
             if (err) {
-                res.send(500, { error: 'Database error.' });
+                res.json({
+                    success: false,
+                    msg: 'Database error.'
+                });
                 return;
             }
 
             if (rows.length === 0 || rows[0].passwd.toString('utf-8') !==
-               passwordSha || rows[0].inuse === 0) {
+             passwordSha || rows[0].inuse === 0) {
                 // Unknown user, wrong password, or disabled account
-                res.send(200, 'NOT OK');
-            } else {
-                var userId = rows[0].userid;
+            res.json({
+                success: false,
+                msg: "Wrong password or ..."
+            });
+        } else {
+            var userId = rows[0].userid;
                 var secret = rows[0].cookie;
                 var secretExpires = rows[0].cookie_expires;
                 var settings = rows[0].settings.toString('utf-8');
@@ -75,13 +81,14 @@ exports.handleLogin = function(req, res) {
                     // Save secret to DB
                     connection.query(
                         'UPDATE users SET cookie = ?, cookie_expires = ? ' +
-                            'WHERE userid = ?',
+                        'WHERE userid = ?',
                         [secret, secretExpires, userId], function (err, rows) {
                         // TODO
-                        });
+                    });
                 }
 
-                res.send(200, {
+                res.json({
+                    success: true,
                     userId: userId,
                     secret: secret,
                     useSsl: useSsl
