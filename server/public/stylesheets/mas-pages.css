@@ -19,22 +19,10 @@ body {
 }
 
 .hero {
-	/* IE10 Consumer Preview */ 
 	background-image: -ms-radial-gradient(center bottom, ellipse farthest-corner, #E9FF26 0%, #048004 100%);
-
-	/* Mozilla Firefox */ 
 	background-image: -moz-radial-gradient(center bottom, ellipse farthest-corner, #E9FF26 0%, #048004 100%);
-
-	/* Opera */ 
-	background-image: -o-radial-gradient(center bottom, ellipse farthest-corner, #E9FF26 0%, #048004 100%);
-
-	/* Webkit (Safari/Chrome 10) */ 
 	background-image: -webkit-gradient(radial, center bottom, 0, center bottom, 553, color-stop(0, #E9FF26), color-stop(1, #048004));
-
-	/* Webkit (Chrome 11+) */ 
 	background-image: -webkit-radial-gradient(center bottom, ellipse farthest-corner, #E9FF26 0%, #048004 100%);
-
-	/* W3C Markup, IE10 Release Preview */ 
 	background-image: radial-gradient(ellipse farthest-corner at center bottom, #E9FF26 0%, #048004 100%);
 }
 
@@ -59,6 +47,13 @@ ul[role=alert] {
 #error-msg {
 	visibility: hidden;
 	color: red;
+	border: 1px solid red;
+	padding: 10px;
+}
+
+.tooltip {
+	opacity: 1;
+	background-color: yellow;
 	border: 1px solid red;
 	padding: 10px;
 }

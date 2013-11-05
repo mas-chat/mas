@@ -52,7 +52,7 @@ app.use(require('less-middleware')({ src: __dirname + '/public' }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/main', express.static( path.join(__dirname, '/..')));
-app.use('/opt/qooxdoo', express.static('/opt/qooxdoo'));
+app.use('/opt/qooxdoo', express.static('../qooxdoo-sdk'));
 
 // Development only
 if (app.get('env') === 'development') {

@@ -1,56 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta name="description" content="meetandspeak chat service">
-		<meta name="author" content="Ilkka Oksanen">
-		<link rel="shortcut icon" href="/favicon.png">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="meetandspeak chat service">
+        <meta name="author" content="Ilkka Oksanen">
+        <link rel="shortcut icon" href="/favicon.png">
 
-		<title>MeetAndSpeak</title>
+        <title>MeetAndSpeak</title>
 
-		<link href="/vendor/stylesheets/bootstrap.css" rel="stylesheet">
-		<link href="/stylesheets/mas-pages.css" rel="stylesheet">
+        <link href="/vendor/stylesheets/bootstrap.css" rel="stylesheet">
+        <link href="/stylesheets/mas-pages.css" rel="stylesheet">
 
-		<script src="/vendor/javascripts/jquery.min.js"></script>
-		<script src="/vendor/javascripts/jqBootstrapValidation.js"></script>
-		<script src="/vendor/javascripts/bootstrap.js"></script>
-		<script data-main="/javascripts/{{getPageJSFile}}" src="/vendor/javascripts/require.min.js"></script>
+        <script src="/vendor/javascripts/jquery.min.js"></script>
+        <script src="/vendor/javascripts/jqBootstrapValidation.js"></script>
+        <script src="/vendor/javascripts/bootstrap.js"></script>
+        <script data-main="/javascripts/main" src="/vendor/javascripts/require.min.js"></script>
 
-		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <script>
+            require(['/javascripts/{{getPageJSFile}}']);
+        </script>
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
         <script src="../../assets/js/html5shiv.js"></script>
         <script src="../../assets/js/respond.min.js"></script>
         <![endif]-->
     </head>
     <body>
-    	<div class="navbar navbar-inverse navbar-fixed-top">
-    		<div class="container">
-    			<div class="navbar-header">
-    				<a class="navbar-brand" href="/">MeetAndSpeak</a>
-    			</div>
-    			<div class="navbar-collapse collapse">
-    				<form class="navbar-form navbar-right">
-    					<div class="form-group">
-    						<input type="text" placeholder="Email" class="form-control">
-    					</div>
-    					<div class="form-group">
-    						<input type="password" placeholder="Password" class="form-control">
-    					</div>
-    					<button type="submit" class="btn btn-success">Sign in</button>
-    				</form>
-    			</div><!--/.navbar-collapse -->
-    		</div>
-    	</div>
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/">MeetAndSpeak</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <form id="login-form" class="navbar-form navbar-right">
+                        <div id="email-or-nick" class="form-group">
+                            <input type="text" name="emailOrNick" placeholder="Email or Nick" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password" placeholder="Password" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-success">Sign in</button>
+                    </form>
+                </div><!--/.navbar-collapse -->
+            </div>
+        </div>
 
-    	{{{body}}}
+        {{{body}}}
 
-    	<div class="jumbotron menu">
-    		<a href="/">Home</a>
-    		<a href="/privacy_and_tou.html">Privacy &amp; Terms of Use</a>
-    		<a href="/about.html">About Us</a>
-    		<a href="/developers.html">Developers</a>
-    	</div>
+        <div class="jumbotron menu">
+            <a href="/">Home</a>
+            <a href="/privacy_and_tou.html">Privacy &amp; Terms of Use</a>
+            <a href="/about.html">About Us</a>
+            <a href="/developers.html">Developers</a>
+        </div>
     </body>
 </html>
 
