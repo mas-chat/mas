@@ -14,18 +14,27 @@
 //   governing permissions and limitations under the License.
 //
 
+w = require('winston');
+
 var express = require('express'),
 	exphbs  = require('express3-handlebars'),
 	expressValidator = require('express-validator'),
-	routes = require('./routes'),
+	routesIndex = require('./routes'),
+    routesPages = require('./routes/pages'),
+    routesRegister = require('./routes/register'),
 	http = require('http'),
 	path = require('path');
 
 var chat = require('./lib/chat'),
-	login = require('./lib/login'),
-	register = require('./lib/register');
+	login = require('./lib/login');
+
+// Configure logging
+w.add(w.transports.File, { filename: 'mas.log' });
+//w.remove(w.transports.Console);
 
 var app = express();
+
+w.info('Server starting.');
 
 // All environments
 app.set('port', process.env.PORT || 3000);
@@ -41,7 +50,7 @@ app.engine('handlebars', exphbs({
 
 app.set('view engine', 'handlebars');
 
-app.use(express.favicon());
+app.use(express.favicon(path.join(__dirname, 'public/images/favicon.ico')));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(expressValidator());
@@ -55,18 +64,19 @@ app.use('/opt/qooxdoo', express.static('../qooxdoo-sdk'));
 
 // Development only
 if (app.get('env') === 'development') {
-  app.use(express.errorHandler());
+    app.use(express.errorHandler());
 }
 
 // Rest API
 app.get('/ralph/:sessionId/:sendSeq/:timezone', chat.handleLongPoll);
 app.post('/login', login.handleLogin);
-app.post('/register', register.handleRegister);
 
-// Web pages
-app.get('/', routes.index);
-app.get(/.html$/, routes.html);
+// Pages
+app.get('/', routesIndex);
+app.get('/register.html', routesRegister);
+app.post('/register', routesRegister);
+app.get(/.html$/, routesPages); // Order matters
 
 http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+    console.log('Express server listening on port ' + app.get('port'));
 });
