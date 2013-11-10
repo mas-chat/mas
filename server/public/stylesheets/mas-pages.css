@@ -44,11 +44,8 @@ ul[role=alert] {
 	color: red;
 }
 
-#error-msg {
-	visibility: hidden;
-	color: red;
-	border: 1px solid red;
-	padding: 10px;
+.error {
+    background-color: red;
 }
 
 .tooltip {
@@ -57,3 +54,10 @@ ul[role=alert] {
 	border: 1px solid red;
 	padding: 10px;
 }
+
+.field input {
+    display: block;
+}
+
+
+

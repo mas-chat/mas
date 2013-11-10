@@ -86,6 +86,8 @@
         "qx": true,
         "mas": true,
         "debug": true,
-        "escape": true
+        "escape": true,
+        "console": true,
+        "require": true
     }
 }
