@@ -14,15 +14,12 @@
 //   governing permissions and limitations under the License.
 //
 
-var mysql = require('mysql'),
-    crypto = require('crypto');
-
-var nconf = require('nconf').file('config.json');
-
 var forms = require('forms'),
     fields = forms.fields,
     widgets = forms.widgets,
     validators = forms.validators;
+
+var User = require('../models/User');
 
 var registrationForm = forms.create({
     name: fields.string({
@@ -49,7 +46,7 @@ var registrationForm = forms.create({
         cssClasses: {
             label: ['control-label']
         },
-        validators: [validators.email]
+        validators: [validators.email()]
     }),
     password: fields.password({
         required: true,
@@ -111,79 +108,26 @@ function renderPage(res, form) {
 }
 
 module.exports = function(req, res) {
-    var body = req.body;
-
-    w.info('ilkka1');
-
     registrationForm.handle(req, {
         success: function (form) {
-            // there is a request and the form is valid
-            // form.data contains the submitted data
-            w.info('Registration OK');
+            w.info('Registration form data is valid');
+            user = new User({
+                name: form.data.name,
+                email: form.data.email,
+                password: form.data.password,
+                nick: form.data.nick
+            });
+            user.save();
+            res.redirect('/registration-success.html');
         },
         error: function (form) {
-            // the data in the request didn't validate,
-            // calling form.toHTML() again will render the error messages
-            w.info('Registration FAIL');
+            w.info('Registration form data is invalid');
             renderPage(res, form);
         },
         empty: function (form) {
-            // there was no form data in the request
             w.info('There is no form');
             renderPage(res, form);
         }
     });
 };
 
-function saveUser() {
-    // Checks done, all is good
-
-    var password = req.body.password;
-    var passwordSha =
-            crypto.createHash('sha256').update(password, 'utf8').digest('hex');
-
-    var connection = mysql.createConnection({
-        host: 'localhost',
-        user: nconf.get('dbUsername'),
-        password: nconf.get('dbPassword'),
-        database: 'milhouse'
-    });
-
-    connection.query(
-        'INSERT INTO users VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())', [
-        body.name,
-        '-',
-        body.email,
-        1,
-        null,
-        passwordSha,
-        body.nick,
-        1, //gender
-        'TDB:token',
-        '',
-        0,
-        ':',
-        ':',
-        'NA',
-        1, //hasinvite
-        '',
-        'TBD:ip',
-        1,
-        1,
-        4,
-        ''],
-        function(err, rows) {
-            if (err) {
-                console.log(err);
-                console.log('Rows: ' + rows);
-                res.json({
-                    success: false,
-                    msg: 'Database error. Please contact support.'
-                });
-            } else {
-                res.json({
-                    success: true
-                });
-            }
-        });
-}
