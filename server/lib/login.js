@@ -15,12 +15,13 @@
 //
 
 var crypto = require('crypto'),
-    mysql = require('mysql');
+    mysql = require('mysql'),
+    nconf = require('nconf').file('config.json');
 
 var connection = mysql.createConnection({
     host: 'localhost',
-    user: 'ircuser',
-    password: 'zeppelin',
+    user: nconf.get('dbUsername'),
+    password: nconf.get('dbPassword'),
     database: 'milhouse'
 });
 
