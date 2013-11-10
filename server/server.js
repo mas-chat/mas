@@ -18,7 +18,6 @@ w = require('winston');
 
 var express = require('express'),
 	exphbs  = require('express3-handlebars'),
-	expressValidator = require('express-validator'),
 	routesIndex = require('./routes'),
     routesPages = require('./routes/pages'),
     routesRegister = require('./routes/register'),
@@ -53,7 +52,6 @@ app.set('view engine', 'handlebars');
 app.use(express.favicon(path.join(__dirname, 'public/images/favicon.ico')));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
-app.use(expressValidator());
 app.use(express.methodOverride());
 app.use(app.router);
 app.use(require('less-middleware')({ src: __dirname + '/public' }));

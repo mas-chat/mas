@@ -36,16 +36,21 @@ body {
 	margin-bottom: 50px;
 }
 
-.padding-top-30 {
-	padding-top: 30px;
+form:nth-child(1) {
+	margin-top: 30px;
+}
+
+form div {
+    margin-bottom: 10px;
 }
 
 ul[role=alert] {
 	color: red;
 }
 
-.error {
-    background-color: red;
+.error_msg {
+    color: red;
+    margin-bottom: 10px;
 }
 
 .tooltip {
