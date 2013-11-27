@@ -1,6 +1,8 @@
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
   padding-top: 50px;
+  background-color: #d6d6d6;
+  font-family: 'Roboto', serif;
 }
 
 .menu {
@@ -8,6 +10,8 @@ body {
 	margin-right: auto;
 	text-align: center;
 	margin-bottom: 0px;
+    margin-top: 50px;
+    margin-bottom: 50px;
 }
 
 .menu a {
@@ -19,11 +23,7 @@ body {
 }
 
 .hero {
-	background-image: -ms-radial-gradient(center bottom, ellipse farthest-corner, #E9FF26 0%, #048004 100%);
-	background-image: -moz-radial-gradient(center bottom, ellipse farthest-corner, #E9FF26 0%, #048004 100%);
-	background-image: -webkit-gradient(radial, center bottom, 0, center bottom, 553, color-stop(0, #E9FF26), color-stop(1, #048004));
-	background-image: -webkit-radial-gradient(center bottom, ellipse farthest-corner, #E9FF26 0%, #048004 100%);
-	background-image: radial-gradient(ellipse farthest-corner at center bottom, #E9FF26 0%, #048004 100%);
+    background-color: #eeeeee;
 }
 
 #register-form-container {
@@ -36,11 +36,11 @@ body {
 	margin-bottom: 50px;
 }
 
-form:nth-child(1) {
+.register-form:nth-child(1) {
 	margin-top: 30px;
 }
 
-form div {
+.register-form div {
     margin-bottom: 10px;
 }
 
@@ -64,5 +64,21 @@ ul[role=alert] {
     display: block;
 }
 
+.navbar-brand {
+    font-family: 'Exo', serif;
+    font-size: 30px;
+}
 
+.navbar-inverse .navbar-brand {
+    color: #eeefef;
+}
+
+.navbar-inverse {
+    background-color: #493524;
+}
+
+img {
+    width: 900px;
+    left: 50%;
+}
 
