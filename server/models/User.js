@@ -14,6 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
+// User object hides the storage details of attributes. Information
+// that can't be lost is stored in MySQL. Everything else is kept
+// in Redis for performance reasons.
+
 var mysql = require('mysql'),
     crypto = require('crypto'),
     nconf = require('nconf').file('config.json');
