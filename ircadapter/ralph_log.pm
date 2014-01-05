@@ -27,14 +27,14 @@ sub dprint_init
     my $newfile = shift @_;
     $send_email = shift @_;
     my $id = shift @_;
-    
+
     if ($newfile)
     {
-	open $log_file, ">", $logfile . "." . $id . ".log" or die $!;
+        open $log_file, ">", $logfile . "." . $id . ".log" or die $!;
     }
     else
     {
-	open $log_file, ">>", $logfile . "." . $id . ".log" or die $!;
+        open $log_file, ">>", $logfile . "." . $id . ".log" or die $!;
     }
 
     dprint(1, 0, "Logging to: $logfile");
@@ -42,7 +42,7 @@ sub dprint_init
     my $ofh = select $log_file; # to disable buffering
     $| = 1;
     select $ofh;
-    
+
     return;
 }
 
@@ -60,7 +60,7 @@ sub dprint
 
     if ($userid == 0)
     {
-	$userid = "GEN";
+        $userid = "GEN";
     }
 
     return if ($level == 0 && !$debug_verbose);
@@ -68,21 +68,21 @@ sub dprint
     return if ($level == -1);
 
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,
-	$yday,$isdst)=localtime(time);
+        $yday,$isdst)=localtime(time);
     my $times = sprintf "%02d-%02d-%02d %02d:%02d:%02d",
     $year-100,$mon+1,$mday,$hour,$min,$sec;
 
     print $log_file $times . " -" . $userid . "- " . $msg . "\n";
-    
+
     if ($debug_stout)
     {
-	print $times . " -" . $userid . "- " . $msg . "\n";
+        print $times . " -" . $userid . "- " . $msg . "\n";
     }
 
     if ($level == 2 && $send_email == 1 && $mails_sent < 30)
     {
-	&::create_mail($msg, "Serious (level 2) Ralph error");
-	$mails_sent++;
+        &::create_mail($msg, "Serious (level 2) Ralph error");
+        $mails_sent++;
     }
 
     return;

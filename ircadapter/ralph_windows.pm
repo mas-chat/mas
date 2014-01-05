@@ -54,7 +54,7 @@ sub window_get_ids_for_nw
 
         if ($nw == $network)
         {
-	    push @result, $windowid;
+            push @result, $windowid;
         }
     }
 

@@ -23,11 +23,11 @@ sub init_users
 
     foreach my $id (@users)
     {
-	dprint(1, 0, " Creating user: $id, " . $::redis->hget("user:$id", "email"));
+        dprint(1, 0, " Creating user: $id, " . $::redis->hget("user:$id", "email"));
 
-	if (!exists($users{$id}))
+        if (!exists($users{$id}))
         {
-	    my $connectdelay = int(rand(120)) + 2;
+            my $connectdelay = int(rand(120)) + 2;
             my @windows = $::redis->smembers("windowlist:$id");
 
             $users{$id}{"disabled"} = 0;
@@ -54,7 +54,7 @@ sub init_users
         }
 
         # TODO: if restart
-	#&queue_and_send_addline($userid, $winid, "<font color=\"red\">The MeetAndSpeak server has been restarted. You may have lost a line or two. $waittext</font><br>", 1, 2);
+        #&queue_and_send_addline($userid, $winid, "<font color=\"red\">The MeetAndSpeak server has been restarted. You may have lost a line or two. $waittext</font><br>", 1, 2);
     }
 }
 
