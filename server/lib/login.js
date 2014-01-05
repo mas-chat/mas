@@ -32,8 +32,8 @@ function init() {
 exports.handleLogin = function(req, res) {
     var name = req.body.emailOrNick;
     var password = req.body.password;
-    var passwordSha =
-            crypto.createHash('sha256').update(password, 'utf8').digest('hex');
+    var passwordSha = crypto.createHash('sha256').update(password,
+       'utf8').digest('hex');
     var searchUsing = 'email';
 
     if (name.indexOf('@') === -1) {
