@@ -1,0 +1,33 @@
+{
+    'info' :
+    {
+        'name' : 'MAS web client',
+
+        'summary' : 'Chat Application',
+        'description' : 'Meetandspeak client app',
+
+        'homepage' : 'http://www.meetandspeak.com/',
+
+        'license' : 'Apache',
+        'authors' :
+        [
+            {
+                'name' : 'Ilkka Oksanen',
+                'email' : 'ilkka@meetandspeak.com'
+            }
+        ],
+
+        'version' : 'trunk',
+        'qooxdoo-versions': ['3.0']
+    },
+
+    'provides' :
+    {
+        'namespace'   : 'mas',
+        'encoding'    : 'utf-8',
+        'class'       : 'source/class',
+        'resource'    : 'source/resource',
+        'translation' : 'source/translation',
+        'type'        : 'application'
+    }
+}
