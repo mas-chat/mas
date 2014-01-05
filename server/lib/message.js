@@ -14,27 +14,30 @@
 //   governing permissions and limitations under the License.
 //
 
-var Message = require('./message.js');
 
-function initializeSession(res) {
-    var msg = new Message();
-    msg.addCommand("SET");
-    msg.addCommand("INITDONE");
-    msg.send(res);
+module.exports = Message;
+
+function Message() {
+    this.cmds = [];
 }
 
-exports.handleLongPoll = function(req, res) {
-    var sessionId = req.param('sessionId');
-    var sendSeq = req.param('sendSeq');
-    var timezone = req.param('timezone');
+Message.prototype.addCommand = function(cmd, params) {
+    this.cmds.push({
+        id: cmd,
+    });
+}
 
-    console.log('here');
+Message.prototype.send = function(res) {
+    res.json({
+        status: "OK",
+        commands: this.cmds
+    });
 
-    if (1) { // sendSeq === 0) {
-        initializeSession(res);
-    }
 
-    console.log('USER', req.user);
+}
 
-    res.json({ user: timezone });
-};
+
+
+
+
+

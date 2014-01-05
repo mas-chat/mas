@@ -29,83 +29,114 @@ var connection = mysql.createConnection({
     database: 'milhouse'
 });
 
-User.getByNickOrEmail = function(nickOrEmail) {
+module.exports = function() {
+    return function(req, res, next) {
+        var dataString = req.cookies.ProjectEvergreen;
+        req.user = undefined;
 
-};
+        if (dataString) {
+            var data = dataString.split('-');
+            var id = data[0];
 
-function User(obj) {
-    for (var key in obj) {
-        if (key !== 'id') {
-            this[key] = obj[key];
+            fetchUserData(id, req, next);
+        } else {
+            next();
         }
     }
+};
+
+function fetchUserData(id, req, next) {
+    connection.query('SELECT * FROM users WHERE userid = ?', [id], function(err, rows, fields) {
+        if (err) throw err;
+
+        if (rows.length > 0) {
+            req.user = rows[0];
+            req.user.save = save;
+            decodeSettings(req);
+        }
+
+        next();
+    });
 }
 
-User.prototype.save = function() {
-    if (this.id) {
-        this.update();
-    } else {
-        var hash = crypto.createHash('sha256');
+function decodeSettings() {
+    var settingsString = req.settings;
+    var settings = settingsString.split('||');
 
-        // Fields not from the form
-        this.passwordSha = hash.update(this.password, 'utf8').digest('hex');
-        this.inUse = 0;
-        this.token = '';
-        this.cookie = '';
-        this.cookieExpires = 0;
-        this.friends = '';
-        this.unFriends = '';
-        this.settings = '';
-        this.lastIp = '';
-        this.maxWindows = 8;
-        this.openIdUrl = '';
-        this.registrationTime = '1234'; // TBD
 
-        // Legacy options
-        this.lastName = '';
-        this.gender = 1;
-        this.country = '';
-        this.hasInvite = 1;
-        this.server = 0;
-        this.ads = 0;
 
-        connection.query(
-            'INSERT INTO users VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())', [
-            this.name,
-            this.lastName,
-            this.email,
-            this.inUse,
-            null, // UserID
-            this.passwordSha,
-            this.nick,
-            this.gender,
-            this.token,
-            this.cookie,
-            this.cookieExpires,
-            this.friends,
-            this.unFriends,
-            this.country,
-            this.hasInvite,
-            this.settings,
-            this.lastIp,
-            this.server,
-            this.ads,
-            this.maxWindows,
-            this.openIdUrl,
-            this.registrationTime
-            ],
-            function(err, rows) {
-                if (err) {
-                    w.error('Database error. Can\'t save new user.');
-                }
-            });
-    }
+}
+
+function save() {
+    //WRONGGGGG!!!!!!!!
+
+    var hash = crypto.createHash('sha256');
+
+    // Fields not from the form
+    this.passwordSha = hash.update(this.password, 'utf8').digest('hex');
+    this.inUse = 0;
+    this.token = '';
+    this.cookie = '';
+    this.cookieExpires = 0;
+    this.friends = '';
+    this.unFriends = '';
+    this.settings = '';
+    this.lastIp = '';
+    this.maxWindows = 8;
+    this.openIdUrl = '';
+    this.registrationTime = '1234'; // TBD
+
+    // Legacy options
+    this.lastName = '';
+    this.gender = 1;
+    this.country = '';
+    this.hasInvite = 1;
+    this.server = 0;
+    this.ads = 0;
+
+    connection.query(
+        'INSERT INTO users VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())', [
+        this.name,
+        this.lastName,
+        this.email,
+        this.inUse,
+        null, // UserID
+        this.passwordSha,
+        this.nick,
+        this.gender,
+        this.token,
+        this.cookie,
+        this.cookieExpires,
+        this.friends,
+        this.unFriends,
+        this.country,
+        this.hasInvite,
+        this.settings,
+        this.lastIp,
+        this.server,
+        this.ads,
+        this.maxWindows,
+        this.openIdUrl,
+        this.registrationTime
+        ],
+        function(err, rows) {
+            if (err) {
+                w.error('Database error. Can\'t save new user.');
+            }
+        });
 };
 
-User.prototype.update = function() {
+function connect(field, cb) {
+    // nick tee!
+    var that = this;
 
-};
+    connection.query('SELECT userid FROM users WHERE email = ?', [this._email], function(err, rows, fields) {
+        if (err) throw err;
 
+        that._id = rows[0].userid;
+        console.log(rows[0]);
+        console.log('User ID: ', that._id);
 
-
-module.exports = User;
+        that._query(field, cb);
+    });
+}
