@@ -15,10 +15,10 @@ our $VERSION = 1.00;
 
 sub get_ts
 {
-    
+
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,
-	$yday,$isdst)=localtime(time);
-    
+        $yday,$isdst)=localtime(time);
+
     my $res_time = $hour * 60 + $min;
 
     return "<" . $res_time . ">";

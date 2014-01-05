@@ -26,10 +26,10 @@ our $basedir = "./";
 # new server
 
 our @serverlist = ( ["MeetAndSpeak", "localhost", 6667, 9999],
-		    ["IRCNet", "ircnet.eversible.com", 6666, 100 ],
-		    ["FreeNode", "irc.freenode.net", 6667, 5],
-		    ["W3C", "irc.w3.org", 6665, 5]
-		  );
+                    ["IRCNet", "ircnet.eversible.com", 6666, 100 ],
+                    ["FreeNode", "irc.freenode.net", 6667, 5],
+                    ["W3C", "irc.w3.org", 6665, 5]
+    );
 
 #################################################################
 

@@ -63,11 +63,11 @@ sub deletetimer
 
     if (exists($ralph_timeouts{$timeout_id}))
     {
-	delete($ralph_timeouts{$timeout_id});
+        delete($ralph_timeouts{$timeout_id});
     }
     else
     {
-	dprint(1, 0, "tried to delete unknown timer!");
+        dprint(1, 0, "tried to delete unknown timer!");
     }
 }
 
@@ -75,22 +75,22 @@ sub checktimers
 {
     foreach my $timeout (keys %ralph_timeouts)
     {
-	#TODO: First test is mystery, why it is needed? Without it server dies
-	#add dprint to see what id is!! dprint id also when timer is created
+        #TODO: First test is mystery, why it is needed? Without it server dies
+        #add dprint to see what id is!! dprint id also when timer is created
 
-	if (!defined($ralph_timeouts{$timeout}[0]))
-	{
-	    dprint(2, 0, "Invalid timer id: $timeout");
-	}
+        if (!defined($ralph_timeouts{$timeout}[0]))
+        {
+            dprint(2, 0, "Invalid timer id: $timeout");
+        }
 
-	if (defined($ralph_timeouts{$timeout}[0]) && $ralph_timeouts{$timeout}[0] < time())
-	{
-	    my $cref = $ralph_timeouts{$timeout}[1];
-	    &$cref($ralph_timeouts{$timeout}[2], $ralph_timeouts{$timeout}[3]);
+        if (defined($ralph_timeouts{$timeout}[0]) && $ralph_timeouts{$timeout}[0] < time())
+        {
+            my $cref = $ralph_timeouts{$timeout}[1];
+            &$cref($ralph_timeouts{$timeout}[2], $ralph_timeouts{$timeout}[3]);
 
-	    delete($ralph_timeouts{$timeout});
-	    #dprint(1, 0, "exired timer: $timeout");
-	}
+            delete($ralph_timeouts{$timeout});
+            #dprint(1, 0, "exired timer: $timeout");
+        }
     }
 }
 
