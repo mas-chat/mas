@@ -1,0 +1,4 @@
+
+IRC adapter can require thousands of sockets:
+
+   Adjust /etc/security/limits.conf and relogin.
