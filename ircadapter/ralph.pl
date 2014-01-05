@@ -134,8 +134,8 @@ while (1)
 
     if (($prev_min == 29 && $min == 30) || ($prev_min == 59 && $min == 0))
     {
-	my $hour = (localtime(time))[2];
-	&inform_day_change($hour, $min);
+        my $hour = (localtime(time))[2];
+        &inform_day_change($hour, $min);
     }
 
     $prev_min = $min;
@@ -145,127 +145,127 @@ while (1)
 
     foreach my $event (@$ret)
     {
-	my ($file_desc, $mask) = @$event;
+        my ($file_desc, $mask) = @$event;
 
-	if ($mask & EPOLLIN)
+        if ($mask & EPOLLIN)
         {
-	    my $data;
+            my $data;
 
-	    if ($file_desc == fileno($listenident))
-	    {
-		&handle_socket_accept($listenident, TYPE_IDENT);
-	    }
-	    elsif (exists($socket_table{$file_desc}))
-	    {
-		my $sock = $socket_table{$file_desc}[1];
-		my $rv = sysread($sock, $data, 3000);
+            if ($file_desc == fileno($listenident))
+            {
+                &handle_socket_accept($listenident, TYPE_IDENT);
+            }
+            elsif (exists($socket_table{$file_desc}))
+            {
+                my $sock = $socket_table{$file_desc}[1];
+                my $rv = sysread($sock, $data, 3000);
 
-		if (!defined($rv) || $rv == 0)
-     		{
-		    $rv = "undef" if (!defined($rv));
-		    dprint(1, 0, "Socket not readable anymore, rv = $rv");
-		    &handle_socket_close($sock);
-		}
-		else
-		{
-		    #add possible partial line from the previous round
-		    $socket_table{$file_desc}[2] .= $data;
-		    my $request = $socket_table{$file_desc}[2];
+                if (!defined($rv) || $rv == 0)
+                {
+                    $rv = "undef" if (!defined($rv));
+                    dprint(1, 0, "Socket not readable anymore, rv = $rv");
+                    &handle_socket_close($sock);
+                }
+                else
+                {
+                    #add possible partial line from the previous round
+                    $socket_table{$file_desc}[2] .= $data;
+                    my $request = $socket_table{$file_desc}[2];
 
-		    if ($socket_table{$file_desc}[0] == TYPE_IDENT)
-		    {
-			if ($request =~ m/\r\n$/)
-			{
-			    &handle_ident_input($request, $sock);
-			}
-		    }
-		    elsif ($socket_table{$file_desc}[0] == TYPE_IRC)
-		    {
-			my @rows = split /\r\n/, $request;
+                    if ($socket_table{$file_desc}[0] == TYPE_IDENT)
+                    {
+                        if ($request =~ m/\r\n$/)
+                        {
+                            &handle_ident_input($request, $sock);
+                        }
+                    }
+                    elsif ($socket_table{$file_desc}[0] == TYPE_IRC)
+                    {
+                        my @rows = split /\r\n/, $request;
 
-			if (!($request =~ m/\r\n$/))
-			{
-			    #last line is partial, store it for the next round
-			    $socket_table{$file_desc}[2] = pop(@rows);
-			}
-			else
-			{
-			    $socket_table{$file_desc}[2] = "";
-			}
+                        if (!($request =~ m/\r\n$/))
+                        {
+                            #last line is partial, store it for the next round
+                            $socket_table{$file_desc}[2] = pop(@rows);
+                        }
+                        else
+                        {
+                            $socket_table{$file_desc}[2] = "";
+                        }
 
-			foreach (@rows)
-			{
-			    dprint(0, $socket_table{$file_desc}[4], "IRC: $_") if (!(m/372/) && !(m/PRIVMSG/));
-			    &handle_irc_input($_, $sock);
-			}
-		    }
-		}
-	    }
-	    else
-	    {
-		dprint (1, 0, "Strange FD: $file_desc ready for reading");
-		POSIX::close($file_desc);
-	    }
-	}
+                        foreach (@rows)
+                        {
+                            dprint(0, $socket_table{$file_desc}[4], "IRC: $_") if (!(m/372/) && !(m/PRIVMSG/));
+                            &handle_irc_input($_, $sock);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                dprint (1, 0, "Strange FD: $file_desc ready for reading");
+                POSIX::close($file_desc);
+            }
+        }
 
-	if ($mask == EPOLLHUP || $mask == EPOLLERR || $mask == (EPOLLHUP | EPOLLERR))
-	{
-	    #TODO: remove if this is impossible
-	    dprint(2, 0, "RCVD unexpected epoll event: $file_desc, full mask: $mask, error in logic");
-	}
-
-	if ($mask & EPOLLOUT)
+        if ($mask == EPOLLHUP || $mask == EPOLLERR || $mask == (EPOLLHUP | EPOLLERR))
         {
-	    if (!exists $socket_table{$file_desc})
-	    {
-		#should never happen
-		dprint (1, 0, "Strange FD: $file_desc ready for writing");
-		POSIX::close($file_desc);
-		next;
-	    }
+            #TODO: remove if this is impossible
+            dprint(2, 0, "RCVD unexpected epoll event: $file_desc, full mask: $mask, error in logic");
+        }
 
-	    my $sock = $socket_table{$file_desc}[1];
+        if ($mask & EPOLLOUT)
+        {
+            if (!exists $socket_table{$file_desc})
+            {
+                #should never happen
+                dprint (1, 0, "Strange FD: $file_desc ready for writing");
+                POSIX::close($file_desc);
+                next;
+            }
 
-	    if ($socket_table{$file_desc}[7] == 1 && $socket_table{$file_desc}[3] eq "")
-	    {
-		dprint(0, 0, "Executing pending close");
-		&handle_socket_close($sock);
-	    }
-	    else
-	    {
-		my $rv = syswrite($sock, $socket_table{$file_desc}[3]);
+            my $sock = $socket_table{$file_desc}[1];
 
-		if (!defined $rv || $rv == 0)
-		{
-		    $rv = "undef" if (!defined($rv));
-		    dprint(1, 0, "Socket not writable anymore, rv = $rv");
-		    &handle_socket_close($sock);
-		}
-		elsif ($rv == length $socket_table{$file_desc}[3])
-		{
-		    $socket_table{$file_desc}[3] = '';
+            if ($socket_table{$file_desc}[7] == 1 && $socket_table{$file_desc}[3] eq "")
+            {
+                dprint(0, 0, "Executing pending close");
+                &handle_socket_close($sock);
+            }
+            else
+            {
+                my $rv = syswrite($sock, $socket_table{$file_desc}[3]);
 
-		    #All is written
-		    if ($socket_table{$file_desc}[0] == TYPE_IRC)
-		    {
-			#It's IRC socket, keep reading
-			epoll_ctl($epfd, EPOLL_CTL_MOD, $file_desc, EPOLLIN) >= 0 ||
-			    dprint(2, $socket_table{$file_desc}[4], "epoll_ctl3: $! fd: $file_desc");
-		    }
-		    else
-		    {
-			my $userid = $socket_table{$file_desc}[4];
+                if (!defined $rv || $rv == 0)
+                {
+                    $rv = "undef" if (!defined($rv));
+                    dprint(1, 0, "Socket not writable anymore, rv = $rv");
+                    &handle_socket_close($sock);
+                }
+                elsif ($rv == length $socket_table{$file_desc}[3])
+                {
+                    $socket_table{$file_desc}[3] = '';
 
-			#IDENT sockets are closed after first complete write
-			$socket_table{$file_desc}[7] = 1; #close is now pending
-		    }
-		}
-		else
-		{
-		    substr($socket_table{$file_desc}[3], 0, $rv) = '';
-		}
-	    }
-	}
+                    #All is written
+                    if ($socket_table{$file_desc}[0] == TYPE_IRC)
+                    {
+                        #It's IRC socket, keep reading
+                        epoll_ctl($epfd, EPOLL_CTL_MOD, $file_desc, EPOLLIN) >= 0 ||
+                            dprint(2, $socket_table{$file_desc}[4], "epoll_ctl3: $! fd: $file_desc");
+                    }
+                    else
+                    {
+                        my $userid = $socket_table{$file_desc}[4];
+
+                        #IDENT sockets are closed after first complete write
+                        $socket_table{$file_desc}[7] = 1; #close is now pending
+                    }
+                }
+                else
+                {
+                    substr($socket_table{$file_desc}[3], 0, $rv) = '';
+                }
+            }
+        }
     }
 }
 
@@ -276,19 +276,19 @@ sub handle_socket_close
 
     if ($socket_table{$file_desc}[0] == TYPE_IRC)
     {
-	my $nw = $socket_table{$file_desc}[5];
-	my $userid = $socket_table{$file_desc}[4];
+        my $nw = $socket_table{$file_desc}[5];
+        my $userid = $socket_table{$file_desc}[4];
 
-	#update stats
-	### if ($users{$userid}{"connected"}[$nw] == 1)
-	{
-	    $serverstats[$nw]--;
-	}
+        #update stats
+        ### if ($users{$userid}{"connected"}[$nw] == 1)
+        {
+            $serverstats[$nw]--;
+        }
 
-	#extra steps for IRC socket
-	### $users{$userid}{"isocket"}[$nw] = undef;
-	### $users{$userid}{"connected"}[$nw] = 0;
-	&schedule_reconnect($userid, $nw);
+        #extra steps for IRC socket
+        ### $users{$userid}{"isocket"}[$nw] = undef;
+        ### $users{$userid}{"connected"}[$nw] = 0;
+        &schedule_reconnect($userid, $nw);
     }
 
     delete $socket_table{$file_desc};
@@ -325,12 +325,12 @@ sub handle_socket_accept
 
     if (accept(my $sock, $listensock))
     {
-	nonblock($sock);
-	epoll_ctl($epfd, EPOLL_CTL_ADD, fileno($sock), EPOLLIN) >= 0 ||
-	    die "epoll_ctl: $!\n";
+        nonblock($sock);
+        epoll_ctl($epfd, EPOLL_CTL_ADD, fileno($sock), EPOLLIN) >= 0 ||
+            die "epoll_ctl: $!\n";
 
-	$socket_table{fileno($sock)} = [$type, $sock, "", "", undef, undef, $timer, 0];
-	dprint(-1, 0, "New $type client FD: " . fileno($sock));
+        $socket_table{fileno($sock)} = [$type, $sock, "", "", undef, undef, $timer, 0];
+        dprint(-1, 0, "New $type client FD: " . fileno($sock));
     }
 }
 
@@ -344,37 +344,37 @@ sub create_mail
     my $i = 1;
 
     while (defined((caller($i))[3]) &&
-	   defined((caller($i))[2]))
+           defined((caller($i))[2]))
     {
-	$text = $text . (caller($i))[3] . ", line: " . (caller($i))[2] . "\n";
-	$i++;
+        $text = $text . (caller($i))[3] . ", line: " . (caller($i))[2] . "\n";
+        $i++;
     }
 
     my $version = "DEVEL:";
 
     if ($evergreen_config::production_version == 1)
     {
-	$version = "PROD:";
+        $version = "PROD:";
     }
 
     my %mail = ( "To"      => 'iao@iki.fi',
-		 "From"    => 'Evergreen admin <admin@meetandspeak.com>',
-		 "Subject" => $version . " " . $subject,
-		 "Message" => "Warning/error was \n\n $text \n\n -ilkka",
-		 "Content-type" => 'text/plain; charset="utf8"'
-		 );
+                 "From"    => 'Evergreen admin <admin@meetandspeak.com>',
+                 "Subject" => $version . " " . $subject,
+                 "Message" => "Warning/error was \n\n $text \n\n -ilkka",
+                 "Content-type" => 'text/plain; charset="utf8"'
+        );
     sendmail(%mail);
 
     # TODO: remove password
     if($send_sms && $evergreen_config::production_version == 1)
     {
-	%mail = ( "To"      => 'sms@messaging.clickatell.com',
-		  "From"    => 'Evergreen admin <admin@meetandspeak.com>',
-		  "Subject" => "Foobar",
-		  "Message" => "user:ilkkao\npassword:-{removed}---\napi_id:3222033\nto:+-{removed-\ntext:Server crashed!",
-		  "Content-type" => 'text/plain; charset="utf8"'
-		  );
-	sendmail(%mail);
+        %mail = ( "To"      => 'sms@messaging.clickatell.com',
+                  "From"    => 'Evergreen admin <admin@meetandspeak.com>',
+                  "Subject" => "Foobar",
+                  "Message" => "user:ilkkao\npassword:-{removed}---\napi_id:3222033\nto:+-{removed-\ntext:Server crashed!",
+                  "Content-type" => 'text/plain; charset="utf8"'
+            );
+        sendmail(%mail);
     }
 }
 
@@ -394,9 +394,9 @@ sub nonblock {
     my $flags;
 
     $flags = fcntl($socket, F_GETFL, 0)
-	or die "Can't get flags for socket: $!\n";
+        or die "Can't get flags for socket: $!\n";
     fcntl($socket, F_SETFL, $flags | O_NONBLOCK)
-	or die "Can't make socket nonblocking: $!\n";
+        or die "Can't make socket nonblocking: $!\n";
 }
 
 sub close_and_remove_socket
@@ -405,11 +405,11 @@ sub close_and_remove_socket
 
     if (!defined($sock))
     {
-	return;
+        return;
     }
 
     epoll_ctl($::epfd, EPOLL_CTL_DEL, fileno($sock), 0) >= 0 ||
-	dprint(2, 0, "Suspicious close: epoll_ctl: $!");
+        dprint(2, 0, "Suspicious close: epoll_ctl: $!");
     close($sock);
     dprint(0, 0, "Closed socket: $sock");
 }
@@ -425,20 +425,20 @@ sub kill_irc_connection
 
     if (defined($rh))
     {
-	delete $socket_table{fileno($rh)};
-	&close_and_remove_socket($rh);
+        delete $socket_table{fileno($rh)};
+        &close_and_remove_socket($rh);
     }
 
     if (defined($users{$userid}{"last_ping"}{$nw}))
     {
-	#delete ping information, disables ping timeout checking
+        #delete ping information, disables ping timeout checking
         delete $users{$userid}{"last_ping"}{$nw};
     }
 
     #TODO: fix me, got more complicated
     #if ($shutdown_in_progress && !keys %ircinbuffer)
     #{
-    #	exit(0);
+    #   exit(0);
     #}
 }
 
@@ -451,48 +451,48 @@ sub schedule_reconnect
 
     if ($::shutdown_in_progress == 1)
     {
-	return;
+        return;
     }
 
     if (defined $users{$userid}{"reconnect_count"}{$nw})
     {
-	$users{$userid}{"reconnect_count"}{$nw} =
-	    $users{$userid}{"reconnect_count"}{$nw} + 1;
+        $users{$userid}{"reconnect_count"}{$nw} =
+            $users{$userid}{"reconnect_count"}{$nw} + 1;
     }
     else
     {
-	$users{$userid}{"reconnect_count"}{$nw} = 1;
+        $users{$userid}{"reconnect_count"}{$nw} = 1;
     }
 
     if ($users{$userid}{"reconnect_count"}{$nw} > 1)
     {
-	&queue_and_send_addline_nw($userid, $nw, "<br>",0, 1, 0, 0);
+        &queue_and_send_addline_nw($userid, $nw, "<br>",0, 1, 0, 0);
     }
 
     if ($users{$userid}{"reconnect_count"}{$nw} > 4)
     {
-	&queue_and_send_addline_nw($userid, $nw,
-		       " *** Error in connection to $evergreen_config::serverlist[$nw][0] after multiple attempts. Waiting " .
-		       " one hour before making another connection attempt. Close this window if you do not wish to retry.<br>",
-			  1, 1, 0, 0);
-	$users{$userid}{"reconnect_count"}{$nw} = 0;
-	&addtimer(\&connect_irc_user, 60 * 60, $userid, $nw);
+        &queue_and_send_addline_nw($userid, $nw,
+                                   " *** Error in connection to $evergreen_config::serverlist[$nw][0] after multiple attempts. Waiting " .
+                                   " one hour before making another connection attempt. Close this window if you do not wish to retry.<br>",
+                                   1, 1, 0, 0);
+        $users{$userid}{"reconnect_count"}{$nw} = 0;
+        &addtimer(\&connect_irc_user, 60 * 60, $userid, $nw);
     }
     elsif ($users{$userid}{"reconnect_count"}{$nw} == 4)
     {
-	&queue_and_send_addline_nw($userid, $nw,
-		       " *** Lost connection to $evergreen_config::serverlist[$nw][0] server. Will try to" .
-		       " reconnect in 3 minutes.<br>", 1, 1, 0, 0);
+        &queue_and_send_addline_nw($userid, $nw,
+                                   " *** Lost connection to $evergreen_config::serverlist[$nw][0] server. Will try to" .
+                                   " reconnect in 3 minutes.<br>", 1, 1, 0, 0);
 
-	&addtimer(\&connect_irc_user, 60 * 3, $userid, $nw);
+        &addtimer(\&connect_irc_user, 60 * 3, $userid, $nw);
     }
     else
     {
-	&queue_and_send_addline_nw($userid, $nw,
-		       " *** Lost connection to $evergreen_config::serverlist[$nw][0] server. Will try to" .
-		       " reconnect in 30 seconds.<br>", 1, 1, 0, 0);
+        &queue_and_send_addline_nw($userid, $nw,
+                                   " *** Lost connection to $evergreen_config::serverlist[$nw][0] server. Will try to" .
+                                   " reconnect in 30 seconds.<br>", 1, 1, 0, 0);
 
-	&addtimer(\&connect_irc_user, 30, $userid, $nw);
+        &addtimer(\&connect_irc_user, 30, $userid, $nw);
     }
 }
 
@@ -511,47 +511,47 @@ sub handle_ident_input
 
     if (defined($query_local) && defined($query_remote))
     {
-	foreach my $user (keys %users)
-	{
-	    for(my $i = 0; $i < @evergreen_config::serverlist; $i++)
-	    {
-		my $sock = $users{$user}{"isocket"}[$i];
+        foreach my $user (keys %users)
+        {
+            for(my $i = 0; $i < @evergreen_config::serverlist; $i++)
+            {
+                my $sock = $users{$user}{"isocket"}[$i];
 
-		if (defined $sock)
-		{
-		    my $localsockaddr = getsockname($sock);
-		    my $remotsockaddr = getpeername($sock);
+                if (defined $sock)
+                {
+                    my $localsockaddr = getsockname($sock);
+                    my $remotsockaddr = getpeername($sock);
 
-		    if (defined($localsockaddr) && defined($remotsockaddr))
-		    {
-			my ($localport, $iaddr) = sockaddr_in($localsockaddr);
-			my ($remoteport, $riaddr) = sockaddr_in($remotsockaddr);
+                    if (defined($localsockaddr) && defined($remotsockaddr))
+                    {
+                        my ($localport, $iaddr) = sockaddr_in($localsockaddr);
+                        my ($remoteport, $riaddr) = sockaddr_in($remotsockaddr);
 
-			if ($localport == $query_local && $remoteport ==
-			    $query_remote)
-			{
-			    $resp = "$query_local, $query_remote : USERID : UNIX : "
-				. $users{$user}{"nick"} . "\r\n";
-			    $found = 1;
-			    last;
-			}
-		    }
-		}
-	    }
-	}
+                        if ($localport == $query_local && $remoteport ==
+                            $query_remote)
+                        {
+                            $resp = "$query_local, $query_remote : USERID : UNIX : "
+                                . $users{$user}{"nick"} . "\r\n";
+                            $found = 1;
+                            last;
+                        }
+                    }
+                }
+            }
+        }
 
-	if (!$found)
-	{
-	    $resp = "$query_local, $query_remote : ERROR : NO-USER\r\n";
-	}
+        if (!$found)
+        {
+            $resp = "$query_local, $query_remote : ERROR : NO-USER\r\n";
+        }
 
-	&schedule_write($sock, $resp);
-	dprint(1, 0, "IDENT: Resp: $resp");
+        &schedule_write($sock, $resp);
+        dprint(1, 0, "IDENT: Resp: $resp");
     }
     else
     {
-	dprint(1, 0, "IDENT: Received malformed request. Not replying");
-	&close_and_remove_socket($sock);
+        dprint(1, 0, "IDENT: Received malformed request. Not replying");
+        &close_and_remove_socket($sock);
     }
 }
 
@@ -568,7 +568,7 @@ sub start_listen_socket
 
     if ($proto eq 'tcp')
     {
-	listen($s, 1600) or die ("Can't listen");
+        listen($s, 1600) or die ("Can't listen");
     }
     nonblock($s);
 
@@ -585,7 +585,7 @@ sub schedule_write
     $socket_table{$file_desc}[3] .= $data;
 
     epoll_ctl($::epfd, EPOLL_CTL_MOD, fileno($socket), EPOLLIN | EPOLLOUT) >= 0 ||
-	dprint (2, $socket_table{$file_desc}[4], "epoll_ctl: $! fd: $file_desc");
+        dprint (2, $socket_table{$file_desc}[4], "epoll_ctl: $! fd: $file_desc");
 }
 
 sub print_usage
