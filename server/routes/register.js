@@ -19,8 +19,6 @@ var forms = require('forms'),
     widgets = forms.widgets,
     validators = forms.validators;
 
-var User = require('../models/User');
-
 var registrationForm = forms.create({
     name: fields.string({
         required: true,
@@ -111,13 +109,13 @@ module.exports = function(req, res) {
     registrationForm.handle(req, {
         success: function (form) {
             w.info('Registration form data is valid');
-            user = new User({
-                name: form.data.name,
-                email: form.data.email,
-                password: form.data.password,
-                nick: form.data.nick
-            });
-            user.save();
+            // user = new User({
+            //     name: form.data.name,
+            //     email: form.data.email,
+            //     password: form.data.password,
+            //     nick: form.data.nick
+            // });
+            // user.save();
             res.redirect('/registration-success.html');
         },
         error: function (form) {

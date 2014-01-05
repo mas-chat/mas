@@ -1,4 +1,4 @@
-//
+    //
 //   Copyright 2009-2013 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,8 @@ var express = require('express'),
 	http = require('http'),
 	path = require('path');
 
-var chat = require('./lib/chat'),
+var user = require('./middleware/User.js');
+    chat = require('./lib/chat'),
 	login = require('./lib/login');
 
 // Configure logging
@@ -47,29 +48,35 @@ app.engine('handlebars', exphbs({
 	}
 }));
 
+// Middlewares
 app.set('view engine', 'handlebars');
 
 app.use(express.favicon(path.join(__dirname, 'public/images/favicon.ico')));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
-app.use(app.router);
-app.use(require('less-middleware')({ src: __dirname + '/public' }));
+app.use(express.cookieParser());
+app.use('/ralph', user());
 
+app.use(app.router);
+
+app.use(require('less-middleware')({ src: __dirname + '/public' }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/main', express.static( path.join(__dirname, '/..')));
+
+app.use('/main', express.static( path.join(__dirname, '/../client')));
 app.use('/opt/qooxdoo', express.static('../qooxdoo-sdk'));
+app.use('/qooxdoo-sdk', express.static('../qooxdoo-sdk'));
 
 // Development only
 if (app.get('env') === 'development') {
     app.use(express.errorHandler());
 }
 
-// Rest API
+// Rest API routes
 app.get('/ralph/:sessionId/:sendSeq/:timezone', chat.handleLongPoll);
 app.post('/login', login.handleLogin);
 
-// Pages
+// Page routes
 app.get('/', routesIndex);
 app.get('/register.html', routesRegister);
 app.post('/register', routesRegister);
