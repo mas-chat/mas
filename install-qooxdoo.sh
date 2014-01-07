@@ -1,8 +1,12 @@
 #!/bin/bash
 
-mkdir tmp
-cd tmp
-wget http://downloads.sourceforge.net/qooxdoo/qooxdoo-3.0.1-sdk.zip
+set -e
 
-unzip qooxdoo-3.0.1-sdk.zip
-mv qooxdoo-3.0.1-sdk ../qooxdoo-sdk
+mkdir tmp-install-qooxdoo
+cd tmp-install-qooxdoo
+
+wget http://downloads.sourceforge.net/qooxdoo/qooxdoo-3.5-sdk.zip
+unzip qooxdoo-3.5-sdk.zip
+mv qooxdoo-3.5-sdk ../qooxdoo-sdk
+
+cd .. && rm -fr tmp-install-qooxdoo
