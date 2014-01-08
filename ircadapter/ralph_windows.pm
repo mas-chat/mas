@@ -78,5 +78,5 @@ sub add_names_to_channel_list
 
 sub get_chan_names
 {
-
+    return "";
 }

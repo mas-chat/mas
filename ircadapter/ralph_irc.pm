@@ -224,10 +224,13 @@ sub handle_privmsg
         }
         elsif ($channel_id == -1)
         {
-            # TODO: Servername is not set! Causes warning!
-            if ($users{$userid}{"servername"}[$nw] eq $nickname)
+            if ($users{$userid}{"connected"}[$nw] == 0)
             {
-                #Server is starting query (w3c server at least does this)
+                # Don't bother user. We are not connected yet.
+                return;
+            } elsif ($users{$userid}{"servername"}[$nw] eq $nickname)
+            {
+                # Server is starting query (w3c server at least does this)
                 $usertext = " *** <b>$nickname</b> $usertext <br>";
                 &queue_and_send_addline_nw($userid, $nw, $usertext, 1, 2, 0, 0);
             }

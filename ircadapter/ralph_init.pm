@@ -31,6 +31,7 @@ sub init_users
             my @windows = $::redis->smembers("windowlist:$id");
 
             $users{$id}{"disabled"} = 0;
+            $users{$id}{"anon"} = 0;
 
             # Make sure that we connect to Evergreen network
             foreach my $window (@windows)
