@@ -32,8 +32,6 @@ Message.prototype.send = function(res) {
         status: "OK",
         commands: this.cmds
     });
-
-
 }
 
 
