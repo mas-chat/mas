@@ -15,9 +15,10 @@
 //
 
 var mysqlDB = require('mysql'),
-    redisDB = require("redis"),
+    redisDB = require('redis'),
     uuid = require('node-uuid'),
-    nconf = require('nconf').file('../config.json');
+    nconf = require('nconf').file('../config.json'),
+    Q = require('q');
 
 var redis = redisDB.createClient();
 
@@ -28,14 +29,8 @@ var mysql = mysqlDB.createConnection({
     database: 'milhouse'
 });
 
-var operationsLeft = 0;
-
-function redisCall() {
-    operationsLeft++;
-}
-
-redis.on("error", function (err) {
-    console.log("Error: " + err);
+redis.on('error', function (err) {
+    console.log('Error: ' + err);
     process.exit(1);
 });
 
@@ -46,13 +41,6 @@ redis.flushdb(function() {
 
 // Users
 function importUsers() {
-    function redisCbUsers() {
-        if (--operationsLeft == 0) {
-            console.log('All users imported.');
-            importWindows();
-        }
-    }
-
     var userColumns = [
         'CAST(firstname AS CHAR(100) CHARSET UTF8) AS firstname',
         'CAST(lastname AS CHAR(100) CHARSET UTF8) AS lastname',
@@ -86,9 +74,10 @@ function importUsers() {
 
             console.log('Processing ' + rows.length + ' users.');
 
+            var opsLeft = 0;
+
             for (var i = 0; i < rows.length && i < 10; i++) {
                 var row = rows[i];
-                var name;
 
                 // Clean name
                 if (row.firstname && row.lastname) {
@@ -102,7 +91,7 @@ function importUsers() {
                 delete row.lastname;
 
                 // Take friends list out
-                var friends = row.friends.split(':').filter(function(v){ return v !== '' });
+                var friends = row.friends.split(':').filter(function(v) { return v !== ''; });
                 delete row.friends;
 
                 // Take settings out
@@ -116,95 +105,103 @@ function importUsers() {
                 // Initialize additional variables
                 row.nextwindowid = 0;
 
-                redisCall();
-                redis.hmset('user:' + row.userid, row, redisCbUsers);
+                opsLeft++;
 
-                redisCall();
-                redis.sadd('userlist', row.userid, redisCbUsers);
+                var promises = [
+                    Q.ninvoke(redis, 'hmset', 'user:' + row.userid, row),
+                    Q.ninvoke(redis, 'sadd', 'userlist', row.userid),
+                    Q.ninvoke(redis, 'hmset', 'settings:' + row.userid, settings)
+                ];
 
-                redisCall();
-                redis.hmset('settings:' + row.userid, settings, redisCbUsers);
+                if (friends.length > 0) {
+                    promises.push(Q.ninvoke(redis, 'sadd', 'friends:' + row.userid, friends));
+                }
 
-                redisCall();
-                redis.sadd('friends:' + row.userid, friends, redisCbUsers);
+                Q.all(promises).then(function() {
+                    if (--opsLeft === 0) {
+                        console.log('All users imported.');
+                        importWindows();
+                    }
+                }, reportErrorAndExit);
             }
         });
 }
 
 function importWindows() {
-    function redisCbWindows() {
-        if (--operationsLeft == 0) {
-            console.log('All windows imported.');
-            process.exit(0);
+    mysql.query('SELECT * FROM channels', function(err, rows) {
+        if (err) {
+            console.error('MySQL error while fetching channels table.');
+            process.exit(1);
         }
-    }
 
-    function addWindowEntry(userid, network, name, row) {
-        // Get the next window id.
-        redis.hincrby('user:' + userid, 'nextwindowid', 1,
-            function(error, res) {
-                // Save rest
+        var opsLeft = 0;
+
+        function redisCbWindows() {
+            if (--opsLeft === 0) {
+                console.log('All windows imported.');
+                process.exit(0);
+            }
+        }
+
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+
+            // Take friends list out
+            var notes = row.notes.split('<>').filter(function(v) { return v !== ''; });
+
+            // Take urls out
+            var urls = row.urls.split('<>').filter(function(v) { return v !== ''; });
+
+            var userid = row.userid;
+            var network = row.network;
+            var name = row.name;
+
+            delete row.urls;
+            delete row.notes;
+            delete row.userid;
+            delete row.network;
+            delete row.id;
+
+            // Save notes
+            for (var ii = 0; ii < notes.length; ii++) {
+                var note = {};
+                var noteUuid = uuid.v4();
+                note.ver = 0;
+                note.msg = notes[ii];
+
+                opsLeft++;
+                Q.all([
+                    Q.ninvoke(redis, 'hmset', 'note:' + noteUuid, note),
+                    Q.ninvoke(redis, 'sadd', 'notelist:' + userid + ':' + network + ':' +
+                        name, noteUuid),
+                ]).then(redisCbWindows, reportErrorAndExit);
+            }
+
+            // Save urls
+            for (ii = 0; ii < urls.length; ii++) {
+                opsLeft++;
+                Q.ninvoke(redis, 'sadd', 'urls:' + userid + ':' +
+                    network + ':' + name, urls[ii]).then(redisCbWindows, reportErrorAndExit);
+            }
+
+            // Get the next window id.
+            opsLeft++;
+            Q.ninvoke(redis, 'hincrby', 'user:' + userid, 'nextwindowid', 1).then(function(res) {
                 var windowid = res - 1;
 
-                redisCall();
-                redis.hmset('window:' + userid + ':' + windowid, row, redisCbWindows);
-
-                redisCall();
-                redis.sadd('windowlist:' + userid, windowid + ':' + network + ':' + name, redisCbWindows);
+                Q.all([
+                    Q.ninvoke(redis, 'hmset', 'window:' + userid + ':' + windowid, row),
+                    Q.ninvoke(redis, 'sadd', 'windowlist:' + userid, windowid + ':' + network +
+                        ':' + name)
+                ]).then(redisCbWindows, reportErrorAndExit);
             });
-    }
+        }
+    });
+}
 
-    mysql.query('SELECT * FROM channels',
-        function(err, rows) {
-            if (err) {
-                console.error('MySQL error while fetching channels table.');
-                process.exit(1);
-            }
-
-            for (var i = 0; i < rows.length; i++) {
-                var row = rows[i];
-
-                // Take friends list out
-                var notes = row.notes.split('<>').filter(function(v){ return v !== '' });
-
-                // Take urls out
-                var urls = row.urls.split('<>').filter(function(v){ return v !== '' });
-
-                var userid = row.userid;
-                var network = row.network;
-                var name = row.name;
-
-                delete row.urls;
-                delete row.notes;
-                delete row.userid;
-                delete row.network;
-                delete row.id;
-
-                // Save notes
-                for (var ii = 0; ii < notes.length; ii++) {
-                    var note = {}
-                    var noteUuid = uuid.v4();
-                    note.ver = 0;
-                    note.msg = notes[ii];
-
-                    redisCall();
-                    redis.hmset('note:' + noteUuid, note, redisCbWindows);
-
-                    redisCall();
-                    redis.sadd('notelist:' + userid + ':' +
-                        network + ':' + name, noteUuid, redisCbWindows);
-                }
-
-                // Save urls
-                for (var ii = 0; ii < urls.length; ii++) {
-                    redisCall();
-                    redis.sadd('urls:' + userid + ':' +
-                        network + ':' + name, urls[ii], redisCbWindows);
-                }
-
-                addWindowEntry(userid, network, name, row);
-            }
-        });
+function reportErrorAndExit(err) {
+    console.log('Import failed. ERROR: ' + err);
+    process.exit(1);
 }
 
 //
