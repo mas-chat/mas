@@ -249,6 +249,15 @@ function importWindows() {
 //   titlealert (int)
 //   hidden (int)
 //
+// [TBD] windowmsgs:<userid>:<id> (list)
+//
+// [TBD] names:<userid>:<id> (set)
+//   nick1, @nick2
+//
+// [TBD] inbox:<userid> (list)
+//   msg:<windowid>
+//   names:<windowid>
+//
 // notelist:<userid>:<nwid>:<channel_name> (set)
 //   note1, note2 ...
 //
