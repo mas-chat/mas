@@ -112,8 +112,13 @@ function *importUsers() {
         // Initialize additional variables
         row.nextwindowid = 0;
 
+        var index = {};
+        index[row.nick] = row.userid,
+        index[row.email] = row.userid
+
         var promises = [
             Q.nsend(r, 'hmset', 'user:' + row.userid, row),
+            Q.nsend(r, 'hmset', 'index:user', index),
             Q.nsend(r, 'sadd', 'userlist', row.userid),
             Q.nsend(r, 'hmset', 'settings:' + row.userid, settings)
         ];
@@ -194,6 +199,10 @@ function *importWindows() {
 //   openidurl (string)
 //   registrationtime (int, unix time)
 //   nextwindowid (int)
+//
+//       index:user (hash)
+//         <email> (string)
+//         <nick> (string)
 //
 // users (set)
 //   userid1, userid2 ...

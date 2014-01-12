@@ -114,8 +114,7 @@ function decodeForm(req) {
 }
 
 module.exports = {
-
-    // GET /users
+    // GET /register
     index: function *(next) {
         var form = yield decodeForm(this.req);
 
@@ -126,7 +125,7 @@ module.exports = {
         });
     },
 
-    // POST /users
+    // POST /register
     create: function *(next) {
         var form = yield decodeForm(this.req);
 
