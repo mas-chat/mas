@@ -20,7 +20,9 @@
     "koa-router": "~2.2.0",
     "koa-error": "~1.1.1",
     "koa-static": "~1.4.2",
-    "koa-less": "0.0.1"
+    "koa-less": "0.0.1",
+    "koa-logger": "~1.1.0",
+    "co-body": "0.0.1"
   },
   "devDependencies": {},
   "scripts": {

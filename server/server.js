@@ -22,13 +22,13 @@ var koa = require('koa'),
     less = require('koa-less'),
     serve = require('koa-static'),
     error = require('koa-error'),
-	routesIndex = require('./routes'),
+    logger = require('koa-logger'),
+    routesIndex = require('./routes'),
     routesPages = require('./routes/pages'),
     path = require('path');
 
 var user = require('./middleware/User.js');
     chat = require('./lib/chat'),
-	login = require('./lib/login');
 
 // Configure logging
 w.add(w.transports.File, { filename: 'mas.log' });
@@ -41,6 +41,7 @@ w.info('Server starting.');
 // Development only
 if (app.env === 'development') {
     app.use(error());
+    app.use(logger());
 }
 
 app.use(hbs.middleware({
@@ -55,28 +56,23 @@ hbs.registerHelper('getPageJSFile', function() {
 app.use(router(app));
 
 //app.use(express.favicon(path.join(__dirname, 'public/images/favicon.ico')));
-//app.use(express.logger('dev'));
-//app.use(express.bodyParser());
-//app.use(express.methodOverride());
-//app.use(express.cookieParser());
-//app.use('/ralph', user());
 
+// REST API routes
+//app.use('/ralph', user());
+//app.get('/ralph/:sessionId/:sendSeq/:timezone', chat.handleLongPoll);
+
+// Routes handled by controllers
+app.resource('login', require('./controllers/login'));
+app.resource('register', require('./controllers/register'));
+
+// Public routes
 app.use(less(path.join(__dirname, 'public')));
 app.use(serve(path.join(__dirname, 'public')));
 
+// Qooxdoo routes
 //app.use('/main', express.static(path.join(__dirname, '/../client')));
-//app.use('/opt/qooxdoo', express.static('../qooxdoo-sdk'));
-//app.use('/qooxdoo-sdk', express.static('../qooxdoo-sdk'));
-
-// Rest API routes
-//app.get('/ralph/:sessionId/:sendSeq/:timezone', chat.handleLongPoll);
-//app.post('/login', login.handleLogin);
-
-app.resource('register', require('./controllers/register'));
-
-// TBD: Use resource
-//app.get('/register.html', routesRegister);
-//app.post('/register', routesRegister);
+//app.use('/opt/qooxdoo', express.static('../vendor/qooxdoo-sdk'));
+//app.use('/qooxdoo-sdk', express.static('../vendor/qooxdoo-sdk'));
 
 // Page routes
 app.get('/', routesIndex);
