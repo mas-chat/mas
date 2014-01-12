@@ -17,7 +17,8 @@
 var forms = require('forms'),
     fields = forms.fields,
     widgets = forms.widgets,
-    validators = forms.validators;
+    validators = forms.validators,
+    Q = require('q');
 
 var registrationForm = forms.create({
     name: fields.string({
@@ -92,22 +93,44 @@ var registrationForm = forms.create({
     })
 });
 
-function renderPage(res, form) {
-    res.render('register', {
-        page: 'register',
-        title: 'MeetAndSpeak',
-        helpers: {
-            registrationForm: function() {
-                w.info('calling toHTML');
-               return form.toHTML();
-            }
-        }
-    });
-}
+function decodeForm(req) {
+    var deferred = Q.defer();
 
-module.exports = function(req, res) {
     registrationForm.handle(req, {
         success: function (form) {
+            deferred.resolve(form);
+        },
+        error: function (form) {
+            w.info('Registration form data is invalid');
+            deferred.resolve(form);
+        },
+        empty: function (form) {
+            w.info('There is no form');
+            deferred.resolve(form);
+        }
+    });
+
+    return deferred.promise;
+}
+
+module.exports = {
+
+    // GET /users
+    index: function *(next) {
+        var form = yield decodeForm(this.req);
+
+        yield this.render('register', {
+            page: 'register',
+            title: 'Register',
+            registrationForm: form.toHTML()
+        });
+    },
+
+    // POST /users
+    create: function *(next) {
+        var form = yield decodeForm(this.req);
+
+        if (form.isValid()) {
             w.info('Registration form data is valid');
             // user = new User({
             //     name: form.data.name,
@@ -116,16 +139,13 @@ module.exports = function(req, res) {
             //     nick: form.data.nick
             // });
             // user.save();
-            res.redirect('/registration-success.html');
-        },
-        error: function (form) {
-            w.info('Registration form data is invalid');
-            renderPage(res, form);
-        },
-        empty: function (form) {
-            w.info('There is no form');
-            renderPage(res, form);
+            this.response.redirect('/registration-success.html');
+        } else {
+            yield this.render('register', {
+                page: 'register',
+                title: 'MeetAndSpeak',
+                registrationForm: form.toHTML()
+            });
         }
-    });
-};
-
+    }
+}

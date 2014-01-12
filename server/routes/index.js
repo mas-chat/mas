@@ -14,10 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-module.exports = function(req, res) {
-    res.render('index', {
+module.exports = function *(next) {
+    yield this.render('index', {
         page: 'frontpage',
-        title: 'MeetAndSpeak' });
+        title: 'MeetAndSpeak'
+    });
 };
-
 
