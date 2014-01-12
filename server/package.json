@@ -5,18 +5,22 @@
   "description": "MeetAndSpeak Server",
   "main": "server.js",
   "dependencies": {
-    "express": "3.3.5",
     "less-middleware": "*",
     "redis": "~0.8.4",
     "mysql": "~2.0.0-alpha8",
-    "express3-handlebars": "~0.5.0",
     "forms": "~0.3.0",
     "winston": "~0.7.2",
     "nconf": "~0.6.8",
     "chai": "~1.8.1",
     "node-uuid": "~1.4.1",
     "q": "~1.0.0",
-    "co": "~3.0.2"
+    "co": "~3.0.2",
+    "koa": "~0.2.1",
+    "koa-hbs": "~0.4.1",
+    "koa-router": "~2.2.0",
+    "koa-error": "~1.1.1",
+    "koa-static": "~1.4.2",
+    "koa-less": "0.0.1"
   },
   "devDependencies": {},
   "scripts": {

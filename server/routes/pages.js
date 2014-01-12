@@ -14,11 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-module.exports = function(req, res) {
-    var page = req.url.replace(/\/(.*)\.html/, '$1');
+module.exports = function *(next) {
+    var page = this.request.url.replace(/\/(.*)\.html/, '$1');
 
-    res.render(page, {
+    yield this.render(page, {
         page: page,
-        title: 'MeetAndSpeak'
-    });
+        title: 'MeetAndSpeak' });
 };
