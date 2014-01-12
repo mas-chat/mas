@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 //
 //   Copyright 2013 Ilkka Oksanen <iao@iki.fi>
 //
@@ -14,33 +15,41 @@
 //   governing permissions and limitations under the License.
 //
 
-var mysqlDB = require('mysql'),
-    redisDB = require('redis'),
+'use strict';
+
+var r = require('redis').createClient(),
     uuid = require('node-uuid'),
     nconf = require('nconf').file('../config.json'),
-    Q = require('q');
+    Q = require('q'),
+    co = require('co');
 
-var redis = redisDB.createClient();
-
-var mysql = mysqlDB.createConnection({
+var mysql = require('mysql').createConnection({
     host: 'localhost',
     user: nconf.get('dbUsername'),
     password: nconf.get('dbPassword'),
     database: 'milhouse'
 });
 
-redis.on('error', function (err) {
+r.on('error', function (err) {
     console.log('Error: ' + err);
     process.exit(1);
 });
 
-redis.flushdb(function() {
-    console.log('Flush done.');
-    importUsers();
-});
+co(function *() {
+    yield importUsers;
+    console.log('All users imported.');
 
-// Users
-function importUsers() {
+    yield importWindows;
+    console.log('All windows imported.');
+
+    process.exit(0);
+})();
+
+function notEmpty(v) {
+   return v !== '';
+}
+
+function *importUsers() {
     var userColumns = [
         'CAST(firstname AS CHAR(100) CHARSET UTF8) AS firstname',
         'CAST(lastname AS CHAR(100) CHARSET UTF8) AS lastname',
@@ -65,143 +74,107 @@ function importUsers() {
         'UNIX_TIMESTAMP(registrationtime) AS registrationtime'
     ];
 
-    mysql.query('SELECT ' + userColumns.join() +' FROM users',
-        function(err, rows) {
-            if (err) {
-                console.error('MySQL error while fetching user table.');
-                process.exit(1);
-            }
+    // Delete existing data from Redis database
+    yield Q.nsend(r, 'flushdb');
+    console.log('Flush done.');
 
-            console.log('Processing ' + rows.length + ' users.');
+    var ret = yield Q.nsend(mysql, 'query', 'SELECT ' + userColumns.join() + ' FROM users');
+    var rows = ret[0];
 
-            var opsLeft = 0;
+    console.log('Processing ' + rows.length + ' users.');
 
-            for (var i = 0; i < rows.length && i < 10; i++) {
-                var row = rows[i];
+    for (var i = 0; i < rows.length && i < 10; i++) {
+        var row = rows[i];
 
-                // Clean name
-                if (row.firstname && row.lastname) {
-                    row.name = row.firstname + ' ' + row.lastname;
-                } else if (row.firstname) {
-                    row.name = row.firstname;
-                } else {
-                    row.name = row.lastname;
-                }
-                delete row.firstname;
-                delete row.lastname;
+        // Clean name
+        if (row.firstname && row.lastname) {
+            row.name = row.firstname + ' ' + row.lastname;
+        } else if (row.firstname) {
+            row.name = row.firstname;
+        } else {
+            row.name = row.lastname;
+        }
+        delete row.firstname;
+        delete row.lastname;
 
-                // Take friends list out
-                var friends = row.friends.split(':').filter(function(v) { return v !== ''; });
-                delete row.friends;
+        // Take friends list out
+        var friends = row.friends.split(':').filter(notEmpty);
+        delete row.friends;
 
-                // Take settings out
-                var settingsArray = row.settings.split('||');
-                var settings = {};
-                for (var ii = 0; ii < settingsArray.length; ii += 2 ) {
-                    settings[settingsArray[ii]] = settingsArray[ii + 1];
-                }
-                delete row.settings;
+        // Take settings out
+        var settingsArray = row.settings.split('||');
+        var settings = {};
+        for (var ii = 0; ii < settingsArray.length; ii += 2 ) {
+            settings[settingsArray[ii]] = settingsArray[ii + 1];
+        }
+        delete row.settings;
 
-                // Initialize additional variables
-                row.nextwindowid = 0;
+        // Initialize additional variables
+        row.nextwindowid = 0;
 
-                opsLeft++;
+        var promises = [
+            Q.nsend(r, 'hmset', 'user:' + row.userid, row),
+            Q.nsend(r, 'sadd', 'userlist', row.userid),
+            Q.nsend(r, 'hmset', 'settings:' + row.userid, settings)
+        ];
 
-                var promises = [
-                    Q.ninvoke(redis, 'hmset', 'user:' + row.userid, row),
-                    Q.ninvoke(redis, 'sadd', 'userlist', row.userid),
-                    Q.ninvoke(redis, 'hmset', 'settings:' + row.userid, settings)
-                ];
+        if (friends.length > 0) {
+            promises.push(Q.nsend(r, 'sadd', 'friends:' + row.userid, friends));
+        }
 
-                if (friends.length > 0) {
-                    promises.push(Q.ninvoke(redis, 'sadd', 'friends:' + row.userid, friends));
-                }
-
-                Q.all(promises).then(function() {
-                    if (--opsLeft === 0) {
-                        console.log('All users imported.');
-                        importWindows();
-                    }
-                }, reportErrorAndExit);
-            }
-        });
+        yield promises;
+    }
 }
 
-function importWindows() {
-    mysql.query('SELECT * FROM channels', function(err, rows) {
-        if (err) {
-            console.error('MySQL error while fetching channels table.');
-            process.exit(1);
+// Windows
+function *importWindows() {
+    var ret = yield Q.nsend(mysql, 'query', 'SELECT * FROM channels');
+    var rows = ret[0];
+
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+
+        // Take friends list out
+        var notes = row.notes.split('<>').filter(notEmpty);
+
+        // Take urls out
+        var urls = row.urls.split('<>').filter(notEmpty);
+
+        var userid = row.userid;
+        var network = row.network;
+        var name = row.name;
+
+        delete row.urls;
+        delete row.notes;
+        delete row.userid;
+        delete row.network;
+        delete row.id;
+
+        // Save notes
+        for (var ii = 0; ii < notes.length; ii++) {
+            var note = {};
+            var noteUuid = uuid.v4();
+            note.ver = 0;
+            note.msg = notes[ii];
+
+            yield Q.nsend(r, 'hmset', 'note:' + noteUuid, note);
+            yield Q.nsend(r, 'sadd', 'notelist:' + userid + ':' + network + ':' +
+                name, noteUuid);
         }
 
-        var opsLeft = 0;
-
-        function redisCbWindows() {
-            if (--opsLeft === 0) {
-                console.log('All windows imported.');
-                process.exit(0);
-            }
+        // Save urls
+        for (ii = 0; ii < urls.length; ii++) {
+            yield Q.nsend(r, 'sadd', 'urls:' + userid + ':' +
+                network + ':' + name, urls[ii]);
         }
 
-        for (var i = 0; i < rows.length; i++) {
-            var row = rows[i];
+        // Get the next window id.
+        var windowid = yield Q.nsend(r, 'hincrby', 'user:' + userid, 'nextwindowid', 1);
+        windowid--;
 
-            // Take friends list out
-            var notes = row.notes.split('<>').filter(function(v) { return v !== ''; });
-
-            // Take urls out
-            var urls = row.urls.split('<>').filter(function(v) { return v !== ''; });
-
-            var userid = row.userid;
-            var network = row.network;
-            var name = row.name;
-
-            delete row.urls;
-            delete row.notes;
-            delete row.userid;
-            delete row.network;
-            delete row.id;
-
-            // Save notes
-            for (var ii = 0; ii < notes.length; ii++) {
-                var note = {};
-                var noteUuid = uuid.v4();
-                note.ver = 0;
-                note.msg = notes[ii];
-
-                opsLeft++;
-                Q.all([
-                    Q.ninvoke(redis, 'hmset', 'note:' + noteUuid, note),
-                    Q.ninvoke(redis, 'sadd', 'notelist:' + userid + ':' + network + ':' +
-                        name, noteUuid),
-                ]).then(redisCbWindows, reportErrorAndExit);
-            }
-
-            // Save urls
-            for (ii = 0; ii < urls.length; ii++) {
-                opsLeft++;
-                Q.ninvoke(redis, 'sadd', 'urls:' + userid + ':' +
-                    network + ':' + name, urls[ii]).then(redisCbWindows, reportErrorAndExit);
-            }
-
-            // Get the next window id.
-            opsLeft++;
-            Q.ninvoke(redis, 'hincrby', 'user:' + userid, 'nextwindowid', 1).then(function(res) {
-                var windowid = res - 1;
-
-                Q.all([
-                    Q.ninvoke(redis, 'hmset', 'window:' + userid + ':' + windowid, row),
-                    Q.ninvoke(redis, 'sadd', 'windowlist:' + userid, windowid + ':' + network +
-                        ':' + name)
-                ]).then(redisCbWindows, reportErrorAndExit);
-            });
-        }
-    });
-}
-
-function reportErrorAndExit(err) {
-    console.log('Import failed. ERROR: ' + err);
-    process.exit(1);
+        yield Q.nsend(r, 'hmset', 'window:' + userid + ':' + windowid, row);
+        yield Q.nsend(r, 'sadd', 'windowlist:' + userid, windowid + ':' + network + ':' + name);
+    }
 }
 
 //
