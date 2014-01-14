@@ -58,7 +58,7 @@ hbs.registerHelper('getPageJSFile', function() {
 app.use(router(app));
 
 // REST API route
-app.get('/listen/:sessionId/:sendSeq/:timezone', listenController);
+app.get('/listen/:sessionId/:listenSeq/:timezone', listenController);
 app.post('/session/:sessionId/:sendSeq/:timezone', msgController);
 
 // Routes handled by controllers
