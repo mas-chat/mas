@@ -29,13 +29,13 @@ qx.Class.define('mas.XHR', {
         this._cbCtx = ctx;
 
         // Long polling XMLHttpRequest that listens for incoming messages
-        this._pollMsgXhr = new qx.io.request.Xhr('/ralph');
+        this._pollMsgXhr = new qx.io.request.Xhr();
         this._pollMsgXhr.setTimeout(35000);
         this._pollMsgXhr.addListener('success', this._pollMsgsSuccess, this);
         this._pollMsgXhr.addListener('fail', this._pollMsgFailure, this);
 
         // Second XMLHttpRequest for sending messages
-        this._sendMsgXhr = new qx.io.request.Xhr('/ralph');
+        this._sendMsgXhr = new qx.io.request.Xhr();
         this._sendMsgXhr.setTimeout(15000);
         this._sendMsgXhr.setMethod('POST');
         this._sendMsgXhr.setRequestHeader('content-type', 'application/json');
@@ -81,7 +81,7 @@ qx.Class.define('mas.XHR', {
 
         _sendMsg: function(message) {
             this._sendMsgXhr.setUrl(
-                '/ralph/' + this._sessionId + '/' + this._sendSeq);
+                '/session/' + this._sessionId + '/' + this._sendSeq);
             this._sendMsgXhr.setRequestData(JSON.stringify(message));
             this._sendMsgXhr.send();
 
@@ -142,7 +142,7 @@ qx.Class.define('mas.XHR', {
             }
 
             this._pollMsgXhr.setUrl(
-                '/ralph/' + this._sessionId + '/' + this._pollSeq + tz);
+                '/listen/' + this._sessionId + '/' + this._pollSeq + tz);
             this._pollMsgXhr.send();
 
             debug.print('--> Polling request sent (seq ' + this._pollSeq + ')');

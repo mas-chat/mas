@@ -22,7 +22,8 @@
     "koa-static": "~1.4.2",
     "koa-less": "0.0.1",
     "koa-logger": "~1.1.0",
-    "co-body": "0.0.1"
+    "co-body": "0.0.1",
+    "koa-mount": "~1.2.3"
   },
   "devDependencies": {},
   "scripts": {
