@@ -14,12 +14,31 @@
 //   governing permissions and limitations under the License.
 //
 
-exports.authenticateUser = function(cookie) {
-    if (cookie) {
-        var data = cookie.split('-');
-        var id = data[0];
-        // TBD: Authenticate user.
+var r = require('redis').createClient(),
+    Q = require('q');
+
+exports.authenticateUser = function *(cookie) {
+    var unixTime = Math.round(new Date().getTime() / 1000);
+    var userId;
+    var cookie;
+
+    if (!cookie) {
         return null;
+    }
+
+    var data = cookie.split('-');
+    userId = data[0];
+    cookie = data[1];
+
+    if (!(data && userId)) {
+        return null;
+    }
+
+    // Authenticate user.
+    var expected = yield Q.nsend(r, 'hmget', 'user:' + userId, 'cookie_expires', 'cookie');
+
+    if (expected[0] > unixTime && expected[1] === cookie) {
+        return userId;
     } else {
         return null;
     }
