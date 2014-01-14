@@ -1,5 +1,5 @@
 //
-//   Copyright 2013 Ilkka Oksanen <iao@iki.fi>
+//   Copyright 2009-2013 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -14,22 +14,13 @@
 //   governing permissions and limitations under the License.
 //
 
-// User object hides the storage details of attributes. Information
-// that can't be lost is stored in MySQL. Everything else is kept
-// in Redis for performance reasons.
-
-module.exports = function() {
-    return function(req, res, next) {
-        var dataString = req.cookies.ProjectEvergreen;
-        req.user = undefined;
-
-        if (dataString) {
-            var data = dataString.split('-');
-            var id = data[0];
-
-            fetchUserData(id, req, next);
-        } else {
-            next();
-        }
+exports.authenticateUser = function(cookie) {
+    if (cookie) {
+        var data = cookie.split('-');
+        var id = data[0];
+        // TBD: Authenticate user.
+        return null;
+    } else {
+        return null;
     }
-};
+}

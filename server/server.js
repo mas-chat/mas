@@ -23,12 +23,14 @@ var koa = require('koa'),
     serve = require('koa-static'),
     error = require('koa-error'),
     logger = require('koa-logger'),
+    mount = require('koa-mount'),
     routesIndex = require('./routes'),
     routesPages = require('./routes/pages'),
+    listenController = require('./controllers/listen'),
+    msgController = require('./controllers/message'),
     path = require('path');
 
-var user = require('./middleware/User.js');
-    chat = require('./lib/chat'),
+var chat = require('./lib/chat');
 
 // Configure logging
 w.add(w.transports.File, { filename: 'mas.log' });
@@ -55,11 +57,9 @@ hbs.registerHelper('getPageJSFile', function() {
 
 app.use(router(app));
 
-//app.use(express.favicon(path.join(__dirname, 'public/images/favicon.ico')));
-
-// REST API routes
-//app.use('/ralph', user());
-//app.get('/ralph/:sessionId/:sendSeq/:timezone', chat.handleLongPoll);
+// REST API route
+app.get('/listen/:sessionId/:sendSeq/:timezone', listenController);
+app.post('/session/:sessionId/:sendSeq/:timezone', msgController);
 
 // Routes handled by controllers
 app.resource('login', require('./controllers/login'));
@@ -70,9 +70,10 @@ app.use(less(path.join(__dirname, 'public')));
 app.use(serve(path.join(__dirname, 'public')));
 
 // Qooxdoo routes
-//app.use('/main', express.static(path.join(__dirname, '/../client')));
+app.use(mount('/main', serve(path.join(__dirname, '/../client'))));
 //app.use('/opt/qooxdoo', express.static('../vendor/qooxdoo-sdk'));
-//app.use('/qooxdoo-sdk', express.static('../vendor/qooxdoo-sdk'));
+app.use(mount('/qooxdoo-sdk', serve(path.join(__dirname,
+    '../vendor/qooxdoo-sdk'))));
 
 // Page routes
 app.get('/', routesIndex);
