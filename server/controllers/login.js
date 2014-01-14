@@ -51,7 +51,7 @@ module.exports = {
                     cookie_expires: unixTime + (60 * 60 * 24 * 14)
                 };
 
-                // Save cookie to Redis
+                // Save secret to Redis
                 yield Q.nsend(r, 'hmset', 'user:' + userId, update);
             }
 

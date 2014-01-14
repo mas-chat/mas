@@ -17,12 +17,17 @@
 var auth = require('../lib/authentication');
 
 module.exports = function *(next) {
-    console.log('here');
-
-    var userId = auth.authenticateUser(this.cookies.get('ProjectEvergreen'));
+    var userId = yield auth.authenticateUser(this.cookies.get('ProjectEvergreen'));
 
     if (!userId) {
         this.status = 'unauthorized';
         return;
     }
+
+    if (this.params.listenSeq === '0') {
+        // New session
+
+    }
+
+    this.status = 304;
 };
