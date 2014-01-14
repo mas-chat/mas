@@ -131,6 +131,7 @@ module.exports = {
 
         if (form.isValid()) {
             w.info('Registration form data is valid');
+            // TBD: Save to redis.
             // user = new User({
             //     name: form.data.name,
             //     email: form.data.email,

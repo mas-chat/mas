@@ -14,27 +14,15 @@
 //   governing permissions and limitations under the License.
 //
 
-//var Message = require('./message.js');
+var auth = require('../lib/authentication');
 
-function initializeSession(res) {
-    var msg = new Message();
-    msg.addCommand("SET");
-    msg.addCommand("INITDONE");
-    msg.send(res);
-}
-
-exports.handleLongPoll = function(req, res) {
-    var sessionId = req.param('sessionId');
-    var sendSeq = req.param('sendSeq');
-    var timezone = req.param('timezone');
-
+module.exports = function *(next) {
     console.log('here');
 
-    if (1) { // sendSeq === 0) {
-        initializeSession(res);
+    var userId = auth.authenticateUser(this.cookies.get('ProjectEvergreen'));
+
+    if (!userId) {
+        this.status = 'unauthorized';
+        return;
     }
-
-    console.log('USER', req.user);
-
-    res.json({ user: timezone });
 };
