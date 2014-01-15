@@ -17,29 +17,74 @@
 var r = require('redis').createClient(),
     Q = require('q');
 
-exports.authenticateUser = function *(cookie) {
-    var unixTime = Math.round(new Date().getTime() / 1000);
-    var userId;
-    var cookie;
-
+exports.authenticateUser = function *(cookie, sessionId) {
     if (!cookie) {
+        this.status = 'unauthorized';
         return null;
     }
 
     var data = cookie.split('-');
-    userId = data[0];
-    cookie = data[1];
 
-    if (!(data && userId)) {
+    if (!data) {
+        return {
+            status: 'unauthorized',
+            userId: null
+        }
+    }
+
+    var userId = data[0];
+    var cookie = data[1];
+    var validUser = yield validateUser(userId, cookie)
+
+    if (!validUser) {
+        return {
+            status: 'unauthorized',
+            userId: null
+        }
+    }
+
+    var validSession = yield validateSession(userId, sessionId);
+    if (validSession) {
+        return {
+            userId: userId
+        }
+    } else {
+        console.log('notvalid session');
+        console.log(this);
+        return {
+            status: 'not acceptable',
+            userId: null
+        }
+    }
+}
+
+function *validateUser(userId, cookie) {
+    var unixTime = Math.round(new Date().getTime() / 1000);
+
+    if (!userId) {
         return null;
     }
 
     // Authenticate user.
     var expected = yield Q.nsend(r, 'hmget', 'user:' + userId, 'cookie_expires', 'cookie');
 
-    if (expected[0] > unixTime && expected[1] === cookie) {
-        return userId;
+    if (expected && expected[0] > unixTime && expected[1] === cookie) {
+        return true;
     } else {
-        return null;
+        return false;
+    }
+}
+
+function *validateSession(userId, sessionId) {
+    if (sessionId !== 0) {
+        var expectedSessionId = yield Q.nsend(r, 'hget',  'user:' + userId, 'sessionId');
+
+        if (sessionId === expectedSessionId) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return true;
     }
 }

@@ -21,7 +21,8 @@ var r = require('redis').createClient(),
     uuid = require('node-uuid'),
     nconf = require('nconf').file('../config.json'),
     Q = require('q'),
-    co = require('co');
+    co = require('co'),
+    User = require('../models/user.js');
 
 var mysql = require('mysql').createConnection({
     host: 'localhost',
@@ -109,25 +110,8 @@ function *importUsers() {
         }
         delete row.settings;
 
-        // Initialize additional variables
-        row.nextwindowid = 0;
-
-        var index = {};
-        index[row.nick] = row.userid,
-        index[row.email] = row.userid
-
-        var promises = [
-            Q.nsend(r, 'hmset', 'user:' + row.userid, row),
-            Q.nsend(r, 'hmset', 'index:user', index),
-            Q.nsend(r, 'sadd', 'userlist', row.userid),
-            Q.nsend(r, 'hmset', 'settings:' + row.userid, settings)
-        ];
-
-        if (friends.length > 0) {
-            promises.push(Q.nsend(r, 'sadd', 'friends:' + row.userid, friends));
-        }
-
-        yield promises;
+        var user = new User(row, settings, friends);
+        yield user.save();
     }
 }
 

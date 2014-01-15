@@ -17,16 +17,45 @@
 var auth = require('../lib/authentication');
 
 module.exports = function *(next) {
-    var userId = yield auth.authenticateUser(this.cookies.get('ProjectEvergreen'));
+    var verdict = yield auth.authenticateUser(this.cookies.get('ProjectEvergreen'));
 
-    if (!userId) {
-        this.status = 'unauthorized';
+    if (!verdict.userId) {
+        this.status = verdict.status;
         return;
     }
 
-    if (this.params.listenSeq === '0') {
-        // New session
+    var expectedListenSeq = yield Q.nsend(r, 'hget', 'user:' + userId, "listenSeq");
+    var rcvdListenSeq = this.params.listenSeq;
 
+    if (rcvdListenSeq !== 0 && rcvdListenSeq === expectedListenSeq - 1) {
+        // TBD: Re-send the previous reply
+        return;
+    } else if (rcvdListenSeq !== 0 && rcvdListenSeq !== expectedListenSeq) {
+        // No way to recover
+        this.status = 'not acceptable';
+        return;
+    }
+
+    // Request is considered valid
+    yield Q.nsend(r, 'hincrby', 'user:' + userId, 'listenSeq', 1);
+
+    yield processRequest(rcvdListenSeq);
+}
+
+function *processRequest(rcvdListenSeq) {
+    if (rcvdListenSeq === '0') {
+        // New session, reset session variables
+        var update = {
+            "sendRcvNext": 1,
+            "listenRcvNext": 1
+            "sessionId": Math.floor((Math.random() * 10000000) + 1);
+        };
+
+        yield Q.nsend(r, 'hmset', 'user:' + userId, update);
+
+        queueMsg('A', null)
+
+        flushQueue();
     }
 
     this.status = 304;
