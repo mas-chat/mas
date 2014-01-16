@@ -81,7 +81,7 @@ qx.Class.define('mas.XHR', {
 
         _sendMsg: function(message) {
             this._sendMsgXhr.setUrl(
-                '/session/' + this._sessionId + '/' + this._sendSeq);
+                '/send/' + this._sessionId + '/' + this._sendSeq);
             this._sendMsgXhr.setRequestData(JSON.stringify(message));
             this._sendMsgXhr.send();
 

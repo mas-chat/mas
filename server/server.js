@@ -30,8 +30,6 @@ var koa = require('koa'),
     msgController = require('./controllers/message'),
     path = require('path');
 
-var chat = require('./lib/chat');
-
 // Configure logging
 w.add(w.transports.File, { filename: 'mas.log' });
 //w.remove(w.transports.Console);
@@ -59,7 +57,7 @@ app.use(router(app));
 
 // REST API route
 app.get('/listen/:sessionId/:listenSeq/:timezone?*', listenController);
-app.post('/session/:sessionId/:sendSeq/:timezone', msgController);
+app.post('/send/:sessionId/:sendSeq/:timezone', msgController);
 
 // Routes handled by controllers
 app.resource('login', require('./controllers/login'));

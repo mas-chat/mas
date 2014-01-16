@@ -50,7 +50,7 @@ qx.Class.define('mas.Controller', {
             this._xhr, this._logDialog, this._settings, anonUser,
             this._friendsPopUp, this);
 
-        root.add(this._mainScreen);
+        root.add(this._mainScreen, { width: '100%', height: '100%' });
     },
 
     members: {

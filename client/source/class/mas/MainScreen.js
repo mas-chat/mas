@@ -15,7 +15,7 @@
 //
 
 qx.Class.define('mas.MainScreen', {
-    extend: qx.ui.core.Widget,
+    extend: qx.ui.container.Composite,
 
     construct: function(
         xhr, logDialog, settings, anonUser, friendsPopUp, controller) {
@@ -27,6 +27,8 @@ qx.Class.define('mas.MainScreen', {
         this._anonUser = anonUser;
         this._controller = controller;
         this._friendsPopUp = friendsPopUp;
+
+        this.setLayout(new qx.ui.layout.Canvas());
 
         this.__topictimer = new qx.event.Timer(1000);
         this.__topictimer.addListener('interval', function() {
