@@ -184,6 +184,10 @@ function *importWindows() {
 //   registrationtime (int, unix time)
 //   nextwindowid (int)
 //
+//   sendRcvNext (int)
+//   listenRcvNext (int)
+//   sessionId (int)
+//
 //       index:user (hash)
 //         <email> (string)
 //         <nick> (string)
@@ -220,6 +224,9 @@ function *importWindows() {
 // [TBD] inbox:<userid> (list)
 //   msg:<windowid>
 //   names:<windowid>
+//
+// outbox:<userid> (list)
+//   msg1, msg2
 //
 // notelist:<userid>:<nwid>:<channel_name> (set)
 //   note1, note2 ...

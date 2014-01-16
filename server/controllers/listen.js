@@ -14,18 +14,24 @@
 //   governing permissions and limitations under the License.
 //
 
-var auth = require('../lib/authentication');
+var redis = require('redis'),
+    r = redis.createClient(),
+    Q = require('q'),
+    auth = require('../lib/authentication'),
+    outbox = require('../lib/outbox.js');
 
 module.exports = function *(next) {
-    var verdict = yield auth.authenticateUser(this.cookies.get('ProjectEvergreen'));
+    var verdict = yield auth.authenticateUser(this.cookies.get('ProjectEvergreen'),
+                      parseInt(this.params.sessionId));
 
     if (!verdict.userId) {
         this.status = verdict.status;
         return;
     }
 
-    var expectedListenSeq = yield Q.nsend(r, 'hget', 'user:' + userId, "listenSeq");
-    var rcvdListenSeq = this.params.listenSeq;
+    var userId = verdict.userId;
+    var expectedListenSeq = parseInt(yield Q.nsend(r, 'hget', 'user:' + userId, "listenRcvNext"));
+    var rcvdListenSeq = parseInt(this.params.listenSeq);
 
     if (rcvdListenSeq !== 0 && rcvdListenSeq === expectedListenSeq - 1) {
         // TBD: Re-send the previous reply
@@ -37,26 +43,54 @@ module.exports = function *(next) {
     }
 
     // Request is considered valid
-    yield Q.nsend(r, 'hincrby', 'user:' + userId, 'listenSeq', 1);
+    yield Q.nsend(r, 'hincrby', 'user:' + userId, 'listenRcvNext', 1);
+    w.info('[' + userId + '] Long poll received');
 
-    yield processRequest(rcvdListenSeq);
-}
-
-function *processRequest(rcvdListenSeq) {
-    if (rcvdListenSeq === '0') {
-        // New session, reset session variables
-        var update = {
-            "sendRcvNext": 1,
-            "listenRcvNext": 1
-            "sessionId": Math.floor((Math.random() * 10000000) + 1);
-        };
-
-        yield Q.nsend(r, 'hmset', 'user:' + userId, update);
-
-        queueMsg('A', null)
-
-        flushQueue();
+    if (rcvdListenSeq === 0) {
+        yield processRequest(userId, rcvdListenSeq);
     }
 
-    this.status = 304;
-};
+    if ((yield outbox.length(userId)) === 0) {
+        var deferred = Q.defer();
+        var pubSubClient = redis.createClient();
+
+        var timer = setTimeout(function() {
+            deferred.resolve();
+        }, 25000);
+
+        pubSubClient.on("message", function (channel, message) {
+            clearTimeout(timer);
+            deferred.resolve();
+        });
+        pubSubClient.subscribe("useroutbox:" + userId);
+
+        // This is after subscribe to avoid race condition
+        if ((yield outbox.length(userId)) === 0) {
+            yield deferred.promise;
+        }
+
+        pubSubClient.unsubscribe();
+        pubSubClient.end();
+    }
+
+    this.body = yield outbox.flush(userId);
+}
+
+function *processRequest(userId, rcvdListenSeq) {
+    // New session, reset session variables
+    var update = {
+        "sendRcvNext": 1,
+        "listenRcvNext": 1,
+        "sessionId": Math.floor((Math.random() * 10000000) + 1)
+    };
+
+    yield Q.nsend(r, 'hmset', 'user:' + userId, update);
+
+    // Reset outbox
+    yield outbox.reset(userId);
+
+    yield outbox.queue(userId, {
+        id: "SESSIONID",
+        sessionId: update.sessionId
+    });
+}
