@@ -47,7 +47,7 @@ module.exports = function *(next) {
     w.info('[' + userId + '] Long poll received');
 
     if (rcvdListenSeq === 0) {
-        yield processRequest(userId, rcvdListenSeq);
+        yield initSession(userId, rcvdListenSeq);
     }
 
     if ((yield outbox.length(userId)) === 0) {
@@ -76,7 +76,7 @@ module.exports = function *(next) {
     this.body = yield outbox.flush(userId);
 }
 
-function *processRequest(userId, rcvdListenSeq) {
+function *initSession(userId, rcvdListenSeq) {
     // New session, reset session variables
     var update = {
         "sendRcvNext": 1,
