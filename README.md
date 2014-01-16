@@ -1,26 +1,30 @@
 MAS server and web client
 =========================
 
-MAS server and web client form together an advanced web chat application. Both the server and client implement MAS REST API. [Meetandspeak.com][] is an instanse of this application. Contains currenly still a lot of poor and old code.
+MAS is an advanced web chat application. The server part provides MAS
+REST API. [Meetandspeak.com][] is an instance of this application.
+
+The server is currently being rewritten from scratch and is not yet
+fully functional.
 
 Installation
 ------------
 
-Not really possible right now. Only usable with the new MAS server which is not fully implemented yet.
+Not really possible right now. Only usable when the new MAS server is
+feature complete. The old server implementation is not available
+publicly.
 
 Prerequisites:
 
-- Qooxdoo 3.0 desktop SDK: http://qooxdoo.org/
-- Node.js: http://nodejs.org/
+- Qooxdoo desktop SDK (version 3.5): http://qooxdoo.org/
+- Node.js (version 0.11.10 or later): http://nodejs.org/
 - Redis: http://redis.io/
-- Perl: http://www.perl.org/ (For IRC module, will be replaced with Node.js eventually)
-
-Currently the purpose of this code is to illustrate how MAS REST API can be implemented. This can be helpful when developing native MAS clients.
+- Perl: http://www.perl.org/ (For the IRC apapter, will be replaced with Node.js eventually)
 
 OS support
 ----------
 
-IRC adapter is Linux only as it uses Linux epoll() system call directly. To be fixed.
+IRC adapter is Linux only as it uses Linux epoll() system call directly. To be changed.
 
 Plan
 ----
