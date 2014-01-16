@@ -93,5 +93,42 @@ function *initSession(userId, rcvdListenSeq) {
     yield outbox.queue(userId, {
         id: "SESSIONID",
         sessionId: update.sessionId
+    }, {
+        id: "SET",
+        settings: {}
     });
+
+    //Iterate through windows
+    var windows = yield redis.smembers('windowlist:' + userId);
+
+    for (var i = 0; i < windows.length; i++) {
+        var details = windows[i].split(':');
+        var windowId = details[0];
+        var networkId = details[1];
+        var windowName = details[2];
+
+        var window = yield redis.hgetall('window:' + userId + ':' + windowId);
+
+        yield outbox.queue(userId, {
+            id: "CREATE",
+            window: windowId,
+            x: parseInt(window.x),
+            y: parseInt(window.y),
+            width: parseInt(window.width),
+            height: parseInt(window.height),
+            nwName: "", // TBD
+            nwId: networkId,
+            chanName: windowName,
+            chanType: parseInt(window.type),
+            sounds: 1, // TBD
+            titlealert: 1, //TBD
+            userMode: 2, //TBD
+            visible: 1, // TBD
+            newMsgs: 2, // TBD
+            password: window.password,
+            topic: "Hello" // TBD
+        });
+    }
+
+    console.log(windows)
 }

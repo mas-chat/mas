@@ -21,8 +21,10 @@ exports.reset = function *(userId) {
     yield redis.del('outbox:' + userId);
 }
 
-exports.queue = function *(userId, msg) {
-    yield redis.rpush('outbox:' + userId, JSON.stringify(msg));
+exports.queue = function *(userId) {
+    for (var i = 1; i < arguments.length; i++){
+        yield redis.rpush('outbox:' + userId, JSON.stringify(arguments[i]));
+    }
 }
 
 exports.flush = function *(userId) {
