@@ -33,8 +33,9 @@ exports.authenticateUser = function *(cookie, sessionId) {
     }
 
     var userId = data[0];
-    var cookie = data[1];
-    var validUser = yield validateUser(userId, cookie)
+    var cookie = data[1]; // TBD: bad name
+
+    var validUser = yield validateUser(userId, cookie);
 
     if (!validUser) {
         return {
@@ -49,8 +50,6 @@ exports.authenticateUser = function *(cookie, sessionId) {
             userId: userId
         }
     } else {
-        console.log('notvalid session');
-        console.log(this);
         return {
             status: 'not acceptable',
             userId: null
@@ -77,7 +76,7 @@ function *validateUser(userId, cookie) {
 
 function *validateSession(userId, sessionId) {
     if (sessionId !== 0) {
-        var expectedSessionId = yield Q.nsend(r, 'hget',  'user:' + userId, 'sessionId');
+        var expectedSessionId = parseInt(yield Q.nsend(r, 'hget',  'user:' + userId, 'sessionId'));
 
         if (sessionId === expectedSessionId) {
             return true;
