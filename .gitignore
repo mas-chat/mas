@@ -8,3 +8,7 @@ build/
 node_modules/
 server/node_modules/
 server/config.json
+
+#Mac files
+.DS_Store
+.DS_Store?
