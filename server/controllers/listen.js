@@ -14,9 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-var redis = require('redis'),
-    r = redis.createClient(),
-    Q = require('q'),
+var Q = require('q'),
+    wrapper = require('co-redis'),
+    redis = wrapper(require('redis').createClient()),
+    plainRedis = require('redis'),
     auth = require('../lib/authentication'),
     outbox = require('../lib/outbox.js');
 
@@ -30,7 +31,7 @@ module.exports = function *(next) {
     }
 
     var userId = verdict.userId;
-    var expectedListenSeq = parseInt(yield Q.nsend(r, 'hget', 'user:' + userId, "listenRcvNext"));
+    var expectedListenSeq = parseInt(yield redis.hget('user:' + userId, "listenRcvNext"));
     var rcvdListenSeq = parseInt(this.params.listenSeq);
 
     if (rcvdListenSeq !== 0 && rcvdListenSeq === expectedListenSeq - 1) {
@@ -43,7 +44,7 @@ module.exports = function *(next) {
     }
 
     // Request is considered valid
-    yield Q.nsend(r, 'hincrby', 'user:' + userId, 'listenRcvNext', 1);
+    yield redis.hincrby('user:' + userId, 'listenRcvNext', 1);
     w.info('[' + userId + '] Long poll received');
 
     if (rcvdListenSeq === 0) {
@@ -52,7 +53,7 @@ module.exports = function *(next) {
 
     if ((yield outbox.length(userId)) === 0) {
         var deferred = Q.defer();
-        var pubSubClient = redis.createClient();
+        var pubSubClient = plainRedis.createClient();
 
         var timer = setTimeout(function() {
             deferred.resolve();
@@ -84,7 +85,7 @@ function *initSession(userId, rcvdListenSeq) {
         "sessionId": Math.floor((Math.random() * 10000000) + 1)
     };
 
-    yield Q.nsend(r, 'hmset', 'user:' + userId, update);
+    yield redis.hmset('user:' + userId, update);
 
     // Reset outbox
     yield outbox.reset(userId);
