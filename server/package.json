@@ -23,7 +23,8 @@
     "koa-less": "0.0.1",
     "koa-logger": "~1.1.0",
     "co-body": "0.0.1",
-    "koa-mount": "~1.2.3"
+    "koa-mount": "~1.2.3",
+    "co-redis": "~1.1.0"
   },
   "devDependencies": {},
   "scripts": {
