@@ -17,11 +17,12 @@
 
 'use strict';
 
-var r = require('redis').createClient(),
+var wrapper = require('co-redis'),
+    redis = wrapper(require('redis').createClient()),
     uuid = require('node-uuid'),
     nconf = require('nconf').file('../config.json'),
-    Q = require('q'),
     co = require('co'),
+    Q = require('q'),
     User = require('../models/user.js');
 
 var mysql = require('mysql').createConnection({
@@ -31,7 +32,7 @@ var mysql = require('mysql').createConnection({
     database: 'milhouse'
 });
 
-r.on('error', function (err) {
+redis.on('error', function (err) {
     console.log('Error: ' + err);
     process.exit(1);
 });
@@ -76,7 +77,7 @@ function *importUsers() {
     ];
 
     // Delete existing data from Redis database
-    yield Q.nsend(r, 'flushdb');
+    yield redis.flushdb();
     console.log('Flush done.');
 
     var ret = yield Q.nsend(mysql, 'query', 'SELECT ' + userColumns.join() + ' FROM users');
@@ -146,23 +147,21 @@ function *importWindows() {
             note.ver = 0;
             note.msg = notes[ii];
 
-            yield Q.nsend(r, 'hmset', 'note:' + noteUuid, note);
-            yield Q.nsend(r, 'sadd', 'notelist:' + userid + ':' + network + ':' +
-                name, noteUuid);
+            yield redis.hmset('note:' + noteUuid, note);
+            yield redis.sadd('notelist:' + userid + ':' + network + ':' + name, noteUuid);
         }
 
         // Save urls
         for (ii = 0; ii < urls.length; ii++) {
-            yield Q.nsend(r, 'sadd', 'urls:' + userid + ':' +
-                network + ':' + name, urls[ii]);
+            yield redis.sadd('urls:' + userid + ':' + network + ':' + name, urls[ii]);
         }
 
         // Get the next window id.
-        var windowid = yield Q.nsend(r, 'hincrby', 'user:' + userid, 'nextwindowid', 1);
+        var windowid = yield redis.hincrby('user:' + userid, 'nextwindowid', 1);
         windowid--;
 
-        yield Q.nsend(r, 'hmset', 'window:' + userid + ':' + windowid, row);
-        yield Q.nsend(r, 'sadd', 'windowlist:' + userid, windowid + ':' + network + ':' + name);
+        yield redis.hmset('window:' + userid + ':' + windowid, row);
+        yield redis.sadd('windowlist:' + userid, windowid + ':' + network + ':' + name);
     }
 }
 
