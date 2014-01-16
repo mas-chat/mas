@@ -17,11 +17,13 @@
 var auth = require('../lib/authentication');
 
 module.exports = function *(next) {
-    var userId = auth.authenticateUser(this.cookies.get('ProjectEvergreen'));
+    var verdict = yield auth.authenticateUser(this.cookies.get('ProjectEvergreen'),
+                      parseInt(this.params.sessionId));
 
-    if (!userId) {
-        this.status = 'unauthorized';
+    if (!verdict.userId) {
+        this.status = verdict.status;
         return;
     }
 
+    // Don't copy paste
 };
