@@ -61,7 +61,7 @@ qx.Class.define('mas.XHR', {
         _pollMsgXhr: 0,
         _firstPoll: true,
         _pollSeq: 0,
-        _sendSeq: 1,
+        _sendSeq: 0,
 
         call: function(command, params) {
             var message = {};

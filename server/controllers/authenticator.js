@@ -57,7 +57,6 @@ module.exports = function *(next) {
     w.info('Valid user and session.');
 
     this.mas = this.mas || {};
-    this.mas.userId = userId;
 
     if (sessionId === 0) {
         //New session, generate session id
@@ -67,6 +66,8 @@ module.exports = function *(next) {
     }
 
     this.mas.sessionId = sessionId;
+    this.mas.userId = userId;
+
     yield next;
 }
 

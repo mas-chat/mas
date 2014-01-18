@@ -17,4 +17,6 @@
 module.exports = function *(next) {
     var userId = this.mas.userId;
 
+    this.body = 'OK';
+
 };
