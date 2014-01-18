@@ -57,7 +57,9 @@ Client Originated Messages
 
 Messages that MAS client can sent to a server at any time after the initial ```/api/listen``` HTTP GET request.
 
-```/api/send/:sessionId/:sendSeq/:command```
+```
+/api/send/:sessionId/:sendSeq/:command
+```
 
 JSON body can contain additonal command parameters.
 
