@@ -96,7 +96,9 @@ qx.Class.define('mas.XHR', {
                 // Stop prossessing the queue
                 return;
             } else {
-                this._processMessages(resp.commands, true);
+                if (resp.commands) {
+                    this._processMessages(resp.commands, true);
+                }
             }
 
             this._sendQueue.shift();
