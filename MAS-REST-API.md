@@ -6,7 +6,7 @@ Work in progress.
 
 MAS protocol is server driven. Overall approach is:
 
-1. The client sends a HTTP GET / to server
+1. The client sends a HTTP GET /listen to the server
 2. The server responds with N messages
    - If the server doesn't have anything to send, HTTP connection is
      blocked up to 30 seconds. If 30 seconds is reached, the server
@@ -48,16 +48,113 @@ Overal server response format is:
 
 When the user a triggers an action, e.g. wants to join a new channel,
 client creates a second HTTP connection to send a message. Server
-responds to this message immedetially.
+responds to this message immediately.
 
 -DETAILS TO BE ADDED-
 
 Client Originated Messages
 ==========================
 
-Messages that MAS client can sent to a server.
+Messages that MAS client can sent to a server at any time after the initial ```/api/listen``` HTTP GET request.
 
--TO BE ADDED-
+```/api/send/:sessionId/:sendSeq/:command```
+
+JSON body can contain additonal command parameters.
+
+Supported commands:
+
+SEND
+----
+
+JOIN
+----
+
+CREATE
+------
+
+CLOSE
+-----
+
+RESIZE
+------
+
+MOVE
+----
+
+HIDE
+----
+
+REST
+----
+
+SEEN
+----
+
+SOUND
+-----
+
+TITLEALERT
+----------
+
+GETLOG
+------
+
+STARTCHAT
+---------
+
+LOGOUT
+------
+
+SET
+---
+
+ADDF
+----
+
+OKF
+---
+
+NOKF
+----
+
+TOPIC
+-----
+
+PW
+--
+
+WHOIS
+-----
+
+KICK
+----
+
+BAN
+---
+
+OP
+--
+
+GETOPERS
+--------
+
+DEOP
+----
+
+GETBANS
+-------
+
+UNBAN
+-----
+
+DELNTF
+------
+
+SETKEY
+------
+
+GETKEY
+------
 
 Server Originated Messages
 ==========================
