@@ -26,8 +26,12 @@ var koa = require('koa'),
     mount = require('koa-mount'),
     routesIndex = require('./routes'),
     routesPages = require('./routes/pages'),
+    authenticator = require('./controllers/authenticator'),
+    seqChecker = require('./controllers/seqChecker'),
     listenController = require('./controllers/listen'),
     msgController = require('./controllers/message'),
+    loginController = require('./controllers/login'),
+    registerController = require('./controllers/register'),
     path = require('path');
 
 // Configure logging
@@ -55,13 +59,15 @@ hbs.registerHelper('getPageJSFile', function() {
 
 app.use(router(app));
 
-// REST API route
-app.get('/listen/:sessionId/:listenSeq/:timezone?*', listenController);
-app.post('/send/:sessionId/:sendSeq/:timezone', msgController);
+// REST API routes
+app.get('/api/listen/:sessionId/:listenSeq/:timezone?*',
+    authenticator, seqChecker, listenController);
+app.post('/api/send/:sessionId/:sendSeq/:timezone',
+    authenticator, seqChecker, msgController);
 
-// Routes handled by controllers
-app.resource('login', require('./controllers/login'));
-app.resource('register', require('./controllers/register'));
+// Registration and login routes
+app.resource('login', loginController);
+app.resource('register', registerController);
 
 // Public routes
 app.use(less(path.join(__dirname, 'public')));
@@ -69,7 +75,6 @@ app.use(serve(path.join(__dirname, 'public')));
 
 // Qooxdoo routes
 app.use(mount('/main', serve(path.join(__dirname, '/../client'))));
-//app.use('/opt/qooxdoo', express.static('../vendor/qooxdoo-sdk'));
 app.use(mount('/qooxdoo-sdk', serve(path.join(__dirname,
     '../vendor/qooxdoo-sdk'))));
 

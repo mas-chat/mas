@@ -14,16 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-var auth = require('../lib/authentication');
-
 module.exports = function *(next) {
-    var verdict = yield auth.authenticateUser(this.cookies.get('ProjectEvergreen'),
-                      parseInt(this.params.sessionId));
+    var userId = this.mas.userId;
 
-    if (!verdict.userId) {
-        this.status = verdict.status;
-        return;
-    }
-
-    // Don't copy paste
 };

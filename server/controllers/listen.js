@@ -18,37 +18,16 @@ var Q = require('q'),
     wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     plainRedis = require('redis'),
-    auth = require('../lib/authentication'),
     outbox = require('../lib/outbox.js');
 
 module.exports = function *(next) {
-    var verdict = yield auth.authenticateUser(this.cookies.get('ProjectEvergreen'),
-                      parseInt(this.params.sessionId));
+    var userId = this.mas.userId;
+    var sessionId = this.mas.sessionId;
 
-    if (!verdict.userId) {
-        this.status = verdict.status;
-        return;
-    }
-
-    var userId = verdict.userId;
-    var expectedListenSeq = parseInt(yield redis.hget('user:' + userId, "listenRcvNext"));
-    var rcvdListenSeq = parseInt(this.params.listenSeq);
-
-    if (rcvdListenSeq !== 0 && rcvdListenSeq === expectedListenSeq - 1) {
-        // TBD: Re-send the previous reply
-        return;
-    } else if (rcvdListenSeq !== 0 && rcvdListenSeq !== expectedListenSeq) {
-        // No way to recover
-        this.status = 'not acceptable';
-        return;
-    }
-
-    // Request is considered valid
-    yield redis.hincrby('user:' + userId, 'listenRcvNext', 1);
     w.info('[' + userId + '] Long poll received');
 
-    if (rcvdListenSeq === 0) {
-        yield initSession(userId, rcvdListenSeq);
+    if (this.mas.newSession) {
+        yield initSession(userId, sessionId);
     }
 
     if ((yield outbox.length(userId)) === 0) {
@@ -77,22 +56,13 @@ module.exports = function *(next) {
     this.body = yield outbox.flush(userId);
 }
 
-function *initSession(userId, rcvdListenSeq) {
-    // New session, reset session variables
-    var update = {
-        "sendRcvNext": 1,
-        "listenRcvNext": 1,
-        "sessionId": Math.floor((Math.random() * 10000000) + 1)
-    };
-
-    yield redis.hmset('user:' + userId, update);
-
-    // Reset outbox
+function *initSession(userId, sessionId) {
+    // New session, reset outbox
     yield outbox.reset(userId);
 
     yield outbox.queue(userId, {
         id: "SESSIONID",
-        sessionId: update.sessionId
+        sessionId: sessionId
     }, {
         id: "SET",
         settings: {}
@@ -129,6 +99,4 @@ function *initSession(userId, rcvdListenSeq) {
             topic: "Hello" // TBD
         });
     }
-
-    console.log(windows)
 }
