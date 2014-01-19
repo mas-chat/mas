@@ -23,7 +23,7 @@ var wrapper = require('co-redis'),
     nconf = require('nconf').file('../config.json'),
     co = require('co'),
     Q = require('q'),
-    User = require('../models/user.js');
+    User = require('../server/models/user.js');
 
 var mysql = require('mysql').createConnection({
     host: 'localhost',
