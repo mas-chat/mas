@@ -62,7 +62,7 @@ app.use(router(app));
 // REST API routes
 app.get('/api/listen/:sessionId/:listenSeq/:timezone?*',
     authenticator, seqChecker, listenController);
-app.post('/api/send/:sessionId/:sendSeq',
+app.post('/api/send/:sessionId/:sendSeq/:command',
     authenticator, seqChecker, msgController);
 
 // Registration and login routes

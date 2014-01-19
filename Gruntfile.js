@@ -4,7 +4,10 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         jshint: {
-            src: [ 'source/class/mas/*' ],
+            src: [
+                'client/source/class/mas/*',
+                'server/*'
+            ],
             all: {
             }
         },
