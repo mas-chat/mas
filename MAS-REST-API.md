@@ -4,18 +4,55 @@ MAS REST API
 
 Work in progress.
 
-MAS protocol is server driven. Overall approach is:
+Introduction
+============
 
-1. The client sends a HTTP GET /listen to the server
-2. The server responds with N messages
-   - If the server doesn't have anything to send, HTTP connection is
-     blocked up to 30 seconds. If 30 seconds is reached, the server
-     closes the connection and responds with status "OK" and empty commands list.
-3. The client builds or updates the UI by processing all the messages (if any)
-4. The client immediately goes back to step 1.
-   - In case of any XHR error, client SHALL wait some seconds and go to step 1.
+MAS protocol is server driven and uses long polling. Overall approach is:
 
-Overal server response format is:
+1. The client sends an **initial MAS listen request**
+2. The server responds with N commands.
+   - These commands allow the client to draw the initial UI view.
+3. The client sends **MAS listen request**
+   - If the server doesn't have anything to send (e.g. no new messages), HTTP connection is blocked up to 30 seconds. If 30 seconds is reached and there is still nothing to send, the server
+     closes the connection and responds with an empty commands list.
+4. The client builds or updates the UI by processing all the commands (if any)
+5. The client immediately goes back to step 3.
+   - In case of any transport errors, client SHALL wait few seconds before proceeding.
+
+When the user a triggers an action, e.g. wants to join a new channel,
+client creates a second HTTP connection to sends **MAS send request**. Server
+responds to this message immediately.
+
+Authentication
+==============
+
+All MAS listen and send requests must contain an authentication cookie. Cookie format is ...
+
+Session management
+==================
+
+The user is allowed to have only one active connection to the server. A new session ID is generated after every initial MAS listen request. This effectively invalidates the
+session ID that the possible another client started previously is using.
+
+If the session ID becomes invalid, the server will respond with the HTTP status code
+```not acceptable```. In this case the client should not reconnect using the initial
+MAS listen request without user interaction to avoid loop between two clients.
+
+
+MAS listen request
+==================
+
+```HTTP GET /api/listen/<sessionId>/<listenSeq>/[timezone]```
+
+**sessionId**: Must be set to 0 in the initial listen request. In other requests sessionID
+must be set to value that the server returned with SESSIONID command.
+
+**listenSeq**: Must be set to 0 in the initial listen request. Must be then increased by one after every received HTTP response from the server.
+
+**timezone**: Optional. Can set to update user's current timezone in the first listen
+request. For example ```120``` if the user is in Helsinki (+2:00 GMT)
+
+Overal server response format to MAS listen request is:
 
 ```JSON
 {
@@ -46,123 +83,8 @@ Overal server response format is:
 }
 ```
 
-When the user a triggers an action, e.g. wants to join a new channel,
-client creates a second HTTP connection to send a message. Server
-responds to this message immediately.
-
--DETAILS TO BE ADDED-
-
-Client Originated Messages
-==========================
-
-Messages that MAS client can sent to a server at any time after the initial ```/api/listen``` HTTP GET request.
-
-```
-/api/send/:sessionId/:sendSeq/:command
-```
-
-JSON body can contain additonal command parameters.
-
-Supported commands:
-
-SEND
-----
-
-JOIN
-----
-
-CREATE
-------
-
-CLOSE
------
-
-RESIZE
-------
-
-MOVE
-----
-
-HIDE
-----
-
-REST
-----
-
-SEEN
-----
-
-SOUND
------
-
-TITLEALERT
-----------
-
-GETLOG
-------
-
-STARTCHAT
----------
-
-LOGOUT
-------
-
-SET
----
-
-ADDF
-----
-
-OKF
----
-
-NOKF
-----
-
-TOPIC
------
-
-PW
---
-
-WHOIS
------
-
-KICK
-----
-
-BAN
----
-
-OP
---
-
-GETOPERS
---------
-
-DEOP
-----
-
-GETBANS
--------
-
-UNBAN
------
-
-DELNTF
-------
-
-SETKEY
-------
-
-GETKEY
-------
-
-Server Originated Messages
-==========================
-
-Messages that MAS server can send to a client. A message is always a
-request for client to take some action.
+Below is the list of commands that MAS server can send to a client.
+A command is always request for the client to take some action.
 
 ADDNAME
 -------
@@ -453,3 +375,122 @@ Update existing parameter for existing window.
 
 ```
 ```
+
+MAS send request
+================
+
+In addition of listening commands from the server, the client can send commands to the server at any time after the initial MAS listen request.
+
+```
+HTTP POST /api/send/<sessionId>/<sendSeq>/<command>
+```
+
+**sessionId**: Must be set to value that the server returned with SESSIONID command.
+
+**sendSeq**: Must be set to 0 in the first send request. Must be then increased by one after every received HTTP response from the server.
+
+*command*: One of the commands listed below.
+
+MAS send request can contain additonal JSON encoded parameters in the body.
+
+SEND
+----
+
+```
+{
+  window: 2,
+  msg: "Hello world"
+}
+```
+
+
+JOIN
+----
+
+CREATE
+------
+
+CLOSE
+-----
+
+RESIZE
+------
+
+MOVE
+----
+
+HIDE
+----
+
+REST
+----
+
+SEEN
+----
+
+SOUND
+-----
+
+TITLEALERT
+----------
+
+GETLOG
+------
+
+STARTCHAT
+---------
+
+LOGOUT
+------
+
+SET
+---
+
+ADDF
+----
+
+OKF
+---
+
+NOKF
+----
+
+TOPIC
+-----
+
+PW
+--
+
+WHOIS
+-----
+
+KICK
+----
+
+BAN
+---
+
+OP
+--
+
+GETOPERS
+--------
+
+DEOP
+----
+
+GETBANS
+-------
+
+UNBAN
+-----
+
+DELNTF
+------
+
+SETKEY
+------
+
+GETKEY
+------
+
