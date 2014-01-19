@@ -46,7 +46,7 @@ module.exports = function *(next) {
         return;
     }
 
-    var validSession = yield* validateSession(userId, sessionId);
+    var validSession = yield validateSession(userId, sessionId);
 
     if (!validSession) {
         w.info('Invalid session.');
