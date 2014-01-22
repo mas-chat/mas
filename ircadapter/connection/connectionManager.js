@@ -17,13 +17,59 @@
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     plainRedis = require('redis');
+    co = require('co');
     net = require('net'),
     pubSubClient = plainRedis.createClient();
 
-var socketList = {}
+var users = {}
+
+var serverList = {
+    MeetAndSpeak: { host: "localhost", port: 6667, unknown: 9999 },
+    IRCNet: { host: "ircnet.eversible.com", port: 6666, unknown: 100 },
+    FreeNode: { host: "irc.freenode.net", port: 6667, unknown: 5 },
+    W3C: { host: "irc.w3.org", port: 6665, unknown: 5 }
+};
+
+function init() {
+    co(function *(){
+        var allUsers = yield redis.smembers('userlist');
+
+        for (var i=0; i < allUsers.length; i++) {
+            var id = allUsers[i];
+
+            if (!(id in users)) {
+                var userInfo = yield redis.hgetall('user:' + id);
+
+                console.log('Importing user ' + userInfo.nick);
+                users[id] = {};
+
+                var connectDelay = Math.floor((Math.random() * 180));
+                var windows = yield redis.smembers('windowlist:' + id);
+
+                // Make sure that we connect to Evergreen network
+                for (var ii=0; ii < windows.length; ii++) {
+                    // Format in Redis is "id:network:name"
+                    console.log('raw windowlist: ' + windows[ii]);
+                    var network = (windows[ii].split(':'))[1];
+
+                    if (network !== '0') {
+                        // TBD: Implement. Wait connectDelay then connect()
+                    }
+                }
+
+                // MeetAndSpeak network, always, no delay
+                users[id].socket = connect(serverList.MeetAndSpeak.host, serverList.MeetAndSpeak.port, id);
+
+                // TBD: Move to parser, only trigger connected evet in this module
+                write(id, "NICK " + userInfo.nick + "\r\nUSER " + userInfo.nick +" 8 * :Real Name (Ralph v1.0)\r\n");
+            }
+        }
+    })()
+}
+
+init();
 
 pubSubClient.on("message", processMessage);
-
 pubSubClient.subscribe("tcpCommands");
 
 function processMessage(channel, message) {
@@ -32,11 +78,18 @@ function processMessage(channel, message) {
     console.log('Rcvd message: ' + message.action);
 
     switch (message.action) {
+        case 'add':
+            // TBD
+            break;
         case 'connect':
+            // TBD: Rethink
             connect(message.host, message.port, message.id);
             break;
+        case 'disconnect':
+            // TBD
+            break;
         case 'write':
-            write(message.data);
+            write(message.id, message.data);
             break;
     }
 }
@@ -61,46 +114,37 @@ function connect(host, port, id) {
         });
     }
 
-    socketList[id] = client;
+    return client;
 }
 
-function write(data, id) {
-    socketList[id].write(data);
+function write(id, data) {
+    users[id].socket.write(data);
 }
-
-
 
 // TBD: Handle PING/PONG here
-
+//
 // tcpMessages (list)
 //   {
 //     action: connect/disconnect/send
 //   }
-
+//
 // {
 //     action: 'connect',
 //     host: 'irc.example.org',
 //     port: '6667'
+// TBD nick: xxx,
+// TBD realName: yyy
 // }
-
-
-
-
+//
 // tcpResponses
 //  {
 //     type :data/event
 //  }
 // newSend
 // newRcvd
-
-// id = connect()
-// send(id, data)
-// close(id)
-
-// events
-
+//
+// events:
+//
 // rcvd
 // opened
 // closed
-
-
