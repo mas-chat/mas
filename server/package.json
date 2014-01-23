@@ -14,7 +14,7 @@
     "co": "~3.0.2",
     "koa": "~0.2.1",
     "koa-hbs": "~0.4.1",
-    "koa-router": "~2.2.0",
+    "koa-router": "~2.4.0",
     "koa-error": "~1.1.1",
     "koa-static": "~1.4.2",
     "koa-less": "0.0.1",
