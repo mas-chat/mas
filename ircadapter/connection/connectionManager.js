@@ -124,7 +124,7 @@ function connect(host, port, userId, network) {
             data: line
         };
 
-        console.log(line);
+        console.log('CONNMAN IRC line RCVD: ' + line);
         plainRedis.lpush('parserinbox', JSON.stringify(message));
     });
 
