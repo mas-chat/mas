@@ -131,8 +131,23 @@ function *importWindows() {
         var urls = row.urls.split('<>').filter(notEmpty);
 
         var userid = row.userid;
-        var network = row.network;
         var name = row.name;
+        var network;
+
+        switch (row.network) {
+            case 0:
+                network = 'MeetAndSpeak';
+                break;
+            case 1:
+                network = 'Eversible';
+                break;
+            case 2:
+                network = 'FreeNode';
+                break;
+            case 3:
+                network = 'W3C';
+                break;
+        }
 
         delete row.urls;
         delete row.notes;
@@ -215,7 +230,7 @@ function *importWindows() {
 //   titlealert (int)
 //   hidden (int)
 //
-// [TBD] windowmsgs:<userid>:<id> (list)
+// windowmsgs:<userid>:<id> (list) [oldest message on the left]
 //
 // [TBD] names:<userid>:<id> (set)
 //   nick1, @nick2
@@ -245,6 +260,10 @@ function *importWindows() {
 //   msg1, msg2 ...
 //
 //
-
+// IRC adapter
+// ===========
+//
+// parserinbox (list)
+//
 //
 //

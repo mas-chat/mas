@@ -74,7 +74,7 @@ function *initSession(userId, sessionId) {
     for (var i = 0; i < windows.length; i++) {
         var details = windows[i].split(':');
         var windowId = details[0];
-        var networkId = details[1];
+        var network = details[1];
         var windowName = details[2];
 
         var window = yield redis.hgetall('window:' + userId + ':' + windowId);
@@ -87,7 +87,7 @@ function *initSession(userId, sessionId) {
             width: parseInt(window.width),
             height: parseInt(window.height),
             nwName: "", // TBD
-            nwId: networkId,
+            nwId: network, // TBD This is now string not number! Fix client and docs!
             chanName: windowName,
             chanType: parseInt(window.type),
             sounds: 1, // TBD
@@ -99,4 +99,9 @@ function *initSession(userId, sessionId) {
             topic: "Hello" // TBD
         });
     }
+
+    // TBD: Makes less queue() calls.
+    yield outbox.queue(userId, {
+        id: 'INITDONE'
+    });
 }
