@@ -19,8 +19,6 @@ var wrapper = require('co-redis'),
     outbox = require('../lib/outbox.js');
 
 exports.broadcast = function *(userId, network, type, text) {
-    console.log('in broadcast');
-
     // TBD: Copy paste from listen.js
 
     //Iterate through windows
