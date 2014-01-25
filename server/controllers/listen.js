@@ -30,30 +30,7 @@ module.exports = function *(next) {
         yield initSession(userId, sessionId);
     }
 
-    if ((yield outbox.length(userId)) === 0) {
-        var deferred = Q.defer();
-        var pubSubClient = plainRedis.createClient();
-
-        var timer = setTimeout(function() {
-            deferred.resolve();
-        }, 25000);
-
-        pubSubClient.on("message", function (channel, message) {
-            clearTimeout(timer);
-            deferred.resolve();
-        });
-        pubSubClient.subscribe("useroutbox:" + userId);
-
-        // This is after subscribe to avoid race condition
-        if ((yield outbox.length(userId)) === 0) {
-            yield deferred.promise;
-        }
-
-        pubSubClient.unsubscribe();
-        pubSubClient.end();
-    }
-
-    this.body = yield outbox.flush(userId);
+    this.body = yield outbox.flush(userId, 25);
 }
 
 function *initSession(userId, sessionId) {
