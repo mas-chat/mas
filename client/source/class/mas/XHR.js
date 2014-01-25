@@ -63,15 +63,17 @@ qx.Class.define('mas.XHR', {
         _pollSeq: 0,
         _sendSeq: 0,
 
-        call: function(command, params) {
-            var message = {};
-            message.command = command;
-            message.params = params;
+        call: function(message) {
+            // TBD: Remove when everything is JSON based
+            if (typeof message !== 'object') {
+                console.log('ERROR: Non-JSON message detected: ' + message );
+                return;
+            }
 
             this._sendQueue.push(message);
 
             debug.print(
-                'Outgoing message buffered: ' + command + ' (Queue len: ' +
+                'Outgoing message buffered: ' + message + ' (Queue len: ' +
                     this._sendQueue.length + ')');
 
             if (this._sendQueue.length === 1) {

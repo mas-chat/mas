@@ -303,7 +303,11 @@ qx.Class.define('mas.UserWindow', {
 
                 var input = this.__inputline.getValue();
                 if (input !== '' && input !== null) {
-                    this.rpc.call('SEND', this.winid + ' ' + input);
+                    this.rpc.call({
+                        command: 'SEND',
+                        window: this.winid,
+                        text: input
+                    });
                     this.__inputline.setValue('');
 
                     input = input.replace(/</g, '&lt;');
