@@ -21,40 +21,45 @@ var wrapper = require('co-redis'),
 
 var handlers = {};
 
-co(process)();
+co(main)();
 
-function *process() {
+function *main() {
+    var result, message;
+
     while (1) {
-        var result = yield redis.brpop('parserinbox', 0);
-        var message = JSON.parse(result[1]);
+        result = yield redis.brpop('parserinbox', 0),
+        message = JSON.parse(result[1]);
 
-        console.log('Got message:' + message.type);
+        console.log('MSG RCVD: ' + message.type);
 
         switch (message.type) {
+            // Upper layer messages
+            case 'addText':
+                yield processAddText(message.userId, message.network, message.text);
+                break;
+
+            // Connection manager messages
             case 'data':
                 yield processIRCLine(message.userId, message.network, message.data);
                 break;
-            case 'addText':
-                var message2 = {
-                    userId: message.userId,
-                    network: message.network,
-                    line: 'PRIVMSG #test ' + message.text,
-                    action: 'write'
-                };
-
-                yield redis.lpush('connectionmanagerinbox', JSON.stringify(message2));
+            case 'connected':
+                // TBD
+                break;
+            case 'disconnected':
+                // TBD
                 break;
         }
     }
 }
 
 function *processIRCLine(userId, network, line) {
-    // See rfc2812
     var parts = line.split(' '),
         params;
         msg = {};
 
-    console.log('Prosessing: ' + line);
+    console.log('Prosessing IRC line: ' + line);
+
+    // See rfc2812
 
     if ((line.charAt(0) === ':')) {
         // Prefix exists
@@ -69,32 +74,41 @@ function *processIRCLine(userId, network, line) {
             msg.nick = prefix.substring(0, Math.min(nickEnds,identEnds));
             msg.userNameAndHost = prefix.substring(Math.min(nickEnds,identEnds));
         }
-        msg.command = parts.shift();
-    } else {
-        msg.command = parts.shift();
     }
+
+    msg.command = parts.shift();
 
     if (msg.command.match(/^[0-9]+$/) !== null) {
         // Numeric reply
         msg.target = parts.shift();
     }
 
-    // Only the parameters are left now
-    params = parts;
     msg.params = [];
 
-    while (params.length !== 0) {
-        if (params[0].charAt(0) === ':') {
-            msg.params.push(params.join(' ').substring(1));
+    // Only the parameters are left now
+    while (parts.length !== 0) {
+        if (parts[0].charAt(0) === ':') {
+            msg.params.push(parts.join(' ').substring(1));
             break;
         } else {
-            msg.params.push(params.shift());
+            msg.params.push(parts.shift());
         }
     }
 
     if (handlers[msg.command]) {
         yield handlers[msg.command](userId, network, msg);
     }
+}
+
+function *processAddText(userId, network, text) {
+    var message = {
+        userId: userId,
+        network: network,
+        line: 'PRIVMSG #test ' + text,
+        action: 'write'
+    };
+
+    yield redis.lpush('connectionmanagerinbox', JSON.stringify(message));
 }
 
 // Process different IRC commands
