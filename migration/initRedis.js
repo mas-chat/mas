@@ -254,9 +254,8 @@ function *importWindows() {
 // urls:<userid>:<nwid>:<channel_name> (list)
 //   url1, url2 ...
 //
-// DRAFTS
 //
-// outbox:nnn (list)
+// outbox:nnn (list) TBD: rename clientinbox!
 //   msg1, msg2 ...
 //
 //
@@ -264,6 +263,6 @@ function *importWindows() {
 // ===========
 //
 // parserinbox (list)
-//
+// connectionmanagerinbox (list)
 //
 //
