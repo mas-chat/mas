@@ -45,7 +45,7 @@ w.info('Server starting.');
 // Development only
 if (app.env === 'development') {
     app.use(error());
-    app.use(logger());
+//    app.use(logger());
 }
 
 app.use(hbs.middleware({

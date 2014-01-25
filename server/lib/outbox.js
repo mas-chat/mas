@@ -23,12 +23,13 @@ exports.reset = function *(userId) {
 
 exports.queue = function *(userId) {
     for (var i = 1; i < arguments.length; i++){
-        yield redis.rpush('outbox:' + userId, JSON.stringify(arguments[i]));
+        yield redis.lpush('outbox:' + userId, JSON.stringify(arguments[i]));
     }
 }
 
-exports.flush = function *(userId) {
-    var command;
+exports.flush = function *(userId, timeout) {
+    var result,
+        command;
 
     w.info('[' + userId + '] Flushing outbox.');
 
@@ -37,7 +38,18 @@ exports.flush = function *(userId) {
         commands: []
     }
 
-    while (command = yield redis.lpop('outbox:' + userId)) {
+    if (timeout) {
+        // Wait for first command to appear if timeout is given
+        result = yield redis.brpop('outbox:' + userId, timeout);
+
+        if (result) {
+            command = result[1];
+            msg.commands.push(JSON.parse(command));
+        }
+    }
+
+    // Retrieve other commands if there are any
+    while (command = yield redis.rpop('outbox:' + userId)) {
         msg.commands.push(JSON.parse(command));
     }
 
