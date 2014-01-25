@@ -14,8 +14,28 @@
 //   governing permissions and limitations under the License.
 //
 
+var wrapper = require('co-redis'),
+    redis = wrapper(require('redis').createClient()),
+    parse = require('co-body');
+
 module.exports = function *(next) {
     var userId = this.mas.userId;
+    var body = yield parse.json(this.req);
+
+    console.log('Prosessing command: ' + body.command);
+
+    switch (body.command) {
+        case 'SEND':
+            var message = {
+                type: 'addText',
+                userId: userId,
+                network: 'TBD',
+                text: body.text
+            }
+
+            yield redis.lpush('parserinbox', JSON.stringify(message));
+            break;
+    }
 
     var resp = {
         status: 'OK'
