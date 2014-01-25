@@ -382,27 +382,25 @@ MAS send request
 In addition of listening commands from the server, the client can send commands to the server at any time after the initial MAS listen request.
 
 ```
-HTTP POST /api/send/<sessionId>/<sendSeq>/<command>
+HTTP POST /api/send/<sessionId>/<sendSeq>
 ```
 
 **sessionId**: Must be set to value that the server returned with SESSIONID command.
 
 **sendSeq**: Must be set to 0 in the first send request. Must be then increased by one after every received HTTP response from the server.
 
-*command*: One of the commands listed below.
-
-MAS send request can contain additonal JSON encoded parameters in the body.
+HTTP body contains the actual message in JSON. Following commands are supported.
 
 SEND
 ----
 
 ```
 {
-  window: 2,
-  msg: "Hello world"
+  "command": "SEND"
+  "window": 2,
+  "text": "Hello world"
 }
 ```
-
 
 JOIN
 ----
