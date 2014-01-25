@@ -28,8 +28,22 @@ function *process() {
         var result = yield redis.brpop('parserinbox', 0);
         var message = JSON.parse(result[1]);
 
-        if (message.type === 'data') {
-            yield processIRCLine(message.userId, message.network, message.data);
+        console.log('Got message:' + message.type);
+
+        switch (message.type) {
+            case 'data':
+                yield processIRCLine(message.userId, message.network, message.data);
+                break;
+            case 'addText':
+                var message2 = {
+                    userId: message.userId,
+                    network: message.network,
+                    line: 'PRIVMSG #test ' + message.text,
+                    action: 'write'
+                };
+
+                yield redis.lpush('connectionmanagerinbox', JSON.stringify(message2));
+                break;
         }
     }
 }
@@ -52,8 +66,8 @@ function *processIRCLine(userId, network, line) {
         if (nickEnds === -1 && identEnds === -1) {
             msg.serverName = prefix;
         } else {
-            msg.nick = prefix.subString(0, Math.min(nickEnds,identEnds));
-            msg.userNameAndHost = prefix.subString(Math.min(nickEnds,identEnds));
+            msg.nick = prefix.substring(0, Math.min(nickEnds,identEnds));
+            msg.userNameAndHost = prefix.substring(Math.min(nickEnds,identEnds));
         }
         msg.command = parts.shift();
     } else {
@@ -103,7 +117,12 @@ var handlers = {
     '266': handleServerText,
     '372': handleServerText,
     '375': handleServerText,
-    '452': handleServerText
+    '452': handleServerText,
+
+    '376': handle376,
+
+    'PRIVMSG': handlePrivmsg,
+    'PING': handlePing
 };
 
 function *handleServerText(userId, network, msg) {
@@ -119,6 +138,38 @@ function *handleServerText(userId, network, msg) {
     //nickname ??
 
     yield textLine.broadcast(userId, network, 'notice', text);
+}
 
-    console.log('got 001 ' + text);
+function *handlePing(userId, network, msg) {
+    var server = msg.params[0];
+    var resp = 'PONG ' + server;
+
+    var message = {
+        userId: userId,
+        network: network,
+        line: resp,
+        action: 'write'
+    }
+
+    yield redis.lpush('connectionmanagerinbox', JSON.stringify(message));
+}
+
+function *handle376(userId, network, msg) {
+    var resp = 'JOIN #test';
+
+    var message = {
+        userId: userId,
+        network: network,
+        line: resp,
+        action: 'write'
+    }
+
+    yield redis.lpush('connectionmanagerinbox', JSON.stringify(message));
+}
+
+function *handlePrivmsg(userId, network, msg) {
+    var target = msg.params[0];
+    var text = msg.params[1];
+
+    yield textLine.broadcast(userId, network, 'msg', text);
 }
