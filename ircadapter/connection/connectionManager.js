@@ -16,7 +16,7 @@
 
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
-    plainRedis = require('redis');
+    plainRedis = require('redis').createClient();
     co = require('co'),
     net = require('net');
     carrier = require('carrier');
@@ -29,6 +29,8 @@ var serverList = {
     FreeNode: { host: "irc.freenode.net", port: 6667, unknown: 5 },
     W3C: { host: "irc.w3.org", port: 6665, unknown: 5 }
 };
+
+init();
 
 function init() {
     co(function *() {
@@ -64,36 +66,40 @@ function init() {
                     userID,
                     'MeetAndSpeak');
 
-                // TBD: Move to parser, only trigger connected evet in this module
+                // TBD: Move to parser, only trigger connected event in this module
                 write(userID,
                     "NICK " + userInfo.nick + "\r\nUSER " + userInfo.nick +
                     " 8 * :Real Name (Ralph v1.0)\r\n");
             }
         }
+
+        yield main();
     })();
 }
 
-init();
+function *main() {
+    while (1) {
+        var result = yield redis.brpop('connectionmanagerinbox', 0);
+        var message = JSON.parse(result[1]);
 
-function processMessage(channel, message) {
-    message = JSON.parse(message);
+        console.log('Rcvd message: ' + message.action);
 
-    console.log('Rcvd message: ' + message.action);
-
-    switch (message.action) {
-        case 'add':
-            // TBD
-            break;
-        case 'connect':
-            // TBD: Rethink
-            connect(message.host, message.port, message.id);
-            break;
-        case 'disconnect':
-            // TBD
-            break;
-        case 'write':
-            write(message.id, message.data);
-            break;
+        switch (message.action) {
+            case 'add':
+                // TBD
+                break;
+            case 'connect':
+                // TBD: Rethink
+                connect(message.host, message.port, message.userId);
+                break;
+            case 'disconnect':
+                // TBD
+                break;
+            case 'write':
+                // TBD: Support networks
+                write(message.userId, message.line);
+                break;
+        }
     }
 }
 
@@ -118,10 +124,8 @@ function connect(host, port, userId, network) {
             data: line
         };
 
-        co(function *() {
-            yield redis.lpush('parserinbox', JSON.stringify(message));
-            console.log(line);
-        })();
+        console.log(line);
+        plainRedis.lpush('parserinbox', JSON.stringify(message));
     });
 
     client.on('end', function() {
@@ -131,8 +135,9 @@ function connect(host, port, userId, network) {
     return client;
 }
 
-function write(id, data) {
-    users[id].socket.write(data);
+function write(userId, data) {
+    console.log('WRITE: ' + data + ', userId: ' + userId);
+    users[userId].socket.write(data + '\r\n');
 }
 
 // TBD: Handle PING/PONG here
