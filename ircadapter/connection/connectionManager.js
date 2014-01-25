@@ -17,60 +17,63 @@
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     plainRedis = require('redis');
-    co = require('co');
-    net = require('net'),
-    pubSubClient = plainRedis.createClient();
+    co = require('co'),
+    net = require('net');
+    carrier = require('carrier');
 
 var users = {}
 
 var serverList = {
     MeetAndSpeak: { host: "localhost", port: 6667, unknown: 9999 },
-    IRCNet: { host: "ircnet.eversible.com", port: 6666, unknown: 100 },
+    Eversible: { host: "ircnet.eversible.com", port: 6666, unknown: 100 },
     FreeNode: { host: "irc.freenode.net", port: 6667, unknown: 5 },
     W3C: { host: "irc.w3.org", port: 6665, unknown: 5 }
 };
 
 function init() {
-    co(function *(){
+    co(function *() {
         var allUsers = yield redis.smembers('userlist');
 
         for (var i=0; i < allUsers.length; i++) {
-            var id = allUsers[i];
+            var userID = allUsers[i];
 
-            if (!(id in users)) {
-                var userInfo = yield redis.hgetall('user:' + id);
+            if (!(userID in users)) {
+                var userInfo = yield redis.hgetall('user:' + userID);
 
                 console.log('Importing user ' + userInfo.nick);
-                users[id] = {};
+                users[userID] = {};
 
                 var connectDelay = Math.floor((Math.random() * 180));
-                var windows = yield redis.smembers('windowlist:' + id);
+                var windows = yield redis.smembers('windowlist:' + userID);
 
                 // Make sure that we connect to Evergreen network
                 for (var ii=0; ii < windows.length; ii++) {
-                    // Format in Redis is "id:network:name"
+                    // Format in Redis is "userID:network:name"
                     console.log('raw windowlist: ' + windows[ii]);
                     var network = (windows[ii].split(':'))[1];
 
-                    if (network !== '0') {
+                    if (network !== 'MeetAndSpeak') {
                         // TBD: Implement. Wait connectDelay then connect()
                     }
                 }
 
-                // MeetAndSpeak network, always, no delay
-                users[id].socket = connect(serverList.MeetAndSpeak.host, serverList.MeetAndSpeak.port, id);
+                // MeetAndSpeak network, connect always, no delay
+                users[userID].socket = connect(
+                    serverList.MeetAndSpeak.host,
+                    serverList.MeetAndSpeak.port,
+                    userID,
+                    'MeetAndSpeak');
 
                 // TBD: Move to parser, only trigger connected evet in this module
-                write(id, "NICK " + userInfo.nick + "\r\nUSER " + userInfo.nick +" 8 * :Real Name (Ralph v1.0)\r\n");
+                write(userID,
+                    "NICK " + userInfo.nick + "\r\nUSER " + userInfo.nick +
+                    " 8 * :Real Name (Ralph v1.0)\r\n");
             }
         }
-    })()
+    })();
 }
 
 init();
-
-pubSubClient.on("message", processMessage);
-pubSubClient.subscribe("tcpCommands");
 
 function processMessage(channel, message) {
     message = JSON.parse(message);
@@ -94,25 +97,36 @@ function processMessage(channel, message) {
     }
 }
 
-function connect(host, port, id) {
+function connect(host, port, userId, network) {
     var options = {
         port: port,
         host: host
     };
 
-    var client = net.connect(options, connected);
+    var client = net.connect(options);
 
-    function connected() {
+    client.on('connect', function () {
         console.log('client connected');
+        //TDB notify parser
+    });
 
-        client.on('data', function(data) {
-            console.log(data.toString());
-        });
+    carrier.carry(client, function(line) {
+        var message = {
+            type: 'data',
+            network: network,
+            userId: userId,
+            data: line
+        };
 
-        client.on('end', function() {
-            console.log('client disconnected');
-        });
-    }
+        co(function *() {
+            yield redis.lpush('parserinbox', JSON.stringify(message));
+            console.log(line);
+        })();
+    });
+
+    client.on('end', function() {
+        console.log('client disconnected');
+    });
 
     return client;
 }
