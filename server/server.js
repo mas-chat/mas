@@ -1,4 +1,5 @@
-    //
+#!/usr/bin/env node --harmony
+//
 //   Copyright 2009-2013 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,7 +63,7 @@ app.use(router(app));
 // REST API routes
 app.get('/api/listen/:sessionId/:listenSeq/:timezone?*',
     authenticator, seqChecker, listenController);
-app.post('/api/send/:sessionId/:sendSeq/:command',
+app.post('/api/send/:sessionId/:sendSeq',
     authenticator, seqChecker, msgController);
 
 // Registration and login routes
