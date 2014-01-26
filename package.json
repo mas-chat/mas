@@ -1,12 +1,12 @@
 {
-  "name": "mas-server",
-  "version": "0.0.2",
+  "name": "mas",
+  "version": "0.0.3",
   "private": true,
-  "description": "MeetAndSpeak Server",
-  "main": "server.js",
+  "description": "MeetAndSpeak Web App",
+  "main": "server/server.js",
   "dependencies": {
     "less-middleware": "*",
-    "redis": "~0.8.4",
+    "redis": "~0.10.0",
     "forms": "~0.3.0",
     "winston": "~0.7.2",
     "chai": "~1.8.1",
@@ -21,9 +21,17 @@
     "koa-logger": "~1.1.0",
     "co-body": "0.0.1",
     "koa-mount": "~1.2.3",
-    "co-redis": "~1.1.0"
+    "co-redis": "~1.1.0",
+    "carrier": "~0.1.13",
+    "node-uuid": "~1.4.1",
+    "nconf": "~0.6.9",
+    "mysql": "~2.0.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.6.3",
+    "grunt-shell": "~0.3.1"
+  },
   "scripts": {
     "test": "echo \"No tests specified\" && exit 1",
     "start": "node server.js"
