@@ -16,7 +16,7 @@
 
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
-    outbox = require('../lib/outbox.js');
+    outbox = require('./outbox.js');
 
 exports.broadcast = function *(userId, network, type, text) {
     // TBD: Copy paste from listen.js
