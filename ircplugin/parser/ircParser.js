@@ -1,3 +1,4 @@
+#!/usr/bin/env node --harmony
 //
 //   Copyright 2009-2013 Ilkka Oksanen <iao@iki.fi>
 //
@@ -17,7 +18,15 @@
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient());
     co = require('co'),
+    courier = require('../../lib/courier'),
     textLine = require('../../server/lib/textLine');
+
+var serverList = {
+    MeetAndSpeak: { host: "localhost", port: 6667, unknown: 9999 },
+    Eversible: { host: "ircnet.eversible.com", port: 6666, unknown: 100 },
+    FreeNode: { host: "irc.freenode.net", port: 6667, unknown: 5 },
+    W3C: { host: "irc.w3.org", port: 6665, unknown: 5 }
+};
 
 var handlers = {};
 
@@ -27,10 +36,7 @@ function *main() {
     var result, message;
 
     while (1) {
-        result = yield redis.brpop('parserinbox', 0),
-        message = JSON.parse(result[1]);
-
-        console.log('MSG RCVD: ' + message.type);
+        message = yield courier.receive('ircparser');
 
         switch (message.type) {
             // Upper layer messages
@@ -39,16 +45,39 @@ function *main() {
                 break;
 
             // Connection manager messages
+            case 'ready':
+                yield init();
+                break;
             case 'data':
                 yield processIRCLine(message.userId, message.network, message.data);
                 break;
             case 'connected':
-                // TBD
+                yield processConnected(message.userId, message.network)
                 break;
             case 'disconnected':
                 // TBD
                 break;
         }
+    }
+}
+
+function *init() {
+    var allUsers = yield redis.smembers('userlist');
+
+    for (var i=0; i < allUsers.length; i++) {
+        var userId = allUsers[i];
+
+        var connectDelay = Math.floor((Math.random() * 180));
+        // TBD: Get user's networks. Connect to them.
+
+        // MeetAndSpeak network, connect always, no delay
+        yield courier.send('connectionmanager', {
+            type: 'connect',
+            userId: userId,
+            network: 'MeetAndSpeak',
+            host: serverList.MeetAndSpeak.host,
+            port: serverList.MeetAndSpeak.port
+        });
     }
 }
 
@@ -101,14 +130,29 @@ function *processIRCLine(userId, network, line) {
 }
 
 function *processAddText(userId, network, text) {
-    var message = {
+    yield courier.send('connectionmanager', {
+        type: 'write',
         userId: userId,
         network: network,
-        line: 'PRIVMSG #test ' + text,
-        action: 'write'
-    };
+        line: 'PRIVMSG #test ' + text
+    });
+}
 
-    yield redis.lpush('connectionmanagerinbox', JSON.stringify(message));
+function *processConnected(userId, network) {
+    var userInfo = yield redis.hgetall('user:' + userId);
+    console.log('Importing user ' + userInfo.nick);
+
+    var commands = [
+        'NICK ' + userInfo.nick,
+        'USER ' + userInfo.nick + ' 8 * :Real Name (Ralph v1.0)'
+    ];
+
+    yield courier.send('connectionmanager', {
+        type: 'write',
+        userId: userId,
+        network: network,
+        line: commands
+    });
 }
 
 // Process different IRC commands
@@ -158,27 +202,23 @@ function *handlePing(userId, network, msg) {
     var server = msg.params[0];
     var resp = 'PONG ' + server;
 
-    var message = {
+    yield courier.send('connectionmanager', {
+        type: 'write',
         userId: userId,
         network: network,
-        line: resp,
-        action: 'write'
-    }
-
-    yield redis.lpush('connectionmanagerinbox', JSON.stringify(message));
+        line: resp
+    });
 }
 
 function *handle376(userId, network, msg) {
     var resp = 'JOIN #test';
 
-    var message = {
+    yield courier.send('connectionmanager', {
+        type: 'write',
         userId: userId,
         network: network,
-        line: resp,
-        action: 'write'
-    }
-
-    yield redis.lpush('connectionmanagerinbox', JSON.stringify(message));
+        line: resp
+    });
 }
 
 function *handlePrivmsg(userId, network, msg) {
