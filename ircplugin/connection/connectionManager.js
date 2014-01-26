@@ -1,3 +1,4 @@
+#!/usr/bin/env node --harmony
 //
 //   Copyright 2013 Ilkka Oksanen <iao@iki.fi>
 //
@@ -14,96 +15,43 @@
 //   governing permissions and limitations under the License.
 //
 
+// Minimal connection manager that keeps TCP sockets alive even if
+// rest of the system is restarted. Allows nondistruptive updates.
+
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
-    plainRedis = require('redis').createClient();
     co = require('co'),
-    net = require('net');
-    carrier = require('carrier');
+    net = require('net'),
+    carrier = require('carrier'),
+    courier = require('../../lib/courier');
 
-var users = {}
+var sockets = {};
 
-var serverList = {
-    MeetAndSpeak: { host: "localhost", port: 6667, unknown: 9999 },
-    Eversible: { host: "ircnet.eversible.com", port: 6666, unknown: 100 },
-    FreeNode: { host: "irc.freenode.net", port: 6667, unknown: 5 },
-    W3C: { host: "irc.w3.org", port: 6665, unknown: 5 }
-};
-
-init();
-
-function init() {
-    co(function *() {
-        var allUsers = yield redis.smembers('userlist');
-
-        for (var i=0; i < allUsers.length; i++) {
-            var userID = allUsers[i];
-
-            if (!(userID in users)) {
-                var userInfo = yield redis.hgetall('user:' + userID);
-
-                console.log('Importing user ' + userInfo.nick);
-                users[userID] = {};
-
-                var connectDelay = Math.floor((Math.random() * 180));
-                var windows = yield redis.smembers('windowlist:' + userID);
-
-                // Make sure that we connect to Evergreen network
-                for (var ii=0; ii < windows.length; ii++) {
-                    // Format in Redis is "userID:network:name"
-                    console.log('raw windowlist: ' + windows[ii]);
-                    var network = (windows[ii].split(':'))[1];
-
-                    if (network !== 'MeetAndSpeak') {
-                        // TBD: Implement. Wait connectDelay then connect()
-                    }
-                }
-
-                // MeetAndSpeak network, connect always, no delay
-                users[userID].socket = connect(
-                    serverList.MeetAndSpeak.host,
-                    serverList.MeetAndSpeak.port,
-                    userID,
-                    'MeetAndSpeak');
-
-                // TBD: Move to parser, only trigger connected event in this module
-                write(userID,
-                    "NICK " + userInfo.nick + "\r\nUSER " + userInfo.nick +
-                    " 8 * :Real Name (Ralph v1.0)\r\n");
-            }
-        }
-
-        yield main();
-    })();
-}
+co(main)();
 
 function *main() {
+    yield courier.send('ircparser', 'ready');
+
     while (1) {
-        var result = yield redis.brpop('connectionmanagerinbox', 0);
-        var message = JSON.parse(result[1]);
+        var message = yield courier.receive('connectionmanager');
+        var userId = message.userId;
+        var network = message.network;
 
-        console.log('Rcvd message: ' + message.action);
-
-        switch (message.action) {
-            case 'add':
-                // TBD
-                break;
+        switch (message.type) {
             case 'connect':
-                // TBD: Rethink
-                connect(message.host, message.port, message.userId);
+                connect(userId, network, message.host, message.port);
                 break;
             case 'disconnect':
-                // TBD
+                disconnect(userId, network);
                 break;
             case 'write':
-                // TBD: Support networks
-                write(message.userId, message.line);
+                write(userId, network, message.line);
                 break;
         }
     }
 }
 
-function connect(host, port, userId, network) {
+function connect(userId, network, host, port) {
     var options = {
         port: port,
         host: host
@@ -112,58 +60,41 @@ function connect(host, port, userId, network) {
     var client = net.connect(options);
 
     client.on('connect', function () {
-        console.log('client connected');
-        //TDB notify parser
+        courier.sendNoWait('ircparser', {
+            type: 'connected',
+            userId: userId,
+            network: network
+        });
     });
 
     carrier.carry(client, function(line) {
-        var message = {
+        courier.sendNoWait('ircparser', {
             type: 'data',
-            network: network,
             userId: userId,
+            network: network,
             data: line
-        };
-
-        console.log('CONNMAN IRC line RCVD: ' + line);
-        plainRedis.lpush('parserinbox', JSON.stringify(message));
+        });
     });
 
     client.on('end', function() {
-        console.log('client disconnected');
+        courier.sendNoWait('ircparser', 'disconnected');
     });
 
-    return client;
+    sockets[userId + ':' + network] = client;
 }
 
-function write(userId, data) {
-    console.log('WRITE: ' + data + ', userId: ' + userId);
-    users[userId].socket.write(data + '\r\n');
+function disconnect(userId, network) {
+    sockets[userId + ':' + network].end();
+    delete sockets[userId + ':' + network];
 }
 
-// TBD: Handle PING/PONG here
-//
-// tcpMessages (list)
-//   {
-//     action: connect/disconnect/send
-//   }
-//
-// {
-//     action: 'connect',
-//     host: 'irc.example.org',
-//     port: '6667'
-// TBD nick: xxx,
-// TBD realName: yyy
-// }
-//
-// tcpResponses
-//  {
-//     type :data/event
-//  }
-// newSend
-// newRcvd
-//
-// events:
-//
-// rcvd
-// opened
-// closed
+function write(userId, network, data) {
+    if (typeof(data) === 'string') {
+        data = [ data ];
+    }
+
+    for (var i = 0; i < data.length; i++) {
+        console.log('WRITE: ' + data[i] + ', userId: ' + userId);
+        sockets[userId + ':' + network].write(data[i] + '\r\n');
+    }
+}
