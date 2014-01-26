@@ -23,7 +23,7 @@ var wrapper = require('co-redis'),
     co = require('co'),
     net = require('net'),
     carrier = require('carrier'),
-    courier = require('../../lib/courier');
+    courier = require('../lib/courier');
 
 var sockets = {};
 

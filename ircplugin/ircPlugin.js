@@ -18,8 +18,8 @@
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient());
     co = require('co'),
-    courier = require('../../lib/courier'),
-    textLine = require('../../server/lib/textLine');
+    courier = require('../lib/courier'),
+    textLine = require('../server/lib/textLine');
 
 var serverList = {
     MeetAndSpeak: { host: "localhost", port: 6667, unknown: 9999 },
