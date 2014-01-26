@@ -1,14 +1,32 @@
 {
-  "name": "mas",
-  "version": "0.1.0",
-  "description": "MeetAndSpeak server and HTML client",
-  "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-jshint": "~0.6.3",
-    "grunt-shell": "~0.3.1"
+  "name": "mas-server",
+  "version": "0.0.2",
+  "private": true,
+  "description": "MeetAndSpeak Server",
+  "main": "server.js",
+  "dependencies": {
+    "less-middleware": "*",
+    "redis": "~0.8.4",
+    "forms": "~0.3.0",
+    "winston": "~0.7.2",
+    "chai": "~1.8.1",
+    "q": "~1.0.0",
+    "co": "~3.0.2",
+    "koa": "~0.2.1",
+    "koa-hbs": "~0.4.1",
+    "koa-router": "~2.4.0",
+    "koa-error": "~1.1.1",
+    "koa-static": "~1.4.2",
+    "koa-less": "0.0.1",
+    "koa-logger": "~1.1.0",
+    "co-body": "0.0.1",
+    "koa-mount": "~1.2.3",
+    "co-redis": "~1.1.0"
   },
+  "devDependencies": {},
   "scripts": {
-    "test": "echo \"No tests specified\" && exit 1"
+    "test": "echo \"No tests specified\" && exit 1",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +38,6 @@
   "author": "Ilkka Oksanen",
   "license": "Apache",
   "bugs": {
-    "url": "https://github.com/ilkkao/mas-webclient/issues"
+    "url": "https://github.com/ilkkao/mas/issues"
   }
 }
