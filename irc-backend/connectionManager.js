@@ -37,7 +37,7 @@ courier.on('connect', function(params) {
 
     var client = net.connect(options);
 
-    client.on('connect', function () {
+    client.on('connect', function() {
         courier.sendNoWait('ircparser', {
             type: 'connected',
             userId: userId,
@@ -77,7 +77,7 @@ courier.on('write', function(params) {
     var data = params.line;
 
     if (typeof(data) === 'string') {
-        data = [ data ];
+        data = [data];
     }
 
     for (var i = 0; i < data.length; i++) {
