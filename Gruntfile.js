@@ -24,7 +24,8 @@ module.exports = function(grunt) {
                     stdout: true,
                     stderr: true
                 },
-                command: 'vagrant ssh -c "sudo killall ralph.pl; cd /source/meetandspeak/ && sudo ./install.sh dev && sudo /opt/evergreen/ralph/ralph.pl -vn 1"'
+                command: 'vagrant ssh -c "sudo killall ralph.pl; cd /source/meetandspeak/ &&' +
+                   ' sudo ./install.sh dev && sudo /opt/evergreen/ralph/ralph.pl -vn 1"'
             }
         }
     });
