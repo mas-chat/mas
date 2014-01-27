@@ -18,38 +18,34 @@
 // Minimal connection manager that keeps TCP sockets alive even if
 // rest of the system is restarted. Allows nondistruptive updates.
 
-var wrapper = require('co-redis'),
-    redis = wrapper(require('redis').createClient()),
-    co = require('co'),
-    net = require('net'),
+var net = require('net'),
     carrier = require('carrier'),
-    courier = require('../lib/courier');
+    courier = require('../lib/courier').createEndPoint('connectionmanager');
 
 var sockets = {};
 
-co(main)();
+courier.sendNoWait('ircparser', 'ready');
 
-function *main() {
-    yield courier.send('ircparser', 'ready');
+courier.on('connect', function *(params) {
+    var userId = params.userId;
+    var network = params.network;
 
-    while (1) {
-        var message = yield courier.receive('connectionmanager');
-        var userId = message.userId;
-        var network = message.network;
+    connect(userId, network, message.host, message.port);
+});
 
-        switch (message.type) {
-            case 'connect':
-                connect(userId, network, message.host, message.port);
-                break;
-            case 'disconnect':
-                disconnect(userId, network);
-                break;
-            case 'write':
-                write(userId, network, message.line);
-                break;
-        }
-    }
-}
+courier.on('disconnect', function *(params) {
+    var userId = message.userId;
+    var network = message.network;
+
+    disconnect(userId, network);
+});
+
+courier.on('write', function *(params) {
+    var userId = message.userId;
+    var network = message.network;
+
+    write(userId, network, message.line);
+});
 
 function connect(userId, network, host, port) {
     var options = {
