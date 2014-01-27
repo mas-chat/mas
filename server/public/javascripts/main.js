@@ -36,12 +36,12 @@ require([
 							expiresdate = 14;
 						}
 
-						$.cookie("ProjectEvergreen", data.userId + "-" + data.secret + "-n",
+						$.cookie('ProjectEvergreen', data.userId + '-' + data.secret + '-n',
 							{ path: '/', expires: expiresdate });
 
-                        window.location.pathname = "/main/source/";
+                        window.location.pathname = '/main/source/';
                     } else {
-                        $("#email-or-nick").simpletip({
+                        $('#email-or-nick').simpletip({
                             content: data.msg,
                             fixed: true,
                             position: 'bottom',

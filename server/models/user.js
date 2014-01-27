@@ -31,8 +31,8 @@ function User(details, settings, friends) {
 
 User.prototype.save = function *() {
     var index = {};
-    index[this.data.nick] = this.data.userid,
-    index[this.data.email] = this.data.userid
+    index[this.data.nick] = this.data.userid;
+    index[this.data.email] = this.data.userid;
 
     var promises = [
         Q.nsend(r, 'hmset', 'user:' + this.data.userid, this.data),
@@ -47,4 +47,4 @@ User.prototype.save = function *() {
     }
 
     yield promises;
-}
+};

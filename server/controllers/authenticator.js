@@ -36,9 +36,9 @@ module.exports = function *(next) {
     }
 
     var userId = data[0];
-    var cookie = data[1]; // TBD: bad name
+    var secret = data[1]; // TBD: bad name
 
-    var validUser = yield validateUser(userId, cookie);
+    var validUser = yield validateUser(userId, secret);
 
     if (!validUser) {
         w.info('Invalid user.');
@@ -69,9 +69,9 @@ module.exports = function *(next) {
     this.mas.userId = userId;
 
     yield next;
-}
+};
 
-function *validateUser(userId, cookie) {
+function *validateUser(userId, secret) {
     var unixTime = Math.round(new Date().getTime() / 1000);
 
     if (!userId) {
@@ -80,7 +80,7 @@ function *validateUser(userId, cookie) {
 
     var expected = yield redis.hmget('user:' + userId, 'cookie_expires', 'cookie');
 
-    if (expected && expected[0] > unixTime && expected[1] === cookie) {
+    if (expected && expected[0] > unixTime && expected[1] === secret) {
         return true;
     } else {
         return false;

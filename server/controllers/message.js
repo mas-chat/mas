@@ -14,12 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-var wrapper = require('co-redis'),
-    redis = wrapper(require('redis').createClient()),
-    parse = require('co-body'),
+var parse = require('co-body'),
     courier = require('../../lib/courier').createEndPoint('message');
 
-module.exports = function *(next) {
+module.exports = function *() {
     var userId = this.mas.userId;
     var body = yield parse.json(this.req);
 
@@ -40,7 +38,7 @@ module.exports = function *(next) {
 
     var resp = {
         status: 'OK'
-    }
+    };
 
     this.body = resp;
 
