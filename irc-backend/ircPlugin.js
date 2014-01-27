@@ -17,8 +17,7 @@
 
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient());
-    co = require('co'),
-    courier = require('../lib/courier'),
+    courier = require('../lib/courier').createEndPoint('ircparser');
     textLine = require('../server/lib/textLine');
 
 var serverList = {
@@ -30,63 +29,30 @@ var serverList = {
 
 var handlers = {};
 
-co(main)();
+// Upper layer messages
 
-function *main() {
-    var result, message;
+// addText
+courier.on('addText', function *(params) {
+    yield courier.send('connectionmanager', {
+        type: 'write',
+        userId: params.userId,
+        network: params.network,
+        line: 'PRIVMSG #test ' + params.text
+    });
+});
 
-    while (1) {
-        message = yield courier.receive('ircparser');
+// Connection manager messages
 
-        switch (message.type) {
-            // Upper layer messages
-            case 'addText':
-                yield processAddText(message.userId, message.network, message.text);
-                break;
+// Ready
+courier.on('ready', function *(params) {
+    yield init();
+});
 
-            // Connection manager messages
-            case 'ready':
-                yield init();
-                break;
-            case 'data':
-                yield processIRCLine(message.userId, message.network, message.data);
-                break;
-            case 'connected':
-                yield processConnected(message.userId, message.network)
-                break;
-            case 'disconnected':
-                // TBD
-                break;
-        }
-    }
-}
-
-function *init() {
-    var allUsers = yield redis.smembers('userlist');
-
-    for (var i=0; i < allUsers.length; i++) {
-        var userId = allUsers[i];
-
-        var connectDelay = Math.floor((Math.random() * 180));
-        // TBD: Get user's networks. Connect to them.
-
-        // MeetAndSpeak network, connect always, no delay
-        yield courier.send('connectionmanager', {
-            type: 'connect',
-            userId: userId,
-            network: 'MeetAndSpeak',
-            host: serverList.MeetAndSpeak.host,
-            port: serverList.MeetAndSpeak.port
-        });
-    }
-}
-
-function *processIRCLine(userId, network, line) {
-    var parts = line.split(' '),
-        params;
+// Data
+courier.on('data', function *(params) {
+    var line = params.line,
+        parts = line.split(' '),
         msg = {};
-
-    console.log('Prosessing IRC line: ' + line);
 
     // See rfc2812
 
@@ -125,21 +91,13 @@ function *processIRCLine(userId, network, line) {
     }
 
     if (handlers[msg.command]) {
-        yield handlers[msg.command](userId, network, msg);
+        yield handlers[msg.command](params.userId, params.network, msg);
     }
-}
+});
 
-function *processAddText(userId, network, text) {
-    yield courier.send('connectionmanager', {
-        type: 'write',
-        userId: userId,
-        network: network,
-        line: 'PRIVMSG #test ' + text
-    });
-}
-
-function *processConnected(userId, network) {
-    var userInfo = yield redis.hgetall('user:' + userId);
+// Connected
+courier.on('connected', function *(params) {
+    var userInfo = yield redis.hgetall('user:' + params.userId);
     console.log('Importing user ' + userInfo.nick);
 
     var commands = [
@@ -149,10 +107,35 @@ function *processConnected(userId, network) {
 
     yield courier.send('connectionmanager', {
         type: 'write',
-        userId: userId,
-        network: network,
+        userId: params.userId,
+        network: params.network,
         line: commands
     });
+});
+
+// Disconnect
+courier.on('disconnected', function *(params) {
+    //TBD
+});
+
+function *init() {
+    var allUsers = yield redis.smembers('userlist');
+
+    for (var i=0; i < allUsers.length; i++) {
+        var userId = allUsers[i];
+
+        var connectDelay = Math.floor((Math.random() * 180));
+        // TBD: Get user's networks. Connect to them.
+
+        // MeetAndSpeak network, connect always, no delay
+        yield courier.send('connectionmanager', {
+            type: 'connect',
+            userId: userId,
+            network: 'MeetAndSpeak',
+            host: serverList.MeetAndSpeak.host,
+            port: serverList.MeetAndSpeak.port
+        });
+    }
 }
 
 // Process different IRC commands
