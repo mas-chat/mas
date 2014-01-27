@@ -64,8 +64,8 @@ courier.on('data', function *(params) {
         if (nickEnds === -1 && identEnds === -1) {
             msg.serverName = prefix;
         } else {
-            msg.nick = prefix.substring(0, Math.min(nickEnds,identEnds));
-            msg.userNameAndHost = prefix.substring(Math.min(nickEnds,identEnds));
+            msg.nick = prefix.substring(0, Math.min(nickEnds, identEnds));
+            msg.userNameAndHost = prefix.substring(Math.min(nickEnds, identEnds));
         }
     }
 
@@ -119,7 +119,7 @@ courier.on('disconnected', function(params) {
 function *init() {
     var allUsers = yield redis.smembers('userlist');
 
-    for (var i=0; i < allUsers.length; i++) {
+    for (var i = 0; i < allUsers.length; i++) {
         var userId = allUsers[i];
 
         var connectDelay = Math.floor((Math.random() * 180));
