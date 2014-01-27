@@ -27,7 +27,7 @@ var sockets = {};
 courier.sendNoWait('ircparser', 'ready');
 
 // Connect
-courier.on('connect', function *(params) {
+courier.on('connect', function(params) {
     var userId = params.userId;
     var network = params.network;
     var options = {
@@ -62,7 +62,7 @@ courier.on('connect', function *(params) {
 });
 
 // Disconnect
-courier.on('disconnect', function *(params) {
+courier.on('disconnect', function(params) {
     var userId = params.userId;
     var network = params.network;
 
@@ -71,7 +71,7 @@ courier.on('disconnect', function *(params) {
 });
 
 // Write
-courier.on('write', function *(params) {
+courier.on('write', function(params) {
     var userId = params.userId;
     var network = params.network;
     var data = params.line;

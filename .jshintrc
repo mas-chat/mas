@@ -88,6 +88,10 @@
         "escape": true,
         "console": true,
         "require": true,
-        "w": true
+        "w": true,
+
+        "it": true,
+        "describe": true,
+        "expect": true
     }
 }

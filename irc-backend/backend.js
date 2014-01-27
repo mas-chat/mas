@@ -27,8 +27,6 @@ var serverList = {
     W3C: { host: 'irc.w3.org', port: 6665, unknown: 5 }
 };
 
-var handlers = {};
-
 // Upper layer messages
 
 // addText
@@ -114,7 +112,7 @@ courier.on('connected', function *(params) {
 });
 
 // Disconnect
-courier.on('disconnected', function *(params) {
+courier.on('disconnected', function(params) {
     //TBD
 });
 
