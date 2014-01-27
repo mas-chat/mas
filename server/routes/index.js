@@ -1,5 +1,5 @@
 //
-//   Copyright 2009-2013 Ilkka Oksanen <iao@iki.fi>
+//   Copyright 2009-2014 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
