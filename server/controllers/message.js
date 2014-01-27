@@ -36,7 +36,7 @@ module.exports = function *(next) {
             break;
     }
 
-    kayta parser tekniikkaa jossa lookup table
+    // TBD: Add lookup table for commands
 
     var resp = {
         status: 'OK'
