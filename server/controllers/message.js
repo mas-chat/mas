@@ -17,7 +17,7 @@
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     parse = require('co-body'),
-    courier = require('../../lib/courier');
+    courier = require('../../lib/courier').createEndPoint('message');
 
 module.exports = function *(next) {
     var userId = this.mas.userId;
@@ -35,6 +35,8 @@ module.exports = function *(next) {
             });
             break;
     }
+
+    kayta parser tekniikkaa jossa lookup table
 
     var resp = {
         status: 'OK'
