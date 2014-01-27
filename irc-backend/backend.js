@@ -21,10 +21,10 @@ var wrapper = require('co-redis'),
     textLine = require('../server/lib/textLine');
 
 var serverList = {
-    MeetAndSpeak: { host: "localhost", port: 6667, unknown: 9999 },
-    Eversible: { host: "ircnet.eversible.com", port: 6666, unknown: 100 },
-    FreeNode: { host: "irc.freenode.net", port: 6667, unknown: 5 },
-    W3C: { host: "irc.w3.org", port: 6665, unknown: 5 }
+    MeetAndSpeak: { host: 'localhost', port: 6667, unknown: 9999 },
+    Eversible: { host: 'ircnet.eversible.com', port: 6666, unknown: 100 },
+    FreeNode: { host: 'irc.freenode.net', port: 6667, unknown: 5 },
+    W3C: { host: 'irc.w3.org', port: 6665, unknown: 5 }
 };
 
 var handlers = {};
