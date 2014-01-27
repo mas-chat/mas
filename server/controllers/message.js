@@ -16,7 +16,8 @@
 
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
-    parse = require('co-body');
+    parse = require('co-body'),
+    courier = require('../../lib/courier');
 
 module.exports = function *(next) {
     var userId = this.mas.userId;
@@ -26,14 +27,12 @@ module.exports = function *(next) {
 
     switch (body.command) {
         case 'SEND':
-            var message = {
+            yield courier.send('ircparser', {
                 type: 'addText',
                 userId: userId,
                 network: 'TBD',
                 text: body.text
-            }
-
-            yield redis.lpush('parserinbox', JSON.stringify(message));
+            });
             break;
     }
 
