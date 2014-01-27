@@ -26,31 +26,13 @@ var sockets = {};
 
 courier.sendNoWait('ircparser', 'ready');
 
+// Connect
 courier.on('connect', function *(params) {
     var userId = params.userId;
     var network = params.network;
-
-    connect(userId, network, message.host, message.port);
-});
-
-courier.on('disconnect', function *(params) {
-    var userId = message.userId;
-    var network = message.network;
-
-    disconnect(userId, network);
-});
-
-courier.on('write', function *(params) {
-    var userId = message.userId;
-    var network = message.network;
-
-    write(userId, network, message.line);
-});
-
-function connect(userId, network, host, port) {
     var options = {
-        port: port,
-        host: host
+        port: params.port,
+        host: params.host
     };
 
     var client = net.connect(options);
@@ -68,7 +50,7 @@ function connect(userId, network, host, port) {
             type: 'data',
             userId: userId,
             network: network,
-            data: line
+            line: line
         });
     });
 
@@ -77,20 +59,28 @@ function connect(userId, network, host, port) {
     });
 
     sockets[userId + ':' + network] = client;
-}
+});
 
-function disconnect(userId, network) {
+// Disconnect
+courier.on('disconnect', function *(params) {
+    var userId = params.userId;
+    var network = params.network;
+
     sockets[userId + ':' + network].end();
     delete sockets[userId + ':' + network];
-}
+});
 
-function write(userId, network, data) {
+// Write
+courier.on('write', function *(params) {
+    var userId = params.userId;
+    var network = params.network;
+    var data = params.line;
+
     if (typeof(data) === 'string') {
         data = [ data ];
     }
 
     for (var i = 0; i < data.length; i++) {
-        console.log('WRITE: ' + data[i] + ', userId: ' + userId);
         sockets[userId + ':' + network].write(data[i] + '\r\n');
     }
-}
+});
