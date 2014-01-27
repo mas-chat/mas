@@ -37,12 +37,12 @@ exports.broadcast = function *(userId, network, type, text) {
             yield redis.rpush('windowmsgs:' + userId + ':' + windowId, text);
 
             yield outbox.queue(userId, {
-                id: "ADDTEXT",
+                id: 'ADDTEXT',
                 window: windowId,
                 body: text,
-                cat: "notice",
-                ts: "209",
-                nick: "testperson",
+                cat: 'notice',
+                ts: '209',
+                nick: 'testperson',
                 type: 0
             });
 
@@ -50,4 +50,4 @@ exports.broadcast = function *(userId, network, type, text) {
             redis.publish('useroutbox:' + userId , 'message');
         }
     }
-}
+};

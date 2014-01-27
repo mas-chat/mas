@@ -14,13 +14,11 @@
 //   governing permissions and limitations under the License.
 //
 
-var Q = require('q'),
-    wrapper = require('co-redis'),
+var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
-    plainRedis = require('redis'),
     outbox = require('../lib/outbox.js');
 
-module.exports = function *(next) {
+module.exports = function *() {
     var userId = this.mas.userId;
     var sessionId = this.mas.sessionId;
 
@@ -31,7 +29,7 @@ module.exports = function *(next) {
     }
 
     this.body = yield outbox.flush(userId, 25);
-}
+};
 
 function *initSession(userId, sessionId) {
     // New session, reset outbox

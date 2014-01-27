@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-module.exports = function *(next) {
+module.exports = function *() {
     var page = this.request.url.replace(/\/(.*)\.html/, '$1');
 
     yield this.render(page, {

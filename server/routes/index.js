@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-module.exports = function *(next) {
+module.exports = function *() {
     yield this.render('index', {
         page: 'frontpage',
         title: 'MeetAndSpeak'

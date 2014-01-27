@@ -16,8 +16,8 @@
 //
 
 var wrapper = require('co-redis'),
-    redis = wrapper(require('redis').createClient());
-    courier = require('../lib/courier').createEndPoint('ircparser');
+    redis = wrapper(require('redis').createClient()),
+    courier = require('../lib/courier').createEndPoint('ircparser'),
     textLine = require('../server/lib/textLine');
 
 var serverList = {

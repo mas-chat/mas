@@ -21,32 +21,34 @@ var crypto = require('crypto'),
 
 module.exports = {
     // POST /login
-    create: function *(next) {
+    create: function *() {
         var body = yield parse.form(this);
-
         var password = body.password;
         var passwordSha = crypto.createHash('sha256').update(password,
                 'utf8').digest('hex');
+        var user = null;
 
         var userId = yield Q.nsend(r, 'hget', 'index:user', body.emailOrNick);
 
         if (userId) {
-            var user = yield Q.nsend(r, 'hgetall', 'user:' + userId);
+            user = yield Q.nsend(r, 'hgetall', 'user:' + userId);
         }
 
         if (!userId || user.passwd !== passwordSha || user.inuse === 0) {
             // Unknown user, wrong password, or disabled account
             this.body = {
                success: false,
-               msg: "Wrong password or ..."
+               msg: 'Wrong password or ...'
             };
         } else {
             var useSsl = yield Q.nsend(r, 'hget', 'settings:' + userId, 'sslEnabled');
             var unixTime = Math.round(new Date().getTime() / 1000);
+            var update = null;
 
+            // TBD: Use word secret everywhere
             if (!(user.cookie > 0 && unixTime < user.cookie_expires)) {
                 // Time to generate new secret
-                var update = {
+                update = {
                     cookie: Math.floor(Math.random() * 100000001) + 100000000,
                     cookie_expires: unixTime + (60 * 60 * 24 * 14)
                 };
@@ -58,7 +60,7 @@ module.exports = {
             this.body = {
                 success: true,
                 userId: userId,
-                secret: user.cookie || update.cookie,
+                secret: update.cookie || user.cookie,
                 useSsl: useSsl
             };
         }

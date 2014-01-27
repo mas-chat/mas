@@ -39,8 +39,8 @@ module.exports = function *(next) {
     if (this.mas.newSession) {
         // New session, reset sequence numbers.
         var update = {
-            "sendRcvNext": 0,
-            "listenRcvNext": 0,
+            'sendRcvNext': 0,
+            'listenRcvNext': 0,
         };
 
         yield redis.hmset('user:' + this.mas.userId, update);
@@ -57,7 +57,7 @@ module.exports = function *(next) {
     yield redis.hincrby('user:' + this.mas.userId, expectedSeqKeyName, 1);
 
     yield next;
-}
+};
 
 function respond(ctx, code, msg) {
     ctx.status = code;

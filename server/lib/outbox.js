@@ -19,7 +19,7 @@ var wrapper = require('co-redis'),
 
 exports.reset = function *(userId) {
     yield redis.del('outbox:' + userId);
-}
+};
 
 exports.queue = function *(userId) {
     for (var i = 1; i < arguments.length; i++){
@@ -36,7 +36,7 @@ exports.flush = function *(userId, timeout) {
     var msg = {
         status: 'OK',
         commands: []
-    }
+    };
 
     if (timeout) {
         // Wait for first command to appear if timeout is given
