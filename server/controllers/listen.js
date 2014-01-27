@@ -38,10 +38,10 @@ function *initSession(userId, sessionId) {
     yield outbox.reset(userId);
 
     yield outbox.queue(userId, {
-        id: "SESSIONID",
+        id: 'SESSIONID',
         sessionId: sessionId
     }, {
-        id: "SET",
+        id: 'SET',
         settings: {}
     });
 
@@ -57,13 +57,13 @@ function *initSession(userId, sessionId) {
         var window = yield redis.hgetall('window:' + userId + ':' + windowId);
 
         yield outbox.queue(userId, {
-            id: "CREATE",
+            id: 'CREATE',
             window: windowId,
             x: parseInt(window.x),
             y: parseInt(window.y),
             width: parseInt(window.width),
             height: parseInt(window.height),
-            nwName: "", // TBD
+            nwName: '', // TBD
             nwId: network, // TBD This is now string not number! Fix client and docs!
             chanName: windowName,
             chanType: parseInt(window.type),
@@ -73,7 +73,7 @@ function *initSession(userId, sessionId) {
             visible: 1, // TBD
             newMsgs: 2, // TBD
             password: window.password,
-            topic: "Hello" // TBD
+            topic: 'Hello' // TBD
         });
     }
 

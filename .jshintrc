@@ -87,6 +87,7 @@
         "debug": true,
         "escape": true,
         "console": true,
-        "require": true
+        "require": true,
+        "w": true
     }
 }

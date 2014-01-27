@@ -25,7 +25,7 @@ exports.queue = function *(userId) {
     for (var i = 1; i < arguments.length; i++){
         yield redis.lpush('outbox:' + userId, JSON.stringify(arguments[i]));
     }
-}
+};
 
 exports.flush = function *(userId, timeout) {
     var result,
@@ -54,8 +54,8 @@ exports.flush = function *(userId, timeout) {
     }
 
     return msg;
-}
+};
 
 exports.length = function *(userId) {
     return parseInt(yield redis.llen('outbox:' + userId));
-}
+};
