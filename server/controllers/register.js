@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+'use strict';
+
 var forms = require('forms'),
     fields = forms.fields,
     widgets = forms.widgets,

@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+'use strict';
+
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     outbox = require('./outbox.js');

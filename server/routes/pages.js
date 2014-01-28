@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+'use strict';
+
 module.exports = function *() {
     var page = this.request.url.replace(/\/(.*)\.html/, '$1');
 
