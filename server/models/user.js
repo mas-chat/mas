@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+'use strict';
+
 var r = require('redis').createClient(),
     Q = require('q');
 

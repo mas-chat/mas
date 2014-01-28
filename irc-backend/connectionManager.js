@@ -15,6 +15,8 @@
 //   governing permissions and limitations under the License.
 //
 
+'use strict';
+
 // Minimal connection manager that keeps TCP sockets alive even if
 // rest of the system is restarted. Allows nondistruptive updates.
 
