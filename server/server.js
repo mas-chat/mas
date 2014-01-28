@@ -15,6 +15,8 @@
 //   governing permissions and limitations under the License.
 //
 
+'use strict';
+
 w = require('winston');
 
 var koa = require('koa'),

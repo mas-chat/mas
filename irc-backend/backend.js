@@ -15,6 +15,8 @@
 //   governing permissions and limitations under the License.
 //
 
+'use strict';
+
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     courier = require('../lib/courier').createEndPoint('ircparser'),

@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+'use strict';
+
 var parse = require('co-body'),
     courier = require('../../lib/courier').createEndPoint('message');
 
