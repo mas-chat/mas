@@ -34,7 +34,7 @@
     "grunt-shell": "~0.6.4"
   },
   "scripts": {
-    "test": "grunt --verbose",
+    "test": "redis-server -v && uname -a && df -h && grunt --verbose",
     "start": "node --harmony server/server"
   },
   "repository": {
