@@ -3,11 +3,11 @@
 [#]*[#]
 .\#*
 
-#Ignore generated directories
-build/
+#Ignore generated files/directories
 node_modules/
-server/node_modules/
-server/config.json
+client/build
+config.json
+npm-debug.log
 
 #Mac files
 .DS_Store
