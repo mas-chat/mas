@@ -16,7 +16,8 @@
 
 'use strict';
 
-var wrapper = require('co-redis'),
+var log = require('../../lib/log'),
+    wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     outbox = require('../lib/outbox.js');
 
@@ -24,7 +25,7 @@ module.exports = function *() {
     var userId = this.mas.userId;
     var sessionId = this.mas.sessionId;
 
-    w.info('[' + userId + '] Long poll received');
+    log.info(userId, 'Long poll HTTP request received');
 
     if (this.mas.newSession) {
         yield initSession(userId, sessionId);

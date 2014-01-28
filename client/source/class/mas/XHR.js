@@ -66,7 +66,7 @@ qx.Class.define('mas.XHR', {
         call: function(message) {
             // TBD: Remove when everything is JSON based
             if (typeof message !== 'object') {
-                console.log('ERROR: Non-JSON message detected: ' + message );
+                debug.print('ERROR: Non-JSON message detected: ' + message );
                 return;
             }
 

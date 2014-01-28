@@ -17,9 +17,8 @@
 
 'use strict';
 
-w = require('winston');
-
-var koa = require('koa'),
+var log = require('../lib/log'),
+    koa = require('koa'),
     router = require('koa-router'),
     hbs = require('koa-hbs'),
     less = require('koa-less'),
@@ -37,13 +36,9 @@ var koa = require('koa'),
     registerController = require('./controllers/register'),
     path = require('path');
 
-// Configure logging
-w.add(w.transports.File, { filename: 'mas.log' });
-//w.remove(w.transports.Console);
-
 var app = koa();
 
-w.info('Server starting.');
+log.info('Server starting.');
 
 // Development only
 if (app.env === 'development') {

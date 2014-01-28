@@ -16,7 +16,8 @@
 
 'use strict';
 
-var wrapper = require('co-redis'),
+var log = require('../../lib/log'),
+    wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient());
 
 exports.reset = function *(userId) {
@@ -33,7 +34,7 @@ exports.flush = function *(userId, timeout) {
     var result,
         command;
 
-    w.info('[' + userId + '] Flushing outbox.');
+    log.info(userId, 'Flushing outbox.');
 
     var msg = {
         status: 'OK',
