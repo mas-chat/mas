@@ -1,4 +1,5 @@
-
+MAS Redis structures
+====================
 
  user:<userid> (hash)
    name (string)
@@ -21,9 +22,9 @@
    listenRcvNext (int)
    sessionId (int)
 
-       index:user (hash)
-         <email> (string)
-         <nick> (string)
+ index:user (hash)
+   <email> (int, userId)
+   <nick> (int, userId)
 
  users (set)
    userid1, userid2 ...
@@ -83,4 +84,3 @@
 
  parserinbox (list)
  connectionmanagerinbox (list)
-
