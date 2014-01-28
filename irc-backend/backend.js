@@ -17,7 +17,8 @@
 
 'use strict';
 
-var wrapper = require('co-redis'),
+var log = require('../lib/log'),
+    wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     courier = require('../lib/courier').createEndPoint('ircparser'),
     textLine = require('../server/lib/textLine');
@@ -98,7 +99,7 @@ courier.on('data', function *(params) {
 // Connected
 courier.on('connected', function *(params) {
     var userInfo = yield redis.hgetall('user:' + params.userId);
-    console.log('Importing user ' + userInfo.nick);
+    log.info('Importing user ' + userInfo.nick);
 
     var commands = [
         'NICK ' + userInfo.nick,

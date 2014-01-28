@@ -17,6 +17,8 @@
 
 'use strict';
 
+/*global console */
+
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     uuid = require('node-uuid'),

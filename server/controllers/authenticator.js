@@ -16,11 +16,12 @@
 
 'use strict';
 
-var wrapper = require('co-redis'),
+var log = require('../../lib/log'),
+    wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient());
 
 module.exports = function *(next) {
-    w.info('Authenticating.');
+    log.info('Authenticating.');
 
     var cookie = this.cookies.get('ProjectEvergreen');
     var sessionId = parseInt(this.params.sessionId);
@@ -43,7 +44,7 @@ module.exports = function *(next) {
     var validUser = yield validateUser(userId, secret);
 
     if (!validUser) {
-        w.info('Invalid user.');
+        log.warn(userId, 'Invalid user.');
         respond('unauthorized', 'Invalid user.');
         return;
     }
@@ -51,12 +52,12 @@ module.exports = function *(next) {
     var validSession = yield validateSession(userId, sessionId);
 
     if (!validSession) {
-        w.info('Invalid session.');
+        log.warn(userId, 'Invalid session.');
         respond('not acceptable', 'Invalid session.');
         return;
     }
 
-    w.info('Valid user and session.');
+    log.info(userId, 'Valid user and session.');
 
     this.mas = this.mas || {};
 
