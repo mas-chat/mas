@@ -32,6 +32,9 @@ exports.broadcast = function *(userId, network, type, text) {
         var windowNetwork = details[1];
         var windowName = details[2];
 
+        windowNetwork = windowNetwork; // TBD
+        windowName = windowName; // TBD
+
         //TBD: Fix me!
         //if (windowNetwork === network) {
         if (1) {

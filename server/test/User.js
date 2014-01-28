@@ -1,7 +1,8 @@
-var chai = require('chai');
-var User = require('../models/user');
 
-var expect = chai.expect;
+//var chai = require('chai');
+//var expect = chai.expect;
+
+var User = require('../models/user');
 
 describe('User', function() {
     describe('constructor', function() {

@@ -87,7 +87,6 @@
         "debug": true,
         "escape": true,
         "require": true,
-        "w": true,
 
         "it": true,
         "describe": true,

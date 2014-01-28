@@ -16,7 +16,10 @@
 
 'use strict';
 
+//TBD add friendly name
 require(['/vendor/javascripts/jqBootstrapValidation.js'], function(validation) {
+
+    validation = validation; //TBD
 
 	$(function() {
 	});

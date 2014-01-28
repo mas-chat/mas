@@ -47,7 +47,9 @@ module.exports = {
             var unixTime = Math.round(new Date().getTime() / 1000);
             var update = null;
 
-            // TBD: Use word secret everywhere
+            // TBD: Use word secret everywhere. Rename cookie_expires to cookieExpires
+
+            /* jshint -W106 */
             if (!(user.cookie > 0 && unixTime < user.cookie_expires)) {
                 // Time to generate new secret
                 update = {
@@ -58,6 +60,7 @@ module.exports = {
                 // Save secret to Redis
                 yield Q.nsend(r, 'hmset', 'user:' + userId, update);
             }
+            /*jshint +W106 */
 
             this.body = {
                 success: true,
