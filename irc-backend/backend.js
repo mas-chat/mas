@@ -67,7 +67,7 @@ courier.on('data', function *(params) {
         if (nickEnds === -1 && identEnds === -1) {
             msg.serverName = prefix;
         } else {
-            msg.nick = prefix.substring(0, Math.min(nickEnds, identEnds));
+            msg.nick = prefix.substring(1, Math.min(nickEnds, identEnds));
             msg.userNameAndHost = prefix.substring(Math.min(nickEnds, identEnds));
         }
     }
@@ -212,7 +212,11 @@ function *handlePrivmsg(userId, network, msg) {
     var target = msg.params[0];
     var text = msg.params[1];
 
-    target = target; // TBD
+    if (0) { // TBD target === currentNick
 
-    yield textLine.broadcast(userId, network, 'msg', text);
+    } else {
+
+    }
+
+    yield textLine.broadcast(userId, network, msg.nick, 'msg', text);
 }

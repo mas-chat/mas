@@ -20,7 +20,7 @@ var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     outbox = require('./outbox.js');
 
-exports.broadcast = function *(userId, network, type, text) {
+exports.broadcast = function *(userId, network, nick, cat, text) {
     // TBD: Copy paste from listen.js
 
     //Iterate through windows
@@ -45,9 +45,9 @@ exports.broadcast = function *(userId, network, type, text) {
                 id: 'ADDTEXT',
                 window: windowId,
                 body: text,
-                cat: 'notice',
+                cat: cat,
                 ts: '209',
-                nick: 'testperson',
+                nick: nick,
                 type: 0
             });
 
