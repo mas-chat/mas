@@ -1,6 +1,10 @@
 MAS server and web client
 =========================
 
+[![Build Status](https://secure.travis-ci.org/ilkkao/mas.png)](http://travis-ci.org/ilkkao/mas)
+
+[![Dependency Status](https://david-dm.org/ilkkao/mas.png)](http://david-dm.org/ilkkao/mas)
+
 MAS is an advanced web chat application. The server part provides MAS
 REST API. [Meetandspeak.com][] is an instance of this application.
 
