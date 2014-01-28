@@ -35,7 +35,7 @@
   },
   "scripts": {
     "test": "grunt --verbose",
-    "start": "node server.js"
+    "start": "node --harmony server/server"
   },
   "repository": {
     "type": "git",
