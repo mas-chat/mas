@@ -153,7 +153,7 @@ qx.Class.define('mas.Controller', {
                 this._friendsPopUp.updateFriendsList(message);
                 var onlineAmount = 0;
 
-                for (var i in message.list) {
+                for (var i in message.list) { /* jshint -W089 */
                     if (message.list.hasOwnProperty(i)) {
                         var online = false;
 
@@ -262,7 +262,7 @@ qx.Class.define('mas.Controller', {
         handleInitDone: function() {
             this.initdone = 1;
 
-            for (var window in this._windows) {
+            for (var window in this._windows) { /* jshint -W089 */
                 this._windows[window].displayWindowContent();
             }
 
@@ -393,7 +393,7 @@ qx.Class.define('mas.Controller', {
         },
 
         checkLimits: function(e) {
-            for (var window in this._windows) {
+            for (var window in this._windows) { /* jshint -W089 */
                 var wbounds = this._windows[window].getBounds();
                 var dim = e.getData();
                 var x = wbounds.left;
@@ -445,7 +445,7 @@ qx.Class.define('mas.Controller', {
             this._mainScreen.blocker.block();
 
             qx.event.Timer.once(function() {
-                for (var window in this._windows) {
+                for (var window in this._windows) { /* jshint -W089 */
                     amount++;
                 }
 
@@ -466,7 +466,7 @@ qx.Class.define('mas.Controller', {
                 var cy = 0;
                 var current = 0;
 
-                for (window in this._windows) {
+                for (window in this._windows) { /* jshint -W089 */
                     current++;
 
                     this._windows[window].moveTo(

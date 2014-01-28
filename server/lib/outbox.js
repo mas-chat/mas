@@ -52,7 +52,7 @@ exports.flush = function *(userId, timeout) {
     }
 
     // Retrieve other commands if there are any
-    while (command = yield redis.rpop('outbox:' + userId)) {
+    while ((command = yield redis.rpop('outbox:' + userId)) !== null) {
         msg.commands.push(JSON.parse(command));
     }
 

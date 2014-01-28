@@ -20,7 +20,7 @@
 qx.Class.define('mas.ListItem', {
     extend: qx.ui.form.ListItem,
 
-    construct: function(label, icon, model) {
+    construct: function() {
         this.base(arguments);
         this.setRich(true);
     },

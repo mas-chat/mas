@@ -28,7 +28,8 @@ qx.Class.define('mas.Application', {
         main: function() {
             this.base(arguments);
 
-            qx.log.appender.Native; // Disable someday
+            // Disable someday
+            qx.log.appender.Native; // jshint ignore:line
 
             var root = this.getRoot().set({
                 backgroundColor: '#FFFFFF'

@@ -45,7 +45,7 @@ courier.on('addText', function *(params) {
 // Connection manager messages
 
 // Ready
-courier.on('ready', function *(params) {
+courier.on('ready', function *() {
     yield init();
 });
 
@@ -115,7 +115,7 @@ courier.on('connected', function *(params) {
 });
 
 // Disconnect
-courier.on('disconnected', function(params) {
+courier.on('disconnected', function() {
     //TBD
 });
 
@@ -126,6 +126,7 @@ function *init() {
         var userId = allUsers[i];
 
         var connectDelay = Math.floor((Math.random() * 180));
+        connectDelay = connectDelay; // TBD
         // TBD: Get user's networks. Connect to them.
 
         // MeetAndSpeak network, connect always, no delay
@@ -195,6 +196,8 @@ function *handlePing(userId, network, msg) {
 }
 
 function *handle376(userId, network, msg) {
+    msg = msg; // TBD
+
     var resp = 'JOIN #test';
 
     yield courier.send('connectionmanager', {
@@ -208,6 +211,8 @@ function *handle376(userId, network, msg) {
 function *handlePrivmsg(userId, network, msg) {
     var target = msg.params[0];
     var text = msg.params[1];
+
+    target = target; // TBD
 
     yield textLine.broadcast(userId, network, 'msg', text);
 }
