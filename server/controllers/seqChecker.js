@@ -16,14 +16,15 @@
 
 'use strict';
 
-var wrapper = require('co-redis'),
+var log = require('../../lib/log'),
+    wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient());
 
 module.exports = function *(next) {
     var expectedSeqKeyName;
     var rcvdSeq;
 
-    w.info('Validating sequence number.');
+    log.info('Validating sequence number.');
 
     if (this.params.listenSeq) {
         rcvdSeq = parseInt(this.params.listenSeq);

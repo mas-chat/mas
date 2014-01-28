@@ -16,14 +16,15 @@
 
 'use strict';
 
-var parse = require('co-body'),
+var log = require('../../lib/log'),
+    parse = require('co-body'),
     courier = require('../../lib/courier').createEndPoint('message');
 
 module.exports = function *() {
     var userId = this.mas.userId;
     var body = yield parse.json(this.req);
 
-    console.log('Prosessing command: ' + body.command);
+    log.info(userId, 'Prosessing command: ' + body.command);
 
     switch (body.command) {
         case 'SEND':

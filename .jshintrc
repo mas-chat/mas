@@ -86,7 +86,6 @@
         "mas": true,
         "debug": true,
         "escape": true,
-        "console": true,
         "require": true,
         "w": true,
 

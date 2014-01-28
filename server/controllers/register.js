@@ -16,7 +16,8 @@
 
 'use strict';
 
-var forms = require('forms'),
+var log = require('../../lib/log'),
+    forms = require('forms'),
     fields = forms.fields,
     widgets = forms.widgets,
     validators = forms.validators,
@@ -103,11 +104,11 @@ function decodeForm(req) {
             deferred.resolve(form);
         },
         error: function (form) {
-            w.info('Registration form data is invalid');
+            log.info('Registration form data is invalid');
             deferred.resolve(form);
         },
         empty: function (form) {
-            w.info('There is no form');
+            log.info('There is no form');
             deferred.resolve(form);
         }
     });
@@ -132,7 +133,7 @@ module.exports = {
         var form = yield decodeForm(this.req);
 
         if (form.isValid()) {
-            w.info('Registration form data is valid');
+            log.info('Registration form data is valid');
             // TBD: Save to redis.
             // user = new User({
             //     name: form.data.name,
