@@ -50,7 +50,7 @@ MAS Redis structures
    titlealert (int)
    hidden (int)
 
- windowmsgs:<userid>:<id> (list) [oldest message on the left]
+ windowmsgs:<userid>:<id> (list) [oldest message on the right]
 
  [TBD] names:<userid>:<id> (set)
    nick1, @nick2

@@ -172,15 +172,7 @@ function *handleServerText(userId, network, msg) {
     //:mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     var text = msg.params.join(' ');
 
-    // TDB options for addLine()
-    //timestamp
-    //type
-    //rememberurl
-    //hidden
-    //cat ??
-    //nickname ??
-
-    yield textLine.broadcast(userId, network, 'notice', text);
+    yield textLine.broadcast(userId, network, null, 'notice', text);
 }
 
 function *handlePing(userId, network, msg) {
