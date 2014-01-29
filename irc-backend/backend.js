@@ -201,14 +201,14 @@ function *handle376(userId, network, msg) {
 }
 
 function *handlePrivmsg(userId, network, msg) {
-    var target = msg.params[0];
+    //var target = msg.params[0];
     var text = msg.params[1];
 
-    if (0) { // TBD target === currentNick
+    // if (0) { // TBD target === currentNick
 
-    } else {
+    // } else {
 
-    }
+    // }
 
     yield textLine.broadcast(userId, network, msg.nick, 'msg', text);
 }
