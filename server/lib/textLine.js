@@ -20,6 +20,13 @@ var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     outbox = require('./outbox.js');
 
+// TDB Consider options:
+//
+// timestamp
+// type
+// rememberurl
+// hidden
+
 exports.broadcast = function *(userId, network, nick, cat, text) {
     // TBD: Copy paste from listen.js
 
@@ -35,24 +42,22 @@ exports.broadcast = function *(userId, network, nick, cat, text) {
         windowNetwork = windowNetwork; // TBD
         windowName = windowName; // TBD
 
+        var line = JSON.stringify({
+            id: 'ADDTEXT',
+            window: windowId,
+            body: text,
+            cat: cat,
+            ts: '209',
+            nick: nick,
+            type: 0
+        });
+
         //TBD: Fix me!
         //if (windowNetwork === network) {
         if (1) {
             // TBD: Push Json message
-            yield redis.rpush('windowmsgs:' + userId + ':' + windowId, text);
-
-            yield outbox.queue(userId, {
-                id: 'ADDTEXT',
-                window: windowId,
-                body: text,
-                cat: cat,
-                ts: '209',
-                nick: nick,
-                type: 0
-            });
-
-            // TBD: Rely on blocking lget in listen.js, remove this pubsub
-            redis.publish('useroutbox:' + userId , 'message');
+            yield redis.lpush('windowmsgs:' + userId + ':' + windowId, line);
+            yield outbox.queue(userId, line);
         }
     }
 };

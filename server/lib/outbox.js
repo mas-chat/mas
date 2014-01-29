@@ -26,7 +26,12 @@ exports.reset = function *(userId) {
 
 exports.queue = function *(userId) {
     for (var i = 1; i < arguments.length; i++){
-        yield redis.lpush('outbox:' + userId, JSON.stringify(arguments[i]));
+        var command = arguments[i];
+        if (typeof(command) !== 'string') {
+            command = JSON.stringify(command);
+        }
+
+        yield redis.lpush('outbox:' + userId, command);
     }
 };
 
