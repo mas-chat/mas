@@ -76,6 +76,12 @@ function *initSession(userId, sessionId) {
             password: window.password,
             topic: 'Hello' // TBD
         });
+
+        var lines = yield redis.lrange('windowmsgs:' + userId + ':' + windowId, 0, -1);
+
+        for (var ii = lines.length - 1; ii > 0; ii--) {
+            yield outbox.queue(userId, lines[ii]);
+        }
     }
 
     // TBD: Makes less queue() calls.
