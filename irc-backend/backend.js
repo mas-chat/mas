@@ -21,7 +21,8 @@ var log = require('../lib/log'),
     wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     courier = require('../lib/courier').createEndPoint('ircparser'),
-    textLine = require('../server/lib/textLine');
+    textLine = require('../server/lib/textLine'),
+    windowHelper = require('../server/lib/windows');
 
 var serverList = {
     MeetAndSpeak: { host: 'localhost', port: 6667, unknown: 9999 },
@@ -116,31 +117,44 @@ courier.on('connected', function *(params) {
 });
 
 // Disconnect
-courier.on('disconnected', function() {
-    //TBD
+courier.on('disconnected', function *(params) {
+    yield redis.hset('user:' + params.userId, 'connected:' + params.network, 'false');
 });
 
 function *init() {
     var allUsers = yield redis.smembers('userlist');
 
     for (var i = 0; i < allUsers.length; i++) {
-        var userId = allUsers[i];
+        var userId = parseInt(allUsers[i]);
+        var networks = yield windowHelper.getNetworks(userId);
 
-        var connectDelay = Math.floor((Math.random() * 180));
-        connectDelay = connectDelay; // TBD
-        // TBD: Get user's networks. Connect to them.
-
-        // MeetAndSpeak network, connect always, no delay
-        // TBD: Remove connection restriction
-        if (userId === 97) {
-            yield courier.send('connectionmanager', {
-                type: 'connect',
-                userId: userId,
-                network: 'MeetAndSpeak',
-                host: serverList.MeetAndSpeak.host,
-                port: serverList.MeetAndSpeak.port
-            });
+        for (var ii = 0; ii < networks.length; ii++) {
+            if (networks[i] !== 'MeetAndSpeak') {
+                yield connect(userId, networks[i]);
+            }
         }
+
+        yield connect(userId, 'MeetAndSpeak');
+    }
+}
+
+function *connect(userId, network) {
+    // TBD: Remove connection restriction
+    // TBD: Enable connectDelay if !MAS. Make it configurable
+    // var connectDelay = Math.floor((Math.random() * 180));
+    var nick = yield redis.hget('user:' + userId, 'nick');
+    yield redis.hmset('user:' + userId,
+        'currentNick:' + network, nick,
+        'connected:' + network, 'false');
+
+    if (userId === 97) {
+        yield courier.send('connectionmanager', {
+            type: 'connect',
+            userId: userId,
+            network: network,
+            host: serverList[network].host,
+            port: serverList[network].port
+        });
     }
 }
 
@@ -167,13 +181,14 @@ var handlers = {
     '452': handleServerText,
 
     '376': handle376,
+    '433': handle433,
 
     'PRIVMSG': handlePrivmsg,
     'PING': handlePing
 };
 
 function *handleServerText(userId, msg) {
-    //:mas.example.org 001 toyni :Welcome to the MAS IRC toyni
+    // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     var text = msg.params.join(' ');
 
     yield textLine.broadcast(userId, msg.network, msg.nick, 'notice', text);
@@ -192,16 +207,26 @@ function *handlePing(userId, msg) {
 }
 
 function *handle376(userId, msg) {
-    msg = msg; // TBD
+    yield redis.hset('user:' + userId, 'connected:' + msg.network, 'true');
 
-    var resp = 'JOIN #test';
+    var channels = yield windowHelper.getWindowNamesForNetwork(userId, msg.network);
 
-    yield courier.send('connectionmanager', {
-        type: 'write',
-        userId: userId,
-        network: msg.network,
-        line: resp
-    });
+    //TBD don't joint to 1on1s
+
+    for (var i = 0; i < channels.length; i++) {
+        yield courier.send('connectionmanager', {
+            type: 'write',
+            userId: userId,
+            network: msg.network,
+            line: 'JOIN ' + channels[i]
+        });
+    }
+}
+
+function *handle433(userId, msg) {
+    // :mas.example.org 433 * ilkka :Nickname is already in use.
+    yield tryDifferentNick(userId, msg.network);
+
 }
 
 function *handlePrivmsg(userId, msg) {
@@ -215,4 +240,45 @@ function *handlePrivmsg(userId, msg) {
     // }
 
     yield textLine.send(userId, msg.network, group, msg.nick, 'msg', text);
+}
+
+function *tryDifferentNick(userId, network) {
+    var result = yield redis.hmget('user:' + userId,
+        'nick',
+        'currentNick:' + network,
+        'connected:' + network);
+
+    var nick = result[0];
+    var currentNick = result[1];
+    var connected = result[2];
+    var nickHasNumbers = false;
+
+    if (nick !== currentNick.substring(0, nick.length)) {
+        // Current nick is unique ID, let's try to change it to something unique immediately
+        currentNick = nick + (100 + Math.floor((Math.random()*900)));
+    } else if (currentNick === nick) {
+        // Second best choice
+        currentNick = nick + '_';
+    } else if (currentNick === nick + '_') {
+        // Third best choice
+        currentNick = nick + (Math.floor((Math.random()*10)));
+        nickHasNumbers = true;
+    } else {
+        // If all else fails, keep adding random numbers
+        currentNick = currentNick + (Math.floor((Math.random()*10)));
+        nickHasNumbers = true;
+    }
+
+    yield redis.hset('user:' + userId, 'currentNick:' + network, currentNick);
+
+    // If we are joining IRC try all alternatives. If we are connected,
+    // try to get only 'nick' or 'nick_' back
+    if (!(connected === 'true' && nickHasNumbers)) {
+        yield courier.send('connectionmanager', {
+            type: 'write',
+            userId: userId,
+            network: network,
+            line: 'NICK ' + currentNick
+        });
+    }
 }
