@@ -151,6 +151,15 @@ function *importWindows() {
                 break;
         }
 
+        if (row.type === 0) {
+            row.type = 'channel';
+        } else if (row.type === 1) {
+            row.type = '1on1';
+        } else {
+            console.log('ERROR: Unsupported window type: ' + row.type);
+            process.exit(1);
+        }
+
         delete row.urls;
         delete row.notes;
         delete row.userid;
