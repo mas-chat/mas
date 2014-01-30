@@ -80,6 +80,7 @@ courier.on('data', function *(params) {
     }
 
     msg.params = [];
+    msg.network = params.network;
 
     // Only the parameters are left now
     while (parts.length !== 0) {
@@ -92,7 +93,7 @@ courier.on('data', function *(params) {
     }
 
     if (handlers[msg.command]) {
-        yield handlers[msg.command](params.userId, params.network, msg);
+        yield handlers[msg.command](params.userId, msg);
     }
 });
 
@@ -130,13 +131,16 @@ function *init() {
         // TBD: Get user's networks. Connect to them.
 
         // MeetAndSpeak network, connect always, no delay
-        yield courier.send('connectionmanager', {
-            type: 'connect',
-            userId: userId,
-            network: 'MeetAndSpeak',
-            host: serverList.MeetAndSpeak.host,
-            port: serverList.MeetAndSpeak.port
-        });
+        // TBD: Remove connection restriction
+        if (userId === 97) {
+            yield courier.send('connectionmanager', {
+                type: 'connect',
+                userId: userId,
+                network: 'MeetAndSpeak',
+                host: serverList.MeetAndSpeak.host,
+                port: serverList.MeetAndSpeak.port
+            });
+        }
     }
 }
 
@@ -168,26 +172,26 @@ var handlers = {
     'PING': handlePing
 };
 
-function *handleServerText(userId, network, msg) {
+function *handleServerText(userId, msg) {
     //:mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     var text = msg.params.join(' ');
 
-    yield textLine.broadcast(userId, network, null, 'notice', text);
+    yield textLine.broadcast(userId, msg.network, msg.nick, 'notice', text);
 }
 
-function *handlePing(userId, network, msg) {
+function *handlePing(userId, msg) {
     var server = msg.params[0];
     var resp = 'PONG ' + server;
 
     yield courier.send('connectionmanager', {
         type: 'write',
         userId: userId,
-        network: network,
+        network: msg.network,
         line: resp
     });
 }
 
-function *handle376(userId, network, msg) {
+function *handle376(userId, msg) {
     msg = msg; // TBD
 
     var resp = 'JOIN #test';
@@ -195,13 +199,13 @@ function *handle376(userId, network, msg) {
     yield courier.send('connectionmanager', {
         type: 'write',
         userId: userId,
-        network: network,
+        network: msg.network,
         line: resp
     });
 }
 
-function *handlePrivmsg(userId, network, msg) {
-    //var target = msg.params[0];
+function *handlePrivmsg(userId, msg) {
+    var group = msg.params[0];
     var text = msg.params[1];
 
     // if (0) { // TBD target === currentNick
@@ -210,5 +214,5 @@ function *handlePrivmsg(userId, network, msg) {
 
     // }
 
-    yield textLine.broadcast(userId, network, msg.nick, 'msg', text);
+    yield textLine.send(userId, msg.network, group, msg.nick, 'msg', text);
 }

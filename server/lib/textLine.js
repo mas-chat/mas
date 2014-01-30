@@ -18,7 +18,8 @@
 
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
-    outbox = require('./outbox.js');
+    outbox = require('./outbox.js'),
+    windowHelper = require('./windows');
 
 // TDB Consider options:
 //
@@ -28,36 +29,32 @@ var wrapper = require('co-redis'),
 // hidden
 
 exports.broadcast = function *(userId, network, nick, cat, text) {
-    // TBD: Copy paste from listen.js
+    var windowIds = yield windowHelper.getWindowIdsForNetwork(userId, network);
 
-    //Iterate through windows
-    var windows = yield redis.smembers('windowlist:' + userId);
-
-    for (var i = 0; i < windows.length; i++) {
-        var details = windows[i].split(':');
-        var windowId = details[0];
-        var windowNetwork = details[1];
-        var windowName = details[2];
-
-        windowNetwork = windowNetwork; // TBD
-        windowName = windowName; // TBD
-
-        var line = JSON.stringify({
-            id: 'ADDTEXT',
-            window: windowId,
-            body: text,
-            cat: cat,
-            ts: '209',
-            nick: nick,
-            type: 0
-        });
-
-        //TBD: Fix me!
-        //if (windowNetwork === network) {
-        if (1) {
-            // TBD: Push Json message
-            yield redis.lpush('windowmsgs:' + userId + ':' + windowId, line);
-            yield outbox.queue(userId, line);
-        }
+    for (var i = 0; i < windowIds.length; i++) {
+        yield sendMessage(userId, windowIds[i], nick, cat, text);
     }
 };
+
+exports.send = function *(userId, network, group, nick, cat, text) {
+    var windowId = yield windowHelper.getWindowID(userId, network, group);
+
+    if (windowId) {
+        yield sendMessage(userId, windowId, nick, cat, text);
+    }
+};
+
+function *sendMessage(userId, windowId, nick, cat, text) {
+    var command = JSON.stringify({
+        id: 'ADDTEXT',
+        window: windowId,
+        nick: nick,
+        body: text,
+        cat: cat,
+        ts: '209',
+        type: 0
+    });
+
+    yield redis.lpush('windowmsgs:' + userId + ':' + windowId, command);
+    yield outbox.queue(userId, command);
+}
