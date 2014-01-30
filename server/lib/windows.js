@@ -21,13 +21,13 @@ var wrapper = require('co-redis'),
     log = require('../../lib/log');
 
 exports.getWindowIdsForNetwork = function *(userId, network) {
-    var ids = yield getWindowIds(userId, network, null);
+    var ids = yield getWindowIds(userId, network, null, 'id');
 
     return ids;
 };
 
 exports.getWindowId = function *(userId, network, group) {
-    var ids = yield getWindowIds(userId, network, group);
+    var ids = yield getWindowIds(userId, network, group, 'id');
 
     if (ids.length === 1) {
         return ids[0];
@@ -37,9 +37,29 @@ exports.getWindowId = function *(userId, network, group) {
     }
 };
 
-function *getWindowIds(userId, network, group) {
+exports.getWindowNamesForNetwork = function *(userId, network) {
+    var ids = yield getWindowIds(userId, network, null, 'name');
+
+    return ids;
+};
+
+exports.getNetworks = function *(userId) {
+    var networks = {};
+
     var windows = yield redis.smembers('windowlist:' + userId);
-    var ids = [];
+    for (var i = 0; i < windows.length; i++) {
+        var details = windows[i].split(':');
+        var windowNetwork = details[1];
+
+        networks[windowNetwork] = true;
+    }
+
+    return Object.keys(networks);
+};
+
+function *getWindowIds(userId, network, group, returnType) {
+    var windows = yield redis.smembers('windowlist:' + userId);
+    var ret = [];
 
     for (var i = 0; i < windows.length; i++) {
         var details = windows[i].split(':');
@@ -48,9 +68,13 @@ function *getWindowIds(userId, network, group) {
         var windowName = details[2];
 
         if (windowNetwork === network && (!group || windowName === group)) {
-            ids.push(windowId);
+            if (returnType === 'id') {
+                ret.push(windowId);
+            } else if (returnType === 'name') {
+                ret.push(windowName);
+            }
         }
     }
 
-    return ids;
+    return ret;
 }
