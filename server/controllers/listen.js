@@ -64,10 +64,9 @@ function *initSession(userId, sessionId) {
             y: parseInt(window.y),
             width: parseInt(window.width),
             height: parseInt(window.height),
-            nwName: '', // TBD
-            nwId: network, // TBD This is now string not number! Fix client and docs!
+            network: network, // TBD This is now string not number! Fix client and docs!
             chanName: windowName,
-            chanType: parseInt(window.type),
+            type: window.type,
             sounds: 1, // TBD
             titlealert: 1, //TBD
             userMode: 2, //TBD
