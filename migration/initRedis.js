@@ -141,7 +141,7 @@ function *importWindows() {
                 network = 'MeetAndSpeak';
                 break;
             case 1:
-                network = 'Eversible';
+                network = 'IRCNet';
                 break;
             case 2:
                 network = 'FreeNode';
@@ -152,7 +152,7 @@ function *importWindows() {
         }
 
         if (row.type === 0) {
-            row.type = 'channel';
+            row.type = 'group';
         } else if (row.type === 1) {
             row.type = '1on1';
         } else {

@@ -37,7 +37,7 @@ exports.broadcast = function *(userId, network, nick, cat, text) {
 };
 
 exports.send = function *(userId, network, group, nick, cat, text) {
-    var windowId = yield windowHelper.getWindowID(userId, network, group);
+    var windowId = yield windowHelper.getWindowId(userId, network, group);
 
     if (windowId) {
         yield sendMessage(userId, windowId, nick, cat, text);

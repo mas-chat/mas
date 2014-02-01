@@ -17,21 +17,20 @@
 qx.Class.define('mas.UserWindow', {
     extend: qx.core.Object,
 
-    construct: function(srpc, desktop, topic, nw, name, type, sound,
-                         titlealert, nwId, usermode, password, newMsgs, id,
+    construct: function(srpc, desktop, topic, name, type, sound,
+                         titlealert, network, usermode, password, newMsgs, id,
                          controller)
     {
         this.base(arguments);
 
-        this.__urllist = [];
         this.nameslist = new qx.data.Array();
         this.rpc = srpc;
         this.winid = id;
-        this.__nw = nw;
-        this.__nwId = nwId;
-        this._controller = controller;
         this.sound = sound;
         this.titlealert = titlealert;
+        this._controller = controller;
+        this.__urllist = [];
+        this.__network = network;
         this.__usermode = usermode;
         this.__password = password;
         this.__newmsgsatstart = newMsgs;
@@ -57,7 +56,7 @@ qx.Class.define('mas.UserWindow', {
             wm1.setShowClose(false);
         }
 
-        var color = (type === 0) ? '#F2F3FC' : '#F7FAC9';
+        var color = (type === 'group') ? '#F2F3FC' : '#F7FAC9';
 
         this.__box = new qx.ui.container.Composite(layout).set({
             padding: 10,
@@ -92,7 +91,7 @@ qx.Class.define('mas.UserWindow', {
         this.__ntftooltip = new qx.ui.tooltip.ToolTip(
             'Double-click to close this notification.');
 
-        color = (type === 0) ? '#F2F5FE' : '#F7FAC9';
+        color = (type === 'group') ? '#F2F5FE' : '#F7FAC9';
 
         this.__atom = new qx.ui.basic.Label('Please wait...<br>').set({
             rich: true,
@@ -135,7 +134,7 @@ qx.Class.define('mas.UserWindow', {
         buttons.add(this.prefButton);
         buttons.add(this.urlButton);
 
-        if (type === 0) {
+        if (type === 'group') {
             this.__box.add(this.getList(), {row: 0, column: 1});
             this.__box.add(buttons, {row: 1, column: 1});
         } else {
@@ -172,7 +171,7 @@ qx.Class.define('mas.UserWindow', {
                 }
 
                 this.__box.remove(this.__textcomposite);
-                if (this.type === 0) {
+                if (this.type === 'group') {
                     this.__box.remove(this.__list);
                     this.__box.add(this.__settings,
                                    { row: 0, column: 0, colSpan: 2 });
@@ -192,7 +191,7 @@ qx.Class.define('mas.UserWindow', {
                 this.updateUrls();
 
                 this.__box.remove(this.__textcomposite);
-                if (this.type === 0) {
+                if (this.type === 'group') {
                     this.__box.remove(this.__list);
                     this.__box.add(this.__urls,
                                    { row: 0, column: 0, colSpan: 2 });
@@ -242,8 +241,7 @@ qx.Class.define('mas.UserWindow', {
         __urls: 0,
         __viewmode: 0,
         __box: 0,
-        __nw: 0,
-        __nwId: 0,
+        __network: 0,
         __topic: 0,
         __name: 0,
         __password: 0,
@@ -253,8 +251,8 @@ qx.Class.define('mas.UserWindow', {
         __ntftooltip: 0,
         __textcomposite: 0,
 
-        updateValues: function(topic, nw, name, type, sound, titlealert,
-                                nwId, usermode, password)
+        updateValues: function(topic, name, type, sound, titlealert,
+                                network, usermode, password)
         {
             this.__password = password;
             this.__usermode = usermode;
@@ -331,7 +329,7 @@ qx.Class.define('mas.UserWindow', {
                             type: 0,
                             cat: input.substr(0,4) === '/me ' ?
                                 'mymsg' : 'action',
-                            nick: this._controller.nicks[this.__nwId],
+                            nick: this._controller.nicks[this.__network],
                             body: this.linkify(input),
                             ts: hour * 60 + min
                         };
@@ -345,7 +343,7 @@ qx.Class.define('mas.UserWindow', {
             }
             else if (key === 'PageDown') {
                 this.__scroll.scrollByY(this.__scroll.getHeight() - 30);
-            } else if (key === 'Tab' && this.type === 0) {
+            } else if (key === 'Tab' && this.type === 'group') {
                 var input2 = this.__inputline.getValue();
 
                 if (input2 === null) {
@@ -494,7 +492,7 @@ qx.Class.define('mas.UserWindow', {
                     e.preventDefault();
                     this.urlButton.setValue(false);
                 }
-                else if (closeok === 0 && (this.type !== 0 ||
+                else if (closeok === 0 && (this.type !== 'group' ||
                                           this.nameslist.getLength() > 0)) {
                     //FIX ME
                     //if (settings.getShowCloseWarn() === 1) {
@@ -575,24 +573,22 @@ qx.Class.define('mas.UserWindow', {
         {
             var nickText = '';
             var ts = this._adjustTime(message.ts, tsConversion);
-
-            if (message.nick) {
-                nickText = '<b>&lt;' + message.nick + '&gt;</b> ';
-            }
-
             var color;
             var prefix = '';
 
             switch (message.cat) {
             case 'msg':
                 color = 'black';
+                nickText = '<b>&lt;' + message.nick + '&gt;</b> ';
                 break;
             case 'info':
                 color = 'green';
+                nickText = message.nick + ': ';
                 prefix = '*** ';
                 break;
             case 'notice':
                 color = 'grey';
+                nickText = message.nick + ': ';
                 prefix = '';
                 break;
             case 'error':
@@ -601,16 +597,20 @@ qx.Class.define('mas.UserWindow', {
                 break;
             case 'mymsg':
                 color = 'blue';
+                nickText = '<b>&lt;' + message.nick + '&gt;</b> ';
                 break;
             case 'mention':
                 color = 'cyan';
+                nickText = '<b>&lt;' + message.nick + '&gt;</b> ';
                 break;
             case 'action':
                 color = 'black';
                 prefix = ' * ';
+                nickText = message.nick;
                 break;
             case 'robot':
                 color = 'brown';
+                nickText = message.nick;
             }
 
             this.__channelText = this.__channelText + '<span style="color:' +
@@ -644,7 +644,7 @@ qx.Class.define('mas.UserWindow', {
 
         changetopic: function(line)
         {
-            var nw = '(' + this.__nw + ' channel) ';
+            var nw = '(' + this.__network + ' channel) ';
             var cname = this.__name;
 
             this.__topic = line;
@@ -653,14 +653,14 @@ qx.Class.define('mas.UserWindow', {
                 line = 'Topic not set.';
             }
 
-            if (this.__nwId === 0 && this.type === 0) {
+            if (this.__network === 'MeetAndSpeak' && this.type === 'group') {
                 cname = cname.substr(1, 1).toUpperCase() + cname.substr(2);
                 nw = 'Group: ';
-            } else if (this.__nwId === 0 && this.type === 1) {
+            } else if (this.__network === 'MeetAndSpeak' && this.type === '1on1') {
                 nw = '';
             }
 
-            if (this.type === 0) {
+            if (this.type === 'group') {
                 this.window.setCaption(nw + cname + ' : ' + line);
             } else {
                 this.window.setCaption(nw + '*** Private conversation with ' +
@@ -670,7 +670,7 @@ qx.Class.define('mas.UserWindow', {
 
         addnames: function(namesarray)
         {
-            if (this.type !== 0) {
+            if (this.type !== 'group') {
                 return;
             }
 
@@ -727,15 +727,14 @@ qx.Class.define('mas.UserWindow', {
 
             //online: 0 = unknown, 1 = online, 2 = offline
 
-            if (this.type === 0) {
+            if (this.type === 'group') {
                 this.nameslist.forEach(function(item) {
                     if (item.getName().toLowerCase() === nick &&
                         item.getOnline() !== online) {
                         item.setOnline(online);
                     }
                 }, this);
-            } else if (this.__nwId === 0 &&
-                       nick === this.__name.toLowerCase()) {
+            } else if (this.__network === 'MeetAndSpeak' && nick === this.__name.toLowerCase()) {
                 var privstatus = '';
 
                 if (online === 1) {
@@ -785,7 +784,7 @@ qx.Class.define('mas.UserWindow', {
             this.__box.remove(this.__settings);
             this.__box.add(this.__textcomposite, { row: 0, column: 0 });
 
-            if (this.type === 0) {
+            if (this.type === 'type') {
                 this.__box.add(this.__list, { row: 0, column: 1 });
             }
 
@@ -798,7 +797,7 @@ qx.Class.define('mas.UserWindow', {
             this.__box.remove(this.__urls);
 
             this.__box.add(this.__textcomposite, { row: 0, column: 0 });
-            if (this.type === 0) {
+            if (this.type === 'group') {
                 this.__box.add(this.__list, { row: 0, column: 1 });
             }
 
@@ -872,13 +871,12 @@ qx.Class.define('mas.UserWindow', {
             chatButton.addListener('execute', function() {
                 var name = this.__list.getSelection().getItem(0).getName();
 
-                this.rpc.call('STARTCHAT', this.__nw + ' ' + name);
+                this.rpc.call('STARTCHAT', this.__network + ' ' + name);
             }, this);
 
             menu.add(chatButton);
 
-            if (this.__nwId !== 0) {
-
+            if (this.__network !== 'MeetAndSpeak') {
                 var whoisButton = new qx.ui.menu.Button('Whois');
 
                 whoisButton.addListener('execute', function() {
@@ -903,8 +901,7 @@ qx.Class.define('mas.UserWindow', {
                 //}
             }
 
-            if (this.__usermode !== 0 || this.__nwId !== 0) {
-
+            if (this.__usermode !== 0 || this.__network !== 'MeetAndSpeak') {
                 var kickButton = new qx.ui.menu.Button('Kick');
 
                 kickButton.addListener('execute', function() {
@@ -926,7 +923,7 @@ qx.Class.define('mas.UserWindow', {
                 menu.add(banButton);
             }
 
-            if (this.__nwId !== 0 || this.__usermode === 2) {
+            if (this.__network !== 'MeetAndSpeak' || this.__usermode === 2) {
                 var opButton = new qx.ui.menu.Button('Give operator rights');
 
                 opButton.addListener('execute', function() {
@@ -1008,7 +1005,7 @@ qx.Class.define('mas.UserWindow', {
 
             var button1 = new qx.ui.form.Button('Change');
 
-            if (this.__nwId !== 0 || this.__usermode === 0) {
+            if (this.__network !== 'MeetAndSpeak' || this.__usermode === 0) {
                 button1.setEnabled(false);
             }
 
@@ -1017,7 +1014,7 @@ qx.Class.define('mas.UserWindow', {
                               this.topicInput.getValue());
             }, this);
 
-            if (this.type === 0) {
+            if (this.type === 'group') {
                 composite.add(ltitle, { row: 0, column: 0 });
                 composite.add(this.topicInput, { row: 0, column: 1 });
                 composite.add(button1, { row: 0, column: 2 });
@@ -1104,7 +1101,7 @@ qx.Class.define('mas.UserWindow', {
 
             var button2 = new qx.ui.form.Button('Change');
 
-            if (this.__nwId !== 0 || this.__usermode !== 2) {
+            if (this.__network !== 'MeetAndSpeak' || this.__usermode !== 2) {
                 button2.setEnabled(false);
             }
 
@@ -1112,7 +1109,7 @@ qx.Class.define('mas.UserWindow', {
                 this.rpc.call('PW', this.winid + ' ' + this.pwInput.getValue());
             }, this);
 
-            if (this.type === 0) {
+            if (this.type === 'group') {
                 composite.add(new qx.ui.basic.Label('Password:'),
                               {row: 3, column: 0});
                 composite.add(this.pwInput, {row: 3, column: 1});
@@ -1121,7 +1118,7 @@ qx.Class.define('mas.UserWindow', {
 
             //Group URL:
 
-            if (this.type === 0 && this.__nwId === 0) {
+            if (this.type === 'group' && this.__network === 'MeetAndSpeak') {
                 composite.add(new qx.ui.basic.Label('Participation link:'),
                               { row: 4, column: 0 });
 
@@ -1207,7 +1204,7 @@ qx.Class.define('mas.UserWindow', {
 
             //Group API key
 
-            if (this.type === 0 && this.__nwId === 0 && this.__usermode === 2) {
+            if (this.type === 'group' && this.__network === 'MeetAndSpeak' && this.__usermode === 2) {
                 composite.add(new qx.ui.basic.Label('Group API key:'),
                               { row: 7, column: 0 });
                 this.apikey = new qx.ui.basic.Label('Refreshing...').set({

@@ -190,20 +190,23 @@ Create new window.
    "width":476,
    "x":453,
    "newMsgs":2,
-   "chanType":0,
+   "type":"group",
    "titlealert":0,
    "y":93,
    "password":"",
-   "nwId":0,
+   "network":"MeetAndSpeak",
    "topic":"",
    "visible":1,
    "userMode":2,
    "height":178,
    "sounds":1,
-   "nwName":"MeetAndSpeak",
    "chanName":"#testone"
 }
 ```
+
+```network``` can be ```MeetAndSpeak```, ```IRCNet```, ```FreeNode``` etc.
+
+```type``` can be ```group``` or ```1on1```
 
 DELNAME
 -------

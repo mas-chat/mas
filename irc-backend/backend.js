@@ -26,7 +26,7 @@ var log = require('../lib/log'),
 
 var serverList = {
     MeetAndSpeak: { host: 'localhost', port: 6667, unknown: 9999 },
-    Eversible: { host: 'ircnet.eversible.com', port: 6666, unknown: 100 },
+    IRCNet: { host: 'ircnet.eversible.com', port: 6666, unknown: 100 },
     FreeNode: { host: 'irc.freenode.net', port: 6667, unknown: 5 },
     W3C: { host: 'irc.w3.org', port: 6665, unknown: 5 }
 };
@@ -66,7 +66,7 @@ courier.on('data', function *(params) {
         var identEnds = prefix.indexOf('@');
 
         if (nickEnds === -1 && identEnds === -1) {
-            msg.serverName = prefix;
+            msg.serverName = prefix.substring(1);
         } else {
             msg.nick = prefix.substring(1, Math.min(nickEnds, identEnds));
             msg.userNameAndHost = prefix.substring(Math.min(nickEnds, identEnds));
@@ -191,7 +191,7 @@ function *handleServerText(userId, msg) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     var text = msg.params.join(' ');
 
-    yield textLine.broadcast(userId, msg.network, msg.nick, 'notice', text);
+    yield textLine.broadcast(userId, msg.network, msg.serverName, 'notice', text);
 }
 
 function *handlePing(userId, msg) {

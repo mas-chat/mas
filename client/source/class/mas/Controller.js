@@ -315,10 +315,9 @@ qx.Class.define('mas.Controller', {
 
         createOrUpdateWindow: function(message, create) {
             var windowId = message.window;
-            var nw = message.nwName;
-            var nwId = message.nwId;
+            var network = message.network;
             var name = message.chanName;
-            var type = message.chanType;
+            var type = message.type;
             var sound = message.sounds;
             var titlealert = message.titleAlert;
             var usermode = message.userMode;
@@ -328,8 +327,8 @@ qx.Class.define('mas.Controller', {
 
             if (create === true) {
                 var newWindow = new mas.UserWindow(
-                    this._xhr, this.desktop, topic, nw, name, type,
-                    sound, titlealert, nwId, usermode, password, newMsgs,
+                    this._xhr, this.desktop, topic, name, type,
+                    sound, titlealert, network, usermode, password, newMsgs,
                     windowId, this);
                 //TODO: Inherit UserWindow from Window.
                 this._mainScreen.desktop.add(newWindow.window);
@@ -380,8 +379,8 @@ qx.Class.define('mas.Controller', {
             } else {
                 if (this._windows[windowId]) {
                     this._windows[windowId].updateValues(
-                        topic, nw, name, type, sound, titlealert,
-                        nwId, usermode, password);
+                        topic, name, type, sound, titlealert,
+                        network, usermode, password);
                 }
             }
 
