@@ -18,7 +18,8 @@
 
 var log = require('../../lib/log'),
     parse = require('co-body'),
-    courier = require('../../lib/courier').createEndPoint('message');
+    courier = require('../../lib/courier').createEndPoint('message'),
+    textLine = require('../lib/textLine');
 
 module.exports = function *() {
     var userId = this.mas.userId;
@@ -28,12 +29,15 @@ module.exports = function *() {
 
     switch (body.command) {
         case 'SEND':
+            // TBD Check that windowId is valid
             yield courier.send('ircparser', {
                 type: 'send',
                 userId: userId,
                 windowId: body.windowId,
                 text: body.text
             });
+            var nick = 'TBD'; // TBD
+            yield textLine.save(userId, body.windowId, nick, 'mymsg', body.text);
             break;
     }
 
