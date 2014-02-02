@@ -19,7 +19,7 @@
 var log = require('../../lib/log'),
     parse = require('co-body'),
     courier = require('../../lib/courier').createEndPoint('message'),
-    textLine = require('../lib/textLine');
+    textLine = require('../../lib/textLine');
 
 module.exports = function *() {
     var userId = this.mas.userId;
