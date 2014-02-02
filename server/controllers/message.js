@@ -29,9 +29,9 @@ module.exports = function *() {
     switch (body.command) {
         case 'SEND':
             yield courier.send('ircparser', {
-                type: 'addText',
+                type: 'send',
                 userId: userId,
-                network: 'TBD',
+                windowId: body.windowId,
                 text: body.text
             });
             break;
