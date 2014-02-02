@@ -48,7 +48,7 @@ exports.getWindowNameAndNetwork = function *(userId, windowId) {
     }
 
     return null;
-}
+};
 
 exports.getWindowNamesForNetwork = function *(userId, network) {
     var ids = yield getWindowIds(userId, network, null, 'name');
