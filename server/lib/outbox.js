@@ -18,21 +18,32 @@
 
 var log = require('../../lib/log'),
     wrapper = require('co-redis'),
-    redis = wrapper(require('redis').createClient());
+    redis = wrapper(require('redis').createClient()),
+    util = require('util');
 
 exports.reset = function *(userId) {
     yield redis.del('outbox:' + userId);
 };
 
 exports.queue = function *(userId) {
-    for (var i = 1; i < arguments.length; i++){
-        var command = arguments[i];
-        if (typeof(command) !== 'string') {
-            command = JSON.stringify(command);
-        }
+    var commands = [];
 
-        yield redis.lpush('outbox:' + userId, command);
+    for (var i = 1; i < arguments.length; i++) {
+        var command = arguments[i];
+
+        if (util.isArray(command)) {
+            commands = commands.concat(command);
+        } else {
+            commands.push(command);
+        }
     }
+
+    commands = commands.map(function(value) {
+        return typeof(value) === 'string' ? value : JSON.stringify(value);
+    });
+
+    commands.unshift('outbox:' + userId);
+    yield redis.lpush.apply(redis, commands);
 };
 
 exports.flush = function *(userId, timeout) {
