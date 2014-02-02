@@ -59,7 +59,7 @@ function *initSession(userId, sessionId) {
 
         yield outbox.queue(userId, {
             id: 'CREATE',
-            window: windowId,
+            windowId: windowId,
             x: parseInt(window.x),
             y: parseInt(window.y),
             width: parseInt(window.width),

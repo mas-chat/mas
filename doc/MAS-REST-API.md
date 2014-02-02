@@ -55,19 +55,17 @@ request. For example ```120``` if the user is in Helsinki (+2:00 GMT)
 Overal server response format to MAS listen request is:
 
 ```JSON
-{
-   "status":"OK",
-   "commands":[
-      {
-         "id":"ADDTEXT"
+[
+    {
+        "id":"ADDTEXT"
          "body":"How are you?",
          "cat":"msg",
          "window":2,
          "ts":341,
          "nick":"neo",
          "type":1,
-      },
-      {
+    },
+    {
          "id":"ADDTEXT"
          "body":"Good, thanks.",
          "cat":"notice",
@@ -75,13 +73,18 @@ Overal server response format to MAS listen request is:
          "ts":348,
          "nick":"morpheus",
          "type":1,
-      },
+    },
 
-      ...
+    ...
 
-   ]
-}
+]
 ```
+
+HTTP status codes:
+
+```200``` OK
+```401``` Unauthenticated. New login needed.
+```406``` Session expired. Reset listenSeq to 0 to restart the session. There can be only one active session. Ask confirmation from user before doing the reset to avoid looping between two or more clients.
 
 Below is the list of commands that MAS server can send to a client.
 A command is always request for the client to take some action.
@@ -186,7 +189,7 @@ Create new window.
 {
    "id":"CREATE",
 
-   "window":1,
+   "windowId":1,
    "width":476,
    "x":453,
    "newMsgs":2,

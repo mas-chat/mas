@@ -49,7 +49,7 @@ courier.on('send', function *(params) {
         type: 'write',
         userId: params.userId,
         network: network,
-        line: 'PRIVMSG ' + name + ' ' + params.text
+        line: 'PRIVMSG ' + name + ' :' + params.text
     });
 });
 
