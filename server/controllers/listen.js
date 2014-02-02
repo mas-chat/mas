@@ -36,9 +36,11 @@ module.exports = function *() {
 
 function *initSession(userId, sessionId) {
     // New session, reset outbox
+    var commands = [];
+
     yield outbox.reset(userId);
 
-    yield outbox.queue(userId, {
+    commands.push({
         id: 'SESSIONID',
         sessionId: sessionId
     }, {
@@ -57,7 +59,7 @@ function *initSession(userId, sessionId) {
 
         var window = yield redis.hgetall('window:' + userId + ':' + windowId);
 
-        yield outbox.queue(userId, {
+        commands.push({
             id: 'CREATE',
             windowId: windowId,
             x: parseInt(window.x),
@@ -78,13 +80,14 @@ function *initSession(userId, sessionId) {
 
         var lines = yield redis.lrange('windowmsgs:' + userId + ':' + windowId, 0, -1);
 
-        for (var ii = lines.length - 1; ii > 0; ii--) {
-            yield outbox.queue(userId, lines[ii]);
+        for (var ii = lines.length - 1; ii >= 0; ii--) {
+            commands.push(lines[ii]);
         }
     }
 
-    // TBD: Makes less queue() calls.
-    yield outbox.queue(userId, {
+    commands.push({
         id: 'INITDONE'
     });
+
+    yield outbox.queue(userId, commands);
 }
