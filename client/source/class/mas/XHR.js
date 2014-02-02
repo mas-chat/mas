@@ -93,14 +93,8 @@ qx.Class.define('mas.XHR', {
         _sendMsgSuccess: function() {
             var resp = this._sendMsgXhr.getResponse();
 
-            if (resp.status !== 'OK') {
-                this._handleErrorCb.call(this._cbCtx, resp.status);
-                // Stop prossessing the queue
-                return;
-            } else {
-                if (resp.commands) {
-                    this._processMessages(resp.commands, true);
-                }
+            if (resp.commands) {
+                this._processMessages(resp.commands, true);
             }
 
             this._sendQueue.shift();
@@ -120,14 +114,18 @@ qx.Class.define('mas.XHR', {
 
             debug.print('sendMsg: XHR request failed, code: ' + code);
 
-            this._setStatusTextCb.call(
-                this._cbCtx, 'Connection to MeetAndSpeak server lost,' +
-                    'trying to reconnect...');
+            if (code === 401 || code === 406) {
+                this._handleErrorCb.call(this._cbCtx, resp.status);
+            } else {
+                this._setStatusTextCb.call(
+                    this._cbCtx, 'Connection to MeetAndSpeak server lost,' +
+                        'trying to reconnect...');
 
-            // Stay optimistic and keep trying
-            qx.event.Timer.once(function() {
-                this._sendMsgFinished();
-            }, this, 2000);
+                // Stay optimistic and keep trying
+                qx.event.Timer.once(function() {
+                    this._sendMsgFinished();
+                }, this, 2000);
+            }
         },
 
         _sendMsgFinished: function() {
@@ -163,12 +161,8 @@ qx.Class.define('mas.XHR', {
 
             debug.print('<-- Response to polling request');
 
-            if (resp.status !== 'OK') {
-                this._handleErrorCb(resp.status);
-            } else {
-                this._processMessages(resp.commands, false);
-                this._pollMsgs();
-            }
+            this._processMessages(resp, false);
+            this._pollMsgs();
         },
 
         _processMessages: function(messages, solicited) {
@@ -205,7 +199,9 @@ qx.Class.define('mas.XHR', {
             var code = this._pollMsgXhr.getStatus();
             var phase = this._pollMsgXhr.getPhase();
 
-            if (this._firstPoll === true) {
+            if (code === 401 || code === 406) {
+                this._handleErrorCb(code);
+            } else if (this._firstPoll === true) {
                 this._handleRpcErrorCb.call(this._cbCtx);
             } else if (phase === 'timeout') {
                 // Make next request immediately

@@ -226,21 +226,14 @@ qx.Class.define('mas.Controller', {
         },
 
         handleError: function(code) {
-            if (code === 'DIE') {
+            if (code === 401) {
                 if (this.desktop === 0) {
                     this.show();
                 }
 
-                new mas.Dialog().set({
-                    caption: 'Error',
-                    text: 'Session expired. <p>Press OK to login again.',
-                    yesLabel: 'OK',
-                    yesCb: function () {
-                        qx.bom.Cookie.del('ProjectEvergreen', '/');
-                        window.location = '/';
-                    }
-                }).open();
-            } else if (code ===  'EXPIRE') {
+                qx.bom.Cookie.del('ProjectEvergreen', '/');
+                window.location = '/';
+            } else if (code === 406) {
                 if (this.desktop === 0) {
                     this.show();
                 }
@@ -314,7 +307,7 @@ qx.Class.define('mas.Controller', {
         },
 
         createOrUpdateWindow: function(message, create) {
-            var windowId = message.window;
+            var windowId = message.windowId;
             var network = message.network;
             var name = message.chanName;
             var type = message.type;
