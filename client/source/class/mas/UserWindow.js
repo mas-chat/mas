@@ -303,7 +303,7 @@ qx.Class.define('mas.UserWindow', {
                 if (input !== '' && input !== null) {
                     this.rpc.call({
                         command: 'SEND',
-                        window: this.winid,
+                        windowId: this.winid,
                         text: input
                     });
                     this.__inputline.setValue('');
