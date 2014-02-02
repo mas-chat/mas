@@ -32,19 +32,24 @@ exports.broadcast = function *(userId, network, nick, cat, text) {
     var windowIds = yield windowHelper.getWindowIdsForNetwork(userId, network);
 
     for (var i = 0; i < windowIds.length; i++) {
-        yield sendMessage(userId, windowIds[i], nick, cat, text);
+        yield processMessage(userId, windowIds[i], nick, cat, text, false);
     }
 };
 
 exports.send = function *(userId, network, group, nick, cat, text) {
     var windowId = yield windowHelper.getWindowId(userId, network, group);
-
-    if (windowId) {
-        yield sendMessage(userId, windowId, nick, cat, text);
-    }
+    yield processMessage(userId, windowId, nick, cat, text, false);
 };
 
-function *sendMessage(userId, windowId, nick, cat, text) {
+exports.save = function *(userId, windowId, nick, cat, text) {
+    yield processMessage(userId, windowId, nick, cat, text, true);
+};
+
+function *processMessage(userId, windowId, nick, cat, text, saveOnly) {
+    if (!windowId) {
+        return;
+    }
+
     var command = JSON.stringify({
         id: 'ADDTEXT',
         window: windowId,
@@ -56,5 +61,8 @@ function *sendMessage(userId, windowId, nick, cat, text) {
     });
 
     yield redis.lpush('windowmsgs:' + userId + ':' + windowId, command);
-    yield outbox.queue(userId, command);
+
+    if (!saveOnly) {
+        yield outbox.queue(userId, command);
+    }
 }
