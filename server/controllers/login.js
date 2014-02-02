@@ -29,11 +29,13 @@ module.exports = {
         var passwordSha = crypto.createHash('sha256').update(password,
                 'utf8').digest('hex');
         var user = null;
+        var cookie;
 
         var userId = yield Q.nsend(r, 'hget', 'index:user', body.emailOrNick);
 
         if (userId) {
             user = yield Q.nsend(r, 'hgetall', 'user:' + userId);
+            cookie = user.cookie;
         }
 
         if (!userId || user.passwd !== passwordSha || user.inuse === 0) {
@@ -56,6 +58,7 @@ module.exports = {
                     cookie: Math.floor(Math.random() * 100000001) + 100000000,
                     cookie_expires: unixTime + (60 * 60 * 24 * 14)
                 };
+                cookie = update.cookie;
 
                 // Save secret to Redis
                 yield Q.nsend(r, 'hmset', 'user:' + userId, update);
@@ -65,7 +68,7 @@ module.exports = {
             this.body = {
                 success: true,
                 userId: userId,
-                secret: update.cookie || user.cookie,
+                secret: cookie,
                 useSsl: useSsl
             };
         }
