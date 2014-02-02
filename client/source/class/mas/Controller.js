@@ -493,7 +493,7 @@ qx.Class.define('mas.Controller', {
         },
 
         setStatusText: function(text) {
-            this._mainscreen.setStatusText(text);
+            this._mainScreen.setStatusText(text);
         }
     }
 });
