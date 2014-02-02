@@ -400,7 +400,7 @@ SEND
 ```
 {
   "command": "SEND"
-  "window": 2,
+  "windowId": 2,
   "text": "Hello world"
 }
 ```
