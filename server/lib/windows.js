@@ -37,6 +37,19 @@ exports.getWindowId = function *(userId, network, group) {
     }
 };
 
+exports.getWindowNameAndNetwork = function *(userId, windowId) {
+    var windows = yield redis.smembers('windowlist:' + userId);
+
+    for (var i = 0; i < windows.length; i++) {
+        var details = windows[i].split(':');
+        if (details[0] === windowId) {
+            return [ details[2],  details[1] ];
+        }
+    }
+
+    return null;
+}
+
 exports.getWindowNamesForNetwork = function *(userId, network) {
     var ids = yield getWindowIds(userId, network, null, 'name');
 
