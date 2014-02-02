@@ -21,7 +21,7 @@ var log = require('../lib/log'),
     wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     courier = require('../lib/courier').createEndPoint('ircparser'),
-    textLine = require('../server/lib/textLine'),
+    textLine = require('../lib/textLine'),
     windowHelper = require('../server/lib/windows');
 
 var serverList = {
