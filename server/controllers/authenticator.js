@@ -45,7 +45,7 @@ module.exports = function *(next) {
 
     if (!validUser) {
         log.warn(userId, 'Invalid user.');
-        respond('unauthorized', 'Invalid user.');
+        respond(this, 'unauthorized', 'Invalid user.');
         return;
     }
 
@@ -53,7 +53,7 @@ module.exports = function *(next) {
 
     if (!validSession) {
         log.warn(userId, 'Invalid session.');
-        respond('not acceptable', 'Invalid session.');
+        respond(this, 'not acceptable', 'Invalid session.');
         return;
     }
 

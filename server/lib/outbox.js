@@ -37,12 +37,8 @@ exports.queue = function *(userId) {
 
 exports.flush = function *(userId, timeout) {
     var result,
-        command;
-
-    var msg = {
-        status: 'OK',
-        commands: []
-    };
+        command,
+        commands = [];
 
     if (timeout) {
         // Wait for first command to appear if timeout is given
@@ -50,18 +46,18 @@ exports.flush = function *(userId, timeout) {
 
         if (result) {
             command = result[1];
-            msg.commands.push(JSON.parse(command));
+            commands.push(JSON.parse(command));
         }
     }
 
     // Retrieve other commands if there are any
     while ((command = yield redis.rpop('outbox:' + userId)) !== null) {
-        msg.commands.push(JSON.parse(command));
+        commands.push(JSON.parse(command));
     }
 
-    log.info(userId, 'Flushing outbox. Messsage: ' + JSON.stringify(msg));
+    log.info(userId, 'Flushing outbox. Response: ' + JSON.stringify(commands));
 
-    return msg;
+    return commands;
 };
 
 exports.length = function *(userId) {
