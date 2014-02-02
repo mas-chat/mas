@@ -39,8 +39,6 @@ exports.flush = function *(userId, timeout) {
     var result,
         command;
 
-    log.info(userId, 'Flushing outbox.');
-
     var msg = {
         status: 'OK',
         commands: []
@@ -60,6 +58,8 @@ exports.flush = function *(userId, timeout) {
     while ((command = yield redis.rpop('outbox:' + userId)) !== null) {
         msg.commands.push(JSON.parse(command));
     }
+
+    log.info(userId, 'Flushing outbox. Messsage: ' + JSON.stringify(msg));
 
     return msg;
 };

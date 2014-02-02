@@ -34,7 +34,7 @@ var serverList = {
 // Upper layer messages
 
 // addText
-courier.on('addText', function *(params) {
+courier.on('send', function *(params) {
     var result = yield windowHelper.getWindowNameAndNetwork(params.userId, params.windowId);
 
     if (!result) {
