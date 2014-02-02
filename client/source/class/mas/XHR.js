@@ -115,7 +115,7 @@ qx.Class.define('mas.XHR', {
             debug.print('sendMsg: XHR request failed, code: ' + code);
 
             if (code === 401 || code === 406) {
-                this._handleErrorCb.call(this._cbCtx, resp.status);
+                this._handleErrorCb.call(this._cbCtx, code);
             } else {
                 this._setStatusTextCb.call(
                     this._cbCtx, 'Connection to MeetAndSpeak server lost,' +

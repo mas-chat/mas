@@ -1204,7 +1204,8 @@ qx.Class.define('mas.UserWindow', {
 
             //Group API key
 
-            if (this.type === 'group' && this.__network === 'MeetAndSpeak' && this.__usermode === 2) {
+            if (this.type === 'group' && this.__network === 'MeetAndSpeak' &&
+                this.__usermode === 2) {
                 composite.add(new qx.ui.basic.Label('Group API key:'),
                               { row: 7, column: 0 });
                 this.apikey = new qx.ui.basic.Label('Refreshing...').set({
