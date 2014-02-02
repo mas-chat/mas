@@ -35,11 +35,21 @@ var serverList = {
 
 // addText
 courier.on('addText', function *(params) {
+    var result = yield windowHelper.getWindowNameAndNetwork(params.userId, params.windowId);
+
+    if (!result) {
+        // TBD: Is this correct place to do message validation?
+        return;
+    }
+
+    var name = result[0];
+    var network = result[1];
+
     yield courier.send('connectionmanager', {
         type: 'write',
         userId: params.userId,
-        network: params.network,
-        line: 'PRIVMSG #test ' + params.text
+        network: network,
+        line: 'PRIVMSG ' + name + ' ' + params.text
     });
 });
 
