@@ -20,6 +20,7 @@
 var log = require('../lib/log'),
     koa = require('koa'),
     router = require('koa-router'),
+    resourceRouter = require('koa-resource-router'),
     hbs = require('koa-hbs'),
     less = require('koa-less'),
     serve = require('koa-static'),
@@ -57,15 +58,18 @@ hbs.registerHelper('getPageJSFile', function() {
 
 app.use(router(app));
 
+// REST API common filtering
+app.all('/api/:method/:sessionId/:listenSeq/:timezone?*', authenticator, seqChecker);
+
 // REST API routes
-app.get('/api/listen/:sessionId/:listenSeq/:timezone?*',
-    authenticator, seqChecker, listenController);
-app.post('/api/send/:sessionId/:sendSeq',
-    authenticator, seqChecker, msgController);
+app.get('/api/listen/:sessionId/:listenSeq/:timezone?*', listenController);
+app.post('/api/send/:sessionId/:sendSeq', msgController);
 
 // Registration and login routes
-app.resource('login', loginController);
-app.resource('register', registerController);
+var login = new resourceRouter('login', loginController);
+var register = new resourceRouter('register', registerController);
+app.use(login.middleware());
+app.use(register.middleware());
 
 // Public routes
 app.use(less(path.join(__dirname, 'public')));
