@@ -129,7 +129,7 @@ qx.Class.define('mas.Controller', {
                 break;
 
             case 'NICK':
-                this.nicks = message.nicks;
+                this.nicks = message;
                 break;
 
             case 'ADDURL':
