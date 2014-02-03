@@ -24,13 +24,11 @@ module.exports = function *(next) {
     var expectedSeqKeyName;
     var rcvdSeq;
 
-    log.info('Validating sequence number.');
+    rcvdSeq = parseInt(this.params.seq);
 
-    if (this.params.listenSeq) {
-        rcvdSeq = parseInt(this.params.listenSeq);
+    if (this.params.method == 'listen') {
         expectedSeqKeyName = 'listenRcvNext';
-    } else if (this.params.sendSeq) {
-        rcvdSeq = parseInt(this.params.sendSeq);
+    } else if (this.params.method == 'send') {
         expectedSeqKeyName = 'sendRcvNext';
     } else {
         respond(this, 'not acceptable', 'Invalid sequence number.');
@@ -63,6 +61,8 @@ module.exports = function *(next) {
 };
 
 function respond(ctx, code, msg) {
+    log.info(ctx.mas.userId,'Validating sequence number.');
+
     ctx.status = code;
     ctx.body = msg;
 }
