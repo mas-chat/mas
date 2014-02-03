@@ -22,14 +22,8 @@ var log = require('../lib/log'),
     redis = wrapper(require('redis').createClient()),
     courier = require('../lib/courier').createEndPoint('ircparser'),
     textLine = require('../lib/textLine'),
-    windowHelper = require('../server/lib/windows');
-
-var serverList = {
-    MeetAndSpeak: { host: 'localhost', port: 6667, unknown: 9999 },
-    IRCNet: { host: 'ircnet.eversible.com', port: 6666, unknown: 100 },
-    FreeNode: { host: 'irc.freenode.net', port: 6667, unknown: 5 },
-    W3C: { host: 'irc.w3.org', port: 6665, unknown: 5 }
-};
+    windowHelper = require('../server/lib/windows'),
+    networkList = require('../lib/networks');
 
 // Upper layer messages
 
@@ -162,8 +156,8 @@ function *connect(userId, network) {
             type: 'connect',
             userId: userId,
             network: network,
-            host: serverList[network].host,
-            port: serverList[network].port
+            host: networkList[network].host,
+            port: networkList[network].port
         });
     }
 }
@@ -231,6 +225,8 @@ function *handle376(userId, msg) {
             line: 'JOIN ' + channels[i]
         });
     }
+
+    yield textLine.sendNicks(userId);
 }
 
 function *handle433(userId, msg) {
