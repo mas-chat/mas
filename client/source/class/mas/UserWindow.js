@@ -327,8 +327,7 @@ qx.Class.define('mas.UserWindow', {
 
                         var fakeMsg = {
                             type: 0,
-                            cat: input.substr(0,4) === '/me ' ?
-                                'mymsg' : 'action',
+                            cat: input.substr(0,4) === '/me ' ? 'action' : 'mymsg',
                             nick: this._controller.nicks[this.__network],
                             body: this.linkify(input),
                             ts: hour * 60 + min
