@@ -19,7 +19,8 @@
 var log = require('../../lib/log'),
     wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
-    outbox = require('../lib/outbox.js');
+    outbox = require('../lib/outbox'),
+    textLine = require('../../lib/textLine');
 
 module.exports = function *() {
     var userId = this.mas.userId;
@@ -90,4 +91,6 @@ function *initSession(userId, sessionId) {
     });
 
     yield outbox.queue(userId, commands);
+
+    yield textLine.sendNicks(userId);
 }
