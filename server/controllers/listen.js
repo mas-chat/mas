@@ -29,6 +29,7 @@ module.exports = function *() {
     log.info(userId, 'Long poll HTTP request received');
 
     if (this.mas.newSession) {
+        log.info(userId, 'Initializing new session');
         yield initSession(userId, sessionId);
     }
 
