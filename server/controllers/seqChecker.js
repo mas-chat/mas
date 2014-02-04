@@ -26,9 +26,9 @@ module.exports = function *(next) {
 
     rcvdSeq = parseInt(this.params.seq);
 
-    if (this.params.method == 'listen') {
+    if (this.params.method === 'listen') {
         expectedSeqKeyName = 'listenRcvNext';
-    } else if (this.params.method == 'send') {
+    } else if (this.params.method === 'send') {
         expectedSeqKeyName = 'sendRcvNext';
     } else {
         respond(this, 'not acceptable', 'Invalid sequence number.');
