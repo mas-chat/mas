@@ -17,9 +17,8 @@
 'use strict';
 
 var log = require('../../lib/log'),
-    wrapper = require('co-redis'),
-    plainRedis = require('redis'),
-    redis = wrapper(plainRedis.createClient()),
+    redisModule = require('../../lib/redis'),
+    redis = redisModule.createClient(),
     util = require('util');
 
 exports.reset = function *(userId) {
@@ -56,9 +55,9 @@ exports.flush = function *(userId, timeout) {
         // Wait for first command to appear if timeout is given
         // For every blocking redis call we need to create own redis client. Otherwise
         // HTTP calls block each other.
-        var plainClient = plainRedis.createClient();
-        result = yield wrapper(plainClient).brpop('outbox:' + userId, timeout);
-        plainClient.end();
+        var newClient = redisModule.createClient();
+        result = yield newClient.brpop('outbox:' + userId + ':' + sessionId, timeout);
+        newClient.end();
 
         if (result) {
             command = result[1];
