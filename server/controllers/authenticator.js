@@ -75,7 +75,7 @@ module.exports = function *(next) {
 };
 
 function *validateUser(userId, secret) {
-    var unixTime = Math.round(new Date().getTime() / 1000);
+    var unixTimeNow = Math.round(new Date().getTime() / 1000);
 
     if (!userId) {
         return false;
@@ -83,7 +83,7 @@ function *validateUser(userId, secret) {
 
     var expected = yield redis.hmget('user:' + userId, 'cookie_expires', 'cookie');
 
-    if (expected && expected[0] > unixTime && expected[1] === secret) {
+    if (expected && expected[0] > unixTimeNow && expected[1] === secret) {
         return true;
     } else {
         return false;
