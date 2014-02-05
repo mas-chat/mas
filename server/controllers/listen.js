@@ -17,8 +17,7 @@
 'use strict';
 
 var log = require('../../lib/log'),
-    wrapper = require('co-redis'),
-    redis = wrapper(require('redis').createClient()),
+    redis = require('../../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
     textLine = require('../../lib/textLine');
 

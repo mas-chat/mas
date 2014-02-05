@@ -17,8 +17,7 @@
 'use strict';
 
 var crypto = require('crypto'),
-    r = require('redis').createClient(),
-    Q = require('q'),
+    redis = require('../../lib/redis').createClient(),
     parse = require('co-body');
 
 module.exports = {
@@ -31,10 +30,10 @@ module.exports = {
         var user = null;
         var cookie;
 
-        var userId = yield Q.nsend(r, 'hget', 'index:user', body.emailOrNick);
+        var userId = yield redis.hget('index:user', body.emailOrNick);
 
         if (userId) {
-            user = yield Q.nsend(r, 'hgetall', 'user:' + userId);
+            user = yield redis.hgetall('user:' + userId);
             cookie = user.cookie;
         }
 
@@ -45,7 +44,7 @@ module.exports = {
                msg: 'Wrong password or ...'
             };
         } else {
-            var useSsl = yield Q.nsend(r, 'hget', 'settings:' + userId, 'sslEnabled');
+            var useSsl = yield redis.hget('settings:' + userId, 'sslEnabled');
             var unixTime = Math.round(new Date().getTime() / 1000);
             var update = null;
 
@@ -61,7 +60,7 @@ module.exports = {
                 cookie = update.cookie;
 
                 // Save secret to Redis
-                yield Q.nsend(r, 'hmset', 'user:' + userId, update);
+                yield redis.hmset('user:' + userId, update);
             }
             /*jshint +W106 */
 
