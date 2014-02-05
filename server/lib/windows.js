@@ -16,8 +16,7 @@
 
 'use strict';
 
-var wrapper = require('co-redis'),
-    redis = wrapper(require('redis').createClient()),
+var redis = require('../../lib/redis').createClient(),
     log = require('../../lib/log');
 
 exports.getWindowIdsForNetwork = function *(userId, network) {
