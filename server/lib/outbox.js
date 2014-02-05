@@ -56,7 +56,7 @@ exports.flush = function *(userId, timeout) {
         // For every blocking redis call we need to create own redis client. Otherwise
         // HTTP calls block each other.
         var newClient = redisModule.createClient();
-        result = yield newClient.brpop('outbox:' + userId + ':' + sessionId, timeout);
+        result = yield newClient.brpop('outbox:' + userId, timeout);
         newClient.end();
 
         if (result) {
