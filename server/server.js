@@ -27,6 +27,8 @@ var log = require('../lib/log'),
     error = require('koa-error'),
     //logger = require('koa-logger'),
     mount = require('koa-mount'),
+    co = require('co'),
+    redis = require('../lib/redis'),
     routesIndex = require('./routes'),
     routesPages = require('./routes/pages'),
     authenticator = require('./controllers/authenticator'),
@@ -84,4 +86,7 @@ app.use(mount('/qooxdoo-sdk', serve(path.join(__dirname,
 app.get('/', routesIndex);
 app.get(/.html$/, routesPages); // All other pages
 
-app.listen(3000);
+co(function *() {
+    yield redis.loadScripts();
+    app.listen(3000);
+})();
