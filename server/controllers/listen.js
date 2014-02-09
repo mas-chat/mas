@@ -36,61 +36,8 @@ module.exports = function *() {
 };
 
 function *initSession(userId, sessionId) {
-    // New session, reset outbox
-    var commands = [];
-
-    yield outbox.reset(userId);
-
-    commands.push({
-        id: 'SESSIONID',
-        sessionId: sessionId
-    }, {
-        id: 'SET',
-        settings: {}
-    });
-
-    //Iterate through windows
-    var windows = yield redis.smembers('windowlist:' + userId);
-
-    for (var i = 0; i < windows.length; i++) {
-        var details = windows[i].split(':');
-        var windowId = details[0];
-        var network = details[1];
-        var windowName = details[2];
-
-        var window = yield redis.hgetall('window:' + userId + ':' + windowId);
-
-        commands.push({
-            id: 'CREATE',
-            windowId: windowId,
-            x: parseInt(window.x),
-            y: parseInt(window.y),
-            width: parseInt(window.width),
-            height: parseInt(window.height),
-            network: network, // TBD This is now string not number! Fix client and docs!
-            chanName: windowName,
-            type: window.type,
-            sounds: 1, // TBD
-            titlealert: 1, //TBD
-            userMode: 2, //TBD
-            visible: 1, // TBD
-            newMsgs: 2, // TBD
-            password: window.password,
-            topic: 'Hello' // TBD
-        });
-
-        var lines = yield redis.lrange('windowmsgs:' + userId + ':' + windowId, 0, -1);
-
-        for (var ii = lines.length - 1; ii >= 0; ii--) {
-            commands.push(lines[ii]);
-        }
-    }
-
-    commands.push({
-        id: 'INITDONE'
-    });
-
-    yield outbox.queue(userId, commands);
+    // New session, reset outbox, send initial messages
+    yield redis.run('initSession', 1, 'outbox:' + userId, sessionId, userId);
 
     yield textLine.sendNicks(userId);
 }
