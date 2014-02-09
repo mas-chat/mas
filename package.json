@@ -21,7 +21,7 @@
     "koa": "~0.3.0",
     "koa-hbs": "~0.4.1",
     "koa-router": "ilkkao/koa-router",
-    "koa-resource-router": "~0.1.0",
+    "koa-resource-router": "~0.2.0",
     "koa-error": "~1.1.1",
     "koa-static": "~1.4.2",
     "koa-less": "0.0.1",
