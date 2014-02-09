@@ -85,16 +85,16 @@ qx.Class.define('mas.Controller', {
                 break;
 
             case 'ADDTEXT':
-                this._windows[message.window].addline(message, true, false);
+                this._windows[message.windowdId].addline(message, true, false);
 
-                if (this._windows[message.window].sound === 1 &&
+                if (this._windows[message.windowdId].sound === 1 &&
                     message.type === 2 && this.initdone === 1) {
                     // Play short sound
                     this._audio.play();
                 }
 
                 if (this.__blur === 1 &&
-                    this._windows[message.window].titlealert === 1 &&
+                    this._windows[message.windowdId].titlealert === 1 &&
                     this.__topictimer.getEnabled() === false &&
                     this.__firstCommand !== 1 && message.type === 2) {
                     this.__topictimeractive = true;
@@ -104,7 +104,7 @@ qx.Class.define('mas.Controller', {
                 break;
 
             case 'ADDNTF':
-                this._windows[message.window].addntf(
+                this._windows[message.windowId].addntf(
                     message.noteId, message.body);
                 break;
 
@@ -113,19 +113,19 @@ qx.Class.define('mas.Controller', {
                 break;
 
             case 'TOPIC':
-                this._windows[message.window].changetopic(message.topic);
+                this._windows[message.windowdD].changetopic(message.topic);
                 break;
 
             case 'NAMES':
-                this._windows[message.window].addnames(message.names);
+                this._windows[message.windowdD].addnames(message.names);
                 break;
 
             case 'ADDNAME':
-                this._windows[message.window].addname(message.nick);
+                this._windows[message.windowdD].addname(message.nick);
                 break;
 
             case 'DELNAME':
-                this._windows[message.window].delname(message.nick);
+                this._windows[message.windowdD].delname(message.nick);
                 break;
 
             case 'NICK':
@@ -133,7 +133,7 @@ qx.Class.define('mas.Controller', {
                 break;
 
             case 'ADDURL':
-                this._windows[message.window].addUrl(message.url);
+                this._windows[message.windowdD].addUrl(message.url);
                 break;
 
             case 'INFO' :
@@ -146,7 +146,7 @@ qx.Class.define('mas.Controller', {
 
             case 'CLOSE':
                 //TODO: call destructor?
-                delete this._windows[message.window];
+                delete this._windows[message.windowdD];
                 break;
 
             case 'FLIST':
@@ -181,15 +181,15 @@ qx.Class.define('mas.Controller', {
                 break;
 
             case 'KEY':
-                this._windows[message.window].apikey.setValue(message.key);
+                this._windows[message.windowdD].apikey.setValue(message.key);
                 break;
 
             case 'OPERLIST':
-                this._windows[message.window].updateOperList(message);
+                this._windows[message.windowdD].updateOperList(message);
                 break;
 
             case 'BANLIST':
-                this._windows[message.window].updateBanList(message);
+                this._windows[message.windowdD].updateBanList(message);
                 break;
 
             case 'LOGS':
