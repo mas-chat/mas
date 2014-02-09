@@ -75,7 +75,7 @@ function *getWindowIds(userId, network, group, returnType) {
 
     for (var i = 0; i < windows.length; i++) {
         var details = windows[i].split(':');
-        var windowId = details[0];
+        var windowId = parseInt(details[0]);
         var windowNetwork = details[1];
         var windowName = details[2];
 
