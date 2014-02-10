@@ -18,9 +18,16 @@ MAS Redis structures
    registrationtime (int, unix time)
    nextwindowid (int)
 
+ sessionlist:<userid> (set)
+   sessionId1, sessionId2 ...
+
+ session:<userid>:<sessionId> (hash)
    sendRcvNext (int)
    listenRcvNext (int)
-   sessionId (int)
+   timeStamp (int)
+
+ outbox:<userid>:<sessionId> (list)
+   msg1, msg2
 
  index:user (hash)
    <email> (int, userId)
@@ -58,9 +65,6 @@ MAS Redis structures
  [TBD] inbox:<userid> (list)
    msg:<windowid>
    names:<windowid>
-
- outbox:<userid> (list)
-   msg1, msg2
 
  notelist:<userid>:<nwid>:<channel_name> (set)
    note1, note2 ...
