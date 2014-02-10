@@ -21,32 +21,30 @@ var log = require('../../lib/log'),
     redis = redisModule.createClient(),
     util = require('util');
 
-exports.reset = function *(userId) {
-    yield redis.del('outbox:' + userId);
-};
-
 exports.queue = function *(userId) {
-    var commands = [];
+    var params = [ userId ];
 
     for (var i = 1; i < arguments.length; i++) {
         var command = arguments[i];
 
         if (util.isArray(command)) {
-            commands = commands.concat(command);
+            params = params.concat(command);
         } else {
-            commands.push(command);
+            params.push(command);
         }
     }
 
-    commands = commands.map(function(value) {
+    params = params.map(function(value) {
         return typeof(value) === 'string' ? value : JSON.stringify(value);
     });
 
-    commands.unshift('outbox:' + userId);
-    yield redis.lpush.apply(redis, commands);
+    // TBD all sessions, specific session? Check the use of this function
+
+    console.log(params);
+    yield redis.run('queueOutbox', [], params);
 };
 
-exports.flush = function *(userId, timeout) {
+exports.flush = function *(userId, sessionId, timeout) {
     var result,
         command,
         commands = [];
@@ -56,7 +54,7 @@ exports.flush = function *(userId, timeout) {
         // For every blocking redis call we need to create own redis client. Otherwise
         // HTTP calls block each other.
         var newClient = redisModule.createClient();
-        result = yield newClient.brpop('outbox:' + userId, timeout);
+        result = yield newClient.brpop('outbox:' + userId + ':' + sessionId, timeout);
         newClient.end();
 
         if (result) {
@@ -66,15 +64,17 @@ exports.flush = function *(userId, timeout) {
     }
 
     // Retrieve other commands if there are any
-    while ((command = yield redis.rpop('outbox:' + userId)) !== null) {
+    while ((command = yield redis.rpop('outbox:' + userId + ':' + sessionId)) !== null) {
         commands.push(JSON.parse(command));
     }
 
-    log.info(userId, 'Flushed outbox. Response: ' + JSON.stringify(commands).substring(0, 100));
+    log.info(userId, 'Flushed outbox. SessionId: ' + sessionId + '. Response: ' +
+        JSON.stringify(commands).substring(0, 100));
 
     return commands;
 };
 
-exports.length = function *(userId) {
-    return parseInt(yield redis.llen('outbox:' + userId));
+exports.length = function *(userId, sessionId) {
+    // TBD Add helper concat('outbox', userId, sessionId)
+    return parseInt(yield redis.llen('outbox:' + userId + ':' + sessionId));
 };
