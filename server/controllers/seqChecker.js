@@ -20,6 +20,7 @@ var log = require('../../lib/log'),
     redis = require('../../lib/redis').createClient();
 
 module.exports = function *(next) {
+    var sessionId = this.mas.sessionId;
     var expectedSeqKeyName;
     var rcvdSeq;
 
@@ -34,17 +35,10 @@ module.exports = function *(next) {
         return;
     }
 
-    var expectedSeq = parseInt(yield redis.hget('user:' + this.mas.userId, expectedSeqKeyName));
+    var expectedSeq = parseInt(yield redis.hget('session:' + this.mas.userId + ':' +
+        sessionId, expectedSeqKeyName));
 
-    if (this.mas.newSession) {
-        // New session, reset sequence numbers.
-        var update = {
-            'sendRcvNext': 0,
-            'listenRcvNext': 0,
-        };
-
-        yield redis.hmset('user:' + this.mas.userId, update);
-    } else if (rcvdSeq === expectedSeq - 1) {
+    if (rcvdSeq === expectedSeq - 1) {
         // TBD: Re-send the previous reply
         respond(this, 'not acceptable',
             'Previous response lost. Resend logic to be implemented.');
@@ -54,7 +48,7 @@ module.exports = function *(next) {
         return;
     }
 
-    yield redis.hincrby('user:' + this.mas.userId, expectedSeqKeyName, 1);
+    yield redis.hincrby('session:' + this.mas.userId + ':' + sessionId, expectedSeqKeyName, 1);
 
     yield next;
 };

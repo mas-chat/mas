@@ -16,14 +16,15 @@
 
 'use strict';
 
-var log = require('../../lib/log'),
+var uuid = require('node-uuid'),
+    log = require('../../lib/log'),
     redis = require('../../lib/redis').createClient();
 
 module.exports = function *(next) {
     log.info('Authenticating.');
 
     var cookie = this.cookies.get('ProjectEvergreen');
-    var sessionId = parseInt(this.params.sessionId);
+    var sessionId = this.params.sessionId;
 
     if (!cookie) {
         respond(this, 'unauthorized', 'Invalid cookie.');
@@ -60,12 +61,19 @@ module.exports = function *(next) {
 
     this.mas = this.mas || {};
 
-    if (sessionId === 0) {
+    if (sessionId === '0') {
         //New session, generate session id
+        // TBD Limit number of sessions
         this.mas.newSession = true;
-        sessionId = Math.floor((Math.random() * 10000000) + 1);
-        yield redis.hset('user:' + userId, 'sessionId', sessionId);
+        sessionId = uuid.v4();
+
+        yield redis.sadd('sessionlist:' + userId, sessionId);
+        yield redis.hmset('session:' + userId + ':' + sessionId, 'sendRcvNext', 0,
+            'listenRcvNext', 0);
     }
+
+    var ts = Math.round(Date.now() / 1000);
+    yield redis.hmset('session:' + userId + ':' + sessionId, 'timeStamp', ts);
 
     this.mas.sessionId = sessionId;
     this.mas.userId = userId;
@@ -74,7 +82,7 @@ module.exports = function *(next) {
 };
 
 function *validateUser(userId, secret) {
-    var unixTimeNow = Math.round(new Date().getTime() / 1000);
+    var ts = Math.round(Date.now() / 1000);
 
     if (!userId) {
         return false;
@@ -82,7 +90,7 @@ function *validateUser(userId, secret) {
 
     var expected = yield redis.hmget('user:' + userId, 'cookie_expires', 'cookie');
 
-    if (expected && expected[0] > unixTimeNow && expected[1] === secret) {
+    if (expected && expected[0] > ts && expected[1] === secret) {
         return true;
     } else {
         return false;
@@ -90,9 +98,9 @@ function *validateUser(userId, secret) {
 }
 
 function *validateSession(userId, sessionId) {
-    var expectedSessionId = parseInt(yield redis.hget('user:' + userId, 'sessionId'));
+    var sessionExists = yield redis.sismember('sessionlist:' + userId, sessionId);
 
-    if (sessionId === 0 || sessionId === expectedSessionId) {
+    if (sessionId === '0' || sessionExists) {
         return true;
     } else {
         return false;

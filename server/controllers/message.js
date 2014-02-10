@@ -18,26 +18,33 @@
 
 var log = require('../../lib/log'),
     parse = require('co-body'),
+    redis = require('../../lib/redis').createClient(),
     courier = require('../../lib/courier').createEndPoint('message'),
-    textLine = require('../../lib/textLine');
+    textLine = require('../../lib/textLine'),
+    windowHelper = require('../lib/windows');
 
 module.exports = function *() {
     var userId = this.mas.userId;
     var body = yield parse.json(this.req);
+    var command = body.command;
+    var windowId = parseInt(body.windowId);
 
-    log.info(userId, 'Prosessing command: ' + body.command);
+    log.info(userId, 'Prosessing command: ' + command);
 
-    switch (body.command) {
+    switch (command) {
         case 'SEND':
+
             // TBD Check that windowId is valid
             yield courier.send('ircparser', {
                 type: 'send',
                 userId: userId,
-                windowId: body.windowId,
+                windowId: windowId,
                 text: body.text
             });
-            var nick = 'TBD'; // TBD
-            yield textLine.save(userId, body.windowId, nick, 'mymsg', body.text);
+
+            var network = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
+            var nick = yield redis.hget('user:' + userId, 'currentNick:' + network[1]);
+            yield textLine.sendByWindowId(userId, body.windowId, nick, 'mymsg', body.text);
             break;
     }
 

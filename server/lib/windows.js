@@ -41,7 +41,7 @@ exports.getWindowNameAndNetwork = function *(userId, windowId) {
 
     for (var i = 0; i < windows.length; i++) {
         var details = windows[i].split(':');
-        if (details[0] === windowId) {
+        if (parseInt(details[0]) === windowId) {
             return [ details[2],  details[1] ];
         }
     }
