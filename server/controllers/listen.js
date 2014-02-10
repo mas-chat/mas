@@ -32,12 +32,11 @@ module.exports = function *() {
         yield initSession(userId, sessionId);
     }
 
-    this.body = yield outbox.flush(userId, 25);
+    this.body = yield outbox.flush(userId, sessionId, 25);
 };
 
 function *initSession(userId, sessionId) {
     // New session, reset outbox, send initial messages
-    yield redis.run('initSession', 1, 'outbox:' + userId, sessionId, userId);
-
+    yield redis.run('initSession', [], [ sessionId, userId ]);
     yield textLine.sendNicks(userId);
 }
