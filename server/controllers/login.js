@@ -45,17 +45,17 @@ module.exports = {
             };
         } else {
             var useSsl = yield redis.hget('settings:' + userId, 'sslEnabled');
-            var unixTime = Math.round(new Date().getTime() / 1000);
+            var ts = Math.round(Date.now() / 1000);
             var update = null;
 
             // TBD: Use word secret everywhere. Rename cookie_expires to cookieExpires
 
             /* jshint -W106 */
-            if (!(user.cookie > 0 && unixTime < user.cookie_expires)) {
+            if (!(user.cookie > 0 && ts < user.cookie_expires)) {
                 // Time to generate new secret
                 update = {
                     cookie: Math.floor(Math.random() * 100000001) + 100000000,
-                    cookie_expires: unixTime + (60 * 60 * 24 * 14)
+                    cookie_expires: ts + (60 * 60 * 24 * 14)
                 };
                 cookie = update.cookie;
 
