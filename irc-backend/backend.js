@@ -18,8 +18,8 @@
 'use strict';
 
 var log = require('../lib/log'),
-    wrapper = require('co-redis'),
-    redis = wrapper(require('redis').createClient()),
+    redisModule = require('../lib/redis'),
+    redis = require('../lib/redis').createClient(),
     courier = require('../lib/courier').createEndPoint('ircparser'),
     textLine = require('../lib/textLine'),
     windowHelper = require('../server/lib/windows'),
@@ -51,6 +51,7 @@ courier.on('send', function *(params) {
 
 // Ready
 courier.on('ready', function *() {
+    yield redisModule.loadScripts();
     yield init();
 });
 
