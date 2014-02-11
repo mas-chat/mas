@@ -5,11 +5,15 @@ MAS server and web client
 
 [![Dependency Status](https://david-dm.org/ilkkao/mas.png)](http://david-dm.org/ilkkao/mas)
 
-MAS is an advanced web chat application. The server part provides MAS
+![Screenshot](http://i.imgur.com/McO0nas.png)
+
+MAS is a web chat application. The server part implements MAS
 REST API. [Meetandspeak.com][] is an instance of this application.
 
 The server is currently being rewritten from scratch and is not yet
 fully functional.
+
+For more info, see [architecture page](https://github.com/ilkkao/mas/wiki).
 
 Installation
 ------------
@@ -28,7 +32,7 @@ Prerequisites:
 OS support
 ----------
 
-MacOS and Linux.
+MacOS/Linux/Windows.
 
 Plan
 ----
