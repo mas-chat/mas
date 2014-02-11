@@ -16,12 +16,12 @@
 
 'use strict';
 
-var log = require('../../lib/log'),
-    forms = require('forms'),
+var forms = require('forms'),
     fields = forms.fields,
     widgets = forms.widgets,
     validators = forms.validators,
-    Q = require('q');
+    Q = require('q'),
+    log = require('../lib/log');
 
 var registrationForm = forms.create({
     name: fields.string({

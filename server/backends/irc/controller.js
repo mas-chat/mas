@@ -17,13 +17,13 @@
 
 'use strict';
 
-var log = require('../lib/log'),
-    redisModule = require('../lib/redis'),
-    redis = require('../lib/redis').createClient(),
-    courier = require('../lib/courier').createEndPoint('ircparser'),
-    textLine = require('../lib/textLine'),
-    windowHelper = require('../server/lib/windows'),
-    networkList = require('../lib/networks');
+var log = require('../../lib/log'),
+    redisModule = require('../../lib/redis'),
+    redis = redisModule.createClient(),
+    courier = require('../../lib/courier').createEndPoint('ircparser'),
+    textLine = require('../../lib/textLine'),
+    windowHelper = require('../../lib/windows'),
+    networkList = require('../../lib/networks');
 
 // Upper layer messages
 
