@@ -16,10 +16,10 @@
 
 'use strict';
 
-var log = require('../../lib/log'),
-    redis = require('../../lib/redis').createClient(),
+var log = require('../lib/log'),
+    redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
-    textLine = require('../../lib/textLine');
+    textLine = require('../lib/textLine');
 
 module.exports = function *() {
     var userId = this.mas.userId;

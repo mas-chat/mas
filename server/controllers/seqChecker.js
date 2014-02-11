@@ -16,8 +16,8 @@
 
 'use strict';
 
-var log = require('../../lib/log'),
-    redis = require('../../lib/redis').createClient();
+var log = require('../lib/log'),
+    redis = require('../lib/redis').createClient();
 
 module.exports = function *(next) {
     var sessionId = this.mas.sessionId;

@@ -16,10 +16,10 @@
 
 'use strict';
 
-var log = require('../../lib/log'),
-    redisModule = require('../../lib/redis'),
-    redis = redisModule.createClient(),
-    util = require('util');
+var util = require('util'),
+    log = require('./log'),
+    redisModule = require('./redis'),
+    redis = redisModule.createClient();
 
 exports.queue = function *(userId) {
     var params = [ userId ];
@@ -39,8 +39,6 @@ exports.queue = function *(userId) {
     });
 
     // TBD all sessions, specific session? Check the use of this function
-
-    console.log(params);
     yield redis.run('queueOutbox', [], params);
 };
 

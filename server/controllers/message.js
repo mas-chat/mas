@@ -16,11 +16,11 @@
 
 'use strict';
 
-var log = require('../../lib/log'),
-    parse = require('co-body'),
-    redis = require('../../lib/redis').createClient(),
-    courier = require('../../lib/courier').createEndPoint('message'),
-    textLine = require('../../lib/textLine'),
+var parse = require('co-body'),
+    log = require('../lib/log'),
+    redis = require('../lib/redis').createClient(),
+    courier = require('../lib/courier').createEndPoint('message'),
+    textLine = require('../lib/textLine'),
     windowHelper = require('../lib/windows');
 
 module.exports = function *() {

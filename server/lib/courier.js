@@ -16,12 +16,12 @@
 
 'use strict';
 
-var log = require('./log'),
-    assert = require('assert'),
+var assert = require('assert'),
     wrapper = require('co-redis'),
     sendRedis = wrapper(require('redis').createClient()),
     rcvRedis = wrapper(require('redis').createClient()),
-    co = require('co');
+    co = require('co'),
+    log = require('./log');
 
 exports.createEndPoint = function(name) {
     return new Courier(name);

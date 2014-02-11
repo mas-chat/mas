@@ -15,7 +15,7 @@
 //
 
 var winston = require('winston'),
-    nconf = require('nconf').file('../config.json');
+    nconf = require('nconf').file(__dirname + '/../../config.json');
 
 var logger = new (winston.Logger)({
     transports: [

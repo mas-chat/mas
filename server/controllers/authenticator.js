@@ -17,8 +17,8 @@
 'use strict';
 
 var uuid = require('node-uuid'),
-    log = require('../../lib/log'),
-    redis = require('../../lib/redis').createClient();
+    log = require('../lib/log'),
+    redis = require('../lib/redis').createClient();
 
 module.exports = function *(next) {
     log.info('Authenticating.');
