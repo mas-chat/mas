@@ -17,8 +17,8 @@
 'use strict';
 
 var redis = require('./redis').createClient(),
-    outbox = require('../server/lib/outbox.js'),
-    windowHelper = require('../server/lib/windows'),
+    outbox = require('./outbox.js'),
+    windowHelper = require('./windows'),
     networkList = require('./networks');
 
 // TDB Consider options:

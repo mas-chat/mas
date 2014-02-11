@@ -17,9 +17,9 @@
 -- Initialization of outbox needs to be atomic operation (=Lua script)
 -- for streaming to be realiable.
 
-local outbox = KEYS[1] -- TBD Duplicate information
 local sessionId = ARGV[1]
 local userId = ARGV[2]
+local outbox = 'outbox:' .. userId .. ':' .. sessionId
 
 local function split(s, delimiter)
     local result = {}

@@ -22,7 +22,7 @@
 
 var net = require('net'),
     carrier = require('carrier'),
-    courier = require('../lib/courier').createEndPoint('connectionmanager');
+    courier = require('../../lib/courier').createEndPoint('connectionmanager');
 
 var sockets = {};
 

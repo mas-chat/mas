@@ -17,8 +17,8 @@
 'use strict';
 
 var crypto = require('crypto'),
-    redis = require('../../lib/redis').createClient(),
-    parse = require('co-body');
+    parse = require('co-body'),
+    redis = require('../lib/redis').createClient();
 
 module.exports = {
     // POST /login

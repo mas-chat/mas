@@ -22,7 +22,7 @@ var fs = require('fs'),
     redis = require('redis'),
     log = require('./log');
 
-var luaPath = __dirname + '/../lua';
+var luaPath = __dirname + '/../../lua';
 var luaFuncs = {};
 
 module.exports = {

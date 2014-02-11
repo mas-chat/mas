@@ -16,8 +16,8 @@
 
 'use strict';
 
-var redis = require('../../lib/redis').createClient(),
-    log = require('../../lib/log');
+var redis = require('./redis').createClient(),
+    log = require('./log');
 
 exports.getWindowIdsForNetwork = function *(userId, network) {
     var ids = yield getWindowIds(userId, network, null, 'id');

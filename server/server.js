@@ -17,7 +17,7 @@
 
 'use strict';
 
-var log = require('../lib/log'),
+var log = require('./lib/log'),
     koa = require('koa'),
     router = require('koa-router'),
     resourceRouter = require('koa-resource-router'),
@@ -28,7 +28,7 @@ var log = require('../lib/log'),
     //logger = require('koa-logger'),
     mount = require('koa-mount'),
     co = require('co'),
-    redis = require('../lib/redis'),
+    redis = require('./lib/redis'),
     routesIndex = require('./routes'),
     routesPages = require('./routes/pages'),
     authenticator = require('./controllers/authenticator'),
