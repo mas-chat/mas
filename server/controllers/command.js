@@ -19,7 +19,7 @@
 var parse = require('co-body'),
     log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
-    courier = require('../lib/courier').createEndPoint('message'),
+    courier = require('../lib/courier').createEndPoint('command'),
     textLine = require('../lib/textLine'),
     windowHelper = require('../lib/windows');
 
