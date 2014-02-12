@@ -8,6 +8,8 @@ node_modules/
 client/build
 config.json
 npm-debug.log
+client/source/script/
+logs/
 
 #Mac files
 .DS_Store
