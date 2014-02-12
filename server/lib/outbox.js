@@ -39,7 +39,7 @@ exports.queue = function *(userId) {
     });
 
     // TBD all sessions, specific session? Check the use of this function
-    yield redis.run('queueOutbox', [], params);
+    yield redis.run('queueOutbox', params);
 };
 
 exports.flush = function *(userId, sessionId, timeout) {
