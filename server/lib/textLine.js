@@ -85,5 +85,5 @@ function *processTextLine(userId, windowId, nick, cat, text) {
         type: 0
     });
 
-    yield redis.run('processTextLine', [], [ userId, windowId, command ]);
+    yield redis.run('processTextLine', userId, windowId, command);
 }
