@@ -37,6 +37,7 @@ var log = require('./lib/log'),
     commandController = require('./controllers/command'),
     loginController = require('./controllers/login'),
     registerController = require('./controllers/register'),
+    scheduler = require('./lib/scheduler'),
     path = require('path');
 
 var app = koa();
@@ -87,5 +88,6 @@ app.get(/.html$/, routesPages); // All other pages
 
 co(function *() {
     yield redis.loadScripts();
+    scheduler.init();
     app.listen(3000);
 })();
