@@ -196,7 +196,11 @@ function *handleServerText(userId, msg) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     var text = msg.params.join(' ');
 
-    yield textLine.broadcast(userId, msg.network, msg.serverName, 'notice', text);
+    yield textLine.broadcast(userId, msg.network, {
+        nick: msg.serverName,
+        cat: 'notice',
+        body: text
+    });
 }
 
 function *handlePing(userId, msg) {
@@ -246,7 +250,11 @@ function *handlePrivmsg(userId, msg) {
 
     // }
 
-    yield textLine.send(userId, msg.network, group, msg.nick, 'msg', text);
+    yield textLine.send(userId, msg.network, group, {
+        nick: msg.nick,
+        cat: 'msg',
+        body: text
+    });
 }
 
 function *tryDifferentNick(userId, network) {

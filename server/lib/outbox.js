@@ -22,24 +22,25 @@ var util = require('util'),
     redis = redisModule.createClient();
 
 exports.queue = function *(userId) {
-    var params = [ userId ];
+    var commands = [];
 
     for (var i = 1; i < arguments.length; i++) {
         var command = arguments[i];
 
         if (util.isArray(command)) {
-            params = params.concat(command);
+            commands = commands.concat(command);
         } else {
-            params.push(command);
+            commands.push(command);
         }
     }
 
-    params = params.map(function(value) {
+    commands = commands.map(function(value) {
         return typeof(value) === 'string' ? value : JSON.stringify(value);
     });
 
+    var params = [ 'queueOutbox', userId ].concat(commands);
     // TBD all sessions, specific session? Check the use of this function
-    yield redis.run('queueOutbox', params);
+    yield redis.run.apply(this, params);
 };
 
 exports.flush = function *(userId, sessionId, timeout) {
@@ -67,7 +68,7 @@ exports.flush = function *(userId, sessionId, timeout) {
     }
 
     log.info(userId, 'Flushed outbox. SessionId: ' + sessionId + '. Response: ' +
-        JSON.stringify(commands).substring(0, 100));
+        JSON.stringify(commands));//.substring(0, 100));
 
     return commands;
 };

@@ -28,21 +28,23 @@ var redis = require('./redis').createClient(),
 // rememberurl
 // hidden
 
-exports.broadcast = function *(userId, network, nick, cat, text) {
+exports.broadcast = function *(userId, network, msg) {
     var windowIds = yield windowHelper.getWindowIdsForNetwork(userId, network);
 
     for (var i = 0; i < windowIds.length; i++) {
-        yield processTextLine(userId, windowIds[i], nick, cat, text);
+        msg.windowId = windowIds[i];
+        yield processTextLine(userId, msg, null);
     }
 };
 
-exports.send = function *(userId, network, group, nick, cat, text) {
-    var windowId = yield windowHelper.getWindowId(userId, network, group);
-    yield processTextLine(userId, windowId, nick, cat, text);
+exports.send = function *(userId, network, group, msg) {
+    msg.windowId = yield windowHelper.getWindowId(userId, network, group);
+    yield processTextLine(userId, msg, null);
 };
 
-exports.sendByWindowId = function *(userId, windowId, nick, cat, text) {
-    yield processTextLine(userId, windowId, nick, cat, text);
+exports.sendByWindowId = function *(userId, windowId, msg, excludeSession) {
+    msg.windowId = windowId;
+    yield processTextLine(userId, msg, excludeSession);
 };
 
 exports.sendNicks = function *(userId, sessionId) {
@@ -66,24 +68,20 @@ exports.sendNicks = function *(userId, sessionId) {
         }
     }
 
-    sessionId = sessionId; // TBD Send to queue()
+    sessionId = sessionId; // TBD Send to queue()?
     yield outbox.queue(userId, command);
 };
 
-function *processTextLine(userId, windowId, nick, cat, text) {
-    if (!windowId) {
+function *processTextLine(userId, msg, excludeSession) {
+    if (!msg.windowId) {
         return;
     }
 
-    var command = JSON.stringify({
-        id: 'ADDTEXT',
-        windowId: windowId,
-        nick: nick,
-        body: text,
-        cat: cat,
-        ts: 209,
-        type: 0
-    });
+    msg.id = 'ADDTEXT';
+    msg.ts = 209; // TBD
+    msg.type = 0; // TBD
 
-    yield redis.run('processTextLine', userId, windowId, command);
+    var command = JSON.stringify(msg);
+
+    yield redis.run('processTextLine', userId, msg.windowId, command, excludeSession);
 }
