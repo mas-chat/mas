@@ -79,8 +79,7 @@ app.use(serve(path.join(__dirname, 'public')));
 
 // Qooxdoo routes
 app.use(mount('/main', serve(path.join(__dirname, '/../client'))));
-app.use(mount('/qooxdoo-sdk', serve(path.join(__dirname,
-    '../vendor/qooxdoo-sdk'))));
+app.use(mount('/vendor/qooxdoo-sdk', serve(path.join(__dirname, '../vendor/qooxdoo-sdk'))));
 
 // Page routes
 app.get('/', routesIndex);

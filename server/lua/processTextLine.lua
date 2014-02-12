@@ -17,11 +17,14 @@
 local userId = ARGV[1]
 local windowId = ARGV[2]
 local command = ARGV[3]
+local excludeSession = ARGV[4]
 
 redis.call('LPUSH', 'windowmsgs:' .. userId .. ':' .. windowId, command)
 
 local sessions = redis.call('SMEMBERS', 'sessionlist:' .. userId)
 
 for i = 1, #sessions do
-    redis.call('LPUSH', 'outbox:' .. userId .. ':' .. sessions[i], command)
+    if sessions[i] ~= excludeSession then
+        redis.call('LPUSH', 'outbox:' .. userId .. ':' .. sessions[i], command)
+    end
 end
