@@ -25,6 +25,7 @@ var parse = require('co-body'),
 
 module.exports = function *() {
     var userId = this.mas.userId;
+    var sessionId = this.mas.sessionId;
     var body = yield parse.json(this.req);
     var command = body.command;
     var windowId = parseInt(body.windowId);
@@ -33,7 +34,6 @@ module.exports = function *() {
 
     switch (command) {
         case 'SEND':
-
             // TBD Check that windowId is valid
             yield courier.send('ircparser', {
                 type: 'send',
@@ -44,7 +44,12 @@ module.exports = function *() {
 
             var network = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
             var nick = yield redis.hget('user:' + userId, 'currentNick:' + network[1]);
-            yield textLine.sendByWindowId(userId, body.windowId, nick, 'mymsg', body.text);
+
+            yield textLine.sendByWindowId(userId, windowId, {
+                nick: nick,
+                cat: 'mymsg',
+                body: body.text
+            }, sessionId);
             break;
     }
 

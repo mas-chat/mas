@@ -22,3 +22,5 @@ local sessions = redis.call('SMEMBERS', 'sessionlist:' .. userId)
 for i = 1, #sessions do
     redis.call('LPUSH', 'outbox:' .. userId .. ':' .. sessions[i], unpack(commands))
 end
+
+redis.call('SET', 'testi', userId .. '.')
