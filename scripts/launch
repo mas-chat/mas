@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
+
+set -e
+
+#Create logs directory
+mkdir -p $ROOT/logs
+
+# Make sure Redis is running
+echo 'Making sure Redis is running...'
+redis-server --daemonize yes
+
+# Kill all node processes, this is crude
+(killall node || true)
+
+# initredis
+if [ "$1" == "reset" ]; then
+    echo 'Making sure MySQL is running...'
+    mysql.server start
+    echo 'Resetting Redis data from MySQL...'
+    (cd $ROOT/migration && node --harmony initRedis)
+fi
+
+# start connection manager
+echo 'Starting IRC connection manager'
+(cd $ROOT/server/backends/irc && nohup ./connectionManager.js > $ROOT/logs/connectionManager.log &)
+
+# start irc adapter
+echo 'Starting IRC backend'
+(cd $ROOT/server/backends/irc && nohup ./controller.js > $ROOT/logs/irc-backend.log &)
+
+# start node server
+echo 'Starting Node server'
+(cd $ROOT/server && ./server.js)
