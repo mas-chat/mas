@@ -26,7 +26,8 @@
     "koa-static": "~1.4.2",
     "koa-less": "0.0.1",
     "koa-logger": "~1.1.0",
-    "koa-mount": "~1.2.3"
+    "koa-mount": "~1.2.3",
+    "cron": "~1.0.3"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
