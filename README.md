@@ -13,7 +13,10 @@ REST API. [Meetandspeak.com][] is an instance of this application.
 The server is currently being rewritten from scratch and is not yet
 fully functional.
 
-For more info, see [architecture page](https://github.com/ilkkao/mas/wiki).
+For more info, see
+
+- [Architecture page](https://github.com/ilkkao/mas/wiki)
+- [MAS REST API](https://github.com/ilkkao/mas/blob/master/doc/MAS-REST-API.md)
 
 Installation
 ------------

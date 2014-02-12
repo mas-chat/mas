@@ -7,12 +7,14 @@ Work in progress.
 Introduction
 ============
 
-MAS protocol is server driven and uses long polling. Overall approach is:
+MAS protocol is message based, server driven and uses long polling. WebSockets as a message transport can be easily supported when all browsers and mobile OSes support WebSockets properly.
 
-1. The client sends an **initial MAS listen request**
+Overall approach is:
+
+1. The client sends an **initial MAS listen HTTP GET request**
 2. The server responds with N commands.
    - These commands allow the client to draw the initial UI view.
-3. The client sends **MAS listen request**
+3. The client sends **MAS listen HTTP GET request**
    - If the server doesn't have anything to send (e.g. no new messages), HTTP connection is blocked up to 30 seconds. If 30 seconds is reached and there is still nothing to send, the server
      closes the connection and responds with an empty commands list.
 4. The client builds or updates the UI by processing all the commands (if any)
@@ -20,8 +22,7 @@ MAS protocol is server driven and uses long polling. Overall approach is:
    - In case of any transport errors, client SHALL wait few seconds before proceeding.
 
 When the user a triggers an action, e.g. wants to join a new channel,
-client creates a second HTTP connection to sends **MAS send request**. Server
-responds to this message immediately.
+client creates a second HTTP connection and sends **MAS send request** containing the command(s). Server responds to this message immediately.
 
 Authentication
 ==============
@@ -31,23 +32,18 @@ All MAS listen and send requests must contain an authentication cookie. Cookie f
 Session management
 ==================
 
-The user is allowed to have only one active connection to the server. A new session ID is generated after every initial MAS listen request. This effectively invalidates the
-session ID that the possible another client started previously is using.
+The user is allowed to have multiple active connections to the server. A new session ID is generated after every initial MAS listen request. Client must include session ID to all HTTP requests after initial MAS listen HTTP GET request.
 
-If the session ID becomes invalid, the server will respond with the HTTP status code
-```not acceptable```. In this case the client should not reconnect using the initial
-MAS listen request without user interaction to avoid loop between two clients.
-
+If the session ID becomes invalid because of long break between HTTP listen requests, the server will respond with the HTTP status code ```not acceptable```. In this case the client can initate new sesssion.
 
 MAS listen request
 ==================
 
 ```HTTP GET /api/listen/<sessionId>/<listenSeq>/[timezone]```
 
-**sessionId**: Must be set to 0 in the initial listen request. In other requests sessionID
-must be set to value that the server returned with SESSIONID command.
+**sessionId**: Must be set to 0 in the initial listen request. In all other requests sessionID must be set to value that the server returned with SESSIONID command.
 
-**listenSeq**: Must be set to 0 in the initial listen request. Must be then increased by one after every received HTTP response from the server.
+**listenSeq**: Must be set to 0 in the initial listen request. Must be then increased by one after every received HTTP response to listen request from the server.
 
 **timezone**: Optional. Can set to update user's current timezone in the first listen
 request. For example ```120``` if the user is in Helsinki (+2:00 GMT)
@@ -83,8 +79,10 @@ Overal server response format to MAS listen request is:
 HTTP status codes:
 
 ```200``` OK
+
 ```401``` Unauthenticated. New login needed.
-```406``` Session expired. Reset listenSeq to 0 to restart the session. There can be only one active session. Ask confirmation from user before doing the reset to avoid looping between two or more clients.
+
+```406``` Session expired. Reset listenSeq to 0 to restart the session.
 
 Below is the list of commands that MAS server can send to a client.
 A command is always request for the client to take some action.
@@ -267,7 +265,7 @@ Show a generic info message.
 INITDONE
 --------
 
-Initialization is complete.
+Initialization is complete. Hint that client can now render the UI as all initial messages (backlog) have arrived. Allows client to not update UI based on every received ADDTEXT command at session startup. Can lead to more responsive UI.
 
 ```JSON
 {
