@@ -43,7 +43,7 @@
     "let" :
     {
         "APPLICATION"  : "mas",
-        "QOOXDOO_PATH" : "../qooxdoo-sdk",
+        "QOOXDOO_PATH" : "../vendor/qooxdoo-sdk",
         "QXTHEME"      : "mas.theme.Theme",
         "API_EXCLUDE"  : ["qx.test.*", "${APPLICATION}.theme.*", "${APPLICATION}.test.*", "${APPLICATION}.simulation.*"],
         "LOCALES"      : [ "en" ],
