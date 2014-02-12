@@ -34,7 +34,7 @@ var log = require('./lib/log'),
     authenticator = require('./controllers/authenticator'),
     seqChecker = require('./controllers/seqChecker'),
     listenController = require('./controllers/listen'),
-    msgController = require('./controllers/message'),
+    commandController = require('./controllers/command'),
     loginController = require('./controllers/login'),
     registerController = require('./controllers/register'),
     path = require('path');
@@ -65,7 +65,7 @@ app.all('/api/:method/:sessionId/:seq/:timezone?*', authenticator, seqChecker);
 
 // REST API routes
 app.get('/api/listen*', listenController);
-app.post('/api/send*', msgController);
+app.post('/api/send*', commandController);
 
 // Registration and login routes
 var login = new resourceRouter('login', loginController);
