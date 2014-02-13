@@ -21,33 +21,25 @@ var co = require('co'),
     redis = require('./redis').createClient(),
     log = require('./log');
 
+const IDLE_TIMEOUT = 60 * 60 * 6; // 6 hours
+
 exports.init = function() {
-    // Once in an hour
-    new cronJob('* * * * * *', removeIdleSessions, null, true);
+    // Once in 10 minutes
+    new cronJob('* */10 * * * *', deleteIdleSessions, null, true);
 };
 
-function removeIdleSessions() {
+function deleteIdleSessions() {
     co(function *() {
-        var cursor = 0, result, batch = [];
+        var ts = Math.round(Date.now() / 1000) - IDLE_TIMEOUT;
+        var list = yield redis.zrangebyscore('sessionlastrequest', '-inf', ts);
 
-        do {
-           // Keep count reasonable so redis calls will hopefully be minimized
-           result = yield redis.scan([ cursor, 'MATCH', 'session:*', 'COUNT', 500 ]);
-           cursor = parseInt(result[0]);
-           var matches = result[1];
+        for (var i = 0; i < list.length; i++) {
+            var fields = list[i].split(':');
+            var userId = fields[0];
+            var sessionId = fields[1];
 
-           if (matches.length !== 0) {
-               batch.push(matches);
-           }
-
-           // Minimize also lua calls
-           if (batch.length > 500 || cursor === 0) {
-              var params = [ 'removeIdleSessions' ].concat(batch);
-              yield redis.run.apply(this, params);
-              batch = [];
-           }
-        } while (cursor !== 0);
-
-        log.info('Removed idle sessions.');
+            yield redis.run('deleteSession', userId, sessionId);
+            log.info('Removed idle session. User: ' + userId + ', sessionId: ' + sessionId);
+        }
     })();
 }
