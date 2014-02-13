@@ -26,6 +26,9 @@ MAS Redis structures
    listenRcvNext (int)
    timeStamp (int)
 
+ sessionlastrequest (zset)
+   userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...
+
  outbox:<userid>:<sessionId> (list)
    msg1, msg2
 
