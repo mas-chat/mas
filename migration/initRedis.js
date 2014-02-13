@@ -22,6 +22,7 @@
 var wrapper = require('co-redis'),
     redis = wrapper(require('redis').createClient()),
     uuid = require('node-uuid'),
+    crypto = require('crypto'),
     nconf = require('nconf').file('../config.json'),
     co = require('co'),
     Q = require('q'),
@@ -112,6 +113,11 @@ function *importUsers() {
             settings[settingsArray[ii]] = settingsArray[ii + 1];
         }
         delete row.settings;
+
+        // Add 64-bit salt
+        row.salt = crypto.randomBytes(8).toString('hex');
+        row.passwd = crypto.createHash('sha256').update(
+            row.passwd + row.salt, 'utf8').digest('hex');
 
         var user = new User(row, settings, friends);
         yield user.save();
