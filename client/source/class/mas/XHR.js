@@ -83,7 +83,7 @@ qx.Class.define('mas.XHR', {
 
         _sendMsg: function(message) {
             this._sendMsgXhr.setUrl(
-                '/api/send/' + this._sessionId + '/' + this._sendSeq);
+                '/api/v1/send/' + this._sessionId + '/' + this._sendSeq);
             this._sendMsgXhr.setRequestData(JSON.stringify(message));
             this._sendMsgXhr.send();
 
@@ -144,7 +144,7 @@ qx.Class.define('mas.XHR', {
             }
 
             this._pollMsgXhr.setUrl(
-                '/api/listen/' + this._sessionId + '/' + this._pollSeq + tz);
+                '/api/v1/listen/' + this._sessionId + '/' + this._pollSeq + tz);
             this._pollMsgXhr.send();
 
             debug.print('--> Polling request sent (seq ' + this._pollSeq + ')');
