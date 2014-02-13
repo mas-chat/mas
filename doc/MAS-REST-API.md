@@ -82,9 +82,13 @@ HTTP status codes:
 
 ```200``` OK
 
-```401``` Unauthenticated. New login needed.
+```401``` (Unauthorized) Unauthenticated. New login needed to update the values in the cookie.
 
-```406``` Session expired. Reset listenSeq to 0 to restart the session.
+```406``` (Not Acceptable) Session expired. Send the initial MAS listen HTTP GET request to open new session.
+
+```429``` (Too Many Requests) Too many open sessions. Currently the limit is 8 sessions. Close one of the existing ones before sending the initial MAS listen HTTP GET request again.
+
+An active session is currently deleted after six hours of idle time.
 
 Below is the list of commands that MAS server can send to a client.
 A command is always request for the client to take some action.

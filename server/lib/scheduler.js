@@ -39,7 +39,7 @@ function deleteIdleSessions() {
             var sessionId = fields[1];
 
             yield redis.run('deleteSession', userId, sessionId);
-            log.info('Removed idle session. User: ' + userId + ', sessionId: ' + sessionId);
+            log.info(userId, 'Removed idle session. SessionId: ' + sessionId);
         }
     })();
 }
