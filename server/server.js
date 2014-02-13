@@ -62,11 +62,11 @@ hbs.registerHelper('getPageJSFile', function() {
 app.use(router(app));
 
 // REST API common filtering
-app.all('/api/:method/:sessionId/:seq/:timezone?*', authenticator, seqChecker);
+app.all('/api/v1/:method/:sessionId/:seq/:timezone?*', authenticator, seqChecker);
 
 // REST API routes
-app.get('/api/listen*', listenController);
-app.post('/api/send*', commandController);
+app.get('/api/v1/listen*', listenController);
+app.post('/api/v1/send*', commandController);
 
 // Registration and login routes
 var login = new resourceRouter('login', loginController);

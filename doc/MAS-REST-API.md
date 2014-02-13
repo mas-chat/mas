@@ -2,12 +2,14 @@
 MAS REST API
 ============
 
+Version: 1
+
 Work in progress.
 
 Introduction
 ============
 
-MAS protocol is message based, server driven and uses long polling. WebSockets as a message transport can be easily supported when all browsers and mobile OSes support WebSockets properly.
+MAS protocol is message based, server driven and built on top of long polling. WebSockets support is straightforward to add when all browsers and mobile OSes support it properly.
 
 Overall approach is:
 
@@ -39,7 +41,7 @@ If the session ID becomes invalid because of long break between HTTP listen requ
 MAS listen request
 ==================
 
-```HTTP GET /api/listen/<sessionId>/<listenSeq>/[timezone]```
+```HTTP GET /api/v1/listen/<sessionId>/<listenSeq>/[timezone]```
 
 **sessionId**: Must be set to 0 in the initial listen request. In all other requests sessionID must be set to value that the server returned with SESSIONID command.
 
@@ -386,7 +388,7 @@ MAS send request
 In addition of listening commands from the server, the client can send commands to the server at any time after the initial MAS listen request.
 
 ```
-HTTP POST /api/send/<sessionId>/<sendSeq>
+HTTP POST /api/v1/send/<sessionId>/<sendSeq>
 ```
 
 **sessionId**: Must be set to value that the server returned with SESSIONID command.
