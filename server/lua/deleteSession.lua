@@ -17,8 +17,15 @@
 -- Initialization of outbox needs to be atomic operation (=Lua script)
 -- for streaming to be realiable.
 
-local sessions = ARGV
+local userId = ARGV[1]
+local sessionId = ARGV[2]
 
--- TBD
+-- Remove outbox
+redis.call('DEL', 'outbox:' .. userId .. ':' .. sessionId)
 
-redis.call('SET', 'test', table.concat(sessions, ","))
+-- Remove session
+redis.call('DEL', 'session:' .. userId .. ':' .. sessionId)
+
+-- Remove sessionlastrequest entry
+redis.call('ZREM', 'sessionlastrequest', userId .. ':' .. sessionId)
+

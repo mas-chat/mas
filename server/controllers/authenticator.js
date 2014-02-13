@@ -73,7 +73,8 @@ module.exports = function *(next) {
     }
 
     var ts = Math.round(Date.now() / 1000);
-    yield redis.hmset('session:' + userId + ':' + sessionId, 'timeStamp', ts);
+    // TDB Race condition possible
+    yield redis.zadd('sessionlastrequest', ts, userId + ':' + sessionId);
 
     this.mas.sessionId = sessionId;
     this.mas.userId = userId;
