@@ -25,16 +25,19 @@ module.exports = {
     create: function *() {
         var body = yield parse.form(this);
         var password = body.password;
-        var passwordSha = crypto.createHash('sha256').update(password,
-                'utf8').digest('hex');
         var user = null;
         var cookie;
+        var passwordSha, passwordShaNoSalt;
 
         var userId = yield redis.hget('index:user', body.emailOrNick);
 
         if (userId) {
             user = yield redis.hgetall('user:' + userId);
             cookie = user.cookie;
+
+            passwordShaNoSalt = crypto.createHash('sha256').update(password, 'utf8').digest('hex');
+            passwordSha = crypto.createHash('sha256').update(
+                passwordShaNoSalt + user.salt, 'utf8').digest('hex');
         }
 
         if (!userId || user.passwd !== passwordSha || user.inuse === 0) {
