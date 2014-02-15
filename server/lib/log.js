@@ -66,7 +66,7 @@ function configTransports() {
         process.exit(1);
     }
 
-    if (conf.get('log:clear_at_startup')) {
+    if (conf.get('log:clear_at_startup') && fs.existsSync(fileName)) {
         fs.unlinkSync(fileName);
     }
 
