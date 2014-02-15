@@ -19,7 +19,7 @@
 var log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
-    textLine = require('../lib/textLine');
+    nicks = require('../lib/nick');
 
 module.exports = function *() {
     var userId = this.mas.userId;
@@ -38,5 +38,5 @@ module.exports = function *() {
 function *initSession(userId, sessionId) {
     // New session, reset outbox, send initial messages
     yield redis.run('initSession', sessionId, userId);
-    yield textLine.sendNicks(userId);
+    yield nicks.send(userId);
 }
