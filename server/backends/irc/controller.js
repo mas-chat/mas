@@ -17,6 +17,8 @@
 
 'use strict';
 
+process.title = 'mas-irc';
+
 var log = require('../../lib/log'),
     redisModule = require('../../lib/redis'),
     redis = redisModule.createClient(),
@@ -134,8 +136,9 @@ function *init() {
         var networks = yield windowHelper.getNetworks(userId);
 
         for (var ii = 0; ii < networks.length; ii++) {
-            if (networks[i] !== 'MeetAndSpeak') {
-                yield connect(userId, networks[i]);
+            if (networks[ii] !== 'MeetAndSpeak') {
+                log.info(userId, 'Connecting to IRC network: ' + networks[ii]);
+                yield connect(userId, networks[ii]);
             }
         }
 

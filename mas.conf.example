@@ -6,16 +6,17 @@
 
 [log]
 directory=/path/to/somewhere
-console=true
+clear_at_startup=false
+console=false
 
 [loggly]
 enabled=false
 subdomain=example
 token=nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
 
-[limits]
-maxparallelsessions=8
-idletimeout=360
+[session]
+max_parallel=8
+idle_timeout=360
 
 ; OPTIONS FOR IRC BACKEND
 

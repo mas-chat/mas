@@ -29,7 +29,7 @@ exports.init = function() {
 
 function deleteIdleSessions() {
     co(function *() {
-        var ts = Math.round(Date.now() / 1000) - conf.get('session:idletimeout') * 60;
+        var ts = Math.round(Date.now() / 1000) - conf.get('session:idle_timeout') * 60;
         var list = yield redis.zrangebyscore('sessionlastrequest', '-inf', ts);
 
         for (var i = 0; i < list.length; i++) {

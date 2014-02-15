@@ -11,8 +11,8 @@ mkdir -p $ROOT/logs
 echo 'Making sure Redis is running...'
 redis-server --daemonize yes
 
-# Kill all node processes, this is crude
-(killall node || true)
+# Kill all mas processes
+(killall mas-server mas-irc mas-irc-connman || true)
 
 # initredis
 if [ "$1" == "reset" ]; then
@@ -24,12 +24,12 @@ fi
 
 # start connection manager
 echo 'Starting IRC connection manager'
-(cd $ROOT/server/backends/irc && nohup ./connectionManager.js > $ROOT/logs/connectionManager.log &)
+(cd $ROOT/server/backends/irc && nohup ./connectionManager.js > /dev/null &)
 
 # start irc adapter
 echo 'Starting IRC backend'
-(cd $ROOT/server/backends/irc && nohup ./controller.js > $ROOT/logs/irc-backend.log &)
+(cd $ROOT/server/backends/irc && nohup ./controller.js > /dev/null &)
 
 # start node server
 echo 'Starting Node server'
-(cd $ROOT/server && ./server.js)
+(cd $ROOT/server && nohup ./server.js > /dev/null &)
