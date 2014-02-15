@@ -7,6 +7,7 @@ MAS Redis structures
    inUse (string)
    lastlogin (int)
    passwd (string)
+   salt (string)
    nick (string)
    token (string)
    cookie (string)
@@ -85,6 +86,7 @@ MAS Redis structures
  outbox:nnn (list) TBD: rename clientinbox!
    msg1, msg2 ...
 
+ nextavailableuserid (string) [integer  counter]
 
  IRC adapter
  ===========
