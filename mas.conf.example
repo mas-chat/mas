@@ -2,6 +2,8 @@
 ; MAS Server main configuration file
 ;
 
+; GENERAL OPTIONS
+
 [log]
 directory=/path/to/somewhere
 console=true
@@ -15,3 +17,21 @@ password=example
 
 [limits]
 maxparallelsessions=8
+idletimeout=360
+
+; OPTIONS FOR IRC BACKEND
+
+[irc]
+enabled=true
+
+[irc.networks.IRCNet]
+host=ircnet.eversible.com
+port=6666
+
+[irc.networks.FreeNode]
+host=irc.freenode.net
+port=6667
+
+[irc.networks.W3C]
+host=irc.w3.org
+port=6665
