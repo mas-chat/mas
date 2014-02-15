@@ -4,6 +4,14 @@
 
 [log]
 directory=/path/to/somewhere
+console=true
+
+[loggly]
+enabled=false
+subdomain=example
+token=example
+username=example
+password=example
 
 [limits]
 maxparallelsessions=8
