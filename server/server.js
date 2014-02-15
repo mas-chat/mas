@@ -46,6 +46,16 @@ var app = koa();
 
 log.info('Server starting.');
 
+process.on('uncaughtException', function(err) {
+    // TBD: Remove
+    log.error(err);
+    log.error(err.stack);
+
+    setTimeout(function() {
+        process.exit(1);
+    }, 100);
+});
+
 // Development only
 if (app.env === 'development') {
     app.use(error());
