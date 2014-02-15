@@ -33,11 +33,11 @@ exports.info = function(userId, msg) {
 };
 
 exports.warn = function(userId, msg) {
-    logEntry('info', userId, msg);
+    logEntry('warn', userId, msg);
 };
 
 exports.error = function(userId, msg) {
-    logEntry('info', userId, msg);
+    logEntry('error', userId, msg);
 };
 
 function logEntry(type, userId, msg) {
