@@ -1,6 +1,0 @@
-{
-    "dbUsername": "default",
-    "dbPassword": "default",
-
-    "logPath": "/path/to/somewhere"
-}

@@ -1,0 +1,9 @@
+;
+; MAS Server main configuration file
+;
+
+[log]
+directory=/path/to/somewhere
+
+[limits]
+maxparallelsessions=8
