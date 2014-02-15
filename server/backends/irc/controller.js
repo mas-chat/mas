@@ -25,6 +25,7 @@ var log = require('../../lib/log'),
     courier = require('../../lib/courier').createEndPoint('ircparser'),
     textLine = require('../../lib/textLine'),
     windowHelper = require('../../lib/windows'),
+    nicks = require('../../lib/nick'),
     conf = require('../../lib/conf');
 
 // Upper layer messages
@@ -234,7 +235,7 @@ function *handle376(userId, msg) {
         });
     }
 
-    yield textLine.sendNicks(userId);
+    yield nicks.send(userId);
 }
 
 function *handle433(userId, msg) {

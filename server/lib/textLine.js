@@ -17,9 +17,7 @@
 'use strict';
 
 var redis = require('./redis').createClient(),
-    outbox = require('./outbox.js'),
-    windowHelper = require('./windows'),
-    conf = require('./conf');
+    windowHelper = require('./windows');
 
 // TDB Consider options:
 //
@@ -45,31 +43,6 @@ exports.send = function *(userId, network, group, msg) {
 exports.sendByWindowId = function *(userId, windowId, msg, excludeSession) {
     msg.windowId = windowId;
     yield processTextLine(userId, msg, excludeSession);
-};
-
-exports.sendNicks = function *(userId, sessionId) {
-    var command = {
-        id: 'NICK'
-    };
-
-    var redisParams = [ 'user:' + userId ];
-    var networks = [];
-
-    for (var network in conf.get('irc:networks')) { /* jshint -W089 */
-        redisParams.push('currentNick:' + network);
-        networks.push(network);
-    }
-
-    var nicks = yield redis.hmget.apply(redis, redisParams);
-
-    for (var i = 0; i < networks.length; i++) {
-        if (nicks[i] !== null) {
-            command[networks[i]] = nicks[i];
-        }
-    }
-
-    sessionId = sessionId; // TBD Send to queue()?
-    yield outbox.queue(userId, command);
 };
 
 function *processTextLine(userId, msg, excludeSession) {
