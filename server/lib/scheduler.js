@@ -19,9 +19,8 @@
 var co = require('co'),
     cronJob = require('cron').CronJob,
     redis = require('./redis').createClient(),
-    log = require('./log');
-
-const IDLE_TIMEOUT = 60 * 60 * 6; // 6 hours
+    log = require('./log'),
+    conf = require('./conf');
 
 exports.init = function() {
     // Once in 10 minutes
@@ -30,7 +29,7 @@ exports.init = function() {
 
 function deleteIdleSessions() {
     co(function *() {
-        var ts = Math.round(Date.now() / 1000) - IDLE_TIMEOUT;
+        var ts = Math.round(Date.now() / 1000) - conf.get('session:idletimeout') * 60;
         var list = yield redis.zrangebyscore('sessionlastrequest', '-inf', ts);
 
         for (var i = 0; i < list.length; i++) {

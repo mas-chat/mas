@@ -18,9 +18,9 @@
 
 var uuid = require('node-uuid'),
     log = require('../lib/log'),
-    redis = require('../lib/redis').createClient();
+    redis = require('../lib/redis').createClient(),
+    conf = require('../lib/conf');
 
-const SESSION_LIMIT = 8;
 const OK = 0, TOO_MANY_SESSIONS = 1, INVALID_SESSION = 2;
 
 module.exports = function *(next) {
@@ -58,7 +58,8 @@ module.exports = function *(next) {
         respond(this, 'not acceptable', 'Invalid session.');
         return;
     } else if (validSession === TOO_MANY_SESSIONS) {
-        respond(this, 'too many requests', 'Too many sessions opened. Limit is: ' + SESSION_LIMIT);
+        respond(this, 'too many requests', 'Too many sessions opened. Limit is: ' +
+           conf.get('session:maxparallel'));
         return;
     }
 
@@ -109,7 +110,7 @@ function *validateSession(userId, sessionId) {
     if (sessionId === '0') {
         // Limit parallel sessions
         var sessionCount = yield redis.scard('sessionlist:' + userId);
-        if (sessionCount > SESSION_LIMIT) {
+        if (sessionCount > conf.get('session:maxparallel')) {
             log.info(userId, 'Too many sessions.');
             retval = TOO_MANY_SESSIONS;
         }
