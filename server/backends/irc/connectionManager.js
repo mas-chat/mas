@@ -17,6 +17,8 @@
 
 'use strict';
 
+process.title = 'mas-irc-connman';
+
 // Minimal connection manager that keeps TCP sockets alive even if
 // rest of the system is restarted. Allows nondistruptive updates.
 

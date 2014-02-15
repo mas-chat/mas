@@ -17,6 +17,8 @@
 
 'use strict';
 
+process.title = 'mas-server';
+
 var log = require('./lib/log'),
     koa = require('koa'),
     router = require('koa-router'),

@@ -6,6 +6,6 @@ killall inspircd
 
 set -e
 
-cd $ROOT/irc-backend/config
+cd $ROOT/ircd-config
 
 inspircd --conf inspircd.conf
