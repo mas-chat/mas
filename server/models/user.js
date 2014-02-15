@@ -16,8 +16,10 @@
 
 'use strict';
 
-var r = require('redis').createClient(),
-    Q = require('q');
+var crypto = require('crypto'),
+    redis = require('../lib/redis').createClient();
+
+const RESERVED_USERIDS = 9000;
 
 module.exports = exports = User;
 
@@ -28,25 +30,42 @@ function User(details, settings, friends) {
 
     // Initialize additional variables
     this.data.nextwindowid = 0;
-
 }
+
+User.prototype.setFinalPasswordSha = function (passwd) {
+    var passwordSha = crypto.createHash('sha256').update(passwd, 'utf8').digest('hex');
+    this.addSalt(passwordSha);
+};
+
+User.prototype.addSalt = function (sha) {
+    // 64-bit salt
+    var salt = crypto.randomBytes(8).toString('hex');
+
+    this.data.salt = salt;
+    this.data.passwd = crypto.createHash('sha256').update(sha + salt, 'utf8').digest('hex');
+};
+
+User.prototype.generateUserId = function *() {
+    var userId = yield redis.incr('nextavailableuserid');
+    userId += RESERVED_USERIDS;
+    this.data.userid = userId;
+};
 
 User.prototype.save = function *() {
     var index = {};
     index[this.data.nick] = this.data.userid;
     index[this.data.email] = this.data.userid;
 
-    var promises = [
-        Q.nsend(r, 'hmset', 'user:' + this.data.userid, this.data),
-        Q.nsend(r, 'hmset', 'index:user', index),
-        Q.nsend(r, 'sadd', 'userlist', this.data.userid),
-        Q.nsend(r, 'hmset', 'settings:' + this.data.userid, this.settings)
-    ];
+    yield redis.hmset('user:' + this.data.userid, this.data);
+    yield redis.hmset('index:user', index);
+    yield redis.sadd('userlist', this.data.userid);
 
-    if (this.friends.length > 0) {
-        promises.push(Q.nsend(r, 'sadd', 'friends:' + this.data.userid,
-            this.friends));
+    if (this.settings.length > 0) {
+        yield redis.hmset('settings:' + this.data.userid, this.settings);
     }
 
-    yield promises;
+    if (this.friends.length > 0) {
+        // TBD: Check if this is correct, this.friends is array
+        yield redis.sadd('friends:' + this.data.userid, this.friends);
+    }
 };
