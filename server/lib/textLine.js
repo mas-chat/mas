@@ -19,7 +19,7 @@
 var redis = require('./redis').createClient(),
     outbox = require('./outbox.js'),
     windowHelper = require('./windows'),
-    networkList = require('./networks');
+    conf = require('./conf');
 
 // TDB Consider options:
 //
@@ -55,7 +55,7 @@ exports.sendNicks = function *(userId, sessionId) {
     var redisParams = [ 'user:' + userId ];
     var networks = [];
 
-    for (var network in networkList) { /* jshint -W089 */
+    for (var network in conf.get('irc:networks')) { /* jshint -W089 */
         redisParams.push('currentNick:' + network);
         networks.push(network);
     }
