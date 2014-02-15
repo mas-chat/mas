@@ -81,7 +81,7 @@ app.all('/api/v1/:method/:sessionId/:seq/:timezone?*', authenticator, seqChecker
 app.get('/api/v1/listen*', listenController);
 app.post('/api/v1/send*', commandController);
 
-// Registration and login routes
+// Registration and login page routes
 var login = new resourceRouter('login', loginController);
 var register = new resourceRouter('register', registerController);
 app.use(login.middleware());

@@ -89,7 +89,7 @@ var registrationForm = forms.create({
     }),
     tos: fields.boolean({
         required: true,
-        label: 'TOS',
+        label: 'I agree MAS Terms of Service',
         widget: widgets.checkbox({
             placeholder: 'foo'
         })
