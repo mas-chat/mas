@@ -59,7 +59,7 @@ module.exports = function *(next) {
         return;
     } else if (validSession === TOO_MANY_SESSIONS) {
         respond(this, 'too many requests', 'Too many sessions opened. Limit is: ' +
-           conf.get('session:maxparallel'));
+           conf.get('session:max_parallel'));
         return;
     }
 
@@ -110,7 +110,7 @@ function *validateSession(userId, sessionId) {
     if (sessionId === '0') {
         // Limit parallel sessions
         var sessionCount = yield redis.scard('sessionlist:' + userId);
-        if (sessionCount > conf.get('session:maxparallel')) {
+        if (sessionCount > conf.get('session:max_parallel')) {
             log.info(userId, 'Too many sessions.');
             retval = TOO_MANY_SESSIONS;
         }

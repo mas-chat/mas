@@ -51,29 +51,34 @@ function logEntry(type, userId, msg) {
         message = msg;
     }
 
+    entry.process = process.title;
     logger.log(type, message, entry);
 }
 
 function configTransports() {
     var transports = [];
+    var logDirectory = path.normalize(conf.get('log:directory'));
+    var fileName = path.normalize(logDirectory + '/' + process.title + '.log');
 
     // Always enable file logging
-    var logDirectory = path.normalize(conf.get('log:directory'));
-
     if (!fs.existsSync(logDirectory)) {
         console.error('ERROR: '.red + 'Log directory ' + logDirectory + ' doesn\'t exist.');
         process.exit(1);
     }
 
+    if (conf.get('log:clear_at_startup')) {
+        fs.unlinkSync(fileName);
+    }
+
     var fileTransport = new (winston.transports.File)({
-        filename: path.normalize(logDirectory + '/mas.log'),
+        filename: fileName,
         colorize: false
     });
 
     transports.push(fileTransport);
 
     // Enable console transport based on config setting
-    if (conf.get('log:console') === true) {
+    if (conf.get('log:console')) {
         var consoleTransport = new (winston.transports.Console)({
             colorize: true
         });
@@ -82,7 +87,7 @@ function configTransports() {
     }
 
     // Same for loggly.com log service
-    if (conf.get('loggly:enabled') === true) {
+    if (conf.get('loggly:enabled')) {
         var logglyTransport = new (winston.transports.Loggly)({
             subdomain: conf.get('loggly:subdomain'),
             inputToken: conf.get('loggly:token'),
