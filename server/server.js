@@ -20,6 +20,8 @@
 process.title = 'mas-server';
 
 var log = require('./lib/log'),
+    fs = require('fs'),
+    path = require('path'),
     koa = require('koa'),
     router = require('koa-router'),
     resourceRouter = require('koa-resource-router'),
@@ -30,6 +32,7 @@ var log = require('./lib/log'),
     //logger = require('koa-logger'),
     mount = require('koa-mount'),
     co = require('co'),
+    conf = require('./lib/conf'),
     redis = require('./lib/redis'),
     routesIndex = require('./routes'),
     routesPages = require('./routes/pages'),
@@ -39,21 +42,19 @@ var log = require('./lib/log'),
     commandController = require('./controllers/command'),
     loginController = require('./controllers/login'),
     registerController = require('./controllers/register'),
-    scheduler = require('./lib/scheduler'),
-    path = require('path');
+    scheduler = require('./lib/scheduler');
 
 var app = koa();
 
 log.info('Server starting.');
 
 process.on('uncaughtException', function(err) {
-    // TBD: Remove
-    log.error(err);
-    log.error(err.stack);
+    var errorMsg = 'STACK: ' + err.stack;
+    var file = path.normalize(conf.get('log:directory') + '/mas-exit-stack-trace.log');
 
-    setTimeout(function() {
-        process.exit(1);
-    }, 100);
+    fs.writeFileSync(file, errorMsg);
+    console.error(err.stack);
+    process.exit(1);
 });
 
 // Development only
