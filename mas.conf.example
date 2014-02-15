@@ -11,9 +11,7 @@ console=true
 [loggly]
 enabled=false
 subdomain=example
-token=example
-username=example
-password=example
+token=nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
 
 [limits]
 maxparallelsessions=8

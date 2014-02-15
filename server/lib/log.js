@@ -86,10 +86,6 @@ function configTransports() {
         var logglyTransport = new (winston.transports.Loggly)({
             subdomain: conf.get('loggly:subdomain'),
             inputToken: conf.get('loggly:token'),
-            auth: {
-                username: conf.get('loggly:username'),
-                password: conf.get('loggly:password')
-            },
             json: true
         });
 
