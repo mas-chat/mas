@@ -14,13 +14,23 @@
 //   governing permissions and limitations under the License.
 //
 
-var winston = require('winston'),
-    nconf = require('nconf').file(__dirname + '/../../config.json');
+var path = require('path'),
+    fs = require('fs'),
+    winston = require('winston'),
+    conf = require('./conf'),
+    colors = require('colors');
+
+var logDirectory = path.normalize(conf.get('log:directory'));
+
+if (!fs.existsSync(logDirectory)) {
+    console.error('ERROR: '.red + 'Log directory ' + logDirectory + ' doesn\'t exist.');
+    process.exit(1);
+}
 
 var logger = new (winston.Logger)({
     transports: [
         new (winston.transports.File)({
-            filename: nconf.get('logPath') + '/mas.log',
+            filename: path.normalize(logDirectory + '/mas.log'),
             colorize: true
         }),
         new (winston.transports.Console)({
