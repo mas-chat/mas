@@ -18,13 +18,14 @@
 
 var path = require('path'),
     fs = require('fs'),
-    nconf = require('nconf'),
-    colors = require('colors');
+    nconf = require('nconf');
+
+require('colors');
 
 var configFile = path.normalize(__dirname + '/../../mas.conf');
 
 if (!fs.existsSync(configFile)) {
-    console.error('ERROR: '.red + 'Config file ' + logFile + ' missing.');
+    console.error('ERROR: '.red + 'Config file ' + configFile + ' missing.');
     process.exit(1);
 }
 

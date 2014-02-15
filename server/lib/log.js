@@ -17,9 +17,9 @@
 var path = require('path'),
     fs = require('fs'),
     winston = require('winston'),
-    conf = require('./conf'),
-    colors = require('colors');
+    conf = require('./conf');
 
+require('colors');
 require('winston-loggly');
 
 var transports = configTransports();
