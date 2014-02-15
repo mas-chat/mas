@@ -21,7 +21,8 @@ var forms = require('forms'),
     widgets = forms.widgets,
     validators = forms.validators,
     Q = require('q'),
-    log = require('../lib/log');
+    log = require('../lib/log'),
+    User = require('../models/user.js');
 
 var registrationForm = forms.create({
     name: fields.string({
@@ -90,6 +91,7 @@ var registrationForm = forms.create({
     tos: fields.boolean({
         required: true,
         label: 'I agree MAS Terms of Service',
+        errorAfterField: true,
         widget: widgets.checkbox({
             placeholder: 'foo'
         })
@@ -134,14 +136,17 @@ module.exports = {
 
         if (form.isValid()) {
             log.info('Registration form data is valid');
-            // TBD: Save to redis.
-            // user = new User({
-            //     name: form.data.name,
-            //     email: form.data.email,
-            //     password: form.data.password,
-            //     nick: form.data.nick
-            // });
-            // user.save();
+            var user = new User({
+                name: form.data.name,
+                email: form.data.email,
+                nick: form.data.nick,
+                inuse: '1'
+            }, {}, {});
+
+            user.setFinalPasswordSha(form.data.password);
+            yield user.generateUserId();
+            yield user.save();
+
             this.response.redirect('/registration-success.html');
         } else {
             yield this.render('register', {
