@@ -23,7 +23,7 @@ var log = require('../../lib/log'),
     courier = require('../../lib/courier').createEndPoint('ircparser'),
     textLine = require('../../lib/textLine'),
     windowHelper = require('../../lib/windows'),
-    networkList = require('../../lib/networks');
+    conf = require('../../lib/conf');
 
 // Upper layer messages
 
@@ -157,8 +157,8 @@ function *connect(userId, network) {
             type: 'connect',
             userId: userId,
             network: network,
-            host: networkList[network].host,
-            port: networkList[network].port
+            host: conf.get('irc:networks:' + network + ':host'),
+            port: conf.get('irc:networks:' + network + ':port')
         });
     }
 }
