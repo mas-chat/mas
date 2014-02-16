@@ -29,27 +29,53 @@ module.exports = function *() {
     var body = yield parse.json(this.req);
     var command = body.command;
     var windowId = parseInt(body.windowId);
+    var result = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
+    var name = result[0];
+    var network = result[1];
+    var backend = network === 'MeetAndSpeak' ? 'loopbackparser' : 'ircparser';
 
     log.info(userId, 'Prosessing command: ' + command);
 
+    // TBD Check that windowId, network, and name are valid
+
     switch (command) {
         case 'SEND':
-            // TBD Check that windowId is valid
-            yield courier.send('ircparser', {
+            yield courier.send(backend, {
                 type: 'send',
                 userId: userId,
-                windowId: windowId,
+                network: network,
+                name: name,
                 text: body.text
             });
 
-            var network = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
-            var nick = yield redis.hget('user:' + userId, 'currentNick:' + network[1]);
+            var nick = yield redis.hget('user:' + userId, 'currentnick:' + network);
 
             yield textLine.sendByWindowId(userId, windowId, {
                 nick: nick,
                 cat: 'mymsg',
                 body: body.text
             }, sessionId);
+            break;
+
+        case 'JOIN':
+            backend = body.network === 'MeetAndSpeak' ? 'loopbackparser' : 'ircparser';
+            yield courier.send(backend, {
+                type: 'join',
+                userId: userId,
+                network: body.network,
+                name: body.name,
+                password: body.password
+            });
+            break;
+
+        case 'CREATE':
+            log.info('ilkka');
+            yield courier.send('loopbackparser', {
+                type: 'create',
+                userId: userId,
+                name: body.name,
+                password: body.password
+            });
             break;
     }
 
