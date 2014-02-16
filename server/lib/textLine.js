@@ -46,7 +46,7 @@ exports.sendByWindowId = function *(userId, windowId, msg, excludeSession) {
 };
 
 function *processTextLine(userId, msg, excludeSession) {
-    if (!msg.windowId) {
+    if (!('windowId' in msg)) {
         return;
     }
 
