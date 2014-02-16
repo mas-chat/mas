@@ -58,26 +58,27 @@ redis.call('LPUSH', outbox, cjson.encode({
 local windows = redis.call('SMEMBERS', 'windowlist:' .. userId);
 
 for i = 1, #windows do
-    local windowId, network, windowName = unpack(split(windows[i], ':'))
+    local windowId, network = unpack(split(windows[i], ':'))
     local window = hgetall('window:' .. userId .. ':' .. windowId);
 
     redis.call('LPUSH', outbox, cjson.encode({
         ['id'] = 'CREATE',
         ['windowId'] = tonumber(windowId),
+        ['network'] = network,
+
+        ['name'] = window.name,
         ['x'] = tonumber(window.x),
         ['y'] = tonumber(window.y),
         ['width'] = tonumber(window.width),
         ['height'] = tonumber(window.height),
-        ['network'] = network,
-        ['chanName'] = windowName,
         ['type'] = window.type,
-        ['sounds'] = 1, -- TBD
-        ['titlealert'] = 1, -- TBD
-        ['userMode'] = 2, -- TBD
-        ['visible'] = 1, -- TBD
-        ['newMsgs'] = 2, -- TBD
+        ['sounds'] = window.sounds,
+        ['titleAlert'] = window.titleAlert,
+        ['userMode'] = window.userMode,
+        ['visible'] = window.visible,
+        ['newMsgs'] = window.newMsgs,
         ['password'] = window.password,
-        ['topic'] = 'Hello' -- TBD
+        ['topic'] = window.topic
     }))
 
     local lines = redis.call('LRANGE', 'windowmsgs:' .. userId .. ':' .. windowId, 0, -1);
