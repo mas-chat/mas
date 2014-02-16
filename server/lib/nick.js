@@ -17,10 +17,10 @@
 'use strict';
 
 var redis = require('./redis').createClient(),
-    outbox = require('./outbox.js'),
+    outbox = require('./outbox'),
     conf = require('./conf');
 
-exports.send = function *(userId, sessionId) {
+exports.sendNick = function *(userId, sessionId) {
     var command = {
         id: 'NICK'
     };
@@ -29,7 +29,7 @@ exports.send = function *(userId, sessionId) {
     var networks = [];
 
     for (var network in conf.get('irc:networks')) { /* jshint -W089 */
-        redisParams.push('currentNick:' + network);
+        redisParams.push('currentnick:' + network);
         networks.push(network);
     }
 
