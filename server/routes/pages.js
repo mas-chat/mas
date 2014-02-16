@@ -21,5 +21,6 @@ module.exports = function *() {
 
     yield this.render(page, {
         page: page,
-        title: 'MeetAndSpeak' });
+        title: page
+    });
 };
