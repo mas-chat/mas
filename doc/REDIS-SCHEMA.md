@@ -9,6 +9,7 @@ MAS Redis structures
    passwd (string)
    salt (string)
    nick (string)
+   currentnick:<network> (text)
    token (string)
    cookie (string)
    cookie_expires (int, unix time)
@@ -30,7 +31,7 @@ MAS Redis structures
  sessionlastrequest (zset)
    userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...
 
- outbox:<userid>:<sessionId> (list)
+ outbox:<userid>:<sessionId> (list) TBD: rename clientinbox!
    msg1, msg2
 
  index:user (hash)
@@ -56,10 +57,13 @@ MAS Redis structures
    width (int)
    height (int)
    type (int)
-   sound (int)
+   sounds (int)
    password (string)
-   titlealert (int)
-   hidden (int)
+   titleAlert (int)
+   visible (int)
+   topic (string)
+   userMode (int)
+   newMsgs (int)
 
  windowmsgs:<userid>:<id> (list) [oldest message on the right]
 
@@ -82,14 +86,11 @@ MAS Redis structures
  urls:<userid>:<nwid>:<channel_name> (list)
    url1, url2 ...
 
-
- outbox:nnn (list) TBD: rename clientinbox!
-   msg1, msg2 ...
-
  nextavailableuserid (string) [integer  counter]
 
- IRC adapter
- ===========
+ Backends
+ ========
 
- parserinbox (list)
- connectionmanagerinbox (list)
+ inbox:loopbackparser (list)
+ inbox:ircparser (list)
+ inbox:connectionmanager (list)
