@@ -362,7 +362,12 @@ qx.Class.define('mas.MainScreen', {
 
             new mas.JoinDialog().set({
                 joinCb: function(name, pw, selectedNw) {
-                    that._xhr.call('JOIN', name + ' ' + selectedNw + ' ' + pw);
+                    that._xhr.call({
+                        command: 'JOIN',
+                        name: name,
+                        network: selectedNw,
+                        password: pw,
+                    });
                 },
                 mode: 'IRC'
             }).open();
@@ -378,7 +383,12 @@ qx.Class.define('mas.MainScreen', {
 
             new mas.JoinDialog().set({
                 joinCb: function(name, pw, selectedNw) {
-                    that._xhr.call('JOIN', name + ' ' + selectedNw + ' ' + pw);
+                    that._xhr.call({
+                        command: 'JOIN',
+                        name: name,
+                        network: selectedNw,
+                        password: pw,
+                    });
                 },
                 mode: 'MASGROUP'
             }).open();
@@ -389,7 +399,11 @@ qx.Class.define('mas.MainScreen', {
 
             new mas.CreateDialog().set({
                 createCb: function(name, pw) {
-                    that._xhr.call('CREATE', name + ' ' + pw);
+                    that._xhr.call({
+                        command: 'CREATE',
+                        name: name,
+                        password: pw
+                    });
                 }
             }).open();
         },

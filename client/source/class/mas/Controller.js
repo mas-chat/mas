@@ -309,7 +309,7 @@ qx.Class.define('mas.Controller', {
         createOrUpdateWindow: function(message, create) {
             var windowId = message.windowId;
             var network = message.network;
-            var name = message.chanName;
+            var name = message.name;
             var type = message.type;
             var sound = message.sounds;
             var titlealert = message.titleAlert;
