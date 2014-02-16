@@ -18,14 +18,6 @@ For more info, see
 - [Architecture page](https://github.com/ilkkao/mas/wiki)
 - [MAS REST API](https://github.com/ilkkao/mas/blob/master/doc/MAS-REST-API.md)
 
-Installation
-------------
-
-Not really possible right now. Only usable when the new MAS server is
-feature complete. The old Perl server implementation is not publicly
-available.
-
-
 Prerequisites:
 
 - Qooxdoo desktop SDK (version 3.5): http://qooxdoo.org/
@@ -36,6 +28,43 @@ OS support
 ----------
 
 MacOS/Linux/Windows.
+
+Installation
+------------
+
+1. Install Redis and latest development release of Node.js
+
+   On Mac you can install [Homebrew](http://brew.sh/) and then do ```brew install redis nodejs-dev```
+
+2. Install Qooxdoo to ```vendor/``` directory
+
+   ```bash
+   $ ./scripts/install-qooxdoo
+   ```
+
+3. Create and inspect the configuration file
+
+   ```bash
+   $ cp mas.conf.example mas.conf
+   ```
+
+4. Launch the server components
+
+   ```bash
+   $ ./scripts/launch
+   ```
+
+5. Check that all four MAS processes are running ([architecture](https://github.com/ilkkao/mas/wiki))
+
+   ```bash
+   $ ps aux | grep mas-
+   ilkkao   40955   0.0  0.6  3107760  47560 s000  S  7:18PM   0:01.09 mas-irc
+   ilkkao   40953   0.0  0.5  3106736  44300 s000  S  7:18PM   0:00.91 mas-irc-connman
+   ilkkao   40961   0.0  1.1  3123840  93592 s000  S  7:18PM   0:04.51 mas-server
+   ilkkao   40958   0.0  0.4  3104688  33904 s000  S  7:18PM   0:00.49 mas-loopback
+   ```
+
+6. Browse to ```http://localhost:3000/``` and register an account.
 
 Plan
 ----
