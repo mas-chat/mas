@@ -18,7 +18,7 @@ var themeOsName = qx.core.Environment.get('os.name');
 var themeOsVersion = qx.core.Environment.get('os.version');
 
 qx.Theme.define('mas.theme.Font', {
-    extend: qx.theme.simple.Font,
+    extend: qx.theme.indigo.Font,
 
     fonts: {
         'defaultlarge': {

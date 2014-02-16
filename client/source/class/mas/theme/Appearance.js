@@ -15,7 +15,7 @@
 //
 
 qx.Theme.define('mas.theme.Appearance', {
-    extend: qx.theme.simple.Appearance,
+    extend: qx.theme.indigo.Appearance,
 
     appearances: {
         'window/captionbar': {

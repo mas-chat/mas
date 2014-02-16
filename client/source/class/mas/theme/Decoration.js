@@ -15,7 +15,7 @@
 //
 
 qx.Theme.define('mas.theme.Decoration', {
-    extend: qx.theme.simple.Decoration,
+    extend: qx.theme.indigo.Decoration,
 
     decorations: {
         'background2': {

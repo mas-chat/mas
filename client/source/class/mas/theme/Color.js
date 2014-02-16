@@ -15,7 +15,7 @@
 //
 
 qx.Theme.define('mas.theme.Color', {
-    extend : qx.theme.simple.Color,
+    extend : qx.theme.indigo.Color,
 
     colors : {
 	link: '#bbbbbb'
