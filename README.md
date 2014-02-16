@@ -42,19 +42,26 @@ Installation
    $ ./scripts/install-qooxdoo
    ```
 
-3. Create and inspect the configuration file
+3. Generate client using Qooxdoo build tool
+
+   ```bash
+   $ cd client
+   $ ./generate.py source
+   ```
+
+4. Create and inspect the configuration file
 
    ```bash
    $ cp mas.conf.example mas.conf
    ```
 
-4. Launch the server components
+5. Launch the server components
 
    ```bash
    $ ./scripts/launch
    ```
 
-5. Check that all four MAS processes are running ([architecture](https://github.com/ilkkao/mas/wiki))
+6. Check that all four MAS processes are running ([architecture](https://github.com/ilkkao/mas/wiki))
 
    ```bash
    $ ps aux | grep mas-
@@ -64,10 +71,10 @@ Installation
    ilkkao   40958   0.0  0.4  3104688  33904 s000  S  7:18PM   0:00.49 mas-loopback
    ```
 
-6. Browse to ```http://localhost:3000/``` and register an account.
+7. Browse to ```http://localhost:3000/``` and register an account.
 
-Plan
-----
+Next steps
+----------
 
 Complete the new MAS server implementation. Polish everything. Create
 a bundle that is easy to install.
