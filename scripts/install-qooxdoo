@@ -1,15 +1,17 @@
 #!/bin/bash
 
+ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
+
 set -e
 
-mkdir tmp-install-qooxdoo
-mkdir -p vendor
+mkdir -p $ROOT/tmp-install-qooxdoo
+mkdir -p $ROOT/vendor
 
-cd tmp-install-qooxdoo
+cd $ROOT/tmp-install-qooxdoo
 
 wget http://downloads.sourceforge.net/qooxdoo/qooxdoo-3.5-sdk.zip
 unzip qooxdoo-3.5-sdk.zip
 
-mv qooxdoo-3.5-sdk ../vendor/qooxdoo-sdk
+mv qooxdoo-3.5-sdk $ROOT/vendor/qooxdoo-sdk
 
-cd .. && rm -fr tmp-install-qooxdoo
+rm -fr $ROOT/tmp-install-qooxdoo
