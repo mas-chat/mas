@@ -46,7 +46,7 @@ exports.getWindowNameAndNetwork = function *(userId, windowId) {
         }
     }
 
-    return null;
+    return [ null, null ];
 };
 
 exports.getWindowNamesForNetwork = function *(userId, network) {
