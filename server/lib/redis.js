@@ -23,7 +23,8 @@ var fs = require('fs'),
     log = require('./log');
 
 var luaPath = __dirname + '/../lua';
-var luaFuncs = {};
+var luaFuncs = [];
+var luaFuncSHAs = {};
 
 module.exports = {
     createClient: createClient,
@@ -38,7 +39,7 @@ function createClient() {
     coRedisClient.plainRedisClient = plainRedisClient;
     coRedisClient.run = function *() {
         var params = [].slice.call(arguments);
-        var sha = luaFuncs[params.shift()];
+        var sha = luaFuncSHAs[params.shift()];
         assert(sha);
 
         var args = [ sha, 0 ].concat(params);
@@ -49,16 +50,20 @@ function createClient() {
 }
 
 function *loadScripts() {
-    var luaScripts = fs.readdirSync(luaPath);
+    var luaFiles = fs.readdirSync(luaPath);
     var redisClient = createClient();
 
-    for (var i = 0; i < luaScripts.length; i++) {
-        var fileName = luaScripts[i];
-        log.info('Loading Redis script: ' + fileName);
-
+    for (var i = 0; i < luaFiles.length; i++) {
+        var fileName = luaFiles[i];
         var script = fs.readFileSync(luaPath + '/' + fileName);
-        var sha = yield redisClient.script('load', script);
-        var scriptName = fileName.replace(/\..+$/, ''); // Remove file extension
-        luaFuncs[scriptName] = sha;
+
+        log.info('Loaded Redis script: ' + fileName);
+        luaFuncs.push(script);
+    }
+
+    for (i = 0; i < luaFuncs.length; i++) {
+        var sha = yield redisClient.script('load', luaFuncs[i]);
+        var scriptName = luaFiles[i].replace(/\..+$/, ''); // Remove the file extension
+        luaFuncSHAs[scriptName] = sha;
     }
 }
