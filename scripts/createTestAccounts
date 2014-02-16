@@ -1,0 +1,67 @@
+#!/usr/bin/env node --harmony
+//
+//   Copyright 2009-2014 Ilkka Oksanen <iao@iki.fi>
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing,
+//   software distributed under the License is distributed on an "AS
+//   IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+//   express or implied.  See the License for the specific language
+//   governing permissions and limitations under the License.
+//
+
+'use strict';
+
+var co = require('co'),
+    User = require('../server/models/user.js');
+
+var names = [
+    'Alfa User',
+    'Beta User',
+    'Gamma User',
+    'Delta User',
+    'Epsilon User',
+    'Zeta User'
+    ];
+
+var emails = [
+    'user1@mas.com',
+    'user2@mas.com',
+    'user3@mas.com',
+    'user4@mas.com',
+    'user5@mas.com',
+    'user6@mas.com'
+    ];
+
+var nicks = [
+    'user1',
+    'user2',
+    'user3',
+    'user4',
+    'user5',
+    'user6'
+    ];
+
+co(function *() {
+    for (var i = 0; i < names.length; i++) {
+        console.log('Adding user: ' + names[i]);
+
+        var user = new User({
+            name: names[i],
+            email: emails[i],
+            nick: nicks[i],
+            inuse: '1'
+        }, {}, {});
+
+        user.setFinalPasswordSha('12345');
+        yield user.generateUserId();
+        yield user.save();
+    }
+
+    process.exit(0);
+})();
