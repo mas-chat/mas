@@ -24,16 +24,16 @@ fi
 
 # start connection manager
 echo 'Starting IRC connection manager'
-(cd $ROOT/server/backends/irc && nohup ./connectionManager.js > /dev/null &)
+(cd $ROOT/server/backends/irc && nohup ./connectionManager.js >> $ROOT/logs/stdout.log &)
 
 # start irc backend
 echo 'Starting IRC backend'
-(cd $ROOT/server/backends/irc && nohup ./controller.js > /dev/null &)
+(cd $ROOT/server/backends/irc && nohup ./controller.js >> $ROOT/logs/stdout.log &)
 
 # start loopback backend
 echo 'Starting loopback backend'
-(cd $ROOT/server/backends/loopback && nohup ./controller.js > /dev/null &)
+(cd $ROOT/server/backends/loopback && nohup ./controller.js >> $ROOT/logs/stdout.log &)
 
 # start node server
 echo 'Starting Node server'
-(cd $ROOT/server && nohup ./server.js > /dev/null &)
+(cd $ROOT/server && nohup ./server.js >> $ROOT/logs/stdout.log &)
