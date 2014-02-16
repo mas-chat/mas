@@ -17,15 +17,74 @@
 
 'use strict';
 
-//var log = require('../../lib/log'),
-//    redisModule = require('../../lib/redis'),
-//    redis = redisModule.createClient(),
-//    courier = require('../../lib/courier').createEndPoint('loopbackparser'),
-//    textLine = require('../../lib/textLine'),
-//    windowHelper = require('../../lib/windows'),
+process.title = 'mas-loopback';
+
+var co = require('co'),
+    log = require('../../lib/log'),
+    redisModule = require('../../lib/redis'),
+    redis = redisModule.createClient(),
+    courier = require('../../lib/courier').createEndPoint('loopbackparser'),
+    textLine = require('../../lib/textLine'),
+    outbox = require('../../lib/outbox');
+
+co(function *() {
+    yield redisModule.loadScripts();
+})();
 
 // Upper layer messages
 
 // addText
-// courier.on('send', function *(params) {
+courier.on('send', function *(params) {
+    var group = params.name;
+    var members = yield redis.smembers('group:' + group);
+    var nick = yield redis.hget('user:' + params.userId, 'nick');
+
+    for (var i = 0; i < members.length; i++) {
+        if (members[i] !== params.userId) {
+            yield textLine.send(members[i], 'MeetAndSpeak', group, {
+                nick: nick,
+                cat: 'msg',
+                body: params.text
+            });
+        }
+    }
+});
+
+courier.on('create', function *(params) {
+    var userId = params.userId;
+    var groupName = params.name;
+    var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
+
+    // TBD: Check that group doesn't exist
+    yield redis.sadd('group:' + groupName, userId);
+
+    log.info(userId, 'Created new MAS group:' + groupName);
+
+    var windowDetails = {
+        name: groupName,
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 200,
+        type: 'group',
+        sounds: 0,
+        password: '',
+        titleAlert: 1,
+        visible: 1,
+        topic: '',
+        userMode: 2, // TBD: Check and fix
+        newMsgs: 0 // TBD: Check and fix
+    };
+
+    yield redis.hmset('window:' + userId + ':' + windowId, windowDetails);
+    yield redis.sadd('windowlist:' + userId, windowId + ':MeetAndSpeak:' + groupName);
+
+    windowDetails.id = 'CREATE';
+    windowDetails.windowId = parseInt(windowId);
+    windowDetails.network = 'MeetAndSpeak';
+
+    yield outbox.queue(userId, windowDetails);
+});
+
+// courier.on('join', function *(params) {
 // });
