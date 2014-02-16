@@ -2,7 +2,7 @@
   "name": "mas",
   "version": "0.0.3",
   "private": true,
-  "description": "MeetAndSpeak Web App",
+  "description": "MAS Web App",
   "main": "server/server.js",
   "dependencies": {
     "less-middleware": "*",
@@ -34,8 +34,7 @@
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-cli": "~0.1.13",
-    "grunt-contrib-jshint": "~0.8.0",
-    "grunt-shell": "~0.6.4"
+    "grunt-contrib-jshint": "~0.8.0"
   },
   "scripts": {
     "test": "redis-server -v && uname -a && df -h && grunt --verbose",
