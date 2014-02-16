@@ -366,7 +366,7 @@ qx.Class.define('mas.MainScreen', {
                         command: 'JOIN',
                         name: name,
                         network: selectedNw,
-                        password: pw,
+                        password: pw
                     });
                 },
                 mode: 'IRC'
@@ -387,7 +387,7 @@ qx.Class.define('mas.MainScreen', {
                         command: 'JOIN',
                         name: name,
                         network: selectedNw,
-                        password: pw,
+                        password: pw
                     });
                 },
                 mode: 'MASGROUP'
