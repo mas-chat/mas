@@ -12,7 +12,7 @@ echo 'Making sure Redis is running...'
 redis-server --daemonize yes
 
 # Kill all mas processes
-(killall mas-server mas-irc mas-irc-connman || true)
+(killall mas-server mas-irc mas-irc-connman mas-loopback || true)
 
 # initredis
 if [ "$1" == "reset" ]; then
@@ -26,9 +26,13 @@ fi
 echo 'Starting IRC connection manager'
 (cd $ROOT/server/backends/irc && nohup ./connectionManager.js > /dev/null &)
 
-# start irc adapter
+# start irc backend
 echo 'Starting IRC backend'
 (cd $ROOT/server/backends/irc && nohup ./controller.js > /dev/null &)
+
+# start loopback backend
+echo 'Starting loopback backend'
+(cd $ROOT/server/backends/loopback && nohup ./controller.js > /dev/null &)
 
 # start node server
 echo 'Starting Node server'
