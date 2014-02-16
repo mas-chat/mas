@@ -151,7 +151,7 @@ module.exports = {
         } else {
             yield this.render('register', {
                 page: 'register',
-                title: 'MeetAndSpeak',
+                title: 'Register',
                 registrationForm: form.toHTML()
             });
         }
