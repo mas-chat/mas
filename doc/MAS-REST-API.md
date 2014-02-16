@@ -194,20 +194,20 @@ Create new window.
    "id":"CREATE",
 
    "windowId":1,
-   "width":476,
-   "x":453,
-   "newMsgs":2,
+   "name":"testone",
    "type":"group",
-   "titlealert":0,
-   "y":93,
-   "password":"",
    "network":"MeetAndSpeak",
+   "x":453,
+   "y":93,
+   "width":476,
+   "height":178,
+   "password":"",
+   "newMsgs":2,
+   "titleAlert":0,
    "topic":"",
    "visible":1,
    "userMode":2,
-   "height":178,
-   "sounds":1,
-   "chanName":"#testone"
+   "sounds":1
 }
 ```
 
@@ -415,8 +415,29 @@ SEND
 JOIN
 ----
 
+Join to new MAS group or IRC channel
+
+```
+{
+  "command": "JOIN"
+  "name": "javascript",
+  "network": "MeetAndSpeak",
+  "password": ""
+}
+```
+
 CREATE
 ------
+
+Create new MAS group
+
+```
+{
+  "command": "CREATE"
+  "name": "javascript",
+  "password": ""
+}
+```
 
 CLOSE
 -----
