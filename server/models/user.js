@@ -29,7 +29,8 @@ function User(details, settings, friends) {
     this.friends = friends;
 
     // Initialize additional variables
-    this.data.nextwindowid = 0;
+    this.data.nextwindowid = -1;
+    this.data['currentnick:MeetAndSpeak'] = this.data.nick;
 }
 
 User.prototype.setFinalPasswordSha = function (passwd) {
