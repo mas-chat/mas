@@ -32,21 +32,11 @@ var log = require('../../lib/log'),
 
 // addText
 courier.on('send', function *(params) {
-    var result = yield windowHelper.getWindowNameAndNetwork(params.userId, params.windowId);
-
-    if (!result) {
-        // TBD: Is this correct place to do message validation?
-        return;
-    }
-
-    var name = result[0];
-    var network = result[1];
-
     yield courier.send('connectionmanager', {
         type: 'write',
         userId: params.userId,
-        network: network,
-        line: 'PRIVMSG ' + name + ' :' + params.text
+        network: params.network,
+        line: 'PRIVMSG ' + params.name + ' :' + params.text
     });
 });
 
@@ -142,8 +132,6 @@ function *init() {
                 yield connect(userId, networks[ii]);
             }
         }
-
-        yield connect(userId, 'MeetAndSpeak');
     }
 }
 
@@ -153,7 +141,7 @@ function *connect(userId, network) {
     // var connectDelay = Math.floor((Math.random() * 180));
     var nick = yield redis.hget('user:' + userId, 'nick');
     yield redis.hmset('user:' + userId,
-        'currentNick:' + network, nick,
+        'currentnick:' + network, nick,
         'connected:' + network, 'false');
 
     if (userId === 97) {
@@ -235,7 +223,7 @@ function *handle376(userId, msg) {
         });
     }
 
-    yield nicks.send(userId);
+    yield nicks.sendNick(userId);
 }
 
 function *handle433(userId, msg) {
@@ -264,7 +252,7 @@ function *handlePrivmsg(userId, msg) {
 function *tryDifferentNick(userId, network) {
     var result = yield redis.hmget('user:' + userId,
         'nick',
-        'currentNick:' + network,
+        'currentnick:' + network,
         'connected:' + network);
 
     var nick = result[0];
@@ -288,7 +276,7 @@ function *tryDifferentNick(userId, network) {
         nickHasNumbers = true;
     }
 
-    yield redis.hset('user:' + userId, 'currentNick:' + network, currentNick);
+    yield redis.hset('user:' + userId, 'currentnick:' + network, currentNick);
 
     // If we are joining IRC try all alternatives. If we are connected,
     // try to get only 'nick' or 'nick_' back
