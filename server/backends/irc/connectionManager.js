@@ -24,11 +24,40 @@ process.title = 'mas-irc-connman';
 
 var net = require('net'),
     carrier = require('carrier'),
+    conf = require('../../lib/conf'),
     courier = require('../../lib/courier').createEndPoint('connectionmanager');
 
 var sockets = {};
 
+const IDENTD_PORT = 113;
+
 courier.sendNoWait('ircparser', 'ready');
+
+// Start IDENT server
+if (conf.get('irc:identd')) {
+    var server = net.createServer(function(conn) {
+        carrier.carry(conn, function(line) {
+            console.log('got one line: ' + line);
+
+            var ports = line.split(',');
+            var localPort = parseInt(ports[0]);
+            var remotePort = parseInt(ports[1]);
+            var resp = localPort + ', ' + remotePort + ' : ERROR : NO-USER';
+
+            for (var i = 0; i < sockets.length; i++) {
+                if (sockets[i].localPort === localPort && sockets[i].remotePort === remotePort &&
+                    sockets[i].remoteAddress === conn.remoteAddress) {
+                    resp = localPort + ', ' + remotePort + ' : UNIX : ' + sockets[i].nick;
+                    break;
+                }
+            }
+
+            conn.end(resp);
+        });
+    });
+
+    server.listen(IDENTD_PORT);
+}
 
 // Connect
 courier.on('connect', function(params) {
@@ -40,6 +69,7 @@ courier.on('connect', function(params) {
     };
 
     var client = net.connect(options);
+    client.nick = params.nick;
 
     client.on('connect', function() {
         courier.sendNoWait('ircparser', {
