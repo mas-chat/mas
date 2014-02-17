@@ -67,7 +67,7 @@ Installation
    $ ps aux | grep mas-
    ilkkao   40955   0.0  0.6  3107760  47560 s000  S  7:18PM   0:01.09 mas-irc
    ilkkao   40953   0.0  0.5  3106736  44300 s000  S  7:18PM   0:00.91 mas-irc-connman
-   ilkkao   40961   0.0  1.1  3123840  93592 s000  S  7:18PM   0:04.51 mas-server
+   ilkkao   40961   0.0  1.1  3123840  93592 s000  S  7:18PM   0:04.51 mas-frontend
    ilkkao   40958   0.0  0.4  3104688  33904 s000  S  7:18PM   0:00.49 mas-loopback
    ```
 
