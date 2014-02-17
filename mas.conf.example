@@ -22,6 +22,7 @@ idle_timeout=360
 
 [irc]
 enabled=true
+identd=false
 
 [irc.networks.IRCNet]
 host=ircnet.eversible.com

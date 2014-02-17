@@ -148,6 +148,7 @@ function *connect(userId, network) {
         yield courier.send('connectionmanager', {
             type: 'connect',
             userId: userId,
+            nick: nick,
             network: network,
             host: conf.get('irc:networks:' + network + ':host'),
             port: conf.get('irc:networks:' + network + ':port')
