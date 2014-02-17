@@ -17,7 +17,7 @@
 
 'use strict';
 
-process.title = 'mas-server';
+process.title = 'mas-frontend';
 
 var log = require('./lib/log'),
     fs = require('fs'),
