@@ -35,28 +35,40 @@ courier.sendNoWait('ircparser', 'ready');
 
 // Start IDENT server
 if (conf.get('irc:identd')) {
-    var server = net.createServer(function(conn) {
-        carrier.carry(conn, function(line) {
-            console.log('got one line: ' + line);
+    net.createServer(function(conn) {
+        var timer = setTimeout(function() {
+            if (conn) {
+                conn.destroy();
+            }
+        }, 3000);
 
+        carrier.carry(conn, function(line) {
             var ports = line.split(',');
             var localPort = parseInt(ports[0]);
             var remotePort = parseInt(ports[1]);
-            var resp = localPort + ', ' + remotePort + ' : ERROR : NO-USER';
+            var found = false;
 
-            for (var i = 0; i < sockets.length; i++) {
-                if (sockets[i].localPort === localPort && sockets[i].remotePort === remotePort &&
-                    sockets[i].remoteAddress === conn.remoteAddress) {
-                    resp = localPort + ', ' + remotePort + ' : UNIX : ' + sockets[i].nick;
-                    break;
+            if (!isNaN(localPort) && !isNaN(remotePort)) {
+                for (var i = 0; i < sockets.length; i++) {
+                    if (sockets[i].localPort === localPort &&
+                        sockets[i].remotePort === remotePort &&
+                        sockets[i].remoteAddress === conn.remoteAddress) {
+                        found = true;
+                        conn.write(localPort + ',' + remotePort + ' : UNIX : ' + sockets[i].nick +
+                            '\r\n');
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    conn.write(localPort + ',' + remotePort + ' : ERROR : NO-USER\r\n');
                 }
             }
 
-            conn.end(resp);
+            clearTimeout(timer);
+            conn.end();
         });
-    });
-
-    server.listen(IDENTD_PORT);
+    }).listen(IDENTD_PORT);
 }
 
 // Connect

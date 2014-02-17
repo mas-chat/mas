@@ -29,7 +29,8 @@
     "koa-mount": "~1.2.3",
     "cron": "~1.0.3",
     "colors": "~0.6.2",
-    "winston-loggly": "~1.0.1"
+    "winston-loggly": "~1.0.1",
+    "foreman": "0.0.26"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
