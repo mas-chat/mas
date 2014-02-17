@@ -26,7 +26,7 @@
  * i.e. using deeper namespaces and a corresponding file structure within the
  * <tt>test</tt> folder.
  */
-qx.Class.define('client.test.DemoTest', {
+qx.Class.define('mas.test.DemoTest', {
   extend : qx.dev.unit.TestCase,
 
   members : {

@@ -12,7 +12,7 @@ echo 'Making sure Redis is running...'
 redis-server --daemonize yes
 
 # Kill all mas processes
-(killall mas-server mas-irc mas-irc-connman mas-loopback || true)
+(killall mas-frontend mas-irc mas-irc-connman mas-loopback || true)
 
 # initredis
 if [ "$1" == "reset" ]; then
