@@ -39,10 +39,13 @@ function createClient() {
     coRedisClient.plainRedisClient = plainRedisClient;
     coRedisClient.run = function *() {
         var params = [].slice.call(arguments);
-        var sha = luaFuncSHAs[params.shift()];
+        var scriptName = params.shift();
+        var sha = luaFuncSHAs[scriptName];
         assert(sha);
 
         var args = [ sha, 0 ].concat(params);
+        log.info('Running lua script: ' + scriptName);
+
         return yield coRedisClient.evalsha.apply(this, args);
     };
 
