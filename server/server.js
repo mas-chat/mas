@@ -102,5 +102,5 @@ app.get(/.html$/, routesPages); // All other pages
 co(function *() {
     yield redis.loadScripts();
     scheduler.init();
-    app.listen(3000);
+    app.listen(conf.get('frontend:port'));
 })();
