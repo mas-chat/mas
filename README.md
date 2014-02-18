@@ -71,7 +71,7 @@ Installation
    ilkkao   40958   0.0  0.4  3104688  33904 s000  S  7:18PM   0:00.49 mas-loopback
    ```
 
-7. Browse to ```http://localhost:3000/``` and register an account.
+7. Browse to ```http://localhost:3200/``` and register an account.
 
 Next steps
 ----------
