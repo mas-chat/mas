@@ -21,8 +21,6 @@ var uuid = require('node-uuid'),
     redis = require('../lib/redis').createClient(),
     conf = require('../lib/conf');
 
-const OK = 0, TOO_MANY_SESSIONS = 1, INVALID_SESSION = 2;
-
 module.exports = function *(next) {
     log.info('Authenticating.');
 
@@ -54,31 +52,27 @@ module.exports = function *(next) {
 
     var validSession = yield validateSession(userId, sessionId);
 
-    if (validSession === INVALID_SESSION) {
+    if (validSession === false) {
         respond(this, 'not acceptable', 'Invalid session.');
-        return;
-    } else if (validSession === TOO_MANY_SESSIONS) {
-        respond(this, 'too many requests', 'Too many sessions opened. Limit is: ' +
-           conf.get('session:max_parallel'));
         return;
     }
 
     log.info(userId, 'Valid user and session.');
 
     this.mas = this.mas || {};
+    var ts = Math.round(Date.now() / 1000);
 
     if (sessionId === '0') {
         //New session, generate session id
         this.mas.newSession = true;
         sessionId = uuid.v4();
 
-        yield redis.sadd('sessionlist:' + userId, sessionId);
         yield redis.hmset('session:' + userId + ':' + sessionId, 'sendRcvNext', 0,
             'listenRcvNext', 0);
     }
 
-    var ts = Math.round(Date.now() / 1000);
-    // TDB Race condition possible
+    // TDB Race condition possible ?
+    yield redis.zadd('sessionlist:' + userId, ts, sessionId);
     yield redis.zadd('sessionlastrequest', ts, userId + ':' + sessionId);
 
     this.mas.sessionId = sessionId;
@@ -104,22 +98,23 @@ function *validateUser(userId, secret) {
 }
 
 function *validateSession(userId, sessionId) {
-    var retval = OK;
-    var sessionExists = yield redis.sismember('sessionlist:' + userId, sessionId);
+    var sessionExists = yield redis.zrank('sessionlist:' + userId, sessionId);
 
     if (sessionId === '0') {
         // Limit parallel sessions
-        var sessionCount = yield redis.scard('sessionlist:' + userId);
+        var sessionCount = yield redis.zcard('sessionlist:' + userId);
         if (sessionCount > conf.get('session:max_parallel')) {
-            log.info(userId, 'Too many sessions.');
-            retval = TOO_MANY_SESSIONS;
+            var oldestSession = yield redis.zrange('sessionlist:' + userId, 0, 0);
+            yield redis.run('deleteSession', userId, oldestSession);
+
+            log.info(userId, 'Too many sessions. Removing the oldest');
         }
-    } else if (!sessionExists) {
+    } else if (sessionExists === null) {
         log.warn(userId, 'Invalid session.');
-        retval = INVALID_SESSION;
+        return false;
     }
 
-    return retval;
+    return true;
 }
 
 function respond(ctx, code, msg) {

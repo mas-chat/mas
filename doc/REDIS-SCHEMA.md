@@ -20,8 +20,8 @@ MAS Redis structures
    registrationtime (int, unix time)
    nextwindowid (int)
 
- sessionlist:<userid> (set)
-   sessionId1, sessionId2 ...
+ sessionlist:<userid> (zset)
+   sessionId1, timeStamp1, sessionId2, timeStamp2 ...
 
  session:<userid>:<sessionId> (hash)
    sendRcvNext (int)
