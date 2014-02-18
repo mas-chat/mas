@@ -21,7 +21,7 @@ local excludeSession = ARGV[4]
 
 redis.call('LPUSH', 'windowmsgs:' .. userId .. ':' .. windowId, command)
 
-local sessions = redis.call('SMEMBERS', 'sessionlist:' .. userId)
+local sessions = redis.call('ZRANGE', 'sessionlist:' .. userId, 0, -1)
 
 for i = 1, #sessions do
     if sessions[i] ~= excludeSession then
