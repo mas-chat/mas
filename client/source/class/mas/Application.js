@@ -38,6 +38,10 @@ qx.Class.define('mas.Application', {
             var marginX = Math.round(qx.bom.Viewport.getWidth() / 2) - 300 / 2;
             var marginY = Math.round(qx.bom.Viewport.getHeight() / 2);
 
+            // Remove the static spinner added in index.html
+            var element = document.getElementById('loading-spinner');
+            element.parentNode.removeChild(element);
+
             var startLabel = new qx.ui.basic.Label(
                 '<center><img src="/images/ajax-loader.gif"><br><br><br>' +
                     'Loading content...</center>').set({
