@@ -4,6 +4,9 @@
 
 ; GENERAL OPTIONS
 
+[frontend]
+port=3200
+
 [log]
 directory=/path/to/somewhere
 clear_at_startup=false
