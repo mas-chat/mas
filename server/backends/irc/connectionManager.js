@@ -35,40 +35,43 @@ courier.sendNoWait('ircparser', 'ready');
 
 // Start IDENT server
 if (conf.get('irc:identd')) {
-    net.createServer(function(conn) {
-        var timer = setTimeout(function() {
-            if (conn) {
-                conn.destroy();
-            }
-        }, 3000);
+    net.createServer(handleIdentConnection).listen(IDENTD_PORT);
+}
 
-        carrier.carry(conn, function(line) {
-            var ports = line.split(',');
-            var localPort = parseInt(ports[0]);
-            var remotePort = parseInt(ports[1]);
-            var found = false;
+function handleIdentConnection(conn) {
+    var timer = setTimeout(function() {
+        if (conn) {
+            conn.destroy();
+        }
+    }, 3000);
 
-            if (!isNaN(localPort) && !isNaN(remotePort)) {
-                for (var i = 0; i < sockets.length; i++) {
-                    if (sockets[i].localPort === localPort &&
-                        sockets[i].remotePort === remotePort &&
-                        sockets[i].remoteAddress === conn.remoteAddress) {
-                        found = true;
-                        conn.write(localPort + ',' + remotePort + ' : UNIX : ' + sockets[i].nick +
-                            '\r\n');
-                        break;
-                    }
+    carrier.carry(conn, function(line) {
+        var ports = line.split(',');
+        var localPort = parseInt(ports[0]);
+        var remotePort = parseInt(ports[1]);
+        var prefix = localPort + ',' + remotePort;
+        var found = false;
+
+
+        if (!isNaN(localPort) && !isNaN(remotePort)) {
+            for (var i = 0; i < sockets.length; i++) {
+                if (sockets[i].localPort === localPort &&
+                    sockets[i].remotePort === remotePort &&
+                    sockets[i].remoteAddress === conn.remoteAddress) {
+                    found = true;
+                    conn.write(prefix + ' : UNIX : ' + sockets[i].nick + '\r\n');
+                    break;
                 }
-
-                if (!found) {
-                    conn.write(localPort + ',' + remotePort + ' : ERROR : NO-USER\r\n');
-                }
             }
 
-            clearTimeout(timer);
-            conn.end();
-        });
-    }).listen(IDENTD_PORT);
+            if (!found) {
+                conn.write(prefix + ' : ERROR : NO-USER\r\n');
+            }
+        }
+
+        clearTimeout(timer);
+        conn.end();
+    });
 }
 
 // Connect
