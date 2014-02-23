@@ -8,7 +8,7 @@ MAS server and web client
 ![Screenshot](http://i.imgur.com/McO0nas.png)
 
 MAS is a web chat application. The server part implements MAS
-REST API. [Meetandspeak.com][] is an instance of this application.
+HTTP API. [Meetandspeak.com][] is an instance of this application.
 
 The server is currently being rewritten from scratch and is not yet
 fully functional.
@@ -16,7 +16,7 @@ fully functional.
 For more info, see
 
 - [Architecture page](https://github.com/ilkkao/mas/wiki)
-- [MAS REST API](https://github.com/ilkkao/mas/blob/master/doc/MAS-REST-API.md)
+- [MAS HTTP API](https://github.com/ilkkao/mas/blob/master/doc/MAS-REST-API.md)
 
 Prerequisites:
 
