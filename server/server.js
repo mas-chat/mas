@@ -91,9 +91,8 @@ app.use(register.middleware());
 app.use(less(path.join(__dirname, 'public')));
 app.use(serve(path.join(__dirname, 'public')));
 
-// Qooxdoo routes
-app.use(mount('/main', serve(path.join(__dirname, '/../client'))));
-app.use(mount('/vendor/qooxdoo-sdk', serve(path.join(__dirname, '../vendor/qooxdoo-sdk'))));
+// Ember routes
+app.use(mount('/app', serve(path.join(__dirname, '/../app'))));
 
 // Page routes
 app.get('/', routesIndex);
