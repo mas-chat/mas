@@ -20,9 +20,20 @@ module.exports = function(grunt) {
                 'migration/**/*.js'
             ]
         },
+        emberTemplates: {
+            compile: {
+                options: {
+                    templateBasePath: /app\/templates\//
+                },
+                files: {
+                  "app/out/templates.js": "app/templates/**/*.hbs"
+                }
+            }
+        }
     });
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-ember-templates');
 
     // Default task(s).
     grunt.registerTask('default', [ 'jshint' ]);
