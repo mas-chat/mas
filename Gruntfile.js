@@ -12,7 +12,10 @@ module.exports = function(grunt) {
             },
             all: [
                 'Gruntfile.js',
-                'client/source/class/mas/**/*.js',
+                'app/**/*.js',
+                '!app/libs/**/*.js',
+                '!app/tests/**/*', // TBD Remove eventually
+                '!app/tests/vendor/**/*.js',
                 'server/**/*.js',
                 '!server/public/vendor/**/*.js',
                 'lib/**/*.js',
@@ -26,7 +29,14 @@ module.exports = function(grunt) {
                     templateBasePath: /app\/templates\//
                 },
                 files: {
-                  "app/out/templates.js": "app/templates/**/*.hbs"
+                    'app/out/templates.js': 'app/templates/**/*.hbs'
+                }
+            }
+        },
+        bower: {
+            install: {
+                options: {
+                    targetDir: './app/libs'
                 }
             }
         }
@@ -34,6 +44,7 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-ember-templates');
+    grunt.loadNpmTasks('grunt-bower-task');
 
     // Default task(s).
     grunt.registerTask('default', [ 'jshint' ]);
