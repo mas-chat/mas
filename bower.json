@@ -1,0 +1,23 @@
+{
+  "name": "mas",
+  "version": "0.2.0",
+  "homepage": "https://github.com/ilkkao/mas",
+  "authors": [
+    "Ilkka Oksanen <iao@iki.fi>"
+  ],
+  "keywords": [
+    "chat"
+  ],
+  "license": "Apache",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "app/libs",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.1.1",
+    "ember": "~1.4.0"
+  }
+}
