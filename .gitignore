@@ -5,10 +5,9 @@
 
 #Ignore generated files/directories
 node_modules/
-client/build
+app/libs/
 config.json
 npm-debug.log
-client/source/script/
 logs/
 
 #Mac files

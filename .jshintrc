@@ -82,7 +82,7 @@
 
     // Custom Globals
     "globals"       : {
-        "qx": true,
+        "Ember": true,
         "mas": true,
         "debug": true,
         "escape": true,
