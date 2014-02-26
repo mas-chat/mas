@@ -1,9 +1,9 @@
 @window-bg-color: white;//lighten(#2b3e50, 55%);
 @window-line-color: darken(@window-bg-color, 20%);
-@window-outer-line-color: #999999;
+@window-outer-line-color: lighten(@window-title-bg-color, 18%);
 
 @window-toolbar-bg-color: whitesmoke;
-@window-title-bg-color: #6B6E69;
+@window-title-bg-color: #142F40;
 
 .window {
     background-color: @window-bg-color;
@@ -24,8 +24,20 @@
     padding: 5px;
 }
 
+.timestamp {
+    color: blue;
+}
+
 .nick {
     font-weight:bold;
+}
+
+.nick:before {
+    content: "<";
+}
+
+.nick:after {
+    content: ">";
 }
 
 .window-members {
