@@ -6,7 +6,6 @@
 #Ignore generated files/directories
 node_modules/
 app/libs/
-config.json
 npm-debug.log
 logs/
 
