@@ -26,3 +26,7 @@ App.IndexRoute = Ember.Route.extend({
     return ['red', 'yellow', 'blue'];
   }
 });
+
+App.ApplicationView = Ember.View.extend({
+    classNames: ["ember-root"]
+})
