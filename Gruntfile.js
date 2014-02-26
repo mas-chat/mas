@@ -29,7 +29,7 @@ module.exports = function(grunt) {
                     templateBasePath: /app\/templates\//
                 },
                 files: {
-                    'app/out/templates.js': 'app/templates/**/*.hbs'
+                    'app/dist/templates.js': 'app/templates/**/*.hbs'
                 }
             }
         },
@@ -39,13 +39,21 @@ module.exports = function(grunt) {
                     targetDir: './app/libs'
                 }
             }
+        },
+        watch: {
+            all: {
+                files: ['./app/templates/**/*.hbs'],
+                tasks: ['emberTemplates']
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-ember-templates');
     grunt.loadNpmTasks('grunt-bower-task');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     // Default task(s).
     grunt.registerTask('default', [ 'jshint' ]);
+    grunt.registerTask('app', [ 'bower', 'emberTemplates' ]);
 };
