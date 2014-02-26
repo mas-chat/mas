@@ -1,0 +1,59 @@
+@window-bg-color: white;//lighten(#2b3e50, 55%);
+@window-line-color: darken(@window-bg-color, 20%);
+@window-outer-line-color: #999999;
+
+@window-toolbar-bg-color: whitesmoke;
+@window-title-bg-color: #6B6E69;
+
+.window {
+    background-color: @window-bg-color;
+    margin: 0px 4px 4px 0px;
+    font-size: 13px;
+    border: 1px solid @window-outer-line-color;
+}
+
+.window-title {
+    padding: 4px 8px;
+    background-color: @window-title-bg-color;
+    border-bottom: 1px solid @window-outer-line-color;
+    color: whitesmoke;
+}
+
+.window-messages {
+    color: black;
+    padding: 5px;
+}
+
+.nick {
+    font-weight:bold;
+}
+
+.window-members {
+    width: 110px;
+    border-left: 1px solid @window-line-color;
+}
+
+.window-toolbar {
+    height: 40px;
+    padding: 4px;
+    border-top: 1px solid @window-line-color;
+    background-color: @window-toolbar-bg-color;
+}
+
+.window-buttons {
+    width: 110px;
+}
+
+.window-toolbar .form-control {
+    height: 30px;
+    background-color: white;
+    border: 1px solid #999999;
+    padding: 0px 5px;
+
+}
+
+.window-toolbar .btn {
+    background-color: @window-toolbar-bg-color;
+    color: #333333;
+    line-height: 14px;
+}
