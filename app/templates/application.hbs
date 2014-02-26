@@ -1,3 +1,34 @@
-<h2>Welcome to Ember.js</h2>
+<div class="flex-grow-row">
+    <div class="grid flex-grow-column flex-1">
+        <div class="flex-grow-row flex-1">
+            {{partial "window"}}
+            {{partial "window"}}
+            {{partial "window"}}
+        </div>
 
-{{outlet}}
+        <div class="flex-grow-row flex-1">
+            {{partial "window"}}
+            {{partial "window"}}
+        </div>
+    </div>
+
+    <div class="sidebar flex-grow-column">
+            <div class="flex-1"></div>
+
+            <button type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-question-sign"></span>
+            </button>
+
+            <button type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-user"></span>
+            </button>
+
+            <button type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-search"></span>
+            </button>
+
+            <button type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-wrench"></span>
+            </button>
+        </div>
+</div>

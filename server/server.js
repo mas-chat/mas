@@ -91,7 +91,8 @@ app.use(register.middleware());
 app.use(less(path.join(__dirname, 'public')));
 app.use(serve(path.join(__dirname, 'public')));
 
-// Ember routes
+// App routes
+app.use(mount('/app/less', less(path.join(__dirname, '/../app/less'))));
 app.use(mount('/app', serve(path.join(__dirname, '/../app'))));
 
 // Page routes

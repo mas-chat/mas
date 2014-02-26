@@ -1,0 +1,54 @@
+@import "variables-superhero.less";
+@import "window.less";
+
+@font-face {
+    font-family: 'Glyphicons Halflings';
+
+    src: url('../libs/bootstrap/glyphicons-halflings-regular.eot');
+    src: url('../libs/bootstrap/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../libs/bootstrap/glyphicons-halflings-regular.woff') format('woff'), url('../libs/bootstrap/glyphicons-halflings-regular.ttf') format('truetype'), url('../libs/bootstrap/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+}
+
+body, html, .ember-root {
+    height: 100%;
+}
+
+.flex-grow-row {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.flex-grow-column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.sidebar {
+    width: 45px;
+    background-color: @gray-light;
+    align-items: center;
+    padding: 10px 5px;
+}
+
+.grid {
+    padding: 4px 0px 0px 4px;
+    background-color: @gray-light;
+}
+
+.red {
+    background-color: red;
+}
+
+.green {
+    background-color: green;
+}
