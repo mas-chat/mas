@@ -37,7 +37,9 @@ module.exports = function(grunt) {
         bower: {
             install: {
                 options: {
-                    targetDir: './app/libs'
+                    targetDir: './app/libs',
+                    cleanTargetDir: true,
+                    cleanBowerDir: true
                 }
             }
         },
@@ -45,6 +47,9 @@ module.exports = function(grunt) {
             dist: {
                 files: {
                     'app/dist/app.js': ['app/js/**/*.js'],
+                },
+                options: {
+                    debug: true
                 }
             }
         },
