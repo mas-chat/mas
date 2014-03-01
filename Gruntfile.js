@@ -54,10 +54,21 @@ module.exports = function(grunt) {
                     'app/libs/jquery/jquery.js',
                     'app/libs/bootstrap/bootstrap.js',
                     'app/libs/handlebars/handlebars.js',
-                    'app/libs/ember/ember.js'
+                    'app/libs/ember/ember.js',
+                    'app/libs/ember-data/ember-data.js'
                 ],
                 dest: 'app/dist/libs.js',
             },
+        },
+        less: {
+            development: {
+                files: {
+                    'app/dist/style.css': 'app/stylesheets/app.less'
+                },
+                options: {
+                    sourceMap: true
+                }
+            }
         },
         watch: {
             templates: {
@@ -71,6 +82,10 @@ module.exports = function(grunt) {
             libs: {
                 files: ['app/libs/**/*.js'],
                 tasks: ['concat']
+            },
+            less: {
+                files: ['app/stylesheets/**/*.css', 'app/stylesheets/**/*.less'],
+                tasks: ['less']
             }
         }
     });
@@ -80,9 +95,10 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-concat');
 
     // Default task(s).
     grunt.registerTask('default', [ 'jshint' ]);
-    grunt.registerTask('app', [ 'bower', 'emberTemplates', 'browserify', 'concat' ]);
+    grunt.registerTask('app', [ 'bower', 'emberTemplates', 'browserify', 'concat', 'less' ]);
 };
