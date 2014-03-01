@@ -1,6 +1,6 @@
 
-MAS REST API
-============
+MAS client API
+==============
 
 Version: 1
 
