@@ -23,7 +23,7 @@ App.MainRoute = Ember.Route.extend({
         return ['red', 'yellow', 'blue'];
     },
 
-    setupController: function(controller, model) {
+    setupController: function() {
         App.Network.create();
     }
 });

@@ -22,5 +22,5 @@ require('./routes/main');
 require('./views/application');
 
 App.Router.map(function() {
-    this.route('main', { path: "/" });
+    this.route('main', { path: '/' });
 });
