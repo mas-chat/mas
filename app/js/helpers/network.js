@@ -46,11 +46,11 @@ App.Network = Ember.Object.extend({
     },
 
     _processResponse: function(data) {
-        Ember.Logger.info('Got good response');
+        Ember.Logger.info('Got good response' + data);
     },
 
     _handleFailure: function(jqxhr, textStatus, error ) {
-        var err = textStatus + ", " + error;
-        console.log( "Request Failed: " + err );
+        var err = textStatus + ', ' + error;
+        console.log('Request Failed: ' + err );
     }
 });
