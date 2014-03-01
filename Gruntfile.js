@@ -40,10 +40,36 @@ module.exports = function(grunt) {
                 }
             }
         },
+        browserify: {
+            dist: {
+                files: {
+                    'app/dist/app.js': ['app/js/**/*.js'],
+                }
+            }
+        },
+        concat: {
+            libs: {
+                src: [
+                    'app/libs/jquery/jquery.js',
+                    'app/libs/bootstrap/bootstrap.js',
+                    'app/libs/handlebars/handlebars.js',
+                    'app/libs/ember/ember.js'
+                ],
+                dest: 'app/dist/libs.js',
+            },
+        },
         watch: {
-            all: {
-                files: ['./app/templates/**/*.hbs'],
+            templates: {
+                files: ['app/templates/**/*.hbs'],
                 tasks: ['emberTemplates']
+            },
+            app: {
+                files: ['app/js/**/*.js'],
+                tasks: ['browserify']
+            },
+            libs: {
+                files: ['app/libs/**/*.js'],
+                tasks: ['concat']
             }
         }
     });
@@ -52,6 +78,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-ember-templates');
     grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-contrib-concat');
 
     // Default task(s).
     grunt.registerTask('default', [ 'jshint' ]);
