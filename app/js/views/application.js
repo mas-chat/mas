@@ -16,11 +16,6 @@
 
 'use strict';
 
-window.App = Ember.Application.create();
-
-require('./routes/main');
-require('./views/application');
-
-App.Router.map(function() {
-    this.route('main', { path: "/" });
+App.ApplicationView = Ember.View.extend({
+    classNames: ["ember-root"]
 });
