@@ -16,7 +16,7 @@ fully functional.
 For more info, see
 
 - [Architecture page](https://github.com/ilkkao/mas/wiki)
-- [MAS HTTP API](https://github.com/ilkkao/mas/blob/master/doc/MAS-REST-API.md)
+- [MAS HTTP client API](https://github.com/ilkkao/mas/blob/master/doc/MAS-client-API.md)
 
 Dependencies:
 
