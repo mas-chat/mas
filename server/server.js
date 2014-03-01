@@ -92,7 +92,6 @@ app.use(less(path.join(__dirname, 'public')));
 app.use(serve(path.join(__dirname, 'public')));
 
 // App routes
-app.use(mount('/app/stylesheets', less(path.join(__dirname, '/../app/stylesheets'))));
 app.use(mount('/app', serve(path.join(__dirname, '/../app'))));
 
 // Page routes
