@@ -84,5 +84,5 @@ module.exports = function(grunt) {
 
     // Default task(s).
     grunt.registerTask('default', [ 'jshint' ]);
-    grunt.registerTask('app', [ 'bower', 'emberTemplates' ]);
+    grunt.registerTask('app', [ 'bower', 'emberTemplates', 'browserify', 'concat' ]);
 };
