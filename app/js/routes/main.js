@@ -16,11 +16,14 @@
 
 'use strict';
 
-window.App = Ember.Application.create();
+require('../helpers/network');
 
-require('./routes/main');
-require('./views/application');
+App.MainRoute = Ember.Route.extend({
+    model: function() {
+        return ['red', 'yellow', 'blue'];
+    },
 
-App.Router.map(function() {
-    this.route('main', { path: "/" });
+    setupController: function(controller, model) {
+        App.Network.create();
+    }
 });
