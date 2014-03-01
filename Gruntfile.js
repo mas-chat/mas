@@ -13,6 +13,7 @@ module.exports = function(grunt) {
             all: [
                 'Gruntfile.js',
                 'app/**/*.js',
+                '!app/dist/*.js',
                 '!app/libs/**/*.js',
                 '!app/tests/**/*', // TBD Remove eventually
                 '!app/tests/vendor/**/*.js',
