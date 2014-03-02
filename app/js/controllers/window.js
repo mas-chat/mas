@@ -26,7 +26,7 @@ App.WindowController = Ember.ObjectController.extend({
     }.property(),
 
     processedMessages: function() {
-        return this.get('messages').map(function(value, index, array) {
+        return this.get('messages').map(function(value) {
             var cat = value.get('cat');
 
             if (cat === 'banner') {
@@ -46,9 +46,8 @@ App.WindowController = Ember.ObjectController.extend({
 
     newMessage: function() {
         Ember.run.next(this, function() {
-            console.log('doing ' + '#' + this.get('id') + ' .window-messages');
             var $messagePanel = $('#' + this.get('id') + ' .window-messages');
-            $messagePanel.scrollTop($messagePanel.prop("scrollHeight"));
+            $messagePanel.scrollTop($messagePanel.prop('scrollHeight'));
         });
     }.observes('messages.[]')
 });
