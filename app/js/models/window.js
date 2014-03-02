@@ -16,5 +16,12 @@
 
 'use strict';
 
-App.MainRoute = Ember.Route.extend({
+App.Window = DS.Model.extend({
+    name: DS.attr('string'),
+    row: DS.attr('number'),
+
+    firstInRow: DS.attr('boolean'),
+    lastInRow: DS.attr('boolean'),
+
+    messages: DS.hasMany('message') // Overwritten in Window controller
 });

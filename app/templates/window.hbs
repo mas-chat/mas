@@ -1,12 +1,28 @@
-<div class="window flex-grow-column flex-1">
-    <div class="window-title">
-        Group: Foo
+<div {{bindAttr id="id"}} class="window flex-grow-column flex-1">
+    <div class="window-title flex-row">
+        <div class="flex-1">
+            Group: {{name}}
+        </div>
+
+        <div>
+            <span class="glyphicon glyphicon-resize-small"></span>
+        </div>
     </div>
 
     <div class="flex-grow-row flex-1">
         <div class="window-messages flex-1">
-
-        <span class="timestamp">13:14</span> <span class="nick">Ilkka</span> All the world's a stage, and all the men and women merely players: they have their exits and their entrances; and one man in his time plays many parts, his acts being seven ages.
+            {{#each message in processedMessages}}
+                <div {{bind-attr class="message.ircMotd:single-line"}}>
+                    <span class="timestamp">
+                        13:14
+                    </span>
+                    <span class="nick">
+                        {{message.nick}}
+                    </span>
+                    {{! Don't indent message.body to its own line, see irc-motd CSS class }}
+                    <span {{bind-attr class="message.ircMotd"}}>{{{message.body}}}</span>
+                </div>
+            {{/each}}
         </div>
 
         <div class="window-members">

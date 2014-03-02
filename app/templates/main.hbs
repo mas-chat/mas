@@ -1,10 +1,9 @@
-<div class="flex-grow-row flex-1">
-    {{partial "window"}}
-    {{partial "window"}}
-    {{partial "window"}}
-</div>
-
-<div class="flex-grow-row flex-1">
-    {{partial "window"}}
-    {{partial "window"}}
-</div>
+{{#each window in sortedWindows}}
+    {{#if window.firstInRow}}
+        <div class="remove-me-debug flex-grow-row flex-1">
+    {{/if}}
+    {{render "window" window}}
+    {{#if window.lastInRow}}
+        </div>
+    {{/if}}
+{{/each}}
