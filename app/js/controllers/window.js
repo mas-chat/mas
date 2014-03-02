@@ -17,6 +17,17 @@
 'use strict';
 
 App.WindowController = Ember.ObjectController.extend({
+    actions: {
+        moveRowUp: function() {
+            this.decrementProperty('row');
+            console.log('here');
+        },
+        moveRowDown: function() {
+            this.incrementProperty('row');
+            console.log('hare');
+        }
+    },
+
     messages: function() {
         // Override model property with a filter to get live updates
         var windowId = this.get('id');
@@ -42,7 +53,7 @@ App.WindowController = Ember.ObjectController.extend({
 
             return value;
         });
-    }.property('messages.[]'),
+    }.property('messages.@each.row'),
 
     newMessage: function() {
         Ember.run.next(this, function() {
