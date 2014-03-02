@@ -19,7 +19,7 @@
 App.MainController = Ember.ArrayController.extend({
     windows: function() {
         // Override model property with a filter to get live updates
-        return this.get('store').filter('window', function(comment) {
+        return this.get('store').filter('window', function() {
             return true;
         });
     }.property(),
