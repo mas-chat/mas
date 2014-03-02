@@ -22,6 +22,8 @@
 .window-messages {
     color: black;
     padding: 5px;
+    overflow-y: auto;
+    overflow-x: auto;
 }
 
 .timestamp {
@@ -32,12 +34,12 @@
     font-weight:bold;
 }
 
-.nick:before {
-    content: "<";
+.irc-motd {
+    font-family: Courier New, monospace;
 }
 
-.nick:after {
-    content: ">";
+.single-line {
+    white-space: nowrap;
 }
 
 .window-members {

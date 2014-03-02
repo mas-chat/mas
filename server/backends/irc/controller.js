@@ -92,7 +92,7 @@ courier.on('data', function *(params) {
     }
 
     if (handlers[msg.command]) {
-        yield handlers[msg.command](params.userId, msg);
+        yield handlers[msg.command](params.userId, msg, msg.command);
     }
 });
 
@@ -185,13 +185,19 @@ var handlers = {
     'PING': handlePing
 };
 
-function *handleServerText(userId, msg) {
+function *handleServerText(userId, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     var text = msg.params.join(' ');
+    var cat = 'notice';
+
+    // 375 = MOTD line
+    if (code === '375') {
+        cat = 'banner';
+    }
 
     yield textLine.broadcast(userId, msg.network, {
         nick: msg.serverName,
-        cat: 'notice',
+        cat: cat,
         body: text
     });
 }

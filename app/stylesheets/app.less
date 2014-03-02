@@ -3,6 +3,8 @@
 @import "variables-superhero";
 @import "window";
 
+@main-bg-color: lighten(@gray-light, 5%);
+
 @font-face {
     font-family: 'Glyphicons Halflings';
 
@@ -12,6 +14,7 @@
 
 body, html, .ember-root {
     height: 100%;
+    overflow: hidden;
 }
 
 .flex-grow-row {
@@ -37,14 +40,14 @@ body, html, .ember-root {
 
 .sidebar {
     width: 45px;
-    background-color: @gray-light;
+    background-color: @main-bg-color;
     align-items: center;
     padding: 10px 5px;
 }
 
 .grid {
     padding: 4px 0px 0px 4px;
-    background-color: @gray-light;
+    background-color: @main-bg-color;
 }
 
 .red {

@@ -19,8 +19,30 @@
 window.App = Ember.Application.create();
 
 require('./routes/main');
+
 require('./views/application');
+
+require('./controllers/main');
+require('./controllers/window');
+
+require('./models/message');
+require('./models/window');
+
+require('./helpers/network');
 
 App.Router.map(function() {
     this.route('main', { path: '/' });
+});
+
+App.Store = DS.Store.extend({
+    adapter: null,
+    _network: null,
+
+    init: function() {
+        this._super();
+
+        this._network = App.Network.create({
+            store: this
+        });
+    }
 });
