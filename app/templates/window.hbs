@@ -35,18 +35,27 @@
             <input type="text" class="form-control">
         </div>
 
-        <div class="window-buttons flex-row">
-            <button type="button" class="flex-1 btn">
+        <div class="window-buttons">
+            <button type="button" class="btn">
                 <span class="glyphicon glyphicon-link"></span>
             </button>
 
-            <button type="button" class="flex-1 btn">
-                <span class="glyphicon glyphicon-align-justify"></span>
-            </button>
 
-            <button type="button" class="flex-1 btn">
-                <span class="glyphicon glyphicon-chevron-right"></span>
-            </button>
+            <div class="btn-group dropup">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-align-justify"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li><a href="#">Action</a></li>
+                    <li><a href="#">Another action</a></li>
+                    <li class="divider"></li>
+                    <li {{action "moveRowUp"}}><a href="#">Move one row up</a></li>
+                    <li {{action "moveRowDown"}}><a href="#">Move one row down</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#">Separated link</a></li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
