@@ -57,7 +57,7 @@ require([
 						$.cookie('ProjectEvergreen', data.userId + '-' + data.secret + '-n',
 							{ path: '/', expires: expiresdate });
 
-                        window.location.pathname = '/main/source/';
+                        window.location.pathname = '/app/';
                     } else {
                         $('#email-or-nick').simpletip({
                             content: data.msg,
