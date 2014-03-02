@@ -67,10 +67,6 @@ for i = 1, #windows do
         ['network'] = network,
 
         ['name'] = window.name,
-        ['x'] = tonumber(window.x),
-        ['y'] = tonumber(window.y),
-        ['width'] = tonumber(window.width),
-        ['height'] = tonumber(window.height),
         ['type'] = window.type,
         ['sounds'] = window.sounds,
         ['titleAlert'] = window.titleAlert,

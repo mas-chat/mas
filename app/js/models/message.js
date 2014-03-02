@@ -16,5 +16,16 @@
 
 'use strict';
 
-App.MainRoute = Ember.Route.extend({
+App.Message = DS.Model.extend({
+    body: DS.attr('string'),
+    cat: DS.attr('string'),
+    ts: DS.attr('number'),
+    nick: DS.attr('string'),
+    type: DS.attr('number'), // TBD clarify
+
+    window: DS.belongsTo('window'),
+
+    ircMotd: DS.attr('boolean', {
+        defaultValue: false
+    })
 });

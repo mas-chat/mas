@@ -58,7 +58,7 @@ Overal server response format to MAS listen request is:
         "id":"ADDTEXT"
          "body":"How are you?",
          "cat":"msg",
-         "window":2,
+         "windowId":2,
          "ts":341,
          "nick":"neo",
          "type":1,
@@ -67,7 +67,7 @@ Overal server response format to MAS listen request is:
          "id":"ADDTEXT"
          "body":"Good, thanks.",
          "cat":"notice",
-         "window":2,
+         "windowId":2,
          "ts":348,
          "nick":"morpheus",
          "type":1,
@@ -145,7 +145,7 @@ Add a messge to window.
 {
    "id":"ADDTEXT",
 
-   "window":1,
+   "windowId":1,
    "body":"Hello worlds!",
    "cat":"notice",
    "ts":"209",
@@ -197,10 +197,6 @@ Create new window.
    "name":"testone",
    "type":"group",
    "network":"MeetAndSpeak",
-   "x":453,
-   "y":93,
-   "width":476,
-   "height":178,
    "password":"",
    "newMsgs":2,
    "titleAlert":0,
