@@ -38,7 +38,7 @@ App.CommandParser = Ember.Object.extend({
         delete windowRecord.windowId;
 
         windowRecord.row = this._row; // TDB: HACK
-        if (windowRecord.id % 2 === 1) {
+        if (windowRecord.id % 3 === 2) {
             this._row++;
         }
         windowRecord.lastInRow = false; // REMOVE
