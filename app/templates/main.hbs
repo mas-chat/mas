@@ -1,9 +1,5 @@
 {{#each window in sortedWindows}}
-    {{#if window.firstInRow}}
-        <div class="remove-me-debug flex-grow-row flex-1">
-    {{/if}}
+    {{startRow window sortedWindows}}
     {{render "window" window}}
-    {{#if window.lastInRow}}
-        </div>
-    {{/if}}
+    {{endRow window sortedWindows}}
 {{/each}}

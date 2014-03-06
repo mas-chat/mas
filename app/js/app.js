@@ -29,6 +29,7 @@ require('./models/message');
 require('./models/window');
 
 require('./helpers/network');
+require('./helpers/handlebars');
 
 App.Router.map(function() {
     this.route('main', { path: '/' });
