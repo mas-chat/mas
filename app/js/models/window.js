@@ -23,5 +23,5 @@ App.Window = Ember.Object.extend({
     firstInRow: false,
     lastInRow: false,
 
-    messages: Ember.A([]);
+    messages: Ember.A([])
 });
