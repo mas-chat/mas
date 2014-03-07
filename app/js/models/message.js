@@ -16,16 +16,12 @@
 
 'use strict';
 
-App.Message = DS.Model.extend({
-    body: DS.attr('string'),
-    cat: DS.attr('string'),
-    ts: DS.attr('number'),
-    nick: DS.attr('string'),
-    type: DS.attr('number'), // TBD clarify
+App.Message = Ember.Object.extend({
+    body: null,
+    cat: null,
+    ts: null,
+    nick: null,
+    type: null,
 
-    window: DS.belongsTo('window'),
-
-    ircMotd: DS.attr('boolean', {
-        defaultValue: false
-    })
+    ircMotd: false,
 });

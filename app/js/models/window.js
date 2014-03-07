@@ -16,12 +16,12 @@
 
 'use strict';
 
-App.Window = DS.Model.extend({
-    name: DS.attr('string'),
-    row: DS.attr('number'),
+App.Window = Ember.Object.extend({
+    name: null,
+    row: null,
 
-    firstInRow: DS.attr('boolean'),
-    lastInRow: DS.attr('boolean'),
+    firstInRow: false,
+    lastInRow: false,
 
-    messages: DS.hasMany('message') // Overwritten in Window controller
+    messages: Ember.A([]);
 });
