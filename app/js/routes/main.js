@@ -18,6 +18,6 @@
 
 App.MainRoute = Ember.Route.extend({
     model: function() {
-        return App.WindowCollection
+        return App.WindowCollection;
     }
 });
