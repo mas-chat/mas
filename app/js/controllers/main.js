@@ -17,16 +17,9 @@
 'use strict';
 
 App.MainController = Ember.ArrayController.extend({
-    windows: function() {
-        // Override model property with a filter to get live updates
-        return this.get('store').filter('window', function() {
-            return true;
-        });
-    }.property(),
-
-    sortedWindows: function() {
+    markedWindows: function() {
         // Mark first and last window on every row
-        return this.get('windows').sortBy('row').map(function(value, index, array) {
+        return this.get('content').sortBy('row').map(function(value, index, array) {
             var last = false;
             var first = false;
 
@@ -43,5 +36,5 @@ App.MainController = Ember.ArrayController.extend({
 
             return value;
         });
-    }.property('windows.[]')
+    }.property('model.@each.row')
 });

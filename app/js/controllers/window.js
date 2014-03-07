@@ -19,22 +19,12 @@
 App.WindowController = Ember.ObjectController.extend({
     actions: {
         moveRowUp: function() {
-            this.decrementProperty('row');
-            console.log('here');
+            this._moveWindow(this.get('windowId'), -1);
         },
         moveRowDown: function() {
-            this.incrementProperty('row');
-            console.log('hare');
+            this._moveWindow(this.get('windowId'), 1);
         }
     },
-
-    messages: function() {
-        // Override model property with a filter to get live updates
-        var windowId = this.get('id');
-        return this.get('store').filter('message', function(message) {
-            return message.get('window.id') === windowId;
-        });
-    }.property(),
 
     processedMessages: function() {
         return this.get('messages').map(function(value) {
@@ -53,12 +43,22 @@ App.WindowController = Ember.ObjectController.extend({
 
             return value;
         });
-    }.property('messages.@each.row'),
+    }.property('messages'),
 
     newMessage: function() {
         Ember.run.next(this, function() {
-            var $messagePanel = $('#' + this.get('id') + ' .window-messages');
+            var $messagePanel = $('#' + this.get('windowId') + ' .window-messages');
             $messagePanel.scrollTop($messagePanel.prop('scrollHeight'));
         });
-    }.observes('messages.[]')
+    }.observes('messages').on('init'),
+
+    _moveWindow: function(id, direction) {
+        this.set('row', this.get('row') + direction);
+        var that = this;
+
+        Ember.run.next(this, function() {
+            // Highlight the moved window
+            $('#' + that.get('windowId')).addClass('tada animated');
+        });
+    }
 });
