@@ -17,11 +17,15 @@
 'use strict';
 
 App.Window = Ember.Object.extend({
+    init: function() {
+        this.messages = Ember.A([]);
+    },
+
     name: null,
     row: null,
 
     firstInRow: false,
     lastInRow: false,
 
-    messages: Ember.A([])
+    messages: null
 });
