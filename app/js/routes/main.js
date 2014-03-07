@@ -17,4 +17,7 @@
 'use strict';
 
 App.MainRoute = Ember.Route.extend({
+    model: function() {
+        return App.WindowCollection
+    }
 });

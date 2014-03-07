@@ -17,7 +17,6 @@
 'use strict';
 
 App.CommandParser = Ember.Object.extend({
-    _nextMessageId: 0,
     _row: 0, // TBD: HACK
 
     process: function(command) {
@@ -33,26 +32,22 @@ App.CommandParser = Ember.Object.extend({
     },
 
     _handleCreate: function(command) {
-        var windowRecord = command;
-        windowRecord.id = windowRecord.windowId;
-        delete windowRecord.windowId;
+        var data = command;
 
-        windowRecord.row = this._row; // TDB: HACK
-        if (windowRecord.id % 3 === 2) {
+        data.row = this._row; // TDB: HACK
+        if (data.windowId % 3 === 2) {
             this._row++;
         }
-        windowRecord.lastInRow = false; // REMOVE
-        windowRecord.firstInRow = false; // REMOVE
 
-        this.get('store').push('window', windowRecord);
+        var windowRecord = App.Window.create(data);
+        App.WindowCollection.pushObject(windowRecord);
     },
 
     _handleAddtext: function(command) {
-        var messageRecord = command;
-        messageRecord.id = this._nextMessageId++;
-        messageRecord.window = messageRecord.windowId;
-        delete messageRecord.windowId;
+        var data = command;
+        var targetWindow = App.WindowCollection.findBy('windowId', command.windowId);
+        var messageRecord = App.Message.create(data);
 
-        this.get('store').push('message', messageRecord);
+        targetWindow.messages.pushObject(messageRecord);
     }
 });
