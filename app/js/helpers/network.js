@@ -27,9 +27,7 @@ App.Network = Ember.Object.extend({
 
     init: function() {
         this._pollMsgs();
-        this._parser = App.CommandParser.create({
-            store: this.get('store')
-        });
+        this._parser = App.CommandParser.create();
     },
 
     _pollMsgs: function() {
@@ -76,7 +74,7 @@ App.Network = Ember.Object.extend({
                 prefix = '  |- MSG: ';
             }
 
-            Ember.Logger.info(prefix + JSON.stringify(command));
+//            Ember.Logger.info(prefix + JSON.stringify(command));
 
             if (command.id === 'SESSIONID') {
                 this._sessionId = command.sessionId;
