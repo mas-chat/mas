@@ -28,7 +28,8 @@ require('./models/window');
 require('./helpers/network');
 require('./helpers/handlebars');
 
-App.WindowCollection = Ember.A([]);
+App.nicks = {};
+App.windowCollection = Ember.A([]);
 
 App.Router.map(function() {
     this.route('main', { path: '/' });

@@ -23,10 +23,10 @@ App.Window = Ember.Object.extend({
     },
 
     name: null,
+    network: null,
     row: null,
+    messages: null,
 
     firstInRow: false,
-    lastInRow: false,
-
-    messages: null
+    lastInRow: false
 });
