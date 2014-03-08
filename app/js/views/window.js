@@ -21,7 +21,7 @@ App.WindowView = Ember.View.extend({
         // Highlight the window that was moved
         if (this.get('controller.model.animate') === true) {
             this.set('controller.model.animate', false);
-            this.$().addClass('tada animated');
+            this.$().addClass('pulse animated');
         }
     }
 });
