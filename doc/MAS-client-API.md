@@ -148,11 +148,15 @@ Add a messge to window.
    "windowId":1,
    "body":"Hello worlds!",
    "cat":"notice",
-   "ts":"209",
+   "ts":"2093243",
    "nick":"ilkka2",
    "type":0
 }
 ```
+
+```ts``` is unix timestamp, seconds since epoch.
+
+```cat``` can be ```msg```, ```info```, ```notice```, ```banner```, ```error```, ```mymsg```, ```mention```, ```action``` or ```robot```
 
 BANLIST
 -------
