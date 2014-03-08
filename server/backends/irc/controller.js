@@ -30,7 +30,6 @@ var log = require('../../lib/log'),
 
 // Upper layer messages
 
-// addText
 courier.on('send', function *(params) {
     yield courier.send('connectionmanager', {
         type: 'write',
@@ -198,7 +197,8 @@ function *handleServerText(userId, msg, code) {
     yield textLine.broadcast(userId, msg.network, {
         nick: msg.serverName,
         cat: cat,
-        body: text
+        body: text,
+        ts: Math.round(Date.now() / 1000)
     });
 }
 
@@ -252,7 +252,8 @@ function *handlePrivmsg(userId, msg) {
     yield textLine.send(userId, msg.network, group, {
         nick: msg.nick,
         cat: 'msg',
-        body: text
+        body: text,
+        ts: Math.round(Date.now() / 1000)
     });
 }
 
