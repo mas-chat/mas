@@ -16,22 +16,6 @@
 
 'use strict';
 
-window.App = Ember.Application.create();
-
-require('./routes/main');
-require('./views/application');
-require('./views/window');
-require('./controllers/main');
-require('./controllers/window');
-require('./models/message');
-require('./models/window');
-require('./helpers/network');
-require('./helpers/handlebars');
-
-App.WindowCollection = Ember.A([]);
-
-App.Router.map(function() {
-    this.route('main', { path: '/' });
+Ember.Handlebars.helper('decoratedTimestamp', function(value) {
+    return new Handlebars.SafeString(moment.unix(value).format('HH:mm'));
 });
-
-App.networkMgr = App.Network.create();

@@ -26,21 +26,47 @@
     overflow-x: auto;
 }
 
+.line {
+    clear: both;
+}
+
 .timestamp {
+    float: left;
+    color: blue;
+    width: 37px;
+}
+
+.body {
+    float: left;
+}
+
+.banner {
+    white-space: pre;
+
+    .nick {
+        display: none;
+    }
+
+    .body {
+        font-family: Courier New, monospace;
+        font-size: 11px;
+    }
+}
+
+.mymsg {
     color: blue;
 }
 
 .nick {
-    font-weight:bold;
-}
-
-.irc-motd {
-    font-family: Courier New, monospace;
-    font-size: 11px;
-}
-
-.single-line {
-    white-space: nowrap;
+    float: left;
+    font-weight: bold;
+    padding-right: 3px;
+    &:before {
+       content: "<";
+    }
+    &:after {
+       content: ">";
+    }
 }
 
 .window-members {
