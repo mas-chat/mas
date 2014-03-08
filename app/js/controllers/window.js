@@ -39,7 +39,7 @@ App.WindowController = Ember.ObjectController.extend({
             this.get('messages').pushObject(App.Message.create({
                 body: text,
                 cat: 'mymsg',
-                nick: 'ilkka',
+                nick: App.nicks[this.get('network')],
                 ts: moment().unix()
             }));
         }
