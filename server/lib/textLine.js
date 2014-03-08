@@ -51,7 +51,6 @@ function *processTextLine(userId, msg, excludeSession) {
     }
 
     msg.id = 'ADDTEXT';
-    msg.ts = 209; // TBD
     msg.type = 0; // TBD
 
     var command = JSON.stringify(msg);

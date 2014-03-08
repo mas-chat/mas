@@ -44,7 +44,8 @@ courier.on('send', function *(params) {
             yield textLine.send(members[i], 'MeetAndSpeak', group, {
                 nick: nick,
                 cat: 'msg',
-                body: params.text
+                body: params.text,
+                ts: Math.round(Date.now() / 1000)
             });
         }
     }
