@@ -18,6 +18,7 @@
 
 App.Window = Ember.Object.extend({
     init: function() {
+        this._super();
         this.messages = Ember.A([]);
     },
 
