@@ -27,33 +27,21 @@ App.WindowController = Ember.ObjectController.extend({
             this.set('animate', true);
         },
         sendMessage: function() {
+            var text = this.get('newMessage');
+
             App.networkMgr.send({
                 command: 'SEND',
-                text: this.get('newMessage'),
+                text: text,
                 windowId: this.get('windowId')
             });
             this.set('newMessage', '');
+
+            this.get('messages').pushObject(App.Message.create({
+                body: text,
+                cat: 'mymsg',
+                nick: 'ilkka',
+                ts: moment().unix()
+            }));
         }
-    },
-
-    processMessage: function() {
-        this.get('messages').map(function(value) {
-            var cat = value.get('cat');
-
-            if (cat === 'banner') {
-                value.set('ircMotd', true);
-                value.set('decoratedBody', value.get('body').replace(/ /g, '&nbsp;'));
-            } else {
-                value.set('decoratedBody', value.get('body'));
-            }
-
-            if (cat === 'banner' || cat === 'notice') {
-                value.set('nick', '');
-            } else {
-                value.set('decoratedNick', '<' + value.get('nick') + '>');
-            }
-
-            return value;
-        });
-    }.observes('messages.@each').on('init')
+    }
 });
