@@ -68,6 +68,7 @@ module.exports = function(grunt) {
                 },
                 files: {
                     'app/dist/libs.js': [
+                        'app/libs/momentjs/moment.js',
                         'app/libs/jquery/jquery.js',
                         'app/libs/bootstrap/bootstrap.js',
                         'app/libs/handlebars/handlebars.js',
@@ -89,7 +90,7 @@ module.exports = function(grunt) {
         watch: {
             templates: {
                 files: ['app/templates/**/*.hbs'],
-                tasks: ['emberTemplates']
+                tasks: ['emberTemplates', 'uglify:mas']
             },
             app: {
                 files: ['app/js/**/*.js'],
