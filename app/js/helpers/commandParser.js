@@ -21,6 +21,8 @@ App.CommandParser = Ember.Object.extend({
 
     process: function(command) {
         var name = command.id;
+        delete command.id;
+
         var funcName = '_handle' + name.charAt(0) + name.substring(1).toLowerCase();
 
         if (!this[funcName]) {
@@ -31,23 +33,25 @@ App.CommandParser = Ember.Object.extend({
         this[funcName](command);
     },
 
-    _handleCreate: function(command) {
-        var data = command;
-
+    _handleCreate: function(data) {
         data.row = this._row; // TDB: HACK
         if (data.windowId % 3 === 2) {
             this._row++;
         }
 
         var windowRecord = App.Window.create(data);
-        App.WindowCollection.pushObject(windowRecord);
+        App.windowCollection.pushObject(windowRecord);
     },
 
-    _handleAddtext: function(command) {
-        var data = command;
-        var targetWindow = App.WindowCollection.findBy('windowId', command.windowId);
-        var messageRecord = App.Message.create(data);
+    _handleAddtext: function(data) {
+        var targetWindow = App.windowCollection.findBy('windowId', data.windowId);
+        delete data.windowId;
 
+        var messageRecord = App.Message.create(data);
         targetWindow.messages.pushObject(messageRecord);
+    },
+
+    _handleNick: function(data) {
+        jQuery.extend(App.nicks, data);
     }
 });
