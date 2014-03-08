@@ -1,61 +1,59 @@
-<div {{bind-attr id="windowId"}} class="window flex-grow-column flex-1">
-    <div class="window-title flex-row">
-        <div class="flex-1">
-            Group: {{name}}
-        </div>
-
-        <div>
-            <span class="glyphicon glyphicon-resize-small"></span>
-        </div>
+<div class="window-title flex-row">
+    <div class="flex-1">
+        Group: {{name}}
     </div>
 
-    <div class="flex-grow-row flex-1">
-        <div class="window-messages flex-1">
-            {{#each message in processedMessages}}
-                <div {{bind-attr class="message.ircMotd:single-line"}}>
-                    <span class="timestamp">
-                        13:14
-                    </span>
-                    <span class="nick">
-                        {{message.nick}}
-                    </span>
-                    {{! Don't indent message.body to its own line, see irc-motd CSS class }}
-                    <span {{bind-attr class="message.ircMotd"}}>{{{message.body}}}</span>
-                </div>
-            {{/each}}
-        </div>
+    <div>
+        <span class="glyphicon glyphicon-resize-small"></span>
+    </div>
+</div>
 
-        <div class="window-members">
+<div class="flex-grow-row flex-1">
+    <div class="window-messages flex-1">
+        {{#each message in messages}}
+        <div {{bind-attr class="message.ircMotd:single-line"}}>
+            <span class="timestamp">
+                13:14
+            </span>
+            <span class="nick">
+                {{message.decoratedNick}}
+            </span>
+            {{! Don't indent message.body to its own line, see irc-motd CSS class }}
+            <span {{bind-attr class="message.ircMotd"}}>{{{message.decoratedBody}}}</span>
         </div>
+        {{/each}}
     </div>
 
-    <div class="window-toolbar flex-row">
+    <div class="window-members">
+    </div>
+</div>
 
-        <div class="flex-1">
-            <input type="text" class="form-control">
-        </div>
+<div class="window-toolbar flex-row">
 
-        <div class="window-buttons">
-            <button type="button" class="btn">
-                <span class="glyphicon glyphicon-link"></span>
+    <div class="flex-1">
+        {{input action="sendMessage" class="form-control" valueBinding="newMessage"}}
+    </div>
+
+    <div class="window-buttons">
+        <button type="button" class="btn">
+            <span class="glyphicon glyphicon-link"></span>
+        </button>
+
+
+        <div class="btn-group dropup">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                <span class="glyphicon glyphicon-align-justify"></span>
+                <span class="sr-only">Toggle Dropdown</span>
             </button>
-
-
-            <div class="btn-group dropup">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span class="glyphicon glyphicon-align-justify"></span>
-                    <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right">
-                    <li><a href="#">Action</a></li>
-                    <li><a href="#">Another action</a></li>
-                    <li class="divider"></li>
-                    <li {{action "moveRowUp"}}><a href="#">Move one row up</a></li>
-                    <li {{action "moveRowDown"}}><a href="#">Move one row down</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#">Separated link</a></li>
-                </ul>
-            </div>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li class="divider"></li>
+                <li {{action "moveRowUp"}}><a href="#">Move one row up</a></li>
+                <li {{action "moveRowDown"}}><a href="#">Move one row down</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Separated link</a></li>
+            </ul>
         </div>
     </div>
 </div>
