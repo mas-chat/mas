@@ -11,16 +11,7 @@
 <div class="flex-grow-row flex-1">
     <div class="window-messages flex-1">
         {{#each message in messages}}
-        <div {{bind-attr class="message.ircMotd:single-line"}}>
-            <span class="timestamp">
-                13:14
-            </span>
-            <span class="nick">
-                {{message.decoratedNick}}
-            </span>
-            {{! Don't indent message.body to its own line, see irc-motd CSS class }}
-            <span {{bind-attr class="message.ircMotd"}}>{{{message.decoratedBody}}}</span>
-        </div>
+        <div {{bind-attr class="message.cat :line"}}><div class="timestamp">{{decoratedTimestamp message.ts}}</div><div class="nick">{{message.nick}}</div><span class="body">{{{message.body}}}</span></div>
         {{/each}}
     </div>
 
