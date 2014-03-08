@@ -48,9 +48,6 @@ module.exports = function(grunt) {
                 files: {
                     'app/dist/app.js': ['app/js/**/*.js'],
                 },
-                options: {
-                    debug: true
-                }
             }
         },
         less: {
@@ -96,7 +93,7 @@ module.exports = function(grunt) {
             },
             app: {
                 files: ['app/js/**/*.js'],
-                tasks: ['browserify', 'uglify:app']
+                tasks: ['browserify', 'uglify:mas']
             },
             libs: {
                 files: ['app/libs/**/*.js'],
