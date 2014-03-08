@@ -53,17 +53,6 @@ module.exports = function(grunt) {
                 }
             }
         },
-        concat: {
-            libs: {
-                src: [
-                    'app/libs/jquery/jquery.js',
-                    'app/libs/bootstrap/bootstrap.js',
-                    'app/libs/handlebars/handlebars.js',
-                    'app/libs/ember/ember.js'
-                ],
-                dest: 'app/dist/libs.js',
-            },
-        },
         less: {
             development: {
                 files: {
@@ -74,6 +63,32 @@ module.exports = function(grunt) {
                 }
             }
         },
+        uglify: {
+            libs: {
+                options: {
+                    compress: false,
+                    sourceMap: true
+                },
+                files: {
+                    'app/dist/libs.js': [
+                        'app/libs/jquery/jquery.js',
+                        'app/libs/bootstrap/bootstrap.js',
+                        'app/libs/handlebars/handlebars.js',
+                        'app/libs/ember/ember.js'
+                    ]}
+            },
+            mas: {
+                options: {
+                    compress: false,
+                    sourceMap: true
+                },
+                files: {
+                    'app/dist/mas.js': [
+                        'app/dist/templates.js',
+                        'app/dist/app.js'
+                    ]}
+            }
+        },
         watch: {
             templates: {
                 files: ['app/templates/**/*.hbs'],
@@ -81,11 +96,11 @@ module.exports = function(grunt) {
             },
             app: {
                 files: ['app/js/**/*.js'],
-                tasks: ['browserify']
+                tasks: ['browserify', 'uglify:app']
             },
             libs: {
                 files: ['app/libs/**/*.js'],
-                tasks: ['concat']
+                tasks: ['uglify:libs']
             },
             less: {
                 files: ['app/stylesheets/**/*.css', 'app/stylesheets/**/*.less'],
@@ -100,9 +115,10 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     // Default task(s).
     grunt.registerTask('default', [ 'jshint' ]);
-    grunt.registerTask('app', [ 'bower', 'emberTemplates', 'browserify', 'concat', 'less' ]);
+    grunt.registerTask('app', [ 'bower', 'emberTemplates', 'browserify', 'uglify:app',
+       'uglify:libs', 'less' ]);
 };
