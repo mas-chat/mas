@@ -20,6 +20,7 @@ window.App = Ember.Application.create();
 
 require('./routes/main');
 require('./views/application');
+require('./views/window');
 require('./controllers/main');
 require('./controllers/window');
 require('./models/message');
@@ -32,4 +33,4 @@ App.Router.map(function() {
     this.route('main', { path: '/' });
 });
 
-App.Network.create();
+App.networkMgr = App.Network.create();

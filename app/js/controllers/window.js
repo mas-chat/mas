@@ -19,46 +19,41 @@
 App.WindowController = Ember.ObjectController.extend({
     actions: {
         moveRowUp: function() {
-            this._moveWindow(this.get('windowId'), -1);
+            this.decrementProperty('row');
+            this.set('animate', true);
         },
         moveRowDown: function() {
-            this._moveWindow(this.get('windowId'), 1);
+            this.incrementProperty('row');
+            this.set('animate', true);
+        },
+        sendMessage: function() {
+            App.networkMgr.send({
+                command: 'SEND',
+                text: this.get('newMessage'),
+                windowId: this.get('windowId')
+            });
+            this.set('newMessage', '');
         }
     },
 
-    processedMessages: function() {
-        return this.get('messages').map(function(value) {
+    processMessage: function() {
+        this.get('messages').map(function(value) {
             var cat = value.get('cat');
 
             if (cat === 'banner') {
                 value.set('ircMotd', true);
-                value.set('body', value.get('body').replace(/ /g, '&nbsp;'));
+                value.set('decoratedBody', value.get('body').replace(/ /g, '&nbsp;'));
+            } else {
+                value.set('decoratedBody', value.get('body'));
             }
 
             if (cat === 'banner' || cat === 'notice') {
                 value.set('nick', '');
             } else {
-                value.set('nick', '<' + value.get('nick') + '>');
+                value.set('decoratedNick', '<' + value.get('nick') + '>');
             }
 
             return value;
         });
-    }.property('messages'),
-
-    newMessage: function() {
-        Ember.run.next(this, function() {
-            var $messagePanel = $('#' + this.get('windowId') + ' .window-messages');
-            $messagePanel.scrollTop($messagePanel.prop('scrollHeight'));
-        });
-    }.observes('messages').on('init'),
-
-    _moveWindow: function(id, direction) {
-        this.set('row', this.get('row') + direction);
-        var that = this;
-
-        Ember.run.next(this, function() {
-            // Highlight the moved window
-            $('#' + that.get('windowId')).addClass('tada animated');
-        });
-    }
+    }.observes('messages.@each').on('init')
 });
