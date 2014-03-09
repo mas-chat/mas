@@ -34,3 +34,26 @@ Ember.Handlebars.helper('decoratedTitle', function(name, network, type) {
 
     return new Handlebars.SafeString(title);
 });
+
+Ember.Handlebars.helper('startWindowRow', function(currentWindow, allVisibleWindows) {
+    var index = allVisibleWindows.indexOf(currentWindow);
+    var res = '';
+
+    if (index === 0 || currentWindow.get('row') !== allVisibleWindows[index - 1].get('row')) {
+        res = new Handlebars.SafeString('<div class="flex-grow-row flex-1">');
+   }
+
+   return res;
+});
+
+Ember.Handlebars.helper('endWindowRow', function(currentWindow, allVisibleWindows) {
+    var index = allVisibleWindows.indexOf(currentWindow);
+    var res = '';
+
+    if (index === allVisibleWindows.length - 1 ||
+        currentWindow.get('row') !== allVisibleWindows[index + 1].get('row')) {
+        res = new Handlebars.SafeString('</div>');
+    }
+
+    return res;
+});
