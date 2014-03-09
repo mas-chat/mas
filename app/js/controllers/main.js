@@ -17,23 +17,25 @@
 'use strict';
 
 App.MainController = Ember.ArrayController.extend({
-    markedWindows: function() {
-        // Mark first and last window on every row
-        return this.get('content').sortBy('row').map(function(value, index, array) {
-            var last = false;
-            var first = false;
+    sortedWindows: function() {
+        return this.get('model').filter(function(val) {
+            return !val.get('hidden');
+        }).sortBy('row');
+    }.property('model.@each.hidden', 'model.@each.row'),
 
-            if (index === array.length - 1 || value.get('row') !== array[index + 1].get('row')) {
-                last = true;
+    nextRow: function(item, direction) {
+        var windows = this.get('sortedWindows');
+        var index =  windows.indexOf(item);
+        var row = windows[index].get('row');
+
+        for (var i = index + direction; i >= 0 && i < windows.length; i += direction) {
+            var currentRow = windows[i].get('row');
+
+            if (currentRow !== row) {
+                return currentRow;
             }
+        }
 
-            if (index === 0 || value.get('row') !== array[index - 1].get('row')) {
-                first = true;
-            }
-
-            value.set('lastInRow', last);
-            value.set('firstInRow', first);
-            return value;
-        });
-    }.property('model.@each.row')
+        return row + direction;
+    }
 });
