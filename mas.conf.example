@@ -6,6 +6,8 @@
 
 [frontend]
 port=3200
+demo_mode=false
+demo_user_email=whogets@fakemessages.com
 
 [log]
 directory=/path/to/somewhere
