@@ -53,7 +53,17 @@
 }
 
 .body {
+    display: inline;
+}
+
+.nick {
     float: left;
+    display: inline-block;
+    font-weight: bold;
+    padding-right: 3px;
+    &:after {
+       content: ":";
+    }
 }
 
 .banner {
@@ -71,18 +81,6 @@
 
 .mymsg {
     color: blue;
-}
-
-.nick {
-    float: left;
-    font-weight: bold;
-    padding-right: 3px;
-    &:before {
-       content: "<";
-    }
-    &:after {
-       content: ">";
-    }
 }
 
 .window-members {
