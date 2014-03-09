@@ -1,11 +1,7 @@
-{{#each window in markedWindows}}
-    {{#if window.firstInRow}}
-        <div class="remove-me-debug flex-grow-row flex-1">
-    {{/if}}
+{{#each window in sortedWindows}}
+    {{startWindowRow window sortedWindows}}
     {{#unless window.hidden}}
         {{render "window" window}}
     {{/unless}}
-    {{#if window.lastInRow}}
-        </div>
-    {{/if}}
+    {{endWindowRow window sortedWindows}}
 {{/each}}
