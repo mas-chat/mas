@@ -1,6 +1,8 @@
+
 MAS Redis structures
 ====================
 
+```
  user:<userid> (hash)
    name (string)
    email (string)
@@ -87,10 +89,13 @@ MAS Redis structures
    url1, url2 ...
 
  nextavailableuserid (string) [integer  counter]
+```
 
  Backends
  ========
 
+```
  inbox:loopbackparser (list)
  inbox:ircparser (list)
  inbox:connectionmanager (list)
+```
