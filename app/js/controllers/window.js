@@ -19,16 +19,17 @@
 App.WindowController = Ember.ObjectController.extend({
     actions: {
         moveRowUp: function() {
-            this.decrementProperty('row');
-            this.set('animate', true);
+            this._seekRow(-1);
         },
+
         moveRowDown: function() {
-            this.incrementProperty('row');
-            this.set('animate', true);
+            this._seekRow(1);
         },
+
         hide: function() {
             this.set('hidden', true);
         },
+
         sendMessage: function() {
             var text = this.get('newMessage');
 
@@ -46,5 +47,11 @@ App.WindowController = Ember.ObjectController.extend({
                 ts: moment().unix()
             }));
         }
+    },
+
+    _seekRow: function(direction) {
+        var newRow = this.get('parentController').nextRow(this.get('model'), direction);
+        this.set('row', newRow);
+        this.set('animate', true);
     }
 });
