@@ -2,7 +2,9 @@
     {{#if window.firstInRow}}
         <div class="remove-me-debug flex-grow-row flex-1">
     {{/if}}
-    {{render "window" window}}
+    {{#unless window.hidden}}
+        {{render "window" window}}
+    {{/unless}}
     {{#if window.lastInRow}}
         </div>
     {{/if}}
