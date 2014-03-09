@@ -24,7 +24,9 @@ App.Window = Ember.Object.extend({
 
     name: null,
     network: null,
+    type: null,
     row: null,
+    hidden: false,
     messages: null,
 
     firstInRow: false,
