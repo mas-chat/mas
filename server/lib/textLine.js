@@ -16,8 +16,11 @@
 
 'use strict';
 
-var redis = require('./redis').createClient(),
-    windowHelper = require('./windows');
+var co = require('co'),
+    Faker = require('Faker'),
+    redis = require('./redis').createClient(),
+    windowHelper = require('./windows'),
+    conf = require('./conf');
 
 // TDB Consider options:
 //
@@ -25,6 +28,32 @@ var redis = require('./redis').createClient(),
 // type
 // rememberurl
 // hidden
+
+if (conf.get('frontend:demo_mode') === true) {
+    var demoUserEmail = conf.get('frontend:demo_user_email');
+
+    setInterval(function() {
+        co(function *() {
+            var demoUserId = parseInt(yield redis.hget('index:user', demoUserEmail));
+
+            if (!demoUserId) {
+                return;
+            }
+
+            var details = yield redis.srandmember('windowlist:' + demoUserId);
+            var windowId = parseInt(details.split(':')[0]);
+            var msg = {
+                body: Faker.Lorem.sentence(10, 4),
+                nick: Faker.Name.firstName(),
+                cat: 'msg',
+                windowId: windowId,
+                ts: Math.round(Date.now() / 1000)
+            };
+
+            yield processTextLine(demoUserId, msg, null);
+        })();
+    }, 5000);
+}
 
 exports.broadcast = function *(userId, network, msg) {
     var windowIds = yield windowHelper.getWindowIdsForNetwork(userId, network);
