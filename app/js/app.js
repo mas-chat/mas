@@ -23,6 +23,7 @@ require('./views/application');
 require('./views/window');
 require('./controllers/main');
 require('./controllers/window');
+require('./controllers/application');
 require('./models/message');
 require('./models/window');
 require('./helpers/network');
