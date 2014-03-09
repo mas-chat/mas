@@ -16,6 +16,21 @@
 
 'use strict';
 
-Ember.Handlebars.helper('decoratedTimestamp', function(value) {
-    return new Handlebars.SafeString(moment.unix(value).format('HH:mm'));
+Ember.Handlebars.helper('decoratedTimestamp', function(timestamp) {
+    return new Handlebars.SafeString(moment.unix(timestamp).format('HH:mm'));
+});
+
+Ember.Handlebars.helper('decoratedTitle', function(name, network, type) {
+    var title;
+
+    if (type === '1on1') {
+        var conversationNetwork = network === 'MeetAndSpeak' ? '' : network + ' ';
+        title = 'Private ' + conversationNetwork + 'conversation with ' + name;
+    } else if (network === 'MeetAndSpeak') {
+        title = 'Group: ' + name;
+    } else {
+        title = network + ' channel: ' + name;
+    }
+
+    return new Handlebars.SafeString(title);
 });
