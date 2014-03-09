@@ -26,6 +26,9 @@ App.WindowController = Ember.ObjectController.extend({
             this.incrementProperty('row');
             this.set('animate', true);
         },
+        hide: function() {
+            this.set('hidden', true);
+        },
         sendMessage: function() {
             var text = this.get('newMessage');
 

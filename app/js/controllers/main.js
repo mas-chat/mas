@@ -33,7 +33,6 @@ App.MainController = Ember.ArrayController.extend({
 
             value.set('lastInRow', last);
             value.set('firstInRow', first);
-
             return value;
         });
     }.property('model.@each.row')

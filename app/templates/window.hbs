@@ -1,10 +1,11 @@
 <div class="window-title flex-row">
-    <div class="flex-1">
-        Group: {{name}}
+    <div class="window-caption flex-1">
+        {{decoratedTitle name network type}}
     </div>
 
     <div>
-        <span class="glyphicon glyphicon-resize-small"></span>
+        <span {{action "expand"}} class="window-title-button glyphicon glyphicon-fullscreen"></span>
+        <span {{action "hide"}} class="window-title-button glyphicon glyphicon-resize-small"></span>
     </div>
 </div>
 
