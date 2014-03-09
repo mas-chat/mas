@@ -5,12 +5,24 @@
 
     <div class="sidebar flex-grow-column">
         <div class="upper-sidebar flex-1">
-            <button type="button" class="btn btn-default hidden-window-btn">
-                <div class="glyphicon glyphicon-folder-open"></div>
-                <div class="badge">
-                    42
+            {{#if hiddenWindowCount}}
+                <div class="btn-group dropdown">
+                    <button type="button" class="btn btn-default hidden-window-btn" data-toggle="dropdown">
+                        <div class="glyphicon glyphicon-folder-open"></div>
+                        <div class="badge">
+                            {{hiddenWindowCount}}
+                        </div>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                        <li role="presentation" class="dropdown-header">Minimized windows</li>
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li class="divider"></li>
+                        <li class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                    </ul>
                 </div>
-            </button>
+            {{/if}}
         </div>
 
         <div class="lower-sidebar">
