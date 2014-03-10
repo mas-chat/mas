@@ -47,8 +47,10 @@ App.CommandParser = Ember.Object.extend({
         var targetWindow = App.windowCollection.findBy('windowId', data.windowId);
         delete data.windowId;
 
-        var messageRecord = App.Message.create(data);
-        targetWindow.messages.pushObject(messageRecord);
+        if (targetWindow) {
+            var messageRecord = App.Message.create(data);
+            targetWindow.messages.pushObject(messageRecord);
+        }
     },
 
     _handleNick: function(data) {
