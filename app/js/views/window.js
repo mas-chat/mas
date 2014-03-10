@@ -2,20 +2,33 @@
 
 App.WindowView = Ember.View.extend({
     classNames: ['window', 'flex-grow-column', 'flex-1'],
+    $messagePanel: 0,
+    scrolling: false,
 
     scrollToBottom: function() {
-        // TBD Why exactly is run.next() needed?
-        Ember.run.next(this, function() {
-            var $messagePanel = this.$('.window-messages');
-            $messagePanel.scrollTop($messagePanel.prop('scrollHeight') + 1000);
-        });
+        if (!this.get('scrolling')) {
+            var duration = this.$messagePanel.scrollTop() === 0 ? 1 : 800;
+            var that = this;
+
+            this.$messagePanel.stop().animate({
+                scrollTop: this.$messagePanel.prop('scrollHeight')
+            }, duration, function() {
+                that.set('scrolling', false);
+            });
+
+            this.set('scrolling', true);
+        }
     },
 
     onChildViewsChanged: function() {
-        this.scrollToBottom();
+        if (this.$messagePanel) {
+            this.scrollToBottom();
+        }
     }.observes('childViews'),
 
     didInsertElement: function() {
+        this.$messagePanel = this.$('.window-messages');
+        this.$().on('load', 'img', $.proxy(this.scrollToBottom, this));
         this.scrollToBottom();
 
         // Highlight the window that was moved
@@ -23,5 +36,9 @@ App.WindowView = Ember.View.extend({
             this.set('controller.model.animate', false);
             this.$().addClass('pulse animated');
         }
+    },
+
+    willDestroyElement: function(){
+        this.$().off('load', 'img', $.proxy(this.scrollToBottom, this));
     }
 });

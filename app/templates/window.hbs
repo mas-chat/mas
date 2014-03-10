@@ -12,7 +12,7 @@
 <div class="flex-grow-row flex-1">
     <div class="window-messages flex-1">
         {{#each message in messages}}
-        <div {{bind-attr class="message.cat :line"}}><div class="timestamp">{{decoratedTimestamp message.ts}}</div><div class="nick">{{message.nick}}</div><span class="body">{{{decoratedBody message.body}}}</span></div>
+        <div {{bind-attr class="message.cat :line"}}><div class="timestamp">{{decoratedTimestamp message.ts}}</div><div class="nick">{{message.nick}}</div>{{{decoratedBody message.body}}}</div>
         {{/each}}
     </div>
 
