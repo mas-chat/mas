@@ -67,7 +67,7 @@ courier.on('create', function *(params) {
         y: 100,
         width: 200,
         height: 200,
-        type: 'group',
+        isGroup: true,
         sounds: 0,
         password: '',
         titleAlert: 1,

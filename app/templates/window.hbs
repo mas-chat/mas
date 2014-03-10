@@ -1,6 +1,6 @@
 <div class="window-title flex-row">
     <div class="window-caption flex-1">
-        {{decoratedTitle name network type}}
+        {{decoratedTitle name network isGroup}}
     </div>
 
     <div>
@@ -16,8 +16,15 @@
         {{/each}}
     </div>
 
-    <div class="window-members">
-    </div>
+    {{#if isGroup}}
+        <div class="window-members">
+        <div style="font-weight:bold">person1</div>
+        <div style="font-weight:bold">person2</div>
+        <div style="font-weight:bold">person3</div>
+        <div>person4</div>
+        <div>person5</div>
+        </div>
+    {{/if}}
 </div>
 
 <div class="window-toolbar flex-row">

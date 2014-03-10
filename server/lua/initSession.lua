@@ -67,7 +67,7 @@ for i = 1, #windows do
         ['network'] = network,
 
         ['name'] = window.name,
-        ['type'] = window.type,
+        ['isGroup'] = window.type == 'group',
         ['sounds'] = window.sounds,
         ['titleAlert'] = window.titleAlert,
         ['userMode'] = window.userMode,

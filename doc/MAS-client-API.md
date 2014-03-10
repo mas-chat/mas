@@ -199,7 +199,7 @@ Create new window.
 
    "windowId":1,
    "name":"testone",
-   "type":"group",
+   "isGroup":true,
    "network":"MeetAndSpeak",
    "password":"",
    "newMsgs":2,
@@ -213,7 +213,7 @@ Create new window.
 
 ```network``` can be ```MeetAndSpeak```, ```IRCNet```, ```FreeNode``` etc.
 
-```type``` can be ```group``` or ```1on1```
+If ```isGroup``` is false, then the window is 1-on-1 conversation.
 
 DELNAME
 -------
