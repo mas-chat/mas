@@ -85,6 +85,7 @@
         "Ember": true,
         "Handlebars": true,
         "moment": true,
+        "URI": true,
         "App": true,
         "require": true,
 
