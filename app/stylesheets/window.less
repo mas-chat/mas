@@ -39,7 +39,8 @@
     color: black;
     padding: 5px;
     overflow-y: auto;
-    overflow-x: auto;
+    overflow-x: hidden;
+    line-height: 140%;
 }
 
 .line {
@@ -74,13 +75,31 @@
     }
 
     .body {
+        display: block;
         font-family: Courier New, monospace;
+        text-overflow: ellipsis;
         font-size: 11px;
     }
 }
 
 .mymsg {
     color: blue;
+}
+
+ul.user-image {
+    margin: 0px 0px 0px 37px;
+    padding: 0px;
+
+    li {
+        display: inline;
+        list-style: none;
+    }
+
+    li img {
+        max-height: 70px;
+        width: auto;
+        margin: 8px 8px 8px 0px;
+    }
 }
 
 .window-members {
