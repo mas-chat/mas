@@ -69,6 +69,10 @@ module.exports = function(grunt) {
                 files: {
                     'app/dist/libs.js': [
                         'app/libs/momentjs/moment.js',
+                        'app/libs/uri.js/IPv6.js',
+                        'app/libs/uri.js/punycode.js',
+                        'app/libs/uri.js/SecondLevelDomains.js',
+                        'app/libs/uri.js/URI.js',
                         'app/libs/jquery/jquery.js',
                         'app/libs/bootstrap/bootstrap.js',
                         'app/libs/handlebars/handlebars.js',

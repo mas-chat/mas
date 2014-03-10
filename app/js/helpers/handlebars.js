@@ -20,6 +20,36 @@ Ember.Handlebars.helper('decoratedTimestamp', function(timestamp) {
     return new Handlebars.SafeString(moment.unix(timestamp).format('HH:mm'));
 });
 
+Ember.Handlebars.helper('decoratedBody', function(text) {
+    function escHtml(string, full) {
+        var res = string.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+        return full ? res.replace(/>/g, '&gt;').replace(/"/g, '&quot;') : res;
+    }
+
+    var parts = [];
+    var pos = 0;
+
+    URI.withinString(text, function(url, start, end, source) {
+        var urlObj = new URI(url);
+
+        if (start !== pos) {
+            parts.push(escHtml(source.substring(pos, start), false));
+        }
+
+        parts.push('<a href="' + escHtml(url, true) + '">' +
+            escHtml(urlObj.readable(), false) + '</a>');
+
+        pos = end;
+        return url;
+    });
+
+    if (pos !== text.length) {
+        parts.push(escHtml(text.substring(pos), false));
+    }
+
+    return new Handlebars.SafeString(parts.join(''));
+});
+
 Ember.Handlebars.helper('decoratedTitle', function(name, network, type) {
     var title;
 
