@@ -40,12 +40,12 @@ function createClient() {
     coRedisClient.run = function *() {
         var params = [].slice.call(arguments);
         var scriptName = params.shift();
+        log.info('Running lua script: ' + scriptName);
+
         var sha = luaFuncSHAs[scriptName];
         assert(sha);
 
         var args = [ sha, 0 ].concat(params);
-        log.info('Running lua script: ' + scriptName);
-
         return yield coRedisClient.evalsha.apply(this, args);
     };
 
@@ -59,8 +59,6 @@ function *loadScripts() {
     for (var i = 0; i < luaFiles.length; i++) {
         var fileName = luaFiles[i];
         var script = fs.readFileSync(luaPath + '/' + fileName);
-
-        log.info('Loaded Redis script: ' + fileName);
         luaFuncs.push(script);
     }
 
@@ -68,5 +66,6 @@ function *loadScripts() {
         var sha = yield redisClient.script('load', luaFuncs[i]);
         var scriptName = luaFiles[i].replace(/\..+$/, ''); // Remove the file extension
         luaFuncSHAs[scriptName] = sha;
+        log.info('Loaded Redis script: ' + scriptName);
     }
 }
