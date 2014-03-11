@@ -17,8 +17,10 @@
 'use strict';
 
 var co = require('co'),
+    wait = require('co-wait'),
     Faker = require('Faker'),
     redis = require('./redis').createClient(),
+    log = require('./log'),
     windowHelper = require('./windows'),
     conf = require('./conf');
 
@@ -30,29 +32,34 @@ var co = require('co'),
 // hidden
 
 if (conf.get('frontend:demo_mode') === true) {
-    var demoUserEmail = conf.get('frontend:demo_user_email');
-
-    setInterval(function() {
-        co(function *() {
+    co(function *() {
+        while (1) {
+            var demoUserEmail = conf.get('frontend:demo_user_email');
             var demoUserId = parseInt(yield redis.hget('index:user', demoUserEmail));
 
-            if (!demoUserId) {
-                return;
+            if (demoUserId) {
+                var details = yield redis.srandmember('windowlist:' + demoUserId);
+
+                if (details) {
+                    // User has at least one window
+                    var windowId = parseInt(details.split(':')[0]);
+                    var msg = {
+                        body: Faker.Lorem.sentence(10, 4),
+                        nick: Faker.Name.firstName(),
+                        cat: 'msg',
+                        windowId: windowId,
+                        ts: Math.round(Date.now() / 1000)
+                    };
+
+                    yield processTextLine(demoUserId, msg, null);
+                }
+            } else {
+                log.error('Demo user doesn\'t exist.');
             }
 
-            var details = yield redis.srandmember('windowlist:' + demoUserId);
-            var windowId = parseInt(details.split(':')[0]);
-            var msg = {
-                body: Faker.Lorem.sentence(10, 4),
-                nick: Faker.Name.firstName(),
-                cat: 'msg',
-                windowId: windowId,
-                ts: Math.round(Date.now() / 1000)
-            };
-
-            yield processTextLine(demoUserId, msg, null);
-        })();
-    }, 5000);
+            yield wait(4000);
+        }
+    })();
 }
 
 exports.broadcast = function *(userId, network, msg) {
