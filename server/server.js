@@ -93,6 +93,7 @@ app.use(serve(path.join(__dirname, 'public')));
 
 // App routes
 app.use(mount('/app', serve(path.join(__dirname, '/../app'))));
+app.use(mount('/app/fonts/', serve(path.join(__dirname, '/../app/libs/bootstrap'))));
 
 // Page routes
 app.get('/', routesIndex);
