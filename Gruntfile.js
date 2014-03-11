@@ -46,8 +46,8 @@ module.exports = function(grunt) {
         browserify: {
             dist: {
                 files: {
-                    'app/dist/app.js': ['app/js/**/*.js'],
-                },
+                    'app/dist/app.js': ['app/js/app.js'],
+                }
             }
         },
         less: {
@@ -121,6 +121,6 @@ module.exports = function(grunt) {
 
     // Default task(s).
     grunt.registerTask('default', [ 'jshint' ]);
-    grunt.registerTask('app', [ 'bower', 'emberTemplates', 'browserify', 'uglify:app',
+    grunt.registerTask('app', [ 'bower', 'emberTemplates', 'browserify', 'uglify:mas',
        'uglify:libs', 'less' ]);
 };
