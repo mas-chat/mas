@@ -34,17 +34,22 @@ var co = require('co'),
 if (conf.get('frontend:demo_mode') === true) {
     co(function *() {
         while (1) {
+            yield wait(4000);
+
             var demoUserEmail = conf.get('frontend:demo_user_email');
             var demoUserId = parseInt(yield redis.hget('index:user', demoUserEmail));
+            var sentenceLength = Math.floor((Math.random() * 30 ) + 1)
 
             if (demoUserId) {
                 var details = yield redis.srandmember('windowlist:' + demoUserId);
 
                 if (details) {
                     // User has at least one window
+                    var url = Math.floor((Math.random() * 10 )) ? '' : Faker.Image.technics(640, 480);
+
                     var windowId = parseInt(details.split(':')[0]);
                     var msg = {
-                        body: Faker.Lorem.sentence(10, 4),
+                        body: Faker.Lorem.sentence(sentenceLength) + ' ' + url,
                         nick: Faker.Name.firstName(),
                         cat: 'msg',
                         windowId: windowId,
@@ -56,8 +61,6 @@ if (conf.get('frontend:demo_mode') === true) {
             } else {
                 log.error('Demo user doesn\'t exist.');
             }
-
-            yield wait(4000);
         }
     })();
 }
