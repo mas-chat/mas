@@ -49,7 +49,13 @@ App.CommandParser = Ember.Object.extend({
 
         if (targetWindow) {
             var messageRecord = App.Message.create(data);
-            targetWindow.messages.pushObject(messageRecord);
+            var messages = targetWindow.messages;
+
+            messages.pushObject(messageRecord);
+
+            if (messages.length > 200) {
+                messages.shiftObject();
+            }
         }
     },
 
