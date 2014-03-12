@@ -14,12 +14,17 @@
 --   governing permissions and limitations under the License.
 --
 
+local MSG_BUFFER_SIZE = 200
+
 local userId = ARGV[1]
 local windowId = ARGV[2]
 local command = ARGV[3]
 local excludeSession = ARGV[4]
 
-redis.call('LPUSH', 'windowmsgs:' .. userId .. ':' .. windowId, command)
+local msgsKey = 'windowmsgs:' .. userId .. ':' .. windowId
+
+redis.call('LPUSH', msgsKey, command)
+redis.call('LTRIM', msgsKey, 0, MSG_BUFFER_SIZE - 1)
 
 local sessions = redis.call('ZRANGE', 'sessionlist:' .. userId, 0, -1)
 
