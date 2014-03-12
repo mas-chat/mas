@@ -16,38 +16,55 @@
 
 'use strict';
 
-require('../../libs/imagesloaded/imagesloaded.js');
-
 App.WindowView = Ember.View.extend({
     classNames: ['window', 'flex-grow-column', 'flex-1'],
-    $messagePanel: 0,
-    scrolling: false,
+    $messagePanel: null,
 
-    scrollToBottom: function() {
-        if (!this.get('scrolling')) {
-            var duration = this.$messagePanel.scrollTop() === 0 ? 1 : 800;
-            var that = this;
+    scrollTo: function(pos) {
+        this.$messagePanel.stop();
+        this.$messagePanel.css('overflow-y', 'hidden');
 
-            this.$messagePanel.stop().animate({
-                scrollTop: this.$messagePanel.prop('scrollHeight')
-            }, duration, function() {
-                that.set('scrolling', false);
-            });
+        this.$messagePanel.animate({
+            scrollTop: pos
+        }, 800, function() {
+            this.$messagePanel.css('overflow-y', 'auto');
+        }.bind(this));
+    },
 
-            this.set('scrolling', true);
+    moveTo: function(pos) {
+        this.$messagePanel.css('overflow-y', 'hidden');
+        this.$messagePanel.scrollTop(pos);
+        this.$messagePanel.css('overflow-y', 'auto');
+    },
+
+    goToBottom: function(dontWaitForImages) {
+        var scrollPos = this.$messagePanel.scrollTop();
+        var bottom = this.$messagePanel.prop('scrollHeight')
+        var height = this.$messagePanel.height();
+
+        if (bottom - scrollPos > 2 * height) {
+            this.moveTo(bottom);
+        } else {
+            this.scrollTo(bottom);
+        }
+
+        if (!dontWaitForImages) {
+            this.$('.window-messages img').imagesLoaded(function() {
+                this.goToBottom(true);
+            }.bind(this));
         }
     },
 
-    onChildViewsChanged: function() {
-        if (this.$messagePanel) {
-            this.scrollToBottom();
-        }
-    }.observes('childViews'),
-
     didInsertElement: function() {
         this.$messagePanel = this.$('.window-messages');
-        this.$().on('load', 'img', $.proxy(this.scrollToBottom, this));
-        this.scrollToBottom();
+        this.goToBottom();
+
+        var observer = new MutationObserver(this.goToBottom.bind(this));
+        observer.observe(this.$messagePanel[0], { childList: true });
+
+        this.$messagePanel.scroll(function() {
+            //TBD
+        });
 
         // Highlight the window that was moved
         if (this.get('controller.model.animate') === true) {
@@ -55,8 +72,4 @@ App.WindowView = Ember.View.extend({
             this.$().addClass('pulse animated');
         }
     },
-
-    willDestroyElement: function(){
-        this.$().off('load', 'img', $.proxy(this.scrollToBottom, this));
-    }
 });
