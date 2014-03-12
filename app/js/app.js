@@ -21,6 +21,7 @@ window.App = Ember.Application.create();
 require('./routes/main');
 require('./views/application');
 require('./views/window');
+require('./controllers/application');
 require('./controllers/main');
 require('./controllers/window');
 require('./models/message');
