@@ -33,7 +33,7 @@ Ember.Handlebars.helper('decoratedBody', function(text) {
 
     URI.withinString(text, function(url, start, end, source) {
         var urlObj = new URI(url);
-        var visibleLink = '[Image link]';
+        var visibleLink;
 
         if (start !== pos) {
             textParts.push(escHtml(source.substring(pos, start), false));
@@ -42,6 +42,7 @@ Ember.Handlebars.helper('decoratedBody', function(text) {
         if (imgSuffixes.indexOf(urlObj.suffix()) !== -1) {
             imgUrls.push('<li><a href="' + escHtml(url, true) + '" target="_newtab">' +
                 '<img src="' + escHtml(url, true) + '"></a></li>');
+            visibleLink = escHtml(urlObj.filename(), false);
         } else {
             visibleLink = escHtml(urlObj.readable(), false);
         }
