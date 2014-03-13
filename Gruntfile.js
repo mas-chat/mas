@@ -78,6 +78,9 @@ module.exports = function(grunt) {
                         'app/libs/uri.js/SecondLevelDomains.js',
                         'app/libs/uri.js/URI.js',
                         'app/libs/jquery/jquery.js',
+                        'app/libs/eventie/eventie.js',
+                        'app/libs/eventEmitter/EventEmitter.js',
+                        'app/libs/imagesloaded/imagesloaded.js',
                         'app/libs/bootstrap/bootstrap.js',
                         'app/libs/handlebars/handlebars.js',
                         'app/libs/ember/ember.js'
@@ -104,6 +107,9 @@ module.exports = function(grunt) {
                     'app/libs/uri.js/SecondLevelDomains.js',
                     'app/libs/uri.js/URI.js',
                     'app/libs/jquery/jquery.js',
+                    'app/libs/eventie/eventie.js',
+                    'app/libs/eventEmitter/EventEmitter.js',
+                    'app/libs/imagesloaded/imagesloaded.js',
                     'app/libs/bootstrap/bootstrap.js',
                     'app/libs/handlebars/handlebars.js',
                     'app/libs/ember/ember.js'
