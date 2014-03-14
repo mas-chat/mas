@@ -39,7 +39,7 @@ App.WindowView = Ember.View.extend({
 
     goToBottom: function(dontWaitForImages) {
         var scrollPos = this.$messagePanel.scrollTop();
-        var bottom = this.$messagePanel.prop('scrollHeight')
+        var bottom = this.$messagePanel.prop('scrollHeight');
         var height = this.$messagePanel.height();
 
         if (bottom - scrollPos > 2 * height) {
