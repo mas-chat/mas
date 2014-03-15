@@ -86,6 +86,7 @@
         "Handlebars": true,
         "moment": true,
         "URI": true,
+        "imagesLoaded": true,
         "App": true,
         "require": true,
 
