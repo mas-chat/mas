@@ -26,7 +26,7 @@ App.WindowView = Ember.View.extend({
 
         this.$messagePanel.animate({
             scrollTop: pos
-        }, 800, function() {
+        }, 500, function() {
             this.$messagePanel.css('overflow-y', 'auto');
         }.bind(this));
     },
@@ -37,7 +37,7 @@ App.WindowView = Ember.View.extend({
         this.$messagePanel.css('overflow-y', 'auto');
     },
 
-    goToBottom: function(dontWaitForImages) {
+    goToBottom: function() {
         var scrollPos = this.$messagePanel.scrollTop();
         var bottom = this.$messagePanel.prop('scrollHeight');
         var height = this.$messagePanel.height();
@@ -47,23 +47,37 @@ App.WindowView = Ember.View.extend({
         } else {
             this.scrollTo(bottom);
         }
+    },
 
-        if (!dontWaitForImages) {
-            this.$('.window-messages img').imagesLoaded(function() {
-                this.goToBottom(true);
-            }.bind(this));
+    handleMutations: function(mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+            for (var ii = 0; ii < mutations[i].addedNodes.length; ii++) {
+                var newNode = mutations[i].addedNodes[ii];
+
+                if (newNode.nodeName === 'DIV') {
+                    // New node is a div for new line, not Ember internal script tag
+                    imagesLoaded(newNode, Ember.run.bind(this, this.goToBottom));
+                }
+            }
         }
+
+        this.goToBottom();
     },
 
     didInsertElement: function() {
         this.$messagePanel = this.$('.window-messages');
         this.goToBottom();
+        var that = this;
 
-        var observer = new MutationObserver(this.goToBottom.bind(this));
+        var observer = new MutationObserver(function(mutations) {
+            Ember.run(function() {
+                that.handleMutations(mutations);
+            });
+        });
         observer.observe(this.$messagePanel[0], { childList: true });
 
         this.$messagePanel.scroll(function() {
-            //TBD
+            // TBD
         });
 
         // Highlight the window that was moved
