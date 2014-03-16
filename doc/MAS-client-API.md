@@ -406,7 +406,7 @@ SEND
 
 ```
 {
-  "command": "SEND"
+  "id": "SEND"
   "windowId": 2,
   "text": "Hello world"
 }
@@ -419,7 +419,7 @@ Join to new MAS group or IRC channel
 
 ```
 {
-  "command": "JOIN"
+  "id": "JOIN"
   "name": "javascript",
   "network": "MAS",
   "password": ""
@@ -433,7 +433,7 @@ Create new MAS group
 
 ```
 {
-  "command": "CREATE"
+  "id": "CREATE"
   "name": "javascript",
   "password": ""
 }
