@@ -200,7 +200,7 @@ Create new window.
    "windowId":1,
    "name":"testone",
    "isGroup":true,
-   "network":"MeetAndSpeak",
+   "network":"MAS",
    "password":"",
    "newMsgs":2,
    "titleAlert":0,
@@ -211,7 +211,7 @@ Create new window.
 }
 ```
 
-```network``` can be ```MeetAndSpeak```, ```IRCNet```, ```FreeNode``` etc.
+```network``` can be ```MAS```, ```IRCNet```, ```FreeNode``` etc.
 
 If ```isGroup``` is false, then the window is 1-on-1 conversation.
 
@@ -421,7 +421,7 @@ Join to new MAS group or IRC channel
 {
   "command": "JOIN"
   "name": "javascript",
-  "network": "MeetAndSpeak",
+  "network": "MAS",
   "password": ""
 }
 ```
