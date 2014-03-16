@@ -32,7 +32,7 @@ module.exports = function *() {
     var result = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
     var name = result[0];
     var network = result[1];
-    var backend = network === 'MeetAndSpeak' ? 'loopbackparser' : 'ircparser';
+    var backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
 
     log.info(userId, 'Prosessing command: ' + command);
 
@@ -58,7 +58,7 @@ module.exports = function *() {
             break;
 
         case 'JOIN':
-            backend = body.network === 'MeetAndSpeak' ? 'loopbackparser' : 'ircparser';
+            backend = body.network === 'MAS' ? 'loopbackparser' : 'ircparser';
             yield courier.send(backend, {
                 type: 'join',
                 userId: userId,
