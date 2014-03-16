@@ -41,6 +41,5 @@ exports.sendNick = function *(userId, sessionId) {
         }
     }
 
-    sessionId = sessionId; // TBD Send to queue()?
-    yield outbox.queue(userId, command);
+    yield outbox.queue(userId, sessionId, command);
 };

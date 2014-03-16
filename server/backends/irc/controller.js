@@ -230,7 +230,7 @@ function *handle376(userId, msg) {
         });
     }
 
-    yield nicks.sendNick(userId);
+    yield nicks.sendNick(userId, true);
 }
 
 function *handle433(userId, msg) {

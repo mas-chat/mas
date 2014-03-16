@@ -15,9 +15,17 @@
 --
 
 local userId = table.remove(ARGV, 1)
+local sessionId = table.remove(ARGV, 1)
 local commands = ARGV -- Rest of the parameters are commands
+local sessions
 
-local sessions = redis.call('ZRANGE', 'sessionlist:' .. userId, 0, -1)
+if sessionId ~= 0 then
+    -- Session specific command
+    sessions = { sessionId }
+else
+    -- Broadcast command to all active sessions
+    sessions = redis.call('ZRANGE', 'sessionlist:' .. userId, 0, -1)
+end
 
 for i = 1, #sessions do
     redis.call('LPUSH', 'outbox:' .. userId .. ':' .. sessions[i], unpack(commands))
