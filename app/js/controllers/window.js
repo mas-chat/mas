@@ -34,7 +34,7 @@ App.WindowController = Ember.ObjectController.extend({
             var text = this.get('newMessage');
 
             App.networkMgr.send({
-                command: 'SEND',
+                id: 'SEND',
                 text: text,
                 windowId: this.get('windowId')
             });
