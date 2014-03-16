@@ -20,11 +20,11 @@ local commands = ARGV -- Rest of the parameters are commands
 local sessions
 
 if sessionId ~= 0 then
-    -- Session specific command
-    sessions = { sessionId }
-else
     -- Broadcast command to all active sessions
     sessions = redis.call('ZRANGE', 'sessionlist:' .. userId, 0, -1)
+else
+    -- Session specific command
+    sessions = { sessionId }
 end
 
 for i = 1, #sessions do
