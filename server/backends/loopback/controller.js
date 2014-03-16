@@ -84,7 +84,7 @@ courier.on('create', function *(params) {
     windowDetails.windowId = parseInt(windowId);
     windowDetails.network = 'MAS';
 
-    yield outbox.queue(userId, windowDetails);
+    yield outbox.queue(userId, true, windowDetails);
 });
 
 // courier.on('join', function *(params) {
