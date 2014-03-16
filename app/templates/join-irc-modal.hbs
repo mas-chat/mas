@@ -1,0 +1,30 @@
+{{#modal-dialog}}
+    <div class="modal-header">
+        <button {{action "close"}} type="button" class="close">&times;</button>
+        <h4 class="modal-title">Join IRC channel</h4>
+    </div>
+    <div class="modal-body">
+        <form role="form">
+            <div class="form-group">
+                <label for="exampleInputEmail1">Type the name of the IRC channel you wish to join</label>
+                {{input class="form-control" valueBinding="group"}}
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Password, if needed</label>
+                {{input class="form-control" valueBinding="password"}}
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">IRC network</label>
+                <select class="form-control">
+                     <option>IRCNet</option>
+                     <option>FreeNode</option>
+                     <option>W3C</option>
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button {{action "close"}} type="button" class="btn btn-default">Cancel</button>
+        <button {{action "submit"}} type="button" class="btn btn-primary">OK</button>
+    </div>
+{{/modal-dialog}}
