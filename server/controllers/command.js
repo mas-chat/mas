@@ -27,7 +27,7 @@ module.exports = function *() {
     var userId = this.mas.userId;
     var sessionId = this.mas.sessionId;
     var body = yield parse.json(this.req);
-    var command = body.command;
+    var command = body.id;
     var windowId = parseInt(body.windowId);
     var result = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
     var name = result[0];
@@ -69,7 +69,6 @@ module.exports = function *() {
             break;
 
         case 'CREATE':
-            log.info('ilkka');
             yield courier.send('loopbackparser', {
                 type: 'create',
                 userId: userId,
