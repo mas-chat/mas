@@ -90,7 +90,6 @@
         "App": true,
         "require": true,
 
-
         "it": true,
         "describe": true,
         "expect": true
