@@ -4,6 +4,7 @@
 .\#*
 
 #Ignore generated files/directories
+mas.conf
 node_modules/
 app/libs/
 app/dist/
