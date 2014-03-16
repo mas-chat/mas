@@ -38,5 +38,5 @@ module.exports = function *() {
 function *initSession(userId, sessionId) {
     // New session, reset outbox, send initial messages
     yield redis.run('initSession', sessionId, userId);
-    yield nicks.sendNick(userId);
+    yield nicks.sendNick(userId, sessionId);
 }

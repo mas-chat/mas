@@ -21,10 +21,15 @@ var util = require('util'),
     redisModule = require('./redis'),
     redis = redisModule.createClient();
 
-exports.queue = function *(userId) {
+exports.queue = function *(userId, sessionId) {
     var commands = [];
 
-    for (var i = 1; i < arguments.length; i++) {
+    // If sessionID is boolean 'true' then broadcast to all active session
+    if (sessionId === true) {
+        sessionId = 0;
+    }
+
+    for (var i = 2; i < arguments.length; i++) {
         var command = arguments[i];
 
         if (util.isArray(command)) {
@@ -38,8 +43,7 @@ exports.queue = function *(userId) {
         return typeof(value) === 'string' ? value : JSON.stringify(value);
     });
 
-    var params = [ 'queueOutbox', userId ].concat(commands);
-    // TBD all sessions, specific session? Check the use of this function
+    var params = [ 'queueOutbox', userId, sessionId ].concat(commands);
     yield redis.run.apply(this, params);
 };
 
