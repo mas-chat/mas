@@ -41,7 +41,7 @@ courier.on('send', function *(params) {
 
     for (var i = 0; i < members.length; i++) {
         if (members[i] !== params.userId) {
-            yield textLine.send(members[i], 'MeetAndSpeak', group, {
+            yield textLine.send(members[i], 'MAS', group, {
                 nick: nick,
                 cat: 'msg',
                 body: params.text,
@@ -78,11 +78,11 @@ courier.on('create', function *(params) {
     };
 
     yield redis.hmset('window:' + userId + ':' + windowId, windowDetails);
-    yield redis.sadd('windowlist:' + userId, windowId + ':MeetAndSpeak:' + groupName);
+    yield redis.sadd('windowlist:' + userId, windowId + ':MAS:' + groupName);
 
     windowDetails.id = 'CREATE';
     windowDetails.windowId = parseInt(windowId);
-    windowDetails.network = 'MeetAndSpeak';
+    windowDetails.network = 'MAS';
 
     yield outbox.queue(userId, windowDetails);
 });

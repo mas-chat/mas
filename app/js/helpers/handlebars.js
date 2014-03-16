@@ -67,9 +67,9 @@ Ember.Handlebars.helper('decoratedTitle', function(name, network, isGroup) {
     var title;
 
     if (!isGroup) {
-        var conversationNetwork = network === 'MeetAndSpeak' ? '' : network + ' ';
+        var conversationNetwork = network === 'MAS' ? '' : network + ' ';
         title = 'Private ' + conversationNetwork + 'conversation with ' + name;
-    } else if (network === 'MeetAndSpeak') {
+    } else if (network === 'MAS') {
         title = 'Group: ' + name;
     } else {
         title = network + ' channel: ' + name;
