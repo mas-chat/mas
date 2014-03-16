@@ -18,14 +18,24 @@
 
 window.App = Ember.Application.create();
 
+require('./routes/application');
 require('./routes/main');
+
 require('./views/application');
 require('./views/window');
+
+require('./components/modalDialog');
+
 require('./controllers/application');
 require('./controllers/main');
 require('./controllers/window');
+require('./controllers/joinGroupModal.js');
+require('./controllers/createGroupModal.js');
+require('./controllers/joinIrcModal.js');
+
 require('./models/message');
 require('./models/window');
+
 require('./helpers/network');
 require('./helpers/handlebars');
 
