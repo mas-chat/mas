@@ -126,7 +126,7 @@ function *init() {
         var networks = yield windowHelper.getNetworks(userId);
 
         for (var ii = 0; ii < networks.length; ii++) {
-            if (networks[ii] !== 'MeetAndSpeak') {
+            if (networks[ii] !== 'MAS') {
                 log.info(userId, 'Connecting to IRC network: ' + networks[ii]);
                 yield connect(userId, networks[ii]);
             }
