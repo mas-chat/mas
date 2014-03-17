@@ -199,21 +199,22 @@ Create new window.
 
    "windowId":1,
    "name":"testone",
-   "isGroup":true,
+   "type":"group",
    "network":"MAS",
    "password":"",
-   "newMsgs":2,
-   "titleAlert":0,
-   "topic":"",
-   "visible":1,
-   "userMode":2,
-   "sounds":1
+   "titleAlert":false,
+   "topic":"We meet tomorrow at 3PM",
+   "visible":true,
+   "userMode":"participant",
+   "sounds":true
 }
 ```
 
+```type``` can be ```group```, ```1on1```
+
 ```network``` can be ```MAS```, ```IRCNet```, ```FreeNode``` etc.
 
-If ```isGroup``` is false, then the window is 1-on-1 conversation.
+```userMode``` can be ```participant```, ```operator```, ```owner```
 
 DELNAME
 -------
