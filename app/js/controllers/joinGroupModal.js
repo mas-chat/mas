@@ -23,11 +23,11 @@ App.JoinGroupModalController = Ember.ObjectController.extend({
     actions: {
         submit: function() {
             console.log('Submit join group');
-            return this.send('closeModal');
+            this.send('closeModal');
         },
 
         close: function() {
-            return this.send('closeModal');
+            this.send('closeModal');
         }
     }
 });
