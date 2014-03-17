@@ -4,13 +4,14 @@
         <h4 class="modal-title">Join group</h4>
     </div>
     <div class="modal-body">
+        <span class="error-text">{{errorMsg}}</span>
         <form role="form">
             <div class="form-group">
-                <label for="exampleInputEmail1">Type the name of the group you wish to join</label>
+                <label>Type the name of the group you wish to join</label>
                 {{input class="form-control" valueBinding="group"}}
             </div>
             <div class="form-group">
-                <label for="exampleInputPassword1">Password, if needed</label>
+                <label>Password, if needed</label>
                 {{input class="form-control" valueBinding="password"}}
             </div>
         </form>

@@ -67,12 +67,11 @@ for i = 1, #windows do
         ['network'] = network,
 
         ['name'] = window.name,
-        ['isGroup'] = window.type == 'group',
-        ['sounds'] = window.sounds,
-        ['titleAlert'] = window.titleAlert,
+        ['type'] = window.type,
+        ['sounds'] = window.sounds == 'true',
+        ['titleAlert'] = window.titleAlert == 'true',
         ['userMode'] = window.userMode,
-        ['visible'] = window.visible,
-        ['newMsgs'] = window.newMsgs,
+        ['visible'] = window.visible == 'true',
         ['password'] = window.password,
         ['topic'] = window.topic
     }))
