@@ -23,6 +23,7 @@ var log = require('../../lib/log'),
     redisModule = require('../../lib/redis'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('ircparser'),
+    outbox = require('../../lib/outbox'),
     textLine = require('../../lib/textLine'),
     windowHelper = require('../../lib/windows'),
     nicks = require('../../lib/nick'),
@@ -37,6 +38,48 @@ courier.on('send', function *(params) {
         network: params.network,
         line: 'PRIVMSG ' + params.name + ' :' + params.text
     });
+});
+
+courier.on('join', function *(params) {
+    var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
+    var channelName = params.name;
+    var legalNameRegEx = /^[&#!\+]/;
+
+    if (!channelName || channelName === '') {
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'JOIN_RESP',
+            status: 'error',
+            errorMsg: 'Channel name missing'
+        });
+        return;
+    }
+
+    if (!legalNameRegEx.test(channelName)) {
+        channelName = '#' + channelName;
+    }
+
+    if (!state || state === 'disconnected') {
+        yield connect(params.userId, params.network);
+    }
+
+    if (state === 'connected') {
+        yield courier.send('connectionmanager', {
+            type: 'write',
+            userId: params.userId,
+            network: params.network,
+            line: 'JOIN ' + channelName + ' ' + params.password
+        });
+    }
+
+    var createCommand = yield windowHelper.createNewWindow(params.userId, params.network,
+        channelName, params.password, 'group');
+
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'JOIN_RESP',
+        status: 'ok',
+    });
+
+    yield outbox.queue(params.userId, true, createCommand);
 });
 
 // Connection manager messages
@@ -115,7 +158,7 @@ courier.on('connected', function *(params) {
 
 // Disconnect
 courier.on('disconnected', function *(params) {
-    yield redis.hset('user:' + params.userId, 'connected:' + params.network, 'false');
+    yield redis.hset('networks:' + params.userId + ':' + params.network, 'state', 'disconnected');
 });
 
 function *init() {
@@ -139,11 +182,12 @@ function *connect(userId, network) {
     // TBD: Enable connectDelay if !MAS. Make it configurable
     // var connectDelay = Math.floor((Math.random() * 180));
     var nick = yield redis.hget('user:' + userId, 'nick');
-    yield redis.hmset('user:' + userId,
-        'currentnick:' + network, nick,
-        'connected:' + network, 'false');
+    yield redis.hset('user:' + userId, 'currentnick:' + network, nick);
+    yield redis.hset('networks:' + userId + ':' + network, 'state', 'connecting');
 
     if (userId === 97) {
+        yield redis.hset('networks:' + userId, network, 'connecting');
+
         yield courier.send('connectionmanager', {
             type: 'connect',
             userId: userId,
@@ -215,11 +259,11 @@ function *handlePing(userId, msg) {
 }
 
 function *handle376(userId, msg) {
-    yield redis.hset('user:' + userId, 'connected:' + msg.network, 'true');
+    yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'connected');
 
     var channels = yield windowHelper.getWindowNamesForNetwork(userId, msg.network);
 
-    //TBD don't joint to 1on1s
+    //TBD don't join to 1on1s
 
     for (var i = 0; i < channels.length; i++) {
         yield courier.send('connectionmanager', {
@@ -258,14 +302,14 @@ function *handlePrivmsg(userId, msg) {
 }
 
 function *tryDifferentNick(userId, network) {
-    var result = yield redis.hmget('user:' + userId,
-        'nick',
-        'currentnick:' + network,
-        'connected:' + network);
+    // TBD Set currentnick to nick and send NICK periodically to trigger this
+    // method to try to reclaim the real nick
 
+    var result = yield redis.hmget('user:' + userId, 'nick', 'currentnick:' + network);
     var nick = result[0];
     var currentNick = result[1];
-    var connected = result[2];
+
+    var state = yield redis.hget('networks:' + userId + ':' + network, 'state');
     var nickHasNumbers = false;
 
     if (nick !== currentNick.substring(0, nick.length)) {
@@ -288,7 +332,7 @@ function *tryDifferentNick(userId, network) {
 
     // If we are joining IRC try all alternatives. If we are connected,
     // try to get only 'nick' or 'nick_' back
-    if (!(connected === 'true' && nickHasNumbers)) {
+    if (!(state === 'connected' && nickHasNumbers)) {
         yield courier.send('connectionmanager', {
             type: 'write',
             userId: userId,

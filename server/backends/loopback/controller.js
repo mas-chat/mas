@@ -61,21 +61,18 @@ courier.on('create', function *(params) {
 
     log.info(userId, 'Created new MAS group:' + groupName);
 
-    var windowDetails = {
-        name: groupName,
-        x: 100,
-        y: 100,
-        width: 200,
-        height: 200,
-        isGroup: true,
-        sounds: 0,
-        password: '',
-        titleAlert: 1,
-        visible: 1,
-        topic: '',
-        userMode: 2, // TBD: Check and fix
-        newMsgs: 0 // TBD: Check and fix
-    };
+    // TBD Use windowhelper
+    var windowDetails = {};
+    //     name: groupName,
+    //     type: 'group',
+    //     sounds: 0,
+    //     password: '',
+    //     titleAlert: 1,
+    //     visible: 1,
+    //     topic: '',
+    //     userMode: 2, // TBD: Check and fix
+    //     newMsgs: 0 // TBD: Check and fix
+    // };
 
     yield redis.hmset('window:' + userId + ':' + windowId, windowDetails);
     yield redis.sadd('windowlist:' + userId, windowId + ':MAS:' + groupName);
