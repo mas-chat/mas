@@ -19,15 +19,31 @@
 App.JoinIrcModalController = Ember.ObjectController.extend({
     channel: '',
     password: '',
+    errorMsg: '',
+
+    selectedNetwork: 'IRCNet',
+    networks: ['IRCNet', 'FreeNode', 'W3C'],
 
     actions: {
         submit: function() {
             console.log('Submit join irc');
-            return this.send('closeModal');
+
+            App.networkMgr.send({
+                id: 'JOIN',
+                network: this.get('selectedNetwork'),
+                name: this.get('channel'),
+                password: this.get('password')
+            }, function(resp) {
+                if (resp.status === 'ok') {
+                    this.send('closeModal');
+                } else {
+                    this.set('errorMsg', resp.errorMsg);
+                }
+            }.bind(this));
         },
 
         close: function() {
-            return this.send('closeModal');
+            this.send('closeModal');
         }
     }
 });

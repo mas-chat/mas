@@ -49,6 +49,10 @@ App.WindowController = Ember.ObjectController.extend({
         }
     },
 
+    isGroup: function() {
+        return this.get('type') === 'group';
+    }.property('type'),
+
     _seekRow: function(direction) {
         var newRow = this.get('parentController').nextRow(this.get('model'), direction);
         this.set('row', newRow);

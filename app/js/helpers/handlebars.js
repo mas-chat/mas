@@ -63,10 +63,10 @@ Ember.Handlebars.helper('decoratedBody', function(text) {
     return new Handlebars.SafeString(textSection + imgSection);
 });
 
-Ember.Handlebars.helper('decoratedTitle', function(name, network, isGroup) {
+Ember.Handlebars.helper('decoratedTitle', function(name, network, type) {
     var title;
 
-    if (!isGroup) {
+    if (type === '1on1') {
         var conversationNetwork = network === 'MAS' ? '' : network + ' ';
         title = 'Private ' + conversationNetwork + 'conversation with ' + name;
     } else if (network === 'MAS') {
