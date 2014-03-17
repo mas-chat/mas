@@ -11,7 +11,6 @@ MAS Redis structures
    passwd (string)
    salt (string)
    nick (string)
-   currentnick:<network> (text)
    token (string)
    cookie (string)
    cookie_expires (int, unix time)
@@ -41,31 +40,30 @@ MAS Redis structures
    <nick> (int, userId)
 
  users (set)
-   userid1, userid2 ...
+   <userid1>, <userid2> ...
 
  friends:<userid> (set)
-   userID1, userId2 ...
+   <userID1>, <userId2> ...
 
  settings:<userid> (hash)
-   nameXYZ (string)
+   <name> (string)
 
  windowlist:<userid> (set)
-   id:network:name
+   <id>:<network>:<name>
+
+ networks:<userid>:<network> (hash)
+   state (string, 'connected', 'connecting', 'disconnected')
+   currentnick (text)
 
  window:<userid>:<id> (hash)
    name (string)
-   x (int)
-   y (int)
-   width (int)
-   height (int)
-   type (int)
-   sounds (int)
+   type (string)
+   sounds (bool)
    password (string)
-   titleAlert (int)
-   visible (int)
+   titleAlert (bool)
+   visible (bool)
    topic (string)
-   userMode (int)
-   newMsgs (int)
+   userMode (string)
 
  windowmsgs:<userid>:<id> (list) [oldest message on the right]
 

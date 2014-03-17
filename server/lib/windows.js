@@ -25,13 +25,13 @@ exports.getWindowIdsForNetwork = function *(userId, network) {
     return ids;
 };
 
-exports.getWindowId = function *(userId, network, group) {
-    var ids = yield getWindowIds(userId, network, group, 'id');
+exports.getWindowId = function *(userId, network, name) {
+    var ids = yield getWindowIds(userId, network, name, 'id');
 
     if (ids.length === 1) {
         return ids[0];
     } else {
-        log.warn(userId, 'Tried to find non-existing group: ' + group);
+        log.warn(userId, 'Tried to find non-existing window: ' + name);
         return null;
     }
 };
@@ -69,7 +69,31 @@ exports.getNetworks = function *(userId) {
     return Object.keys(networks);
 };
 
-function *getWindowIds(userId, network, group, returnType) {
+exports.createNewWindow = function *(userId, network, name, password, type) {
+    var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
+
+    var newWindow = {
+        windowId: windowId,
+        network: network,
+
+        name: name,
+        type: type,
+        sounds: false,
+        titleAlert: false,
+        userMode: 'owner',
+        visible: true,
+        password: password,
+        topic: ''
+    };
+
+    yield redis.hmset('window:' + userId + ':' + windowId, newWindow);
+    yield redis.sadd('windowlist:' + userId, windowId + ':' + network + ':' + name);
+
+    newWindow.id = 'CREATE';
+    return newWindow;
+};
+
+function *getWindowIds(userId, network, name, returnType) {
     var windows = yield redis.smembers('windowlist:' + userId);
     var ret = [];
 
@@ -79,7 +103,7 @@ function *getWindowIds(userId, network, group, returnType) {
         var windowNetwork = details[1];
         var windowName = details[2];
 
-        if (windowNetwork === network && (!group || windowName === group)) {
+        if (windowNetwork === network && (!name || windowName === name)) {
             if (returnType === 'id') {
                 ret.push(windowId);
             } else if (returnType === 'name') {

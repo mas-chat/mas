@@ -23,20 +23,25 @@ App.Network = Ember.Object.extend({
     _pollSeq: 0,
     _sendSeq: 0,
     _sendQueue: [],
+    _callbacks: {},
     _firstPoll: true,
-    _parser: null,
+    _unsolicitedParser: null,
     _state: 'normal',
 
     init: function() {
         this._super();
         this._pollMsgs();
-        this._parser = App.CommandParser.create();
+        this._unsolicitedParser = App.CommandParser.create();
     },
 
-    send: function(command) {
+    send: function(command, callback) {
         this._sendQueue.push(command);
 
-        Ember.Logger.info('Outgoing command buffered: ' + command + ' (Queue len: ' +
+        if (callback) {
+            this._callbacks[command.id + '_RESP'] = callback;
+        }
+
+        Ember.Logger.info('Outgoing command buffered: ' + command.id + ' (Queue len: ' +
             this._sendQueue.length + ')');
 
         if (this._sendQueue.length === 1) {
@@ -56,7 +61,7 @@ App.Network = Ember.Object.extend({
             timeout: 10000
         });
 
-        Ember.Logger.info('--> MSG: ' + message.command);
+        Ember.Logger.info('--> MSG: ' + message.id);
     },
 
     _sendMsgSuccess: function(data) {
@@ -85,9 +90,8 @@ App.Network = Ember.Object.extend({
             code = code;
            //this._handleErrorCb.call(this._cbCtx, code);
         } else {
-           //this._setStatusTextCb.call(
-           //    this._cbCtx, 'Connection to MeetAndSpeak server lost,' +
-           //    'trying to reconnect...');
+           //this._setStatusTextCb.call(this._cbCtx,
+           //   'Connection to MAS server lost, trying to reconnect...');
 
            // Stay optimistic and keep trying
            var that = this;
@@ -131,29 +135,24 @@ App.Network = Ember.Object.extend({
             this._firstPoll = false;
         }
 
-        Ember.Logger.info('<-- Response to polling request');
-
-        this._processCommands(data, false);
+        this._processCommands(data);
         this._pollMsgs();
     },
 
-    _processCommands: function(commands, solicited) {
+    _processCommands: function(commands) {
         for (var i = 0; i < commands.length; i++) {
             var command = commands[i];
+            Ember.Logger.info('<-- MSG: ' + JSON.stringify(command));
 
-            var prefix = '<-- MSG: ';
-            if (!solicited) {
-                // This is a response to polling request, it can contain
-                // multiple commands
-                prefix = '  |- MSG: ';
-            }
-
-//            Ember.Logger.info(prefix + JSON.stringify(command));
-
-            if (command.id === 'SESSIONID') {
+            if (this._callbacks[command.id]) {
+                // Command is a response to command we sent earlier
+                this._callbacks[command.id](command);
+            } else if (command.id === 'SESSIONID') {
+                // Special unsolicited command that can be handle directly here
                 this._sessionId = command.sessionId;
             } else {
-                this._parser.process(command);
+                // Other Unsolicited command
+                this._unsolicitedParser.process(command);
             }
         }
     },

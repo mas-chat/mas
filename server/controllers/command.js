@@ -27,6 +27,7 @@ module.exports = function *() {
     var userId = this.mas.userId;
     var sessionId = this.mas.sessionId;
     var body = yield parse.json(this.req);
+
     var command = body.id;
     var windowId = parseInt(body.windowId);
     var result = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
@@ -64,7 +65,8 @@ module.exports = function *() {
                 userId: userId,
                 network: body.network,
                 name: body.name,
-                password: body.password
+                password: body.password,
+                sessionId: sessionId
             });
             break;
 
