@@ -157,7 +157,14 @@ App.Network = Ember.Object.extend({
         }
     },
 
-    _handleFailure: function(jqxhr, textStatus, error ) {
+    _pollMsgsFailure: function(jqXHR, textStatus, error ) {
+        var code = jqXHR.status;
+
+        if (code === 401 || code === 406) {
+            $.cookie('ProjectEvergreen', null);
+            window.location = '/';
+        }
+
         var err = textStatus + ', ' + error;
         console.log('Request Failed: ' + err );
     }
