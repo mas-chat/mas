@@ -34,7 +34,6 @@ require.config({
     }
 });
 
-
 require([
 	'jquery',
 	'jquery-simpletip',
