@@ -37,7 +37,7 @@ module.exports = function(grunt) {
         bower: {
             install: {
                 options: {
-                    targetDir: './app/libs',
+                    targetDir: './server/public/vendor',
                     cleanTargetDir: true,
                     cleanBowerDir: true
                 }
@@ -72,19 +72,19 @@ module.exports = function(grunt) {
                 },
                 files: {
                     'app/dist/libs.js': [
-                        'app/libs/momentjs/moment.js',
-                        'app/libs/uri.js/IPv6.js',
-                        'app/libs/uri.js/punycode.js',
-                        'app/libs/uri.js/SecondLevelDomains.js',
-                        'app/libs/uri.js/URI.js',
-                        'app/libs/jquery/jquery.js',
-                        'app/libs/jquery-cookie/jquery.cookie.js',
-                        'app/libs/eventie/eventie.js',
-                        'app/libs/eventEmitter/EventEmitter.js',
-                        'app/libs/imagesloaded/imagesloaded.js',
-                        'app/libs/bootstrap/bootstrap.js',
-                        'app/libs/handlebars/handlebars.js',
-                        'app/libs/ember/ember.js'
+                        'server/public/vendor/momentjs/moment.js',
+                        'server/public/vendor/uri.js/IPv6.js',
+                        'server/public/vendor/uri.js/punycode.js',
+                        'server/public/vendor/uri.js/SecondLevelDomains.js',
+                        'server/public/vendor/uri.js/URI.js',
+                        'server/public/vendor/jquery/jquery.js',
+                        'server/public/vendor/jquery-cookie/jquery.cookie.js',
+                        'server/public/vendor/eventie/eventie.js',
+                        'server/public/vendor/eventEmitter/EventEmitter.js',
+                        'server/public/vendor/imagesloaded/imagesloaded.js',
+                        'server/public/vendor/bootstrap/bootstrap.js',
+                        'server/public/vendor/handlebars/handlebars.js',
+                        'server/public/vendor/ember/ember.js'
                     ],
                     'app/dist/mas.js': [
                         'app/dist/templates.js',
@@ -102,19 +102,19 @@ module.exports = function(grunt) {
             },
             libs: {
                 src: [
-                    'app/libs/momentjs/moment.js',
-                    'app/libs/uri.js/IPv6.js',
-                    'app/libs/uri.js/punycode.js',
-                    'app/libs/uri.js/SecondLevelDomains.js',
-                    'app/libs/uri.js/URI.js',
-                    'app/libs/jquery/jquery.js',
-                    'app/libs/jquery-cookie/jquery.cookie.js',
-                    'app/libs/eventie/eventie.js',
-                    'app/libs/eventEmitter/EventEmitter.js',
-                    'app/libs/imagesloaded/imagesloaded.js',
-                    'app/libs/bootstrap/bootstrap.js',
-                    'app/libs/handlebars/handlebars.js',
-                    'app/libs/ember/ember.js'
+                    'server/public/vendor/momentjs/moment.js',
+                    'server/public/vendor/uri.js/IPv6.js',
+                    'server/public/vendor/uri.js/punycode.js',
+                    'server/public/vendor/uri.js/SecondLevelDomains.js',
+                    'server/public/vendor/uri.js/URI.js',
+                    'server/public/vendor/jquery/jquery.js',
+                    'server/public/vendor/jquery-cookie/jquery.cookie.js',
+                    'server/public/vendor/eventie/eventie.js',
+                    'server/public/vendor/eventEmitter/EventEmitter.js',
+                    'server/public/vendor/imagesloaded/imagesloaded.js',
+                    'server/public/vendor/bootstrap/bootstrap.js',
+                    'server/public/vendor/handlebars/handlebars.js',
+                    'server/public/vendor/ember/ember.js'
                 ],
                 dest: 'app/dist/libs.js'
             }

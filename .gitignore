@@ -6,7 +6,7 @@
 #Ignore generated files/directories
 mas.conf
 node_modules/
-app/libs/
+server/public/vendor/
 app/dist/
 npm-debug.log
 logs/
