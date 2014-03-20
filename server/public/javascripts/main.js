@@ -19,9 +19,9 @@
 require.config({
     baseUrl: '/javascripts',
     paths: {
-        'jquery': '/vendor/javascripts/jquery.min',
-        'jquery-simpletip': '/vendor/javascripts/jquery.simpletip-1.3.1',
-        'jquery-cookie': '/vendor/javascripts/jquery.cookie'
+        'jquery': '/vendor/jquery/jquery',
+        'jquery-simpletip': '/libs/jquery.simpletip-1.3.1',
+        'jquery-cookie': '/vendor/jquery-cookie/jquery.cookie'
     },
     shim: {
         'jquery-simpletip': {
