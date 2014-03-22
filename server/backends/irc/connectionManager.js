@@ -23,12 +23,17 @@ process.title = 'mas-irc-connman';
 // rest of the system is restarted. Allows nondistruptive updates.
 
 var net = require('net'),
+    npid = require('npid'),
     carrier = require('carrier'),
     conf = require('../../lib/conf'),
+    log = require('../../lib/log'),
     courier = require('../../lib/courier').createEndPoint('connectionmanager');
 
-var sockets = {};
+npid.create(conf.get('pid:directory') + '/' + process.title + '.pid');
 
+log.info('Starting: ' + process.title);
+
+var sockets = {};
 const IDENTD_PORT = 113;
 
 courier.sendNoWait('ircparser', 'ready');

@@ -19,7 +19,8 @@
 
 process.title = 'mas-irc';
 
-var log = require('../../lib/log'),
+var npid = require('npid'),
+    log = require('../../lib/log'),
     redisModule = require('../../lib/redis'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('ircparser'),
@@ -28,6 +29,10 @@ var log = require('../../lib/log'),
     windowHelper = require('../../lib/windows'),
     nicks = require('../../lib/nick'),
     conf = require('../../lib/conf');
+
+npid.create(conf.get('pid:directory') + '/' + process.title + '.pid');
+
+log.info('Starting: ' + process.title);
 
 // Upper layer messages
 
