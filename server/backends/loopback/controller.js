@@ -18,6 +18,7 @@
 'use strict';
 
 process.title = 'mas-loopback';
+process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
 
 var co = require('co'),
     npid = require('npid'),

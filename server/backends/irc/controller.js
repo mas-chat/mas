@@ -18,6 +18,7 @@
 'use strict';
 
 process.title = 'mas-irc';
+process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
 
 var npid = require('npid'),
     log = require('../../lib/log'),
