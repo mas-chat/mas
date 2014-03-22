@@ -21,6 +21,7 @@ process.title = 'mas-irc';
 process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
 
 var npid = require('npid'),
+    co = require('co'),
     log = require('../../lib/log'),
     redisModule = require('../../lib/redis'),
     redis = redisModule.createClient(),
@@ -35,32 +36,45 @@ npid.create(conf.get('pid:directory') + '/' + process.title + '.pid');
 
 log.info('Starting: ' + process.title);
 
+co(function *() {
+    yield redisModule.loadScripts();
+
+    courier.on('send', processSend);
+    courier.on('join', processJoin);
+    courier.on('restarted', processRestarted);
+    courier.on('data', processData);
+    courier.on('connected', processConnected);
+    courier.on('disconnected', processDisconnected);
+    courier.start();
+})();
+
 // Upper layer messages
 
-courier.on('send', function *(params) {
+function *processSend(params) {
     yield courier.send('connectionmanager', {
         type: 'write',
         userId: params.userId,
         network: params.network,
         line: 'PRIVMSG ' + params.name + ' :' + params.text
     });
-});
+}
 
-courier.on('join', function *(params) {
+function *processJoin(params) {
     var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
     var channelName = params.name;
-    var legalNameRegEx = /^[&#!\+]/;
+    var hasChannelPrefixRegex = /^[&#!\+]/;
+    var illegalNameRegEx = /\s|\cG|,/; // See RFC2812, section 1.3
 
-    if (!channelName || channelName === '') {
+    if (!channelName || channelName === '' || illegalNameRegEx.test(channelName)) {
         yield outbox.queue(params.userId, params.sessionId, {
             id: 'JOIN_RESP',
             status: 'error',
-            errorMsg: 'Channel name missing'
+            errorMsg: 'Illegal or missing channel name.'
         });
         return;
     }
 
-    if (!legalNameRegEx.test(channelName)) {
+    if (!hasChannelPrefixRegex.test(channelName)) {
         channelName = '#' + channelName;
     }
 
@@ -86,18 +100,29 @@ courier.on('join', function *(params) {
     });
 
     yield outbox.queue(params.userId, true, createCommand);
-});
+}
 
 // Connection manager messages
 
-// Ready
-courier.on('ready', function *() {
-    yield redisModule.loadScripts();
-    yield init();
-});
+// Restarted
+function *processRestarted() {
+    var allUsers = yield redis.smembers('userlist');
+
+    for (var i = 0; i < allUsers.length; i++) {
+        var userId = parseInt(allUsers[i]);
+        var networks = yield windowHelper.getNetworks(userId);
+
+        for (var ii = 0; ii < networks.length; ii++) {
+            if (networks[ii] !== 'MAS') {
+                log.info(userId, 'Connecting to IRC network: ' + networks[ii]);
+                yield connect(userId, networks[ii]);
+            }
+        }
+    }
+}
 
 // Data
-courier.on('data', function *(params) {
+function *processData(params) {
     var line = params.line,
         parts = line.split(' '),
         msg = {};
@@ -142,10 +167,10 @@ courier.on('data', function *(params) {
     if (handlers[msg.command]) {
         yield handlers[msg.command](params.userId, msg, msg.command);
     }
-});
+}
 
 // Connected
-courier.on('connected', function *(params) {
+function *processConnected(params) {
     var userInfo = yield redis.hgetall('user:' + params.userId);
     log.info('Importing user ' + userInfo.nick);
 
@@ -160,27 +185,11 @@ courier.on('connected', function *(params) {
         network: params.network,
         line: commands
     });
-});
+}
 
 // Disconnect
-courier.on('disconnected', function *(params) {
+function *processDisconnected(params) {
     yield redis.hset('networks:' + params.userId + ':' + params.network, 'state', 'disconnected');
-});
-
-function *init() {
-    var allUsers = yield redis.smembers('userlist');
-
-    for (var i = 0; i < allUsers.length; i++) {
-        var userId = parseInt(allUsers[i]);
-        var networks = yield windowHelper.getNetworks(userId);
-
-        for (var ii = 0; ii < networks.length; ii++) {
-            if (networks[ii] !== 'MAS') {
-                log.info(userId, 'Connecting to IRC network: ' + networks[ii]);
-                yield connect(userId, networks[ii]);
-            }
-        }
-    }
 }
 
 function *connect(userId, network) {

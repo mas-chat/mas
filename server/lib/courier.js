@@ -32,7 +32,9 @@ function Courier(name) {
     this.handlers = {};
 
     log.info('New Courier instance created.');
+}
 
+Courier.prototype.start = function () {
     co(function *() {
         while (1) {
             var result = yield rcvRedis.brpop('inbox:' + this.name, 0);
@@ -50,7 +52,7 @@ function Courier(name) {
             }
         }
     }).call(this);
-}
+};
 
 Courier.prototype.send = function *(dest, msg) {
     var data = convert(msg, this.name, dest);

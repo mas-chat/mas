@@ -37,7 +37,7 @@ log.info('Starting: ' + process.title);
 var sockets = {};
 const IDENTD_PORT = 113;
 
-courier.sendNoWait('ircparser', 'ready');
+courier.sendNoWait('ircparser', 'restarted');
 
 // Start IDENT server
 if (conf.get('irc:identd')) {
@@ -145,3 +145,5 @@ courier.on('write', function(params) {
         sockets[userId + ':' + network].write(data[i] + '\r\n');
     }
 });
+
+courier.start();
