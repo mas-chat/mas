@@ -20,8 +20,8 @@
 process.title = 'mas-frontend';
 
 var log = require('./lib/log'),
-    fs = require('fs'),
     path = require('path'),
+    npid = require('npid'),
     koa = require('koa'),
     router = require('koa-router'),
     resourceRouter = require('koa-resource-router'),
@@ -44,18 +44,11 @@ var log = require('./lib/log'),
     registerController = require('./controllers/register'),
     scheduler = require('./lib/scheduler');
 
+npid.create(conf.get('pid:directory') + '/' + process.title + '.pid');
+
+log.info('Starting: ' + process.title);
+
 var app = koa();
-
-log.info('Server starting.');
-
-process.on('uncaughtException', function(err) {
-    var errorMsg = 'STACK: ' + err.stack;
-    var file = path.normalize(conf.get('log:directory') + '/mas-exit-stack-trace.log');
-
-    fs.writeFileSync(file, errorMsg);
-    console.error(err.stack);
-    process.exit(1);
-});
 
 // Development only
 if (app.env === 'development') {
