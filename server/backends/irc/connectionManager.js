@@ -55,17 +55,17 @@ function handleIdentConnection(conn) {
         var ports = line.split(',');
         var localPort = parseInt(ports[0]);
         var remotePort = parseInt(ports[1]);
-        var prefix = localPort + ',' + remotePort;
+        var prefix = localPort + ', ' + remotePort;
         var found = false;
         var resp;
 
         if (!isNaN(localPort) && !isNaN(remotePort)) {
-            for (var i = 0; i < sockets.length; i++) {
-                if (sockets[i].localPort === localPort &&
-                    sockets[i].remotePort === remotePort &&
-                    sockets[i].remoteAddress === conn.remoteAddress) {
+            for (var userId in sockets) {
+                if (sockets[userId].localPort === localPort &&
+                    sockets[userId].remotePort === remotePort &&
+                    sockets[userId].remoteAddress === conn.remoteAddress) {
                     found = true;
-                    resp = prefix + ' : UNIX : ' + sockets[i].nick + '\r\n';
+                    resp = prefix + ' : UNIX : ' + sockets[userId].nick + '\r\n';
                     break;
                 }
             }
@@ -76,7 +76,10 @@ function handleIdentConnection(conn) {
         }
 
         clearTimeout(timer);
-        conn.write(resp);
+
+        if (resp) {
+            conn.write(resp);
+        }
         conn.end();
 
         log.info('Ident request from ' + conn.remoteAddress + ', resp: ' + resp);
