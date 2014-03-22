@@ -65,7 +65,7 @@ function handleIdentConnection(conn) {
                     sockets[userId].remotePort === remotePort &&
                     sockets[userId].remoteAddress === conn.remoteAddress) {
                     found = true;
-                    resp = prefix + ' : UNIX : ' + sockets[userId].nick + '\r\n';
+                    resp = prefix + ' : USERID : UNIX : ' + sockets[userId].nick + '\r\n';
                     break;
                 }
             }
