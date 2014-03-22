@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+shopt -s nullglob
+
+ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
+ACTION='none'
+ALSO_CONNMAN=false
+IDENTD_ENABLED=$(grep identd mas.conf | cut -d "=" -f2)
+IMPORT=false
+
+GREEN_COLOR='\e[0;32m'
+RED_COLOR='\e[0;31m'
+NO_COLOR='\e[0m' # No Color
+
+while [[ $# > 0 ]]
+do
+    KEY="$1"
+    shift
+
+    case $KEY in
+    -m|--import)
+        IMPORT=true
+        ;;
+    -c|--connman)
+        ALSO_CONNMAN=true
+        ;;
+    start)
+        ACTION='start'
+        ;;
+    stop)
+        ACTION='stop'
+        ;;
+    restart)
+        ACTION='restart'
+        ;;
+    status)
+        ACTION='status'
+        ;;
+    *)
+        ;;
+    esac
+done
+
+# Create logs and pid directories
+mkdir -p $ROOT/logs
+mkdir -p $ROOT/run
+
+if [ $ACTION == "stop" ] || [ $ACTION == "restart" ]; then
+    # Kill all running mas processes
+    for file in $ROOT/run/*.pid; do
+        PID=$(<$file)
+        OWNER=$(ps aux | awk -v PID=$PID '$2 == PID { print $1 }')
+        NAME=$(basename $file .pid)
+        SUDO=''
+
+        if $ALSO_CONNMAN || [ $NAME != "mas-irc-connman" ]; then
+            printf "${RED_COLOR}Stopping:${NO_COLOR} $NAME [owner: $OWNER]\n"
+
+            if [ $OWNER == "root" ]; then
+                SUDO='sudo'
+            fi
+
+            $SUDO kill $PID;
+            $SUDO rm -f $file # In case the process was already dead
+        fi
+    done
+fi
+
+CURRENT_USER=$(whoami)
+
+if [ $ACTION == "start" ] || [ $ACTION == "restart" ]; then
+    # Make sure Redis is running
+    echo 'Making sure Redis is running...'
+    redis-server --daemonize yes
+
+    # Init Redisn (only for meetandspeak.com)
+    if $IMPORT; then
+        echo 'Making sure MySQL is running...'
+        mysql.server start
+        echo 'Resetting Redis data from MySQL...'
+        (cd $ROOT/migration && node --harmony initRedis)
+    fi
+
+    if $ALSO_CONNMAN; then
+        # Start connection manager
+        if [ $IDENTD_ENABLED == "true" ] ; then
+            printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-connman [user: root]\n"
+            sudo sh -c "$ROOT/server/backends/irc/connectionManager.js > /dev/null & disown %1"
+        else
+            printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-connman [user: $CURRENT_USER]\n"
+            (nohup $ROOT/server/backends/irc/connectionManager.js > /dev/null &)
+        fi
+    fi
+
+    # Start irc backend
+    printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc [user: $CURRENT_USER]\n"
+    (nohup $ROOT/server/backends/irc/controller.js > /dev/null &)
+
+    # Start loopback backend
+    printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-loopback [user: $CURRENT_USER]\n"
+    (nohup $ROOT/server/backends/loopback/controller.js > /dev/null &)
+
+    # Start node server
+    printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-frontend [user: $CURRENT_USER]\n"
+    (nohup $ROOT/server/server.js > /dev/null &)
+fi
+
+if [ $ACTION == "status" ]; then
+    declare -a SERVERS=(mas-frontend mas-loopback mas-irc mas-irc-connman)
+
+    for i in "${SERVERS[@]}"
+    do
+        PID=''
+
+        if [ -e $ROOT/run/$i.pid ]; then
+            PID=$(<$ROOT/run/$i.pid)
+        fi
+
+        if ! ps -p $PID > /dev/null 2>&1; then
+            printf "$i: ${RED_COLOR}stopped${NO_COLOR}\n"
+        else
+            printf "$i: ${GREEN_COLOR}running${NO_COLOR}, pid: $PID\n"
+        fi
+    done
+fi
