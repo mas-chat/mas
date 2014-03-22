@@ -19,7 +19,7 @@ do
     shift
 
     case $KEY in
-    -m|--import)
+    -i|--import)
         IMPORT=true
         ;;
     -c|--connman)
