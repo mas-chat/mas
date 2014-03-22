@@ -7,6 +7,7 @@ ACTION='none'
 ALSO_CONNMAN=false
 IDENTD_ENABLED=$(grep identd mas.conf | cut -d "=" -f2)
 IMPORT=false
+NODE=$(which node)
 
 GREEN_COLOR='\e[0;32m'
 RED_COLOR='\e[0;31m'
@@ -78,31 +79,31 @@ if [ $ACTION == "start" ] || [ $ACTION == "restart" ]; then
         echo 'Making sure MySQL is running...'
         mysql.server start
         echo 'Resetting Redis data from MySQL...'
-        (cd $ROOT/migration && node --harmony initRedis)
+        (cd $ROOT/migration && $NODE --harmony initRedis)
     fi
 
     if $ALSO_CONNMAN; then
         # Start connection manager
         if [ $IDENTD_ENABLED == "true" ] ; then
             printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-connman [user: root]\n"
-            sudo sh -c "node --harmony $ROOT/server/backends/irc/connectionManager.js > /dev/null & disown %1"
+            sudo sh -c "$NODE --harmony $ROOT/server/backends/irc/connectionManager.js > /dev/null & disown %1"
         else
             printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-connman [user: $CURRENT_USER]\n"
-            (nohup node --harmony $ROOT/server/backends/irc/connectionManager.js > /dev/null &)
+            (nohup $NODE --harmony $ROOT/server/backends/irc/connectionManager.js > /dev/null &)
         fi
     fi
 
     # Start irc backend
     printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc [user: $CURRENT_USER]\n"
-    (nohup node --harmony $ROOT/server/backends/irc/controller.js > /dev/null &)
+    (nohup $NODE --harmony $ROOT/server/backends/irc/controller.js > /dev/null &)
 
     # Start loopback backend
     printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-loopback [user: $CURRENT_USER]\n"
-    (nohup node --harmony $ROOT/server/backends/loopback/controller.js > /dev/null &)
+    (nohup $NODE --harmony $ROOT/server/backends/loopback/controller.js > /dev/null &)
 
-    # Start node server
+    # Start frontend server
     printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-frontend [user: $CURRENT_USER]\n"
-    (nohup node --harmony $ROOT/server/server.js > /dev/null &)
+    (nohup $NODE --harmony $ROOT/server/server.js > /dev/null &)
 fi
 
 if [ $ACTION == "status" ]; then
