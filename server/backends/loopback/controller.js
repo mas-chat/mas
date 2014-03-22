@@ -20,12 +20,18 @@
 process.title = 'mas-loopback';
 
 var co = require('co'),
+    npid = require('npid'),
     log = require('../../lib/log'),
     redisModule = require('../../lib/redis'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('loopbackparser'),
     textLine = require('../../lib/textLine'),
-    outbox = require('../../lib/outbox');
+    outbox = require('../../lib/outbox'),
+    conf = require('../../lib/conf');
+
+npid.create(conf.get('pid:directory') + '/' + process.title + '.pid');
+
+log.info('Starting: ' + process.title);
 
 co(function *() {
     yield redisModule.loadScripts();
