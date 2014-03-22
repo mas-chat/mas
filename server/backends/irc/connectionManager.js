@@ -18,6 +18,7 @@
 'use strict';
 
 process.title = 'mas-irc-connman';
+process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
 
 // Minimal connection manager that keeps TCP sockets alive even if
 // rest of the system is restarted. Allows nondistruptive updates.
