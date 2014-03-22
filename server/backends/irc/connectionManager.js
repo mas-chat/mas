@@ -82,7 +82,7 @@ function handleIdentConnection(conn) {
         }
         conn.end();
 
-        log.info('Ident request from ' + conn.remoteAddress + ', resp: ' + resp);
+        log.info('Ident request from ' + conn.remoteAddress + ', req: ' + line +', resp: ' + resp);
     });
 }
 
