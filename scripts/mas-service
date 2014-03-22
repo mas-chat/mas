@@ -85,24 +85,24 @@ if [ $ACTION == "start" ] || [ $ACTION == "restart" ]; then
         # Start connection manager
         if [ $IDENTD_ENABLED == "true" ] ; then
             printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-connman [user: root]\n"
-            sudo sh -c "$ROOT/server/backends/irc/connectionManager.js > /dev/null & disown %1"
+            sudo sh -c "node --harmony $ROOT/server/backends/irc/connectionManager.js > /dev/null & disown %1"
         else
             printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-connman [user: $CURRENT_USER]\n"
-            (nohup $ROOT/server/backends/irc/connectionManager.js > /dev/null &)
+            (nohup node --harmony $ROOT/server/backends/irc/connectionManager.js > /dev/null &)
         fi
     fi
 
     # Start irc backend
     printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc [user: $CURRENT_USER]\n"
-    (nohup $ROOT/server/backends/irc/controller.js > /dev/null &)
+    (nohup node --harmony $ROOT/server/backends/irc/controller.js > /dev/null &)
 
     # Start loopback backend
     printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-loopback [user: $CURRENT_USER]\n"
-    (nohup $ROOT/server/backends/loopback/controller.js > /dev/null &)
+    (nohup node --harmony $ROOT/server/backends/loopback/controller.js > /dev/null &)
 
     # Start node server
     printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-frontend [user: $CURRENT_USER]\n"
-    (nohup $ROOT/server/server.js > /dev/null &)
+    (nohup node --harmony $ROOT/server/server.js > /dev/null &)
 fi
 
 if [ $ACTION == "status" ]; then
