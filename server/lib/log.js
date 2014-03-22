@@ -72,7 +72,8 @@ function configTransports() {
 
     var fileTransport = new (winston.transports.File)({
         filename: fileName,
-        colorize: false
+        colorize: false,
+        handleExceptions: true
     });
 
     transports.push(fileTransport);
@@ -80,7 +81,8 @@ function configTransports() {
     // Enable console transport based on config setting
     if (conf.get('log:console')) {
         var consoleTransport = new (winston.transports.Console)({
-            colorize: true
+            colorize: true,
+            handleExceptions: true
         });
 
         transports.push(consoleTransport);
