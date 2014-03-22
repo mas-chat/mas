@@ -36,12 +36,16 @@ log.info('Starting: ' + process.title);
 
 co(function *() {
     yield redisModule.loadScripts();
+
+    courier.on('send', processSend);
+    courier.on('create', processCreate);
+    courier.start();
 })();
 
 // Upper layer messages
 
 // addText
-courier.on('send', function *(params) {
+function *processSend(params) {
     var group = params.name;
     var members = yield redis.smembers('group:' + group);
     var nick = yield redis.hget('user:' + params.userId, 'nick');
@@ -56,9 +60,9 @@ courier.on('send', function *(params) {
             });
         }
     }
-});
+}
 
-courier.on('create', function *(params) {
+function *processCreate(params) {
     var userId = params.userId;
     var groupName = params.name;
     var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
@@ -89,7 +93,7 @@ courier.on('create', function *(params) {
     windowDetails.network = 'MAS';
 
     yield outbox.queue(userId, true, windowDetails);
-});
+}
 
-// courier.on('join', function *(params) {
+// function *processJoin(params) {
 // });
