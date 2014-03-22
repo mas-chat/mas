@@ -14,13 +14,11 @@ module.exports = function(grunt) {
                 'Gruntfile.js',
                 'app/**/*.js',
                 '!app/dist/*.js',
-                '!app/libs/**/*.js',
                 '!app/tests/**/*', // TBD Remove eventually
                 '!app/tests/vendor/**/*.js',
                 'server/**/*.js',
                 '!server/public/vendor/**/*.js',
-                'lib/**/*.js',
-                'irc-backend/**/*.js',
+                '!server/public/libs/**/*.js',
                 'migration/**/*.js'
             ]
         },
