@@ -47,7 +47,8 @@ Ember.Handlebars.helper('decoratedBody', function(text) {
             visibleLink = escHtml(urlObj.readable(), false);
         }
 
-        textParts.push('<a href="' + escHtml(url, true) + '">' + visibleLink+ '</a>');
+        textParts.push('<a href="' + escHtml(url, true) + '" target="_newtab">' +
+            visibleLink + '</a>');
         pos = end;
 
         return url;
