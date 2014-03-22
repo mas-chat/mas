@@ -18,6 +18,7 @@
 'use strict';
 
 process.title = 'mas-frontend';
+process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
 
 var log = require('./lib/log'),
     path = require('path'),
