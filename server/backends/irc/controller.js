@@ -108,12 +108,7 @@ function *processClose(params) {
 
     if (state === 'connected') {
         // TBD: Don't send part if 1on1
-        yield courier.send('connectionmanager', {
-            type: 'write',
-            userId: params.userId,
-            network: params.network,
-            line: 'PART ' + params.name
-        });
+        yield sendIRCPart(params.userId, params.network, params.name);
     }
 }
 
@@ -155,7 +150,7 @@ function *processData(params) {
             msg.serverName = prefix.substring(1);
         } else {
             msg.nick = prefix.substring(1, Math.min(nickEnds, identEnds));
-            msg.userNameAndHost = prefix.substring(Math.min(nickEnds, identEnds));
+            msg.userNameAndHost = prefix.substring(Math.min(nickEnds + 1, identEnds + 1));
         }
     }
 
@@ -261,6 +256,7 @@ var handlers = {
     '376': handle376,
     '433': handle433,
 
+    'JOIN': handleJoin,
     'PRIVMSG': handlePrivmsg,
     'PING': handlePing
 };
@@ -298,27 +294,10 @@ function *handlePing(userId, msg) {
 function *handle353(userId, msg) {
     // :own.freenode.net 353 drwillie @ #evergreenproject :drwillie ilkkaoks
     var channel = msg.params[1];
-    var names = msg.params[2].split(' ');
-    var users = [];
-    var ops = [];
-
-    for (var i = 0; i < names.length; i++) {
-        if (names[i].charAt(0) === '@') {
-            ops.push(names[i].substring(1));
-        } else {
-            users.push(names[i]);
-        }
-    }
-
     var windowId = yield windowHelper.getWindowId(userId, msg.network, channel);
+    var names = msg.params[2].split(' ');
 
-    if (ops.length > 0) {
-        yield redis.sadd('names:' + userId + ':' + windowId + ':ops', ops);
-    }
-
-    if (users.length > 0) {
-        yield redis.sadd('names:' + userId + ':' + windowId + ':users', users);
-    }
+    yield updateNamesSets(names, userId, windowId);
 }
 
 function *handle366(userId, msg) {
@@ -347,8 +326,6 @@ function *handle376(userId, msg) {
 
     for (var i = 0; i < channels.length; i++) {
         var windowId = yield windowHelper.getWindowId(userId, msg.network, channels[i]);
-        yield redis.del('names:' + userId + ':' + windowId + ':ops',
-            'names:' + userId + ':' + windowId + ':users');
 
         yield outbox.queue(userId, true, {
             id: 'ADDNAMES',
@@ -372,14 +349,46 @@ function *handle433(userId, msg) {
     yield tryDifferentNick(userId, msg.network);
 }
 
+function *handleJoin(userId, msg) {
+    // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
+    var channel = msg.params[0];
+    var windowId = yield windowHelper.getWindowId(userId, msg.network, channel);
+    var currentNick = yield redis.hget('user:' + userId, 'currentnick:' + msg.network);
+
+    if (!windowId) {
+        // User has closed the window very recently
+        yield sendIRCPart(userId, msg.network, channel);
+        return;
+    }
+
+    if (msg.nick === currentNick) {
+        yield redis.del('names:' + userId + ':' + windowId + ':ops',
+            'names:' + userId + ':' + windowId + ':users');
+    } else {
+        var names = [ msg.nick ];
+        yield updateNamesSets(names, userId, windowId);
+
+        yield outbox.queue(userId, true, {
+            id: 'ADDNAMES',
+            reset: false,
+            windowId: windowId,
+            users: [ msg.nick ]
+        });
+    }
+
+    yield textLine.send(userId, msg.network, channel, {
+        cat: 'info',
+        body: msg.nick + ' (' + msg.userNameAndHost + ') has joined channel ' + channel,
+        ts: Math.round(Date.now() / 1000)
+    });
+}
+
 function *handlePrivmsg(userId, msg) {
     var group = msg.params[0];
     var text = msg.params[1];
 
     // if (0) { // TBD target === currentNick
-
     // } else {
-
     // }
 
     yield textLine.send(userId, msg.network, group, {
@@ -428,5 +437,35 @@ function *tryDifferentNick(userId, network) {
             network: network,
             line: 'NICK ' + currentNick
         });
+    }
+}
+
+function *sendIRCPart(userId, network, channel) {
+    yield courier.send('connectionmanager', {
+        type: 'write',
+        userId: userId,
+        network: network,
+        line: 'PART ' + channel
+    });
+}
+
+function *updateNamesSets(names, userId, windowId) {
+    var users = [];
+    var ops = [];
+
+    for (var i = 0; i < names.length; i++) {
+        if (names[i].charAt(0) === '@') {
+            ops.push(names[i].substring(1));
+        } else {
+            users.push(names[i]);
+        }
+    }
+
+    if (ops.length > 0) {
+        yield redis.sadd('names:' + userId + ':' + windowId + ':ops', ops);
+    }
+
+    if (users.length > 0) {
+        yield redis.sadd('names:' + userId + ':' + windowId + ':users', users);
     }
 }
