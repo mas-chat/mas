@@ -64,8 +64,8 @@ for i = 1, #windows do
     redis.call('LPUSH', outbox, cjson.encode({
         ['id'] = 'CREATE',
         ['windowId'] = tonumber(windowId),
-        ['network'] = network,
 
+        ['network'] = network,
         ['name'] = window.name,
         ['type'] = window.type,
         ['sounds'] = window.sounds == 'true',
@@ -75,6 +75,26 @@ for i = 1, #windows do
         ['password'] = window.password,
         ['topic'] = window.topic
     }))
+
+    local ops = redis.call('SMEMBERS', 'names:' .. userId .. ':' .. windowId .. ':ops')
+    local users = redis.call('SMEMBERS', 'names:' .. userId .. ':' .. windowId .. ':users')
+    local namesCommand = {
+        ['id'] = 'ADDNAMES',
+        ['windowId'] = tonumber(windowId),
+        ['reset'] = true,
+    }
+
+    --Just because empty arrays are problematic, google 'lua cjson empty array'
+
+    if #ops > 0 then
+        namesCommand['operators'] = ops
+    end
+
+    if #users > 0 then
+        namesCommand['users'] = users
+    end
+
+    redis.call('LPUSH', outbox, cjson.encode(namesCommand))
 
     local lines = redis.call('LRANGE', 'windowmsgs:' .. userId .. ':' .. windowId, 0, -1);
 
