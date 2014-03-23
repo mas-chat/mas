@@ -30,6 +30,13 @@ App.WindowController = Ember.ObjectController.extend({
             this.set('hidden', true);
         },
 
+        close: function() {
+            App.networkMgr.send({
+                id: 'CLOSE',
+                windowId: this.get('windowId')
+            });
+        },
+
         sendMessage: function() {
             var text = this.get('newMessage');
 
