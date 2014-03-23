@@ -251,6 +251,8 @@ var handlers = {
     '375': handleServerText,
     '452': handleServerText,
 
+    '353': handle353,
+    '366': handle366,
     '376': handle376,
     '433': handle433,
 
@@ -288,6 +290,49 @@ function *handlePing(userId, msg) {
     });
 }
 
+function *handle353(userId, msg) {
+    // :own.freenode.net 353 drwillie @ #evergreenproject :drwillie ilkkaoks
+    var channel = msg.params[1];
+    var names = msg.params[2].split(' ');
+    var users = [];
+    var ops = [];
+
+    for (var i = 0; i < names.length; i++) {
+        if (names[i].charAt(0) === '@') {
+            ops.push(names[i].substring(1));
+        } else {
+            users.push(names[i]);
+        }
+    }
+
+    var windowId = yield windowHelper.getWindowId(userId, msg.network, channel);
+
+    if (ops.length > 0) {
+        yield redis.sadd('names:' + userId + ':' + windowId + ':ops', ops);
+    }
+
+    if (users.length > 0) {
+        yield redis.sadd('names:' + userId + ':' + windowId + ':users', users);
+    }
+}
+
+function *handle366(userId, msg) {
+    // :pratchett.freenode.net 366 il3kkaoksWEB #testi1 :End of /NAMES list.
+    var channel = msg.params[0];
+
+    var windowId = yield windowHelper.getWindowId(userId, msg.network, channel);
+    var ops = yield redis.smembers('names:' + userId + ':' + windowId + ':ops');
+    var users = yield redis.smembers('names:' + userId + ':' + windowId + ':users');
+
+    yield outbox.queue(userId, true, {
+        id: 'ADDNAMES',
+        reset: true,
+        windowId: windowId,
+        operators: ops,
+        users: users
+    });
+}
+
 function *handle376(userId, msg) {
     yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'connected');
 
@@ -296,6 +341,16 @@ function *handle376(userId, msg) {
     //TBD don't join to 1on1s
 
     for (var i = 0; i < channels.length; i++) {
+        var windowId = yield windowHelper.getWindowId(userId, msg.network, channels[i]);
+        yield redis.del('names:' + userId + ':' + windowId + ':ops',
+            'names:' + userId + ':' + windowId + ':users');
+
+        yield outbox.queue(userId, true, {
+            id: 'ADDNAMES',
+            reset: true,
+            windowId: windowId,
+        });
+
         yield courier.send('connectionmanager', {
             type: 'write',
             userId: userId,
