@@ -298,23 +298,34 @@ Update Information about user log files.
 ```
 ```
 
-NAMES
------
+ADDNAMES
+--------
 
 Update window participant list.
 
 ```JSON
 {
-   "id":"NAMES"
+   "id":"ADDNAMES"
 
-   "names":[
+   "windowId":"1",
+   "reset": true,
+   "operators":[
       "ilkka",
       "neo",
       "morpheus",
    ],
-   "window":"1",
+   "users":[
+      "trinity",
+      "mranderson"
+   ]
 }
 ```
+
+If ```reset``` is true, then the existing list needs to be cleared. Otherwise the command adds new names to the existing list.
+
+```operators``` key will not be added to the command if there are no operators to add.
+
+```users``` key is will not be added to the command if there are no users to add.
 
 NICK
 ----
