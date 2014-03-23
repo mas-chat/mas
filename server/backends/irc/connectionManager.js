@@ -137,6 +137,11 @@ courier.on('write', function(params) {
     var network = params.network;
     var data = params.line;
 
+    if (!sockets[userId + ':' + network]) {
+        log.warn(userId, 'Non-existent socket');
+        return;
+    }
+
     if (typeof(data) === 'string') {
         data = [data];
     }
