@@ -18,11 +18,12 @@
 
     {{#if isGroup}}
         <div class="window-members">
-        <div style="font-weight:bold">person1</div>
-        <div style="font-weight:bold">person2</div>
-        <div style="font-weight:bold">person3</div>
-        <div>person4</div>
-        <div>person5</div>
+            {{#each name in operators}}
+            <div class="window-operator">{{name}}</div>
+            {{/each}}
+            {{#each name in users}}
+            <div>{{name}}</div>
+            {{/each}}
         </div>
     {{/if}}
 </div>
