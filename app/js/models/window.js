@@ -19,7 +19,10 @@
 App.Window = Ember.Object.extend({
     init: function() {
         this._super();
+
         this.messages = Ember.A([]);
+        this.operators = Ember.A([]);
+        this.users = Ember.A([]);
     },
 
     name: null,
@@ -28,6 +31,8 @@ App.Window = Ember.Object.extend({
     row: null,
     hidden: false,
     messages: null,
+    operators: null,
+    users: null,
 
     firstInRow: false,
     lastInRow: false
