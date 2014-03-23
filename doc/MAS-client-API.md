@@ -9,7 +9,7 @@ Work in progress.
 Introduction
 ============
 
-MAS protocol is message based, server driven and built on top of long polling. WebSockets support is straightforward to add when all browsers and mobile OSes support it properly.
+MAS protocol is message based, server driven and built on top of long polling. It is designed with WebSockets support in mind. WebSockets transport will be added when all browsers and mobile OSes have adequate support for it.
 
 Overall approach is:
 
@@ -23,8 +23,10 @@ Overall approach is:
 5. The client immediately goes back to step 3.
    - In case of any transport errors, client SHALL wait few seconds before proceeding.
 
-When the user a triggers an action, e.g. wants to join a new channel,
-client creates a second HTTP connection and sends **MAS send request** containing the command(s). Server responds to this message immediately.
+When the user triggers an action, for example to join a new channel,
+the client creates a second HTTP connection and sends **MAS send request** containing the command(s). Server responds to this request immediately with an empty HTTP body. After processing the command(s), server uses the active MAS listen request (long polling connection) to send a corresponding response message.
+
+For example, the user wants to join a new channel and sends JOIN command. The server responds with HTTP 200 OK and closes the HTTP connection. The server then processes the join command and sends JOIN_RESP as a reply to the active MAS listen HTTP GET request.
 
 Authentication
 ==============
@@ -400,7 +402,7 @@ HTTP POST /api/v1/send/<sessionId>/<sendSeq>
 
 **sendSeq**: Must be set to 0 in the first send request. Must be then increased by one after every received HTTP response from the server.
 
-HTTP body contains the actual message in JSON. Following commands are supported.
+HTTP body contains the actual message in JSON. Following commands are supported. Under every command is corresponding response.
 
 SEND
 ----
@@ -412,6 +414,9 @@ SEND
   "text": "Hello world"
 }
 ```
+
+SEND_RESP
+---------
 
 JOIN
 ----
@@ -427,6 +432,9 @@ Join to new MAS group or IRC channel
 }
 ```
 
+JOIN_RESP
+---------
+
 CREATE
 ------
 
@@ -440,87 +448,167 @@ Create new MAS group
 }
 ```
 
+CREATE_RESP
+-----------
+
 CLOSE
 -----
 
-RESIZE
-------
+CLOSE_RESP
+----------
 
 MOVE
 ----
 
+MOVE_RESP
+---------
+
 HIDE
 ----
+
+HIDE_RESP
+---------
 
 REST
 ----
 
+REST_RESP
+---------
+
 SEEN
 ----
+
+SEEN_RESP
+---------
 
 SOUND
 -----
 
+SOUND_RESP
+----------
+
 TITLEALERT
 ----------
+
+TITLEALERT_RESP
+---------------
 
 GETLOG
 ------
 
+GETLOG_RESP
+-----------
+
 STARTCHAT
 ---------
+
+STARTCHAT_RESP
+--------------
 
 LOGOUT
 ------
 
+LOGOUT_RESP
+-----------
+
 SET
 ---
+
+SET_RESP
+--------
 
 ADDF
 ----
 
+ADDF_RESP
+---------
+
 OKF
 ---
+
+OKF_RESP
+--------
 
 NOKF
 ----
 
+NOKF_RESP
+---------
+
 TOPIC
 -----
+
+TOPIC_RESP
+----------
 
 PW
 --
 
+PW_RESP
+-------
+
 WHOIS
 -----
+
+WHOIS_RESP
+----------
 
 KICK
 ----
 
+KICK_RESP
+---------
+
 BAN
 ---
+
+BAN_RESP
+--------
 
 OP
 --
 
+OP_RESP
+-------
+
 GETOPERS
 --------
+
+GETOPERS_RESP
+-------------
 
 DEOP
 ----
 
+DEOP_RESP
+---------
+
 GETBANS
 -------
+
+GETBANS_RESP
+------------
 
 UNBAN
 -----
 
+UNBAN_RESP
+----------
+
 DELNTF
 ------
+
+DELNTF_RESP
+-----------
 
 SETKEY
 ------
 
+SETKEY_RESP
+-----------
+
 GETKEY
 ------
 
+GETKEY_RESP
+-----------
