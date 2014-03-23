@@ -23,14 +23,17 @@ App.CommandParser = Ember.Object.extend({
         var name = command.id;
         delete command.id;
 
+        if (command.windowId) {
+            command._targetWindow = App.windowCollection.findBy('windowId', command.windowId);
+        }
+
         var funcName = '_handle' + name.charAt(0) + name.substring(1).toLowerCase();
 
         if (!this[funcName]) {
             Ember.Logger.warn('Unknown command received: ' + name);
-            return;
+        } else {
+            this[funcName](command);
         }
-
-        this[funcName](command);
     },
 
     _handleCreate: function(data) {
@@ -43,19 +46,23 @@ App.CommandParser = Ember.Object.extend({
         App.windowCollection.pushObject(windowRecord);
     },
 
+    _handleClose: function(data) {
+        App.windowCollection.removeObject(data._targetWindow);
+    },
+
     _handleAddtext: function(data) {
-        var targetWindow = App.windowCollection.findBy('windowId', data.windowId);
+        if (!data._targetWindow) {
+            return;
+        }
+
         delete data.windowId;
+        var messageRecord = App.Message.create(data);
+        var messages = data._targetWindow.messages;
 
-        if (targetWindow) {
-            var messageRecord = App.Message.create(data);
-            var messages = targetWindow.messages;
+        messages.pushObject(messageRecord);
 
-            messages.pushObject(messageRecord);
-
-            if (messages.length > 200) {
-                messages.shiftObject();
-            }
+        if (messages.length > 200) {
+            messages.shiftObject();
         }
     },
 
