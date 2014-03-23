@@ -3,7 +3,7 @@ MAS Redis structures
 ====================
 
 ```
- user:<userid> (hash)
+ user:<userId> (hash)
    name (string)
    email (string)
    inUse (string)
@@ -21,10 +21,10 @@ MAS Redis structures
    registrationtime (int, unix time)
    nextwindowid (int)
 
- sessionlist:<userid> (zset)
+ sessionlist:<userId> (zset)
    sessionId1, timeStamp1, sessionId2, timeStamp2 ...
 
- session:<userid>:<sessionId> (hash)
+ session:<userId>:<sessionId> (hash)
    sendRcvNext (int)
    listenRcvNext (int)
    timeStamp (int)
@@ -32,7 +32,7 @@ MAS Redis structures
  sessionlastrequest (zset)
    userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...
 
- outbox:<userid>:<sessionId> (list) TBD: rename clientinbox!
+ outbox:<userId>:<sessionId> (list) TBD: rename clientinbox!
    msg1, msg2
 
  index:user (hash)
@@ -40,22 +40,22 @@ MAS Redis structures
    <nick> (int, userId)
 
  users (set)
-   <userid1>, <userid2> ...
+   <userId1>, <userId2> ...
 
- friends:<userid> (set)
+ friends:<userId> (set)
    <userID1>, <userId2> ...
 
- settings:<userid> (hash)
+ settings:<userId> (hash)
    <name> (string)
 
- windowlist:<userid> (set)
-   <id>:<network>:<name>
+ windowlist:<userId> (set)
+   <windowId>:<network>:<name>
 
- networks:<userid>:<network> (hash)
+ networks:<userId>:<network> (hash)
    state (string, 'connected', 'connecting', 'disconnected')
    currentnick (text)
 
- window:<userid>:<id> (hash)
+ window:<userId>:<windowId> (hash)
    name (string)
    type (string)
    sounds (bool)
@@ -65,16 +65,19 @@ MAS Redis structures
    topic (string)
    userMode (string)
 
- windowmsgs:<userid>:<id> (list) [oldest message on the right]
+ windowmsgs:<userId>:<windowId> (list) [oldest message on the right]
 
- [TBD] names:<userid>:<id> (set)
-   nick1, @nick2
+ names:<userId>:<windowId>:ops (set)
+   nick1, nick2
 
- [TBD] inbox:<userid> (list)
+ names:<userId>:<windowId>:users (set)
+   nick1, nick2
+
+ [TBD] inbox:<userId> (list)
    msg:<windowid>
    names:<windowid>
 
- notelist:<userid>:<nwid>:<channel_name> (set)
+ notelist:<userId>:<nwid>:<channel_name> (set) TBD: Use windowId
    note1, note2 ...
 
  note:<uuid> (hash)
@@ -83,10 +86,10 @@ MAS Redis structures
    timestamp (int)
    msg (text)
 
- urls:<userid>:<nwid>:<channel_name> (list)
+ urls:<userId>:<nwid>:<channel_name> (list) TBD: Use windowId
    url1, url2 ...
 
- nextavailableuserid (string) [integer  counter]
+ nextavailableuserId (string) [integer  counter]
 ```
 
  Backends
