@@ -68,5 +68,25 @@ App.CommandParser = Ember.Object.extend({
 
     _handleNick: function(data) {
         jQuery.extend(App.nicks, data);
+    },
+
+    _handleAddnames: function(data) {
+        if (!data._targetWindow) {
+            return;
+        }
+
+        if (data.reset) {
+            data._targetWindow.operators.clear();
+            data._targetWindow.users.clear();
+        }
+
+
+        if (data.operators) {
+            data._targetWindow.operators.pushObjects(data.operators);
+        }
+
+        if (data.users) {
+            data._targetWindow.users.pushObjects(data.users);
+        }
     }
 });
