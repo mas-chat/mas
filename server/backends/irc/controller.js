@@ -41,6 +41,7 @@ co(function *() {
 
     courier.on('send', processSend);
     courier.on('join', processJoin);
+    courier.on('close', processClose);
     courier.on('restarted', processRestarted);
     courier.on('data', processData);
     courier.on('connected', processConnected);
@@ -62,7 +63,7 @@ function *processSend(params) {
 function *processJoin(params) {
     var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
     var channelName = params.name;
-    var hasChannelPrefixRegex = /^[&#!\+]/;
+    var hasChannelPrefixRegex = /^[&#!+]/;
     var illegalNameRegEx = /\s|\cG|,/; // See RFC2812, section 1.3
 
     if (!channelName || channelName === '' || illegalNameRegEx.test(channelName)) {
@@ -100,6 +101,20 @@ function *processJoin(params) {
     });
 
     yield outbox.queue(params.userId, true, createCommand);
+}
+
+function *processClose(params) {
+    var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
+
+    if (state === 'connected') {
+        // TBD: Don't send part if 1on1
+        yield courier.send('connectionmanager', {
+            type: 'write',
+            userId: params.userId,
+            network: params.network,
+            line: 'PART ' + params.name
+        });
+    }
 }
 
 // Connection manager messages
@@ -295,7 +310,6 @@ function *handle376(userId, msg) {
 function *handle433(userId, msg) {
     // :mas.example.org 433 * ilkka :Nickname is already in use.
     yield tryDifferentNick(userId, msg.network);
-
 }
 
 function *handlePrivmsg(userId, msg) {
