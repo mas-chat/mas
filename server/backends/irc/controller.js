@@ -164,6 +164,11 @@ function *processData(params) {
     if (msg.command.match(/^[0-9]+$/) !== null) {
         // Numeric reply
         msg.target = parts.shift();
+
+        if (/^[&#!+]/.test(msg.target)) {
+            // Channel names are case insensitive, always use lower case version
+            msg.target = msg.target.toLowerCase();
+        }
     }
 
     msg.params = [];
@@ -262,7 +267,7 @@ var handlers = {
 
 function *handleServerText(userId, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
-    var text = msg.params.join(' ');
+    var text = msg.params[0];
     var cat = 'notice';
 
     // 375 = MOTD line
