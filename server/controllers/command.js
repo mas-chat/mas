@@ -19,6 +19,7 @@
 var parse = require('co-body'),
     log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
+    outbox = require('../lib/outbox'),
     courier = require('../lib/courier').createEndPoint('command'),
     textLine = require('../lib/textLine'),
     windowHelper = require('../lib/windows');
@@ -68,6 +69,28 @@ module.exports = function *() {
                 password: body.password,
                 sessionId: sessionId
             });
+            break;
+
+        case 'CLOSE':
+            yield outbox.queue(userId, true, {
+                id: 'CLOSE',
+                windowId: windowId,
+            });
+
+            // Backend specific cleanup
+            yield courier.send(backend, {
+                type: 'close',
+                userId: userId,
+                network: network,
+                name: name,
+            });
+
+            // Redis cleanup
+            yield redis.srem('windowlist:' + userId, windowId + ':' + network + ':' + name);
+            yield redis.del('window:' + userId + ':' + windowId);
+            yield redis.del('windowmsgs:' + userId + ':' + windowId);
+            yield redis.del('names:' + userId + ':' + windowId + ':ops',
+                'names:' + userId + ':' + windowId + ':users');
             break;
 
         case 'CREATE':
