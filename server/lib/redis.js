@@ -17,12 +17,13 @@
 'use strict';
 
 var fs = require('fs'),
+    path = require('path'),
     assert = require('assert'),
     coRedis = require('co-redis'),
     redis = require('redis'),
     log = require('./log');
 
-var luaPath = __dirname + '/../lua';
+var luaPath = path.join(__dirname, '..', 'lua');
 var luaFuncs = [];
 var luaFuncSHAs = {};
 
@@ -58,7 +59,7 @@ function *loadScripts() {
 
     for (var i = 0; i < luaFiles.length; i++) {
         var fileName = luaFiles[i];
-        var script = fs.readFileSync(luaPath + '/' + fileName);
+        var script = fs.readFileSync(path.join(luaPath, fileName));
         luaFuncs.push(script);
     }
 

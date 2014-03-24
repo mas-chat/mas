@@ -18,11 +18,10 @@
 'use strict';
 
 process.title = 'mas-irc';
-process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
 
-var npid = require('npid'),
-    co = require('co'),
+var co = require('co'),
     log = require('../../lib/log'),
+    common = require('../../lib/common'),
     redisModule = require('../../lib/redis'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('ircparser'),
@@ -32,9 +31,7 @@ var npid = require('npid'),
     nicks = require('../../lib/nick'),
     conf = require('../../lib/conf');
 
-npid.create(conf.get('pid:directory') + '/' + process.title + '.pid');
-
-log.info('Starting: ' + process.title);
+common.init();
 
 co(function *() {
     yield redisModule.loadScripts();
