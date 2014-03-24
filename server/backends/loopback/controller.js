@@ -18,21 +18,17 @@
 'use strict';
 
 process.title = 'mas-loopback';
-process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
 
 var co = require('co'),
-    npid = require('npid'),
+    common = require('../../lib/common'),
     log = require('../../lib/log'),
     redisModule = require('../../lib/redis'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('loopbackparser'),
     textLine = require('../../lib/textLine'),
-    outbox = require('../../lib/outbox'),
-    conf = require('../../lib/conf');
+    outbox = require('../../lib/outbox');
 
-npid.create(conf.get('pid:directory') + '/' + process.title + '.pid');
-
-log.info('Starting: ' + process.title);
+common.init();
 
 co(function *() {
     yield redisModule.loadScripts();
