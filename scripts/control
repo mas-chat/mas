@@ -13,6 +13,22 @@ GREEN_COLOR='\e[0;32m'
 RED_COLOR='\e[0;31m'
 NO_COLOR='\e[0m' # No Color
 
+source $ROOT/scripts/read_ini.sh
+
+read_ini mas.conf
+
+PID_DIRECTORY=${INI__pid__directory%/}
+LOG_DIRECTORY=${INI__log__directory%/}
+
+#Expand paths if they are relative
+if [[ "$PID_DIRECTORY" != /* ]]; then
+    PID_DIRECTORY=$ROOT/$PID_DIRECTORY
+fi
+
+if [[ "$LOG_DIRECTORY" != /* ]]; then
+    LOG_DIRECTORY=$ROOT/$LOG_DIRECTORY
+fi
+
 while [[ $# > 0 ]]
 do
     KEY="$1"
@@ -42,13 +58,9 @@ do
     esac
 done
 
-# Create logs and pid directories
-mkdir -p $ROOT/logs
-mkdir -p $ROOT/run
-
 if [ $ACTION == "stop" ] || [ $ACTION == "restart" ]; then
     # Kill all running mas processes
-    for file in $ROOT/run/*.pid; do
+    for file in $PID_DIRECTORY/*.pid; do
         PID=$(<$file)
         OWNER=$(ps aux | awk -v PID=$PID '$2 == PID { print $1 }')
         NAME=$(basename $file .pid)
@@ -70,6 +82,10 @@ fi
 CURRENT_USER=$(whoami)
 
 if [ $ACTION == "start" ] || [ $ACTION == "restart" ]; then
+    # Create logs and pid directories if they don't exist
+    mkdir -p $LOG_DIRECTORY
+    mkdir -p $PID_DIRECTORY
+
     # Make sure Redis is running
     echo 'Making sure Redis is running...'
     redis-server --daemonize yes
@@ -113,8 +129,8 @@ if [ $ACTION == "status" ]; then
     do
         PID=''
 
-        if [ -e $ROOT/run/$i.pid ]; then
-            PID=$(<$ROOT/run/$i.pid)
+        if [ -e $PID_DIRECTORY/$i.pid ]; then
+            PID=$(<$PID_DIRECTORY/$i.pid)
         fi
 
         if ! ps -p $PID > /dev/null 2>&1; then

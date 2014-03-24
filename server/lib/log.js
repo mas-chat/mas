@@ -58,7 +58,12 @@ function logEntry(type, userId, msg) {
 function configTransports() {
     var transports = [];
     var logDirectory = path.normalize(conf.get('log:directory'));
-    var fileName = path.normalize(logDirectory + '/' + process.title + '.log');
+
+    if (logDirectory.charAt(0) !== path.sep) {
+        logDirectory = path.join(__dirname, '..', '..', logDirectory);
+    }
+
+    var fileName = path.join(logDirectory, process.title + '.log');
 
     // Always enable file logging
     if (!fs.existsSync(logDirectory)) {
