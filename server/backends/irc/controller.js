@@ -212,18 +212,16 @@ function *connect(userId, network) {
     yield redis.hset('user:' + userId, 'currentnick:' + network, nick);
     yield redis.hset('networks:' + userId + ':' + network, 'state', 'connecting');
 
-    if (userId === 97) {
-        yield redis.hset('networks:' + userId, network, 'connecting');
+    yield redis.hset('networks:' + userId, network, 'connecting');
 
-        yield courier.send('connectionmanager', {
-            type: 'connect',
-            userId: userId,
-            nick: nick,
-            network: network,
-            host: conf.get('irc:networks:' + network + ':host'),
-            port: conf.get('irc:networks:' + network + ':port')
-        });
-    }
+    yield courier.send('connectionmanager', {
+        type: 'connect',
+        userId: userId,
+        nick: nick,
+        network: network,
+        host: conf.get('irc:networks:' + network + ':host'),
+        port: conf.get('irc:networks:' + network + ':port')
+    });
 }
 
 // Process different IRC commands
