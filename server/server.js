@@ -18,11 +18,8 @@
 'use strict';
 
 process.title = 'mas-frontend';
-process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
 
-var log = require('./lib/log'),
-    path = require('path'),
-    npid = require('npid'),
+var path = require('path'),
     koa = require('koa'),
     router = require('koa-router'),
     resourceRouter = require('koa-resource-router'),
@@ -33,6 +30,7 @@ var log = require('./lib/log'),
     //logger = require('koa-logger'),
     mount = require('koa-mount'),
     co = require('co'),
+    common = require('./lib/common'),
     conf = require('./lib/conf'),
     redis = require('./lib/redis'),
     routesIndex = require('./routes'),
@@ -45,9 +43,7 @@ var log = require('./lib/log'),
     registerController = require('./controllers/register'),
     scheduler = require('./lib/scheduler');
 
-npid.create(conf.get('pid:directory') + '/' + process.title + '.pid');
-
-log.info('Starting: ' + process.title);
+common.init();
 
 var app = koa();
 

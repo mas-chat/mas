@@ -17,22 +17,19 @@
 
 'use strict';
 
-process.title = 'mas-irc-connman';
-process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
-
 // Minimal connection manager that keeps TCP sockets alive even if
 // rest of the system is restarted. Allows nondistruptive updates.
 
+process.title = 'mas-irc-connman';
+
 var net = require('net'),
-    npid = require('npid'),
     carrier = require('carrier'),
+    common = require('../../lib/common'),
     conf = require('../../lib/conf'),
     log = require('../../lib/log'),
     courier = require('../../lib/courier').createEndPoint('connectionmanager');
 
-npid.create(conf.get('pid:directory') + '/' + process.title + '.pid');
-
-log.info('Starting: ' + process.title);
+common.init();
 
 var sockets = {};
 const IDENTD_PORT = 113;
