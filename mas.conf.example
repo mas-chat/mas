@@ -4,18 +4,20 @@
 
 ; GENERAL OPTIONS
 
+; Project root directory is the base if relative paths are used
+
 [frontend]
 port=3200
 demo_mode=false
 demo_user_email=whogets@fakemessages.com
 
 [log]
-directory=/path/to/somewhere
+directory=logs
 clear_at_startup=false
 console=false
 
 [pid]
-directory=/path/to/somewhere
+directory=run
 
 [loggly]
 enabled=false
@@ -26,7 +28,7 @@ token=nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
 max_parallel=8
 idle_timeout=360
 
-; OPTIONS FOR IRC BACKEND
+; OPTIONS FOR THE IRC BACKEND
 
 [irc]
 enabled=true
