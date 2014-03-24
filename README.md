@@ -56,7 +56,7 @@ Installation
 5. Launch the server components
 
    ```bash
-   $ ./scripts/control start
+   $ ./scripts/control -c start
    ```
 
 6. Check that all four MAS processes are running ([architecture](https://github.com/ilkkao/mas/wiki))
@@ -70,12 +70,6 @@ Installation
    ```
 
 7. Browse to ```http://localhost:3200/``` and register an account.
-
-Next steps
-----------
-
-Complete the new MAS server implementation. Polish everything. Create
-a bundle that is easy to install.
 
 Feedback
 --------
