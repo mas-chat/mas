@@ -35,13 +35,13 @@ Installation
 
    On Mac you can install [Homebrew](http://brew.sh/) and then do ```brew install redis nodejs-dev```
 
-2. Create and inspect the configuration file. Use absolute paths for directories. For now, pid directory has to be ```/path/to/git-project/run```
+2. Create the configuration file. You don't need to edit it, default options should work.
 
    ```bash
    $ cp mas.conf.example mas.conf
    ```
 
-3. Install node modules
+3. Install the required node modules
 
    ```bash
    $ npm install
