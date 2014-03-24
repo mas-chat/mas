@@ -35,29 +35,41 @@ Installation
 
    On Mac you can install [Homebrew](http://brew.sh/) and then do ```brew install redis nodejs-dev```
 
-2. Create and inspect the configuration file
+2. Create and inspect the configuration file. Use absolute paths for directories. For now, pid directory has to be ```/path/to/git-project/run```
 
    ```bash
    $ cp mas.conf.example mas.conf
    ```
 
-3. Launch the server components
+3. Install node modules
 
    ```bash
-   $ ./scripts/launch
+   $ npm install
    ```
 
-4. Check that all four MAS processes are running ([architecture](https://github.com/ilkkao/mas/wiki))
+4. Build the web app
 
    ```bash
-   $ ps aux | grep mas-
-   ilkkao   40955   0.0  0.6  3107760  47560 s000  S  7:18PM   0:01.09 mas-irc
-   ilkkao   40953   0.0  0.5  3106736  44300 s000  S  7:18PM   0:00.91 mas-irc-connman
-   ilkkao   40961   0.0  1.1  3123840  93592 s000  S  7:18PM   0:04.51 mas-frontend
-   ilkkao   40958   0.0  0.4  3104688  33904 s000  S  7:18PM   0:00.49 mas-loopback
+   $ grunt dev
    ```
 
-5. Browse to ```http://localhost:3200/``` and register an account.
+5. Launch the server components
+
+   ```bash
+   $ ./scripts/control start
+   ```
+
+6. Check that all four MAS processes are running ([architecture](https://github.com/ilkkao/mas/wiki))
+
+   ```bash
+   $ ./scripts/control status
+   mas-frontend: running, pid: 95284
+   mas-loopback: running, pid: 95282
+   mas-irc: running, pid: 95280
+   mas-irc-connman: running, pid: 82417
+   ```
+
+7. Browse to ```http://localhost:3200/``` and register an account.
 
 Next steps
 ----------
