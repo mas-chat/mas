@@ -28,6 +28,7 @@ App.WindowController = Ember.ObjectController.extend({
 
         hide: function() {
             this.set('hidden', true);
+            this.set('timeHidden', Date.now());
         },
 
         close: function() {

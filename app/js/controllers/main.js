@@ -32,8 +32,8 @@ App.MainController = Ember.ArrayController.extend({
     sortedHiddenWindows: function() {
         return this.get('model').filter(function(val) {
             return val.get('hidden');
-        }).sortBy('row');
-    }.property('model.@each.hidden', 'model.@each.row'),
+        }).sortBy('timeHidden');
+    }.property('model.@each.hidden'),
 
     nextRow: function(item, direction) {
         var windows = this.get('sortedWindows');
