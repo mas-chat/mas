@@ -35,5 +35,11 @@ App.Window = Ember.Object.extend({
     users: null,
 
     firstInRow: false,
-    lastInRow: false
+    lastInRow: false,
+
+    simplifiedName: function() {
+        var name = this.get('name');
+        name = name.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
+        return name;
+    }.property('name')
 });
