@@ -17,9 +17,21 @@
 'use strict';
 
 App.MainController = Ember.ArrayController.extend({
-    sortedWindows: function() {
+    actions: {
+        show: function(window) {
+            window.set('hidden', false);
+        }
+    },
+
+    sortedVisibleWindows: function() {
         return this.get('model').filter(function(val) {
             return !val.get('hidden');
+        }).sortBy('row');
+    }.property('model.@each.hidden', 'model.@each.row'),
+
+    sortedHiddenWindows: function() {
+        return this.get('model').filter(function(val) {
+            return val.get('hidden');
         }).sortBy('row');
     }.property('model.@each.hidden', 'model.@each.row'),
 

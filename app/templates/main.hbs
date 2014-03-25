@@ -1,7 +1,51 @@
-{{#each window in sortedWindows}}
-    {{startWindowRow window sortedWindows}}
-    {{#unless window.hidden}}
-        {{render "window" window}}
-    {{/unless}}
-    {{endWindowRow window sortedWindows}}
-{{/each}}
+<div class="flex-grow-row">
+    <div class="grid flex-grow-column flex-1">
+        {{#each window in sortedVisibleWindows}}
+            {{startWindowRow window sortedVisibleWindows}}
+            {{render "window" window}}
+            {{endWindowRow window sortedVisibleWindows}}
+        {{/each}}
+    </div>
+
+    <div class="sidebar flex-grow-column">
+        <div class="upper-sidebar flex-1">
+            {{#each window in sortedHiddenWindows}}
+                <div class="main-hidden-window-container" {{action "show" window}}>
+                    <div class="main-badge">888</div>
+                    <div class="main-short-name">{{window.simplifiedName}}</div>
+                </div>
+            {{/each}}
+        </div>
+
+        <div class="lower-sidebar">
+            <div class="btn-group dropdown">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-plus"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li {{action "openModal" "create-group-modal"}}><a href="#">Create new group&#8230;</a></li>
+                    <li {{action "openModal" "join-group-modal"}}><a href="#">Join existing group&#8230;</a></li>
+                    <li class="divider"></li>
+                    <li {{action "openModal" "join-irc-modal"}}><a href="#">Join IRC channel&#8230;</a></li>
+                </ul>
+            </div>
+
+            <button type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-question-sign"></span>
+            </button>
+
+            <button type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-user"></span>
+            </button>
+
+            <button type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-search"></span>
+            </button>
+
+            <button type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-wrench"></span>
+            </button>
+        </div>
+    </div>
+</div>
