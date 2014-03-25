@@ -5,20 +5,20 @@ shopt -s nullglob
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
 ACTION='none'
 ALSO_CONNMAN=false
-IDENTD_ENABLED=$(grep identd mas.conf | cut -d "=" -f2)
 IMPORT=false
 NODE=$(which node)
 
 GREEN_COLOR='\e[0;32m'
 RED_COLOR='\e[0;31m'
-NO_COLOR='\e[0m' # No Color
+NO_COLOR='\e[0m'
 
 source $ROOT/scripts/read_ini.sh
 
-read_ini mas.conf
+read_ini $ROOT/mas.conf
 
 PID_DIRECTORY=${INI__pid__directory%/}
 LOG_DIRECTORY=${INI__log__directory%/}
+IDENTD_ENABLED=${INI__irc__identd}
 
 #Expand paths if they are relative
 if [[ "$PID_DIRECTORY" != /* ]]; then
@@ -29,8 +29,7 @@ if [[ "$LOG_DIRECTORY" != /* ]]; then
     LOG_DIRECTORY=$ROOT/$LOG_DIRECTORY
 fi
 
-while [[ $# > 0 ]]
-do
+while [[ $# > 0 ]]; do
     KEY="$1"
     shift
 
@@ -100,7 +99,7 @@ if [ $ACTION == "start" ] || [ $ACTION == "restart" ]; then
 
     if $ALSO_CONNMAN; then
         # Start connection manager
-        if [ $IDENTD_ENABLED == "true" ] ; then
+        if $IDENTD_ENABLED; then
             printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-connman [user: root]\n"
             sudo sh -c "$NODE --harmony $ROOT/server/backends/irc/connectionManager.js > /dev/null & disown %1"
         else
@@ -125,8 +124,7 @@ fi
 if [ $ACTION == "status" ]; then
     declare -a SERVERS=(mas-frontend mas-loopback mas-irc mas-irc-connman)
 
-    for i in "${SERVERS[@]}"
-    do
+    for i in "${SERVERS[@]}"; do
         PID=''
 
         if [ -e $PID_DIRECTORY/$i.pid ]; then
