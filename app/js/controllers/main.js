@@ -36,7 +36,7 @@ App.MainController = Ember.ArrayController.extend({
     }.property('model.@each.hidden'),
 
     nextRow: function(item, direction) {
-        var windows = this.get('sortedWindows');
+        var windows = this.get('sortedVisibleWindows');
         var index =  windows.indexOf(item);
         var row = windows[index].get('row');
 
