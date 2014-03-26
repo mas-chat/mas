@@ -11,7 +11,7 @@
         <div class="upper-sidebar flex-1">
             {{#each window in sortedHiddenWindows}}
                 <div class="main-hidden-window-container" {{action "show" window}}>
-                    <div class="main-badge">888</div>
+                    <div class="main-badge">{{window.newMessagesCount}}</div>
                     <div class="main-short-name">{{window.simplifiedName}}</div>
                 </div>
             {{/each}}
