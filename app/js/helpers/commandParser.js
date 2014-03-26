@@ -21,10 +21,12 @@ App.CommandParser = Ember.Object.extend({
 
     process: function(command) {
         var name = command.id;
+        var targetWindow = null;
+
         delete command.id;
 
         if (command.windowId) {
-            command._targetWindow = App.windowCollection.findBy('windowId', command.windowId);
+            targetWindow = App.windowCollection.findBy('windowId', command.windowId);
         }
 
         var funcName = '_handle' + name.charAt(0) + name.substring(1).toLowerCase();
@@ -32,7 +34,7 @@ App.CommandParser = Ember.Object.extend({
         if (!this[funcName]) {
             Ember.Logger.warn('Unknown command received: ' + name);
         } else {
-            this[funcName](command);
+            this[funcName](command, targetWindow);
         }
     },
 
@@ -46,20 +48,21 @@ App.CommandParser = Ember.Object.extend({
         App.windowCollection.pushObject(windowRecord);
     },
 
-    _handleClose: function(data) {
-        App.windowCollection.removeObject(data._targetWindow);
+    _handleClose: function(data, targetWindow) {
+        App.windowCollection.removeObject(targetWindow);
     },
 
-    _handleAddtext: function(data) {
-        if (!data._targetWindow) {
+    _handleAddtext: function(data, targetWindow) {
+        if (!targetWindow) {
             return;
         }
 
         delete data.windowId;
         var messageRecord = App.Message.create(data);
-        var messages = data._targetWindow.messages;
+        var messages = targetWindow.messages;
 
         messages.pushObject(messageRecord);
+        targetWindow.incrementProperty('newMessagesCount');
 
         if (messages.length > 200) {
             messages.shiftObject();
@@ -70,23 +73,22 @@ App.CommandParser = Ember.Object.extend({
         jQuery.extend(App.nicks, data);
     },
 
-    _handleAddnames: function(data) {
-        if (!data._targetWindow) {
+    _handleAddnames: function(data, targetWindow) {
+        if (!targetWindow) {
             return;
         }
 
         if (data.reset) {
-            data._targetWindow.operators.clear();
-            data._targetWindow.users.clear();
+            targetWindow.operators.clear();
+            targetWindow.users.clear();
         }
 
-
         if (data.operators) {
-            data._targetWindow.operators.pushObjects(data.operators);
+            targetWindow.operators.pushObjects(data.operators);
         }
 
         if (data.users) {
-            data._targetWindow.users.pushObjects(data.users);
+            targetWindow.users.pushObjects(data.users);
         }
     }
 });
