@@ -103,8 +103,14 @@ module.exports = function *() {
             break;
 
         case 'UPDATE':
-            if (typeof(body.visible) !== 'undefined') {
-                yield redis.hset('window:' + userId + ':' + windowId, 'visible', body.visible);
+            var accepted = ['visible', 'row'];
+
+            for (var i = 0; i < accepted.length; i++) {
+                var prop = body[accepted[i]];
+
+                if (typeof(prop) !== 'undefined') {
+                    yield redis.hset('window:' + userId + ':' + windowId, accepted[i], prop);
+                }
             }
             // TBD Broadcast the update to other sessions *if* the value was changed!
             break;

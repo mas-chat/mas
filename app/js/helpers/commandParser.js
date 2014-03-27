@@ -17,8 +17,6 @@
 'use strict';
 
 App.CommandParser = Ember.Object.extend({
-    _row: 0, // TBD: HACK
-
     process: function(command) {
         var name = command.id;
         var targetWindow = null;
@@ -39,11 +37,6 @@ App.CommandParser = Ember.Object.extend({
     },
 
     _handleCreate: function(data) {
-        data.row = this._row; // TDB: HACK
-        if (data.windowId % 3 === 2) {
-            this._row++;
-        }
-
         var windowRecord = App.Window.create(data);
         App.windowCollection.pushObject(windowRecord);
     },

@@ -50,7 +50,8 @@ App.Window = Ember.Object.extend({
         App.networkMgr.send({
             id: 'UPDATE',
             windowId: this.get('windowId'),
+            row: this.get('row'),
             visible: this.get('visible')
         });
-    }.observes('visible')
+    }.observes('visible', 'row')
 });
