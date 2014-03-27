@@ -19,21 +19,21 @@
 App.MainController = Ember.ArrayController.extend({
     actions: {
         show: function(window) {
-            window.set('hidden', false);
+            window.set('visible', true);
         }
     },
 
     sortedVisibleWindows: function() {
         return this.get('model').filter(function(val) {
-            return !val.get('hidden');
+            return val.get('visible');
         }).sortBy('row');
-    }.property('model.@each.hidden', 'model.@each.row'),
+    }.property('model.@each.visible', 'model.@each.row'),
 
     sortedHiddenWindows: function() {
         return this.get('model').filter(function(val) {
-            return val.get('hidden');
+            return !val.get('visible');
         }).sortBy('timeHidden');
-    }.property('model.@each.hidden'),
+    }.property('model.@each.visible'),
 
     nextRow: function(item, direction) {
         var windows = this.get('sortedVisibleWindows');
