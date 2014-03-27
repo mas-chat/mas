@@ -27,7 +27,7 @@ App.WindowController = Ember.ObjectController.extend({
         },
 
         hide: function() {
-            this.set('hidden', true);
+            this.set('visible', false);
             this.set('timeHidden', Date.now());
             this.set('newMessagesCount', 0);
         },
