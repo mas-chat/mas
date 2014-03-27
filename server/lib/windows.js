@@ -82,6 +82,7 @@ exports.createNewWindow = function *(userId, network, name, password, type) {
         titleAlert: false,
         userMode: 'owner',
         visible: true,
+        row: 0,
         password: password,
         topic: ''
     };
