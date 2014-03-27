@@ -25,11 +25,12 @@ App.Window = Ember.Object.extend({
         this.users = Ember.A([]);
     },
 
+    windowId: 0,
     name: null,
     network: null,
     type: null,
     row: null,
-    hidden: false,
+    visible: false,
     messages: null,
     newMessagesCount: 0,
 
@@ -43,5 +44,13 @@ App.Window = Ember.Object.extend({
         var name = this.get('name');
         name = name.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
         return name;
-    }.property('name')
+    }.property('name'),
+
+    syncServer: function() {
+        App.networkMgr.send({
+            id: 'UPDATE',
+            windowId: this.get('windowId'),
+            visible: this.get('visible')
+        });
+    }.observes('visible')
 });

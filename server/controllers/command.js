@@ -101,6 +101,13 @@ module.exports = function *() {
                 password: body.password
             });
             break;
+
+        case 'UPDATE':
+            if (typeof(body.visible) !== 'undefined') {
+                yield redis.hset('window:' + userId + ':' + windowId, 'visible', body.visible);
+            }
+            // TBD Broadcast the update to other sessions *if* the value was changed!
+            break;
     }
 
     // TBD: Add lookup table for commands
