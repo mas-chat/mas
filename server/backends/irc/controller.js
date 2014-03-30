@@ -97,7 +97,7 @@ function *processJoin(params) {
         status: 'ok',
     });
 
-    yield outbox.queue(params.userId, true, createCommand);
+    yield outbox.queueAll(params.userId, createCommand);
 }
 
 function *processClose(params) {
@@ -303,7 +303,7 @@ function *handle366(userId, msg) {
     var ops = yield redis.smembers('names:' + userId + ':' + windowId + ':ops');
     var users = yield redis.smembers('names:' + userId + ':' + windowId + ':users');
 
-    yield outbox.queue(userId, true, {
+    yield outbox.queueAll(userId, {
         id: 'ADDNAMES',
         reset: true,
         windowId: windowId,
@@ -322,7 +322,7 @@ function *handle376(userId, msg) {
     for (var i = 0; i < channels.length; i++) {
         var windowId = yield windowHelper.getWindowId(userId, msg.network, channels[i]);
 
-        yield outbox.queue(userId, true, {
+        yield outbox.queueAll(userId, {
             id: 'ADDNAMES',
             reset: true,
             windowId: windowId,
@@ -336,7 +336,7 @@ function *handle376(userId, msg) {
         });
     }
 
-    yield nicks.sendNick(userId, true);
+    yield nicks.sendNickAll(userId);
 }
 
 function *handle433(userId, msg) {
@@ -363,7 +363,7 @@ function *handleJoin(userId, msg) {
         var names = [ msg.nick ];
         yield updateNamesSets(names, userId, windowId);
 
-        yield outbox.queue(userId, true, {
+        yield outbox.queueAll(userId, {
             id: 'ADDNAMES',
             reset: false,
             windowId: windowId,

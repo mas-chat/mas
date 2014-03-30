@@ -88,7 +88,7 @@ function *processCreate(params) {
     windowDetails.windowId = parseInt(windowId);
     windowDetails.network = 'MAS';
 
-    yield outbox.queue(userId, true, windowDetails);
+    yield outbox.queueAll(userId, windowDetails);
 }
 
 // function *processJoin(params) {
