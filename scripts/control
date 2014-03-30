@@ -14,7 +14,7 @@ NO_COLOR='\e[0m'
 
 source $ROOT/scripts/read_ini.sh
 
-read_ini $ROOT/mas.conf
+read_ini $ROOT/mas.conf --booleans 0
 
 PID_DIRECTORY=${INI__pid__directory%/}
 LOG_DIRECTORY=${INI__log__directory%/}
