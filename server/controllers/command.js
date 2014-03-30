@@ -72,7 +72,8 @@ module.exports = function *() {
             break;
 
         case 'CLOSE':
-            yield outbox.queue(userId, true, {
+            // Ask all session to close this window
+            yield outbox.queueAll(userId, {
                 id: 'CLOSE',
                 windowId: windowId,
             });
@@ -112,7 +113,14 @@ module.exports = function *() {
                     yield redis.hset('window:' + userId + ':' + windowId, accepted[i], prop);
                 }
             }
-            // TBD Broadcast the update to other sessions *if* the value was changed!
+
+            // Notify all sessions
+            yield outbox.queueAll(userId, {
+                id: 'UPDATE',
+                windowId: windowId,
+                visible: body.visible,
+                row: body.row
+            });
             break;
     }
 

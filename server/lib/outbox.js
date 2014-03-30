@@ -22,29 +22,13 @@ var util = require('util'),
     redis = redisModule.createClient();
 
 exports.queue = function *(userId, sessionId) {
-    var commands = [];
+    var commands = normalizeCommands(Array.prototype.slice.call(arguments, 2));
+    yield redis.run.apply(this, [ 'queueOutbox', userId, sessionId ].concat(commands));
+};
 
-    // If sessionID is boolean 'true' then broadcast to all active session
-    if (sessionId === true) {
-        sessionId = 0;
-    }
-
-    for (var i = 2; i < arguments.length; i++) {
-        var command = arguments[i];
-
-        if (util.isArray(command)) {
-            commands = commands.concat(command);
-        } else {
-            commands.push(command);
-        }
-    }
-
-    commands = commands.map(function(value) {
-        return typeof(value) === 'string' ? value : JSON.stringify(value);
-    });
-
-    var params = [ 'queueOutbox', userId, sessionId ].concat(commands);
-    yield redis.run.apply(this, params);
+exports.queueAll = function *(userId) {
+    var commands = normalizeCommands(Array.prototype.slice.call(arguments, 1));
+    yield redis.run.apply(this, [ 'queueOutbox', userId, 0 ].concat(commands));
 };
 
 exports.flush = function *(userId, sessionId, timeout) {
@@ -81,3 +65,21 @@ exports.length = function *(userId, sessionId) {
     // TBD Add helper concat('outbox', userId, sessionId)
     return parseInt(yield redis.llen('outbox:' + userId + ':' + sessionId));
 };
+
+function normalizeCommands(commands) {
+    var commandArray = [];
+
+    commands.forEach(function (command) {
+        if (util.isArray(command)) {
+            commandArray = commandArray.concat(command);
+        } else {
+            commandArray.push(command);
+        }
+    });
+
+    commandArray = commandArray.map(function(value) {
+        return typeof(value) === 'string' ? value : JSON.stringify(value);
+    });
+
+    return commandArray;
+}

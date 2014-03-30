@@ -20,7 +20,17 @@ var redis = require('./redis').createClient(),
     outbox = require('./outbox'),
     conf = require('./conf');
 
+exports.sendNickAll = function *(userId) {
+    var command = yield buildCommand(userId);
+    yield outbox.queueAll(userId, command);
+};
+
 exports.sendNick = function *(userId, sessionId) {
+    var command = yield buildCommand(userId);
+    yield outbox.queue(userId, sessionId, command);
+};
+
+function *buildCommand(userId) {
     var command = {
         id: 'NICK'
     };
@@ -41,5 +51,5 @@ exports.sendNick = function *(userId, sessionId) {
         }
     }
 
-    yield outbox.queue(userId, sessionId, command);
-};
+    return command;
+}
