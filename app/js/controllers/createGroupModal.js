@@ -22,8 +22,17 @@ App.CreateGroupModalController = Ember.ObjectController.extend({
 
     actions: {
         submit: function() {
-            console.log('Submit create group' + this.get('group'));
-            this.send('closeModal');
+            App.networkMgr.send({
+                id: 'CREATE',
+                name: this.get('channel'),
+                password: this.get('password')
+            }, function(resp) {
+                if (resp.status === 'ok') {
+                    this.send('closeModal');
+                } else {
+                    this.set('errorMsg', resp.errorMsg);
+                }
+            }.bind(this));
         },
 
         close: function() {
