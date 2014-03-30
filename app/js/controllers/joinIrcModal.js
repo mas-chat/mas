@@ -26,8 +26,6 @@ App.JoinIrcModalController = Ember.ObjectController.extend({
 
     actions: {
         submit: function() {
-            console.log('Submit join irc');
-
             App.networkMgr.send({
                 id: 'JOIN',
                 network: this.get('selectedNetwork'),

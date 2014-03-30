@@ -22,8 +22,18 @@ App.JoinGroupModalController = Ember.ObjectController.extend({
 
     actions: {
         submit: function() {
-            console.log('Submit join group');
-            this.send('closeModal');
+            App.networkMgr.send({
+                id: 'JOIN',
+                network: 'MAS',
+                name: this.get('channel'),
+                password: this.get('password')
+            }, function(resp) {
+                if (resp.status === 'ok') {
+                    this.send('closeModal');
+                } else {
+                    this.set('errorMsg', resp.errorMsg);
+                }
+            }.bind(this));
         },
 
         close: function() {
