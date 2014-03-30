@@ -67,13 +67,8 @@ App.WindowView = Ember.View.extend({
     didInsertElement: function() {
         this.$messagePanel = this.$('.window-messages');
         this.goToBottom();
-        var that = this;
 
-        var observer = new MutationObserver(function(mutations) {
-            Ember.run(function() {
-                that.handleMutations(mutations);
-            });
-        });
+        var observer = new MutationObserver(Ember.run.bind(this, this.handleMutations));
         observer.observe(this.$messagePanel[0], { childList: true });
 
         this.$messagePanel.scroll(function() {
