@@ -34,7 +34,7 @@
         {{input action="sendMessage" placeholder="Write here&hellip;" class="form-control" valueBinding="newMessage"}}
     </div>
 
-    <div class="window-buttons">
+    <div class="window-buttons flex-row">
         <button type="button" class="btn">
             <span class="glyphicon glyphicon-link"></span>
         </button>
@@ -45,9 +45,6 @@
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-right">
-                <li><a href="#">Action</a></li>
-                <li><a href="#">Another action</a></li>
-                <li class="divider"></li>
                 <li {{action "moveRowUp"}}><a href="#">Move one row up</a></li>
                 <li {{action "moveRowDown"}}><a href="#">Move one row down</a></li>
                 <li class="divider"></li>

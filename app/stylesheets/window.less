@@ -127,24 +127,27 @@ ul.user-image {
 
 .window-toolbar {
     border-top: 1px solid @window-line-color;
-    background-color: @window-toolbar-bg-color;
+    height: 32px;
+
+    .btn {
+        background-color: whitesmoke;
+        color: #777777;
+        padding: 3px 16px;
+    }
+
+    .dropdown-toggle {
+        width: 50px;
+    }
+
+    .form-control {
+        background-color: white;
+        box-shadow: none;
+        height: 31px;
+        padding: 0px 10px;
+    }
 }
 
 .window-buttons {
     width: 100px;
     border-left: 1px solid @window-line-color;
-}
-
-.window-toolbar .form-control {
-    height: 30px;
-    background-color: white;
-    padding: 0px 5px;
-    box-shadow: none;
-}
-
-.window-toolbar .btn {
-    background-color: @window-toolbar-bg-color;
-    width: 30px;
-    color: #333333;
-    line-height: 14px;
 }
