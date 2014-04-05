@@ -19,6 +19,7 @@
 App.JoinGroupModalController = Ember.ObjectController.extend({
     group: '',
     password: '',
+    errorMsg: '',
 
     actions: {
         submit: function() {
