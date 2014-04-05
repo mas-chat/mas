@@ -43,7 +43,7 @@ MAS Redis structures
    <userId1>, <userId2> ...
 
  friends:<userId> (set)
-   <userID1>, <userId2> ...
+   <userId1>, <userId2> ...
 
  settings:<userId> (hash)
    <name> (string)
@@ -66,6 +66,17 @@ MAS Redis structures
    userMode (string)
 
  windowmsgs:<userId>:<windowId> (list) [oldest message on the right]
+
+ group:<name> (hash)
+   owner (int, userId)
+   password: (string)
+   apikey: (string)
+
+ groupmembers:<name> (set)
+   <userId1>, <userId2> ...
+
+ groupbacklog:<name> (list)
+   <msg1>, <msg2>
 
  names:<userId>:<windowId>:ops (set)
    nick1, nick2
