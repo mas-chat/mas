@@ -20,11 +20,12 @@ App.CommandParser = Ember.Object.extend({
     process: function(command) {
         var name = command.id;
         var targetWindow = null;
+        var windowId = command.windowId;
 
         delete command.id;
 
-        if (command.windowId) {
-            targetWindow = App.windowCollection.findBy('windowId', command.windowId);
+        if (typeof windowId === 'number') {
+            targetWindow = App.windowCollection.findBy('windowId', windowId);
         }
 
         var funcName = '_handle' + name.charAt(0) + name.substring(1).toLowerCase();
