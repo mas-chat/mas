@@ -79,7 +79,7 @@ function *processCreate(params) {
         status: 'ok'
     });
 
-    yield redis.sadd('group:' + groupName, {
+    yield redis.hmset('group:' + groupName, {
         owner: userId,
         password: password,
         apikey: ''
