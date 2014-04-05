@@ -29,6 +29,17 @@ if [[ "$LOG_DIRECTORY" != /* ]]; then
     LOG_DIRECTORY=$ROOT/$LOG_DIRECTORY
 fi
 
+usage ()
+{
+    echo "Usage: control [options] <start|stop|restart|status>"
+    echo ""
+    echo "control is a tool to manage MAS processes."
+    echo ""
+    echo "-c|--connman         Also start, stop or restart IRC connman process."
+    echo "-i|--import          MeetAndSpeak.com specific option."
+    exit
+}
+
 while [[ $# > 0 ]]; do
     KEY="$1"
     shift
@@ -53,9 +64,14 @@ while [[ $# > 0 ]]; do
         ACTION='status'
         ;;
     *)
+        usage
         ;;
     esac
 done
+
+if [ $ACTION == "none" ]; then
+    usage
+fi
 
 if [ $ACTION == "stop" ] || [ $ACTION == "restart" ]; then
     # Kill all running mas processes
@@ -66,13 +82,18 @@ if [ $ACTION == "stop" ] || [ $ACTION == "restart" ]; then
         SUDO=''
 
         if $ALSO_CONNMAN || [ $NAME != "mas-irc-connman" ]; then
-            printf "${RED_COLOR}Stopping:${NO_COLOR} $NAME [owner: $OWNER]\n"
-
-            if [ $OWNER == "root" ]; then
+            if [ -n "$OWNER" ] && [ $OWNER == "root" ]; then
                 SUDO='sudo'
             fi
 
-            $SUDO kill $PID;
+            $SUDO kill $PID 2>/dev/null
+
+            if [ $? -eq 0 ]; then
+                printf "${RED_COLOR}Stopped:${NO_COLOR} $NAME [owner: $OWNER]\n"
+            else
+                echo "Process $NAME (pid: $PID) was not running even the PID file existed."
+            fi
+
             $SUDO rm -f $file # In case the process was already dead
         fi
     done
