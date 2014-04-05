@@ -21,7 +21,7 @@
     "koa": "~0.5.0",
     "koa-hbs": "~0.4.1",
     "koa-router": "ilkkao/koa-router",
-    "koa-resource-router": "~0.2.0",
+    "koa-resource-router": "~0.3.0",
     "koa-error": "~1.1.1",
     "koa-static": "~1.4.2",
     "koa-less": "0.0.1",
@@ -36,18 +36,18 @@
     "npid": "^0.3.2"
   },
   "devDependencies": {
-    "ember-template-compiler": "~1.4.0-beta.1",
+    "ember-template-compiler": "~1.5.0",
     "grunt": "~0.4.1",
     "grunt-cli": "~0.1.13",
-    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-contrib-jshint": "~0.10.0",
     "grunt-bower-task": "~0.3.4",
-    "grunt-contrib-watch": "~0.5.3",
-    "browserify": "~3.31.2",
-    "grunt-browserify": "~1.3.1",
+    "grunt-contrib-watch": "~0.6.1",
+    "browserify": "~3.38.0",
+    "grunt-browserify": "~2.0.3",
     "grunt-ember-templates": "~0.4.18",
-    "grunt-contrib-less": "~0.9.0",
+    "grunt-contrib-less": "~0.11.0",
     "grunt-contrib-uglify": "~0.4.0",
-    "grunt-contrib-concat": "~0.3.0"
+    "grunt-contrib-concat": "~0.4.0"
   },
   "scripts": {
     "test": "redis-server -v && uname -a && df -h && grunt --verbose",
