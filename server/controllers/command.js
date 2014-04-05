@@ -59,6 +59,16 @@ module.exports = function *() {
             }, sessionId);
             break;
 
+        case 'CREATE':
+            yield courier.send('loopbackparser', {
+                type: 'create',
+                userId: userId,
+                sessionId: sessionId,
+                name: body.name,
+                password: body.password
+            });
+            break;
+
         case 'JOIN':
             backend = body.network === 'MAS' ? 'loopbackparser' : 'ircparser';
             yield courier.send(backend, {
@@ -92,16 +102,6 @@ module.exports = function *() {
             yield redis.del('windowmsgs:' + userId + ':' + windowId);
             yield redis.del('names:' + userId + ':' + windowId + ':ops',
                 'names:' + userId + ':' + windowId + ':users');
-            break;
-
-        case 'CREATE':
-            yield courier.send('loopbackparser', {
-                type: 'create',
-                userId: userId,
-                sessionId: sessionId,
-                name: body.name,
-                password: body.password
-            });
             break;
 
         case 'UPDATE':
