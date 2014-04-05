@@ -47,7 +47,9 @@ module.exports = function(grunt) {
                     'app/dist/app.js': ['app/js/app.js'],
                 },
                 options: {
-                    debug: true
+                    bundleOptions: {
+                        debug: true
+                    }
                 }
             }
         },
@@ -84,20 +86,12 @@ module.exports = function(grunt) {
                         'server/public/vendor/handlebars/handlebars.js',
                         'server/public/vendor/ember/ember.js'
                     ],
-                    'app/dist/mas.js': [
-                        'app/dist/templates.js',
+                    'app/dist/app.js': [
                         'app/dist/app.js'
                     ]}
             }
         },
         concat: {
-            app: {
-                src: [
-                    'app/dist/templates.js',
-                    'app/dist/app.js'
-                ],
-                dest: 'app/dist/mas.js'
-            },
             libs: {
                 src: [
                     'server/public/vendor/momentjs/moment.js',
@@ -120,11 +114,11 @@ module.exports = function(grunt) {
         watch: {
             templates: {
                 files: ['app/templates/**/*.hbs'],
-                tasks: ['emberTemplates', 'concat:app']
+                tasks: ['emberTemplates']
             },
             app: {
                 files: ['app/js/**/*.js'],
-                tasks: ['browserify', 'concat:app']
+                tasks: ['browserify']
             },
             libs: {
                 files: ['app/libs/**/*.js'],
@@ -149,9 +143,7 @@ module.exports = function(grunt) {
     // Default task(s).
     grunt.registerTask('default', [ 'jshint' ]);
 
-    grunt.registerTask('dev', [ 'bower', 'emberTemplates', 'browserify', 'concat:app',
-        'concat:libs', 'less' ]);
-    grunt.registerTask('prod', [ 'bower', 'emberTemplates', 'browserify', 'uglify:app',
-        'ufligy:libs', 'less' ]);
+    grunt.registerTask('dev', [ 'bower', 'emberTemplates', 'browserify', 'concat:libs', 'less' ]);
+    grunt.registerTask('prod', [ 'bower', 'emberTemplates', 'browserify', 'uglify:app', 'less' ]);
 
 };
