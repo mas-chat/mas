@@ -64,10 +64,10 @@ module.exports = function *() {
             yield courier.send(backend, {
                 type: 'join',
                 userId: userId,
+                sessionId: sessionId,
                 network: body.network,
                 name: body.name,
-                password: body.password,
-                sessionId: sessionId
+                password: body.password
             });
             break;
 
@@ -98,6 +98,7 @@ module.exports = function *() {
             yield courier.send('loopbackparser', {
                 type: 'create',
                 userId: userId,
+                sessionId: sessionId,
                 name: body.name,
                 password: body.password
             });

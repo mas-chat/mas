@@ -19,12 +19,13 @@
 App.CreateGroupModalController = Ember.ObjectController.extend({
     group: '',
     password: '',
+    errorMsg: '',
 
     actions: {
         submit: function() {
             App.networkMgr.send({
                 id: 'CREATE',
-                name: this.get('channel'),
+                name: this.get('group'),
                 password: this.get('password')
             }, function(resp) {
                 if (resp.status === 'ok') {
