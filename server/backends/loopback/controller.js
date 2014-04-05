@@ -26,6 +26,7 @@ var co = require('co'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('loopbackparser'),
     textLine = require('../../lib/textLine'),
+    windowHelper = require('../../lib/windows'),
     outbox = require('../../lib/outbox');
 
 common.init();
@@ -35,15 +36,13 @@ co(function *() {
 
     courier.on('send', processSend);
     courier.on('create', processCreate);
+    courier.on('join', processJoin);
     courier.start();
 })();
 
-// Upper layer messages
-
-// addText
 function *processSend(params) {
     var group = params.name;
-    var members = yield redis.smembers('group:' + group);
+    var members = yield redis.smembers('groupmembers:' + group);
     var nick = yield redis.hget('user:' + params.userId, 'nick');
 
     for (var i = 0; i < members.length; i++) {
@@ -61,35 +60,50 @@ function *processSend(params) {
 function *processCreate(params) {
     var userId = params.userId;
     var groupName = params.name;
-    var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
+    var password = params.password;
+    var existingGroup = yield redis.hgetall('group:' + groupName);
 
-    // TBD: Check that group doesn't exist
-    yield redis.sadd('group:' + groupName, userId);
+    if (existingGroup) {
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'CREATE_RESP',
+            status: 'error',
+            errorMsg: 'A group by this name already exists. If you\'d like, you can try to join it.'
+        });
+        return;
+    }
+
+    // TBD Add other checks
+
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'CREATE_RESP',
+        status: 'ok'
+    });
+
+    yield redis.sadd('group:' + groupName, {
+        owner: userId,
+        password: password,
+        apikey: ''
+    });
 
     log.info(userId, 'Created new MAS group:' + groupName);
 
-    // TBD Use windowhelper
-    var windowDetails = {};
-    //     name: groupName,
-    //     type: 'group',
-    //     sounds: 0,
-    //     password: '',
-    //     titleAlert: 1,
-    //     visible: 1,
-    //     topic: '',
-    //     userMode: 2, // TBD: Check and fix
-    //     newMsgs: 0 // TBD: Check and fix
-    // };
-
-    yield redis.hmset('window:' + userId + ':' + windowId, windowDetails);
-    yield redis.sadd('windowlist:' + userId, windowId + ':MAS:' + groupName);
-
-    windowDetails.id = 'CREATE';
-    windowDetails.windowId = parseInt(windowId);
-    windowDetails.network = 'MAS';
-
-    yield outbox.queueAll(userId, windowDetails);
+    yield joinGroup(params);
 }
 
-// function *processJoin(params) {
-// });
+ function *processJoin(params) {
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'JOIN_RESP',
+        status: 'ok'
+    });
+
+    yield joinGroup(params);
+ }
+
+function *joinGroup(params) {
+    var groupName = params.name;
+    var createCommand = yield windowHelper.createNewWindow(params.userId, 'MAS',
+        groupName, params.password, 'group');
+
+    yield outbox.queueAll(params.userId, createCommand);
+    yield redis.sadd('groupmembers:' + groupName, params.userId);
+}

@@ -26,7 +26,7 @@ App.JoinGroupModalController = Ember.ObjectController.extend({
             App.networkMgr.send({
                 id: 'JOIN',
                 network: 'MAS',
-                name: this.get('channel'),
+                name: this.get('group'),
                 password: this.get('password')
             }, function(resp) {
                 if (resp.status === 'ok') {
