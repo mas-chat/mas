@@ -35,9 +35,10 @@ function *buildCommand(userId) {
         id: 'NICK'
     };
 
-    var redisParams = [ 'user:' + userId ];
-    var networks = [];
+    var redisParams = [ 'user:' + userId, 'currentnick:MAS' ];
+    var networks = [ 'MAS' ];
 
+    // Add IRC networks
     for (var network in conf.get('irc:networks')) { /* jshint -W089 */
         redisParams.push('currentnick:' + network);
         networks.push(network);
@@ -50,6 +51,7 @@ function *buildCommand(userId) {
             command[networks[i]] = nicks[i];
         }
     }
+
 
     return command;
 }
