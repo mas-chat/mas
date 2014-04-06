@@ -29,7 +29,7 @@ module.exports = {
         var cookie;
         var passwordSha, passwordShaNoSalt;
 
-        var userId = yield redis.hget('index:user', body.emailOrNick);
+        var userId = yield redis.hget('index:user', body.emailOrNick.toLowerCase());
 
         if (userId) {
             user = yield redis.hgetall('user:' + userId);
