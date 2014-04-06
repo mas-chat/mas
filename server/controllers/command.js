@@ -34,6 +34,7 @@ module.exports = function *() {
     var result = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
     var name = result[0];
     var network = result[1];
+    var type = result[2];
     var backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
 
     log.info(userId, 'Prosessing command: ' + command);
@@ -42,15 +43,27 @@ module.exports = function *() {
 
     switch (command) {
         case 'SEND':
-            yield courier.send(backend, {
-                type: 'send',
-                userId: userId,
-                network: network,
-                name: name,
-                text: body.text
-            });
-
             var nick = yield redis.hget('user:' + userId, 'currentnick:' + network);
+
+            if (network === 'MAS' && type === '1on1') {
+                var targetUserId = yield redis.hget('window:' + userId + ':' + windowId,
+                    'targetUserId');
+
+                yield courier.send(backend, {
+                    type: 'sendPrivate',
+                    userId: userId,
+                    targetUserId: targetUserId,
+                    text: body.text
+                });
+            } else {
+                yield courier.send(backend, {
+                    type: 'send',
+                    userId: userId,
+                    network: network,
+                    name: name,
+                    text: body.text
+                });
+            }
 
             yield textLine.sendByWindowId(userId, windowId, {
                 nick: nick,
@@ -97,7 +110,8 @@ module.exports = function *() {
             });
 
             // Redis cleanup
-            yield redis.srem('windowlist:' + userId, windowId + ':' + network + ':' + name);
+            yield redis.srem('windowlist:' + userId,
+                windowId + ':' + network + ':' + name + ':' + type);
             yield redis.del('window:' + userId + ':' + windowId);
             yield redis.del('windowmsgs:' + userId + ':' + windowId);
             yield redis.del('names:' + userId + ':' + windowId + ':ops',
