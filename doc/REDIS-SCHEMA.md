@@ -49,7 +49,7 @@ MAS Redis structures
    <name> (string)
 
  windowlist:<userId> (set)
-   <windowId>:<network>:<name>
+   <windowId>:<network>:<name>:<type>
 
  networks:<userId>:<network> (hash)
    state (string, 'connected', 'connecting', 'disconnected')
@@ -58,6 +58,7 @@ MAS Redis structures
  window:<userId>:<windowId> (hash)
    name (string)
    type (string)
+   targetUserId (int)
    sounds (bool)
    password (string)
    titleAlert (bool)

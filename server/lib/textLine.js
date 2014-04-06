@@ -78,14 +78,19 @@ exports.broadcast = function *(userId, network, msg) {
     }
 };
 
-exports.send = function *(userId, network, group, msg) {
-    msg.windowId = yield windowHelper.getWindowId(userId, network, group);
+exports.send = function *(userId, network, name, type, msg) {
+    msg.windowId = yield windowHelper.getWindowId(userId, network, name, type);
     yield processTextLine(userId, msg, null);
 };
 
 exports.sendByWindowId = function *(userId, windowId, msg, excludeSession) {
     msg.windowId = windowId;
     yield processTextLine(userId, msg, excludeSession);
+};
+
+exports.sendFromUserId = function *(userId, targetUserId, msg) {
+    msg.windowId = yield windowHelper.getWindowIdByTargetUserId(targetUserId, userId);
+    yield processTextLine(targetUserId, msg, null);
 };
 
 function *processTextLine(userId, msg, excludeSession) {
