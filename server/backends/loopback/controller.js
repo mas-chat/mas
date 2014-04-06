@@ -35,19 +35,20 @@ co(function *() {
     yield redisModule.loadScripts();
 
     courier.on('send', processSend);
+    courier.on('sendPrivate', processSendPrivate);
     courier.on('create', processCreate);
     courier.on('join', processJoin);
     courier.start();
 })();
 
 function *processSend(params) {
-    var group = params.name;
-    var members = yield redis.smembers('groupmembers:' + group);
+    var name = params.name;
+    var members = yield redis.smembers('groupmembers:' + name);
     var nick = yield redis.hget('user:' + params.userId, 'nick');
 
     for (var i = 0; i < members.length; i++) {
         if (members[i] !== params.userId) {
-            yield textLine.send(members[i], 'MAS', group, {
+            yield textLine.send(members[i], 'MAS', name, {
                 nick: nick,
                 cat: 'msg',
                 body: params.text,
@@ -55,6 +56,17 @@ function *processSend(params) {
             });
         }
     }
+}
+
+function *processSendPrivate(params) {
+    var nick = yield redis.hget('user:' + params.userId, 'nick');
+
+    yield textLine.sendFromUserId(params.userId, params.targetUserId, {
+        nick: nick,
+        cat: 'msg',
+        body: params.text,
+        ts: Math.round(Date.now() / 1000)
+    });
 }
 
 function *processCreate(params) {

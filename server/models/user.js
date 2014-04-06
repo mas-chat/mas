@@ -54,8 +54,8 @@ User.prototype.generateUserId = function *() {
 
 User.prototype.save = function *() {
     var index = {};
-    index[this.data.nick] = this.data.userid;
-    index[this.data.email] = this.data.userid;
+    index[this.data.nick.toLowerCase()] = this.data.userid;
+    index[this.data.email.toLowerCase()] = this.data.userid;
 
     yield redis.hmset('user:' + this.data.userid, this.data);
     yield redis.hmset('index:user', index);

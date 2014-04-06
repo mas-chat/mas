@@ -371,7 +371,7 @@ function *handleJoin(userId, msg) {
         });
     }
 
-    yield textLine.send(userId, msg.network, channel, {
+    yield textLine.send(userId, msg.network, channel, 'group', {
         cat: 'info',
         body: msg.nick + ' (' + msg.userNameAndHost + ') has joined channel ' + channel,
         ts: Math.round(Date.now() / 1000)
@@ -379,14 +379,16 @@ function *handleJoin(userId, msg) {
 }
 
 function *handlePrivmsg(userId, msg) {
-    var group = msg.params[0];
+    var channel = msg.params[0];
     var text = msg.params[1];
 
     // if (0) { // TBD target === currentNick
     // } else {
     // }
 
-    yield textLine.send(userId, msg.network, group, {
+    // TBD Handle 1on1 conversations
+
+    yield textLine.send(userId, msg.network, channel, 'group', {
         nick: msg.nick,
         cat: 'msg',
         body: text,
