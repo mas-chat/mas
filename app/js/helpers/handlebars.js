@@ -20,50 +20,6 @@ Ember.Handlebars.helper('decoratedTimestamp', function(timestamp) {
     return new Handlebars.SafeString(moment.unix(timestamp).format('HH:mm'));
 });
 
-Ember.Handlebars.helper('decoratedBody', function(text) {
-    function escHtml(string, full) {
-        var res = string.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-        return full ? res.replace(/>/g, '&gt;').replace(/"/g, '&quot;') : res;
-    }
-
-    var textParts = [];
-    var imgUrls = [];
-    var pos = 0;
-    var imgSuffixes = ['png', 'jpg', 'jpeg', 'gif'];
-
-    URI.withinString(text, function(url, start, end, source) {
-        var urlObj = new URI(url);
-        var visibleLink;
-
-        if (start !== pos) {
-            textParts.push(escHtml(source.substring(pos, start), false));
-        }
-
-        if (imgSuffixes.indexOf(urlObj.suffix()) !== -1) {
-            imgUrls.push('<li><a href="' + escHtml(url, true) + '" target="_newtab">' +
-                '<img src="' + escHtml(url, true) + '"></a></li>');
-            visibleLink = escHtml(urlObj.filename(), false);
-        } else {
-            visibleLink = escHtml(urlObj.readable(), false);
-        }
-
-        textParts.push('<a href="' + escHtml(url, true) + '" target="_newtab">' +
-            visibleLink + '</a>');
-        pos = end;
-
-        return url;
-    });
-
-    if (pos !== text.length) {
-        textParts.push(escHtml(text.substring(pos), false));
-    }
-
-    var textSection = '<span class="body">' + textParts.join('') + '</span>';
-    var imgSection = imgUrls.length ? '<ul class="user-image">' + imgUrls.join(' ') + '</ul>' : '';
-
-    return new Handlebars.SafeString(textSection + imgSection);
-});
-
 Ember.Handlebars.helper('decoratedTitle', function(name, network, type) {
     var title;
 
