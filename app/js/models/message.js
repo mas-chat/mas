@@ -24,4 +24,53 @@ App.Message = Ember.Object.extend({
     type: null,
 
     ircMotd: false,
+
+    decoratedBody: function() {
+        return this._decorate(this.get('body'));
+    }.property('body'),
+
+    _decorate: function(text) {
+        var textParts = [];
+        var imgUrls = [];
+        var pos = 0;
+        var imgSuffixes = ['png', 'jpg', 'jpeg', 'gif'];
+
+        URI.withinString(text, function(url, start, end, source) {
+            var urlObj = new URI(url);
+            var visibleLink;
+
+            if (start !== pos) {
+                textParts.push(this._escHtml(source.substring(pos, start), false));
+            }
+
+            if (imgSuffixes.indexOf(urlObj.suffix()) !== -1) {
+                imgUrls.push('<li><a href="' + this._escHtml(url, true) + '" target="_newtab">' +
+                    '<img src="' + this._escHtml(url, true) + '"></a></li>');
+                visibleLink = this._escHtml(urlObj.filename(), false);
+            } else {
+                visibleLink = this._escHtml(urlObj.readable(), false);
+            }
+
+            textParts.push('<a href="' + this._escHtml(url, true) + '" target="_newtab">' +
+                visibleLink + '</a>');
+            pos = end;
+
+            return url;
+        }.bind(this));
+
+        if (pos !== text.length) {
+            textParts.push(this._escHtml(text.substring(pos), false));
+        }
+
+        var textSection = '<span class="body">' + textParts.join('') + '</span>';
+        var imgSection = imgUrls.length ? '<ul class="user-image">' + imgUrls.join(' ') +
+            '</ul>' : '';
+
+        return textSection + imgSection;
+    },
+
+    _escHtml: function (string, full) {
+        var res = string.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+        return full ? res.replace(/>/g, '&gt;').replace(/"/g, '&quot;') : res;
+    }
 });
