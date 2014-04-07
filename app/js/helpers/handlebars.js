@@ -29,7 +29,7 @@ Ember.Handlebars.helper('decoratedBody', function(text) {
     var textParts = [];
     var imgUrls = [];
     var pos = 0;
-    var imgSuffixes = ['png', 'jpg', 'jpeg'];
+    var imgSuffixes = ['png', 'jpg', 'jpeg', 'gif'];
 
     URI.withinString(text, function(url, start, end, source) {
         var urlObj = new URI(url);
