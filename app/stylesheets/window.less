@@ -10,147 +10,147 @@
     margin: 0px 4px 4px 0px;
     font-size: 13px;
     border: 1px solid @window-outer-line-color;
-}
+    color: #333333;
 
-.window-title {
-    padding: 4px 8px;
-    background-color: @window-title-bg-color;
-    border-bottom: 1px solid @window-outer-line-color;
-    color: whitesmoke;
-}
-
-.window-title-button {
-    cursor: pointer;
-    opacity: 0.5;
-}
-
-.window-title-button:hover {
-    opacity: 1;
-}
-
-.window-caption {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    padding-right: 8px;
-}
-
-.window-messages {
-    color: black;
-    padding: 5px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    line-height: 140%;
-}
-
-.line {
-    clear: both;
-}
-
-.timestamp {
-    float: left;
-    color: blue;
-    width: 37px;
-}
-
-.body {
-    display: inline;
-}
-
-.nick {
-    float: left;
-    display: inline-block;
-    font-weight: bold;
-    padding-right: 3px;
-    &:before {
-       content: "<";
-    }
-    &:after {
-       content: ">";
-    }
-}
-
-.line.banner {
-    white-space: pre;
-
-    .nick {
-        display: none;
+    .window-title {
+        padding: 4px 8px;
+        background-color: @window-title-bg-color;
+        border-bottom: 1px solid @window-outer-line-color;
+        color: whitesmoke;
     }
 
-    .body {
-        display: block;
-        font-family: Courier New, monospace;
+    .window-title-button {
+        cursor: pointer;
+        opacity: 0.5;
+    }
+
+    .window-title-button:hover {
+        opacity: 1;
+    }
+
+    .window-caption {
+        overflow: hidden;
+        white-space: nowrap;
         text-overflow: ellipsis;
-        font-size: 11px;
+        padding-right: 8px;
     }
-}
 
-.line.info {
-    .nick {
-        display: none;
+    .window-messages {
+        color: #333333;
+        padding: 5px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        line-height: 140%;
+    }
+
+    .line {
+        clear: both;
+    }
+
+    .timestamp {
+        float: left;
+        color: blue;
+        width: 37px;
     }
 
     .body {
-        color: #a52a2a;
-    }
-}
-
-.line.mymsg {
-    color: blue;
-}
-
-ul.user-image {
-    margin: 0px 0px 0px 37px;
-    padding: 0px;
-
-    li {
         display: inline;
-        list-style: none;
     }
 
-    li img {
-        max-height: 70px;
-        width: auto;
-        margin: 8px 8px 8px 0px;
-    }
-}
-
-.window-members {
-    width: 100px;
-    border-left: 1px solid @window-line-color;
-    padding: 4px 8px;
-    line-height: 150%;
-    overflow-y: auto;
-    color: black;
-}
-
-.window-operator {
-    font-weight: bold
-}
-
-.window-toolbar {
-    border-top: 1px solid @window-line-color;
-    height: 32px;
-
-    .btn {
-        background-color: whitesmoke;
-        color: #777777;
-        padding: 3px 16px;
+    .nick {
+        float: left;
+        display: inline-block;
+        font-weight: bold;
+        padding-right: 3px;
+        &:before {
+            content: "<";
+        }
+        &:after {
+            content: ">";
+        }
     }
 
-    .dropdown-toggle {
-        width: 50px;
+    .line.banner {
+        white-space: pre;
+
+        .nick {
+            display: none;
+        }
+
+        .body {
+            display: block;
+            font-family: Courier New, monospace;
+            text-overflow: ellipsis;
+            font-size: 11px;
+        }
     }
 
-    .form-control {
-        background-color: white;
-        box-shadow: none;
-        height: 31px;
-        padding: 0px 10px;
-    }
-}
+    .line.info {
+        .nick {
+            display: none;
+        }
 
-.window-buttons {
-    width: 100px;
-    border-left: 1px solid @window-line-color;
+        .body {
+            color: #a52a2a;
+        }
+    }
+
+    .line.mymsg {
+        color: blue;
+    }
+
+    ul.user-image {
+        margin: 0px 0px 0px 37px;
+        padding: 0px;
+
+        li {
+            display: inline;
+            list-style: none;
+        }
+
+        li img {
+            max-height: 70px;
+            width: auto;
+            margin: 8px 8px 8px 0px;
+        }
+    }
+
+    .window-members {
+        width: 100px;
+        border-left: 1px solid @window-line-color;
+        padding: 4px 8px;
+        line-height: 150%;
+        overflow-y: auto;
+    }
+
+    .window-operator {
+        font-weight: bold
+    }
+
+    .window-toolbar {
+        border-top: 1px solid @window-line-color;
+        height: 32px;
+
+        .btn {
+            background-color: whitesmoke;
+            color: #777777;
+            padding: 3px 16px;
+        }
+
+        .dropdown-toggle {
+            width: 50px;
+        }
+
+        .form-control {
+            background-color: white;
+            box-shadow: none;
+            height: 31px;
+            padding: 0px 10px;
+        }
+    }
+
+    .window-buttons {
+        width: 100px;
+        border-left: 1px solid @window-line-color;
+    }
 }
