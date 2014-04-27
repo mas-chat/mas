@@ -16,11 +16,9 @@
 
 'use strict';
 
-//TBD add friendly name
-require(['/vendor/javascripts/jqBootstrapValidation.js'], function(validation) {
-
+require(['/vendor/jqBootstrapValidation/jqBootstrapValidation-1.3.7.min.js'], function(validation) {
     validation = validation; //TBD
 
-	$(function() {
-	});
+    $(function() {
+    });
 });
