@@ -56,13 +56,13 @@ Installation
 5. Launch the server components
 
    ```bash
-   $ ./scripts/control -c start
+   $ ./scripts/masctl -c start
    ```
 
 6. Check that all four MAS processes are running ([architecture](https://github.com/ilkkao/mas/wiki))
 
    ```bash
-   $ ./scripts/control status
+   $ ./scripts/masctl status
    mas-frontend: running, pid: 95284
    mas-loopback: running, pid: 95282
    mas-irc: running, pid: 95280
