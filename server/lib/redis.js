@@ -16,16 +16,19 @@
 
 'use strict';
 
-var fs = require('fs'),
-    path = require('path'),
+var path = require('path'),
     assert = require('assert'),
     coRedis = require('co-redis'),
     redis = require('redis'),
+    thunkify = require('thunkify'),
+    redisLuaHelper = require('redis-lua-helper'),
     log = require('./log');
 
-var luaPath = path.join(__dirname, '..', 'lua');
-var luaFuncs = [];
-var luaFuncSHAs = {};
+var rlh = redisLuaHelper({
+    'root': path.join(__dirname, '..', 'lua'),
+    'macro': '--#include',
+    'extension': 'lua'
+});
 
 module.exports = {
     createClient: createClient,
@@ -43,7 +46,7 @@ function createClient() {
         var scriptName = params.shift();
         log.info('Running lua script: ' + scriptName);
 
-        var sha = luaFuncSHAs[scriptName];
+        var sha = rlh.shasum(scriptName);
         assert(sha);
 
         var args = [ sha, 0 ].concat(params);
@@ -54,19 +57,14 @@ function createClient() {
 }
 
 function *loadScripts() {
-    var luaFiles = fs.readdirSync(luaPath);
     var redisClient = createClient();
+    var loadDir = thunkify(function (callback) {
+        rlh.loadDir(callback);
+    });
+    var scripts = yield loadDir();
 
-    for (var i = 0; i < luaFiles.length; i++) {
-        var fileName = luaFiles[i];
-        var script = fs.readFileSync(path.join(luaPath, fileName));
-        luaFuncs.push(script);
-    }
-
-    for (i = 0; i < luaFuncs.length; i++) {
-        var sha = yield redisClient.script('load', luaFuncs[i]);
-        var scriptName = luaFiles[i].replace(/\..+$/, ''); // Remove the file extension
-        luaFuncSHAs[scriptName] = sha;
-        log.info('Loaded Redis script: ' + scriptName);
+    for (var i = 0; i < scripts.length; i++) {
+        log.info('Loading Redis script: ' + scripts[i]);
+        yield redisClient.script('load', rlh.code(scripts[i]));
     }
 }
