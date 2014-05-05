@@ -32,7 +32,9 @@
     "handlebars": "~1.3.0",
     "Faker": "~0.7.0",
     "co-wait": "0.0.0",
-    "npid": "^0.4.0"
+    "npid": "^0.4.0",
+    "redis-lua-helper": "^0.2.0",
+    "thunkify": "^2.1.1"
   },
   "devDependencies": {
     "mysql": "~2.2.0",
