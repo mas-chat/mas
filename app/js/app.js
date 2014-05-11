@@ -18,6 +18,8 @@
 
 window.App = Ember.Application.create();
 
+require('../dist/templates.js')
+
 require('./routes/application');
 require('./routes/main');
 
