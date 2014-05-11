@@ -19,7 +19,7 @@
 require.config({
     baseUrl: '/javascripts',
     paths: {
-        'jquery': '/vendor/jquery/jquery',
+        'jquery': '/vendor/jquery/dist/jquery',
         'jquery-simpletip': '/libs/jquery.simpletip-1.3.1',
         'jquery-cookie': '/vendor/jquery-cookie/jquery.cookie'
     },
