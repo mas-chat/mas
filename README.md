@@ -47,19 +47,25 @@ Installation
    $ npm install
    ```
 
-4. Build the web app
+4. Install gulp if you don't have it
 
    ```bash
-   $ grunt dev
+   $ npm install -g gulp
    ```
 
-5. Launch the server components
+5. Build the web app
+
+   ```bash
+   $ gulp all
+   ```
+
+6. Launch the server components
 
    ```bash
    $ ./scripts/masctl -c start
    ```
 
-6. Check that all four MAS processes are running ([architecture](https://github.com/ilkkao/mas/wiki))
+7. Check that all four MAS processes are running ([architecture](https://github.com/ilkkao/mas/wiki))
 
    ```bash
    $ ./scripts/masctl status
@@ -69,7 +75,7 @@ Installation
    mas-irc-connman: running, pid: 82417
    ```
 
-7. Browse to ```http://localhost:3200/``` and register an account.
+8. Browse to ```http://localhost:3200/``` and register an account.
 
 Feedback
 --------

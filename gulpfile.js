@@ -2,6 +2,7 @@
 
 var argv = require('yargs').argv,
     gulp = require('gulp'),
+    util = require('gulp-util'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
     jshint = require('gulp-jshint'),
@@ -50,6 +51,13 @@ var paths = {
     ]
 };
 
+function handleError(err) {
+    /* jshint validthis: true */
+    util.log(util.colors.red(err.toString()));
+    util.beep();
+    this.emit('end');
+}
+
 gulp.task('jshint', function() {
     return gulp.src(paths.serverJavaScripts, paths.clientJavaScripts)
         .pipe(jshint())
@@ -57,8 +65,7 @@ gulp.task('jshint', function() {
 });
 
 gulp.task('bower', function() {
-    return bower()
-        .pipe(gulp.dest('./server/public/vendor'));
+    return bower('./server/public/vendor');
 });
 
 gulp.task('templates', function(){
@@ -70,39 +77,32 @@ gulp.task('templates', function(){
         .pipe(gulp.dest('./app/dist/'));
 });
 
-gulp.task('browserify', function() {
-    var stream = browserify('./app/js/app.js')
+gulp.task('browserify', ['templates'], function() {
+    return browserify('./app/js/app.js')
         .bundle({
             debug: true
         })
-        .pipe(source('app.js'));
-
-    if (argv.prod) {
-        stream = stream.pipe(streamify(uglify()));
-    }
-
-    return stream.pipe(gulp.dest('./app/dist'));
+        .on('error', handleError)
+        .pipe(source('app.js'))
+        .pipe(argv.prod ? streamify(uglify()) : util.noop())
+        .pipe(gulp.dest('./app/dist'));
 });
 
-gulp.task('libs', function() {
-    var stream = gulp.src(paths.clientLibs)
-        .pipe(concat('libs.js'));
-
-    if (gulp.env.prod) {
-        stream = stream.pipe(uglify());
-    }
-
-    return stream.pipe(gulp.dest('./app/dist'));
+gulp.task('libs', ['bower'], function() {
+    return gulp.src(paths.clientLibs)
+        .pipe(concat('libs.js'))
+        .pipe(argv.prod ? uglify() : util.noop())
+        .pipe(gulp.dest('./app/dist'));
 });
 
-gulp.task('less', function () {
+gulp.task('less', ['bower'], function () {
     gulp.src('./app/stylesheets/app.less')
         .pipe(less())
         .pipe(gulp.dest('./app/dist/'));
 });
 
 gulp.task('watch', function() {
-    gulp.watch(paths.clientTemplates, ['templates', 'browserify']);
+    gulp.watch(paths.clientTemplates, ['browserify']);
     gulp.watch(paths.clientJavaScripts, ['browserify']);
     gulp.watch(paths.clientCSS, ['less']);
 });
@@ -110,4 +110,4 @@ gulp.task('watch', function() {
 // The default task
 gulp.task('default', ['jshint']);
 
-gulp.task('all', ['templates', 'bower', 'browserify', 'compress', 'less']);
+gulp.task('all', ['browserify', 'libs', 'less']);
