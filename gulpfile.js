@@ -1,6 +1,7 @@
 'use strict';
 
-var gulp = require('gulp'),
+var argv = require('yargs').argv,
+    gulp = require('gulp'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
     jshint = require('gulp-jshint'),
@@ -8,6 +9,7 @@ var gulp = require('gulp'),
     bower = require('gulp-bower'),
     browserify = require('browserify'),
     source = require('vinyl-source-stream'),
+    streamify = require('gulp-streamify'),
     less = require('gulp-less');
 
 var paths = {
@@ -54,8 +56,13 @@ gulp.task('jshint', function() {
         .pipe(jshint.reporter('jshint-stylish'));
 });
 
+gulp.task('bower', function() {
+    return bower()
+        .pipe(gulp.dest('./server/public/vendor'));
+});
+
 gulp.task('templates', function(){
-    gulp.src(paths.clientTemplates)
+    return gulp.src(paths.clientTemplates)
         .pipe(handlebars({
             outputType: 'cjs'
         }))
@@ -63,37 +70,29 @@ gulp.task('templates', function(){
         .pipe(gulp.dest('./app/dist/'));
 });
 
-gulp.task('bower', function() {
-    bower()
-        .pipe(gulp.dest('./server/public/vendor'));
-});
-
 gulp.task('browserify', function() {
-    return browserify({
-        entries: ['./app/js/app.js'],
-        extensions: ['.js']
-    })
+    var stream = browserify('./app/js/app.js')
         .bundle({
             debug: true
         })
-        .pipe(source('app.js'))
-        .pipe(gulp.dest('./app/dist'));
+        .pipe(source('app.js'));
+
+    if (argv.prod) {
+        stream = stream.pipe(streamify(uglify()));
+    }
+
+    return stream.pipe(gulp.dest('./app/dist'));
 });
 
 gulp.task('libs', function() {
-    gulp.src(paths.clientLibs)
-        .pipe(concat('libs.js'))
-        .pipe(gulp.dest('./app/dist'));
-});
+    var stream = gulp.src(paths.clientLibs)
+        .pipe(concat('libs.js'));
 
-gulp.task('compress', function() {
-    gulp.src('./app/dist/app.js')
-        .pipe(uglify())
-        .pipe(gulp.dest('./app/dist'));
+    if (gulp.env.prod) {
+        stream = stream.pipe(uglify());
+    }
 
-    gulp.src('./app/dist/libs.js')
-        .pipe(uglify())
-        .pipe(gulp.dest('./app/dist'));
+    return stream.pipe(gulp.dest('./app/dist'));
 });
 
 gulp.task('less', function () {

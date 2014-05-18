@@ -49,10 +49,12 @@
     "gulp-less": "^1.2.3",
     "gulp-concat": "^2.2.0",
     "vinyl-source-stream": "^0.1.1",
-    "jshint-stylish": "^0.2.0"
+    "jshint-stylish": "^0.2.0",
+    "yargs": "^1.2.2",
+    "gulp-streamify": "0.0.5"
   },
   "scripts": {
-    "test": "redis-server -v && uname -a && df -h && grunt --verbose",
+    "test": "redis-server -v && uname -a && df -h && gulp --verbose",
     "start": "node --harmony server/server"
   },
   "repository": {
