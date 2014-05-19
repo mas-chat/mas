@@ -2,6 +2,7 @@
 
 var argv = require('yargs').argv,
     gulp = require('gulp'),
+//  debug = require('gulp-debug'),
     util = require('gulp-util'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
@@ -34,22 +35,23 @@ var paths = {
         'app/stylesheets/**/*.less'
     ],
     clientLibs: [
-        'server/public/vendor/momentjs/moment.js',
-        'server/public/vendor/uri.js/IPv6.js',
-        'server/public/vendor/uri.js/punycode.js',
-        'server/public/vendor/uri.js/SecondLevelDomains.js',
-        'server/public/vendor/uri.js/URI.js',
-        'server/public/vendor/jquery/dist/jquery.js',
-        'server/public/vendor/jquery-cookie/jquery.cookie.js',
-        'server/public/vendor/eventie/eventie.js',
-        'server/public/vendor/eventEmitter/EventEmitter.js',
-        'server/public/vendor/imagesloaded/imagesloaded.js',
-        'server/public/vendor/bootstrap/bootstrap.js',
-        'server/public/vendor/handlebars/handlebars.js',
-        'server/public/vendor/ember/ember.js',
-        'server/public/vendor/emojify/emojify.js'
+        'momentjs/moment.js',
+        'uri.js/src/IPv6.js',
+        'uri.js/src/punycode.js',
+        'uri.js/src/SecondLevelDomains.js',
+        'uri.js/src/URI.js',
+        'jquery/dist/jquery.js',
+        'jquery-cookie/jquery.cookie.js',
+        'eventie/eventie.js',
+        'eventEmitter/EventEmitter.js',
+        'imagesloaded/imagesloaded.js',
+        'bootstrap/dist/js/bootstrap.js',
+        'handlebars/handlebars.js',
+        'ember/ember.js'
     ]
 };
+
+paths.clientLibs = paths.clientLibs.map(function(elem) { return 'server/public/vendor/' + elem; });
 
 function handleError(err) {
     /* jshint validthis: true */
