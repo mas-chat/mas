@@ -108,7 +108,7 @@ if [ $ACTION == "start" ] || [ $ACTION == "restart" ]; then
 
     # Make sure Redis is running
     echo 'Making sure Redis is running...'
-    redis-server --daemonize yes
+    redis-server ./conf/redis.conf
 
     # Init Redisn (only for meetandspeak.com)
     if $IMPORT; then
