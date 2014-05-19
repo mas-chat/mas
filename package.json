@@ -34,7 +34,9 @@
     "co-wait": "0.0.0",
     "npid": "^0.4.0",
     "redis-lua-helper": "^0.2.0",
-    "thunkify": "^2.1.1"
+    "thunkify": "^2.1.1",
+    "is-utf8": "^0.2.0",
+    "iconv-lite": "^0.2.11"
   },
   "devDependencies": {
     "mysql": "~2.3.0",
