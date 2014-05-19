@@ -24,6 +24,8 @@ process.title = 'mas-irc-connman';
 
 var net = require('net'),
     carrier = require('carrier'),
+    isUtf8 = require('is-utf8'),
+    iconv = require('iconv-lite'),
     common = require('../../lib/common'),
     conf = require('../../lib/conf'),
     log = require('../../lib/log'),
@@ -103,12 +105,25 @@ courier.on('connect', function(params) {
         });
     });
 
-    carrier.carry(client, function(line) {
-        courier.sendNoWait('ircparser', {
-            type: 'data',
-            userId: userId,
-            network: network,
-            line: line
+    var buffer = '';
+
+    client.on('data', function(data) {
+        // IRC protocol doesn't have character set concept, we need to guess.
+        // Algorithm is simple. If received binary data is valid utf8 then use
+        // that. Else assume that the character set is iso-8859-15.
+        data = isUtf8(data) ? data.toString : iconv.decode(data, 'iso-8859-15');
+        data = buffer + data;
+
+        var lines = data.split(/\r\n/);
+        buffer = !!data.match(/\r\n$/) ? '' : lines.pop(); // Save partial lines to buffer
+
+        lines.forEach(function(line) {
+            courier.sendNoWait('ircparser', {
+                type: 'data',
+                userId: userId,
+                network: network,
+                line: line
+            });
         });
     });
 
