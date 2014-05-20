@@ -128,7 +128,23 @@ courier.on('connect', function(params) {
     });
 
     client.on('end', function() {
-        courier.sendNoWait('ircparser', 'disconnected');
+        log.info(userId, 'IRC connection closed by the server.');
+        courier.sendNoWait('ircparser', {
+            type: 'disconnected',
+            userId: userId,
+            network: network,
+            reason: 'connection closed by peer'
+        });
+    });
+
+    client.on('error', function(err) {
+        log.info(userId, 'IRC connection error: ' + err);
+        courier.sendNoWait('ircparser', {
+            type: 'disconnected',
+            userId: userId,
+            network: network,
+            reason: err.code
+        });
     });
 
     sockets[userId + ':' + network] = client;
