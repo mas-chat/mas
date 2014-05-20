@@ -20,6 +20,7 @@
 process.title = 'mas-irc';
 
 var co = require('co'),
+    wait = require('co-wait'),
     log = require('../../lib/log'),
     common = require('../../lib/common'),
     redisModule = require('../../lib/redis'),
@@ -184,7 +185,7 @@ function *processData(params) {
 // Connected
 function *processConnected(params) {
     var userInfo = yield redis.hgetall('user:' + params.userId);
-    log.info('Importing user ' + userInfo.nick);
+    log.info(params.userId, 'Connected to IRC server');
 
     var commands = [
         'NICK ' + userInfo.nick,
@@ -199,12 +200,40 @@ function *processConnected(params) {
     });
 }
 
-// Disconnect
+// Disconnected
 function *processDisconnected(params) {
-    yield redis.hset('networks:' + params.userId + ':' + params.network, 'state', 'disconnected');
+    var userId = params.userId;
+    var network = params.network;
+    var delay = 30 * 1000; // 30s
+    var msg = 'Lost connection to IRC server (' + params.reason + '). Will try to reconnect in ';
+
+    yield redis.hset('networks:' + userId + ':' + network, 'state', 'disconnected');
+    var count = yield redis.hincrby('networks:' + userId + ':' + network, 'retryCount', 1);
+
+    // Set the backoff timer
+    if (count < 4) {
+        msg = msg + '30 seconds.';
+    } else if (count < 8) {
+        delay = 3 * 60 * 1000; // 3 mins
+        msg = msg + '3 minutes.';
+    } else if (count >= 8) {
+        delay = 60 * 60 * 1000; // 1 hour
+        msg = 'Error in connection to IRC server after multiple attempts. Waiting one hour ' +
+            'before making another connection attempt. Close this window if you do not wish ' +
+            'to retry.';
+    }
+
+    yield textLine.broadcast(userId, network, {
+        cat: 'info',
+        body: msg,
+        ts: Math.round(Date.now() / 1000)
+    });
+
+    yield wait(delay);
+    yield connect(params.userId, params.network, true);
 }
 
-function *connect(userId, network) {
+function *connect(userId, network, skipRetryCountReset) {
     // TBD: Remove connection restriction
     // TBD: Enable connectDelay if !MAS. Make it configurable
     // var connectDelay = Math.floor((Math.random() * 180));
@@ -212,7 +241,9 @@ function *connect(userId, network) {
     yield redis.hset('user:' + userId, 'currentnick:' + network, nick);
     yield redis.hset('networks:' + userId + ':' + network, 'state', 'connecting');
 
-    yield redis.hset('networks:' + userId, network, 'connecting');
+    if (!skipRetryCountReset) {
+        yield resetRetryCount(userId, network);
+    }
 
     yield courier.send('connectionmanager', {
         type: 'connect',
@@ -314,6 +345,7 @@ function *handle366(userId, msg) {
 
 function *handle376(userId, msg) {
     yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'connected');
+    yield resetRetryCount(userId, msg.network);
 
     var channels = yield windowHelper.getWindowNamesForNetwork(userId, msg.network);
 
@@ -350,7 +382,7 @@ function *handleJoin(userId, msg) {
     var windowId = yield windowHelper.getWindowId(userId, msg.network, channel);
     var currentNick = yield redis.hget('user:' + userId, 'currentnick:' + msg.network);
 
-    if (!windowId) {
+    if (windowId === null) {
         // User has closed the window very recently
         yield sendIRCPart(userId, msg.network, channel);
         return;
@@ -465,4 +497,8 @@ function *updateNamesSets(names, userId, windowId) {
     if (users.length > 0) {
         yield redis.sadd('names:' + userId + ':' + windowId + ':users', users);
     }
+}
+
+function *resetRetryCount(userId, network) {
+    yield redis.hset('networks:' + userId + ':' + network, 'retryCount', 0);
 }
