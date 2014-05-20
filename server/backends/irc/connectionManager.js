@@ -111,7 +111,7 @@ courier.on('connect', function(params) {
         // IRC protocol doesn't have character set concept, we need to guess.
         // Algorithm is simple. If received binary data is valid utf8 then use
         // that. Else assume that the character set is iso-8859-15.
-        data = isUtf8(data) ? data.toString : iconv.decode(data, 'iso-8859-15');
+        data = isUtf8(data) ? data.toString() : iconv.decode(data, 'iso-8859-15');
         data = buffer + data;
 
         var lines = data.split(/\r\n/);
