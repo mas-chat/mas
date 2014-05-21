@@ -95,20 +95,6 @@ An active session is currently deleted after six hours of idle time.
 Below is the list of commands that MAS server can send to a client.
 A command is always request for the client to take some action.
 
-ADDNAME
--------
-
-Add a new nick to window participant list.
-
-```JSON
-{
-   "id":"ADDNAME",
-
-   "window":1,
-   "nick":"@zorro"
-}
-```
-
 ADDNTF
 ------
 
@@ -218,20 +204,6 @@ Create new window.
 
 ```userMode``` can be ```participant```, ```operator```, ```owner```
 
-DELNAME
--------
-
-Remove a nick from window participant list.
-
-```JSON
-{
-   "id":"DELNAME",
-
-   "window":1,
-   "nick":"ilkka"
-}
-```
-
 FLIST
 -----
 
@@ -301,22 +273,22 @@ Update Information about user log files.
 ADDNAMES
 --------
 
-Update window participant list.
+Add nicks to window participant list.
 
 ```JSON
 {
    "id":"ADDNAMES"
 
-   "windowId":"1",
+   "windowId":1,
    "reset": true,
    "operators":[
-      "ilkka",
-      "neo",
-      "morpheus",
+     "ilkka",
+     "neo",
+     "morpheus",
    ],
    "users":[
-      "trinity",
-      "mranderson"
+     "trinity",
+     "mranderson"
    ]
 }
 ```
@@ -326,6 +298,25 @@ If ```reset``` is true, then the existing list needs to be cleared. Otherwise th
 ```operators``` key will not be added to the command if there are no operators to add.
 
 ```users``` key is will not be added to the command if there are no users to add.
+
+DELNAMES
+--------
+
+Remove nicks from window participant list.
+
+```JSON
+{
+   "id":"DELNAMES",
+
+   "windowId":1,
+   "operators":[
+     "ilkka"
+   ],
+   "users":[
+     "trinity"
+   ]
+}
+```
 
 NICK
 ----
