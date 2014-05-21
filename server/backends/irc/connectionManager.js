@@ -115,7 +115,7 @@ courier.on('connect', function(params) {
         data = buffer + data;
 
         var lines = data.split(/\r\n/);
-        buffer = !!data.match(/\r\n$/) ? '' : lines.pop(); // Save partial lines to buffer
+        buffer = lines.pop(); // Save the potential partial line to buffer
 
         lines.forEach(function(line) {
             courier.sendNoWait('ircparser', {
