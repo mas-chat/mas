@@ -225,8 +225,7 @@ function *processDisconnected(params) {
 
     yield textLine.broadcast(userId, network, {
         cat: 'info',
-        body: msg,
-        ts: Math.round(Date.now() / 1000)
+        body: msg
     });
 
     yield wait(delay);
@@ -300,8 +299,7 @@ function *handleServerText(userId, msg, code) {
     yield textLine.broadcast(userId, msg.network, {
         nick: msg.serverName,
         cat: cat,
-        body: text,
-        ts: Math.round(Date.now() / 1000)
+        body: text
     });
 }
 
@@ -405,8 +403,7 @@ function *handleJoin(userId, msg) {
 
     yield textLine.send(userId, msg.network, channel, 'group', {
         cat: 'info',
-        body: msg.nick + ' (' + msg.userNameAndHost + ') has joined channel ' + channel,
-        ts: Math.round(Date.now() / 1000)
+        body: msg.nick + ' (' + msg.userNameAndHost + ') has joined channel ' + channel
     });
 }
 
@@ -423,8 +420,7 @@ function *handlePrivmsg(userId, msg) {
     yield textLine.send(userId, msg.network, channel, 'group', {
         nick: msg.nick,
         cat: 'msg',
-        body: text,
-        ts: Math.round(Date.now() / 1000)
+        body: text
     });
 }
 
