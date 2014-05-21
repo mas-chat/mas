@@ -282,6 +282,7 @@ var handlers = {
     '433': handle433,
 
     'JOIN': handleJoin,
+    'QUIT': handleQuit,
     'PRIVMSG': handlePrivmsg,
     'PING': handlePing
 };
@@ -405,6 +406,41 @@ function *handleJoin(userId, msg) {
         cat: 'info',
         body: msg.nick + ' (' + msg.userNameAndHost + ') has joined channel ' + channel
     });
+}
+
+function *handleQuit(userId, msg) {
+    // :ilkka!ilkkao@localhost.myrootshell.com QUIT :"leaving"
+    var reason = msg.params[0];
+    var windowIds = yield windowHelper.getWindowIdsForNetwork(userId, msg.network);
+
+    for (var i = 0; i < windowIds.length; i++) {
+        var windowId = parseInt(windowIds[i]);
+        var command = {
+            id: 'DELNAMES',
+            windowId: windowId
+        };
+        // First try to find the nick from users list. It probably contains more nicks.
+        var removed = yield redis.srem('names:' + userId + ':' + windowId + ':users', msg.nick);
+
+        if (removed === 0) {
+            removed = yield redis.srem('names:' + userId + ':' + windowId + ':ops', msg.nick);
+
+            if (removed === 1) {
+                command.operators = [ msg.nick ];
+            }
+        } else {
+            command.users = [ msg.nick ];
+        }
+
+        if (removed === 1) {
+            yield textLine.sendByWindowId(userId, windowId, {
+                cat: 'info',
+                body: msg.nick + ' (' + msg.userNameAndHost + ') has quit IRC. Reason: ' + reason
+            });
+
+            yield outbox.queueAll(userId, command);
+       }
+    }
 }
 
 function *handlePrivmsg(userId, msg) {
