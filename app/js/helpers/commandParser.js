@@ -84,5 +84,19 @@ App.CommandParser = Ember.Object.extend({
         if (data.users) {
             targetWindow.users.pushObjects(data.users);
         }
+    },
+
+    _handleDelnames: function(data, targetWindow) {
+        if (!targetWindow) {
+            return;
+        }
+
+        if (data.operators) {
+            targetWindow.operators.removeObjects(data.operators);
+        }
+
+        if (data.users) {
+            targetWindow.users.removeObjects(data.users);
+        }
     }
 });
