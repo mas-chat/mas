@@ -56,8 +56,7 @@ if (conf.get('frontend:demo_mode') === true) {
                         body: Faker.Lorem.sentence(sentenceLength) + ' ' + url,
                         nick: Faker.Name.firstName(),
                         cat: 'msg',
-                        windowId: windowId,
-                        ts: Math.round(Date.now() / 1000)
+                        windowId: windowId
                     };
 
                     yield processTextLine(demoUserId, msg, null);
