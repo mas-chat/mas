@@ -51,8 +51,7 @@ function *processSend(params) {
             yield textLine.send(members[i], 'MAS', name, {
                 nick: nick,
                 cat: 'msg',
-                body: params.text,
-                ts: Math.round(Date.now() / 1000)
+                body: params.text
             });
         }
     }
@@ -64,8 +63,7 @@ function *processSendPrivate(params) {
     yield textLine.sendFromUserId(params.userId, params.targetUserId, {
         nick: nick,
         cat: 'msg',
-        body: params.text,
-        ts: Math.round(Date.now() / 1000)
+        body: params.text
     });
 }
 
