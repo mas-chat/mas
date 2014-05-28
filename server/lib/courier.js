@@ -17,9 +17,9 @@
 'use strict';
 
 var assert = require('assert'),
-    wrapper = require('co-redis'),
-    sendRedis = wrapper(require('redis').createClient()),
-    rcvRedis = wrapper(require('redis').createClient()),
+    redisModule = require('./redis'),
+    sendRedis = redisModule.createClient(),
+    rcvRedis = redisModule.createClient(),
     co = require('co'),
     log = require('./log');
 
