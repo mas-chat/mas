@@ -28,6 +28,10 @@ token=nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
 max_parallel=8
 idle_timeout=360
 
+[redis]
+port=6379
+host=localhost
+
 ; OPTIONS FOR THE IRC BACKEND
 
 [irc]

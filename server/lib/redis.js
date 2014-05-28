@@ -22,7 +22,8 @@ var path = require('path'),
     redis = require('redis'),
     thunkify = require('thunkify'),
     redisLuaHelper = require('redis-lua-helper'),
-    log = require('./log');
+    log = require('./log'),
+    conf = require('./conf');
 
 var rlh = redisLuaHelper({
     'root': path.join(__dirname, '..', 'lua'),
@@ -36,7 +37,10 @@ module.exports = {
 };
 
 function createClient() {
-    var plainRedisClient = redis.createClient();
+    var host = conf.get('redis:host');
+    var port = conf.get('redis:port');
+
+    var plainRedisClient = redis.createClient(port, host);
     var coRedisClient = coRedis(plainRedisClient);
 
     coRedisClient.plainRedis = redis;
