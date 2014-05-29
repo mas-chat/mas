@@ -57,33 +57,34 @@ function logEntry(type, userId, msg) {
 
 function configTransports() {
     var transports = [];
-    var logDirectory = path.normalize(conf.get('log:directory'));
 
-    if (logDirectory.charAt(0) !== path.sep) {
-        logDirectory = path.join(__dirname, '..', '..', logDirectory);
+    if (conf.get('log:enabled')) {
+        var logDirectory = path.normalize(conf.get('log:directory'));
+
+        if (logDirectory.charAt(0) !== path.sep) {
+            logDirectory = path.join(__dirname, '..', '..', logDirectory);
+        }
+
+        var fileName = path.join(logDirectory, process.title + '.log');
+
+        if (!fs.existsSync(logDirectory)) {
+            console.error('ERROR: '.red + 'Log directory ' + logDirectory + ' doesn\'t exist.');
+            process.exit(1);
+        }
+
+        if (conf.get('log:clear_at_startup') && fs.existsSync(fileName)) {
+            fs.unlinkSync(fileName);
+        }
+
+        var fileTransport = new (winston.transports.File)({
+            filename: fileName,
+            colorize: false,
+            handleExceptions: true
+        });
+
+        transports.push(fileTransport);
     }
 
-    var fileName = path.join(logDirectory, process.title + '.log');
-
-    // Always enable file logging
-    if (!fs.existsSync(logDirectory)) {
-        console.error('ERROR: '.red + 'Log directory ' + logDirectory + ' doesn\'t exist.');
-        process.exit(1);
-    }
-
-    if (conf.get('log:clear_at_startup') && fs.existsSync(fileName)) {
-        fs.unlinkSync(fileName);
-    }
-
-    var fileTransport = new (winston.transports.File)({
-        filename: fileName,
-        colorize: false,
-        handleExceptions: true
-    });
-
-    transports.push(fileTransport);
-
-    // Enable console transport based on config setting
     if (conf.get('log:console')) {
         var consoleTransport = new (winston.transports.Console)({
             colorize: true,
@@ -93,7 +94,6 @@ function configTransports() {
         transports.push(consoleTransport);
     }
 
-    // Same for loggly.com log service
     if (conf.get('loggly:enabled')) {
         var logglyTransport = new (winston.transports.Loggly)({
             subdomain: conf.get('loggly:subdomain'),
