@@ -58,7 +58,7 @@
     "jshint-stylish": "~0.2.0"
   },
   "scripts": {
-    "test": "redis-server -v && uname -a && df -h && gulp --verbose",
+    "test": "gulp jshint && ./scripts/run-tests.js",
     "start": "node --harmony server/server"
   },
   "repository": {
