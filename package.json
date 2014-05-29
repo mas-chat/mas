@@ -58,7 +58,7 @@
     "jshint-stylish": "~0.2.0"
   },
   "scripts": {
-    "test": "gulp jshint && ./scripts/run-tests.js",
+    "test": "gulp all && gulp jshint && ./scripts/run-tests.sh",
     "start": "node --harmony server/server"
   },
   "repository": {
