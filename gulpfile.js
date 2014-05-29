@@ -48,6 +48,9 @@ var paths = {
         'bootstrap/dist/js/bootstrap.js',
         'handlebars/handlebars.js',
         'ember/ember.js'
+    ],
+    testJavaScripts: [
+        'test/acceptance/**/*.js'
     ]
 };
 
@@ -61,7 +64,9 @@ function handleError(err) {
 }
 
 gulp.task('jshint', function() {
-    return gulp.src(paths.serverJavaScripts, paths.clientJavaScripts)
+    return gulp.src(paths.serverJavaScripts
+        .concat(paths.clientJavaScripts)
+        .concat(paths.testJavaScripts))
         .pipe(jshint())
         .pipe(jshint.reporter('jshint-stylish'));
 });
