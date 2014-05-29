@@ -18,11 +18,20 @@
 
 var path = require('path'),
     fs = require('fs'),
-    nconf = require('nconf');
+    nconf = require('nconf'),
+    argv = require('yargs').argv;
 
 require('colors');
 
-var configFile = path.normalize(__dirname + '/../../mas.conf');
+var configFileOption = argv.configFile;
+var configFile;
+
+if (configFileOption && configFileOption.charAt(0) === path.sep) {
+    // Absolute path
+    configFile = path.normalize(configFileOption);
+} else {
+    configFile = path.join(__dirname, '..', '..', configFileOption || 'mas.conf');
+}
 
 if (!fs.existsSync(configFile)) {
     console.error('ERROR: '.red + 'Config file ' + configFile + ' missing.');
