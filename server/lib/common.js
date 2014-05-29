@@ -24,13 +24,15 @@ var path = require('path'),
 exports.init = function() {
     process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
 
-    var pidDirectory = conf.get('pid:directory');
+    if (!conf.get('pid:disabled')) {
+        var pidDirectory = conf.get('pid:directory');
 
-    if (pidDirectory.charAt(0) !== path.sep) {
-        pidDirectory = path.join(__dirname, '..', '..', pidDirectory);
+        if (pidDirectory.charAt(0) !== path.sep) {
+            pidDirectory = path.join(__dirname, '..', '..', pidDirectory);
+        }
+
+        npid.create(path.join(pidDirectory, process.title + '.pid'));
     }
-
-    npid.create(path.join(pidDirectory, process.title + '.pid'));
 
     log.info('Starting: ' + process.title);
 };
