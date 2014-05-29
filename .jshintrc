@@ -90,6 +90,7 @@
         "App": true,
         "require": true,
 
+        "casper": true,
         "it": true,
         "describe": true,
         "expect": true
