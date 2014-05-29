@@ -12,13 +12,14 @@ demo_mode=false
 demo_user_email=whogets@fakemessages.com
 
 [log]
+enabled=true
 directory=logs
 clear_at_startup=false
 console=false
 
 [pid]
+enabled=true
 directory=run
-disabled=false
 
 [loggly]
 enabled=false

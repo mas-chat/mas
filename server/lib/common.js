@@ -24,7 +24,7 @@ var path = require('path'),
 exports.init = function() {
     process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
 
-    if (!conf.get('pid:disabled')) {
+    if (conf.get('pid:enabled')) {
         var pidDirectory = conf.get('pid:directory');
 
         if (pidDirectory.charAt(0) !== path.sep) {
