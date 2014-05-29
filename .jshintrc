@@ -89,6 +89,7 @@
         "imagesLoaded": true,
         "App": true,
         "require": true,
+        "define": true,
 
         "casper": true,
         "it": true,
