@@ -12,10 +12,10 @@ sleep 1
 nohup node --harmony ./server/server.js --configFile=test/mas-test.conf > server.log &
 FE_PID=$!
 
-echo "Waiting 3 seconds for the servers to start."
-sleep 3
+echo "Waiting 1 second for the servers to start."
+sleep 1
 
-casperjs test $ROOT/test/acceptance/*.js
+casperjs test $ROOT/test/acceptance/test-*.js
 
 kill -9 $PID
 kill -9 $FE_PID
