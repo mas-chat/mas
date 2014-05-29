@@ -6,3 +6,5 @@ before_install:
 before_script:
   - phantomjs --version
   - casperjs --version
+after_script:
+  - cat server.log
