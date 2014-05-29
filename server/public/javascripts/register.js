@@ -16,8 +16,9 @@
 
 'use strict';
 
-require(['/vendor/jqBootstrapValidation/jqBootstrapValidation-1.3.7.min.js'], function(validation) {
-    validation = validation; //TBD
+define(function(require) {
+    var valid = require('/vendor/jqBootstrapValidation/dist/jqBootstrapValidation-1.3.7.min.js');
+    valid = valid; //TBD
 
     $(function() {
     });
