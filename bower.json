@@ -18,14 +18,14 @@
   ],
   "dependencies": {
     "bootstrap": "~3.1.1",
-    "ember": "~1.6.0-beta.4",
+    "ember": "~1.6.0-beta.5",
     "animate.css": "~3.1.0",
     "momentjs": "~2.6.0",
-    "uri.js": "~1.13.1",
+    "uri.js": "~1.13.2",
     "imagesloaded": "~3.1.4",
     "jquery-cookie": "~1.4.0",
     "jqBootstrapValidation": "~2.0.0-alpha",
-    "requirejs": "~2.1.11",
+    "requirejs": "~2.1.14",
     "bootswatch": "~3.1.1"
   }
 }
