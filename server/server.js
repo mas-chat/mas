@@ -27,6 +27,7 @@ var path = require('path'),
     less = require('koa-less'),
     serve = require('koa-static'),
     error = require('koa-error'),
+    compress = require('koa-compress'),
     //logger = require('koa-logger'),
     mount = require('koa-mount'),
     co = require('co'),
@@ -52,6 +53,9 @@ if (app.env === 'development') {
     app.use(error());
 //    app.use(logger());
 }
+
+// Enable GZIP compression
+app.use(compress());
 
 app.use(hbs.middleware({
     defaultLayout: 'layouts/main',
