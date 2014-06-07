@@ -20,4 +20,6 @@ trap "kill -9 $PID; kill -9 $FE_PID" EXIT
 echo "Waiting 1 second for the front-end server to start."
 sleep 1
 
+cat server.log
+
 casperjs test --engine=slimerjs --verbose $ROOT/test/acceptance/test-*.js
