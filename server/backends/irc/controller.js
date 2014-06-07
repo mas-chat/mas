@@ -17,12 +17,11 @@
 
 'use strict';
 
-process.title = 'mas-irc';
+require('../../lib/init')('irc');
 
 var co = require('co'),
     wait = require('co-wait'),
     log = require('../../lib/log'),
-    common = require('../../lib/common'),
     redisModule = require('../../lib/redis'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('ircparser'),
@@ -31,8 +30,6 @@ var co = require('co'),
     windowHelper = require('../../lib/windows'),
     nicks = require('../../lib/nick'),
     conf = require('../../lib/conf');
-
-common.init();
 
 co(function *() {
     yield redisModule.loadScripts();

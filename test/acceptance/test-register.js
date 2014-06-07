@@ -64,11 +64,12 @@ casper.test.begin('Register new user', 5, function suite(test) {
     });
 
     casper.then(function() {
-        this.clickLabel('OK', 'button');
+        this.clickLabel('OK');
     });
 
-    // casper.waitUntilVisible('.window', function() {
-    // });
+    casper.waitUntilVisible('.window', function() {
+
+    });
 
     casper.run(function() {
         test.done();

@@ -20,18 +20,15 @@
 // Minimal connection manager that keeps TCP sockets alive even if
 // rest of the system is restarted. Allows nondistruptive updates.
 
-process.title = 'mas-irc-connman';
+require('../../lib/init')('irc-connman');
 
 var net = require('net'),
     carrier = require('carrier'),
     isUtf8 = require('is-utf8'),
     iconv = require('iconv-lite'),
-    common = require('../../lib/common'),
     conf = require('../../lib/conf'),
     log = require('../../lib/log'),
     courier = require('../../lib/courier').createEndPoint('connectionmanager');
-
-common.init();
 
 var sockets = {};
 const IDENTD_PORT = 113;
