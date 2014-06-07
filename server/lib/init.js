@@ -18,11 +18,13 @@
 
 var path = require('path'),
     npid = require('npid'),
-    conf = require('./conf'),
-    log = require('./log');
+    conf = require('./conf');
 
-exports.init = function() {
+module.exports = function configureProcess(serverName) {
+    var processName = 'mas-' + serverName + '-' + conf.get('common:env');
+
     process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
+    process.title = processName;
 
     if (conf.get('pid:enabled')) {
         var pidDirectory = conf.get('pid:directory');
@@ -31,8 +33,15 @@ exports.init = function() {
             pidDirectory = path.join(__dirname, '..', '..', pidDirectory);
         }
 
-        npid.create(path.join(pidDirectory, process.title + '.pid'));
-    }
+        var pid = npid.create(path.join(pidDirectory, processName + '.pid'));
+        pid.removeOnExit();
 
-    log.info('Starting: ' + process.title);
+        function deletePidAndExit() {
+            pid.remove();
+            process.exit();
+        }
+
+        process.on('SIGINT', deletePidAndExit);
+        process.on('SIGTERM', deletePidAndExit);
+    }
 };

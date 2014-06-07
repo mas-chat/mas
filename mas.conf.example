@@ -6,6 +6,9 @@
 
 ; Project root directory is the base if relative paths are used
 
+[common]
+env=default
+
 [frontend]
 port=3200
 demo_mode=false

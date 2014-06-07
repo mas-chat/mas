@@ -17,7 +17,7 @@
 
 'use strict';
 
-process.title = 'mas-frontend';
+require('./lib/init')('frontend');
 
 var path = require('path'),
     koa = require('koa'),
@@ -31,7 +31,6 @@ var path = require('path'),
     //logger = require('koa-logger'),
     mount = require('koa-mount'),
     co = require('co'),
-    common = require('./lib/common'),
     conf = require('./lib/conf'),
     redis = require('./lib/redis'),
     routesIndex = require('./routes'),
@@ -43,8 +42,6 @@ var path = require('path'),
     loginController = require('./controllers/login'),
     registerController = require('./controllers/register'),
     scheduler = require('./lib/scheduler');
-
-common.init();
 
 var app = koa();
 
