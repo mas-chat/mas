@@ -36,10 +36,10 @@ module.exports = function configureProcess(serverName) {
         var pid = npid.create(path.join(pidDirectory, processName + '.pid'));
         pid.removeOnExit();
 
-        function deletePidAndExit() {
+        var deletePidAndExit = function() {
             pid.remove();
             process.exit();
-        }
+        };
 
         process.on('SIGINT', deletePidAndExit);
         process.on('SIGTERM', deletePidAndExit);
