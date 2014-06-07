@@ -37,7 +37,8 @@
     "thunkify": "~2.1.1",
     "is-utf8": "~0.2.0",
     "iconv-lite": "~0.2.11",
-    "yargs": "~1.2.2"
+    "yargs": "~1.2.2",
+    "koa-compress": "^1.0.7"
   },
   "devDependencies": {
     "mysql": "~2.3.0",
