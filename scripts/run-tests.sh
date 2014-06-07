@@ -4,18 +4,20 @@ set -e
 
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
 
+cd $ROOT
+
 redis-server --port 44144 &
 PID=$!
 
+echo "Waiting 1 second for the redis to start."
 sleep 1
 
 nohup node --harmony ./server/server.js --configFile=test/mas-test.conf > server.log &
 FE_PID=$!
 
-echo "Waiting 1 second for the servers to start."
+trap "kill -9 $PID; kill -9 $FE_PID" EXIT
+
+echo "Waiting 1 second for the front-end server to start."
 sleep 1
 
-casperjs test $ROOT/test/acceptance/test-*.js
-
-kill -9 $PID
-kill -9 $FE_PID
+casperjs test --engine=slimerjs --verbose $ROOT/test/acceptance/test-*.js
