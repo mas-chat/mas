@@ -1,9 +1,12 @@
 language: node_js
 env:
-  - SLIMERJSLAUNCHER=$(which firefox) DISPLAY=:99.0 PATH=$TRAVIS_BUILD_DIR/bin/slimerjs:$PATH
+  - SLIMERJSLAUNCHER=$(which firefox) DISPLAY=:99.0 PATH=$TRAVIS_BUILD_DIR/slimerjs:$PATH
+addons:
+  firefox: "25.0"
 node_js:
   - "0.11"
 before_install:
+  - npm config set loglevel warn --global
   - npm install -g casperjs
 before_script:
   - casperjs --version
