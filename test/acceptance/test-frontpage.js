@@ -1,4 +1,17 @@
-require('./helper');
+// Common start
+
+function captureAndExit() {
+    casper.log('Test failed. Taking screenshot', 'info');
+    casper.capture('fail.png');
+    casper.exit(1);
+}
+
+casper.on('page.error', function(msg, trace) {
+    this.echo('Error on page: ' + msg + 'Trace: ' + trace);
+    captureAndExit();
+});
+
+// Common end. TBD: Split to a separate file when slimerjs is fixed
 
 casper.test.begin('Load frontpage', 2, function suite(test) {
     casper.start('http://localhost:44199/', function() {
