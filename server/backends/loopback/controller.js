@@ -17,10 +17,9 @@
 
 'use strict';
 
-process.title = 'mas-loopback';
+require('../../lib/init')('loopback');
 
 var co = require('co'),
-    common = require('../../lib/common'),
     log = require('../../lib/log'),
     redisModule = require('../../lib/redis'),
     redis = redisModule.createClient(),
@@ -28,8 +27,6 @@ var co = require('co'),
     textLine = require('../../lib/textLine'),
     windowHelper = require('../../lib/windows'),
     outbox = require('../../lib/outbox');
-
-common.init();
 
 co(function *() {
     yield redisModule.loadScripts();

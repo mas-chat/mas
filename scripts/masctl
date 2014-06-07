@@ -7,27 +7,13 @@ ACTION='none'
 ALSO_CONNMAN=false
 IMPORT=false
 NODE=$(which node)
+CONFIG_FILE='mas.conf'
 
 GREEN_COLOR='\e[0;32m'
 RED_COLOR='\e[0;31m'
 NO_COLOR='\e[0m'
 
-source $ROOT/scripts/read_ini.sh
-
-read_ini $ROOT/mas.conf --booleans 0
-
-PID_DIRECTORY=${INI__pid__directory%/}
-LOG_DIRECTORY=${INI__log__directory%/}
-IDENTD_ENABLED=${INI__irc__identd}
-
-#Expand paths if they are relative
-if [[ "$PID_DIRECTORY" != /* ]]; then
-    PID_DIRECTORY=$ROOT/$PID_DIRECTORY
-fi
-
-if [[ "$LOG_DIRECTORY" != /* ]]; then
-    LOG_DIRECTORY=$ROOT/$LOG_DIRECTORY
-fi
+cd $ROOT
 
 usage ()
 {
@@ -51,6 +37,10 @@ while [[ $# > 0 ]]; do
     -c|--connman)
         ALSO_CONNMAN=true
         ;;
+    -f|--configFile)
+        CONFIG_FILE="$1"
+        shift
+        ;;
     start)
         ACTION='start'
         ;;
@@ -69,19 +59,39 @@ while [[ $# > 0 ]]; do
     esac
 done
 
+source $ROOT/scripts/read_ini.sh
+
+read_ini $CONFIG_FILE --booleans 0
+
+PID_DIRECTORY=${INI__pid__directory%/}
+LOG_DIRECTORY=${INI__log__directory%/}
+IDENTD_ENABLED=${INI__irc__identd}
+
+MAS_ENV=${INI__common__env}
+REDIS_PORT=${INI__redis__port}
+
+#Expand paths if they are relative
+if [[ "$PID_DIRECTORY" != /* ]]; then
+    PID_DIRECTORY=$ROOT/$PID_DIRECTORY
+fi
+
+if [[ "$LOG_DIRECTORY" != /* ]]; then
+    LOG_DIRECTORY=$ROOT/$LOG_DIRECTORY
+fi
+
 if [ $ACTION == "none" ]; then
     usage
 fi
 
 if [ $ACTION == "stop" ] || [ $ACTION == "restart" ]; then
     # Kill all running mas processes
-    for file in $PID_DIRECTORY/*.pid; do
+    for file in $PID_DIRECTORY/*-$MAS_ENV.pid; do
         PID=$(<$file)
         OWNER=$(ps aux | awk -v PID=$PID '$2 == PID { print $1 }')
         NAME=$(basename $file .pid)
         SUDO=''
 
-        if $ALSO_CONNMAN || [ $NAME != "mas-irc-connman" ]; then
+        if $ALSO_CONNMAN || [ $NAME != "mas-irc-connman-$MAS_ENV" ]; then
             if [ -n "$OWNER" ] && [ $OWNER == "root" ]; then
                 SUDO='sudo'
             fi
@@ -100,17 +110,17 @@ if [ $ACTION == "stop" ] || [ $ACTION == "restart" ]; then
 fi
 
 CURRENT_USER=$(whoami)
+CONFIG_OPTION="--configFile $CONFIG_FILE"
 
 if [ $ACTION == "start" ] || [ $ACTION == "restart" ]; then
     # Create logs and pid directories if they don't exist
     mkdir -p $LOG_DIRECTORY
     mkdir -p $PID_DIRECTORY
 
-    # Make sure Redis is running
     echo 'Making sure Redis is running...'
-    redis-server ./conf/redis.conf
+    redis-server ./conf/redis.conf --port $REDIS_PORT
 
-    # Init Redisn (only for meetandspeak.com)
+    # Init Redis (only for meetandspeak.com)
     if $IMPORT; then
         echo 'Making sure MySQL is running...'
         mysql.server start
@@ -121,31 +131,32 @@ if [ $ACTION == "start" ] || [ $ACTION == "restart" ]; then
     if $ALSO_CONNMAN; then
         # Start connection manager
         if $IDENTD_ENABLED; then
-            printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-connman [user: root]\n"
-            sudo sh -c "$NODE --harmony $ROOT/server/backends/irc/connectionManager.js > /dev/null & disown %1"
+            printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-connman-$MAS_ENV [user: root]\n"
+            sudo sh -c "$NODE --harmony $ROOT/server/backends/irc/connectionManager.js $CONFIG_OPTION > /dev/null & disown %1"
         else
-            printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-connman [user: $CURRENT_USER]\n"
-            (nohup $NODE --harmony $ROOT/server/backends/irc/connectionManager.js > /dev/null &)
+            printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-connman-$MAS_ENV [user: $CURRENT_USER]\n"
+            (nohup $NODE --harmony $ROOT/server/backends/irc/connectionManager.js $CONFIG_OPTION > /dev/null &)
         fi
     fi
 
     # Start irc backend
-    printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc [user: $CURRENT_USER]\n"
-    (nohup $NODE --harmony $ROOT/server/backends/irc/controller.js > /dev/null &)
+    printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-irc-$MAS_ENV [user: $CURRENT_USER]\n"
+    (nohup $NODE --harmony $ROOT/server/backends/irc/controller.js $CONFIG_OPTION > /dev/null &)
 
     # Start loopback backend
-    printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-loopback [user: $CURRENT_USER]\n"
-    (nohup $NODE --harmony $ROOT/server/backends/loopback/controller.js > /dev/null &)
+    printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-loopback-$MAS_ENV [user: $CURRENT_USER]\n"
+    (nohup $NODE --harmony $ROOT/server/backends/loopback/controller.js $CONFIG_OPTION > /dev/null &)
 
     # Start frontend server
-    printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-frontend [user: $CURRENT_USER]\n"
-    (nohup $NODE --harmony $ROOT/server/server.js > /dev/null &)
+    printf "${GREEN_COLOR}Starting:${NO_COLOR} mas-frontend-$MAS_ENV [user: $CURRENT_USER]\n"
+    (nohup $NODE --harmony $ROOT/server/server.js $CONFIG_OPTION > /dev/null &)
 fi
 
 if [ $ACTION == "status" ]; then
     declare -a SERVERS=(mas-frontend mas-loopback mas-irc mas-irc-connman)
 
     for i in "${SERVERS[@]}"; do
+        i="$i-$MAS_ENV"
         PID=''
 
         if [ -e $PID_DIRECTORY/$i.pid ]; then
@@ -154,8 +165,11 @@ if [ $ACTION == "status" ]; then
 
         if ! ps -p $PID > /dev/null 2>&1; then
             printf "$i: ${RED_COLOR}stopped${NO_COLOR}\n"
+            EXIT_STATUS=1
         else
             printf "$i: ${GREEN_COLOR}running${NO_COLOR}, pid: $PID\n"
         fi
     done
 fi
+
+exit $EXIT_STATUS

@@ -7,19 +7,19 @@ ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
 cd $ROOT
 
 redis-server --port 44144 &
-PID=$!
+REDIS_PID=$!
 
 echo "Waiting 1 second for the redis to start."
 sleep 1
 
-nohup node --harmony ./server/server.js --configFile=test/mas-test.conf > server.log 2> server_error.log&
-FE_PID=$!
+./scripts/masctl -c start --configFile test/mas-test.conf
 
-trap "kill -9 $PID; kill -9 $FE_PID" EXIT
+trap "./scripts/masctl -c stop --configFile test/mas-test.conf; kill $REDIS_PID" EXIT
 
-echo "Waiting 1 second for the front-end server to start."
-sleep 1
+echo "Waiting 3 seconds for the MAS processes to start and init."
+sleep 3
 
-cat server.log
+#Verify that all servers are still running
+./scripts/masctl status --configFile test/mas-test.conf
 
 casperjs test --engine=slimerjs --verbose $ROOT/test/acceptance/test-*.js
