@@ -53,7 +53,7 @@ MAS Redis structures
 
  networks:<userId>:<network> (hash)
    state (string, 'connected', 'connecting', 'disconnected')
-   currentnick (text) (TBD!)
+   currentnick (text)
    retryCount (int)
 
  window:<userId>:<windowId> (hash)

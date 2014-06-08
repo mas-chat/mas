@@ -30,7 +30,6 @@ function User(details, settings, friends) {
 
     // Initialize additional variables
     this.data.nextwindowid = -1;
-    this.data['currentnick:MAS'] = this.data.nick;
 }
 
 User.prototype.setFinalPasswordSha = function (passwd) {
