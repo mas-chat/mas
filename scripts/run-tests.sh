@@ -14,7 +14,7 @@ sleep 1
 
 ./scripts/masctl -c start --configFile test/mas-test.conf
 
-trap "./scripts/masctl -c stop --configFile test/mas-test.conf; kill $REDIS_PID" EXIT
+trap "./scripts/masctl -c stop --configFile test/mas-test.conf; kill $REDIS_PID; sleep 1" EXIT
 
 echo "Waiting 3 seconds for the MAS processes to start and init."
 sleep 3
