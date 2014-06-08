@@ -61,6 +61,10 @@ App.CommandParser = Ember.Object.extend({
         if (messages.length > 200) {
             messages.shiftObject();
         }
+
+        if (document.hidden) {
+            titlenotifier.add();
+        }
     },
 
     _handleNick: function(data) {
