@@ -80,5 +80,20 @@ App.WindowView = Ember.View.extend({
             this.set('controller.model.animate', false);
             this.$().addClass('pulse animated');
         }
+
+        var emojisList = $.map(emojify.emojiNames, function(value, i) {
+            return {'id':i, 'name':value};
+        });
+
+        var emojiListTemplate =
+            '<li data-value=":${name}:">' +
+            '<img src="/vendor/emojify.js/images/emoji/${name}.png">${name}' +
+            '</li>';
+
+        this.$('.form-control').atwho({
+            at: ':',
+            tpl: emojiListTemplate,
+            data: emojisList
+        });
     },
 });
