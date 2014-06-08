@@ -48,7 +48,8 @@ var paths = {
         'imagesloaded/imagesloaded.js',
         'bootstrap/dist/js/bootstrap.js',
         'handlebars/handlebars.js',
-        'ember/ember.js'
+        'ember/ember.js',
+        'TitleNotifier.js/title_notifier.js'
     ],
     testJavaScripts: [
         'test/acceptance/**/*.js'
