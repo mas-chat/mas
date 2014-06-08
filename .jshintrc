@@ -87,6 +87,8 @@
         "moment": true,
         "URI": true,
         "imagesLoaded": true,
+        "titlenotifier": true,
+        "Howl": true,
         "App": true,
         "require": true,
         "define": true,
