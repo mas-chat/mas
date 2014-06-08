@@ -17,6 +17,16 @@
 'use strict';
 
 App.WindowController = Ember.ObjectController.extend({
+    init: function() {
+        // Sound notification
+        this.set('sound', new Howl({
+            urls: ['sounds/staple_gun.mp3', 'sounds/staple_gun.ogg'],
+            volume: 0.5
+        }));
+
+        this._super();
+    },
+
     actions: {
         moveRowUp: function() {
             this._seekRow(-1);
@@ -57,6 +67,22 @@ App.WindowController = Ember.ObjectController.extend({
             }));
         }
     },
+
+    newMessageReceived: function() {
+        this.incrementProperty('newMessagesCount');
+
+        if (this.get('messages').length > 200) {
+            this.get('messages').shiftObject();
+        }
+
+        if (document.hidden) {
+            // Browser title notification
+            titlenotifier.add();
+
+            // Sound notification
+            this.get('sound').play();
+        }
+    }.observes('messages.@each'),
 
     isGroup: function() {
         return this.get('type') === 'group';
