@@ -56,15 +56,6 @@ App.CommandParser = Ember.Object.extend({
         var messages = targetWindow.messages;
 
         messages.pushObject(messageRecord);
-        targetWindow.incrementProperty('newMessagesCount');
-
-        if (messages.length > 200) {
-            messages.shiftObject();
-        }
-
-        if (document.hidden) {
-            titlenotifier.add();
-        }
     },
 
     _handleNick: function(data) {
