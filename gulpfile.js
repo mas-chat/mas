@@ -53,7 +53,8 @@ var paths = {
         'howler/howler.js',
         'jquery.atwho/dist/js/jquery.atwho.js',
         'Caret.js/dist/jquery.caret.min.js',
-        'emojify.js/emojify.js'
+        'emojify.js/emojify.js',
+        'magnific-popup/dist/jquery.magnific-popup.js'
     ],
     testJavaScripts: [
         'test/acceptance/**/*.js'
