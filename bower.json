@@ -30,6 +30,7 @@
     "TitleNotifier.js": "*",
     "howler": "~1.1.21",
     "jquery.atwho": "~0.4.11",
-    "emojify.js": "*"
+    "emojify.js": "*",
+    "magnific-popup": "~0.9.9"
   }
 }

@@ -95,5 +95,19 @@ App.WindowView = Ember.View.extend({
             tpl: emojiListTemplate,
             data: emojisList
         });
-    },
+
+        this.$('.user-img').magnificPopup({
+            type: 'image',
+            closeOnContentClick: true,
+            image: {
+                verticalFit: false,
+                titleSrc: function(item) {
+                    var href = item.el.attr('href');
+
+                    return '<small>Link to the original image:</small><a href="' + href +
+                        '" target="_newtab">' + href + '</a>';
+                }
+            }
+        });
+    }
 });

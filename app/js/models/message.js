@@ -44,7 +44,7 @@ App.Message = Ember.Object.extend({
             }
 
             if (imgSuffixes.indexOf(urlObj.suffix()) !== -1) {
-                imgUrls.push('<li><a href="' + this._escHtml(url, true) + '" target="_newtab">' +
+                imgUrls.push('<li><a href="' + this._escHtml(url, true) + '" class="user-img">' +
                     '<img src="' + this._escHtml(url, true) + '"></a></li>');
                 visibleLink = this._escHtml(urlObj.filename(), false);
             } else {
