@@ -30,28 +30,30 @@ exports.sendNick = function *(userId, sessionId) {
     yield outbox.queue(userId, sessionId, command);
 };
 
+exports.updateCurrentNick = function *(userId, network, nick) {
+    yield redis.hset('networks:' + userId + ':' + network, 'currentnick', nick);
+};
+
+exports.getCurrentNick = getCurrentNick;
+
+function *getCurrentNick(userId, network) {
+    return yield redis.hget('networks:' + userId + ':' + network, 'currentnick');
+}
+
 function *buildCommand(userId) {
     var command = {
-        id: 'NICK'
+        id: 'NICK',
+        MAS: yield redis.hget('user:' + userId, 'nick')
     };
-
-    var redisParams = [ 'user:' + userId, 'currentnick:MAS' ];
-    var networks = [ 'MAS' ];
 
     // Add IRC networks
     for (var network in conf.get('irc:networks')) { /* jshint -W089 */
-        redisParams.push('currentnick:' + network);
-        networks.push(network);
-    }
+        var nick = yield getCurrentNick(userId, network);
 
-    var nicks = yield redis.hmget.apply(redis, redisParams);
-
-    for (var i = 0; i < networks.length; i++) {
-        if (nicks[i] !== null) {
-            command[networks[i]] = nicks[i];
+        if (nick !== null) {
+            command[network] = nick;
         }
     }
-
 
     return command;
 }
