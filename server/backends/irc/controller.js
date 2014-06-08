@@ -435,7 +435,8 @@ function *handlePart(userId, msg) {
         message = msg.nick + ' (' + msg.userNameAndHost + ') has left';
     }
 
-    yield removeParticipant(userId, windowId, msg.nick, message + ' channel ' + channel + '. ' + reason);
+    yield removeParticipant(userId, windowId, msg.nick,
+        message + ' channel ' + channel + '. ' + reason);
 }
 
 function *handlePrivmsg(userId, msg) {
