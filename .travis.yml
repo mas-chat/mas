@@ -6,6 +6,8 @@ node_js:
 before_install:
   - npm config set loglevel warn --global
   - npm install -g casperjs
+  - sudo apt-get install ircd-irc2
+  - sudo /etc/init.d/ircd-irc2 start
 before_script:
   - casperjs --version
   - ./scripts/travis-install-slimerjs.sh
