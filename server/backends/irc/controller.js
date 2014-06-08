@@ -128,7 +128,7 @@ function *processRestarted() {
 
 // Data
 function *processData(params) {
-    var line = params.line,
+    var line = params.line.trim(),
         parts = line.split(' '),
         msg = {};
 
@@ -234,7 +234,8 @@ function *connect(userId, network, skipRetryCountReset) {
     // TBD: Enable connectDelay if !MAS. Make it configurable
     // var connectDelay = Math.floor((Math.random() * 180));
     var nick = yield redis.hget('user:' + userId, 'nick');
-    yield redis.hset('user:' + userId, 'currentnick:' + network, nick);
+    yield nicks.updateCurrentNick(userId, network, nick);
+
     yield redis.hset('networks:' + userId + ':' + network, 'state', 'connecting');
 
     if (!skipRetryCountReset) {
@@ -279,6 +280,7 @@ var handlers = {
     '433': handle433,
 
     'JOIN': handleJoin,
+    'PART': handlePart,
     'QUIT': handleQuit,
     'PRIVMSG': handlePrivmsg,
     'PING': handlePing
@@ -376,7 +378,7 @@ function *handleJoin(userId, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
     var channel = msg.params[0];
     var windowId = yield windowHelper.getWindowId(userId, msg.network, channel);
-    var currentNick = yield redis.hget('user:' + userId, 'currentnick:' + msg.network);
+    var currentNick = yield nicks.getCurrentNick(userId, msg.network);
 
     if (windowId === null) {
         // User has closed the window very recently
@@ -411,33 +413,29 @@ function *handleQuit(userId, msg) {
     var windowIds = yield windowHelper.getWindowIdsForNetwork(userId, msg.network);
 
     for (var i = 0; i < windowIds.length; i++) {
-        var windowId = parseInt(windowIds[i]);
-        var command = {
-            id: 'DELNAMES',
-            windowId: windowId
-        };
-        // First try to find the nick from users list. It probably contains more nicks.
-        var removed = yield redis.srem('names:' + userId + ':' + windowId + ':users', msg.nick);
-
-        if (removed === 0) {
-            removed = yield redis.srem('names:' + userId + ':' + windowId + ':ops', msg.nick);
-
-            if (removed === 1) {
-                command.operators = [ msg.nick ];
-            }
-        } else {
-            command.users = [ msg.nick ];
-        }
-
-        if (removed === 1) {
-            yield textLine.sendByWindowId(userId, windowId, {
-                cat: 'info',
-                body: msg.nick + ' (' + msg.userNameAndHost + ') has quit IRC. Reason: ' + reason
-            });
-
-            yield outbox.queueAll(userId, command);
-       }
+        yield removeParticipant(userId, parseInt(windowIds[i]), msg.nick,
+            msg.nick + ' (' + msg.userNameAndHost + ') has quit IRC. Reason: ' + reason);
     }
+}
+
+function *handlePart(userId, msg) {
+    // :ilkka!ilkkao@localhost.myrootshell.com PART #portaali :
+    var channel = msg.params[0];
+    var reason = msg.params[1];
+    var message = 'Yoo have left';
+
+    var windowId = yield windowHelper.getWindowId(userId, msg.network, channel, 'group');
+    var myNick = yield nicks.getCurrentNick(userId, msg.network);
+
+    if (windowId === null) {
+        return;
+    }
+
+    if (msg.nick !== myNick) {
+        message = msg.nick + ' (' + msg.userNameAndHost + ') has left';
+    }
+
+    yield removeParticipant(userId, windowId, msg.nick, message + ' channel ' + channel + '. ' + reason);
 }
 
 function *handlePrivmsg(userId, msg) {
@@ -461,9 +459,8 @@ function *tryDifferentNick(userId, network) {
     // TBD Set currentnick to nick and send NICK periodically to trigger this
     // method to try to reclaim the real nick
 
-    var result = yield redis.hmget('user:' + userId, 'nick', 'currentnick:' + network);
-    var nick = result[0];
-    var currentNick = result[1];
+    var nick = yield redis.hget('user:' + userId, 'nick');
+    var currentNick = yield nicks.getCurrentNick(userId, network);
 
     var state = yield redis.hget('networks:' + userId + ':' + network, 'state');
     var nickHasNumbers = false;
@@ -484,7 +481,7 @@ function *tryDifferentNick(userId, network) {
         nickHasNumbers = true;
     }
 
-    yield redis.hset('user:' + userId, 'currentnick:' + network, currentNick);
+    yield nicks.updateCurrentNick(userId, network, currentNick);
 
     // If we are joining IRC try all alternatives. If we are connected,
     // try to get only 'nick' or 'nick_' back
@@ -495,6 +492,34 @@ function *tryDifferentNick(userId, network) {
             network: network,
             line: 'NICK ' + currentNick
         });
+    }
+}
+
+function *removeParticipant(userId, windowId, nick, message) {
+    var command = {
+        id: 'DELNAMES',
+        windowId: windowId
+    };
+    // First try to find the nick from users list. It probably contains more nicks.
+    var removed = yield redis.srem('names:' + userId + ':' + windowId + ':users', nick);
+
+    if (removed === 0) {
+        removed = yield redis.srem('names:' + userId + ':' + windowId + ':ops', nick);
+
+        if (removed === 1) {
+            command.operators = [ nick ];
+        }
+    } else {
+        command.users = [ nick ];
+    }
+
+    if (removed === 1) {
+        yield textLine.sendByWindowId(userId, windowId, {
+            cat: 'info',
+            body: message
+        });
+
+        yield outbox.queueAll(userId, command);
     }
 }
 

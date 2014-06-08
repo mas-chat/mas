@@ -22,7 +22,8 @@ var parse = require('co-body'),
     outbox = require('../lib/outbox'),
     courier = require('../lib/courier').createEndPoint('command'),
     textLine = require('../lib/textLine'),
-    windowHelper = require('../lib/windows');
+    windowHelper = require('../lib/windows'),
+    nicks = require('../lib/nick');
 
 module.exports = function *() {
     var userId = this.mas.userId;
@@ -43,7 +44,7 @@ module.exports = function *() {
 
     switch (command) {
         case 'SEND':
-            var nick = yield redis.hget('user:' + userId, 'currentnick:' + network);
+            var nick = yield nicks.getCurrentNick(userId, network);
 
             if (network === 'MAS' && type === '1on1') {
                 var targetUserId = yield redis.hget('window:' + userId + ':' + windowId,
