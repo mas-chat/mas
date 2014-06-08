@@ -56,7 +56,8 @@
     "gulp-debug": "~0.3.0",
     "gulp-util": "~2.2.14",
     "vinyl-source-stream": "~0.1.1",
-    "jshint-stylish": "~0.2.0"
+    "jshint-stylish": "~0.2.0",
+    "gulp-livereload": "^2.0.0"
   },
   "scripts": {
     "test": "gulp all && gulp jshint && ./scripts/run-tests.sh",
