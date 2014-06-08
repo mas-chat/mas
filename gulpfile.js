@@ -10,7 +10,7 @@ var argv = require('yargs').argv,
     handlebars = require('gulp-ember-handlebars'),
     bower = require('gulp-bower'),
     browserify = require('browserify'),
-    livereload = require('gulp-livereload'),
+//  livereload = require('gulp-livereload'),
     source = require('vinyl-source-stream'),
     streamify = require('gulp-streamify'),
     less = require('gulp-less');
@@ -87,8 +87,7 @@ gulp.task('templates', function(){
             outputType: 'cjs'
         }))
         .pipe(concat('templates.js'))
-        .pipe(gulp.dest('./app/dist/'))
-        .pipe(livereload());
+        .pipe(gulp.dest('./app/dist/'));
 });
 
 gulp.task('browserify', ['templates'], function() {
@@ -99,23 +98,20 @@ gulp.task('browserify', ['templates'], function() {
         .on('error', handleError)
         .pipe(source('app.js'))
         .pipe(argv.prod ? streamify(uglify()) : util.noop())
-        .pipe(gulp.dest('./app/dist'))
-        .pipe(livereload());
+        .pipe(gulp.dest('./app/dist'));
 });
 
 gulp.task('libs', ['bower'], function() {
     return gulp.src(paths.clientLibs)
         .pipe(concat('libs.js'))
         .pipe(argv.prod ? uglify() : util.noop())
-        .pipe(gulp.dest('./app/dist'))
-        .pipe(livereload());
+        .pipe(gulp.dest('./app/dist'));
 });
 
 gulp.task('less', ['bower'], function () {
     gulp.src('./app/stylesheets/app.less')
         .pipe(less())
-        .pipe(gulp.dest('./app/dist/'))
-        .pipe(livereload());
+        .pipe(gulp.dest('./app/dist/'));
 });
 
 gulp.task('watch', function() {
