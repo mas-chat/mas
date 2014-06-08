@@ -89,6 +89,7 @@
         "imagesLoaded": true,
         "titlenotifier": true,
         "Howl": true,
+        "emojify": true,
         "App": true,
         "require": true,
         "define": true,
