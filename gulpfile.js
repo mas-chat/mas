@@ -50,7 +50,10 @@ var paths = {
         'handlebars/handlebars.js',
         'ember/ember.js',
         'TitleNotifier.js/title_notifier.js',
-        'howler/howler.js'
+        'howler/howler.js',
+        'jquery.atwho/dist/js/jquery.atwho.js',
+        'Caret.js/dist/jquery.caret.min.js',
+        'emojify.js/emojify.js'
     ],
     testJavaScripts: [
         'test/acceptance/**/*.js'

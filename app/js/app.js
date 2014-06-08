@@ -16,6 +16,8 @@
 
 'use strict';
 
+/*jshint camelcase: false */
+
 window.App = Ember.Application.create();
 
 require('../dist/templates.js');
@@ -54,3 +56,5 @@ document.addEventListener('visibilitychange', function() {
         titlenotifier.reset();
     }
 });
+
+emojify.defaultConfig.img_dir = '/vendor/emojify.js/images/emoji/';

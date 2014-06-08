@@ -66,7 +66,7 @@ App.Message = Ember.Object.extend({
         var imgSection = imgUrls.length ? '<ul class="user-image">' + imgUrls.join(' ') +
             '</ul>' : '';
 
-        return textSection + imgSection;
+        return emojify.replace(textSection) + imgSection;
     },
 
     _escHtml: function (string, full) {
