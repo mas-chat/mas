@@ -48,3 +48,9 @@ App.Router.map(function() {
 });
 
 App.networkMgr = App.Network.create();
+
+document.addEventListener("visibilitychange", function() {
+    if (!document.hidden) {
+        titlenotifier.reset();
+    }
+});
