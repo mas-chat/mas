@@ -270,34 +270,28 @@ Update Information about user log files.
 ```
 ```
 
-ADDNAMES
---------
+UPDATENAMES
+-----------
 
-Add nicks to window participant list.
+Add or update nicknames in window participant list.
 
 ```JSON
 {
-   "id":"ADDNAMES"
+   "id":"UPDATENAMES"
 
    "windowId":1,
    "reset": true,
-   "operators":[
-     "ilkka",
-     "neo",
-     "morpheus",
-   ],
-   "users":[
-     "trinity",
-     "mranderson"
-   ]
+   "names":{
+     "trinity": "@",
+     "mranderson: "u",
+     "neo": "+"
+   }
 }
 ```
 
 If ```reset``` is true, then the existing list needs to be cleared. Otherwise the command adds new names to the existing list.
 
-```operators``` key will not be added to the command if there are no operators to add.
-
-```users``` key is will not be added to the command if there are no users to add.
+```names``` Object presenting the changes. Property names are new nicknames in the group or existing nicknames whose status has changed. Value is either ```@``` if the nickname is an operator, ```+``` if the nickname has voice, and ```u``` if the nickname is a normal user.
 
 DELNAMES
 --------

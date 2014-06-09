@@ -80,11 +80,9 @@ MAS Redis structures
  groupbacklog:<name> (list)
    <msg1>, <msg2>
 
- names:<userId>:<windowId>:ops (set)
-   nick1, nick2
-
- names:<userId>:<windowId>:users (set)
-   nick1, nick2
+ names:<userId>:<windowId> (hash)
+   <nick1>: (string, '@', '+', 'u')
+   ...
 
  [TBD] inbox:<userId> (list)
    msg:<windowid>

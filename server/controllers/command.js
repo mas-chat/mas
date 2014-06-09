@@ -115,8 +115,7 @@ module.exports = function *() {
                 windowId + ':' + network + ':' + name + ':' + type);
             yield redis.del('window:' + userId + ':' + windowId);
             yield redis.del('windowmsgs:' + userId + ':' + windowId);
-            yield redis.del('names:' + userId + ':' + windowId + ':ops',
-                'names:' + userId + ':' + windowId + ':users');
+            yield redis.del('names:' + userId + ':' + windowId);
             break;
 
         case 'UPDATE':
