@@ -22,6 +22,7 @@ App.Window = Ember.Object.extend({
 
         this.messages = Ember.A([]);
         this.operators = Ember.A([]);
+        this.voices = Ember.A([]);
         this.users = Ember.A([]);
     },
 
@@ -35,6 +36,7 @@ App.Window = Ember.Object.extend({
     newMessagesCount: 0,
 
     operators: null,
+    voices: null,
     users: null,
 
     firstInRow: false,

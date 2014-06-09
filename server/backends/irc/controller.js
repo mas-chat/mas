@@ -322,7 +322,7 @@ function *handle353(userId, msg) {
     var windowId = yield windowHelper.getWindowId(userId, msg.network, channel);
     var names = msg.params[2].split(' ');
 
-    yield updateNamesSets(names, userId, windowId);
+    yield updateNamesHash(names, userId, windowId);
 }
 
 function *handle366(userId, msg) {
@@ -330,15 +330,13 @@ function *handle366(userId, msg) {
     var channel = msg.params[0];
 
     var windowId = yield windowHelper.getWindowId(userId, msg.network, channel);
-    var ops = yield redis.smembers('names:' + userId + ':' + windowId + ':ops');
-    var users = yield redis.smembers('names:' + userId + ':' + windowId + ':users');
+    var names = yield redis.hgetall('names:' + userId + ':' + windowId);
 
     yield outbox.queueAll(userId, {
-        id: 'ADDNAMES',
+        id: 'UPDATENAMES',
         reset: true,
         windowId: windowId,
-        operators: ops,
-        users: users
+        names: names
     });
 }
 
@@ -354,9 +352,9 @@ function *handle376(userId, msg) {
         var windowId = yield windowHelper.getWindowId(userId, msg.network, channels[i]);
 
         yield outbox.queueAll(userId, {
-            id: 'ADDNAMES',
+            id: 'UPDATENAMES',
             reset: true,
-            windowId: windowId,
+            windowId: windowId
         });
 
         yield courier.send('connectionmanager', {
@@ -388,17 +386,19 @@ function *handleJoin(userId, msg) {
     }
 
     if (msg.nick === currentNick) {
-        yield redis.del('names:' + userId + ':' + windowId + ':ops',
-            'names:' + userId + ':' + windowId + ':users');
+        yield redis.del('names:' + userId + ':' + windowId);
     } else {
         var names = [ msg.nick ];
-        yield updateNamesSets(names, userId, windowId);
+        yield updateNamesHash(names, userId, windowId);
+
+        var hash = {};
+        hash[msg.nick] = 'u';
 
         yield outbox.queueAll(userId, {
-            id: 'ADDNAMES',
+            id: 'UPDATENAMES',
             reset: false,
             windowId: windowId,
-            users: [ msg.nick ]
+            names: hash
         });
     }
 
@@ -460,7 +460,62 @@ function *handleMode(userId, msg) {
         body: 'Mode change: ' + msg.params.join(' ') + ' by ' + msg.nick
     });
 
-    //TBD: Heavy lifting
+    var modeParams = msg.params.slice(1);
+    var names = {};
+
+    while (modeParams.length !== 0) {
+        var command = modeParams.shift();
+        var oper = command.charAt(0);
+        var modes = command.substring(1).split('');
+        var param;
+
+        for (var i = 0; i < modes.length; i++) {
+            var mode = modes[i];
+            var key = 'names:' + userId + ':' + windowId;
+            var newClass = null;
+
+            if (mode.match(/[klbeIOov]/)) {
+                param = modeParams.shift();
+
+                if (!param) {
+                    log.warn(userId, 'Received broken MODE command');
+                }
+            }
+
+            if (mode === 'o' && oper === '+') {
+                // Got oper status
+                newClass = '@';
+            } else if (mode === 'o' && oper === '-') {
+                // Lost oper status
+                newClass = 'u';
+            } else if (mode === 'v') {
+                var status = yield redis.hget(key, param);
+
+                if (status !== '@') {
+                    if (oper === '+') {
+                        // Non-oper got voice
+                        newClass = '+';
+                    } else if (oper === '-') {
+                        // Non-oper lost voice
+                        newClass = 'u';
+                    }
+                }
+            }
+
+            if (newClass) {
+                yield redis.hset(key, param, newClass);
+                names[param] = newClass;
+            }
+
+        }
+    }
+
+    yield outbox.queueAll(userId, {
+        id: 'UPDATENAMES',
+        reset: false,
+        windowId: windowId,
+        names: names
+    });
 }
 
 function *handlePrivmsg(userId, msg) {
@@ -521,30 +576,19 @@ function *tryDifferentNick(userId, network) {
 }
 
 function *removeParticipant(userId, windowId, nick, message) {
-    var command = {
-        id: 'DELNAMES',
-        windowId: windowId
-    };
-    // First try to find the nick from users list. It probably contains more nicks.
-    var removed = yield redis.srem('names:' + userId + ':' + windowId + ':users', nick);
+    var removed = yield redis.hdel('names:' + userId + ':' + windowId, nick);
 
-    if (removed === 0) {
-        removed = yield redis.srem('names:' + userId + ':' + windowId + ':ops', nick);
-
-        if (removed === 1) {
-            command.operators = [ nick ];
-        }
-    } else {
-        command.users = [ nick ];
-    }
-
-    if (removed === 1) {
+    if (removed) {
         yield textLine.sendByWindowId(userId, windowId, {
             cat: 'info',
             body: message
         });
 
-        yield outbox.queueAll(userId, command);
+        yield outbox.queueAll(userId, {
+            id: 'DELNAMES',
+            windowId: windowId,
+            names: [ nick ]
+        });
     }
 }
 
@@ -557,25 +601,23 @@ function *sendIRCPart(userId, network, channel) {
     });
 }
 
-function *updateNamesSets(names, userId, windowId) {
-    var users = [];
-    var ops = [];
+function *updateNamesHash(names, userId, windowId) {
+    var namesHash = {};
 
     for (var i = 0; i < names.length; i++) {
-        if (names[i].charAt(0) === '@') {
-            ops.push(names[i].substring(1));
+        var userClass = names[i].charAt(0);
+        var nick = names[i];
+
+        if (userClass === '@' || userClass === '+') {
+            nick = names[i].substring(1);
         } else {
-            users.push(names[i]);
+            userClass = 'u';
         }
+
+        namesHash[nick] = userClass;
     }
 
-    if (ops.length > 0) {
-        yield redis.sadd('names:' + userId + ':' + windowId + ':ops', ops);
-    }
-
-    if (users.length > 0) {
-        yield redis.sadd('names:' + userId + ':' + windowId + ':users', users);
-    }
+    yield redis.hmset('names:' + userId + ':' + windowId, namesHash);
 }
 
 function *resetRetryCount(userId, network) {
