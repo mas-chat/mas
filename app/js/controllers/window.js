@@ -16,17 +16,9 @@
 
 'use strict';
 
+var sound = require('../helpers/sound');
+
 App.WindowController = Ember.ObjectController.extend({
-    init: function() {
-        // Sound notification
-        this.set('sound', new Howl({
-            urls: ['sounds/staple_gun.mp3', 'sounds/staple_gun.ogg'],
-            volume: 0.5
-        }));
-
-        this._super();
-    },
-
     actions: {
         moveRowUp: function() {
             this._seekRow(-1);
@@ -80,7 +72,7 @@ App.WindowController = Ember.ObjectController.extend({
             titlenotifier.add();
 
             // Sound notification
-            this.get('sound').play();
+            sound.play();
         }
     }.observes('messages.@each'),
 
