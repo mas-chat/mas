@@ -62,22 +62,32 @@ App.CommandParser = Ember.Object.extend({
         jQuery.extend(App.nicks, data);
     },
 
-    _handleAddnames: function(data, targetWindow) {
+    _handleUpdatenames: function(data, targetWindow) {
         if (!targetWindow) {
             return;
         }
 
         if (data.reset) {
             targetWindow.operators.clear();
+            targetWindow.voices.clear();
             targetWindow.users.clear();
         }
 
-        if (data.operators) {
-            targetWindow.operators.pushObjects(data.operators);
-        }
+        for (var name in data.names) { /* jshint -W089 */
+            var userClass = data.names[name];
+            this._removeName(name, targetWindow);
 
-        if (data.users) {
-            targetWindow.users.pushObjects(data.users);
+            switch (userClass) {
+                case '@':
+                    targetWindow.operators.pushObject(name);
+                    break;
+                case '+':
+                    targetWindow.voices.pushObject(name);
+                    break;
+                default:
+                    targetWindow.users.pushObject(name);
+                    break;
+            }
         }
     },
 
@@ -86,12 +96,14 @@ App.CommandParser = Ember.Object.extend({
             return;
         }
 
-        if (data.operators) {
-            targetWindow.operators.removeObjects(data.operators);
-        }
+        data.names.forEach(function(name) {
+            this._removeName(name, targetWindow);
+        });
+    },
 
-        if (data.users) {
-            targetWindow.users.removeObjects(data.users);
-        }
+    _removeName: function(name, targetWindow) {
+        targetWindow.operators.removeObject(name);
+        targetWindow.voices.removeObject(name);
+        targetWindow.users.removeObject(name);
     }
 });

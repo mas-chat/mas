@@ -19,10 +19,13 @@
     {{#if isGroup}}
         <div class="window-members">
             {{#each name in operators}}
-            <div class="window-operator">{{name}}</div>
+                <div class="window-operator">{{name}}</div>
+            {{/each}}
+            {{#each name in voices}}
+                <div class="window-voice">{{name}}</div>
             {{/each}}
             {{#each name in users}}
-            <div>{{name}}</div>
+                <div>{{name}}</div>
             {{/each}}
         </div>
     {{/if}}
