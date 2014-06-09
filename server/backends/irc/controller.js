@@ -282,6 +282,7 @@ var handlers = {
     'JOIN': handleJoin,
     'PART': handlePart,
     'QUIT': handleQuit,
+    'MODE': handleMode,
     'PRIVMSG': handlePrivmsg,
     'PING': handlePing
 };
@@ -439,6 +440,29 @@ function *handlePart(userId, msg) {
         message + ' channel ' + channel + '. ' + reason);
 }
 
+function *handleMode(userId, msg) {
+    // :ilkka9!~ilkka9@localhost.myrootshell.com MODE #sunnuntai +k foobar3
+    var target = msg.params[0];
+
+    if (!isChannel(target)) {
+        // TDB: Handle user's mode change
+        return;
+    }
+
+    var windowId = yield windowHelper.getWindowId(userId, msg.network, target, 'group');
+
+    if (windowId === null) {
+        return;
+    }
+
+    yield textLine.sendByWindowId(userId, windowId, {
+        cat: 'info',
+        body: 'Mode change: ' + msg.params.join(' ') + ' by ' + msg.nick
+    });
+
+    //TBD: Heavy lifting
+}
+
 function *handlePrivmsg(userId, msg) {
     var channel = msg.params[0];
     var text = msg.params[1];
@@ -556,4 +580,10 @@ function *updateNamesSets(names, userId, windowId) {
 
 function *resetRetryCount(userId, network) {
     yield redis.hset('networks:' + userId + ':' + network, 'retryCount', 0);
+}
+
+function isChannel(text) {
+    return ['&', '#', '+', '!'].some(function(element) {
+        return element === text.charAt(0);
+    });
 }
