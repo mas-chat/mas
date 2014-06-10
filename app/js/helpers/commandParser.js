@@ -101,6 +101,14 @@ App.CommandParser = Ember.Object.extend({
         });
     },
 
+    _handleUpdate: function(data, targetWindow) {
+        if (!targetWindow) {
+            return;
+        }
+
+        targetWindow.setProperties(data);
+    },
+
     _removeName: function(name, targetWindow) {
         targetWindow.operators.removeObject(name);
         targetWindow.voices.removeObject(name);

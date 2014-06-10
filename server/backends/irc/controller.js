@@ -288,7 +288,8 @@ var handlers = {
     'QUIT': handleQuit,
     'MODE': handleMode,
     'PRIVMSG': handlePrivmsg,
-    'PING': handlePing
+    'PING': handlePing,
+    'ERROR': handleError
 };
 
 function *handleServerText(userId, msg, code) {
@@ -423,6 +424,16 @@ function *handleQuit(userId, msg) {
     }
 }
 
+function *handleError(userId, msg) {
+    var reason = msg.params[0];
+
+    yield textLine.broadcast(userId, msg.network, {
+        nick: msg.serverName,
+        cat: 'notice',
+        body: 'Server error: ' + reason
+    });
+}
+
 function *handlePart(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com PART #portaali :
     var channel = msg.params[0];
@@ -466,12 +477,18 @@ function *handleMode(userId, msg) {
 
     var modeParams = msg.params.slice(1);
     var names = {};
+    var sendUpdateNames = false;
 
     while (modeParams.length !== 0) {
         var command = modeParams.shift();
         var oper = command.charAt(0);
         var modes = command.substring(1).split('');
         var param;
+
+        if (!(oper === '+' || oper === '-' )) {
+            log.warn(userId, 'Received broken MODE command');
+            continue;
+        }
 
         for (var i = 0; i < modes.length; i++) {
             var mode = modes[i];
@@ -499,27 +516,52 @@ function *handleMode(userId, msg) {
                     if (oper === '+') {
                         // Non-oper got voice
                         newClass = VOICE;
-                    } else if (oper === '-') {
+                    } else {
                         // Non-oper lost voice
                         newClass = USER;
                     }
                 }
+            } else if (mode === 'k') {
+                var password = '';
+                var text = '';
+
+                if (oper === '+') {
+                    password = param;
+                    text = 'The password for this channel has been changed to ' + password + '.';
+                } else {
+                    text = 'Password protection has been removed from this channel.';
+                }
+
+                yield redis.hset('window:' + userId + ':' + windowId, 'password', password);
+
+                yield textLine.sendByWindowId(userId, windowId, {
+                    cat: 'info',
+                    body: text
+                });
+
+                yield outbox.queueAll(userId, {
+                    id: 'UPDATE',
+                    windowId: windowId,
+                    password: password
+                });
             }
 
             if (newClass) {
                 yield redis.hset(key, param, newClass);
                 names[param] = newClass;
+                sendUpdateNames = true;
             }
-
         }
     }
 
-    yield outbox.queueAll(userId, {
-        id: 'UPDATENAMES',
-        reset: false,
-        windowId: windowId,
-        names: names
-    });
+    if (sendUpdateNames) {
+        yield outbox.queueAll(userId, {
+            id: 'UPDATENAMES',
+            reset: false,
+            windowId: windowId,
+            names: names
+        });
+    }
 }
 
 function *handlePrivmsg(userId, msg) {
