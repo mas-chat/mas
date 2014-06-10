@@ -45,7 +45,7 @@
     "browserify": "~4.1.5",
     "mocha-co": "~1.17.1-co.1",
     "install": "~0.1.7",
-    "gulp": "~3.7.0",
+    "gulp": "~3.8.0",
     "gulp-jshint": "~1.6.2",
     "gulp-uglify": "~0.3.0",
     "gulp-ember-handlebars": "~0.6.0",
