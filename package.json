@@ -3,7 +3,6 @@
   "version": "0.0.3",
   "private": true,
   "description": "MAS Web App",
-  "main": "server/server.js",
   "dependencies": {
     "less-middleware": "*",
     "redis": "~0.10.0",
