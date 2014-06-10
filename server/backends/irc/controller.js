@@ -31,6 +31,10 @@ var co = require('co'),
     nicks = require('../../lib/nick'),
     conf = require('../../lib/conf');
 
+const OPER = '@';
+const VOICE = '+';
+const USER = 'u';
+
 co(function *() {
     yield redisModule.loadScripts();
 
@@ -392,7 +396,7 @@ function *handleJoin(userId, msg) {
         yield updateNamesHash(names, userId, windowId);
 
         var hash = {};
-        hash[msg.nick] = 'u';
+        hash[msg.nick] = USER;
 
         yield outbox.queueAll(userId, {
             id: 'UPDATENAMES',
@@ -484,20 +488,20 @@ function *handleMode(userId, msg) {
 
             if (mode === 'o' && oper === '+') {
                 // Got oper status
-                newClass = '@';
+                newClass = OPER;
             } else if (mode === 'o' && oper === '-') {
                 // Lost oper status
-                newClass = 'u';
+                newClass = USER;
             } else if (mode === 'v') {
-                var status = yield redis.hget(key, param);
+                var oldClass = yield redis.hget(key, param);
 
-                if (status !== '@') {
+                if (oldClass !== OPER) {
                     if (oper === '+') {
                         // Non-oper got voice
-                        newClass = '+';
+                        newClass = VOICE;
                     } else if (oper === '-') {
                         // Non-oper lost voice
-                        newClass = 'u';
+                        newClass = USER;
                     }
                 }
             }
@@ -605,13 +609,20 @@ function *updateNamesHash(names, userId, windowId) {
     var namesHash = {};
 
     for (var i = 0; i < names.length; i++) {
-        var userClass = names[i].charAt(0);
         var nick = names[i];
+        var userClass = USER;
 
-        if (userClass === '@' || userClass === '+') {
-            nick = names[i].substring(1);
-        } else {
-            userClass = 'u';
+        switch (nick.charAt(0)) {
+            case '@':
+                userClass = OPER;
+                break;
+            case '+':
+                userClass = VOICE;
+                break;
+        }
+
+        if (userClass === OPER || userClass === VOICE) {
+            nick = nick.substring(1);
         }
 
         namesHash[nick] = userClass;
