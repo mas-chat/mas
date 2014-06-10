@@ -252,14 +252,7 @@ Initialization is complete. Hint that client can now render the UI as all initia
 {
    "id":"INITDONE"
 }
-```
 
-KEY
----
-
-Update window password.
-
-```
 ```
 
 LOGS
@@ -382,8 +375,19 @@ UPDATE
 
 Update existing parameter for existing window.
 
+```JSON
+{
+   "id":"UPDATE",
+   "windowId":1,
+
+   "password":"newsecret"
+}
 ```
-```
+
+Updates a value initially received in ```CREATE``` command.
+
+Attributes in ```CREATE``` command that can be update are: ```password```.
+
 
 MAS send request
 ================
