@@ -87,17 +87,14 @@ App.Network = Ember.Object.extend({
         Ember.Logger.error('sendMsg: XHR request failed, code: ' + code);
 
         if (code === 401 || code === 406) {
-            code = code;
-           //this._handleErrorCb.call(this._cbCtx, code);
+            this._logout();
         } else {
-           //this._setStatusTextCb.call(this._cbCtx,
-           //   'Connection to MAS server lost, trying to reconnect...');
+           // TBD: Add notification: 'Connection to MAS server lost, trying to reconnect...'
 
            // Stay optimistic and keep trying
-           var that = this;
            setTimeout(function() {
-               that._sendMsgFinished();
-           }, 2000);
+               this._sendMsgFinished();
+           }.bind(this), 2000);
        }
     },
 
@@ -161,11 +158,15 @@ App.Network = Ember.Object.extend({
         var code = jqXHR.status;
 
         if (code === 401 || code === 406) {
-            $.cookie('ProjectEvergreen', null);
-            window.location = '/';
+            this._logout();
         }
 
         var err = textStatus + ', ' + error;
         console.log('Request Failed: ' + err );
+    },
+
+    _logout: function() {
+        $.cookie('ProjectEvergreen', null);
+        window.location = '/';
     }
 });

@@ -17,8 +17,14 @@
 'use strict';
 
 module.exports = function *() {
-    yield this.render('index', {
-        page: 'frontpage',
-        title: ''
-    });
+    var cookie = this.cookies.get('ProjectEvergreen');
+
+    if (cookie) {
+        this.redirect('/app');
+    } else {
+        yield this.render('index', {
+            page: 'frontpage',
+            title: ''
+        });
+    }
 };
