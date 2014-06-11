@@ -13,6 +13,11 @@ GREEN_COLOR='\e[0;32m'
 RED_COLOR='\e[0;31m'
 NO_COLOR='\e[0m'
 
+if [ -z "$NODE" ]; then
+    echo "ERROR: Node.js not found in path."
+    exit 1
+fi
+
 cd $ROOT
 
 usage ()
