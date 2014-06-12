@@ -16,7 +16,7 @@
 
 'use strict';
 
-App.Message = Ember.Object.extend({
+Mas.Message = Ember.Object.extend({
     body: null,
     cat: null,
     ts: null,

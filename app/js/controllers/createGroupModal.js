@@ -16,14 +16,14 @@
 
 'use strict';
 
-App.CreateGroupModalController = Ember.ObjectController.extend({
+Mas.CreateGroupModalController = Ember.ObjectController.extend({
     group: '',
     password: '',
     errorMsg: '',
 
     actions: {
         submit: function() {
-            App.networkMgr.send({
+            Mas.networkMgr.send({
                 id: 'CREATE',
                 name: this.get('group'),
                 password: this.get('password')

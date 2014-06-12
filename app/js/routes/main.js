@@ -16,8 +16,8 @@
 
 'use strict';
 
-App.MainRoute = Ember.Route.extend({
+Mas.MainRoute = Ember.Route.extend({
     model: function() {
-        return App.windowCollection;
+        return Mas.windowCollection;
     }
 });
