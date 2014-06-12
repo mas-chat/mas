@@ -16,7 +16,7 @@
 
 'use strict';
 
-App.JoinIrcModalController = Ember.ObjectController.extend({
+Mas.JoinIrcModalController = Ember.ObjectController.extend({
     channel: '',
     password: '',
     errorMsg: '',
@@ -26,7 +26,7 @@ App.JoinIrcModalController = Ember.ObjectController.extend({
 
     actions: {
         submit: function() {
-            App.networkMgr.send({
+            Mas.networkMgr.send({
                 id: 'JOIN',
                 network: this.get('selectedNetwork'),
                 name: this.get('channel'),

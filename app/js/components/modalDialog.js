@@ -16,7 +16,7 @@
 
 'use strict';
 
-App.ModalDialogComponent = Ember.Component.extend({
+Mas.ModalDialogComponent = Ember.Component.extend({
     classNames: ['modal', 'fade'],
 
     didInsertElement: function() {

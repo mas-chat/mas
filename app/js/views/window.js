@@ -16,7 +16,7 @@
 
 'use strict';
 
-App.WindowView = Ember.View.extend({
+Mas.WindowView = Ember.View.extend({
     classNames: ['window', 'flex-grow-column', 'flex-1'],
     $messagePanel: null,
 
