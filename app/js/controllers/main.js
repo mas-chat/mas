@@ -16,7 +16,7 @@
 
 'use strict';
 
-App.MainController = Ember.ArrayController.extend({
+Mas.MainController = Ember.ArrayController.extend({
     actions: {
         show: function(window) {
             window.set('visible', true);
