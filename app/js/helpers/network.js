@@ -18,7 +18,7 @@
 
 require('./commandParser');
 
-App.Network = Ember.Object.extend({
+Mas.Network = Ember.Object.extend({
     _sessionId: 0,
     _pollSeq: 0,
     _sendSeq: 0,
@@ -31,7 +31,7 @@ App.Network = Ember.Object.extend({
     init: function() {
         this._super();
         this._pollMsgs();
-        this._unsolicitedParser = App.CommandParser.create();
+        this._unsolicitedParser = Mas.CommandParser.create();
     },
 
     send: function(command, callback) {

@@ -16,7 +16,7 @@
 
 'use strict';
 
-App.CommandParser = Ember.Object.extend({
+Mas.CommandParser = Ember.Object.extend({
     process: function(command) {
         var name = command.id;
         var targetWindow = null;
@@ -25,7 +25,7 @@ App.CommandParser = Ember.Object.extend({
         delete command.id;
 
         if (typeof windowId === 'number') {
-            targetWindow = App.windowCollection.findBy('windowId', windowId);
+            targetWindow = Mas.windowCollection.findBy('windowId', windowId);
         }
 
         var funcName = '_handle' + name.charAt(0) + name.substring(1).toLowerCase();
@@ -38,12 +38,12 @@ App.CommandParser = Ember.Object.extend({
     },
 
     _handleCreate: function(data) {
-        var windowRecord = App.Window.create(data);
-        App.windowCollection.pushObject(windowRecord);
+        var windowRecord = Mas.Window.create(data);
+        Mas.windowCollection.pushObject(windowRecord);
     },
 
     _handleClose: function(data, targetWindow) {
-        App.windowCollection.removeObject(targetWindow);
+        Mas.windowCollection.removeObject(targetWindow);
     },
 
     _handleAddtext: function(data, targetWindow) {
@@ -52,14 +52,14 @@ App.CommandParser = Ember.Object.extend({
         }
 
         delete data.windowId;
-        var messageRecord = App.Message.create(data);
+        var messageRecord = Mas.Message.create(data);
         var messages = targetWindow.messages;
 
         messages.pushObject(messageRecord);
     },
 
     _handleNick: function(data) {
-        jQuery.extend(App.nicks, data);
+        jQuery.extend(Mas.nicks, data);
     },
 
     _handleUpdatenames: function(data, targetWindow) {

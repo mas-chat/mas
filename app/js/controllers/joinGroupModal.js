@@ -16,14 +16,14 @@
 
 'use strict';
 
-App.JoinGroupModalController = Ember.ObjectController.extend({
+Mas.JoinGroupModalController = Ember.ObjectController.extend({
     group: '',
     password: '',
     errorMsg: '',
 
     actions: {
         submit: function() {
-            App.networkMgr.send({
+            Mas.networkMgr.send({
                 id: 'JOIN',
                 network: 'MAS',
                 name: this.get('group'),

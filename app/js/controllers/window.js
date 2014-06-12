@@ -18,7 +18,7 @@
 
 var sound = require('../helpers/sound');
 
-App.WindowController = Ember.ObjectController.extend({
+Mas.WindowController = Ember.ObjectController.extend({
     actions: {
         moveRowUp: function() {
             this._seekRow(-1);
@@ -35,7 +35,7 @@ App.WindowController = Ember.ObjectController.extend({
         },
 
         close: function() {
-            App.networkMgr.send({
+            Mas.networkMgr.send({
                 id: 'CLOSE',
                 windowId: this.get('windowId')
             });
@@ -44,17 +44,17 @@ App.WindowController = Ember.ObjectController.extend({
         sendMessage: function() {
             var text = this.get('newMessage');
 
-            App.networkMgr.send({
+            Mas.networkMgr.send({
                 id: 'SEND',
                 text: text,
                 windowId: this.get('windowId')
             });
             this.set('newMessage', '');
 
-            this.get('messages').pushObject(App.Message.create({
+            this.get('messages').pushObject(Mas.Message.create({
                 body: text,
                 cat: 'mymsg',
-                nick: App.nicks[this.get('network')],
+                nick: Mas.nicks[this.get('network')],
                 ts: moment().unix()
             }));
         }

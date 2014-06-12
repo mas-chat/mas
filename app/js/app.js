@@ -18,7 +18,7 @@
 
 /*jshint camelcase: false */
 
-window.App = Ember.Application.create();
+window.Mas = Ember.Application.create();
 
 require('../dist/templates.js');
 
@@ -42,14 +42,14 @@ require('./models/window');
 require('./helpers/network');
 require('./helpers/handlebars');
 
-App.nicks = {};
-App.windowCollection = Ember.A([]);
+Mas.nicks = {};
+Mas.windowCollection = Ember.A([]);
 
-App.Router.map(function() {
+Mas.Router.map(function() {
     this.route('main', { path: '/' });
 });
 
-App.networkMgr = App.Network.create();
+Mas.networkMgr = Mas.Network.create();
 
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {

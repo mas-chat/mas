@@ -16,7 +16,7 @@
 
 'use strict';
 
-App.Window = Ember.Object.extend({
+Mas.Window = Ember.Object.extend({
     init: function() {
         this._super();
 
@@ -49,7 +49,7 @@ App.Window = Ember.Object.extend({
     }.property('name'),
 
     syncServer: function() {
-        App.networkMgr.send({
+        Mas.networkMgr.send({
             id: 'UPDATE',
             windowId: this.get('windowId'),
             row: this.get('row'),

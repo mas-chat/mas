@@ -16,7 +16,7 @@
 
 'use strict';
 
-App.ApplicationRoute = Ember.Route.extend({
+Mas.ApplicationRoute = Ember.Route.extend({
     actions: {
         openModal: function(modalName) {
             return this.render(modalName, {
