@@ -19,7 +19,7 @@
 var playing = false;
 
 var notification = new Howl({
-    urls: ['sounds/staple_gun.mp3', 'sounds/staple_gun.ogg'],
+    urls: ['/app/sounds/staple_gun.mp3', '/app/sounds/staple_gun.ogg'],
     volume: 0.5,
     onplay: function() {
         playing = true;
