@@ -22,7 +22,7 @@
     "animate.css": "~3.1.0",
     "momentjs": "~2.7.0",
     "uri.js": "~1.13.2",
-    "imagesloaded": "~3.1.4",
+    "imagesloaded": "~3.1.8",
     "jquery-cookie": "~1.4.0",
     "jqBootstrapValidation": "~2.0.0-alpha",
     "requirejs": "~2.1.14",
