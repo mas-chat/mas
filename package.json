@@ -17,7 +17,7 @@
     "co-body": "~0.0.2",
     "co-redis": "~1.1.0",
     "co-wait": "0.0.0",
-    "koa": "~0.7.0",
+    "koa": "~0.8.0",
     "koa-hbs": "~0.4.1",
     "koa-router": "ilkkao/koa-router",
     "koa-resource-router": "~0.3.0",
