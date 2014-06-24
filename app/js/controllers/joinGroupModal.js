@@ -22,7 +22,7 @@ Mas.JoinGroupModalController = Ember.ObjectController.extend({
     errorMsg: '',
 
     actions: {
-        submit: function() {
+        joinGroup: function() {
             Mas.networkMgr.send({
                 id: 'JOIN',
                 network: 'MAS',
@@ -35,10 +35,6 @@ Mas.JoinGroupModalController = Ember.ObjectController.extend({
                     this.set('errorMsg', resp.errorMsg);
                 }
             }.bind(this));
-        },
-
-        close: function() {
-            this.send('closeModal');
         }
     }
 });
