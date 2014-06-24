@@ -1,23 +1,17 @@
-{{#modal-dialog title="Join IRC channel"}}
-    <div class="modal-body">
-        <span class="error-text">{{errorMsg}}</span>
-        <form role="form">
-            <div class="form-group">
-                <label>Type the name of the IRC channel you wish to join</label>
-                {{input class="form-control" elementId="join_irc_name" valueBinding="channel"}}
-            </div>
-            <div class="form-group">
-                <label>Password, if needed</label>
-                {{input class="form-control" elementId="join_irc_password" valueBinding="password"}}
-            </div>
-            <div class="form-group">
-                <label>IRC network</label>
-                {{view Ember.Select content=networks value=selectedNetwork classNames="form-control"}}
-            </div>
-        </form>
-    </div>
-    <div class="modal-footer">
-        <button {{action "close"}} type="button" class="btn btn-default">Cancel</button>
-        <button {{action "submit"}} type="button" class="btn btn-primary">OK</button>
-    </div>
+{{#modal-dialog title="Join IRC channel" proceedButton="OK" cancel="closeModal" submit="joinIRC"}}
+    <span class="error-text">{{errorMsg}}</span>
+    <form role="form">
+        <div class="form-group">
+            <label>Type the name of the IRC channel you wish to join</label>
+            {{input class="form-control" elementId="join_irc_name" valueBinding="channel"}}
+        </div>
+        <div class="form-group">
+            <label>Password, if needed</label>
+            {{input class="form-control" elementId="join_irc_password" valueBinding="password"}}
+        </div>
+        <div class="form-group">
+            <label>IRC network</label>
+            {{view Ember.Select content=networks value=selectedNetwork classNames="form-control"}}
+        </div>
+    </form>
 {{/modal-dialog}}

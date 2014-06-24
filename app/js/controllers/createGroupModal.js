@@ -22,7 +22,7 @@ Mas.CreateGroupModalController = Ember.ObjectController.extend({
     errorMsg: '',
 
     actions: {
-        submit: function() {
+        newGroup: function() {
             Mas.networkMgr.send({
                 id: 'CREATE',
                 name: this.get('group'),
@@ -34,10 +34,6 @@ Mas.CreateGroupModalController = Ember.ObjectController.extend({
                     this.set('errorMsg', resp.errorMsg);
                 }
             }.bind(this));
-        },
-
-        close: function() {
-            this.send('closeModal');
         }
     }
 });

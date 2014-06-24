@@ -19,6 +19,16 @@
 Mas.ModalDialogComponent = Ember.Component.extend({
     classNames: ['modal', 'fade'],
 
+    actions: {
+        cancel: function() {
+            this.sendAction('cancel');
+        },
+
+        submit: function() {
+            this.sendAction('submit');
+        }
+    },
+
     didInsertElement: function() {
         this.$().modal({
             backdrop: 'static',
@@ -30,3 +40,4 @@ Mas.ModalDialogComponent = Ember.Component.extend({
         this.$().modal('hide');
     }
 });
+
