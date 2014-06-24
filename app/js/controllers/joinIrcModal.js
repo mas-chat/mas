@@ -25,7 +25,7 @@ Mas.JoinIrcModalController = Ember.ObjectController.extend({
     networks: ['IRCNet', 'FreeNode', 'W3C'],
 
     actions: {
-        submit: function() {
+        joinIRC: function() {
             Mas.networkMgr.send({
                 id: 'JOIN',
                 network: this.get('selectedNetwork'),
@@ -38,10 +38,6 @@ Mas.JoinIrcModalController = Ember.ObjectController.extend({
                     this.set('errorMsg', resp.errorMsg);
                 }
             }.bind(this));
-        },
-
-        close: function() {
-            this.send('closeModal');
         }
     }
 });
