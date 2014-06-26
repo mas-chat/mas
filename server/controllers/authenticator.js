@@ -17,6 +17,7 @@
 'use strict';
 
 var uuid = require('node-uuid'),
+    httpStatus = require('statuses'),
     log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
     conf = require('../lib/conf');
@@ -118,6 +119,6 @@ function *validateSession(userId, sessionId) {
 }
 
 function respond(ctx, code, msg) {
-    ctx.status = code;
+    ctx.status = httpStatus(code);
     ctx.body = msg;
 }
