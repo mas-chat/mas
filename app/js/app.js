@@ -27,6 +27,7 @@ require('./routes/main');
 
 require('./views/application');
 require('./views/window');
+require('./views/radioButton');
 
 require('./components/modalDialog');
 
@@ -35,6 +36,7 @@ require('./controllers/window');
 require('./controllers/joinGroupModal.js');
 require('./controllers/createGroupModal.js');
 require('./controllers/joinIrcModal.js');
+require('./controllers/passwordModal.js');
 
 require('./models/message');
 require('./models/window');
