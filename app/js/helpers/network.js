@@ -166,7 +166,7 @@ Mas.Network = Ember.Object.extend({
     },
 
     _logout: function() {
-        $.removeCookie('ProjectEvergreen', { path: '/' })
+        $.removeCookie('ProjectEvergreen', { path: '/' });
         window.location = '/';
     }
 });
