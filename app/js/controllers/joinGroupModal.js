@@ -29,7 +29,7 @@ Mas.JoinGroupModalController = Ember.ObjectController.extend({
                 name: this.get('group'),
                 password: this.get('password')
             }, function(resp) {
-                if (resp.status === 'ok') {
+                if (resp.status === 'OK') {
                     this.send('closeModal');
                 } else {
                     this.set('errorMsg', resp.errorMsg);

@@ -16,24 +16,25 @@
 
 'use strict';
 
-Mas.CreateGroupModalController = Ember.ObjectController.extend({
-    group: '',
-    password: '',
-    errorMsg: '',
+Mas.RadioButton = Ember.View.extend({
+    tagName: 'input',
+    attributeBindings: ['type', 'value', 'checked:checked:'],
+    type: 'radio',
 
-    actions: {
-        newGroup: function() {
-            Mas.networkMgr.send({
-                id: 'CREATE',
-                name: this.get('group'),
-                password: this.get('password')
-            }, function(resp) {
-                if (resp.status === 'OK') {
-                    this.send('closeModal');
-                } else {
-                    this.set('errorMsg', resp.errorMsg);
-                }
-            }.bind(this));
+    selection: null,
+
+    click: function () {
+        this.set('selection', this.$().val());
+    },
+
+    checked: function () {
+        return this.get('value') === this.get('selection');
+    }.property(),
+
+    updateValue: function () {
+        if (this.get('selection') === this.$().val()) {
+            return this.set('checked', true);
         }
-    }
+        return this.set('checked', false);
+    }.observes('selection')
 });
