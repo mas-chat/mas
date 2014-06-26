@@ -202,6 +202,8 @@ Create new window.
 
 ```network``` can be ```MAS```, ```IRCNet```, ```FreeNode``` etc.
 
+```password``` null if password protection is disabled, a string otherwise
+
 ```userMode``` can be ```participant```, ```operator```, ```owner```
 
 FLIST

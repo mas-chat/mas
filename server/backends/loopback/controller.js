@@ -83,7 +83,7 @@ function *processCreate(params) {
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'CREATE_RESP',
-        status: 'ok'
+        status: 'OK'
     });
 
     yield redis.hmset('group:' + groupName, {
@@ -100,7 +100,7 @@ function *processCreate(params) {
  function *processJoin(params) {
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'JOIN_RESP',
-        status: 'ok'
+        status: 'OK'
     });
 
     yield joinGroup(params);
