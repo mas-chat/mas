@@ -96,7 +96,7 @@ function *processJoin(params) {
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'JOIN_RESP',
-        status: 'ok',
+        status: 'OK',
     });
 
     yield outbox.queueAll(params.userId, createCommand);
