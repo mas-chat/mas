@@ -543,11 +543,31 @@ TOPIC
 TOPIC_RESP
 ----------
 
-PW
---
+UPDATE_PASSWORD
+---------------
 
-PW_RESP
--------
+```JSON
+{
+   "id":"UPDATE_PASSWORD"
+
+   "windowId":1,
+   "password": "pass123",
+}
+```
+
+Password protection will be disabled if ```password``` is ```null```.
+
+UPDATE_PASSWORD_RESP
+--------------------
+
+```JSON
+{
+   "id":"UPDATE_PASSWORD_RESP"
+   "status": "OK"
+}
+```
+
+Contains ```errorMsg``` property if the staus is not ```OK```
 
 WHOIS
 -----
