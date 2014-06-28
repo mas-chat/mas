@@ -23,10 +23,16 @@ Mas.CreateGroupModalController = Ember.ObjectController.extend({
 
     actions: {
         newGroup: function() {
+            var password = this.get('password').trim();
+
+            if (password === '') {
+                password = null;
+            }
+
             Mas.networkMgr.send({
                 id: 'CREATE',
                 name: this.get('group'),
-                password: this.get('password')
+                password: password,
             }, function(resp) {
                 if (resp.status === 'OK') {
                     this.send('closeModal');
