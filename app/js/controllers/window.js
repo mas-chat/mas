@@ -69,10 +69,14 @@ Mas.WindowController = Ember.ObjectController.extend({
 
         if (document.hidden) {
             // Browser title notification
-            titlenotifier.add();
+            if (this.get('titleAlert')) {
+                titlenotifier.add();
+            }
 
             // Sound notification
-            sound.play();
+            if (this.get('sounds')) {
+                sound.play();
+            }
         }
     }.observes('messages.@each'),
 

@@ -38,6 +38,7 @@ require('./controllers/createGroupModal.js');
 require('./controllers/joinIrcModal.js');
 require('./controllers/passwordModal.js');
 require('./controllers/topicModal.js');
+require('./controllers/alertsModal.js');
 
 require('./models/message');
 require('./models/window');
