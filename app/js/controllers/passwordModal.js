@@ -23,14 +23,12 @@ Mas.PasswordModalController = Ember.ObjectController.extend({
 
     actions: {
         changePassword: function() {
-            // User has clicked 'OK', update real window password property
+            // User has clicked 'OK', send the new password to server
             var newPassword = null;
 
             if (this.get('modalPasswordStatus') === 'enabled') {
                 newPassword = this.get('modalPassword');
             }
-
-            this.set('password', newPassword);
 
             Mas.networkMgr.send({
                 id: 'UPDATE_PASSWORD',

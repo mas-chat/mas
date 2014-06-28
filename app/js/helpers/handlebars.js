@@ -20,7 +20,7 @@ Ember.Handlebars.helper('decoratedTimestamp', function(timestamp) {
     return new Handlebars.SafeString(moment.unix(timestamp).format('HH:mm'));
 });
 
-Ember.Handlebars.helper('decoratedTitle', function(name, network, type) {
+Ember.Handlebars.helper('decoratedTitle', function(name, network, type, topic) {
     var title;
 
     if (type === '1on1') {
@@ -29,7 +29,11 @@ Ember.Handlebars.helper('decoratedTitle', function(name, network, type) {
     } else if (network === 'MAS') {
         title = 'Group: ' + name;
     } else {
-        title = network + ' channel: ' + name;
+        title = network + ': ' + name;
+    }
+
+    if (topic) {
+        title += ' - ' + Handlebars.Utils.escapeExpression(topic);
     }
 
     return new Handlebars.SafeString(title);
