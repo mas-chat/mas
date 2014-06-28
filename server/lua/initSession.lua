@@ -76,7 +76,7 @@ for i = 1, #windows do
         ['titleAlert'] = window.titleAlert == 'true',
         ['userMode'] = window.userMode,
         ['visible'] = window.visible == 'true',
-        ['row'] = window.row,
+        ['row'] = tonumber(window.row),
         ['password'] = window.password,
         ['topic'] = window.topic
     }))
