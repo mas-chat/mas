@@ -100,13 +100,16 @@ exports.createNewWindow = function *(userId, network, name, password, type) {
         userMode: 'owner',
         visible: true,
         row: 0,
-        password: password,
+        password: password === null ? '' : password,
         topic: ''
     };
 
     yield redis.hmset('window:' + userId + ':' + windowId, newWindow);
     yield redis.sadd('windowlist:' + userId, windowId + ':' + network + ':' + name + ':' + type);
 
+    if (newWindow.password === '') {
+        newWindow.password = null; // Undo 'Redis can't store NULL' fix
+    }
     newWindow.id = 'CREATE';
     return newWindow;
 };
