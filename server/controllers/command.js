@@ -118,7 +118,7 @@ module.exports = function *() {
             break;
 
         case 'UPDATE':
-            var accepted = ['visible', 'row'];
+            var accepted = ['visible', 'row', 'sounds', 'titleAlert'];
 
             for (var i = 0; i < accepted.length; i++) {
                 var prop = body[accepted[i]];
@@ -128,12 +128,14 @@ module.exports = function *() {
                 }
             }
 
-            // Notify all sessions
+            // Notify all sessions. Undefined body properties won't appear in the JSON message
             yield outbox.queueAll(userId, {
                 id: 'UPDATE',
                 windowId: windowId,
                 visible: body.visible,
-                row: body.row
+                row: body.row,
+                sounds: body.sounds,
+                titleAlert: body.titleAlert
             });
             break;
 
