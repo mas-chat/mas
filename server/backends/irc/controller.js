@@ -42,6 +42,7 @@ co(function *() {
     courier.on('join', processJoin);
     courier.on('close', processClose);
     courier.on('updatePassword', processUpdatePassword);
+    courier.on('updateTopic', processUpdateTopic);
     courier.on('restarted', processRestarted);
     courier.on('data', processData);
     courier.on('connected', processConnected);
@@ -138,6 +139,30 @@ function *processUpdatePassword(params) {
 
         yield outbox.queue(params.userId, params.sessionId, {
             id: 'UPDATE_PASSWORD_RESP',
+            status: 'OK',
+        });
+    }
+}
+
+function *processUpdateTopic(params) {
+    var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
+
+    if (state !== 'connected') {
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'UPDATE_TOPIC_RESP',
+            status: 'ERROR',
+            errorMsg: 'Can\'t change the topic. You are not connected to the IRC network'
+        });
+    } else {
+        yield courier.send('connectionmanager', {
+            type: 'write',
+            userId: params.userId,
+            network: params.network,
+            line: 'TOPIC ' + params.name + ' :' + params.topic
+        });
+
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'UPDATE_TOPIC_RESP',
             status: 'OK',
         });
     }
@@ -310,6 +335,7 @@ var handlers = {
     '375': handleServerText,
     '452': handleServerText,
 
+    '332': handle332,
     '353': handle353,
     '366': handle366,
     '376': handle376,
@@ -320,6 +346,7 @@ var handlers = {
     'PART': handlePart,
     'QUIT': handleQuit,
     'MODE': handleMode,
+    'TOPIC': handleTopic,
     'PRIVMSG': handlePrivmsg,
     'PING': handlePing,
     'ERROR': handleError
@@ -352,6 +379,15 @@ function *handlePing(userId, msg) {
         network: msg.network,
         line: resp
     });
+}
+
+function *handle332(userId, msg) {
+    // :portaali.org 332 ilkka #portaali :Cool topic
+    var channel = msg.params[0];
+    var topic = msg.params[1];
+    var windowId = yield windowHelper.getWindowId(userId, msg.network, channel);
+
+    yield updateTopic(userId, windowId, topic);
 }
 
 function *handle353(userId, msg) {
@@ -609,6 +645,20 @@ function *handleMode(userId, msg) {
     }
 }
 
+function *handleTopic(userId, msg) {
+    // :ilkka!ilkkao@localhost.myrootshell.com TOPIC #portaali :My new topic
+    var channel = msg.params[0];
+    var topic = msg.params[1];
+    var windowId = yield windowHelper.getWindowId(userId, msg.network, channel);
+
+    yield updateTopic(userId, windowId, topic);
+
+    yield textLine.send(userId, msg.network, channel, 'group', {
+        cat: 'info',
+        body: msg.nick + ' has changed the topic to: "' + topic + '".'
+    });
+}
+
 function *handlePrivmsg(userId, msg) {
     var channel = msg.params[0];
     var text = msg.params[1];
@@ -720,6 +770,16 @@ function *updateNamesHash(names, userId, windowId) {
 
 function *resetRetryCount(userId, network) {
     yield redis.hset('networks:' + userId + ':' + network, 'retryCount', 0);
+}
+
+function *updateTopic(userId, windowId, topic) {
+    yield redis.hset('window:' + userId + ':' + windowId, 'topic', topic);
+
+    yield outbox.queueAll(userId, {
+        id: 'UPDATE',
+        windowId: windowId,
+        topic: topic
+    });
 }
 
 function isChannel(text) {
