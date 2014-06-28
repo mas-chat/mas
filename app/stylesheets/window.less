@@ -145,17 +145,31 @@
     .window-members {
         width: 100px;
         border-left: 1px solid @window-line-color;
-        padding: 4px 8px;
         line-height: 150%;
         overflow-y: auto;
-    }
 
-    .window-operator {
-        font-weight: bold
-    }
+        & > * {
+            cursor: default;
+            padding: 0px 8px;
 
-    .window-voice::before {
-        content: "+";
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        & > *:hover {
+            background-color: #eee;
+        }
+
+        .window-operator {
+            font-weight: bold
+        }
+
+        .window-voice::before {
+            content: "+";
+        }
     }
 
     .window-toolbar {
