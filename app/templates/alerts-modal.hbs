@@ -1,0 +1,23 @@
+{{#modal-dialog title=alertsTitle proceedButton="Change" cancel="cancel" submit="changeAlerts"}}
+    <form role="form">
+        <label class="setting-title">Sound alert:</label>
+        <div class="modal-radio new-row">
+            {{view Mas.RadioButton selectionBinding="modalSoundAlert" value="enabled"}}
+            Enabled. Play sound when new message arrives.
+        </div>
+        <div class="modal-radio">
+            {{view Mas.RadioButton selectionBinding="modalSoundAlert" value="disabled"}}
+            Disabled
+        </div>
+
+        <label class="setting-title setting-title-next">Title alert:</label>
+        <div class="modal-radio new-row">
+            {{view Mas.RadioButton selectionBinding="modalTitleAlert" value="enabled"}}
+            Enabled. Show the amount of unread messages in browser title bar.
+        </div>
+        <div class="modal-radio">
+            {{view Mas.RadioButton selectionBinding="modalTitleAlert" value="disabled"}}
+            Disabled
+        </div>
+    </form>
+{{/modal-dialog}}

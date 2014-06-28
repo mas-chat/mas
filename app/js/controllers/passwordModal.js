@@ -57,6 +57,10 @@ Mas.PasswordModalController = Ember.ObjectController.extend({
         return this.get('modalPasswordStatus') !== 'enabled';
     }.property('modalPasswordStatus'),
 
+    passwordTitle: function() {
+        return 'Change Password for \'' + this.get('name') + '\'';
+    }.property('name'),
+
     _updateModalPassword: function() {
         var password = this.get('password');
 
