@@ -459,18 +459,6 @@ CLOSE
 CLOSE_RESP
 ----------
 
-MOVE
-----
-
-MOVE_RESP
----------
-
-HIDE
-----
-
-HIDE_RESP
----------
-
 REST
 ----
 
@@ -482,18 +470,6 @@ SEEN
 
 SEEN_RESP
 ---------
-
-SOUND
------
-
-SOUND_RESP
-----------
-
-TITLEALERT
-----------
-
-TITLEALERT_RESP
----------------
 
 GETLOG
 ------
@@ -537,12 +513,6 @@ NOKF
 NOKF_RESP
 ---------
 
-TOPIC
------
-
-TOPIC_RESP
-----------
-
 UPDATE_PASSWORD
 ---------------
 
@@ -567,70 +537,29 @@ UPDATE_PASSWORD_RESP
 }
 ```
 
-Contains ```errorMsg``` property if the staus is not ```OK```
+Contains ```errorMsg``` property if the status is not ```OK```
 
-WHOIS
------
-
-WHOIS_RESP
-----------
-
-KICK
-----
-
-KICK_RESP
----------
-
-BAN
----
-
-BAN_RESP
---------
-
-OP
---
-
-OP_RESP
--------
-
-GETOPERS
---------
-
-GETOPERS_RESP
--------------
-
-DEOP
-----
-
-DEOP_RESP
----------
-
-GETBANS
--------
-
-GETBANS_RESP
+UPDATE_TOPIC
 ------------
 
-UNBAN
------
+```JSON
+{
+   "id":"UPDATE_TOPIC"
 
-UNBAN_RESP
-----------
+   "windowId":1,
+   "topic": "My new topic",
+}
+```
 
-DELNTF
-------
+UPDATE_PASSWORD_RESP
+--------------------
 
-DELNTF_RESP
------------
+```JSON
+{
+   "id":"UPDATE_PASSWORD_RESP"
+   "status": "OK"
+}
+```
 
-SETKEY
-------
+Contains ```errorMsg``` property if the status is not ```OK```
 
-SETKEY_RESP
------------
-
-GETKEY
-------
-
-GETKEY_RESP
------------
