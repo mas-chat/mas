@@ -84,6 +84,15 @@ Mas.WindowController = Ember.ObjectController.extend({
         return this.get('type') === 'group';
     }.property('type'),
 
+    cssType: function() {
+        if (this.get('type') === 'group') {
+            return 'group';
+        } else {
+            // 1on1 is not valid css class name
+            return 'private-1on1';
+        }
+    }.property('type'),
+
     _seekRow: function(direction) {
         var newRow = this.get('parentController').nextRow(this.get('model'), direction);
         this.set('row', newRow);
