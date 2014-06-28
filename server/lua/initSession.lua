@@ -51,7 +51,7 @@ redis.call('LPUSH', outbox, cjson.encode({
 
 redis.call('LPUSH', outbox, cjson.encode({
     ['id'] = 'SET',
-    ['settings'] = nil
+    ['settings'] = cjson.null
 }))
 
 --Iterate through windows
@@ -60,6 +60,10 @@ local windows = redis.call('SMEMBERS', 'windowlist:' .. userId);
 for i = 1, #windows do
     local windowId, network = unpack(split(windows[i], ':'))
     local window = hgetall('window:' .. userId .. ':' .. windowId);
+
+    if window.password == '' then
+        window.password = cjson.null
+    end
 
     redis.call('LPUSH', outbox, cjson.encode({
         ['id'] = 'CREATE',

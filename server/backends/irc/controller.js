@@ -576,7 +576,8 @@ function *handleMode(userId, msg) {
                     text = 'Password protection has been removed from this channel.';
                 }
 
-                yield redis.hset('window:' + userId + ':' + windowId, 'password', password);
+                yield redis.hset('window:' + userId + ':' + windowId, 'password',
+                    password === null ? '' : password);
 
                 yield textLine.sendByWindowId(userId, windowId, {
                     cat: 'info',
