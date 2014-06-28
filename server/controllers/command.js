@@ -152,6 +152,16 @@ module.exports = function *() {
             // all session using UPDATE command, IRC backend does all this in handleMode() when
             // the IRC server echoes the MODE command
             break;
+
+        case 'UPDATE_TOPIC':
+            yield courier.send(backend, {
+                type: 'updateTopic',
+                userId: userId,
+                name: name,
+                network: network,
+                topic: body.topic
+            });
+            break;
     }
 
     // TBD: Add lookup table for commands
