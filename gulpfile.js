@@ -54,7 +54,8 @@ var paths = {
         'jquery.atwho/dist/js/jquery.atwho.js',
         'Caret.js/dist/jquery.caret.min.js',
         'emojify.js/emojify.js',
-        'magnific-popup/dist/jquery.magnific-popup.js'
+        'magnific-popup/dist/jquery.magnific-popup.js',
+        'bootstrap-contextmenu/bootstrap-contextmenu.js'
     ],
     testJavaScripts: [
         'test/acceptance/**/*.js'
