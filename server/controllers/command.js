@@ -84,7 +84,6 @@ module.exports = function *() {
             break;
 
         case 'JOIN':
-            backend = body.network === 'MAS' ? 'loopbackparser' : 'ircparser';
             yield courier.send(backend, {
                 type: 'join',
                 userId: userId,
@@ -136,6 +135,22 @@ module.exports = function *() {
                 visible: body.visible,
                 row: body.row
             });
+            break;
+
+        case 'UPDATE_PASSWORD':
+            yield courier.send(backend, {
+                type: 'updatePassword',
+                userId: userId,
+                name: name,
+                network: network,
+                password: body.password
+            });
+
+            // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
+
+            // TBD: loopback backend needs to update the password manually in redis and notify
+            // all session using UPDATE command, IRC backend does all this in handleMode() when
+            // the IRC server echoes the MODE command
             break;
     }
 
