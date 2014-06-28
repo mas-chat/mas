@@ -68,7 +68,7 @@ function *processJoin(params) {
     if (!channelName || channelName === '' || illegalNameRegEx.test(channelName)) {
         yield outbox.queue(params.userId, params.sessionId, {
             id: 'JOIN_RESP',
-            status: 'error',
+            status: 'ERROR',
             errorMsg: 'Illegal or missing channel name.'
         });
         return;
