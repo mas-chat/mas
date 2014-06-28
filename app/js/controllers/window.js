@@ -57,6 +57,46 @@ Mas.WindowController = Ember.ObjectController.extend({
                 nick: Mas.nicks[this.get('network')],
                 ts: moment().unix()
             }));
+        },
+
+        chat: function(nick) {
+            Mas.networkMgr.send({
+                id: 'CHAT',
+                windowId: this.get('windowId'),
+                nick: nick
+            });
+        },
+
+        whois: function(nick) {
+            Mas.networkMgr.send({
+                id: 'WHOIS',
+                windowId: this.get('windowId'),
+                nick: nick
+            });
+        },
+
+        op: function(nick) {
+            Mas.networkMgr.send({
+                id: 'OP',
+                windowId: this.get('windowId'),
+                nick: nick
+            });
+        },
+
+        kick: function(nick) {
+            Mas.networkMgr.send({
+                id: 'KICK',
+                windowId: this.get('windowId'),
+                nick: nick
+            });
+        },
+
+        kickban: function(nick) {
+            Mas.networkMgr.send({
+                id: 'KICKBAN',
+                windowId: this.get('windowId'),
+                nick: nick
+            });
         }
     },
 

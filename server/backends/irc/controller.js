@@ -43,6 +43,8 @@ co(function *() {
     courier.on('close', processClose);
     courier.on('updatePassword', processUpdatePassword);
     courier.on('updateTopic', processUpdateTopic);
+    courier.on('whois', processWhois);
+    courier.on('chat', processChat);
     courier.on('restarted', processRestarted);
     courier.on('data', processData);
     courier.on('connected', processConnected);
@@ -96,6 +98,18 @@ function *processJoin(params) {
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'JOIN_RESP',
+        status: 'OK',
+    });
+
+    yield outbox.queueAll(params.userId, createCommand);
+}
+
+function *processChat(params) {
+    var createCommand = yield windowHelper.createNewWindow(params.userId, params.network,
+        params.nick, null, '1on1');
+
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'CHAT_RESP',
         status: 'OK',
     });
 
@@ -164,6 +178,15 @@ function *processUpdateTopic(params) {
             status: 'OK',
         });
     }
+}
+
+function *processWhois(params) {
+    yield courier.send('connectionmanager', {
+        type: 'write',
+        userId: params.userId,
+        network: params.network,
+        line: 'WHOIS ' + params.nick
+    });
 }
 
 // Connection manager messages
