@@ -65,11 +65,12 @@ Mas.WindowView = Ember.View.extend({
     },
 
     didInsertElement: function() {
-        this.$messagePanel = this.$('.window-messages');
-        this.goToBottom();
-
         var observer = new MutationObserver(Ember.run.bind(this, this.handleMutations));
+        var that = this;
+
+        this.$messagePanel = this.$('.window-messages');
         observer.observe(this.$messagePanel[0], { childList: true });
+        this.goToBottom();
 
         this.$messagePanel.scroll(function() {
             // TBD
@@ -77,6 +78,25 @@ Mas.WindowView = Ember.View.extend({
 
         this.$('.window-caption').tooltip({
             delay: { show: 0, hide: 300 }
+        });
+
+        this.$('.window-members > *').contextmenu({
+            target: '#window-contextMenu',
+            before: function(e) {
+                e.preventDefault();
+                this.getMenu().find('li').eq(0).text($(e.target).text());
+                return true;
+            },
+            onItem: function(context,e) {
+                var action = $(e.target).data('action');
+                that.get('controller').send(action, $(context).text());
+            }
+        });
+
+        this.$('.window-members > *').click(function(e) {
+            $(this).contextmenu('show', e);
+            e.preventDefault();
+            return false;
         });
 
         // Highlight the window that was moved
