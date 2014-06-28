@@ -39,6 +39,10 @@ Mas.TopicModalController = Ember.ObjectController.extend({
         }
     },
 
+    topicTitle: function() {
+        return 'Edit topic for \'' + this.get('name') + '\'';
+    }.property('name'),
+
     topicDidChange: function() {
         this.set('modalTopic', this.get('topic'));
     }.observes('topic').on('init'),
