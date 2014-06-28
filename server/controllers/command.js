@@ -164,6 +164,26 @@ module.exports = function *() {
                 topic: body.topic
             });
             break;
+
+        case 'WHOIS':
+            yield courier.send(backend, {
+                type: 'whois',
+                userId: userId,
+                name: name,
+                network: network,
+                nick: body.nick
+            });
+            break;
+
+        case 'CHAT':
+            yield courier.send(backend, {
+                type: 'chat',
+                userId: userId,
+                name: name,
+                network: network,
+                nick: body.nick
+            });
+            break;
     }
 
     // TBD: Add lookup table for commands
