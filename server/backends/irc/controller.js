@@ -660,16 +660,31 @@ function *handleTopic(userId, msg) {
 }
 
 function *handlePrivmsg(userId, msg) {
-    var channel = msg.params[0];
+    var target = msg.params[0];
     var text = msg.params[1];
+    var currentNick = yield nicks.getCurrentNick(userId, msg.network);
+    var windowId;
 
-    // if (0) { // TBD target === currentNick
-    // } else {
-    // }
+    if (target === currentNick) {
+        // Message is for the user only
+        windowId = yield windowHelper.getWindowId(userId, msg.network, msg.nick);
 
-    // TBD Handle 1on1 conversations
+        if (windowId === null) {
+            var createCommand = yield windowHelper.createNewWindow(userId, msg.network,
+                msg.nick, null, '1on1');
+            yield outbox.queueAll(userId, createCommand);
+            windowId = createCommand.windowId;
+        }
+    } else {
+        windowId = yield windowHelper.getWindowId(userId, msg.network, target);
 
-    yield textLine.send(userId, msg.network, channel, 'group', {
+        if (windowId === null) {
+            log.warn(userId, 'Message arrived for an unknown channel');
+            return;
+        }
+    }
+
+    yield textLine.sendByWindowId(userId, windowId, {
         nick: msg.nick,
         cat: 'msg',
         body: text
