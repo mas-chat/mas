@@ -26,11 +26,17 @@ Mas.JoinIrcModalController = Ember.ObjectController.extend({
 
     actions: {
         joinIRC: function() {
+            var password = this.get('password').trim();
+
+            if (password === '') {
+                password = null;
+            }
+
             Mas.networkMgr.send({
                 id: 'JOIN',
                 network: this.get('selectedNetwork'),
                 name: this.get('channel'),
-                password: this.get('password')
+                password: password
             }, function(resp) {
                 if (resp.status === 'OK') {
                     this.send('closeModal');
