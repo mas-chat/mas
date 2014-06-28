@@ -82,9 +82,7 @@ function *processJoin(params) {
 
     if (!state || state === 'disconnected') {
         yield connect(params.userId, params.network);
-    }
-
-    if (state === 'connected') {
+    } else if (state === 'connected') {
         yield courier.send('connectionmanager', {
             type: 'write',
             userId: params.userId,
