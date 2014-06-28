@@ -48,6 +48,10 @@ Mas.Window = Ember.Object.extend({
         return name;
     }.property('name'),
 
+    tooltipTopic: function() {
+        return 'Topic: ' + this.get('topic');
+    }.property('topic'),
+
     syncServer: function() {
         Mas.networkMgr.send({
             id: 'UPDATE',

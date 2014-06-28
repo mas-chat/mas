@@ -75,6 +75,10 @@ Mas.WindowView = Ember.View.extend({
             // TBD
         });
 
+        this.$('.window-caption').tooltip({
+            delay: { show: 0, hide: 300 }
+        });
+
         // Highlight the window that was moved
         if (this.get('controller.model.animate') === true) {
             this.set('controller.model.animate', false);
