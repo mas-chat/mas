@@ -20,6 +20,12 @@ Mas.WindowView = Ember.View.extend({
     classNames: ['window', 'flex-grow-column', 'flex-1'],
     $messagePanel: null,
 
+    actions: {
+        expand: function() {
+            //TBD: Hard
+        }
+    },
+
     scrollTo: function(pos) {
         this.$messagePanel.stop();
         this.$messagePanel.css('overflow-y', 'hidden');
