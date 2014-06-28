@@ -41,6 +41,7 @@ co(function *() {
     courier.on('send', processSend);
     courier.on('join', processJoin);
     courier.on('close', processClose);
+    courier.on('updatePassword', processUpdatePassword);
     courier.on('restarted', processRestarted);
     courier.on('data', processData);
     courier.on('connected', processConnected);
@@ -108,6 +109,37 @@ function *processClose(params) {
     if (state === 'connected') {
         // TBD: Don't send part if 1on1
         yield sendIRCPart(params.userId, params.network, params.name);
+    }
+}
+
+function *processUpdatePassword(params) {
+    var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
+    var modeline = 'MODE ' + params.name + ' ';
+
+    if (params.password === null) {
+        modeline += '-k foobar'; // IRC protocol is odd, -k requires dummy parameter
+    } else {
+        modeline += '+k ' + params.password;
+    }
+
+    if (state !== 'connected') {
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'UPDATE_PASSWORD_RESP',
+            status: 'ERROR',
+            errorMsg: 'Can\'t change the password. You are not connected to the IRC network'
+        });
+    } else {
+        yield courier.send('connectionmanager', {
+            type: 'write',
+            userId: params.userId,
+            network: params.network,
+            line: modeline
+        });
+
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'UPDATE_PASSWORD_RESP',
+            status: 'OK',
+        });
     }
 }
 
@@ -534,7 +566,7 @@ function *handleMode(userId, msg) {
                     }
                 }
             } else if (mode === 'k') {
-                var password = '';
+                var password = null;
                 var text = '';
 
                 if (oper === '+') {
