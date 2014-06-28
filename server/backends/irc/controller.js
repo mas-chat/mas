@@ -282,6 +282,7 @@ var handlers = {
     '366': handle366,
     '376': handle376,
     '433': handle433,
+    '482': handle482,
 
     'JOIN': handleJoin,
     'PART': handlePart,
@@ -376,6 +377,17 @@ function *handle376(userId, msg) {
 function *handle433(userId, msg) {
     // :mas.example.org 433 * ilkka :Nickname is already in use.
     yield tryDifferentNick(userId, msg.network);
+}
+
+function *handle482(userId, msg) {
+    // irc.localhost 482 ilkka #test2 :You're not channel operator
+    var channel = msg.params[0];
+
+    yield textLine.send(userId, msg.network, channel, 'group', {
+        nick: msg.serverName,
+        cat: 'error',
+        body: 'You\'re not channel operator'
+    });
 }
 
 function *handleJoin(userId, msg) {
