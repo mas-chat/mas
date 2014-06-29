@@ -99,6 +99,7 @@ function *processTextLine(userId, msg, excludeSession) {
 
     msg.id = 'ADDTEXT';
     msg.type = 0; // TBD
+    msg.ts = Math.round(Date.now() / 1000);
 
     var command = JSON.stringify(msg);
 
