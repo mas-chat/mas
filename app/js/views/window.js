@@ -22,7 +22,28 @@ Mas.WindowView = Ember.View.extend({
 
     actions: {
         expand: function() {
-            //TBD: Hard
+            //TBD: Buggy
+            var origOffset = this.$().offset();
+            var origWidth = this.$().width();
+            var origHeight = this.$().height();
+
+            this.$().css('display', 'block');
+            this.$().css('position', 'absolute');
+            this.$().css('z-index', 1000);
+
+            this.$().width(origWidth);
+            this.$().height(origHeight);
+            this.$().offset(origOffset);
+
+            // var w = $(window).width() - 8;
+            // var h = $(window).height() - 8;
+
+            // this.$().animate({
+            //     width: w,
+            //     height: h,
+            //     left: 4,
+            //     top: 4
+            // }, 1000);
         }
     },
 
