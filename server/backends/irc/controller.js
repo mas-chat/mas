@@ -119,9 +119,12 @@ function *processChat(params) {
 function *processClose(params) {
     var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
 
-    if (state === 'connected') {
-        // TBD: Don't send part if 1on1
+    if (state === 'connected' && params.windowType === 'group') {
         yield sendIRCPart(params.userId, params.network, params.name);
+    }
+
+    if (params.last) {
+        yield disconnect(params.userId, params.network);
     }
 }
 
@@ -283,10 +286,17 @@ function *processConnected(params) {
 function *processDisconnected(params) {
     var userId = params.userId;
     var network = params.network;
-    var delay = 30 * 1000; // 30s
-    var msg = 'Lost connection to IRC server (' + params.reason + '). Will try to reconnect in ';
+    var previousState = yield redis.hget('networks:' + userId + ':' + network, 'state');
 
     yield redis.hset('networks:' + userId + ':' + network, 'state', 'disconnected');
+
+    if (previousState === 'closing') {
+        // We wanted to close the connection, don't reconnect
+        return;
+    }
+
+    var delay = 30 * 1000; // 30s
+    var msg = 'Lost connection to IRC server (' + params.reason + '). Will try to reconnect in ';
     var count = yield redis.hincrby('networks:' + userId + ':' + network, 'retryCount', 1);
 
     // Set the backoff timer
@@ -331,6 +341,16 @@ function *connect(userId, network, skipRetryCountReset) {
         network: network,
         host: conf.get('irc:networks:' + network + ':host'),
         port: conf.get('irc:networks:' + network + ':port')
+    });
+}
+
+function *disconnect(userId, network) {
+    yield redis.hset('networks:' + userId + ':' + network, 'state', 'closing');
+
+    yield courier.send('connectionmanager', {
+        type: 'disconnect',
+        userId: userId,
+        network: network,
     });
 }
 
@@ -440,6 +460,12 @@ function *handle376(userId, msg) {
     yield resetRetryCount(userId, msg.network);
 
     var channels = yield windowHelper.getWindowNamesForNetwork(userId, msg.network);
+
+    if (channels.length === 0) {
+        log.info(userId, 'Connected, but no channels/1on1s to join. Disconnecting');
+        yield disconnect(userId, msg.network);
+        return;
+    }
 
     //TBD don't join to 1on1s
 
