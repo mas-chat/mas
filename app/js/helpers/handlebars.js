@@ -17,7 +17,10 @@
 'use strict';
 
 Ember.Handlebars.helper('decoratedTimestamp', function(timestamp) {
-    return new Handlebars.SafeString(moment.unix(timestamp).format('HH:mm'));
+    var ts = moment.unix(timestamp);
+
+    return new Handlebars.SafeString('<div class="timestamp" data-toggle="tooltip" title="' +
+        ts.format('ddd, MMM D') + '">' + ts.format('HH:mm') + '</div>');
 });
 
 Ember.Handlebars.helper('decoratedTitle', function(name, network, type, topic) {
@@ -60,4 +63,14 @@ Ember.Handlebars.helper('endWindowRow', function(currentWindow, allVisibleWindow
     }
 
     return res;
+});
+
+Ember.Handlebars.helper('dayDivider', function(list, index) {
+    var dateForCurrent = moment.unix(list[index].get('ts'));
+    var dateForPrevious = index === 0 ? null : moment.unix(list[index - 1].get('ts'));
+
+    if (index === 0 || dateForCurrent.format('l') !== dateForPrevious.format('l')) {
+        return new Handlebars.SafeString(
+            '<div class="date-divider">' + dateForCurrent.format('dddd, MMMM D, YYYY') + '</div>');
+    }
 });
