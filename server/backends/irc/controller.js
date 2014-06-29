@@ -559,6 +559,19 @@ function *handleError(userId, msg) {
         cat: 'notice',
         body: 'Server error: ' + reason
     });
+
+    if (reason.indexOf('Too many host connections')) {
+        log.error(userId, 'Too many connections to: ' + msg.network);
+
+        yield textLine.broadcast(userId, msg.network, {
+            nick: msg.serverName,
+            cat: 'error',
+            body: msg.network + ' IRC network doesn\'t allow more connections.'
+        });
+
+        // Disable auto-reconnect
+        yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'closing');
+    }
 }
 
 function *handlePart(userId, msg) {
