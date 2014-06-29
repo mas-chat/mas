@@ -94,6 +94,8 @@ courier.on('connect', function(params) {
     var client = net.connect(options);
     client.nick = params.nick;
 
+    client.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
+
     client.on('connect', function() {
         courier.sendNoWait('ircparser', {
             type: 'connected',
