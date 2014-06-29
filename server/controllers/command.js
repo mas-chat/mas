@@ -95,6 +95,8 @@ module.exports = function *() {
             break;
 
         case 'CLOSE':
+            var ids = yield windowHelper.getWindowIdsForNetwork(userId, network);
+
             // Ask all session to close this window
             yield outbox.queueAll(userId, {
                 id: 'CLOSE',
@@ -107,6 +109,8 @@ module.exports = function *() {
                 userId: userId,
                 network: network,
                 name: name,
+                windowType: type,
+                last: ids.length === 1
             });
 
             // Redis cleanup
