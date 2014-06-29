@@ -12,7 +12,8 @@
 <div class="flex-grow-row flex-1">
     <div class="window-messages flex-1">
         {{#each message in messages}}
-        <div {{bind-attr class="message.cat :line"}}><div class="timestamp">{{decoratedTimestamp message.ts}}</div><div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
+            {{dayDivider messages _view.contentIndex}}
+            <div {{bind-attr class="message.cat :line"}}>{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
         {{/each}}
     </div>
 
