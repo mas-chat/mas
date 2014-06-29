@@ -107,11 +107,17 @@ Mas.WindowView = Ember.View.extend({
             delay: { show: 0, hide: 300 }
         });
 
-        this.$('.window-members > *').contextmenu({
+        this.$('.window-members').contextmenu({
             target: '#window-contextMenu',
             before: function(e) {
+                var $target = $(e.target);
+
+                if ($target.hasClass('window-members')) {
+                    return false;
+                }
+
                 e.preventDefault();
-                this.getMenu().find('li').eq(0).text($(e.target).text());
+                this.getMenu().find('li').eq(0).text($target.text());
                 return true;
             },
             onItem: function(context,e) {
@@ -120,7 +126,7 @@ Mas.WindowView = Ember.View.extend({
             }
         });
 
-        this.$('.window-members > *').click(function(e) {
+        this.$('.window-members').click(function(e) {
             $(this).contextmenu('show', e);
             e.preventDefault();
             return false;
@@ -147,8 +153,9 @@ Mas.WindowView = Ember.View.extend({
             data: emojisList
         });
 
-        this.$('.user-img').magnificPopup({
+        this.$('.window-messages').magnificPopup({
             type: 'image',
+            delegate: '.user-img',
             closeOnContentClick: true,
             image: {
                 verticalFit: false,
