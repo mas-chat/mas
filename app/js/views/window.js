@@ -103,8 +103,10 @@ Mas.WindowView = Ember.View.extend({
             // TBD
         });
 
-        this.$('.window-caption').tooltip({
-            delay: { show: 0, hide: 300 }
+        this.$('.window-caption').tooltip();
+        this.$('.window-messages').tooltip({
+            selector: '.timestamp',
+            placement: 'right'
         });
 
         this.$('.window-members').contextmenu({
