@@ -109,6 +109,8 @@ Mas.WindowView = Ember.View.extend({
             placement: 'right'
         });
 
+        var selectedNick;
+
         this.$('.window-members').contextmenu({
             target: '#window-contextMenu',
             before: function(e) {
@@ -119,12 +121,13 @@ Mas.WindowView = Ember.View.extend({
                 }
 
                 e.preventDefault();
-                this.getMenu().find('li').eq(0).text($target.text());
+                selectedNick = $target.text();
+                this.getMenu().find('li').eq(0).text(selectedNick);
                 return true;
             },
-            onItem: function(context,e) {
+            onItem: function(context, e) {
                 var action = $(e.target).data('action');
-                that.get('controller').send(action, $(context).text());
+                that.get('controller').send(action, selectedNick);
             }
         });
 
