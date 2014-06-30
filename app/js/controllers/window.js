@@ -64,7 +64,11 @@ Mas.WindowController = Ember.ObjectController.extend({
                 id: 'CHAT',
                 windowId: this.get('windowId'),
                 nick: nick
-            });
+            }, function(resp) {
+                if (resp.status !== 'OK') {
+                    this.send('openModal', 'info-modal', { title: 'Error', body: resp.errorMsg });
+                }
+            }.bind(this));
         },
 
         whois: function(nick) {

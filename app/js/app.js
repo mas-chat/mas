@@ -39,6 +39,7 @@ require('./controllers/joinIrcModal.js');
 require('./controllers/passwordModal.js');
 require('./controllers/topicModal.js');
 require('./controllers/alertsModal.js');
+require('./controllers/infoModal.js');
 
 require('./models/message');
 require('./models/window');
