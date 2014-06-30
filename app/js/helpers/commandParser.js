@@ -55,6 +55,10 @@ Mas.CommandParser = Ember.Object.extend({
         var messageRecord = Mas.Message.create(data);
         var messages = targetWindow.messages;
 
+        if (messages.length > 200) {
+            messages.shiftObject();
+        }
+
         messages.pushObject(messageRecord);
     },
 
