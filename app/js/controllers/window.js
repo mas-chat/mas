@@ -103,10 +103,6 @@ Mas.WindowController = Ember.ObjectController.extend({
     newMessageReceived: function() {
         this.incrementProperty('newMessagesCount');
 
-        if (this.get('messages').length > 200) {
-            this.get('messages').shiftObject();
-        }
-
         if (document.hidden) {
             // Browser title notification
             if (this.get('titleAlert')) {
