@@ -173,20 +173,28 @@ module.exports = function *() {
             yield courier.send(backend, {
                 type: 'whois',
                 userId: userId,
-                name: name,
                 network: network,
                 nick: body.nick
             });
             break;
 
         case 'CHAT':
-            yield courier.send(backend, {
-                type: 'chat',
-                userId: userId,
-                name: name,
-                network: network,
-                nick: body.nick
-            });
+            windowId = yield windowHelper.getWindowId(userId, network, body.nick, '1on1');
+
+            if (windowId !== null) {
+                yield outbox.queue(userId, sessionId, {
+                    id: 'CHAT_RESP',
+                    status: 'ERROR',
+                    errorMsg: 'You are already chatting with ' + body.nick
+                });
+            } else {
+                yield courier.send(backend, {
+                    type: 'chat',
+                    userId: userId,
+                    network: network,
+                    nick: body.nick
+                });
+            }
             break;
     }
 
