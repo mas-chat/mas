@@ -8,9 +8,11 @@
             {{yield}}
         </div>
         <div class="modal-footer">
-            <button {{action "cancel"}} type="button" class="btn btn-default">
-                Cancel
-            </button>
+            {{#unless noCancel}}
+                <button {{action "cancel"}} type="button" class="btn btn-default">
+                    Cancel
+                </button>
+            {{/unless}}
             <button {{action "submit"}} type="button" class="btn btn-primary">
                 {{proceedButton}}
             </button>
