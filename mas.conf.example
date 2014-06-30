@@ -44,7 +44,7 @@ enabled=true
 identd=false
 
 [irc.networks.IRCNet]
-host=ircnet.eversible.com
+host=localhost
 port=6666
 
 [irc.networks.FreeNode]
