@@ -17,21 +17,47 @@
 'use strict';
 
 Mas.ApplicationRoute = Ember.Route.extend({
+    modalOpen: false,
+    modalQueue: Ember.A([]),
+
     actions: {
         openModal: function(modalName, model) {
-            this.controllerFor(modalName).set('model', model);
-
-            return this.render(modalName, {
-                into: 'application',
-                outlet: 'modal'
-            });
+            if (this.get('modalOpen')) {
+                this.modalQueue.pushObject({
+                    name: modalName,
+                    model: model
+                });
+            } else {
+                this._open(modalName, model);
+            }
         },
 
         closeModal: function() {
-            return this.disconnectOutlet({
+            this.disconnectOutlet({
                 outlet: 'modal',
                 parentView: 'application'
             });
+
+            var nextModal = this.modalQueue.shiftObject();
+
+            if (nextModal) {
+                Ember.run.later(this, function() {
+                    this._open(nextModal.name, nextModal.model);
+                }, 300);
+            } else {
+                this.set('modalOpen', false);
+            }
         }
+    },
+
+    _open: function(modalName, model) {
+        this.controllerFor(modalName).set('model', model);
+
+        this.render(modalName, {
+            into: 'application',
+            outlet: 'modal'
+        });
+
+        this.set('modalOpen', true);
     }
 });
