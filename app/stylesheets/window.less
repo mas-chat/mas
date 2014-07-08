@@ -53,6 +53,11 @@
             position: relative;
             top: -2px;
         }
+
+        img[data-src] {
+            width: 31px;
+            height: 31px;
+        }
     }
 
     .line {
@@ -190,8 +195,24 @@
         }
     }
 
+    .window-new-messages {
+        position: absolute;
+        white-space: nowrap;
+        left: 0px;
+        bottom: 40px;
+        padding: 5px 10px 5px 5px;
+        color: white;
+        background-color: #4e5d6c;
+        opacity: 0.93;
+        z: 100;
+    }
+
     .window-buttons {
         width: 100px;
         border-left: 1px solid @window-line-color;
+    }
+
+    .window-add-text-container {
+        position: relative;
     }
 }

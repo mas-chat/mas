@@ -20,6 +20,10 @@ Mas.MainController = Ember.ArrayController.extend({
     actions: {
         show: function(window) {
             window.set('visible', true);
+
+            if (!window.get('scrollLock')) {
+                window.set('newMessagesCount', 0);
+            }
         }
     },
 
