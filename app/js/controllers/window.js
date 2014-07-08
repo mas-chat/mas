@@ -31,7 +31,6 @@ Mas.WindowController = Ember.ObjectController.extend({
         hide: function() {
             this.set('visible', false);
             this.set('timeHidden', Date.now());
-            this.set('newMessagesCount', 0);
         },
 
         close: function() {
@@ -105,7 +104,9 @@ Mas.WindowController = Ember.ObjectController.extend({
     },
 
     newMessageReceived: function() {
-        this.incrementProperty('newMessagesCount');
+        if (!this.get('visible') || this.get('scrollLock')) {
+            this.incrementProperty('newMessagesCount');
+        }
 
         if (document.hidden) {
             // Browser title notification

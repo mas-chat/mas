@@ -19,6 +19,8 @@
 Mas.WindowView = Ember.View.extend({
     classNames: ['window', 'flex-grow-column', 'flex-1'],
     $messagePanel: null,
+    $images: null,
+    ready: false,
 
     actions: {
         expand: function() {
@@ -65,6 +67,10 @@ Mas.WindowView = Ember.View.extend({
     },
 
     goToBottom: function() {
+        if (this.get('controller.model.scrollLock')) {
+            return;
+        }
+
         var scrollPos = this.$messagePanel.scrollTop();
         var bottom = this.$messagePanel.prop('scrollHeight');
         var height = this.$messagePanel.height();
@@ -76,35 +82,35 @@ Mas.WindowView = Ember.View.extend({
         }
     },
 
-    handleMutations: function(mutations) {
-        for (var i = 0; i < mutations.length; i++) {
-            for (var ii = 0; ii < mutations[i].addedNodes.length; ii++) {
-                var newNode = mutations[i].addedNodes[ii];
-
-                if (newNode.nodeName === 'DIV') {
-                    // New node is a div for new line, not Ember internal script tag
-                    imagesLoaded(newNode, Ember.run.bind(this, this.goToBottom));
-                }
+    initReady: function() {
+        if (this.get('controller.model.initDone')) {
+            if (this.ready) {
+                this._setupScrolling();
+            } else {
+                this.ready = true;
             }
         }
-
-        this.goToBottom();
-    },
+    }.observes('controller.model.initDone'),
 
     didInsertElement: function() {
-        var observer = new MutationObserver(Ember.run.bind(this, this.handleMutations));
         var that = this;
 
         this.$messagePanel = this.$('.window-messages');
-        observer.observe(this.$messagePanel[0], { childList: true });
-        this.goToBottom();
 
-        this.$messagePanel.scroll(function() {
-            // TBD
-        });
+        var observer = new MutationObserver(Ember.run.bind(this, function() {
+            that.goToBottom();
+            that._updateImages();
+        }));
+        observer.observe(this.$messagePanel[0], { childList: true });
+
+        if (this.ready) {
+            this._setupScrolling();
+        } else {
+            this.ready = true;
+        }
 
         this.$('.window-caption').tooltip();
-        this.$('.window-messages').tooltip({
+        this.$messagePanel.tooltip({
             selector: '.timestamp',
             placement: 'right'
         });
@@ -158,7 +164,7 @@ Mas.WindowView = Ember.View.extend({
             data: emojisList
         });
 
-        this.$('.window-messages').magnificPopup({
+        this.$messagePanel.magnificPopup({
             type: 'image',
             delegate: '.user-img',
             closeOnContentClick: true,
@@ -171,6 +177,70 @@ Mas.WindowView = Ember.View.extend({
                         '" target="_newtab">' + href + '</a>';
                 }
             }
+        });
+    },
+
+    _setupScrolling: function() {
+        this._updateImages();
+
+        this._addScrollHandler();
+        this.goToBottom();
+    },
+
+    _updateImages: function() {
+        if (this.$images === null) {
+            this.$images = $([]);
+        }
+
+        this.$images = this.$images.add('img[data-src]');
+    },
+
+    _addScrollHandler: function() {
+        var that = this;
+        var prevScrollPos = 0;
+
+        this.$messagePanel.on('scroll', Ember.run.bind(this, function() {
+            var $panel = that.$messagePanel;
+            var scrollPos = $panel.scrollTop();
+
+            if (!that.get('controller.model.deletedLine') &&
+                !that.get('controller.model.scrollLock') && prevScrollPos > scrollPos) {
+                // Scrolllock on
+                that.set('controller.model.scrollLock', true);
+                Ember.Logger.info('scrollock on');
+            } else if (that.get('controller.model.scrollLock') &&
+                scrollPos + $panel.innerHeight() >= $panel.prop('scrollHeight')) {
+                // Scrolllock off
+                that.set('controller.model.scrollLock', false);
+                that.set('controller.model.newMessagesCount', 0);
+                Ember.Logger.info('scrollock off');
+            }
+
+            prevScrollPos = scrollPos;
+            that.set('controller.model.deletedLine', false);
+
+            that._showImages();
+        }));
+    },
+
+    _showImages: function() {
+        var placeHolderHeight = 31;
+        var panelHeight = this.$messagePanel.height();
+        var that = this;
+
+        this.$images = this.$images.filter(function() {
+            var $img = $(this);
+            var pos = $img.position().top;
+
+            if (pos + placeHolderHeight >= 0 && pos <= panelHeight) {
+                $img.attr('src', $img.data('src'));
+                $img.removeAttr('data-src');
+                $img.one('load error', function() { that.goToBottom(); });
+
+                return false;
+            }
+
+            return true;
         });
     }
 });
