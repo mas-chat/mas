@@ -80,7 +80,6 @@
         "Handlebars": true,
         "moment": true,
         "URI": true,
-        "imagesLoaded": true,
         "titlenotifier": true,
         "Howl": true,
         "emojify": true,

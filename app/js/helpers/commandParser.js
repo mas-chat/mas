@@ -57,6 +57,7 @@ Mas.CommandParser = Ember.Object.extend({
 
         if (messages.length > 200) {
             messages.shiftObject();
+            targetWindow.deletedLine = true;
         }
 
         messages.pushObject(messageRecord);
@@ -64,6 +65,10 @@ Mas.CommandParser = Ember.Object.extend({
 
     _handleNick: function(data) {
         jQuery.extend(Mas.nicks, data);
+    },
+
+    _handleInitdone: function() {
+        Mas.windowCollection.setEach('initDone', true);
     },
 
     _handleUpdatenames: function(data, targetWindow) {
