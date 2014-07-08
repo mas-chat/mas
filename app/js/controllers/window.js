@@ -100,6 +100,21 @@ Mas.WindowController = Ember.ObjectController.extend({
                 windowId: this.get('windowId'),
                 nick: nick
             });
+        },
+
+        scrollUp: function() {
+            if (!this.get('deletedLine') && !this.get('scrollLock')) {
+                this.set('scrollLock', true);
+                Ember.Logger.info('scrollock on');
+            }
+        },
+
+        scrollBottom: function() {
+            if (this.get('scrollLock')) {
+                this.set('scrollLock', false);
+                this.set('newMessagesCount', 0);
+                Ember.Logger.info('scrollock off');
+            }
         }
     },
 

@@ -84,11 +84,7 @@ Mas.WindowView = Ember.View.extend({
 
     initReady: function() {
         if (this.get('controller.model.initDone')) {
-            if (this.ready) {
-                this._setupScrolling();
-            } else {
-                this.ready = true;
-            }
+            this._setupScrolling();
         }
     }.observes('controller.model.initDone'),
 
@@ -103,11 +99,7 @@ Mas.WindowView = Ember.View.extend({
         }));
         observer.observe(this.$messagePanel[0], { childList: true });
 
-        if (this.ready) {
-            this._setupScrolling();
-        } else {
-            this.ready = true;
-        }
+        this._setupScrolling();
 
         this.$('.window-caption').tooltip();
         this.$messagePanel.tooltip({
@@ -181,10 +173,37 @@ Mas.WindowView = Ember.View.extend({
     },
 
     _setupScrolling: function() {
+        if (!this.ready) {
+            // Only act on second time, when INITDONE message has been received
+            // and the view is ready
+            this.ready = true;
+            return;
+        }
+
         this._updateImages();
 
         this._addScrollHandler();
         this.goToBottom();
+    },
+
+    _addScrollHandler: function() {
+        var prevScrollPos = 0;
+
+        this.$messagePanel.on('scroll', Ember.run.bind(this, function() {
+            var $panel = this.$messagePanel;
+            var scrollPos = $panel.scrollTop();
+
+            if (prevScrollPos > scrollPos) {
+                this.get('controller').send('scrollUp');
+            } else if (scrollPos + $panel.innerHeight() >= $panel.prop('scrollHeight')) {
+                this.get('controller').send('scrollBottom');
+            }
+
+            prevScrollPos = scrollPos;
+            this.set('controller.model.deletedLine', false); // Hack
+
+            this._showImages();
+        }));
     },
 
     _updateImages: function() {
@@ -193,34 +212,6 @@ Mas.WindowView = Ember.View.extend({
         }
 
         this.$images = this.$images.add('img[data-src]');
-    },
-
-    _addScrollHandler: function() {
-        var that = this;
-        var prevScrollPos = 0;
-
-        this.$messagePanel.on('scroll', Ember.run.bind(this, function() {
-            var $panel = that.$messagePanel;
-            var scrollPos = $panel.scrollTop();
-
-            if (!that.get('controller.model.deletedLine') &&
-                !that.get('controller.model.scrollLock') && prevScrollPos > scrollPos) {
-                // Scrolllock on
-                that.set('controller.model.scrollLock', true);
-                Ember.Logger.info('scrollock on');
-            } else if (that.get('controller.model.scrollLock') &&
-                scrollPos + $panel.innerHeight() >= $panel.prop('scrollHeight')) {
-                // Scrolllock off
-                that.set('controller.model.scrollLock', false);
-                that.set('controller.model.newMessagesCount', 0);
-                Ember.Logger.info('scrollock off');
-            }
-
-            prevScrollPos = scrollPos;
-            that.set('controller.model.deletedLine', false);
-
-            that._showImages();
-        }));
     },
 
     _showImages: function() {
