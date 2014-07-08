@@ -33,7 +33,11 @@ Mas.Window = Ember.Object.extend({
     row: null,
     visible: false,
     messages: null,
+
     newMessagesCount: 0,
+    scrollLock: false,
+    deletedLine: false,
+    initDone: false,
 
     operators: null,
     voices: null,

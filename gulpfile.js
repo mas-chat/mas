@@ -45,7 +45,6 @@ var paths = {
         'jquery-cookie/jquery.cookie.js',
         'eventie/eventie.js',
         'eventEmitter/EventEmitter.js',
-        'imagesloaded/imagesloaded.js',
         'bootstrap/dist/js/bootstrap.js',
         'handlebars/handlebars.js',
         'ember/ember.js',
