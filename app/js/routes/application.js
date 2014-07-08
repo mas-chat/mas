@@ -51,11 +51,10 @@ Mas.ApplicationRoute = Ember.Route.extend({
     },
 
     _open: function(modalName, model) {
-        this.controllerFor(modalName).set('model', model);
-
         this.render(modalName, {
             into: 'application',
-            outlet: 'modal'
+            outlet: 'modal',
+            model: model
         });
 
         this.set('modalOpen', true);
