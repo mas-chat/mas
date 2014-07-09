@@ -23,7 +23,7 @@
                     <span class="glyphicon glyphicon-plus"></span>
                     <span class="sr-only">Toggle Dropdown</span>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-right">
+                <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-down">
                     <li {{action "openModal" "create-group-modal"}}><a href="#">Create new group&#8230;</a></li>
                     <li {{action "openModal" "join-group-modal"}}><a href="#">Join existing group&#8230;</a></li>
                     <li class="divider"></li>
@@ -35,9 +35,23 @@
                 <span class="glyphicon glyphicon-question-sign"></span>
             </button>
 
-            <button type="button" class="btn btn-default">
-                <span class="glyphicon glyphicon-user"></span>
-            </button>
+            <div class="btn-group dropup pull-left">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-user"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-up">
+                    <li class="dropdown-header">Friends:</li>
+                    <li class="main-friend-item">
+                        <div class="main-friend-idle main-online">ONLINE</div>
+                        <div class="main-friend-name"><span class="glyphicon glyphicon-comment"></span>Ilkka Oksanen</div>
+                    </li>
+                    <li class="main-friend-item">
+                        <div class="main-friend-idle">3h</div>
+                        <div class="main-friend-name"><span class="glyphicon glyphicon-comment"></span>Wilma Vääränen</div>
+                    </li>
+                </ul>
+            </div>
 
             <button type="button" class="btn btn-default">
                 <span class="glyphicon glyphicon-search"></span>
