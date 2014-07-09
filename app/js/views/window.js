@@ -225,8 +225,10 @@ Mas.WindowView = Ember.View.extend({
 
             if (pos + placeHolderHeight >= 0 && pos <= panelHeight) {
                 $img.attr('src', $img.data('src'));
-                $img.removeAttr('data-src');
-                $img.one('load error', function() { that.goToBottom(); });
+                $img.one('load error', function() {
+                    $img.removeAttr('data-src');
+                    that.goToBottom();
+                });
 
                 return false;
             }
