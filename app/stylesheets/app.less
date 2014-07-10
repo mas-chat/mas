@@ -3,9 +3,7 @@
 @import "../../server/public/vendor/bootswatch/superhero/variables";
 
 @import (inline) "../../server/public/vendor/animate.css/animate.css";
-
 @import (inline) "../../server/public/vendor/jquery.atwho/dist/css/jquery.atwho.css";
-
 @import (inline) "../../server/public/vendor/magnific-popup/dist/magnific-popup.css";
 
 @import url(http://fonts.googleapis.com/css?family=Roboto:400,500&subset=latin,latin-ext);
@@ -14,60 +12,20 @@
 @import "main";
 @import "dialog";
 
-@main-bg-color: @gray-light;
-
 body, html, .ember-root {
     height: 100%;
     overflow: hidden;
     font-family: 'Roboto', sans-serif;
 }
 
-.flex-grow-row {
-    display: flex;
-    flex-direction: row;
-    height: 100%;
-}
-
-.flex-row {
-    display: flex;
-    flex-direction: row;
-}
-
-.flex-grow-column {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
-
-.flex-1 {
-    flex: 1;
-}
-
-.sidebar {
-    width: 45px;
-    background-color: @main-bg-color;
-    align-items: center;
-    padding: 20px 9px 10px 5px;
-}
-
-.grid {
-    padding: 4px 0px 0px 4px;
-    background-color: @main-bg-color;
-}
-
-.btn.hidden-window-btn {
-    white-space: normal;
-    padding: 0px;
-
-    .badge {
-        width: 100%;
-        padding: 0px 8px;
-    }
-}
-
 .error-text {
     color: yellow;
 }
+
+/* bootswatch color cutomizations */
+
+@navbar-default-bg: #28537E;
+@body-bg: @navbar-default-bg;
 
 /* Bootstrap customizations */
 
