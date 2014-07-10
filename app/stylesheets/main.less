@@ -45,26 +45,34 @@
 
 .main-friend-item {
     padding: 0px 20px;
-    width: 300px;
+    width: 230px;
     float: right;
     font-size: 12px;
 }
 
 .main-friend-name {
-    width: 160px;
+    width: 140px;
     float: left;
     padding: 2px 14px 2px 0px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
 
     .glyphicon-comment {
         padding-left: 8px;
         position: relative;
         top: 2px;
         right: 8px;
+
+        &:hover {
+            color: @brand-primary;
+            cursor: pointer;
+        }
     }
 }
 
 .main-friend-idle {
-    width: 70px;
+    width: 50px;
     float: right;
     padding: 2px 0px;
     text-align: right;
@@ -72,4 +80,45 @@
 
 .main-online {
     color: lime;
+}
+
+.flex-grow-row {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.flex-grow-column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.sidebar {
+    width: 45px;
+    align-items: center;
+    padding: 20px 9px 10px 5px;
+}
+
+.grid {
+    padding: 4px 0px 0px 4px;
+}
+
+.btn.hidden-window-btn {
+    white-space: normal;
+    padding: 0px;
+
+    .badge {
+        width: 100%;
+        padding: 0px 8px;
+    }
 }
