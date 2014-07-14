@@ -26,6 +26,14 @@ Mas.MainController = Ember.ArrayController.extend({
             if (!window.get('scrollLock')) {
                 window.set('newMessagesCount', 0);
             }
+        },
+
+        joinLobby: function() {
+            Mas.networkMgr.send({
+                id: 'JOIN',
+                network: 'MAS',
+                name: 'lobby'
+            });
         }
     },
 
