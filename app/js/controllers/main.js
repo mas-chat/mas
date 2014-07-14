@@ -17,6 +17,8 @@
 'use strict';
 
 Mas.MainController = Ember.ArrayController.extend({
+    needs: ['application'],
+
     actions: {
         show: function(window) {
             window.set('visible', true);
@@ -26,6 +28,8 @@ Mas.MainController = Ember.ArrayController.extend({
             }
         }
     },
+
+    initDone: Ember.computed.alias('controllers.application.initDone'),
 
     sortedVisibleWindows: function() {
         return this.get('model').filter(function(val) {
