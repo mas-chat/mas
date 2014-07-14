@@ -69,6 +69,7 @@ Mas.CommandParser = Ember.Object.extend({
 
     _handleInitdone: function() {
         Mas.windowCollection.setEach('initDone', true);
+        Mas.__container__.lookup("controller:application").set('initDone', true); // TBD: Improve
     },
 
     _handleUpdatenames: function(data, targetWindow) {
