@@ -41,7 +41,7 @@
     "yargs": "~1.2.2"
   },
   "devDependencies": {
-    "mysql": "~2.3.0",
+    "mysql": "~2.4.1",
     "browserify": "~4.2.0",
     "mocha-co": "~1.17.1-co.1",
     "install": "~0.1.7",
@@ -56,7 +56,7 @@
     "gulp-debug": "~0.3.0",
     "gulp-util": "~2.2.14",
     "vinyl-source-stream": "~0.1.1",
-    "jshint-stylish": "~0.3.0",
+    "jshint-stylish": "~0.4.0",
     "gulp-livereload": "^2.0.0"
   },
   "scripts": {
