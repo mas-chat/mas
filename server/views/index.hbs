@@ -1,39 +1,37 @@
-    <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="jumbotron hero">
-      <div class="container text-center">
+<div class="flex-grow-row login-register-container flex-align-center">
+    <div class="info">
+        <img class="logo" src="/images/logo.png">
+        <h2>MAS - A modern open source chat tool</h2>
+        <p><a href="http://github.com/ilkkao/mas">http://github.com/ilkkao/mas</a></p>
 
-      <img id="mas-logo" src="/images/logo.png">
-
-        <h1>MAS</h1>
-        <p>an advanced chat tool for groups</p>
-        <p><a href="/register" class="btn btn-primary btn-lg">Register &raquo;</a></p>
-      </div>
+        <div class="register">
+            <a href="/register" class="btn btn-register btn-primary btn-lg">Register &raquo;</a>
+        </div>
     </div>
+    <div class="flex-1">
+        <div class="login">
+            <form id="login-form" class="form-horizontal">
+                <div id="email-or-nick" class="form-group">
+                    <input type="text" name="emailOrNick" placeholder="Email or Nick" class="form-control">
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" placeholder="Password" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary btn-login">Sign in</button> <a class="forgot" href="#"><small>Forgot your password?</small></a>
+            </form>
 
-    <div class="container">
-      <!-- Example row of columns -->
-      <div class="row">
-        <div class="col-lg-6">
-          <h2>Open source, IRC like chat service</h2>
-          <p>
-              <ul>
-                  <li>Register.</li>
-                  <li>Create a group for your team, project, or friends.</li>
-                  <li>Ask others in your team to register too, or share the link for registration-free participation.</li>
-                  <li>Interact non-stop, using a modern Web-based UI, no browser plugins required.</li>
-              </ul>
-          </p>
-      </div>
-        <div class="col-lg-6">
-          <h2>Registered users have</h2>
-          <p>
-              <ul>
-                  <li>The power to create and manage new groups.</li>
-                  <li>Always-online sessions. Never miss conversations.</li>
-                  <li>Searchable conversation logs.</li>
-              </ul>
-          </p>
+            <div class="register-horizontal-divider">
+                <div class="or-label">OR</div>
+            </div>
 
-       </div>
-      </div>
-    </div> <!-- /container -->
+            <a class="btn btn-social btn-google-plus">
+                <i class="fa fa-google-plus"></i> Sign in with Google
+            </a>
+
+            <a class="btn btn-social btn-twitter">
+                <i class="fa fa-twitter"></i> Sign in with Twitter
+            </a>
+        </div>
+    </div>
+</div>
+
