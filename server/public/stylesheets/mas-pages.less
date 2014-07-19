@@ -1,28 +1,92 @@
-@import (inline) "../vendor/bootswatch/yeti/bootstrap.css";
+@import "../vendor/bootstrap/less/bootstrap";
+@import "../vendor/bootswatch/yeti/bootswatch";
+@import "../vendor/bootswatch/yeti/variables";
 
-/* Move down content because we have a fixed navbar that is 50px tall */
-body {
-    padding-top: 50px;
+@import "../vendor/font-awesome/less/font-awesome";
+@fa-font-path: "../vendor/font-awesome/fonts";
+
+@import "../vendor/bootstrap-social/bootstrap-social";
+
+@import "../../../app/stylesheets/main";
+
+@body-bg: #28537E;
+
+body, html {
+    height: 100%;
+    background-color: white;
 }
 
-.menu {
+.login-register-container {
+    width: 85%;
     margin-left: auto;
     margin-right: auto;
-    text-align: center;
-    margin-bottom: 0px;
-    margin-top: 50px;
-    margin-bottom: 50px;
+    flex-flow: row wrap;
+
+    .info {
+        min-width: 380px;
+        padding: 45px;
+        flex: 2;
+    }
+
+    .logo {
+        width: 250px;
+    }
+
+    .login {
+        width: 250px;
+        margin: 0px 30px;
+    }
+
+    .form-horizontal .form-group {
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+
+    .btn.btn-social {
+        margin: 10px 0px;
+        padding: 6px 6px 6px 45px;
+        width: 100%;
+        display: block;
+    }
+
+    .btn {
+        padding: 7px 28px;
+    }
+
+    .btn-register {
+        width: 100%;
+        max-width: 350px;
+        margin-top: 40px;
+    }
+
+    .btn-register, .btn-login {
+        background-color: #5976f8;
+    }
+
+    .forgot {
+        float: right;
+        padding: 8px 3px 0px 0px;
+    }
+
+    .register-horizontal-divider {
+        height: 1px;
+        background-color: #ddd;
+        margin: 30px 0px;
+    }
+
+    .or-label {
+        position: relative;
+        display: inline;
+        font-size: 12px;
+        color: #aaa;
+        padding: 0px 5px;
+        left: 46%;
+        top: -11px;
+        background-color: white;
+    }
 }
 
-.menu a {
-    margin-right: 30px;
-}
-
-.form-group {
-    margin-right: 10px;
-}
-
-#register-form-container {
+.register-form-container {
     float: none;
     margin-left: auto;
     margin-right: auto;
@@ -30,54 +94,37 @@ body {
     max-width: 500px;
     margin-top: 40px;
     margin-bottom: 50px;
-}
 
-.register-form:nth-child(1) {
-    margin-top: 30px;
-}
+    .register-form:nth-child(1) {
+        margin-top: 30px;
+    }
 
-.register-form div {
-    margin-bottom: 10px;
-}
+    .register-form div {
+        margin-bottom: 10px;
+    }
 
-.register-controls {
-    margin-top: 50px;
-}
+    .register-controls {
+        margin-top: 50px;
+    }
 
-ul[role=alert] {
-    color: red;
-}
+    ul[role=alert] {
+        color: red;
+    }
 
-.error_msg {
-    color: red;
-    margin-bottom: 10px;
-}
+    .error_msg {
+        color: red;
+        margin-bottom: 10px;
+    }
 
-.tooltip {
-    opacity: 1;
-    background-color: yellow;
-    border: 1px solid red;
-    padding: 10px;
-}
+    .tooltip {
+        opacity: 1;
+        background-color: yellow;
+        border: 1px solid red;
+        padding: 10px;
+    }
 
-.field input {
-    display: block;
+    .btn {
+        background-color: #5976f8;
+        color: white;
+    }
 }
-
-.navbar-brand {
-    font-size: 30px;
-}
-
-.mas-sign-in-btn {
-    padding: 6px 12px;
-}
-
-.navbar-form.mas-login-bar:last-child {
-    margin-right: 0px;
-}
-
-#mas-logo {
-    width: 200px;
-    left: 50%;
-}
-
