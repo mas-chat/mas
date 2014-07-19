@@ -25,11 +25,15 @@ module.exports = {
     create: function *() {
         var body = yield parse.form(this);
         var password = body.password;
+        var account = body.emailOrNick;
         var user = null;
+        var userId = null;
         var cookie;
         var passwordSha, passwordShaNoSalt;
 
-        var userId = yield redis.hget('index:user', body.emailOrNick.toLowerCase());
+        if (account) {
+            userId = yield redis.hget('index:user', account.toLowerCase());
+        }
 
         if (userId) {
             user = yield redis.hgetall('user:' + userId);
@@ -44,7 +48,7 @@ module.exports = {
             // Unknown user, wrong password, or disabled account
             this.body = {
                success: false,
-               msg: 'Wrong password or ...'
+               msg: 'Incorrect password or nick/email.'
             };
         } else {
             var useSsl = yield redis.hget('settings:' + userId, 'sslEnabled');
