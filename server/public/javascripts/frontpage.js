@@ -16,39 +16,32 @@
 
 'use strict';
 
-require([
-    'jquery',
-    'jquery-cookie'
-    ], function($) {
+$(function() {
+    $('input[name="emailOrNick"]').focus();
 
-    $(function() {
+    $('#login-form').submit(function() {
+        $('.login-error').empty();
 
-        $('input[name="emailOrNick"]').focus();
-
-        $('#login-form').submit(function() {
-            $('.login-error').empty();
-
-            $.post('/login',
-                $('#login-form').serialize(),
-                function(data) {
-                    if (data.success === true) {
-                        var expiresdate = null;
-                        if (1) {
-                            //TBD
-                            expiresdate = 14;
-                        }
-
-                        $.cookie('ProjectEvergreen', data.userId + '-' + data.secret + '-n',
-                            { path: '/', expires: expiresdate });
-
-                        window.location.pathname = '/app/';
-                    } else {
-                        $('.login-error').text(data.msg);
+        $.post('/login',
+            $('#login-form').serialize(),
+            function(data) {
+                if (data.success === true) {
+                    var expiresdate = null;
+                    if (1) {
+                        //TBD
+                        expiresdate = 14;
                     }
-                });
 
-            return false;
-        });
+                    $.cookie('ProjectEvergreen', data.userId + '-' + data.secret + '-n', {
+                        path: '/', expires: expiresdate
+                    });
+
+                    window.location.pathname = '/app/';
+                } else {
+                    $('.login-error').text(data.msg);
+                }
+            });
+
+        return false;
     });
-
 });

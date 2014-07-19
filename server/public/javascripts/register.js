@@ -16,10 +16,9 @@
 
 'use strict';
 
-define(function(require) {
-    var valid = require('/vendor/jqBootstrapValidation/dist/jqBootstrapValidation-1.3.7.min.js');
-    valid = valid; //TBD
+// var valid = require('/vendor/jqBootstrapValidation/dist/jqBootstrapValidation-1.3.7.min.js');
+// valid = valid; //TBD
 
-    $(function() {
-    });
+$(function() {
+
 });

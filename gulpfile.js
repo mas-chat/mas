@@ -56,12 +56,16 @@ var paths = {
         'magnific-popup/dist/jquery.magnific-popup.js',
         'bootstrap-contextmenu/bootstrap-contextmenu.js'
     ],
+    pagesLibs: [
+        'jquery/dist/jquery.js',
+        'jquery-cookie/jquery.cookie.js',
+        'bootstrap/dist/js/bootstrap.js'
+    ],
+
     testJavaScripts: [
         'test/acceptance/**/*.js'
     ]
 };
-
-paths.clientLibs = paths.clientLibs.map(function(elem) { return 'server/public/vendor/' + elem; });
 
 function handleError(err) {
     /* jshint validthis: true */
@@ -69,6 +73,13 @@ function handleError(err) {
     util.beep();
     this.emit('end');
 }
+
+function appendPath(libs) {
+    return libs.map(function(elem) { return 'server/public/vendor/' + elem; });
+}
+
+paths.clientLibs = appendPath(paths.clientLibs);
+paths.pagesLibs = appendPath(paths.pagesLibs);
 
 gulp.task('jshint', function() {
     return gulp.src(paths.serverJavaScripts
@@ -82,7 +93,7 @@ gulp.task('bower', function() {
     return bower('./server/public/vendor');
 });
 
-gulp.task('templates', function(){
+gulp.task('templates', function() {
     return gulp.src(paths.clientTemplates)
         .pipe(handlebars({
             outputType: 'cjs'
@@ -109,6 +120,13 @@ gulp.task('libs', ['bower'], function() {
         .pipe(gulp.dest('./app/dist'));
 });
 
+gulp.task('libs-pages', ['bower'], function() {
+    return gulp.src(paths.pagesLibs)
+        .pipe(concat('libs.js'))
+        .pipe(argv.prod ? uglify() : util.noop())
+        .pipe(gulp.dest('./server/public/javascripts'));
+});
+
 gulp.task('less', ['bower'], function () {
     gulp.src('./app/stylesheets/app.less')
         .pipe(less())
@@ -124,4 +142,4 @@ gulp.task('watch', function() {
 // The default task
 gulp.task('default', ['jshint']);
 
-gulp.task('all', ['browserify', 'libs', 'less']);
+gulp.task('all', ['browserify', 'libs', 'libs-pages', 'less']);
