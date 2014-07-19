@@ -25,7 +25,6 @@
     "uri.js": "~1.13.2",
     "jquery-cookie": "~1.4.0",
     "jqBootstrapValidation": "~2.0.0-alpha",
-    "requirejs": "~2.1.14",
     "bootswatch": "~3.2.0",
     "TitleNotifier.js": "*",
     "howler": "~1.1.21",
