@@ -16,41 +16,6 @@
 
 'use strict';
 
-require([
-	'jquery',
-	'jquery-simpletip',
-	'jquery-cookie'
-	], function($) {
+require([], function() {
 
-	$(function() {
-
-		$('#login-form').submit(function() {
-			$.post('/login',
-				$('#login-form').serialize(),
-				function(data) {
-					if (data.success === true) {
-                        var expiresdate = null;
-                        if (1) {
-							//TBD
-							expiresdate = 14;
-						}
-
-						$.cookie('ProjectEvergreen', data.userId + '-' + data.secret + '-n',
-							{ path: '/', expires: expiresdate });
-
-                        window.location.pathname = '/app/';
-                    } else {
-                        $('#email-or-nick').simpletip({
-                            content: data.msg,
-                            fixed: true,
-                            position: 'bottom',
-                            hidden: false,
-                            persistent: true
-                        });
-                    }
-                });
-
-			return false;
-		});
-	});
 });
