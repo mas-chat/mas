@@ -32,7 +32,7 @@
     "node-uuid": "~1.4.1",
     "npid": "~0.4.0",
     "q": "~1.0.0",
-    "redis": "~0.10.0",
+    "redis": "~0.11.0",
     "redis-lua-helper": "~0.2.0",
     "statuses": "^1.0.3",
     "thunkify": "~2.1.1",
