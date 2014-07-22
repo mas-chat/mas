@@ -13,14 +13,15 @@ var argv = require('yargs').argv,
 //  livereload = require('gulp-livereload'),
     source = require('vinyl-source-stream'),
     streamify = require('gulp-streamify'),
-    less = require('gulp-less');
+    less = require('gulp-less'),
+    minifyCSS = require('gulp-minify-css');
 
 var paths = {
     serverJavaScripts: [
         'gulpfile.js',
         'server/**/*.js',
         '!server/public/vendor/**/*.js',
-        '!server/public/libs/**/*.js',
+        '!server/public/javascripts/libs.js',
         'migration/**/*.js'
     ],
     clientJavaScripts: [
@@ -130,6 +131,7 @@ gulp.task('libs-pages', ['bower'], function() {
 gulp.task('less', ['bower'], function () {
     gulp.src('./app/stylesheets/app.less')
         .pipe(less())
+        .pipe(minifyCSS())
         .pipe(gulp.dest('./app/dist/'));
 });
 
