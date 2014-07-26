@@ -22,6 +22,10 @@ $(function() {
     $('#login-form').submit(function() {
         $('.login-error').empty();
 
+        $('input').keypress(function() {
+            $('.login-error').empty();
+        });
+
         $.post('/login',
             $('#login-form').serialize(),
             function(data) {
@@ -34,6 +38,8 @@ $(function() {
                     window.location.pathname = '/app/';
                 } else {
                     $('.login-error').text(data.msg);
+                    $('input[name="username"]').val('').focus();
+                    $('input[name="password"]').val('');
                 }
             });
 
