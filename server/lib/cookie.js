@@ -16,7 +16,8 @@
 
 'use strict';
 
-var redis = require('../lib/redis').createClient();
+var uuid = require('uid2'),
+    redis = require('../lib/redis').createClient();
 
 exports.createSession = function *(userId) {
     /* jshint -W106 */
@@ -28,10 +29,10 @@ exports.createSession = function *(userId) {
 
     // TBD: Use word secret everywhere. Rename cookie_expires to cookieExpires
 
-    if (!(cookie > 0 && ts < expires)) {
+    if (!cookie || ts > expires)) {
         // We need to generate new secret
         expires = ts + (60 * 60 * 24 * 14);
-        cookie = Math.floor(Math.random() * 100000001) + 100000000;
+        cookie = uuid(20);
 
         // Save secret to Redis
         yield redis.hmset('user:' + userId, {
