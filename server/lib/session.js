@@ -16,7 +16,7 @@
 
 'use strict';
 
-var uuid = require('node-uuid'),
+var uuid = require('uid2'),
     httpStatus = require('statuses'),
     log = require('./log'),
     redis = require('./redis').createClient(),
@@ -50,7 +50,7 @@ module.exports = function *(next) {
 
         //New session, generate session id
         this.mas.newSession = true;
-        sessionId = uuid.v4();
+        sessionId = uuid(15);
 
         yield redis.hmset('session:' + userId + ':' + sessionId, 'sendRcvNext', 0,
             'listenRcvNext', 0);
