@@ -17,9 +17,7 @@
 'use strict';
 
 module.exports = function *() {
-    var cookie = this.cookies.get('ProjectEvergreen');
-
-    if (cookie) {
+    if (this.mas.userId !== null) {
         this.redirect('/app');
     } else {
         yield this.render('index', {
