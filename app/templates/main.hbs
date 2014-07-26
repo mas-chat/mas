@@ -71,9 +71,15 @@
                 <span class="glyphicon glyphicon-search"></span>
             </button>
 
-            <button type="button" class="btn btn-default">
-                <span class="glyphicon glyphicon-wrench"></span>
-            </button>
+            <div class="btn-group dropup pull-left">
+                <button type="button" class="btn btn-default" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-wrench"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-up">
+                    <li {{action "logout"}}><a href="#">Logout</a></li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
