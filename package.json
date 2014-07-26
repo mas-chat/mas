@@ -28,7 +28,6 @@
     "koa-static": "~1.4.2",
     "less-middleware": "*",
     "nconf": "~0.6.9",
-    "node-uuid": "~1.4.1",
     "npid": "~0.4.0",
     "q": "~1.0.0",
     "redis": "~0.11.0",
@@ -41,7 +40,8 @@
     "koa-passport": "^0.5.1",
     "passport-google": "^0.3.0",
     "passport-local": "^1.0.0",
-    "koa-bodyparser": "^1.0.1"
+    "koa-bodyparser": "^1.0.1",
+    "uid2": "0.0.3"
   },
   "devDependencies": {
     "mysql": "~2.4.1",
