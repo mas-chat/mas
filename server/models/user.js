@@ -49,12 +49,23 @@ User.prototype.generateUserId = function *() {
     var userId = yield redis.incr('nextavailableuserid');
     userId += RESERVED_USERIDS;
     this.data.userid = userId;
+    return userId;
 };
 
 User.prototype.save = function *() {
     var index = {};
-    index[this.data.nick.toLowerCase()] = this.data.userid;
-    index[this.data.email.toLowerCase()] = this.data.userid;
+
+    if (this.data.nick) {
+        index[this.data.nick.toLowerCase()] = this.data.userid;
+    }
+
+    if (this.data.email) {
+        index[this.data.email.toLowerCase()] = this.data.userid;
+    }
+
+    if (this.data.extAuthId) {
+        index[this.data.extAuthId] = this.data.userid;
+    }
 
     yield redis.hmset('user:' + this.data.userid, this.data);
     yield redis.hmset('index:user', index);

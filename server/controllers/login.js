@@ -16,70 +16,48 @@
 
 'use strict';
 
-var crypto = require('crypto'),
-    parse = require('co-body'),
-    redis = require('../lib/redis').createClient();
+var passport = require('../lib/passport'),
+    log = require('../lib/log'),
+    redis = require('../lib/redis').createClient(),
+    cookie = require('../lib/cookie');
 
-module.exports = {
-    // POST /login
-    create: function *() {
-        var body = yield parse.form(this);
-        var password = body.password;
-        var account = body.emailOrNick;
-        var user = null;
-        var userId = null;
-        var cookie;
-        var passwordSha, passwordShaNoSalt;
+exports.localLogin = function *(next) {
+    var that = this;
 
-        if (account) {
-            userId = yield redis.hget('index:user', account.toLowerCase());
-        }
-
-        if (userId) {
-            user = yield redis.hgetall('user:' + userId);
-            cookie = user.cookie;
-
-            passwordShaNoSalt = crypto.createHash('sha256').update(password, 'utf8').digest('hex');
-            passwordSha = crypto.createHash('sha256').update(
-                passwordShaNoSalt + user.salt, 'utf8').digest('hex');
-        }
-
-        if (!userId || user.passwd !== passwordSha || user.inuse === 0) {
+    yield passport.authenticate('local', function *(err, userId) {
+        if (err || userId === false) {
             // Unknown user, wrong password, or disabled account
-            this.body = {
-               success: false,
-               msg: 'Incorrect password or nick/email.'
+            that.body = {
+                success: false,
+                msg: 'Incorrect password or nick/email.'
             };
         } else {
-            var useSsl = yield redis.hget('settings:' + userId, 'sslEnabled');
-            var ts = Math.round(Date.now() / 1000);
-            var update = null;
-
-            // TBD: Use word secret everywhere. Rename cookie_expires to cookieExpires
-
-            /* jshint -W106 */
-            if (!(user.cookie > 0 && ts < user.cookie_expires)) {
-                // Time to generate new secret
-                update = {
-                    cookie: Math.floor(Math.random() * 100000001) + 100000000,
-                    cookie_expires: ts + (60 * 60 * 24 * 14)
-                };
-                cookie = update.cookie;
-
-                // Save secret to Redis
-                yield redis.hmset('user:' + userId, update);
-            }
-            /*jshint +W106 */
-
-            this.body = {
-                success: true,
-                userId: userId,
-                secret: cookie,
-                useSsl: useSsl
-            };
+            that.body = yield cookie.createSession(userId);
+            that.body.success = true;
         }
-    }
+    }).call(this, next);
 };
 
+exports.googleLogin = function *(next) {
+    var that = this;
 
+    yield passport.authenticate('google', function *(err, userId) {
+        if (err || userId === false) {
+            log.warn('Invalid external login attempt.');
+            return;
+        }
 
+        log.info('External login finished');
+
+        var resp = yield cookie.createSession(userId);
+        cookie.set(userId, resp.secret, resp.expires, that);
+
+        var inUse = yield redis.hget('user:' + userId, 'inuse');
+
+        if (inUse === '1') {
+            that.redirect('/app/');
+        } else {
+            that.redirect('/register?ext=true');
+        }
+    }).call(this, next);
+};

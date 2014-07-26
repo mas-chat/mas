@@ -21,10 +21,13 @@ var forms = require('forms'),
     widgets = forms.widgets,
     validators = forms.validators,
     Q = require('q'),
+    httpStatus = require('statuses'),
+    redis = require('../lib/redis').createClient(),
     log = require('../lib/log'),
-    User = require('../models/user.js');
+    cookie = require('../lib/cookie'),
+    User = require('../models/user');
 
-var registrationForm = forms.create({
+var formFields = {
     name: fields.string({
         required: true,
         label: 'Your name',
@@ -95,13 +98,34 @@ var registrationForm = forms.create({
         widget: widgets.checkbox({
             placeholder: 'foo'
         })
+    }),
+    registrationType: fields.string({
+        required: false,
+        widget: widgets.hidden()
     })
+};
+
+var registrationForm = forms.create({
+    name: formFields.name,
+    email: formFields.email,
+    password: formFields.password,
+    confirm: formFields.confirm,
+    nick: formFields.nick,
+    tos: formFields.tos
 });
 
-function decodeForm(req) {
+var registrationFormExt = forms.create({
+    name: formFields.name,
+    email: formFields.email,
+    nick: formFields.nick,
+    tos: formFields.tos,
+    registrationType: formFields.registrationType
+});
+
+function decodeForm(req, inputForm) {
     var deferred = Q.defer();
 
-    registrationForm.handle(req, {
+    inputForm.handle(req, {
         success: function (form) {
             deferred.resolve(form);
         },
@@ -118,42 +142,87 @@ function decodeForm(req) {
     return deferred.promise;
 }
 
-module.exports = {
-    // GET /register
-    index: function *() {
-        var form = yield decodeForm(this.req);
+exports.index = function *() {
+    var extAuth = this.query.ext === 'true';
+    var form, template;
 
+    if (extAuth) {
+        if (!this.mas.userId) {
+            this.status = httpStatus('bad request');
+            return;
+        }
+
+        template = 'register-ext';
+
+        var user = yield redis.hgetall('user:' + this.mas.userId);
+        form = registrationFormExt.bind({
+            name: user.name,
+            email: user.email,
+            registrationType: 'ext'
+        });
+    } else {
+        template = 'register';
+        form = registrationForm;
+    }
+
+    yield this.render(template, {
+        page: 'register',
+        title: 'Register',
+        registrationForm: form.toHTML()
+    });
+};
+
+exports.create = function *() {
+    var form = yield decodeForm(this.req, registrationForm);
+
+    if (!form.isValid()) {
         yield this.render('register', {
             page: 'register',
             title: 'Register',
             registrationForm: form.toHTML()
         });
-    },
+    } else {
+        log.info('Registration form data is valid');
 
-    // POST /register
-    create: function *() {
-        var form = yield decodeForm(this.req);
+        var user = new User({
+            name: form.data.name,
+            email: form.data.email,
+            nick: form.data.nick,
+            inuse: '1'
+        }, {}, {});
 
-        if (form.isValid()) {
-            log.info('Registration form data is valid');
-            var user = new User({
-                name: form.data.name,
-                email: form.data.email,
-                nick: form.data.nick,
-                inuse: '1'
-            }, {}, {});
+        user.setFinalPasswordSha(form.data.password);
+        var userId = yield user.generateUserId();
+        yield user.save();
 
-            user.setFinalPasswordSha(form.data.password);
-            yield user.generateUserId();
-            yield user.save();
+        var resp = yield cookie.createSession(userId);
+        cookie.set(userId, resp.secret, resp.expires, this);
+        this.response.redirect('/app');
+    }
+};
 
-            this.response.redirect('/registration-success.html');
-        } else {
-            yield this.render('register', {
-                page: 'register',
-                title: 'Register',
-                registrationForm: form.toHTML()
-            });
-        }
+exports.createExt = function *() {
+    var form = yield decodeForm(this.req, registrationFormExt);
+
+    if (!this.mas.userId) {
+        this.status = httpStatus('bad request');
+        return;
+    }
+
+    if (!form.isValid()) {
+        yield this.render('register-ext', {
+            page: 'register',
+            title: 'Register',
+            registrationForm: form.toHTML()
+        });
+    } else {
+        yield redis.hmset('user:' + this.mas.userId, {
+            name: form.data.name,
+            email: form.data.email,
+            nick: form.data.nick,
+            inuse: '1'
+        });
+
+        this.response.redirect('/app');
     }
 };
