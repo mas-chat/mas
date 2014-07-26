@@ -17,7 +17,7 @@
 'use strict';
 
 $(function() {
-    $('input[name="emailOrNick"]').focus();
+    $('input[name="username"]').focus();
 
     $('#login-form').submit(function() {
         $('.login-error').empty();
@@ -26,14 +26,9 @@ $(function() {
             $('#login-form').serialize(),
             function(data) {
                 if (data.success === true) {
-                    var expiresdate = null;
-                    if (1) {
-                        //TBD
-                        expiresdate = 14;
-                    }
-
                     $.cookie('ProjectEvergreen', data.userId + '-' + data.secret + '-n', {
-                        path: '/', expires: expiresdate
+                        path: '/',
+                        expires: new Date(data.expires)
                     });
 
                     window.location.pathname = '/app/';
