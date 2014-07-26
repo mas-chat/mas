@@ -37,6 +37,10 @@ idle_timeout=360
 port=6379
 host=localhost
 
+[openid]
+return_url=http://yoursite.com/auth/google/callback
+realm=http://yoursite.com
+
 ; OPTIONS FOR THE IRC BACKEND
 
 [irc]
