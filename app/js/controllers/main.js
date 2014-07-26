@@ -28,6 +28,11 @@ Mas.MainController = Ember.ArrayController.extend({
             }
         },
 
+        logout: function() {
+            $.removeCookie('ProjectEvergreen', { path: '/' });
+            window.location = '/';
+        },
+
         joinLobby: function() {
             Mas.networkMgr.send({
                 id: 'JOIN',
