@@ -89,10 +89,11 @@ var formFields = {
         cssClasses: {
             label: ['control-label']
         },
-        // TBD Validate uniqueness and rules
+        validators: [validators.rangelength(3, 14, 'Nick has to 3-14 characters long.'),
+            validateNick]
     }),
     tos: fields.boolean({
-        required: true,
+        required: validators.required('You must agree MAS TOS'),
         label: 'I agree MAS Terms of Service',
         errorAfterField: true,
         widget: widgets.checkbox({
@@ -108,6 +109,20 @@ var formFields = {
         widget: widgets.hidden()
     })
 };
+
+function validateNick(form, field, callback) {
+    var nick = field.data;
+
+    if (/[0-9]/.test(nick.charAt(0))) {
+        callback('Nick can\'t start with digit');
+    } else if (!(/^[A-Z\`a-z0-9[\]\\_\^{|}]+$/.test(nick))) {
+        var valid = ['a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}'];
+        callback('Illegal characters, allowed are <span class="badge">' +
+            valid.join('</span> <span class="badge">') + '</span>');
+    } else {
+        callback();
+    }
+}
 
 var registrationForm = forms.create({
     name: formFields.name,
