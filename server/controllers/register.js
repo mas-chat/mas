@@ -198,7 +198,7 @@ exports.indexReset = function *() {
         title: 'Register',
         registrationForm: form.toHTML()
     });
-}
+};
 
 exports.create = function *() {
     var form = yield decodeForm(this.req, registrationForm);

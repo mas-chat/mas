@@ -74,7 +74,9 @@ app.use(router(app));
 
 // Passport authentication routes
 app.get('/auth/google', passport.authenticate('google'));
+app.get('/auth/yahoo', passport.authenticate('yahoo'));
 app.get('/auth/google/callback', loginController.googleLogin);
+app.get('/auth/yahoo/callback', loginController.yahooLogin);
 app.post('/login', bodyParser(), loginController.localLogin);
 
 // REST API common filtering

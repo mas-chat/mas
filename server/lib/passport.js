@@ -21,6 +21,7 @@ var crypto = require('crypto'),
     passport = require('koa-passport'),
     LocalStrategy = require('passport-local').Strategy,
     GoogleStrategy = require('passport-google').Strategy,
+    YahooStrategy = require('passport-yahoo').Strategy,
     redis = require('./redis').createClient(),
     User = require('../models/user'),
     conf = require('./conf');
@@ -51,7 +52,7 @@ function authLocal(username, password, done) {
     })();
 }
 
-function authGoogle(identifier, profile, done) {
+function authOpenId(identifier, profile, done) {
     co(function *() {
         var userId = yield redis.hget('index:user', identifier);
 
@@ -74,11 +75,17 @@ function authGoogle(identifier, profile, done) {
 var google = new GoogleStrategy({
     returnURL: conf.get('site:url') + '/auth/google/callback',
     realm: conf.get('site:url')
-}, authGoogle);
+}, authOpenId);
+
+var yahoo = new YahooStrategy({
+    returnURL: conf.get('site:url') + '/auth/yahoo/callback',
+    realm: conf.get('site:url')
+}, authOpenId);
 
 var local = new LocalStrategy(authLocal);
 
 passport.use(google);
+passport.use(yahoo);
 passport.use(local);
 
 module.exports = passport;
