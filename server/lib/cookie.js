@@ -29,7 +29,7 @@ exports.createSession = function *(userId) {
 
     // TBD: Use word secret everywhere. Rename cookie_expires to cookieExpires
 
-    if (!cookie || ts > expires)) {
+    if (!cookie || ts > expires) {
         // We need to generate new secret
         expires = ts + (60 * 60 * 24 * 14);
         cookie = uuid(20);

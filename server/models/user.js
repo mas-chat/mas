@@ -24,6 +24,11 @@ const RESERVED_USERIDS = 9000;
 module.exports = exports = User;
 
 function User(details, settings, friends) {
+    if (!details) {
+        // Create empty an user object that can be initialized with load()
+        return;
+    }
+
     this.data = details;
     this.settings = settings;
     this.friends = friends;
@@ -32,17 +37,26 @@ function User(details, settings, friends) {
     this.data.nextwindowid = -1;
 }
 
-User.prototype.setFinalPasswordSha = function (passwd) {
-    var passwordSha = crypto.createHash('sha256').update(passwd, 'utf8').digest('hex');
-    this.addSalt(passwordSha);
+User.prototype.load = function *(userId) {
+    this.data = yield redis.hgetall('user:' + userId);
+    this.settings = yield redis.hgetall('settings:' + userId);
+    this.friends = yield redis.hgetall('friends:' + userId);
+
+    if (this.settings === null) {
+        this.settings = {};
+    }
+
+    if (this.friends == null) {
+        this.friends = {};
+    }
 };
 
-User.prototype.addSalt = function (sha) {
-    // 64-bit salt
+User.prototype.setFinalPasswordSha = function (passwd) {
+    var passwordSha = crypto.createHash('sha256').update(passwd, 'utf8').digest('hex');
     var salt = crypto.randomBytes(8).toString('hex');
 
     this.data.salt = salt;
-    this.data.passwd = crypto.createHash('sha256').update(sha + salt, 'utf8').digest('hex');
+    this.data.passwd = crypto.createHash('sha256').update(passwordSha + salt, 'utf8').digest('hex');
 };
 
 User.prototype.generateUserId = function *() {
