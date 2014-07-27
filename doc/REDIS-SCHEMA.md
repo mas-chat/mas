@@ -101,6 +101,10 @@ MAS Redis structures
    url1, url2 ...
 
  nextavailableuserId (string) [integer  counter]
+
+ passwordresettoken:<token> (string with expiry time)
+   <userId>
+
 ```
 
  Backends
