@@ -16,3 +16,6 @@
 
 'use strict';
 
+$(function() {
+    $('input[name="email"]').focus();
+});
