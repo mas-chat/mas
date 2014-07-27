@@ -39,9 +39,15 @@ exports.localLogin = function *(next) {
 };
 
 exports.googleLogin = function *(next) {
-    var that = this;
+    yield auth(this, next, 'google');
+};
 
-    yield passport.authenticate('google', function *(err, userId) {
+exports.yahooLogin = function *(next) {
+    yield auth(this, next, 'yahoo');
+};
+
+function *auth(ctx, next, provider) {
+    yield passport.authenticate(provider, function *(err, userId) {
         if (err || userId === false) {
             log.warn('Invalid external login attempt.');
             return;
@@ -50,14 +56,14 @@ exports.googleLogin = function *(next) {
         log.info('External login finished');
 
         var resp = yield cookie.createSession(userId);
-        cookie.set(userId, resp.secret, resp.expires, that);
+        cookie.set(userId, resp.secret, resp.expires, ctx);
 
         var inUse = yield redis.hget('user:' + userId, 'inuse');
 
         if (inUse === '1') {
-            that.redirect('/app/');
+            ctx.redirect('/app/');
         } else {
-            that.redirect('/register?ext=true');
+            ctx.redirect('/register?ext=true');
         }
-    }).call(this, next);
-};
+    }).call(ctx, next);
+}
