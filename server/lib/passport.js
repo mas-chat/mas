@@ -72,8 +72,8 @@ function authGoogle(identifier, profile, done) {
 }
 
 var google = new GoogleStrategy({
-    returnURL: conf.get('openid:return_url'),
-    realm: conf.get('openid:realm')
+    returnURL: conf.get('site:url') + '/auth/google/callback',
+    realm: conf.get('site:url')
 }, authGoogle);
 
 var local = new LocalStrategy(authLocal);
