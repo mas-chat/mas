@@ -102,6 +102,10 @@ var formFields = {
     registrationType: fields.string({
         required: false,
         widget: widgets.hidden()
+    }),
+    token: fields.string({
+        required: false,
+        widget: widgets.hidden()
     })
 };
 
@@ -120,6 +124,12 @@ var registrationFormExt = forms.create({
     nick: formFields.nick,
     tos: formFields.tos,
     registrationType: formFields.registrationType
+});
+
+var registrationFormReset = forms.create({
+    password: formFields.password,
+    confirm: formFields.confirm,
+    token: formFields.token
 });
 
 function decodeForm(req, inputForm) {
@@ -171,6 +181,24 @@ exports.index = function *() {
         registrationForm: form.toHTML()
     });
 };
+
+exports.indexReset = function *() {
+    var token = this.params.token;
+    var userId = yield redis.get('passwordresettoken:' + token);
+
+    if (!userId) {
+        this.body = 'Expired or invalid password reset link.';
+        return;
+    }
+
+    var form = registrationFormReset.bind({ token: token });
+
+    yield this.render('register-reset', {
+        page: 'register',
+        title: 'Register',
+        registrationForm: form.toHTML()
+    });
+}
 
 exports.create = function *() {
     var form = yield decodeForm(this.req, registrationForm);
@@ -224,5 +252,33 @@ exports.createExt = function *() {
         });
 
         this.response.redirect('/app');
+    }
+};
+
+exports.createReset = function *() {
+    var form = yield decodeForm(this.req, registrationFormReset);
+
+    var userId = yield redis.get('passwordresettoken:' + form.data.token);
+
+    if (!userId) {
+        this.status = httpStatus('bad request');
+        return;
+    }
+
+    if (!form.isValid()) {
+        yield this.render('register-reset', {
+            page: 'register',
+            title: 'Register',
+            registrationForm: form.toHTML()
+        });
+    } else {
+        yield redis.del('passwordresettoken:' + form.data.token);
+
+        var user = new User();
+        yield user.load(userId);
+        user.setFinalPasswordSha(form.data.password);
+        yield user.save();
+
+        this.response.redirect('/');
     }
 };

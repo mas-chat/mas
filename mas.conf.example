@@ -9,6 +9,10 @@
 [common]
 env=default
 
+[site]
+url=http://localhost:3200
+admin_email=admin@example.com
+
 [frontend]
 port=3200
 demo_mode=false
@@ -36,10 +40,6 @@ idle_timeout=360
 [redis]
 port=6379
 host=localhost
-
-[openid]
-return_url=http://yoursite.com/auth/google/callback
-realm=http://yoursite.com
 
 ; OPTIONS FOR THE IRC BACKEND
 

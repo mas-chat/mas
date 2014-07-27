@@ -43,6 +43,7 @@ var path = require('path'),
     commandController = require('./controllers/command'),
     loginController = require('./controllers/login'),
     registerController = require('./controllers/register'),
+    forgotPasswordController = require('./controllers/forgotPassword'),
     scheduler = require('./lib/scheduler');
 
 var app = koa();
@@ -87,6 +88,11 @@ app.post('/api/v1/send*', commandController);
 app.get('/register', registerController.index);
 app.post('/register', registerController.create);
 app.post('/register-ext', registerController.createExt);
+app.post('/register-reset', registerController.createReset);
+
+// Forgot password
+app.post('/forgot-password', bodyParser(), forgotPasswordController.create);
+app.get('/reset-password/:token', registerController.indexReset);
 
 // Public routes
 app.use(less(path.join(__dirname, 'public')));
