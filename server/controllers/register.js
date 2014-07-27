@@ -117,8 +117,9 @@ function validateNick(form, field, callback) {
         callback('Nick can\'t start with digit');
     } else if (!(/^[A-Z\`a-z0-9[\]\\_\^{|}]+$/.test(nick))) {
         var valid = ['a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}'];
-        callback('Illegal characters, allowed are <span class="badge">' +
-            valid.join('</span> <span class="badge">') + '</span>');
+        valid = '<span class="badge">' + valid.join('</span> <span class="badge">') + '</span>';
+
+        callback('Illegal characters, allowed are ' + valid);
     } else {
         callback();
     }
@@ -165,6 +166,17 @@ function decodeForm(req, inputForm) {
     });
 
     return deferred.promise;
+}
+
+function *nickOrEmailTaken(nickOrEmail, field, type) {
+    var userId = yield redis.hget('index:user', nickOrEmail.toLowerCase());
+
+    if (userId) {
+        field.error = 'This ' + type + ' is already reserved.';
+        return true;
+    } else {
+        return false;
+    }
 }
 
 exports.index = function *() {
@@ -217,8 +229,10 @@ exports.indexReset = function *() {
 
 exports.create = function *() {
     var form = yield decodeForm(this.req, registrationForm);
+    var emailInUse = yield nickOrEmailTaken(form.data.email, form.fields.email, 'email address');
+    var nickInUse = yield nickOrEmailTaken(form.data.nick, form.fields.nick, 'nick');
 
-    if (!form.isValid()) {
+    if (!form.isValid() || emailInUse || nickInUse) {
         yield this.render('register', {
             page: 'register',
             title: 'Register',
@@ -246,13 +260,15 @@ exports.create = function *() {
 
 exports.createExt = function *() {
     var form = yield decodeForm(this.req, registrationFormExt);
+    var emailInUse = yield nickOrEmailTaken(form.data.email, form.fields.email, 'email address');
+    var nickInUse = yield nickOrEmailTaken(form.data.nick, form.fields.nick, 'nick');
 
     if (!this.mas.userId) {
         this.status = httpStatus('bad request');
         return;
     }
 
-    if (!form.isValid()) {
+    if (!form.isValid() || emailInUse || nickInUse) {
         yield this.render('register-ext', {
             page: 'register',
             title: 'Register',
