@@ -31,6 +31,7 @@ require('./views/radioButton');
 
 require('./components/modalDialog');
 
+require('./controllers/application');
 require('./controllers/main');
 require('./controllers/window');
 require('./controllers/joinGroupModal.js');
