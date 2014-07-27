@@ -16,9 +16,6 @@
 
 'use strict';
 
-// var valid = require('/vendor/jqBootstrapValidation/dist/jqBootstrapValidation-1.3.7.min.js');
-// valid = valid; //TBD
-
 $(function() {
-
+    $('input[name="name"]').focus();
 });
