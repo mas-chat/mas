@@ -46,7 +46,7 @@ User.prototype.load = function *(userId) {
         this.settings = {};
     }
 
-    if (this.friends == null) {
+    if (this.friends === null) {
         this.friends = {};
     }
 };
