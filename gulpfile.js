@@ -104,10 +104,11 @@ gulp.task('templates', function() {
 });
 
 gulp.task('browserify', ['templates'], function() {
-    return browserify('./app/js/app.js')
-        .bundle({
+    return browserify({
+            entries: './app/js/app.js',
             debug: true
         })
+        .bundle()
         .on('error', handleError)
         .pipe(source('app.js'))
         .pipe(argv.prod ? streamify(uglify()) : util.noop())
