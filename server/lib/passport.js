@@ -20,7 +20,7 @@ var crypto = require('crypto'),
     co = require('co'),
     passport = require('koa-passport'),
     LocalStrategy = require('passport-local').Strategy,
-    GoogleStrategy = require('passport-google').Strategy,
+    GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
     YahooStrategy = require('passport-yahoo').Strategy,
     redis = require('./redis').createClient(),
     User = require('../models/user'),
@@ -72,10 +72,15 @@ function authOpenId(identifier, profile, done) {
     })();
 }
 
+function authGoogle(token, tokenSecret, profile, done) {
+    authOpenId(profile.id, profile, done);
+}
+
 var google = new GoogleStrategy({
-    returnURL: conf.get('site:url') + '/auth/google/callback',
-    realm: conf.get('site:url')
-}, authOpenId);
+    clientID: conf.get('googleauth:client_id'),
+    clientSecret: conf.get('googleauth:client_secret'),
+    callbackURL: conf.get('site:url') + '/auth/google/oauth2callback'
+}, authGoogle);
 
 var yahoo = new YahooStrategy({
     returnURL: conf.get('site:url') + '/auth/yahoo/callback',
