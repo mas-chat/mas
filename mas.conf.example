@@ -13,6 +13,12 @@ env=default
 url=http://localhost:3200
 admin_email=admin@example.com
 
+; google auth callback must be /auth/google/oauth2callback
+
+[googleauth]
+client_id=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com
+client_secret=XXXXXXXXXXXXXXXXXXXXXXX
+
 [frontend]
 port=3200
 demo_mode=false
