@@ -26,6 +26,8 @@ var crypto = require('crypto'),
     User = require('../models/user'),
     conf = require('./conf');
 
+// TBD: Rename Redis user.openidurl property to user.extAuthToken
+
 function authLocal(username, password, done) {
     co(function *() {
         var user = null;
@@ -44,23 +46,40 @@ function authLocal(username, password, done) {
                 passwordShaNoSalt + user.salt, 'utf8').digest('hex');
         }
 
-        if (!userId || user.passwd !== passwordSha || user.inuse === 0) {
-            done(null, false);
+        if (userId && user.openidurl) {
+            done('useExt', false);
+        } else if (!userId || user.passwd !== passwordSha || user.inuse === 0) {
+            done('invalid', false);
         } else {
             done(null, userId);
         }
     })();
 }
 
-function authOpenId(identifier, profile, done) {
+function authExt(openid_id, oauth_id, profile, done) {
     co(function *() {
-        var userId = yield redis.hget('index:user', identifier);
+        // Some old users are known by their google OpenID 2.0 identifier. Google is closing down
+        // OpenID support so always convert in that case to OAuth 2.0 id.
+
+        var userId = yield redis.hget('index:user', openid_id);
+
+        if (oauth_id) {
+            if (userId) {
+                // User is identified by his OpenID 2.0 identifier even we know his OAuth 2.0 id.
+                // Start to solely use OAuth 2.0 id.
+                yield redis.hset('user:' + userId, 'openidurl', oauth_id);
+                yield redis.hdel('index:user', openid_id);
+                yield redis.hset('index:user', oauth_id, userId);
+            } else {
+                userId = yield redis.hget('index:user', oauth_id);
+            }
+        }
 
         if (userId === null) {
             var user = new User({
                 name: profile.displayName,
                 email: profile.emails[0].value,
-                extAuthId: identifier,
+                extAuthId: oauth_id || openid_id,
                 inuse: '0'
             }, {}, {});
 
@@ -72,20 +91,27 @@ function authOpenId(identifier, profile, done) {
     })();
 }
 
-function authGoogle(token, tokenSecret, profile, done) {
-    authOpenId(profile.id, profile, done);
-}
-
 var google = new GoogleStrategy({
     clientID: conf.get('googleauth:client_id'),
     clientSecret: conf.get('googleauth:client_secret'),
     callbackURL: conf.get('site:url') + '/auth/google/oauth2callback'
-}, authGoogle);
+}, function(openid_id, tokenSecret, profile, done) {
+    // profile.id is google's oauth_id
+    authExt('https://www.google.com/accounts/o8/id?id=' + openid_id,
+        'google:' + profile.id, profile, done);
+});
+
+// A trick to force Google to return OpenID 2.0 identifier in addition to OAuth 2.0 id
+google.authorizationParams = function(options) {
+    return { 'openid.realm': '' };
+}
 
 var yahoo = new YahooStrategy({
     returnURL: conf.get('site:url') + '/auth/yahoo/callback',
     realm: conf.get('site:url')
-}, authOpenId);
+}, function(identifier, profile, done) {
+    authExt(identifier, null, profile, done);
+});
 
 var local = new LocalStrategy(authLocal);
 
