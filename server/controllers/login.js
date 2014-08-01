@@ -25,7 +25,12 @@ exports.localLogin = function *(next) {
     var that = this;
 
     yield passport.authenticate('local', function *(err, userId) {
-        if (err || userId === false) {
+        if (err === 'useExt') {
+            that.body = {
+                success: false,
+                msg: 'This email address is bound to Google/Yahoo login.'
+            };
+        } else if (err || userId === false) {
             // Unknown user, wrong password, or disabled account
             that.body = {
                 success: false,
