@@ -268,7 +268,7 @@ exports.createExt = function *() {
         return;
     }
 
-    if (!form.isValid() || emailInUse || nickInUse) {
+    if (!form.isValid() || (emailInUse && this.mas.email !== form.data.email) || nickInUse) {
         yield this.render('register-ext', {
             page: 'register',
             title: 'Register',

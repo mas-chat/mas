@@ -45,7 +45,8 @@ module.exports = function authenticate() {
         }
 
         if (valid) {
-            expect = yield redis.hmget('user:' + userId, 'cookie_expires', 'cookie', 'inuse');
+            expect = yield redis.hmget('user:' + userId, 'cookie_expires', 'cookie', 'inuse',
+                'email');
 
             if (!(expect && expect[0] > ts && expect[1] === secret)) {
                 valid = false;
@@ -54,6 +55,7 @@ module.exports = function authenticate() {
 
         this.mas = this.mas || {};
         this.mas.userId = valid ? userId : null;
+        this.mas.email = valid ? expect[3] : null;
         this.mas.inUse = valid ? expect[2] === '1' : null;
 
         yield next;
