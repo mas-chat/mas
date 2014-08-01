@@ -56,22 +56,22 @@ function authLocal(username, password, done) {
     })();
 }
 
-function authExt(openid_id, oauth_id, profile, done) {
+function authExt(openidId, oauthId, profile, done) {
     co(function *() {
         // Some old users are known by their google OpenID 2.0 identifier. Google is closing down
         // OpenID support so always convert in that case to OAuth 2.0 id.
 
-        var userId = yield redis.hget('index:user', openid_id);
+        var userId = yield redis.hget('index:user', openidId);
 
-        if (oauth_id) {
+        if (oauthId) {
             if (userId) {
                 // User is identified by his OpenID 2.0 identifier even we know his OAuth 2.0 id.
                 // Start to solely use OAuth 2.0 id.
-                yield redis.hset('user:' + userId, 'openidurl', oauth_id);
-                yield redis.hdel('index:user', openid_id);
-                yield redis.hset('index:user', oauth_id, userId);
+                yield redis.hset('user:' + userId, 'openidurl', oauthId);
+                yield redis.hdel('index:user', openidId);
+                yield redis.hset('index:user', oauthId, userId);
             } else {
-                userId = yield redis.hget('index:user', oauth_id);
+                userId = yield redis.hget('index:user', oauthId);
             }
         }
 
@@ -79,7 +79,7 @@ function authExt(openid_id, oauth_id, profile, done) {
             var user = new User({
                 name: profile.displayName,
                 email: profile.emails[0].value,
-                extAuthId: oauth_id || openid_id,
+                extAuthId: oauthId || openidId,
                 inuse: '0'
             }, {}, {});
 
@@ -95,16 +95,16 @@ var google = new GoogleStrategy({
     clientID: conf.get('googleauth:client_id'),
     clientSecret: conf.get('googleauth:client_secret'),
     callbackURL: conf.get('site:url') + '/auth/google/oauth2callback'
-}, function(openid_id, tokenSecret, profile, done) {
+}, function(openidId, tokenSecret, profile, done) {
     // profile.id is google's oauth_id
-    authExt('https://www.google.com/accounts/o8/id?id=' + openid_id,
+    authExt('https://www.google.com/accounts/o8/id?id=' + openidId,
         'google:' + profile.id, profile, done);
 });
 
 // A trick to force Google to return OpenID 2.0 identifier in addition to OAuth 2.0 id
-google.authorizationParams = function(options) {
+google.authorizationParams = function() {
     return { 'openid.realm': '' };
-}
+};
 
 var yahoo = new YahooStrategy({
     returnURL: conf.get('site:url') + '/auth/yahoo/callback',
