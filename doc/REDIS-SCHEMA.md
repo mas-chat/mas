@@ -38,6 +38,7 @@ MAS Redis structures
  index:user (hash)
    <email> (int, userId)
    <nick> (int, userId)
+   <openidurl> (int, userId)
 
  users (set)
    <userId1>, <userId2> ...
