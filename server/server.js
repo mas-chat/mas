@@ -72,8 +72,14 @@ app.use(userSession());
 
 app.use(router(app));
 
+var googleAuthOptions = { scope: 'email profile' };
+
+if (conf.get('googleauth:openid_realm')) {
+    googleAuthOptions.openIdRealm = conf.get('googleauth:openid_realm');
+}
+
 // Passport authentication routes
-app.get('/auth/google', passport.authenticate('google', { scope: 'email profile' }));
+app.get('/auth/google', passport.authenticate('google', googleAuthOptions));
 app.get('/auth/google/oauth2callback', loginController.googleLogin);
 app.get('/auth/yahoo', passport.authenticate('yahoo'));
 app.get('/auth/yahoo/callback', loginController.yahooLogin);
