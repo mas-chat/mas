@@ -38,12 +38,13 @@
     "winston-loggly": "~1.0.1",
     "yargs": "~1.3.1",
     "koa-passport": "^0.5.1",
-    "passport-google-oauth": "^0.1.5",
+    "passport-google-oauth": "ilkkao/passport-google-oauth",
     "passport-local": "^1.0.0",
     "koa-bodyparser": "^1.0.1",
     "nodemailer": "^1.0.4",
     "uid2": "0.0.3",
-    "passport-yahoo": "^0.3.0"
+    "passport-yahoo": "^0.3.0",
+    "jwt-simple": "^0.2.0"
   },
   "devDependencies": {
     "mysql": "~2.4.1",

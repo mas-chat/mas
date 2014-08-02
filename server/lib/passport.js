@@ -18,6 +18,7 @@
 
 var crypto = require('crypto'),
     co = require('co'),
+    jwt = require('jwt-simple'),
     passport = require('koa-passport'),
     LocalStrategy = require('passport-local').Strategy,
     GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
@@ -95,22 +96,16 @@ var google = new GoogleStrategy({
     clientID: conf.get('googleauth:client_id'),
     clientSecret: conf.get('googleauth:client_secret'),
     callbackURL: conf.get('site:url') + '/auth/google/oauth2callback'
-}, function(openidId, tokenSecret, profile, done) {
-    // profile.id is google's oauth_id
-    authExt('https://www.google.com/accounts/o8/id?id=' + openidId,
-        'google:' + profile.id, profile, done);
+}, function(accessToken, refreshToken, params, profile, done) {
+    var openIdId = jwt.decode(params.id_token, null, true).openid_id;
+    authExt(openIdId, 'google:' + profile.id, profile, done);
 });
-
-// A trick to force Google to return OpenID 2.0 identifier in addition to OAuth 2.0 id
-google.authorizationParams = function() {
-    return { 'openid.realm': '' };
-};
 
 var yahoo = new YahooStrategy({
     returnURL: conf.get('site:url') + '/auth/yahoo/callback',
     realm: conf.get('site:url')
-}, function(identifier, profile, done) {
-    authExt(identifier, null, profile, done);
+}, function(openIdId, profile, done) {
+    authExt(openIdId, null, profile, done);
 });
 
 var local = new LocalStrategy(authLocal);
