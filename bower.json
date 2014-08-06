@@ -21,7 +21,7 @@
     "bootstrap": "~3.2.0",
     "ember": "~1.7.0-beta.4",
     "animate.css": "~3.2.0",
-    "momentjs": "~2.8.0",
+    "momentjs": "~2.8.1",
     "uri.js": "~1.13.2",
     "jquery-cookie": "~1.4.0",
     "jqBootstrapValidation": "~2.0.0-alpha",
@@ -33,7 +33,7 @@
     "magnific-popup": "~0.9.9",
     "bootstrap-contextmenu": "~0.2.0",
     "qunit": "~1.14.0",
-    "bootstrap-social": "~4.5.1"
+    "bootstrap-social": "~4.6.0"
   },
   "resolutions": {
     "jquery": "~2.1.1"
