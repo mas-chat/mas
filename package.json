@@ -44,7 +44,8 @@
     "nodemailer": "^1.0.4",
     "uid2": "0.0.3",
     "passport-yahoo": "^0.3.0",
-    "jwt-simple": "^0.2.0"
+    "jwt-simple": "^0.2.0",
+    "elasticsearch": "^2.4.0"
   },
   "devDependencies": {
     "mysql": "~2.4.1",
