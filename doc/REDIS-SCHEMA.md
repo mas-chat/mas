@@ -101,8 +101,6 @@ MAS Redis structures
  urls:<userId>:<nwid>:<channel_name> (list) TBD: Use windowId
    url1, url2 ...
 
- nextavailableuserId (string) [integer  counter]
-
  passwordresettoken:<token> (string with expiry time)
    <userId>
 
@@ -115,4 +113,13 @@ MAS Redis structures
  inbox:loopbackparser (list)
  inbox:ircparser (list)
  inbox:connectionmanager (list)
+```
+
+Global IDs
+==========
+
+```
+ nextavailableuserId (string) [integer  counter]
+ nextavailablenoteId (string) [integer  counter]
+ nextavailablemsgId (string) [integer  counter]
 ```
