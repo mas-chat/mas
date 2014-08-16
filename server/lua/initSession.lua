@@ -56,6 +56,7 @@ redis.call('LPUSH', outbox, cjson.encode({
 
 --Iterate through windows
 local windows = redis.call('SMEMBERS', 'windowlist:' .. userId);
+local names = {}
 
 for i = 1, #windows do
     local windowId, network = unpack(split(windows[i], ':'))
@@ -81,7 +82,16 @@ for i = 1, #windows do
         ['topic'] = window.topic
     }))
 
-    local names = hgetall('names:' .. userId .. ':' .. windowId)
+    if network == 'MAS' then
+        local ids = redis.call('SMEMBERS', 'groupmembers:' .. window.name)
+
+        for k, v in pairs(ids) do
+            local name = redis.call('HGET', 'user:' .. v, 'nick')
+            names[name] = 'u'
+        end
+    else
+        names = redis.call('HGETALL', 'names:' .. userId .. ':' .. windowId)
+    end
 
     redis.call('LPUSH', outbox, cjson.encode({
         ['id'] = 'UPDATENAMES',
