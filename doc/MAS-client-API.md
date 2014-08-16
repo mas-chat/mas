@@ -62,8 +62,7 @@ Overal server response format to MAS listen request is:
          "cat":"msg",
          "windowId":2,
          "ts":341,
-         "nick":"neo",
-         "type":1,
+         "nick":"neo"
     },
     {
          "id":"ADDTEXT"
@@ -71,8 +70,7 @@ Overal server response format to MAS listen request is:
          "cat":"notice",
          "windowId":2,
          "ts":348,
-         "nick":"morpheus",
-         "type":1,
+         "nick":"morpheus"
     },
 
     ...
@@ -137,8 +135,7 @@ Add a messge to window.
    "body":"Hello worlds!",
    "cat":"notice",
    "ts":"2093243",
-   "nick":"ilkka2",
-   "type":0
+   "nick":"ilkka2"
 }
 ```
 
