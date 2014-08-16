@@ -24,20 +24,17 @@ var co = require('co'),
 
 var client = new elasticsearch.Client({
     host: 'localhost:9200',
-    log: 'trace'
+//    log: 'trace'
 });
 
-
-
 co(function *() {
-
     if (argv.deleteIndices) {
         yield Q.nsend(client.indices, 'delete', {
             index: '_all'
         });
     }
 
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < 100; i++) {
         console.log('Setting index: ' + i);
 
         var ret = yield Q.nsend(client.indices, 'create', {
@@ -64,10 +61,18 @@ co(function *() {
                 },
                 userId: {
                     type: 'long'
+                },
+                name: {
+                    type: 'string'
+                },
+                type: {
+                    type: 'string'
+		},
+                network: {
+                    type: 'string'
                 }
             }
         }
     });
-
 })();
 
