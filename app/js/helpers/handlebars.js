@@ -30,7 +30,7 @@ Ember.Handlebars.helper('decoratedTitle', function(name, network, type, topic) {
         var conversationNetwork = network === 'MAS' ? '' : network + ' ';
         title = 'Private ' + conversationNetwork + 'conversation with ' + name;
     } else if (network === 'MAS') {
-        title = 'Group: ' + name;
+        title = 'Group: ' + name.charAt(0).toUpperCase() + name.substr(1);
     } else {
         title = network + ': ' + name;
     }
