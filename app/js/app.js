@@ -41,6 +41,7 @@ require('./controllers/passwordModal.js');
 require('./controllers/topicModal.js');
 require('./controllers/alertsModal.js');
 require('./controllers/infoModal.js');
+require('./controllers/friends.js');
 
 require('./models/message');
 require('./models/window');
@@ -50,6 +51,7 @@ require('./helpers/handlebars');
 
 Mas.nicks = {};
 Mas.windowCollection = Ember.A([]);
+Mas.friendCollection = Ember.A([]);
 
 Mas.Router.map(function() {
     this.route('main', { path: '/' });
