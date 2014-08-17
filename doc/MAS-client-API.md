@@ -62,7 +62,8 @@ Overal server response format to MAS listen request is:
          "cat":"msg",
          "windowId":2,
          "ts":341,
-         "nick":"neo"
+         "nick":"neo",
+         "gid":48929534
     },
     {
          "id":"ADDTEXT"
@@ -70,7 +71,8 @@ Overal server response format to MAS listen request is:
          "cat":"notice",
          "windowId":2,
          "ts":348,
-         "nick":"morpheus"
+         "nick":"morpheus",
+         "gid":48929537
     },
 
     ...
@@ -135,13 +137,16 @@ Add a messge to window.
    "body":"Hello worlds!",
    "cat":"notice",
    "ts":"2093243",
-   "nick":"ilkka2"
+   "nick":"ilkka2",
+   "gid":823458234
 }
 ```
 
-```ts``` is unix timestamp, seconds since epoch.
+```ts``` is a unix timestamp, seconds since epoch.
 
 ```cat``` can be ```msg```, ```info```, ```notice```, ```banner```, ```error```, ```mymsg```, ```mention```, ```action``` or ```robot```
+
+```gid``` is a globally unique identifier (integer) for the message. Given two messages, a newer one has always larger gid. Gid can increase by more than one between subsequent messages inside a window.
 
 BANLIST
 -------
