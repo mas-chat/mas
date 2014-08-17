@@ -67,7 +67,7 @@ User.prototype.addSalt = function(sha) {
 User.prototype.generateUserId = function *() {
     var userId = yield redis.incr('nextGlobalUserId');
     userId += RESERVED_USERIDS;
-    this.data.userid = userId;
+    this.data.userId = userId;
     return userId;
 };
 
@@ -75,27 +75,27 @@ User.prototype.save = function *() {
     var index = {};
 
     if (this.data.nick) {
-        index[this.data.nick.toLowerCase()] = this.data.userid;
+        index[this.data.nick.toLowerCase()] = this.data.userId;
     }
 
     if (this.data.email) {
-        index[this.data.email.toLowerCase()] = this.data.userid;
+        index[this.data.email.toLowerCase()] = this.data.userId;
     }
 
     if (this.data.extAuthId) {
-        index[this.data.extAuthId] = this.data.userid;
+        index[this.data.extAuthId] = this.data.userId;
     }
 
-    yield redis.hmset('user:' + this.data.userid, this.data);
+    yield redis.hmset('user:' + this.data.userId, this.data);
     yield redis.hmset('index:user', index);
-    yield redis.sadd('userlist', this.data.userid);
+    yield redis.sadd('userlist', this.data.userId);
 
-    if (this.settings.length > 0) {
-        yield redis.hmset('settings:' + this.data.userid, this.settings);
+    if (Object.keys(this.settings).length > 0) {
+        yield redis.hmset('settings:' + this.data.userId, this.settings);
     }
 
     if (this.friends.length > 0) {
         // TBD: Check if this is correct, this.friends is array
-        yield redis.sadd('friends:' + this.data.userid, this.friends);
+        yield redis.sadd('friends:' + this.data.userId, this.friends);
     }
 };
