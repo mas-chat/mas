@@ -51,12 +51,12 @@ User.prototype.load = function *(userId) {
     }
 };
 
-User.prototype.setFinalPasswordSha = function (passwd) {
+User.prototype.setFinalPasswordSha = function(passwd) {
     var passwordSha = crypto.createHash('sha256').update(passwd, 'utf8').digest('hex');
     this.addSalt(passwordSha);
 };
 
-User.prototype.addSalt = function (sha) {
+User.prototype.addSalt = function(sha) {
     // 64-bit salt
     var salt = crypto.randomBytes(8).toString('hex');
 
