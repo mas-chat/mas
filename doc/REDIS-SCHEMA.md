@@ -119,7 +119,7 @@ Global IDs
 ==========
 
 ```
- nextavailableuserId (string) [integer  counter]
- nextavailablenoteId (string) [integer  counter]
- nextavailablemsgId (string) [integer  counter]
+ nextGlobalUserId (string) (integer, counter)
+ nextGlobalNoteId (string) (integer, counter)
+ nextGlobalMsgId (string) (integer, counter)
 ```
