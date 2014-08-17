@@ -16,13 +16,6 @@
 
 'use strict';
 
-Mas.MainRoute = Ember.Route.extend({
-    model: function() {
-        return Mas.windowCollection;
-    },
+Mas.FriendsController = Ember.ArrayController.extend({
 
-    setupController: function(controller, model) {
-        controller.set('friends', Mas.friendCollection);
-        controller.set('model', model);
-    }
 });
