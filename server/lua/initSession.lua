@@ -49,9 +49,11 @@ redis.call('LPUSH', outbox, cjson.encode({
     ['sessionId'] = sessionId
 }))
 
+local settings = hgetall('settings:' .. userId)
+
 redis.call('LPUSH', outbox, cjson.encode({
     ['id'] = 'SET',
-    ['settings'] = cjson.null
+    ['settings'] = settings
 }))
 
 --Iterate through windows
