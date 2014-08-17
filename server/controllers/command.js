@@ -66,6 +66,7 @@ module.exports = function *() {
                 });
             }
 
+            // Update user's other sessions
             yield textLine.sendByWindowId(userId, windowId, {
                 nick: nick,
                 cat: 'mymsg',

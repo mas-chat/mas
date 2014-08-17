@@ -45,7 +45,7 @@ function *processSend(params) {
 
     for (var i = 0; i < members.length; i++) {
         if (members[i] !== params.userId) {
-            yield textLine.send(members[i], 'MAS', name, {
+            yield textLine.send(members[i], 'MAS', name, 'group', {
                 nick: nick,
                 cat: 'msg',
                 body: params.text
