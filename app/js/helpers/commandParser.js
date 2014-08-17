@@ -119,6 +119,11 @@ Mas.CommandParser = Ember.Object.extend({
         targetWindow.setProperties(data);
     },
 
+    _handleFriends: function(data) {
+        Mas.friendCollection.clear();
+        Mas.friendCollection.pushObjects(data.friends);
+    },
+
     _removeName: function(name, targetWindow) {
         targetWindow.operators.removeObject(name);
         targetWindow.voices.removeObject(name);

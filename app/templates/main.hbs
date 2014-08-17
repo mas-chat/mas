@@ -55,15 +55,7 @@
                     <span class="sr-only">Toggle Dropdown</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-up">
-                    <li class="dropdown-header">Friends:</li>
-                    <li class="main-friend-item">
-                        <div class="main-friend-idle main-online">ONLINE</div>
-                        <div class="main-friend-name"><span class="glyphicon glyphicon-comment"></span>Ilkka Oksanen</div>
-                    </li>
-                    <li class="main-friend-item">
-                        <div class="main-friend-idle">3h</div>
-                        <div class="main-friend-name"><span class="glyphicon glyphicon-comment"></span>Wilma Vääränen</div>
-                    </li>
+                    {{render "friends" friends}}
                 </ul>
             </div>
 

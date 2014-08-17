@@ -19,7 +19,8 @@
 var log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
-    nicks = require('../lib/nick');
+    nicks = require('../lib/nick'),
+    friends = require('../lib/friends');
 
 module.exports = function *() {
     var userId = this.mas.userId;
@@ -30,6 +31,7 @@ module.exports = function *() {
     if (this.mas.newSession) {
         log.info(userId, 'Initializing new session');
         yield initSession(userId, sessionId);
+        yield friends.sendFriends(userId, sessionId);
     }
 
     this.body = yield outbox.flush(userId, sessionId, 25);
