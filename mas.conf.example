@@ -47,6 +47,11 @@ idle_timeout=360
 port=6379
 host=localhost
 
+[elasticsearch]
+enabled=false
+port=9200
+host=localhost
+
 ; OPTIONS FOR THE IRC BACKEND
 
 [irc]
