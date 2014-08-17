@@ -65,7 +65,7 @@ User.prototype.addSalt = function (sha) {
 };
 
 User.prototype.generateUserId = function *() {
-    var userId = yield redis.incr('nextavailableuserid');
+    var userId = yield redis.incr('nextGlobalUserId');
     userId += RESERVED_USERIDS;
     this.data.userid = userId;
     return userId;
