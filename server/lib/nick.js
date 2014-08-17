@@ -37,7 +37,15 @@ exports.updateCurrentNick = function *(userId, network, nick) {
 exports.getCurrentNick = getCurrentNick;
 
 function *getCurrentNick(userId, network) {
-    return yield redis.hget('networks:' + userId + ':' + network, 'currentnick');
+    var nick;
+
+    if (network === 'MAS') {
+        nick = yield redis.hget('user:' + userId, 'nick');
+    } else {
+        nick = yield redis.hget('networks:' + userId + ':' + network, 'currentnick');
+    }
+
+    return nick;
 }
 
 function *buildCommand(userId) {
