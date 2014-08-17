@@ -57,12 +57,12 @@ redis.call('LPUSH', outbox, cjson.encode({
 }))
 
 --Iterate through windows
-local windows = redis.call('SMEMBERS', 'windowlist:' .. userId);
+local windows = redis.call('SMEMBERS', 'windowlist:' .. userId)
 local names = {}
 
 for i = 1, #windows do
     local windowId, network = unpack(split(windows[i], ':'))
-    local window = hgetall('window:' .. userId .. ':' .. windowId);
+    local window = hgetall('window:' .. userId .. ':' .. windowId)
 
     if window.password == '' then
         window.password = cjson.null
