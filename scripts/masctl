@@ -18,6 +18,11 @@ if [ -z "$NODE" ]; then
     exit 1
 fi
 
+if [ ! -f $ROOT/mas.conf ]; then
+    echo "ERROR: Main configuration file: $ROOT/mas.conf is missing."
+    exit 1
+fi
+
 cd $ROOT
 
 usage ()
