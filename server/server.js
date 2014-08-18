@@ -23,7 +23,6 @@ var path = require('path'),
     koa = require('koa'),
     router = require('koa-router'),
     hbs = require('koa-hbs'),
-    less = require('koa-less'),
     serve = require('koa-static'),
     error = require('koa-error'),
     bodyParser = require('koa-bodyparser'),
@@ -103,7 +102,6 @@ app.post('/forgot-password', bodyParser(), forgotPasswordController.create);
 app.get('/reset-password/:token', registerController.indexReset);
 
 // Public routes
-app.use(less(path.join(__dirname, 'public')));
 app.use(serve(path.join(__dirname, 'public')));
 
 // App routes
