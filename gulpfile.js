@@ -22,7 +22,8 @@ var paths = {
         'server/**/*.js',
         '!server/public/vendor/**/*.js',
         '!server/public/javascripts/libs.js',
-        'migration/**/*.js'
+        'migration/**/*.js',
+        'mas-private/**/*.js'
     ],
     clientJavaScripts: [
         'app/**/*.js',
@@ -35,6 +36,9 @@ var paths = {
     ],
     clientCSS: [
         'app/stylesheets/**/*.less'
+    ],
+    pagesCSS: [
+        'server/pages/stylesheets/*.less'
     ],
     clientLibs: [
         'momentjs/moment.js',
@@ -129,20 +133,28 @@ gulp.task('libs-pages', ['bower'], function() {
         .pipe(gulp.dest('./server/public/javascripts'));
 });
 
-gulp.task('less', ['bower'], function () {
+gulp.task('less-app', ['bower'], function () {
     gulp.src('./app/stylesheets/app.less')
         .pipe(less())
         .pipe(minifyCSS())
         .pipe(gulp.dest('./app/dist/'));
 });
 
+gulp.task('less-pages', ['bower'], function () {
+    gulp.src('./server/pages/stylesheets/mas-pages.less')
+        .pipe(less())
+        .pipe(minifyCSS())
+        .pipe(gulp.dest('./server/public/dist/'));
+});
+
 gulp.task('watch', function() {
     gulp.watch(paths.clientTemplates, ['browserify']);
     gulp.watch(paths.clientJavaScripts, ['browserify']);
-    gulp.watch(paths.clientCSS, ['less']);
+    gulp.watch(paths.clientCSS, ['less-app']);
+    gulp.watch(paths.pagesCSS, ['less-pages']);
 });
 
 // The default task
 gulp.task('default', ['jshint']);
 
-gulp.task('all', ['browserify', 'libs', 'libs-pages', 'less']);
+gulp.task('all', ['browserify', 'libs', 'libs-pages', 'less-app', 'less-pages']);
