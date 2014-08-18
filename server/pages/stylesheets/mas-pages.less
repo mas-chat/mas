@@ -1,11 +1,11 @@
-@import "../vendor/bootstrap/less/bootstrap";
-@import "../vendor/bootswatch/yeti/bootswatch";
-@import "../vendor/bootswatch/yeti/variables";
+@import "../../public/vendor/bootstrap/less/bootstrap";
+@import "../../public/vendor/bootswatch/yeti/bootswatch";
+@import "../../public/vendor/bootswatch/yeti/variables";
 
-@import "../vendor/font-awesome/less/font-awesome";
+@import "../../public/vendor/font-awesome/less/font-awesome";
 @fa-font-path: "../vendor/font-awesome/fonts";
 
-@import "../vendor/bootstrap-social/bootstrap-social";
+@import "../../public/vendor/bootstrap-social/bootstrap-social";
 
 @import "../../../app/stylesheets/main";
 
@@ -21,11 +21,14 @@ body, html {
     margin-left: auto;
     margin-right: auto;
     flex-flow: row wrap;
+    justify-content: space-around;
 
     .info {
         min-width: 380px;
-        padding: 45px;
-        flex: 2;
+    }
+
+    & > div {
+        display: inline-block;
     }
 
     .logo {
