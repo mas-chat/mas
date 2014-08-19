@@ -103,10 +103,12 @@ app.get('/reset-password/:token', registerController.indexReset);
 
 // Public routes
 app.use(serve(path.join(__dirname, 'public')));
+app.use(mount('/fonts/', serve(path.join(__dirname, 'public/vendor/bootstrap/fonts'))));
 
-// App routes
-app.use(mount('/app', serve(path.join(__dirname, '/../app'))));
-app.use(mount('/app/fonts/', serve(path.join(__dirname, 'public/vendor/bootstrap/fonts'))));
+// Hopefully temporary. Koa-static (serve) should support this soon.
+app.get(/\/app$/, function *(next) {
+    this.redirect('/app/');
+});
 
 // Page routes
 app.get('/', routesIndex);

@@ -45,7 +45,7 @@ Mas.Message = Ember.Object.extend({
 
             if (imgSuffixes.indexOf(urlObj.suffix()) !== -1) {
                 imgUrls.push('<li><a href="' + this._escHtml(url, true) + '" class="user-img">' +
-                    '<img src="/app/images/spinner_96.gif" data-src="' +
+                    '<img src="/images/client/spinner_96.gif" data-src="' +
                     this._escHtml(url, true) + '"></a></li>');
                 visibleLink = this._escHtml(urlObj.filename(), false);
             } else {
