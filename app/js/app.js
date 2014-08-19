@@ -20,7 +20,7 @@
 
 window.Mas = Ember.Application.create();
 
-require('../dist/templates.js');
+require('../../server/public/dist/client-templates.js');
 
 require('./routes/application');
 require('./routes/main');

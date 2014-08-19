@@ -21,13 +21,11 @@ var paths = {
         'gulpfile.js',
         'server/**/*.js',
         '!server/public/vendor/**/*.js',
-        '!server/public/javascripts/libs.js',
-        'migration/**/*.js',
+        '!server/public/dist/**/*.js',
         'mas-private/**/*.js'
     ],
     clientJavaScripts: [
         'app/**/*.js',
-        '!app/dist/*.js',
         '!app/tests/**/*', // TBD Remove eventually
         '!app/tests/vendor/**/*.js'
     ],
@@ -103,8 +101,8 @@ gulp.task('templates', function() {
         .pipe(handlebars({
             outputType: 'cjs'
         }))
-        .pipe(concat('templates.js'))
-        .pipe(gulp.dest('./app/dist/'));
+        .pipe(concat('client-templates.js'))
+        .pipe(gulp.dest('./server/public/dist/'));
 });
 
 gulp.task('browserify', ['templates'], function() {
@@ -114,34 +112,34 @@ gulp.task('browserify', ['templates'], function() {
         })
         .bundle()
         .on('error', handleError)
-        .pipe(source('app.js'))
+        .pipe(source('client.js'))
         .pipe(argv.prod ? streamify(uglify()) : util.noop())
-        .pipe(gulp.dest('./app/dist'));
+        .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('libs', ['bower'], function() {
+gulp.task('libs-client', ['bower'], function() {
     return gulp.src(paths.clientLibs)
-        .pipe(concat('libs.js'))
+        .pipe(concat('client-libs.js'))
         .pipe(argv.prod ? uglify() : util.noop())
-        .pipe(gulp.dest('./app/dist'));
+        .pipe(gulp.dest('./server/public/dist/'));
 });
 
 gulp.task('libs-pages', ['bower'], function() {
     return gulp.src(paths.pagesLibs)
-        .pipe(concat('libs.js'))
+        .pipe(concat('pages-libs.js'))
         .pipe(argv.prod ? uglify() : util.noop())
-        .pipe(gulp.dest('./server/public/javascripts'));
+        .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('less-app', ['bower'], function () {
-    gulp.src('./app/stylesheets/app.less')
+gulp.task('less-client', ['bower'], function () {
+    gulp.src('./app/stylesheets/client.less')
         .pipe(less())
         .pipe(minifyCSS())
-        .pipe(gulp.dest('./app/dist/'));
+        .pipe(gulp.dest('./server/public/dist/'));
 });
 
 gulp.task('less-pages', ['bower'], function () {
-    gulp.src('./server/pages/stylesheets/mas-pages.less')
+    gulp.src('./server/pages/stylesheets/pages.less')
         .pipe(less())
         .pipe(minifyCSS())
         .pipe(gulp.dest('./server/public/dist/'));
@@ -150,11 +148,11 @@ gulp.task('less-pages', ['bower'], function () {
 gulp.task('watch', function() {
     gulp.watch(paths.clientTemplates, ['browserify']);
     gulp.watch(paths.clientJavaScripts, ['browserify']);
-    gulp.watch(paths.clientCSS, ['less-app']);
+    gulp.watch(paths.clientCSS, ['less-client']);
     gulp.watch(paths.pagesCSS, ['less-pages']);
 });
 
 // The default task
 gulp.task('default', ['jshint']);
 
-gulp.task('all', ['browserify', 'libs', 'libs-pages', 'less-app', 'less-pages']);
+gulp.task('all', ['browserify', 'libs-client', 'libs-pages', 'less-client', 'less-pages']);
