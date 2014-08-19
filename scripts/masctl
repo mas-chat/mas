@@ -18,6 +18,13 @@ if [ -z "$NODE" ]; then
     exit 1
 fi
 
+node -e 'res = require("semver").gt(process.version, "v0.11.10"); process.exit(res ? 0 : 42)'
+
+if [[ $? != 0 ]] ; then
+    echo "ERROR: Installed Node.js version must be at least v0.11.11"
+    exit 1
+fi
+
 if [ ! -f $ROOT/mas.conf ]; then
     echo "ERROR: Main configuration file: $ROOT/mas.conf is missing."
     exit 1
