@@ -42,6 +42,7 @@ require('./controllers/topicModal.js');
 require('./controllers/alertsModal.js');
 require('./controllers/infoModal.js');
 require('./controllers/friends.js');
+require('./controllers/logs.js');
 
 require('./models/message');
 require('./models/window');
