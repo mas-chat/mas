@@ -23,6 +23,7 @@ Mas.ApplicationRoute = Ember.Route.extend({
     actions: {
         openModal: function(modalName, model) {
             if (this.get('modalOpen')) {
+                // New modal goes to a queue if there's already a modal open.
                 this.modalQueue.pushObject({
                     name: modalName,
                     model: model
@@ -30,6 +31,14 @@ Mas.ApplicationRoute = Ember.Route.extend({
             } else {
                 this._open(modalName, model);
             }
+        },
+
+        openFullScreenModal: function(modalName, model) {
+            this.render(modalName, {
+                into: 'application',
+                outlet: 'fullscreen-modal',
+                model: model
+            });
         },
 
         closeModal: function() {
@@ -47,6 +56,13 @@ Mas.ApplicationRoute = Ember.Route.extend({
             } else {
                 this.set('modalOpen', false);
             }
+        },
+
+        closeFullScreenModal: function() {
+            this.disconnectOutlet({
+                outlet: 'fullscreen-modal',
+                parentView: 'application'
+            });
         }
     },
 
