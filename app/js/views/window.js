@@ -183,6 +183,7 @@ Mas.WindowView = Ember.View.extend({
         this._updateImages();
 
         this._addScrollHandler();
+        this._showImages();
         this.goToBottom();
     },
 
@@ -211,7 +212,7 @@ Mas.WindowView = Ember.View.extend({
             this.$images = $([]);
         }
 
-        this.$images = this.$images.add('img[data-src]');
+        this.$images = this.$images.add(this.$('img[data-src]'));
     },
 
     _showImages: function() {
@@ -221,6 +222,10 @@ Mas.WindowView = Ember.View.extend({
 
         this.$images = this.$images.filter(function() {
             var $img = $(this);
+
+            // We want to know image's position in .window-messages container div. For position()
+            // to work correctly, .window-messages has to have position set to 'relative'. See
+            // jQuery offsetParent() documentation for details.
             var pos = $img.position().top;
 
             if (pos + placeHolderHeight >= 0 && pos <= panelHeight) {
