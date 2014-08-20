@@ -34,9 +34,9 @@ cd $ROOT
 
 usage ()
 {
-    echo "Usage: control [options] <start|stop|restart|status>"
+    echo "Usage: masctl [options] <start|stop|restart|status>"
     echo ""
-    echo "control is a tool to manage MAS processes."
+    echo "masctl is a tool to manage MAS processes."
     echo ""
     echo "-c|--connman         Also start, stop or restart IRC connman process."
     echo "-i|--import          MeetAndSpeak.com specific option."
