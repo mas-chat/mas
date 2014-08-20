@@ -19,7 +19,7 @@
   "dependencies": {
     "jquery": "~2.1.1",
     "bootstrap": "~3.2.0",
-    "ember": "~1.7.0-beta.5",
+    "ember": "canary",
     "animate.css": "~3.2.0",
     "momentjs": "~2.8.1",
     "uri.js": "~1.13.2",
@@ -35,5 +35,8 @@
     "qunit": "~1.15.0",
     "bootstrap-social": "~4.6.0",
     "font-awesome": "~4.1.0"
+  },
+  "resolutions": {
+    "jquery": "~2.1.1"
   }
 }
