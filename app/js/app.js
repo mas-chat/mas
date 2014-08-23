@@ -20,7 +20,7 @@
 
 window.Mas = Ember.Application.create();
 
-require('../../server/public/dist/client-templates.js');
+require('../../server/public/dist/client-templates');
 
 require('./routes/application');
 require('./routes/main');
@@ -34,15 +34,15 @@ require('./components/modalDialog');
 require('./controllers/application');
 require('./controllers/main');
 require('./controllers/window');
-require('./controllers/joinGroupModal.js');
-require('./controllers/createGroupModal.js');
-require('./controllers/joinIrcModal.js');
-require('./controllers/passwordModal.js');
-require('./controllers/topicModal.js');
-require('./controllers/alertsModal.js');
-require('./controllers/infoModal.js');
-require('./controllers/friends.js');
-require('./controllers/logs.js');
+require('./controllers/joinGroupModal');
+require('./controllers/createGroupModal');
+require('./controllers/joinIrcModal');
+require('./controllers/passwordModal');
+require('./controllers/topicModal');
+require('./controllers/alertsModal');
+require('./controllers/infoModal');
+require('./controllers/friends');
+require('./controllers/logs');
 
 require('./models/message');
 require('./models/window');
