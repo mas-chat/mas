@@ -57,7 +57,8 @@ var paths = {
         'Caret.js/dist/jquery.caret.min.js',
         'emojify.js/emojify.js',
         'magnific-popup/dist/jquery.magnific-popup.js',
-        'bootstrap-contextmenu/bootstrap-contextmenu.js'
+        'bootstrap-contextmenu/bootstrap-contextmenu.js',
+        'velocity/jquery.velocity.js'
     ],
     pagesLibs: [
         'jquery/dist/jquery.js',
