@@ -17,7 +17,19 @@
 'use strict';
 
 Mas.WindowView = Ember.View.extend({
-    classNames: ['window', 'flex-grow-column', 'flex-1'],
+    classNames: ['window', 'flex-grow-column'],
+    attributeBindings: ['row:data-row', 'visible:data-visible'],
+
+    row: Ember.computed.alias('controller.model.row'),
+
+    visible: function() {
+        return this.get('controller.model.visible') ? 'true' : 'false';
+    }.property('controller.model.visible'),
+
+    visibilityChanged: function() {
+        this.get('parentView').windowAdded();
+    }.observes('controller.model.visible'),
+
     $messagePanel: null,
     $images: null,
     ready: false,
@@ -170,6 +182,8 @@ Mas.WindowView = Ember.View.extend({
                 }
             }
         });
+
+        this.get('parentView').windowAdded();
     },
 
     _setupScrolling: function() {

@@ -35,7 +35,7 @@
 <div class="window-toolbar flex-row">
     <div class="window-add-text-container flex-1">
         <form {{action "sendMessage" on="submit"}}>
-            {{input placeholder="Write here&hellip;" class="form-control" valueBinding="newMessage"}}
+            {{input placeholder="Write here…" class="form-control" valueBinding="newMessage"}}
             {{#if scrollLock}}
                 {{#if newMessagesCount}}
                     <div class="window-new-messages">
