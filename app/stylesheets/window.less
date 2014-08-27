@@ -5,12 +5,15 @@
 @window-toolbar-bg-color: whitesmoke;
 @window-title-bg-color: #142F40;
 
+.window[data-visible="false"] {
+    display: none;
+}
+
 .window {
     background-color: @window-bg-color;
-    margin: 0px 4px 4px 0px;
     font-size: 13px;
-    border: 1px solid @window-outer-line-color;
     color: #333333;
+    position: absolute;
 
     .window-title {
         padding: 4px 8px;
@@ -142,6 +145,7 @@
         font-weight: bold;
         background-color: whitesmoke;
         text-align: center;
+        white-space: nowrap;
     }
 
     .window-members {

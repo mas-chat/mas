@@ -31,44 +31,14 @@ Mas.MainController = Ember.ArrayController.extend({
         logout: function() {
             $.removeCookie('ProjectEvergreen', { path: '/' });
             window.location = '/';
-        },
-
-        joinLobby: function() {
-            Mas.networkMgr.send({
-                id: 'JOIN',
-                network: 'MAS',
-                name: 'lobby'
-            });
         }
     },
 
     initDone: Ember.computed.alias('controllers.application.initDone'),
 
-    sortedVisibleWindows: function() {
-        return this.get('model').filter(function(val) {
-            return val.get('visible');
-        }).sortBy('row');
-    }.property('model.@each.visible', 'model.@each.row'),
-
     sortedHiddenWindows: function() {
         return this.get('model').filter(function(val) {
             return !val.get('visible');
         }).sortBy('timeHidden');
-    }.property('model.@each.visible'),
-
-    nextRow: function(item, direction) {
-        var windows = this.get('sortedVisibleWindows');
-        var index =  windows.indexOf(item);
-        var row = windows[index].get('row');
-
-        for (var i = index + direction; i >= 0 && i < windows.length; i += direction) {
-            var currentRow = windows[i].get('row');
-
-            if (currentRow !== row) {
-                return currentRow;
-            }
-        }
-
-        return row + direction;
-    }
+    }.property('model.@each.visible')
 });

@@ -1,77 +1,55 @@
-<div class="flex-grow-row">
-    <div class="grid flex-grow-column flex-1">
-        {{#each window in sortedVisibleWindows}}
-            {{startWindowRow window sortedVisibleWindows}}
-            {{render "window" window}}
-            {{endWindowRow window sortedVisibleWindows}}
-        {{else}}
-            <div class="flex-grow-row flex-1 flex-align-center">
-                {{#if initDone}}
-                    <div class="main-welcome-msg">
-                        <h2>Welcome!</h2><p>You haven't joined any groups yet.</p>
-                        <p>Press the <span class="glyphicon glyphicon-plus"></span> button on the right if
-                        you already know the name of group you like to join or create. Otherwise you can
-                        join the lobby group by clicking the button below to see how things work.</p>
-                        <button {{action "joinLobby"}} type="button" class="btn btn-primary">Join LOBBY group</button>
-                    </div>
-                {{else}}
-                    <img style="display:block;" src="/images/client/loading.gif">
-                {{/if}}
+{{render "grid" this}}
+
+<div class="sidebar flex-grow-column">
+    <div class="upper-sidebar flex-1">
+        {{#each window in sortedHiddenWindows}}
+            <div class="main-hidden-window-container" {{action "show" window}}>
+                <div class="main-badge">{{window.newMessagesCount}}</div>
+                <div class="main-short-name">{{window.simplifiedName}}</div>
             </div>
         {{/each}}
     </div>
 
-    <div class="sidebar flex-grow-column">
-        <div class="upper-sidebar flex-1">
-            {{#each window in sortedHiddenWindows}}
-                <div class="main-hidden-window-container" {{action "show" window}}>
-                    <div class="main-badge">{{window.newMessagesCount}}</div>
-                    <div class="main-short-name">{{window.simplifiedName}}</div>
-                </div>
-            {{/each}}
+    <div class="lower-sidebar">
+        <div class="btn-group dropdown">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                <span class="glyphicon glyphicon-plus"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-down">
+                <li {{action "openModal" "create-group-modal"}}><a href="#">Create new group&#8230;</a></li>
+                <li {{action "openModal" "join-group-modal"}}><a href="#">Join existing group&#8230;</a></li>
+                <li class="divider"></li>
+                <li {{action "openModal" "join-irc-modal"}}><a href="#">Join IRC channel&#8230;</a></li>
+            </ul>
         </div>
 
-        <div class="lower-sidebar">
-            <div class="btn-group dropdown">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span class="glyphicon glyphicon-plus"></span>
-                    <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-down">
-                    <li {{action "openModal" "create-group-modal"}}><a href="#">Create new group&#8230;</a></li>
-                    <li {{action "openModal" "join-group-modal"}}><a href="#">Join existing group&#8230;</a></li>
-                    <li class="divider"></li>
-                    <li {{action "openModal" "join-irc-modal"}}><a href="#">Join IRC channel&#8230;</a></li>
-                </ul>
-            </div>
+        <button type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-question-sign"></span>
+        </button>
 
-            <button type="button" class="btn btn-default">
-                <span class="glyphicon glyphicon-question-sign"></span>
+        <div class="btn-group dropup pull-left">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                <span class="glyphicon glyphicon-user"></span>
+                <span class="sr-only">Toggle Dropdown</span>
             </button>
+            <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-up">
+                {{render "friends" friends}}
+            </ul>
+        </div>
 
-            <div class="btn-group dropup pull-left">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span class="glyphicon glyphicon-user"></span>
-                    <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-up">
-                    {{render "friends" friends}}
-                </ul>
-            </div>
+        <button {{action "openFullScreenModal" "logs"}} type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-search"></span>
+        </button>
 
-            <button {{action "openFullScreenModal" "logs"}} type="button" class="btn btn-default">
-                <span class="glyphicon glyphicon-search"></span>
+        <div class="btn-group dropup pull-left">
+            <button type="button" class="btn btn-default" data-toggle="dropdown">
+                <span class="glyphicon glyphicon-wrench"></span>
+                <span class="sr-only">Toggle Dropdown</span>
             </button>
-
-            <div class="btn-group dropup pull-left">
-                <button type="button" class="btn btn-default" data-toggle="dropdown">
-                    <span class="glyphicon glyphicon-wrench"></span>
-                    <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-up">
-                    <li {{action "logout"}}><a href="#">Logout</a></li>
-                </ul>
-            </div>
+            <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-up">
+                <li {{action "logout"}}><a href="#">Logout</a></li>
+            </ul>
         </div>
     </div>
 </div>
