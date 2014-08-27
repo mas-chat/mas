@@ -35,6 +35,7 @@
     "qunit": "~1.15.0",
     "bootstrap-social": "~4.6.1",
     "font-awesome": "~4.1.0",
-    "velocity": "~0.11.9"
+    "velocity": "~0.11.9",
+    "lodash": "~2.4.1"
   }
 }

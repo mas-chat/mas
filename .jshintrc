@@ -76,20 +76,21 @@
 
     // Custom Globals
     "globals"       : {
-        "Ember": true,
-        "Handlebars": true,
-        "moment": true,
-        "URI": true,
-        "titlenotifier": true,
-        "Howl": true,
-        "emojify": true,
-        "Mas": true,
-        "require": true,
-        "define": true,
+        "_": false,
+        "Ember": false,
+        "Handlebars": false,
+        "moment": false,
+        "URI": false,
+        "titlenotifier": false,
+        "Howl": false,
+        "emojify": false,
+        "Mas": false,
+        "require": false,
+        "define": false,
 
-        "casper": true,
-        "it": true,
-        "describe": true,
-        "expect": true
+        "casper": false,
+        "it": false,
+        "describe": false,
+        "expect": false
     }
 }
