@@ -20,16 +20,13 @@ Mas.GridView = Ember.View.extend({
     classNames: ['grid', 'flex-1'],
 
     didInsertElement: function() {
-        var that = this;
-        $(window).on('resize', function() {
-            that.layoutWindows();
-        });
+        $(window).on('resize', Ember.run.bind(this, function() {
+            this.layoutWindows(false);
+        }));
     },
 
     windowAdded: function() {
-        Ember.run.next(this, Ember.run.bind(this, function() {
-            this.layoutWindows(false);
-        }));
+        Ember.run.next(this, function() { this.layoutWindows(false); });
     },
 
     layoutWindows: function() {
