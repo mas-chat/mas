@@ -1,0 +1,18 @@
+{{#each}}
+    {{render "window" this}}
+{{else}}
+    <div class="flex-grow-row flex-1 flex-align-center">
+        {{#if initDone}}
+            <div class="main-welcome-msg">
+                <h2>Welcome!</h2><p>You haven't joined any groups yet.</p>
+                <p>Press the <span class="glyphicon glyphicon-plus"></span> button on the right if
+                you already know the name of group you like to join or create. Otherwise you can
+                join the lobby group by clicking the button below to see how things work.</p>
+
+                <button {{action "joinLobby"}} type="button" class="btn btn-primary">Join LOBBY group</button>
+            </div>
+        {{else}}
+            <img style="display:block;" src="/images/client/loading.gif">
+        {{/if}}
+    </div>
+{{/each}}

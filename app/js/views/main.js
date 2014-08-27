@@ -16,10 +16,6 @@
 
 'use strict';
 
-Mas.LogsController = Ember.ArrayController.extend({
-    actions: {
-        close: function() {
-            this.send('closeFullScreenModal');
-        }
-    }
+Mas.MainView = Ember.View.extend({
+    classNames: ['flex-grow-row'],
 });

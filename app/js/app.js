@@ -26,6 +26,8 @@ require('./routes/application');
 require('./routes/main');
 
 require('./views/application');
+require('./views/main');
+require('./views/grid');
 require('./views/window');
 require('./views/radioButton');
 
@@ -33,6 +35,7 @@ require('./components/modalDialog');
 
 require('./controllers/application');
 require('./controllers/main');
+require('./controllers/grid');
 require('./controllers/window');
 require('./controllers/joinGroupModal');
 require('./controllers/createGroupModal');
