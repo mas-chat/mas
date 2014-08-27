@@ -27,7 +27,7 @@ Mas.WindowView = Ember.View.extend({
     }.property('controller.model.visible'),
 
     visibilityChanged: function() {
-        this.get('parentView').windowAdded();
+        this.get('parentView').windowAdded(true);
     }.observes('controller.model.visible'),
 
     $messagePanel: null,
@@ -183,7 +183,7 @@ Mas.WindowView = Ember.View.extend({
             }
         });
 
-        this.get('parentView').windowAdded();
+        this.get('parentView').windowAdded(false);
     },
 
     _setupScrolling: function() {
