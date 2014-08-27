@@ -25,15 +25,16 @@ Mas.GridView = Ember.View.extend({
         }));
     },
 
-    windowAdded: function() {
-        Ember.run.next(this, function() { this.layoutWindows(false); });
+    windowAdded: function(animate) {
+        Ember.run.next(this, function() { this.layoutWindows(animate); });
     },
 
-    layoutWindows: function() {
+    layoutWindows: function(animate) {
         // TBD: Add animation parameter
         // TBD: Consider to chain animations instead of stopping
 
         var PADDING = 5;
+        var duration = animate ? 400 : 0;
         var el = this.get('element');
         var containerWidth = this.$().width();
         var containerHeight = this.$().height();
@@ -46,7 +47,8 @@ Mas.GridView = Ember.View.extend({
         _.forEach(rowNumbers, function(row, rowIndex) {
             var windowsInRow = el.querySelectorAll(
                 '.window[data-row="' + row + '"][data-visible="true"]');
-            var windowWidth = (containerWidth - windowsInRow.length * PADDING) / windowsInRow.length;
+            var windowWidth = (containerWidth - windowsInRow.length * PADDING) /
+                windowsInRow.length;
 
             _.forEach(windowsInRow, function(element, index) {
                 $(element).velocity('stop').velocity({
@@ -54,7 +56,7 @@ Mas.GridView = Ember.View.extend({
                     top : rowIndex * rowHeight + (rowIndex + 1) * PADDING + 'px',
                     width: windowWidth + 'px',
                     height : rowHeight + 'px'
-                }, 400);
+                }, duration);
             });
         });
     }
