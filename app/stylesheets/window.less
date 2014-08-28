@@ -5,15 +5,24 @@
 @window-toolbar-bg-color: whitesmoke;
 @window-title-bg-color: #142F40;
 
-.window[data-visible="false"] {
-    display: none;
-}
-
 .window {
     background-color: @window-bg-color;
     font-size: 13px;
     color: #333333;
     position: absolute;
+
+    &.hidden {
+        display: none;
+    }
+
+    &.expanded {
+        z-index: 10;
+    }
+
+    &.velocity-animating {
+        box-shadow: 0px 0px 25px #4E4755;
+        z-index: 5;
+    }
 
     .window-title {
         padding: 4px 8px;

@@ -19,6 +19,8 @@
 Mas.GridView = Ember.View.extend({
     classNames: ['grid', 'flex-1'],
 
+    PADDING: 5,
+
     didInsertElement: function() {
         $(window).on('resize', Ember.run.bind(this, function() {
             this.layoutWindows(false);
@@ -26,38 +28,84 @@ Mas.GridView = Ember.View.extend({
     },
 
     windowAdded: function(animate) {
-        Ember.run.next(this, function() { this.layoutWindows(animate); });
+        if (this.get('controller.initDone')) {
+            Ember.run.next(this, function() { this.layoutWindows(animate); });
+        }
     },
 
+    initReady: function() {
+        this.windowAdded(false);
+    }.observes('controller.initDone'),
+
     layoutWindows: function(animate) {
-        // TBD: Add animation parameter
-        // TBD: Consider to chain animations instead of stopping
-
-        var PADDING = 5;
-        var duration = animate ? 400 : 0;
+        var that = this;
+        var duration = animate ? 600 : 0;
         var el = this.get('element');
-        var containerWidth = this.$().width();
-        var containerHeight = this.$().height();
+        var container = this._containerDimensions();
+        var expandedWindow = el.querySelector('.window.expanded');
 
-        var windows = el.querySelectorAll('.window[data-visible="true"]');
+        if (expandedWindow) {
+            $(expandedWindow).velocity({
+                left: this.PADDING + 'px',
+                top : this.PADDING + 'px',
+                width: container.width - 2 * this.PADDING + 'px',
+                height : container.height - 2 * this.PADDING + 'px',
+            }, duration);
+            return;
+        }
+
+        var windows = el.querySelectorAll('.window.visible');
         var rowNumbers = _.uniq(_.map(windows,
             function(element) { return element.getAttribute('data-row'); }));
-        var rowHeight = (containerHeight - (rowNumbers.length + 1) * PADDING) / rowNumbers.length;
+        var rowHeight = (container.height - (rowNumbers.length + 1) * this.PADDING) /
+            rowNumbers.length;
 
         _.forEach(rowNumbers, function(row, rowIndex) {
-            var windowsInRow = el.querySelectorAll(
-                '.window[data-row="' + row + '"][data-visible="true"]');
-            var windowWidth = (containerWidth - windowsInRow.length * PADDING) /
+            var windowsInRow = el.querySelectorAll('.window.visible[data-row="' + row + '"]');
+            var windowWidth = (container.width - (windowsInRow.length + 1) * that.PADDING) /
                 windowsInRow.length;
 
             _.forEach(windowsInRow, function(element, index) {
-                $(element).velocity('stop').velocity({
-                    left: index * windowWidth + (index + 1) * PADDING + 'px',
-                    top : rowIndex * rowHeight + (rowIndex + 1) * PADDING + 'px',
-                    width: windowWidth + 'px',
-                    height : rowHeight + 'px'
-                }, duration);
+                that._animate(element, index, rowIndex, windowWidth, rowHeight, duration);
             });
         });
+    },
+
+    _animate: function(el, columnIndex, rowIndex, width, height, duration) {
+        var $el = $(el);
+        var position = $el.position();
+
+        var dim = {
+            currentLeft: position.left,
+            currentTop: position.top,
+            currentWidth: $el.width(),
+            currentHeight: $el.height(),
+            left: columnIndex * width + (columnIndex + 1) * this.PADDING,
+            top: rowIndex * height + (rowIndex + 1) * this.PADDING,
+            width: width,
+            height: height
+        };
+
+        dim = _.mapValues(dim, function(val) { return Math.round(val); });
+
+        if (dim.left === dim.currentLeft && dim.top === dim.currentTop &&
+            dim.width === dim.currentWidth && dim.height === dim.currentHeight) {
+            // Nothing to animate
+            return;
+        }
+
+        $(el).velocity('stop').velocity({
+            left:  dim.left + 'px',
+            top :  dim.top + 'px',
+            width: dim.width + 'px',
+            height : dim.height + 'px'
+        }, duration);
+    },
+
+    _containerDimensions: function() {
+        return {
+            width: this.$().width(),
+            height: this.$().height()
+        };
     }
 });
