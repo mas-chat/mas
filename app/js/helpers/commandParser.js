@@ -68,8 +68,13 @@ Mas.CommandParser = Ember.Object.extend({
     },
 
     _handleInitdone: function() {
-        Mas.windowCollection.setEach('initDone', true);
-        Mas.__container__.lookup('controller:application').set('initDone', true); // TBD: Improve
+        // INITDONE command usually arrives together with another commands. These
+        // other commands update property bindings. INITDONE triggers code that
+        // assumes these updates have been processed. Therefore INITDONE must be
+        // processed one run loop round later than everything else.
+        Ember.run.next(this, function() {
+            Mas.__container__.lookup('controller:application').set('initDone', true);
+        });
     },
 
     _handleUpdatenames: function(data, targetWindow) {
