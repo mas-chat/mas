@@ -19,6 +19,8 @@
 var sound = require('../helpers/sound');
 
 Mas.WindowController = Ember.ObjectController.extend({
+    needs: ['application'],
+
     actions: {
         moveRowUp: function() {
             this._seekRow(-1);
@@ -117,6 +119,8 @@ Mas.WindowController = Ember.ObjectController.extend({
             }
         }
     },
+
+    initDone: Ember.computed.alias('controllers.application.initDone'),
 
     newMessageReceived: function() {
         if (!this.get('visible') || this.get('scrollLock')) {

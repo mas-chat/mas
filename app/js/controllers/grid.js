@@ -17,6 +17,8 @@
 'use strict';
 
 Mas.GridController = Ember.ArrayController.extend({
+    needs: ['application'],
+
     actions: {
         joinLobby: function() {
             Mas.networkMgr.send({
@@ -26,6 +28,8 @@ Mas.GridController = Ember.ArrayController.extend({
             });
         }
     },
+
+    initDone: Ember.computed.alias('controllers.application.initDone'),
 
     nextRow: function(item, direction) {
         var windows = this.get('model').filter(function(val) {

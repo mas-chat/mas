@@ -37,14 +37,10 @@ Mas.Window = Ember.Object.extend({
     newMessagesCount: 0,
     scrollLock: false,
     deletedLine: false,
-    initDone: false,
 
     operators: null,
     voices: null,
     users: null,
-
-    firstInRow: false,
-    lastInRow: false,
 
     simplifiedName: function() {
         var name = this.get('name');

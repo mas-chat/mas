@@ -5,7 +5,11 @@
 
     <div>
         <span {{action "hide"}} class="window-title-button glyphicon glyphicon-minus"></span>
-        <span {{action "expand" target="view"}} class="window-title-button glyphicon glyphicon-plus"></span>
+        {{#if view.expanded}}
+            <span {{action "compress" target="view"}} class="window-title-button fa fa-compress"></span>
+        {{else}}
+            <span {{action "expand" target="view"}} class="window-title-button fa fa-expand"></span>
+        {{/if}}
     </div>
 </div>
 
