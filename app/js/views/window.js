@@ -18,13 +18,22 @@
 
 Mas.WindowView = Ember.View.extend({
     classNames: ['window', 'flex-grow-column'],
-    attributeBindings: ['row:data-row', 'visible:data-visible'],
+    attributeBindings: ['row:data-row', 'visible:data-visible', 'expanded:data-expanded', 'draggable'],
 
     row: Ember.computed.alias('controller.model.row'),
+    expanded: 'false',
+
+    expanded2: function() {
+        return this.get('expanded') === 'true' ? true : false;
+    }.property('expanded'),
 
     visible: function() {
         return this.get('controller.model.visible') ? 'true' : 'false';
     }.property('controller.model.visible'),
+
+    draggable: function() {
+        return 'true';
+    }.property(),
 
     visibilityChanged: function() {
         this.get('parentView').windowAdded(true);
@@ -36,28 +45,13 @@ Mas.WindowView = Ember.View.extend({
 
     actions: {
         expand: function() {
-            //TBD: Buggy
-            var origOffset = this.$().offset();
-            var origWidth = this.$().width();
-            var origHeight = this.$().height();
+            this.set('expanded', 'true');
+            this.get('parentView').windowAdded(true);
+        },
 
-            this.$().css('display', 'block');
-            this.$().css('position', 'absolute');
-            this.$().css('z-index', 1000);
-
-            this.$().width(origWidth);
-            this.$().height(origHeight);
-            this.$().offset(origOffset);
-
-            // var w = $(window).width() - 8;
-            // var h = $(window).height() - 8;
-
-            // this.$().animate({
-            //     width: w,
-            //     height: h,
-            //     left: 4,
-            //     top: 4
-            // }, 1000);
+        compress: function() {
+            this.set('expanded', 'false');
+            this.get('parentView').windowAdded(true);
         }
     },
 

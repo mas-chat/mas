@@ -29,6 +29,10 @@ Mas.GridView = Ember.View.extend({
         Ember.run.next(this, function() { this.layoutWindows(animate); });
     },
 
+    expandWindow: function(id) {
+        var container = this._containerDimensions();
+    },
+
     layoutWindows: function(animate) {
         // TBD: Add animation parameter
         // TBD: Consider to chain animations instead of stopping
@@ -36,18 +40,28 @@ Mas.GridView = Ember.View.extend({
         var PADDING = 5;
         var duration = animate ? 400 : 0;
         var el = this.get('element');
-        var containerWidth = this.$().width();
-        var containerHeight = this.$().height();
+        var container = this._containerDimensions();
+        var expandedWindow = el.querySelector('.window[data-expanded="true"]');
+        
+        if (expandedWindow) {
+            $(expandedWindow).velocity({
+                left: PADDING + 'px',
+                top : PADDING + 'px',
+                width: container.width - 2 * PADDING + 'px',
+                height : container.height - 2 * PADDING + 'px',
+            }, duration);
+            return;
+        }
 
         var windows = el.querySelectorAll('.window[data-visible="true"]');
         var rowNumbers = _.uniq(_.map(windows,
             function(element) { return element.getAttribute('data-row'); }));
-        var rowHeight = (containerHeight - (rowNumbers.length + 1) * PADDING) / rowNumbers.length;
+        var rowHeight = (container.height - (rowNumbers.length + 1) * PADDING) / rowNumbers.length;
 
         _.forEach(rowNumbers, function(row, rowIndex) {
             var windowsInRow = el.querySelectorAll(
                 '.window[data-row="' + row + '"][data-visible="true"]');
-            var windowWidth = (containerWidth - windowsInRow.length * PADDING) /
+            var windowWidth = (container.width - windowsInRow.length * PADDING) /
                 windowsInRow.length;
 
             _.forEach(windowsInRow, function(element, index) {
@@ -59,5 +73,12 @@ Mas.GridView = Ember.View.extend({
                 }, duration);
             });
         });
+    },
+
+    _containerDimensions: function() {
+        return {
+            width: this.$().width(),
+            height: this.$().height()
+        }
     }
 });
