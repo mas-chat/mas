@@ -4,7 +4,7 @@
   "private": true,
   "description": "MAS Web App",
   "dependencies": {
-    "Faker": "~0.7.0",
+    "faker": "~1.1.0",
     "carrier": "~0.1.13",
     "chai": "~1.9.0",
     "co": "~3.1.0",
