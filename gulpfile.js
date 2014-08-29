@@ -13,7 +13,7 @@ var argv = require('yargs').argv,
     defineModule = require('gulp-define-module'),
     bower = require('gulp-bower'),
     browserify = require('browserify'),
-    livereload = require('gulp-livereload'),
+    livereload = require('gulp-livereload')(),
     source = require('vinyl-source-stream'),
     streamify = require('gulp-streamify'),
     less = require('gulp-less'),
@@ -34,6 +34,12 @@ var paths = {
     ],
     clientTemplates: [
         'app/templates/**/*.hbs'
+    ],
+    clientDistFiles: [
+        'server/public/dist/client.css',
+        'server/public/dist/client-libs.js',
+        'server/public/dist/client.js',
+        'server/public/app/index.html'
     ],
     clientCSS: [
         'app/stylesheets/**/*.less'
@@ -125,8 +131,7 @@ gulp.task('browserify', ['templates'], function() {
         .on('error', handleError)
         .pipe(source('client.js'))
         .pipe(argv.prod ? streamify(uglify()) : util.noop())
-        .pipe(gulp.dest('./server/public/dist/'))
-        .pipe(livereload());
+        .pipe(gulp.dest('./server/public/dist/'));
 });
 
 gulp.task('libs-client', ['bower'], function() {
@@ -147,8 +152,7 @@ gulp.task('less-client', ['bower'], function () {
     gulp.src('./app/stylesheets/client.less')
         .pipe(less())
         .pipe(minifyCSS())
-        .pipe(gulp.dest('./server/public/dist/'))
-        .pipe(livereload());
+        .pipe(gulp.dest('./server/public/dist/'));
 });
 
 gulp.task('less-pages', ['bower'], function () {
@@ -163,6 +167,10 @@ gulp.task('watch', function() {
     gulp.watch(paths.clientJavaScripts, ['browserify']);
     gulp.watch(paths.clientCSS, ['less-client']);
     gulp.watch(paths.pagesCSS, ['less-pages']);
+
+    gulp.watch(paths.clientDistFiles, function(file) {
+        livereload.changed(file.path);
+    });
 });
 
 // The default task
