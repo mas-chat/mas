@@ -67,6 +67,9 @@ Mas.Message = Ember.Object.extend({
         var imgSection = imgUrls.length ? '<ul class="user-image">' + imgUrls.join(' ') +
             '</ul>' : '';
 
+        // Legacy thumb up emoji
+        textSection = textSection.replace('*thumb up*', ':thumbsup: ');
+
         return emojify.replace(textSection) + imgSection;
     },
 
