@@ -135,14 +135,8 @@ Mas.WindowView = Ember.View.extend({
             return false;
         });
 
-        // Highlight the window that was moved
-        if (this.get('controller.model.animate') === true) {
-            this.set('controller.model.animate', false);
-            this.$().addClass('pulse animated');
-        }
-
         var emojisList = $.map(emojify.emojiNames, function(value, i) {
-            return {'id':i, 'name':value};
+            return { id: i, name: value };
         });
 
         var emojiListTemplate =
