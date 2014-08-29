@@ -7,7 +7,10 @@ var argv = require('yargs').argv,
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
     jshint = require('gulp-jshint'),
-    handlebars = require('gulp-ember-handlebars'),
+    handlebars = require('gulp-handlebars'),
+    wrap = require('gulp-wrap'),
+    declare = require('gulp-declare'),
+    defineModule = require('gulp-define-module'),
     bower = require('gulp-bower'),
     browserify = require('browserify'),
     livereload = require('gulp-livereload'),
@@ -101,7 +104,13 @@ gulp.task('bower', function() {
 gulp.task('templates', function() {
     return gulp.src(paths.clientTemplates)
         .pipe(handlebars({
-            outputType: 'cjs'
+            handlebars: require('ember-handlebars')
+        }))
+        .pipe(wrap('Ember.Handlebars.template(<%= contents %>)'))
+        .pipe(declare({
+            root: 'window',
+            namespace: 'Ember.TEMPLATES',
+            noRedeclare: true, // Avoid duplicate declarations
         }))
         .pipe(concat('client-templates.js'))
         .pipe(gulp.dest('./server/public/dist/'));
