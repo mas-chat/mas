@@ -22,14 +22,6 @@ Mas.WindowController = Ember.ObjectController.extend({
     needs: ['application'],
 
     actions: {
-        moveRowUp: function() {
-            this._seekRow(-1);
-        },
-
-        moveRowDown: function() {
-            this._seekRow(1);
-        },
-
         hide: function() {
             this.set('visible', false);
             this.set('timeHidden', Date.now());
