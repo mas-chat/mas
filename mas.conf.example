@@ -16,8 +16,12 @@ admin_email=admin@example.com
 ; google auth callback must be /auth/google/oauth2callback
 
 [googleauth]
+enabled=false
 client_id=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com
 client_secret=XXXXXXXXXXXXXXXXXXXXXXX
+
+[yahooauth]
+enabled=false
 
 [frontend]
 port=3200

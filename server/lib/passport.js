@@ -92,26 +92,31 @@ function authExt(openidId, oauthId, profile, done) {
     })();
 }
 
-var google = new GoogleStrategy({
-    clientID: conf.get('googleauth:client_id'),
-    clientSecret: conf.get('googleauth:client_secret'),
-    callbackURL: conf.get('site:url') + '/auth/google/oauth2callback'
-}, function(accessToken, refreshToken, params, profile, done) {
-    var openIdId = jwt.decode(params.id_token, null, true).openid_id;
-    authExt(openIdId, 'google:' + profile.id, profile, done);
-});
+if (conf.get('googleauth:enabled') === true) {
+    var google = new GoogleStrategy({
+        clientID: conf.get('googleauth:client_id'),
+        clientSecret: conf.get('googleauth:client_secret'),
+        callbackURL: conf.get('site:url') + '/auth/google/oauth2callback'
+    }, function(accessToken, refreshToken, params, profile, done) {
+        var openIdId = jwt.decode(params.id_token, null, true).openid_id;
+        authExt(openIdId, 'google:' + profile.id, profile, done);
+    });
 
-var yahoo = new YahooStrategy({
-    returnURL: conf.get('site:url') + '/auth/yahoo/callback',
-    realm: conf.get('site:url')
-}, function(openIdId, profile, done) {
-    authExt(openIdId, null, profile, done);
-});
+    passport.use(google);
+}
+
+if (conf.get('yahoooauth:enabled') === true) {
+    var yahoo = new YahooStrategy({
+        returnURL: conf.get('site:url') + '/auth/yahoo/callback',
+        realm: conf.get('site:url')
+    }, function(openIdId, profile, done) {
+        authExt(openIdId, null, profile, done);
+    });
+
+    passport.use(yahoo);
+}
 
 var local = new LocalStrategy(authLocal);
-
-passport.use(google);
-passport.use(yahoo);
 passport.use(local);
 
 module.exports = passport;
