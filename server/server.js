@@ -71,17 +71,21 @@ app.use(userSession());
 
 app.use(router(app));
 
-var googleAuthOptions = { scope: 'email profile' };
+// Passport authentication routes
 
-if (conf.get('googleauth:openid_realm')) {
+if (conf.get('googleauth:enabled') === true && conf.get('googleauth:openid_realm')) {
+    var googleAuthOptions = { scope: 'email profile' };
     googleAuthOptions.openIdRealm = conf.get('googleauth:openid_realm');
+
+    app.get('/auth/google', passport.authenticate('google', googleAuthOptions));
+    app.get('/auth/google/oauth2callback', loginController.googleLogin);
 }
 
-// Passport authentication routes
-app.get('/auth/google', passport.authenticate('google', googleAuthOptions));
-app.get('/auth/google/oauth2callback', loginController.googleLogin);
-app.get('/auth/yahoo', passport.authenticate('yahoo'));
-app.get('/auth/yahoo/callback', loginController.yahooLogin);
+if (conf.get('yahooauth:enabled') === true) {
+    app.get('/auth/yahoo', passport.authenticate('yahoo'));
+    app.get('/auth/yahoo/callback', loginController.yahooLogin);
+}
+
 app.post('/login', bodyParser(), loginController.localLogin);
 
 // REST API common filtering
