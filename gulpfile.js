@@ -1,6 +1,7 @@
 'use strict';
 
-var argv = require('yargs').argv,
+var path = require('path'),
+    argv = require('yargs').argv,
     gulp = require('gulp'),
 //  debug = require('gulp-debug'),
     util = require('gulp-util'),
@@ -117,6 +118,10 @@ gulp.task('templates', function() {
             root: 'window',
             namespace: 'Ember.TEMPLATES',
             noRedeclare: true, // Avoid duplicate declarations
+            processName: function(filePath) {
+                var base = __dirname + path.sep + 'app' + path.sep + 'templates';
+                return path.relative(base, filePath).slice(0, -3); // Remove .js file extension
+            }
         }))
         .pipe(concat('client-templates.js'))
         .pipe(gulp.dest('./server/public/dist/'));
