@@ -123,7 +123,7 @@ gulp.task('templates', function() {
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('browserify', ['templates'], function() {
+gulp.task('browserify', ['bower', 'templates'], function() {
     return browserify({
             entries: './app/js/app.js',
             paths: [ './server/public/vendor' ],
