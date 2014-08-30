@@ -16,6 +16,8 @@
 
 'use strict';
 
+var _ = require('lodash/dist/lodash');
+
 Mas.GridView = Ember.View.extend({
     classNames: ['grid', 'flex-1'],
 

@@ -49,7 +49,6 @@ var paths = {
         'server/pages/stylesheets/*.less'
     ],
     clientLibs: [
-        'lodash/dist/lodash.js',
         'uri.js/src/IPv6.js',
         'uri.js/src/punycode.js',
         'uri.js/src/SecondLevelDomains.js',
