@@ -16,7 +16,8 @@
 
 'use strict';
 
-var sound = require('../helpers/sound');
+var moment = require('momentjs/moment'),
+    sound = require('../helpers/sound');
 
 Mas.WindowController = Ember.ObjectController.extend({
     needs: ['application'],

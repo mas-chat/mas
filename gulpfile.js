@@ -50,7 +50,6 @@ var paths = {
     ],
     clientLibs: [
         'lodash/dist/lodash.js',
-        'momentjs/moment.js',
         'uri.js/src/IPv6.js',
         'uri.js/src/punycode.js',
         'uri.js/src/SecondLevelDomains.js',
