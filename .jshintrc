@@ -76,7 +76,6 @@
 
     // Custom Globals
     "globals"       : {
-        "_": false,
         "Ember": false,
         "Handlebars": false,
         "URI": false,
