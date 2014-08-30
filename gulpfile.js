@@ -63,7 +63,6 @@ var paths = {
         'handlebars/handlebars.js',
         'ember/ember.js',
         'TitleNotifier.js/title_notifier.js',
-        'howler/howler.js',
         'jquery.atwho/dist/js/jquery.atwho.js',
         'Caret.js/dist/jquery.caret.min.js',
         'emojify.js/emojify.js',
@@ -130,6 +129,7 @@ gulp.task('templates', function() {
 gulp.task('browserify', ['templates'], function() {
     return browserify({
             entries: './app/js/app.js',
+            paths: [ './server/public/vendor' ],
             debug: true
         })
         .bundle()
