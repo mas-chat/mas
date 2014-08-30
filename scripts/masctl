@@ -25,11 +25,6 @@ if [[ $? != 0 ]] ; then
     exit 1
 fi
 
-if [ ! -f $ROOT/mas.conf ]; then
-    echo "ERROR: Main configuration file: $ROOT/mas.conf is missing."
-    exit 1
-fi
-
 cd $ROOT
 
 usage ()
@@ -75,6 +70,11 @@ while [[ $# > 0 ]]; do
         ;;
     esac
 done
+
+if [ ! -f $CONFIG_FILE ]; then
+    echo "ERROR: Main configuration file: $ROOT/$CONFIG_FILE is missing."
+    exit 1
+fi
 
 source $ROOT/scripts/read_ini.sh
 
