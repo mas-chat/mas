@@ -26,11 +26,17 @@ body, html, .ember-root {
     color: yellow;
 }
 
-/* bootswatch color cutomizations */
+/* Bootswatch color customizations */
 
-@navbar-default-bg: #28537E;
-@body-bg: @navbar-default-bg;
-@dropdown-divider-bg: lighten(@body-bg, 50%);
+@mas-bg-color: #28537E;
+
+/* These bootswap/bootstrap less variable names are totally misleading. Some of them are used
+   everywhere, not just in a single component as their name suggests */
+@navbar-default-bg: @mas-bg-color;
+@body-bg: @mas-bg-color;
+@dropdown-divider-bg: lighten(@mas-bg-color, 50%);
+@nav-tabs-border-color: lighten(@mas-bg-color, 50%);
+@nav-tabs-active-link-hover-border-color: lighten(@mas-bg-color, 50%);
 
 /* Bootstrap customizations */
 
