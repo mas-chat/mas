@@ -29,6 +29,7 @@ require('./views/application');
 require('./views/main');
 require('./views/grid');
 require('./views/window');
+require('./views/logs');
 require('./views/radioButton');
 
 require('./components/modalDialog');

@@ -1,6 +1,30 @@
 
-.logsbar {
-    width: 100px;
-    align-items: center;
-    padding: 20px 9px 10px 5px;
+.logs-controls {
+    align-items: flex-end;
+    padding: 20px 0px 0px 0px;
+}
+
+.logs-browse-controls {
+    padding: 20px 0px;
+}
+
+.logs-search-controls {
+    display: flex;
+    padding: 40px 20px;
+
+    input {
+        margin: 0px 20px 0px 0px;
+        height: 39px;
+        border: none;
+    }
+}
+
+.logs-channel {
+    background-color: white;
+    margin: 0px 0px 0px 20px;
+}
+
+.logs-content .tab-content > .active {
+    // Make bootstrap tab flexbox compatible
+    display: flex;
 }
