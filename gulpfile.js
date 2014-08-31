@@ -65,7 +65,7 @@ var paths = {
         'emojify.js/emojify.js',
         'magnific-popup/dist/jquery.magnific-popup.js',
         'bootstrap-contextmenu/bootstrap-contextmenu.js',
-        'velocity/jquery.velocity.js'
+        'velocity/velocity.js'
     ],
     pagesLibs: [
         'jquery/dist/jquery.js',
