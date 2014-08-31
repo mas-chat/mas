@@ -6,6 +6,22 @@
 
 .logs-browse-controls {
     padding: 20px 0px;
+    justify-content: flex-end;
+    height: 80px;
+}
+
+.logs-date {
+    padding: 0px 20px;
+}
+
+.logs-channel {
+    background-color: white;
+    margin: 0px 0px 0px 20px;
+}
+
+.logs-content .tab-content > .active {
+    // Make bootstrap tab flexbox compatible
+    display: flex;
 }
 
 .logs-search-controls {
@@ -17,14 +33,4 @@
         height: 39px;
         border: none;
     }
-}
-
-.logs-channel {
-    background-color: white;
-    margin: 0px 0px 0px 20px;
-}
-
-.logs-content .tab-content > .active {
-    // Make bootstrap tab flexbox compatible
-    display: flex;
 }
