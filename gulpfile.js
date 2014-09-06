@@ -17,7 +17,9 @@ var path = require('path'),
     source = require('vinyl-source-stream'),
     streamify = require('gulp-streamify'),
     less = require('gulp-less'),
-    minifyCSS = require('gulp-minify-css');
+    minifyCSS = require('gulp-minify-css'),
+    rev = require('gulp-rev'),
+    rimraf = require('rimraf');
 
 var paths = {
     serverJavaScripts: [
@@ -150,18 +152,33 @@ gulp.task('libs-pages', ['bower'], function() {
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('less-client', ['bower'], function () {
+gulp.task('less-client', ['bower'], function() {
     gulp.src('./app/stylesheets/client.less')
         .pipe(less())
         .pipe(minifyCSS())
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('less-pages', ['bower'], function () {
+gulp.task('less-pages', ['bower'], function() {
     gulp.src('./server/pages/stylesheets/pages.less')
         .pipe(less())
         .pipe(minifyCSS())
         .pipe(gulp.dest('./server/public/dist/'));
+});
+
+gulp.task('clean-assets', function (cb) {
+    rimraf('./server/public/dist', cb);
+});
+
+gulp.task('prepare-assets', [ 'browserify', 'libs-client', 'libs-pages', 'less-client',
+    'less-pages'], function() {
+    if (argv.prod) {
+        gulp.src('./server/public/dist/**/*')
+            .pipe(rev())
+            .pipe(gulp.dest('./server/public/dist'))
+            .pipe(rev.manifest())
+            .pipe(gulp.dest('./server/public/dist'));
+    }
 });
 
 gulp.task('watch', function() {
@@ -177,5 +194,3 @@ gulp.task('watch', function() {
 
 // The default task
 gulp.task('default', ['jshint']);
-
-gulp.task('all', ['browserify', 'libs-client', 'libs-pages', 'less-client', 'less-pages']);
