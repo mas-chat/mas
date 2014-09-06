@@ -70,8 +70,8 @@
     "gulp-wrap": "~0.3.0",
     "gulp-declare": "~0.3.0",
     "gulp-define-module": "~0.1.1",
-    "gulp-rev": "^1.1.0",
-    "rimraf": "^2.2.8"
+    "gulp-rev": "~1.1.0",
+    "rimraf": "~2.2.8"
   },
   "scripts": {
     "test": "gulp all && gulp jshint && ./scripts/run-tests.sh"
