@@ -141,7 +141,7 @@ Mas.WindowView = Ember.View.extend({
 
         var emojiListTemplate =
             '<li data-value=":${name}:">' +
-            '<img src="/vendor/emojify.js/images/emoji/${name}.png">${name}' +
+            '<img src="/dist/images/emojify/${name}.png">${name}' +
             '</li>';
 
         this.$('.form-control').atwho({

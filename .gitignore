@@ -8,7 +8,6 @@ mas.conf
 node_modules/
 bower_components/
 server/public/dist/
-server/public/vendor/
 npm-debug.log
 logs/
 run/
