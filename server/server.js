@@ -30,6 +30,7 @@ var path = require('path'),
     //logger = require('koa-logger'),
     mount = require('koa-mount'),
     co = require('co'),
+    handlebarsHelpers = require('./lib/handlebarsHelpers'),
     conf = require('./lib/conf'),
     redisModule = require('./lib/redis'),
     passport = require('./lib/passport'),
@@ -37,6 +38,7 @@ var path = require('path'),
     session = require('./lib/session'),
     routesIndex = require('./routes'),
     routesPages = require('./routes/pages'),
+    routesApp = require('./routes/app'),
     seqChecker = require('./controllers/seqChecker'),
     listenController = require('./controllers/listen'),
     commandController = require('./controllers/command'),
@@ -63,16 +65,15 @@ app.use(hbs.middleware({
     viewPath: __dirname + '/views'
 }));
 
-hbs.registerHelper('getPageJSFile', function() {
-    return this.page + '.js';
-});
+handlebarsHelpers.registerHelpers(hbs);
 
 app.use(userSession());
 
 app.use(router(app));
 
-// Passport authentication routes
+// ROUTES START
 
+// Passport authentication routes
 if (conf.get('googleauth:enabled') === true && conf.get('googleauth:openid_realm')) {
     var googleAuthOptions = { scope: 'email profile' };
     googleAuthOptions.openIdRealm = conf.get('googleauth:openid_realm');
@@ -105,18 +106,22 @@ app.post('/register-reset', registerController.createReset);
 app.post('/forgot-password', bodyParser(), forgotPasswordController.create);
 app.get('/reset-password/:token', registerController.indexReset);
 
-// Public routes
-app.use(serve(path.join(__dirname, 'public')));
-app.use(mount('/fonts/', serve(path.join(__dirname, 'public/vendor/bootstrap/fonts'))));
-
-// Hopefully temporary. Koa-static (serve) should support this soon.
-app.get(/\/app$/, function *(next) {
-    this.redirect('/app/');
+// Special rule for hashed assets
+app.get(/\/dist\/\S+-........\.\w+$/, function* (next) {
+    yield next;
+    this.set('Cache-Control', 'public, max-age=8640000'); // 100 days
 });
 
 // Page routes
 app.get('/', routesIndex);
+app.get(/^\/app/, routesApp);
 app.get(/.html$/, routesPages); // All other pages
+
+// ROUTES END
+
+// Public assets
+app.use(serve(path.join(__dirname, 'public')));
+app.use(mount('/fonts/', serve(path.join(__dirname, 'public/vendor/bootstrap/fonts'))));
 
 co(function *() {
     yield redisModule.loadScripts();
