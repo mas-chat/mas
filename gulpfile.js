@@ -25,14 +25,12 @@ var paths = {
     serverJavaScripts: [
         'gulpfile.js',
         'server/**/*.js',
-        '!server/public/vendor/**/*.js',
         '!server/public/dist/**/*.js',
         'mas-private/**/*.js'
     ],
     clientJavaScripts: [
         'app/**/*.js',
         '!app/tests/**/*', // TBD Remove eventually
-        '!app/tests/vendor/**/*.js'
     ],
     clientTemplates: [
         'app/templates/**/*.hbs'
@@ -88,7 +86,7 @@ function handleError(err) {
 }
 
 function appendPath(libs) {
-    return libs.map(function(elem) { return 'server/public/vendor/' + elem; });
+    return libs.map(function(elem) { return 'bower_components/' + elem; });
 }
 
 paths.clientLibs = appendPath(paths.clientLibs);
@@ -103,7 +101,7 @@ gulp.task('jshint', function() {
 });
 
 gulp.task('bower', function() {
-    return bower('./server/public/vendor');
+    return bower();
 });
 
 gulp.task('templates', function() {
@@ -128,7 +126,7 @@ gulp.task('templates', function() {
 gulp.task('browserify', ['bower', 'templates'], function() {
     return browserify({
             entries: './app/js/app.js',
-            paths: [ './server/public/vendor' ],
+            paths: [ './bower_components' ],
             debug: true
         })
         .bundle()
@@ -154,16 +152,31 @@ gulp.task('libs-pages', ['bower'], function() {
 
 gulp.task('less-client', ['bower'], function() {
     gulp.src('./app/stylesheets/client.less')
-        .pipe(less())
+        .pipe(less({
+            paths: [ path.join(__dirname, 'bower_components') ]
+        }))
         .pipe(minifyCSS())
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
 gulp.task('less-pages', ['bower'], function() {
     gulp.src('./server/pages/stylesheets/pages.less')
-        .pipe(less())
+        .pipe(less({
+            paths: [ path.join(__dirname, 'bower_components') ]
+        }))
         .pipe(minifyCSS())
         .pipe(gulp.dest('./server/public/dist/'));
+});
+
+gulp.task('fonts', ['bower'], function() {
+    gulp.src([ './bower_components/bootstrap/dist/fonts/*',
+        './bower_components/font-awesome/fonts/*' ])
+        .pipe(gulp.dest('./server/public/dist/fonts'));
+});
+
+gulp.task('emojis', ['bower'], function() {
+    gulp.src('./bower_components/emojify.js/images/emoji/*')
+        .pipe(gulp.dest('./server/public/dist/images/emojify'));
 });
 
 gulp.task('clean-assets', function (cb) {
@@ -171,7 +184,7 @@ gulp.task('clean-assets', function (cb) {
 });
 
 gulp.task('prepare-assets', [ 'browserify', 'libs-client', 'libs-pages', 'less-client',
-    'less-pages'], function() {
+    'less-pages', 'fonts', 'emojis'], function() {
     if (argv.prod) {
         gulp.src('./server/public/dist/**/*')
             .pipe(rev())

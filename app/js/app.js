@@ -70,4 +70,7 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
-emojify.defaultConfig.img_dir = '/vendor/emojify.js/images/emoji/';
+emojify.setConfig({
+    img_dir: '/dist/images/emojify',
+    ignore_emoticons: true
+});
