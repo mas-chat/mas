@@ -121,7 +121,7 @@ app.get(/.html$/, routesPages); // All other pages
 
 // Public assets
 app.use(serve(path.join(__dirname, 'public')));
-app.use(mount('/fonts/', serve(path.join(__dirname, 'public/vendor/bootstrap/fonts'))));
+app.use(mount('/fonts/', serve(path.join(__dirname, 'public/dist/fonts'))));
 
 co(function *() {
     yield redisModule.loadScripts();
