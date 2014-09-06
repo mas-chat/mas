@@ -18,7 +18,7 @@
 
 var co = require('co'),
     wait = require('co-wait'),
-    Faker = require('Faker'),
+    faker = require('faker'),
     redis = require('./redis').createClient(),
     log = require('./log'),
     windowHelper = require('./windows'),
@@ -53,8 +53,8 @@ if (conf.get('frontend:demo_mode') === true) {
 
                     var windowId = parseInt(details.split(':')[0]);
                     var msg = {
-                        body: Faker.Lorem.sentence(sentenceLength) + ' ' + url,
-                        nick: Faker.Name.firstName(),
+                        body: faker.Lorem.sentence(sentenceLength) + ' ' + url,
+                        nick: faker.Name.firstName(),
                         cat: 'msg',
                         windowId: windowId
                     };
