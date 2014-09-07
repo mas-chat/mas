@@ -20,6 +20,7 @@ var router = require('koa-router'),
     bodyParser = require('koa-bodyparser'),
     conf = require('../lib/conf'),
     passport = require('../lib/passport'),
+    cacheFilter = require('../lib/cacheFilter'),
     sessionFilter = require('../lib/sessionFilter'),
     sequenceFilter = require('../lib/sequenceFilter'),
     registerController = require('../controllers/register'),
@@ -36,12 +37,10 @@ exports.register = function(app) {
 
     // Passport authentication routes
     if (conf.get('googleauth:enabled') === true && conf.get('googleauth:openid_realm')) {
-        var googleAuthOptions = {
+        app.get('/auth/google', passport.authenticate('google', {
             scope: 'email profile',
             openIdRealm: conf.get('googleauth:openid_realm')
-        };
-
-        app.get('/auth/google', passport.authenticate('google', googleAuthOptions));
+        }));
         app.get('/auth/google/oauth2callback', loginController.googleLogin);
     }
 
@@ -70,10 +69,7 @@ exports.register = function(app) {
     app.get('/reset-password/:token', registerController.indexReset);
 
     // Special filter route for hashed assets
-    app.get(/\/dist\/\S+-........\.\w+$/, function* (next) {
-        yield next;
-        this.set('Cache-Control', 'public, max-age=8640000'); // 100 days
-    });
+    app.get(/\/dist\/\S+-........\.\w+$/, cacheFilter);
 
     // Page routes
     app.get('/', indexPageController);
