@@ -59,7 +59,6 @@ Mas.Network = Ember.Object.extend({
         $.ajax({
             type: 'POST',
             contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
             url: '/api/v1/send',
             data: JSON.stringify(data),
             success: this._sendMsgSuccess,
@@ -71,11 +70,7 @@ Mas.Network = Ember.Object.extend({
         Ember.Logger.info('--> MSG: ' + message.id);
     },
 
-    _sendMsgSuccess: function(data) {
-        if (data.commands) {
-            this._processMessages(data.commands, true);
-        }
-
+    _sendMsgSuccess: function() {
         this._sendQueue.shift();
         this._sendSeq++;
 
