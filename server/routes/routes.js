@@ -23,16 +23,15 @@ var router = require('koa-router'),
     loginController = require('../controllers/login'),
     seqChecker = require('../controllers/seqChecker'),
     session = require('../lib/session'),
-    routesIndex = require('../routes'),
-    routesPages = require('../routes/pages'),
-    routesApp = require('../routes/app'),
+    indexPageController = require('../controllers/pages'),
+    appPageController = require('../controllers/pages/app'),
+    pagesController = require('../controllers/pages/pages'),
     listenController = require('../controllers/listen'),
     commandController = require('../controllers/command'),
     forgotPasswordController = require('../controllers/forgotPassword'),
     conf = require('../lib/conf');
 
 exports.register = function(app) {
-
     app.use(router(app));
 
     // Passport authentication routes
@@ -77,7 +76,7 @@ exports.register = function(app) {
     });
 
     // Page routes
-    app.get('/', routesIndex);
-    app.get(/^\/app/, routesApp);
-    app.get(/.html$/, routesPages); // All other pages
+    app.get('/', indexPageController);
+    app.get(/^\/app/, appPageController);
+    app.get(/.html$/, pagesController); // All other pages
 };
