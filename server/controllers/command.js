@@ -16,8 +16,7 @@
 
 'use strict';
 
-var parse = require('co-body'),
-    log = require('../lib/log'),
+var log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
     courier = require('../lib/courier').createEndPoint('command'),
@@ -28,21 +27,21 @@ var parse = require('co-body'),
 module.exports = function *() {
     var userId = this.mas.userId;
     var sessionId = this.mas.sessionId;
-    var body = yield parse.json(this.req);
 
-    var command = body.id;
-    var windowId = parseInt(body.windowId);
+    var command = this.request.body.command;
+    var windowId = command.windowId;
+
     var result = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
     var name = result[0];
     var network = result[1];
     var type = result[2];
     var backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
 
-    log.info(userId, 'Prosessing command: ' + command);
+    log.info(userId, 'Prosessing command: ' + command.id);
 
     // TBD Check that windowId, network, and name are valid
 
-    switch (command) {
+    switch (command.id) {
         case 'SEND':
             var nick = yield nicks.getCurrentNick(userId, network);
 
@@ -54,7 +53,7 @@ module.exports = function *() {
                     type: 'sendPrivate',
                     userId: userId,
                     targetUserId: targetUserId,
-                    text: body.text
+                    text: command.text
                 });
             } else {
                 yield courier.send(backend, {
@@ -62,7 +61,7 @@ module.exports = function *() {
                     userId: userId,
                     network: network,
                     name: name,
-                    text: body.text
+                    text: command.text
                 });
             }
 
@@ -70,7 +69,7 @@ module.exports = function *() {
             yield textLine.sendByWindowId(userId, windowId, {
                 nick: nick,
                 cat: 'mymsg',
-                body: body.text
+                body: command.text
             }, sessionId);
             break;
 
@@ -79,8 +78,8 @@ module.exports = function *() {
                 type: 'create',
                 userId: userId,
                 sessionId: sessionId,
-                name: body.name,
-                password: body.password
+                name: command.name,
+                password: command.password
             });
             break;
 
@@ -89,9 +88,9 @@ module.exports = function *() {
                 type: 'join',
                 userId: userId,
                 sessionId: sessionId,
-                network: body.network,
-                name: body.name,
-                password: body.password
+                network: command.network,
+                name: command.name,
+                password: command.password
             });
             break;
 
@@ -126,7 +125,7 @@ module.exports = function *() {
             var accepted = ['visible', 'row', 'sounds', 'titleAlert'];
 
             for (var i = 0; i < accepted.length; i++) {
-                var prop = body[accepted[i]];
+                var prop = command[accepted[i]];
 
                 if (typeof(prop) !== 'undefined') {
                     yield redis.hset('window:' + userId + ':' + windowId, accepted[i], prop);
@@ -137,10 +136,10 @@ module.exports = function *() {
             yield outbox.queueAll(userId, {
                 id: 'UPDATE',
                 windowId: windowId,
-                visible: body.visible,
-                row: body.row,
-                sounds: body.sounds,
-                titleAlert: body.titleAlert
+                visible: command.visible,
+                row: command.row,
+                sounds: command.sounds,
+                titleAlert: command.titleAlert
             });
             break;
 
@@ -150,7 +149,7 @@ module.exports = function *() {
                 userId: userId,
                 name: name,
                 network: network,
-                password: body.password
+                password: command.password
             });
 
             // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
@@ -166,7 +165,7 @@ module.exports = function *() {
                 userId: userId,
                 name: name,
                 network: network,
-                topic: body.topic
+                topic: command.topic
             });
             break;
 
@@ -175,25 +174,25 @@ module.exports = function *() {
                 type: 'whois',
                 userId: userId,
                 network: network,
-                nick: body.nick
+                nick: command.nick
             });
             break;
 
         case 'CHAT':
-            windowId = yield windowHelper.getWindowId(userId, network, body.nick, '1on1');
+            windowId = yield windowHelper.getWindowId(userId, network, command.nick, '1on1');
 
             if (windowId !== null) {
                 yield outbox.queue(userId, sessionId, {
                     id: 'CHAT_RESP',
                     status: 'ERROR',
-                    errorMsg: 'You are already chatting with ' + body.nick
+                    errorMsg: 'You are already chatting with ' + command.nick
                 });
             } else {
                 yield courier.send(backend, {
                     type: 'chat',
                     userId: userId,
                     network: network,
-                    nick: body.nick
+                    nick: command.nick
                 });
             }
             break;
@@ -201,10 +200,7 @@ module.exports = function *() {
 
     // TBD: Add lookup table for commands
 
-    var resp = {
+    this.body = {
         status: 'OK'
     };
-
-    this.body = resp;
-
 };

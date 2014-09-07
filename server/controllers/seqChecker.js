@@ -16,22 +16,21 @@
 
 'use strict';
 
-var log = require('../lib/log'),
+var httpStatus = require('statuses'),
+    log = require('../lib/log'),
     redis = require('../lib/redis').createClient();
 
 module.exports = function *(next) {
     var sessionId = this.mas.sessionId;
     var expectedSeqKeyName;
-    var rcvdSeq;
-
-    rcvdSeq = parseInt(this.params.seq);
+    var rcvdSeq = this.request.body.seq;
 
     if (this.params.method === 'listen') {
         expectedSeqKeyName = 'listenRcvNext';
     } else if (this.params.method === 'send') {
         expectedSeqKeyName = 'sendRcvNext';
     } else {
-        respond(this, 'not acceptable', 'Invalid sequence number.');
+        respond(this, 'not acceptable', 'Invalid API endpoint.');
         return;
     }
 
@@ -54,8 +53,8 @@ module.exports = function *(next) {
 };
 
 function respond(ctx, code, msg) {
-    log.info(ctx.mas.userId,'Validating sequence number.');
+    log.info(ctx.mas.userId,'Sequence number error: ' + msg);
 
-    ctx.status = code;
+    ctx.status = httpStatus(code);
     ctx.body = msg;
 }

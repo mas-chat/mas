@@ -90,11 +90,11 @@ if (conf.get('yahooauth:enabled') === true) {
 app.post('/login', bodyParser(), loginController.localLogin);
 
 // REST API common filtering
-app.all('/api/v1/:method/:sessionId/:seq/:timezone?', session, seqChecker);
+app.post('/api/v1/:method', bodyParser(), session, seqChecker);
 
 // REST API routes
-app.get('/api/v1/listen/:dummy*', listenController);
-app.post('/api/v1/send/:dummy*', commandController);
+app.post('/api/v1/listen', listenController);
+app.post('/api/v1/send', commandController);
 
 // Registration routes
 app.get('/register', registerController.index);
