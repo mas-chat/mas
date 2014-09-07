@@ -53,7 +53,7 @@ MAS listen request
 
 ```
 POST /api/v1/listen
-Content-Type:application/json; charset=UTF-8
+Content-Type: application/json; charset=UTF-8
 ```
 ```JSON
 {
@@ -414,7 +414,6 @@ In addition of listening commands from the server, the client can send commands 
 
 ```
 POST /api/v1/send
-Content-Type:application/json; charset=UTF-8
 ```
 ```JSON
 {
@@ -433,6 +432,16 @@ Content-Type:application/json; charset=UTF-8
 **seq**: Must be set to 0 in the first send request. Must be then increased by one after every received send request HTTP response from the server. See the sequence number description for listen request. In send request case the sequence number prevents command duplication. For example, the client sends SEND message and the server processes it. However the reponse gets lost in the network. On the client side this leads to failed ajax request. The client shall resend the command but with the same sequence number. The server notices the duplicate sequence number and just responds OK without actually proccessing the command second time. After that the client and server are in sync again.
 
 **command**: One of the supported commands.
+
+HTTP status codes:
+
+```204``` OK
+
+```401``` (Unauthorized) Unauthenticated. Same as listen request.
+
+```406``` (Not Acceptable) Session expired. Same as listen request.
+
+Response body is always empty.
 
 Following commands are supported. Under every command is corresponding response.
 

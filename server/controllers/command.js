@@ -200,7 +200,5 @@ module.exports = function *() {
 
     // TBD: Add lookup table for commands
 
-    this.body = {
-        status: 'OK'
-    };
+    this.status = 204;
 };

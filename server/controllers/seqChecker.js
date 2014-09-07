@@ -24,10 +24,11 @@ module.exports = function *(next) {
     var sessionId = this.mas.sessionId;
     var expectedSeqKeyName;
     var rcvdSeq = this.request.body.seq;
+    var method = this.params.method;
 
-    if (this.params.method === 'listen') {
+    if (method === 'listen') {
         expectedSeqKeyName = 'listenRcvNext';
-    } else if (this.params.method === 'send') {
+    } else if (method === 'send') {
         expectedSeqKeyName = 'sendRcvNext';
     } else {
         respond(this, 'not acceptable', 'Invalid API endpoint.');
@@ -38,9 +39,7 @@ module.exports = function *(next) {
         sessionId, expectedSeqKeyName));
 
     if (rcvdSeq === expectedSeq - 1) {
-        // TBD: Re-send the previous reply
-        respond(this, 'not acceptable',
-            'Previous response lost. Resend logic to be implemented.');
+        handleResponseLost(this, method);
         return;
     } else if (rcvdSeq !== expectedSeq) {
         respond(this, 'not acceptable', 'Invalid sequence number.');
@@ -52,9 +51,25 @@ module.exports = function *(next) {
     yield next;
 };
 
+function handleResponseLost(ctx, method) {
+    log.info(ctx.mas.userId, 'Received duplicate request, method: ' + method);
+
+    if (method === 'send') {
+        // Client hasn't received the previous send req response. Just send OK back again.
+        respond(ctx, 'no content');
+    } else {
+        // TBD: Re-send the previous reply
+        respond(ctx, 'not acceptable',
+            'Previous response lost. Listen req resend logic to be implemented.');
+    }
+}
+
 function respond(ctx, code, msg) {
-    log.info(ctx.mas.userId,'Sequence number error: ' + msg);
+    log.info(ctx.mas.userId, 'Sequence number error, code: ' + code);
 
     ctx.status = httpStatus(code);
-    ctx.body = msg;
+
+    if (msg) {
+        ctx.body = msg;
+    }
 }
