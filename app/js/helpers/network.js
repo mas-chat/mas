@@ -50,11 +50,18 @@ Mas.Network = Ember.Object.extend({
     },
 
     _sendMsg: function(message) {
+        var data = {
+            sessionId: this._sessionId,
+            seq: this._sendSeq,
+            command: message
+        };
+
         $.ajax({
             type: 'POST',
+            contentType: 'application/json; charset=utf-8',
             dataType: 'json',
-            url: '/api/v1/send/' + this._sessionId + '/' + this._sendSeq,
-            data: JSON.stringify(message),
+            url: '/api/v1/send',
+            data: JSON.stringify(data),
             success: this._sendMsgSuccess,
             error: this._sendMsgFailure,
             context: this,
@@ -106,23 +113,25 @@ Mas.Network = Ember.Object.extend({
     },
 
     _pollMsgs: function() {
-        var tz = '';
+        var data = { seq: this._pollSeq };
 
-        if (this._firstPoll) {
-            var date = new Date();
-            tz = '/' + date.getTimezoneOffset();
+        if (!this._firstPoll) {
+            data.sessionId = this._sessionId;
         }
 
-        Ember.Logger.info('--> Polling request sent (seq ' + this._pollSeq + ')');
-
         $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
             dataType: 'json',
-            url: '/api/v1/listen/' + this._sessionId + '/' + this._pollSeq + tz,
+            url: '/api/v1/listen',
+            data: JSON.stringify(data),
             success: this._pollMsgsSuccess,
             error: this._pollMsgsFailure,
             context: this,
             timeout: 35000
         });
+
+        Ember.Logger.info('--> Polling request sent (seq ' + this._pollSeq + ')');
     },
 
     _pollMsgsSuccess: function(data) {

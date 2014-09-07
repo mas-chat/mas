@@ -24,7 +24,7 @@ var uuid = require('uid2'),
 
 module.exports = function *(next) {
     var userId = this.mas.userId;
-    var sessionId = this.params.sessionId;
+    var sessionId = this.request.body.sessionId;
 
     log.info('Authenticating.');
 
@@ -38,7 +38,7 @@ module.exports = function *(next) {
         return;
     }
 
-    if (sessionId === '0') {
+    if (!sessionId) {
         // Limit parallel sessions
         var sessionCount = yield redis.zcard('sessionlist:' + userId);
         if (sessionCount > conf.get('session:max_parallel')) {
