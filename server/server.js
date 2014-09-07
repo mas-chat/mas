@@ -21,11 +21,9 @@ require('./lib/init')('frontend');
 
 var path = require('path'),
     koa = require('koa'),
-    router = require('koa-router'),
     hbs = require('koa-hbs'),
     serve = require('koa-static'),
     error = require('koa-error'),
-    bodyParser = require('koa-bodyparser'),
     compress = require('koa-compress'),
     //logger = require('koa-logger'),
     mount = require('koa-mount'),
@@ -35,16 +33,7 @@ var path = require('path'),
     redisModule = require('./lib/redis'),
     passport = require('./lib/passport'),
     userSession = require('./lib/userSession'),
-    session = require('./lib/session'),
-    routesIndex = require('./routes'),
-    routesPages = require('./routes/pages'),
-    routesApp = require('./routes/app'),
-    seqChecker = require('./controllers/seqChecker'),
-    listenController = require('./controllers/listen'),
-    commandController = require('./controllers/command'),
-    loginController = require('./controllers/login'),
-    registerController = require('./controllers/register'),
-    forgotPasswordController = require('./controllers/forgotPassword'),
+    routes = require('./routes/routes'),
     scheduler = require('./lib/scheduler');
 
 var app = koa();
@@ -65,59 +54,10 @@ app.use(hbs.middleware({
     viewPath: __dirname + '/views'
 }));
 
-handlebarsHelpers.registerHelpers(hbs);
-
 app.use(userSession());
 
-app.use(router(app));
-
-// ROUTES START
-
-// Passport authentication routes
-if (conf.get('googleauth:enabled') === true && conf.get('googleauth:openid_realm')) {
-    var googleAuthOptions = { scope: 'email profile' };
-    googleAuthOptions.openIdRealm = conf.get('googleauth:openid_realm');
-
-    app.get('/auth/google', passport.authenticate('google', googleAuthOptions));
-    app.get('/auth/google/oauth2callback', loginController.googleLogin);
-}
-
-if (conf.get('yahooauth:enabled') === true) {
-    app.get('/auth/yahoo', passport.authenticate('yahoo'));
-    app.get('/auth/yahoo/callback', loginController.yahooLogin);
-}
-
-app.post('/login', bodyParser(), loginController.localLogin);
-
-// REST API common filtering
-app.post('/api/v1/:method', bodyParser(), session, seqChecker);
-
-// REST API routes
-app.post('/api/v1/listen', listenController);
-app.post('/api/v1/send', commandController);
-
-// Registration routes
-app.get('/register', registerController.index);
-app.post('/register', registerController.create);
-app.post('/register-ext', registerController.createExt);
-app.post('/register-reset', registerController.createReset);
-
-// Forgot password
-app.post('/forgot-password', bodyParser(), forgotPasswordController.create);
-app.get('/reset-password/:token', registerController.indexReset);
-
-// Special rule for hashed assets
-app.get(/\/dist\/\S+-........\.\w+$/, function* (next) {
-    yield next;
-    this.set('Cache-Control', 'public, max-age=8640000'); // 100 days
-});
-
-// Page routes
-app.get('/', routesIndex);
-app.get(/^\/app/, routesApp);
-app.get(/.html$/, routesPages); // All other pages
-
-// ROUTES END
+handlebarsHelpers.registerHelpers(hbs);
+routes.register(app);
 
 // Public assets
 app.use(serve(path.join(__dirname, 'public')));
