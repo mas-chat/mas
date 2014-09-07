@@ -19,14 +19,11 @@
 
 require('./lib/init')('frontend');
 
-var path = require('path'),
-    koa = require('koa'),
+var koa = require('koa'),
     hbs = require('koa-hbs'),
-    serve = require('koa-static'),
     error = require('koa-error'),
     compress = require('koa-compress'),
     //logger = require('koa-logger'),
-    mount = require('koa-mount'),
     co = require('co'),
     handlebarsHelpers = require('./lib/handlebarsHelpers'),
     conf = require('./lib/conf'),
@@ -58,10 +55,6 @@ app.use(userSession());
 
 handlebarsHelpers.registerHelpers(hbs);
 routes.register(app);
-
-// Public assets
-app.use(serve(path.join(__dirname, 'public')));
-app.use(mount('/fonts/', serve(path.join(__dirname, 'public/dist/fonts'))));
 
 co(function *() {
     yield redisModule.loadScripts();
