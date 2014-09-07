@@ -18,18 +18,18 @@
 
 var router = require('koa-router'),
     bodyParser = require('koa-bodyparser'),
+    conf = require('../lib/conf'),
     passport = require('../lib/passport'),
+    sessionFilter = require('../lib/sessionFilter'),
+    sequenceFilter = require('../lib/sequenceFilter'),
     registerController = require('../controllers/register'),
     loginController = require('../controllers/login'),
-    seqChecker = require('../controllers/seqChecker'),
-    session = require('../lib/session'),
     indexPageController = require('../controllers/pages'),
     appPageController = require('../controllers/pages/app'),
     pagesController = require('../controllers/pages/pages'),
     listenController = require('../controllers/listen'),
     commandController = require('../controllers/command'),
-    forgotPasswordController = require('../controllers/forgotPassword'),
-    conf = require('../lib/conf');
+    forgotPasswordController = require('../controllers/forgotPassword');
 
 exports.register = function(app) {
     app.use(router(app));
@@ -53,7 +53,7 @@ exports.register = function(app) {
     app.post('/login', bodyParser(), loginController.localLogin);
 
     // REST API common filtering
-    app.post('/api/v1/:method', bodyParser(), session, seqChecker);
+    app.post('/api/v1/:method', bodyParser(), sessionFilter, sequenceFilter);
 
     // REST API routes
     app.post('/api/v1/listen', listenController);
