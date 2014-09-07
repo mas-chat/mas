@@ -31,7 +31,15 @@ For example, the user wants to join a new channel and sends JOIN command. The se
 Authentication
 ==============
 
-All MAS listen and send requests must contain an authentication cookie. Cookie format is ...
+All MAS listen and send requests must contain an authentication cookie. Cookie format is
+
+```
+Cookie: ProjectEvergreen=<userId>-<secToken>-n
+```
+
+**userId**: User ID (integer). Returned by the server after a successful login.
+
+**secToken**: Security token (integer). Returned by the server after a successful login.
 
 Session management
 ==================
@@ -43,11 +51,11 @@ If the session ID becomes invalid because of long break between HTTP listen requ
 MAS listen request
 ==================
 
-```JSON
+```
+POST /api/v1/listen
 Content-Type:application/json; charset=UTF-8
-
-HTTP POST /api/v1/listen
-
+```
+```JSON
 {
     "seq":123,
     "sessionId":"YCkmphVXX3GmmJb"
@@ -56,7 +64,7 @@ HTTP POST /api/v1/listen
 
 **sessionId**: Must NOT exist in the initial listen request. In all other requests sessionID must be set to value (string) that the server returned with SESSIONID command.
 
-**seq**: Must be set to 0 in the initial listen request. Must be then increased by one after every received HTTP response to listen request from the server.
+**seq**: Sequence number. Must be set to 0 in the initial listen request. Must be then increased by one after every succesfully received HTTP response from the server. Sequence numbers give protection against network errors. For example, consider a situation where the client sends listen request with seq 13. New chat message has arrived so the server responds with ADDTEXT command. From the server point of view, new chat message has now been delivered to the client. It is however possible that HTTP response gets lost in the network and client never receives it. In this case the client generated HTTP ajax request fails and so the client doesn't increase sequence number. Then during the next round, server sees that the sequence number is still 13 and concludes that the client didn't receive its previous response. This triggers the server to resend the ADDTEXT command in addition to possible new commands.
 
 Overal server response format to MAS listen request is:
 
@@ -404,14 +412,14 @@ MAS send request
 
 In addition of listening commands from the server, the client can send commands to the server at any time after the initial MAS listen request.
 
-```JSON
+```
+POST /api/v1/send
 Content-Type:application/json; charset=UTF-8
-
-HTTP POST /api/v1/send
-
+```
+```JSON
 {
     "seq":12,
-    "sessionId":"YCkmphVXX3GmmJb"
+    "sessionId":"YCkmphVXX3GmmJb",
     "command": {
         "id": "SEND"
         "windowId": 2,
@@ -422,7 +430,7 @@ HTTP POST /api/v1/send
 
 **sessionId**: Must be set to value that the server returned with SESSIONID command.
 
-**sendSeq**: Must be set to 0 in the first send request. Must be then increased by one after every received send request HTTP response from the server.
+**seq**: Must be set to 0 in the first send request. Must be then increased by one after every received send request HTTP response from the server. See the sequence number description for listen request. In send request case the sequence number prevents command duplication. For example, the client sends SEND message and the server processes it. However the reponse gets lost in the network. On the client side this leads to failed ajax request. The client shall resend the command but with the same sequence number. The server notices the duplicate sequence number and just responds OK without actually proccessing the command second time. After that the client and server are in sync again.
 
 **command**: One of the supported commands.
 
