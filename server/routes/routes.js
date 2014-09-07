@@ -16,7 +16,10 @@
 
 'use strict';
 
-var router = require('koa-router'),
+var path = require('path'),
+    router = require('koa-router'),
+    serve = require('koa-static'),
+    mount = require('koa-mount'),
     bodyParser = require('koa-bodyparser'),
     conf = require('../lib/conf'),
     passport = require('../lib/passport'),
@@ -75,4 +78,8 @@ exports.register = function(app) {
     app.get('/', indexPageController);
     app.get(/^\/app/, appPageController);
     app.get(/.html$/, pagesController); // All other pages
+
+    // Public assets
+    app.use(serve(path.join(__dirname, 'public')));
+    app.use(mount('/fonts/', serve(path.join(__dirname, 'public/dist/fonts'))));
 };
