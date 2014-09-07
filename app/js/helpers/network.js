@@ -112,6 +112,8 @@ Mas.Network = Ember.Object.extend({
 
         if (!this._firstPoll) {
             data.sessionId = this._sessionId;
+            data.clientName = 'webclient';
+            data.clientOS = navigator.platform;
         }
 
         $.ajax({
