@@ -62,9 +62,13 @@ Content-Type: application/json; charset=UTF-8
 }
 ```
 
-**sessionId**: Must NOT exist in the initial listen request. In all other requests sessionID must be set to value (string) that the server returned with SESSIONID command.
-
-**seq**: Sequence number. Must be set to 0 in the initial listen request. Must be then increased by one after every succesfully received HTTP response from the server. Sequence numbers give protection against network errors. For example, consider a situation where the client sends listen request with seq 13. New chat message has arrived so the server responds with ADDTEXT command. From the server point of view, new chat message has now been delivered to the client. It is however possible that HTTP response gets lost in the network and client never receives it. In this case the client generated HTTP ajax request fails and so the client doesn't increase sequence number. Then during the next round, server sees that the sequence number is still 13 and concludes that the client didn't receive its previous response. This triggers the server to resend the ADDTEXT command in addition to possible new commands.
+| Parameter|Allowed in|Type|Description|
+------------|-------------|----------|-------------|
+| seq       | all         | mandatory| Sequence number, must be set to 0 in the initial listen request. Must be then increased by one after every succesfully received HTTP response from the server. Sequence numbers give protection against network errors. For example, consider a situation where the client sends listen request with seq 13. New chat message has arrived so the server responds with ADDTEXT command. From the server point of view, new chat message has now been delivered to the client. It is however possible that HTTP response gets lost in the network and client never receives it. In this case the client generated HTTP ajax request fails so the client doesn't increase sequence number. Then during the next round, server sees that the sequence number is still 13 and concludes that the client didn't receive its previous response. This triggers the server to resend the ADDTEXT command in addition to possible new commands. |
+| sessionId  | all except first | mandatory | Mandatory in all requests, except in the initial listen request where it must not exist. SessionID must be set to value (string) that the server returned with SESSIONID command. |
+| clientName | first | optional | Client name |
+| clientOS   | first | optional | Client operating system |
+| cachedUpto | first | optional | Every message has a gid field which is ever increasing global id. This parameter communicates the highest ADDTEXT gid that the client has already seen and stored. The server will omit of sending messages with lower gid in the beginning of session. Without this option, the server sends up to 200 ADDTEXT messages for every window to fill the window backlog. |
 
 Overal server response format to MAS listen request is:
 
