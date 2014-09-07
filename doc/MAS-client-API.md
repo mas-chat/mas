@@ -13,10 +13,10 @@ MAS protocol is message based, server driven and built on top of long polling. I
 
 Overall approach is:
 
-1. The client sends an **initial MAS listen HTTP GET request**
+1. The client sends an **initial MAS listen HTTP POST request**
 2. The server responds with N commands.
    - These commands allow the client to draw the initial UI view.
-3. The client sends **MAS listen HTTP GET request**
+3. The client sends **MAS listen HTTP POST request**
    - If the server doesn't have anything to send (e.g. no new messages), HTTP connection is blocked up to 30 seconds. If 30 seconds is reached and there is still nothing to send, the server
      closes the connection and responds with an empty commands list.
 4. The client builds or updates the UI by processing all the commands (if any)
@@ -43,21 +43,27 @@ If the session ID becomes invalid because of long break between HTTP listen requ
 MAS listen request
 ==================
 
-```HTTP GET /api/v1/listen/<sessionId>/<listenSeq>/[timezone]```
+```JSON
+Content-Type:application/json; charset=UTF-8
 
-**sessionId**: Must be set to 0 in the initial listen request. In all other requests sessionID must be set to value that the server returned with SESSIONID command.
+HTTP POST /api/v1/listen
 
-**listenSeq**: Must be set to 0 in the initial listen request. Must be then increased by one after every received HTTP response to listen request from the server.
+{
+    "seq":123,
+    "sessionId":"YCkmphVXX3GmmJb"
+}
+```
 
-**timezone**: Optional. Can set to update user's current timezone in the first listen
-request. For example ```120``` if the user is in Helsinki (+2:00 GMT)
+**sessionId**: Must NOT exist in the initial listen request. In all other requests sessionID must be set to value (string) that the server returned with SESSIONID command.
+
+**seq**: Must be set to 0 in the initial listen request. Must be then increased by one after every received HTTP response to listen request from the server.
 
 Overal server response format to MAS listen request is:
 
 ```JSON
 [
     {
-        "id":"ADDTEXT"
+         "id":"ADDTEXT"
          "body":"How are you?",
          "cat":"msg",
          "windowId":2,
@@ -398,15 +404,29 @@ MAS send request
 
 In addition of listening commands from the server, the client can send commands to the server at any time after the initial MAS listen request.
 
-```
-HTTP POST /api/v1/send/<sessionId>/<sendSeq>
+```JSON
+Content-Type:application/json; charset=UTF-8
+
+HTTP POST /api/v1/send
+
+{
+    "seq":12,
+    "sessionId":"YCkmphVXX3GmmJb"
+    "command": {
+        "id": "SEND"
+        "windowId": 2,
+        "text": "Hello world"
+    }
+}
 ```
 
 **sessionId**: Must be set to value that the server returned with SESSIONID command.
 
-**sendSeq**: Must be set to 0 in the first send request. Must be then increased by one after every received HTTP response from the server.
+**sendSeq**: Must be set to 0 in the first send request. Must be then increased by one after every received send request HTTP response from the server.
 
-HTTP body contains the actual message in JSON. Following commands are supported. Under every command is corresponding response.
+**command**: One of the supported commands.
+
+Following commands are supported. Under every command is corresponding response.
 
 SEND
 ----
