@@ -63,17 +63,17 @@ Mas.Message = Ember.Object.extend({
             textParts.push(this._escHtml(text.substring(pos), false));
         }
 
-        var text = textParts.join('');
+        var processedText = textParts.join('');
 
         // Legacy thumb up emoji
-        text = text.replace('*thumb up*', ':thumbsup: ');
+        processedText = processedText.replace('*thumb up*', ':thumbsup: ');
 
         // Other emojis
-        text = emojify.replace(text);
+        processedText = emojify.replace(processedText);
 
         var imgSection = imgUrls.length ? '<ul class="user-image">' + imgUrls.join(' ') +
             '</ul>' : '';
-        var textSection = '<span class="body">' + text + '</span>';
+        var textSection = '<span class="body">' + processedText + '</span>';
 
         return textSection + imgSection;
     },
