@@ -18,5 +18,5 @@
 
 module.exports = function *(next) {
     yield next;
-    this.set('Cache-Control', 'public, max-age=8640000'); // 100 days
+    this.set('Cache-Control', 'public, max-age=31536000'); // 1 year
 };
