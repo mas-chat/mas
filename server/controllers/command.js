@@ -200,5 +200,6 @@ module.exports = function *() {
 
     // TBD: Add lookup table for commands
 
+    this.set('Cache-Control', 'private, max-age=0, no-cache');
     this.status = 204;
 };

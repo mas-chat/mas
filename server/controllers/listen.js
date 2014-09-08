@@ -35,6 +35,7 @@ module.exports = function *() {
     }
 
     this.body = yield outbox.flush(userId, sessionId, 25);
+    this.set('Cache-Control', 'private, max-age=0, no-cache');
 };
 
 function *initSession(userId, sessionId) {
