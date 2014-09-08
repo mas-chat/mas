@@ -317,8 +317,10 @@ function *processDisconnected(params) {
         body: msg
     });
 
-    yield wait(delay);
-    yield connect(params.userId, params.network, true);
+    co(function *() {
+        yield wait(delay);
+        yield connect(params.userId, params.network, true);
+    })();
 }
 
 function *connect(userId, network, skipRetryCountReset) {
