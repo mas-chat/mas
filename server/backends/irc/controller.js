@@ -205,7 +205,12 @@ function *processRestarted() {
         for (var ii = 0; ii < networks.length; ii++) {
             if (networks[ii] !== 'MAS') {
                 log.info(userId, 'Connecting to IRC network: ' + networks[ii]);
-                yield connect(userId, networks[ii]);
+                var delay = Math.floor((Math.random() * 1000 * 60 * 10)); // 10 minutes
+
+                co(function *() {
+                    yield wait(delay);
+                    yield connect(userId, networks[ii]);
+                })();
             }
         }
     }
@@ -324,9 +329,6 @@ function *processDisconnected(params) {
 }
 
 function *connect(userId, network, skipRetryCountReset) {
-    // TBD: Remove connection restriction
-    // TBD: Enable connectDelay if !MAS. Make it configurable
-    // var connectDelay = Math.floor((Math.random() * 180));
     var nick = yield redis.hget('user:' + userId, 'nick');
     yield nicks.updateCurrentNick(userId, network, nick);
 
