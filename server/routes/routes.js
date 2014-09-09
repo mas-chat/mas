@@ -80,6 +80,11 @@ exports.register = function(app) {
     app.get(/.html$/, pagesController); // All other pages
 
     // Public assets
-    app.use(serve(path.join(__dirname, '..', 'public')));
-    app.use(mount('/fonts/', serve(path.join(__dirname, '..', 'public/dist/fonts'))));
+    app.use(serve(path.join(__dirname, '..', 'public'), {
+        maxage: (1000 * 60 * 60 * 24 * 7) // 1 week
+    }));
+
+    app.use(mount('/fonts/', serve(path.join(__dirname, '..', 'public/dist/fonts'), {
+        maxage: (1000 * 60 * 60 * 24 * 7) // 1 week
+    })));
 };

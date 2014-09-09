@@ -18,4 +18,6 @@
 
 module.exports = function *() {
     yield this.render('app/index', {});
+
+    this.set('Cache-Control', 'private, max-age=0, no-cache');
 };
