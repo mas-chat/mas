@@ -22,7 +22,7 @@
     "ember": "~1.8.0-beta.1",
     "animate.css": "~3.2.0",
     "momentjs": "~2.8.2",
-    "uri.js": "~1.13.2",
+    "uri.js": "~1.14.0",
     "jquery-cookie": "~1.4.0",
     "jqBootstrapValidation": "~2.0.0-alpha",
     "bootswatch": "~3.2.0",
