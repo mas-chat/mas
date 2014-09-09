@@ -86,6 +86,7 @@ function handleIdentConnection(conn) {
 courier.on('connect', function(params) {
     var userId = params.userId;
     var network = params.network;
+    var pingTimer;
     var options = {
         port: params.port,
         host: params.host
@@ -96,12 +97,18 @@ courier.on('connect', function(params) {
 
     client.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
 
+    function sendPing() {
+        client.write('PING ' + params.host + '\r\n');
+    }
+
     client.on('connect', function() {
         courier.sendNoWait('ircparser', {
             type: 'connected',
             userId: userId,
             network: network
         });
+
+        pingTimer = setInterval(sendPing, 60 * 1000);
     });
 
     var buffer = '';
@@ -126,24 +133,16 @@ courier.on('connect', function(params) {
         });
     });
 
-    client.on('end', function() {
-        log.info(userId, 'IRC connection closed by the server.');
+    client.on('close', function(had_error) {
+        log.info(userId, 'IRC connection closed by the server or network.');
         courier.sendNoWait('ircparser', {
             type: 'disconnected',
             userId: userId,
             network: network,
-            reason: 'connection closed by peer'
+            reason: had_error ? 'transmission error' : 'connection closed by the server'
         });
-    });
 
-    client.on('error', function(err) {
-        log.info(userId, 'IRC connection error: ' + err);
-        courier.sendNoWait('ircparser', {
-            type: 'disconnected',
-            userId: userId,
-            network: network,
-            reason: err.code
-        });
+        clearInterval(pingTimer);
     });
 
     sockets[userId + ':' + network] = client;
