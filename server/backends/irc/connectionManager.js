@@ -94,7 +94,7 @@ courier.on('connect', function(params) {
     };
 
     if (!nextNetworkConnectionSlot[network]) {
-        nextNetworkConnectionSlot = Date.now();
+        nextNetworkConnectionSlot[network] = Date.now();
     }
 
     var delay = nextNetworkConnectionSlot[network] - Date.now;
@@ -106,64 +106,6 @@ courier.on('connect', function(params) {
         connect(options, params.userId, params.nick, network);
     }, delay);
 });
-
-function connect(options, userId, nick, network) {
-    var pingTimer;
-    var client = net.connect(options);
-    client.nick = nick;
-
-    client.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
-
-    function sendPing() {
-        client.write('PING ' + options.host + '\r\n');
-    }
-
-    client.on('connect', function() {
-        courier.sendNoWait('ircparser', {
-            type: 'connected',
-            userId: userId,
-            network: network
-        });
-
-        pingTimer = setInterval(sendPing, 60 * 1000);
-    });
-
-    var buffer = '';
-
-    client.on('data', function(data) {
-        // IRC protocol doesn't have character set concept, we need to guess.
-        // Algorithm is simple. If received binary data is valid utf8 then use
-        // that. Else assume that the character set is iso-8859-15.
-        data = isUtf8(data) ? data.toString() : iconv.decode(data, 'iso-8859-15');
-        data = buffer + data;
-
-        var lines = data.split(/\r\n/);
-        buffer = lines.pop(); // Save the potential partial line to buffer
-
-        lines.forEach(function(line) {
-            courier.sendNoWait('ircparser', {
-                type: 'data',
-                userId: userId,
-                network: network,
-                line: line
-            });
-        });
-    });
-
-    client.on('close', function(had_error) {
-        log.info(userId, 'IRC connection closed by the server or network.');
-        courier.sendNoWait('ircparser', {
-            type: 'disconnected',
-            userId: userId,
-            network: network,
-            reason: had_error ? 'transmission error' : 'connection closed by the server'
-        });
-
-        clearInterval(pingTimer);
-    });
-
-    sockets[userId + ':' + network] = client;
-}
 
 // Disconnect
 courier.on('disconnect', function(params) {
@@ -195,3 +137,81 @@ courier.on('write', function(params) {
 });
 
 courier.start();
+
+function connect(options, userId, nick, network) {
+    var socket = net.connect(options);
+    socket.nick = nick;
+
+    socket.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
+
+    function sendPing() {
+        socket.write('PING ' + options.host + '\r\n');
+    }
+
+    socket.on('connect', function() {
+        courier.sendNoWait('ircparser', {
+            type: 'connected',
+            userId: userId,
+            network: network
+        });
+
+        socket.pingTimer = setInterval(sendPing, 60 * 1000);
+    });
+
+    var buffer = '';
+
+    socket.on('data', function(data) {
+        // IRC protocol doesn't have character set concept, we need to guess.
+        // Algorithm is simple. If received binary data is valid utf8 then use
+        // that. Else assume that the character set is iso-8859-15.
+        data = isUtf8(data) ? data.toString() : iconv.decode(data, 'iso-8859-15');
+        data = buffer + data;
+
+        var lines = data.split(/\r\n/);
+        buffer = lines.pop(); // Save the potential partial line to buffer
+
+        lines.forEach(function(line) {
+            courier.sendNoWait('ircparser', {
+                type: 'data',
+                userId: userId,
+                network: network,
+                line: line
+            });
+        });
+    });
+
+    socket.on('end', function() {
+        handleEnd(false, userId, network);
+    });
+
+    socket.on('error', function() {
+        handleEnd(true, userId, network);
+    });
+
+    socket.on('close', function(hadError) {
+        handleEnd(hadError, userId, network);
+    });
+
+    sockets[userId + ':' + network] = socket;
+}
+
+function handleEnd(hadError, userId, network) {
+    var socket = sockets[userId + ':' + network];
+
+    if (!socket) {
+        // Already handled
+        return;
+    }
+
+    delete sockets[userId + ':' + network];
+    clearInterval(socket.pingTimer);
+
+    log.info(userId, 'IRC connection closed by the server or network.');
+
+    courier.sendNoWait('ircparser', {
+        type: 'disconnected',
+        userId: userId,
+        network: network,
+        reason: hadError ? 'transmission error' : 'connection closed by the server'
+    });
+}
