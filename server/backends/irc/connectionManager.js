@@ -119,9 +119,9 @@ courier.on('disconnect', function(params) {
 
 // Write
 courier.on('write', function(params) {
-    var socket = sockets[userId + ':' + network];
     var userId = params.userId;
     var network = params.network;
+    var socket = sockets[userId + ':' + network];
     var data = params.line;
 
     if (!socket) {
