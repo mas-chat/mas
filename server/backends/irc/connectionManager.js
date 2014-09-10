@@ -97,7 +97,7 @@ courier.on('connect', function(params) {
         nextNetworkConnectionSlot[network] = Date.now();
     }
 
-    var delay = nextNetworkConnectionSlot[network] - Date.now;
+    var delay = nextNetworkConnectionSlot[network] - Date.now();
     var rateLimit = conf.get('irc:networks:' + network + ':rate_limit'); // connections per minute
 
     nextNetworkConnectionSlot[network] += Math.round(60 / rateLimit * 1000);
