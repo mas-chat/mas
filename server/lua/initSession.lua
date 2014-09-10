@@ -92,7 +92,7 @@ for i = 1, #windows do
             names[name] = 'u'
         end
     else
-        names = redis.call('HGETALL', 'names:' .. userId .. ':' .. windowId)
+        names = hgetall('HGETALL', 'names:' .. userId .. ':' .. windowId)
     end
 
     redis.call('LPUSH', outbox, cjson.encode({
