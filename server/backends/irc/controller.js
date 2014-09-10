@@ -202,9 +202,18 @@ function *processRestarted() {
         var networks = yield windowHelper.getNetworks(userId);
 
         for (var ii = 0; ii < networks.length; ii++) {
-            if (networks[ii] !== 'MAS') {
-                log.info(userId, 'Scheduling connect() to IRC network: ' + networks[ii]);
-                yield connect(userId, networks[ii]);
+            var network = networks[ii];
+
+            if (network !== 'MAS') {
+                log.info(userId, 'Scheduling connect() to IRC network: ' + network);
+
+                yield textLine.broadcast(userId, network, {
+                    cat: 'info',
+                    body: 'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
+                        ' server enabled. Next connect will be slow.'
+                });
+
+                yield connect(userId, network);
             }
         }
     }
@@ -331,6 +340,11 @@ function *connect(userId, network, skipRetryCountReset) {
     if (!skipRetryCountReset) {
         yield resetRetryCount(userId, network);
     }
+
+    yield textLine.broadcast(userId, network, {
+        cat: 'info',
+        body: 'Connecting to IRC server...'
+    });
 
     yield courier.send('connectionmanager', {
         type: 'connect',
