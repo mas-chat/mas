@@ -214,7 +214,10 @@ function *processRestarted() {
 function *processData(params) {
     var line = params.line.trim(),
         parts = line.split(' '),
-        msg = {};
+        msg = {
+            params: [],
+            network: params.network
+        };
 
     // See rfc2812
 
@@ -244,9 +247,6 @@ function *processData(params) {
             msg.target = msg.target.toLowerCase();
         }
     }
-
-    msg.params = [];
-    msg.network = params.network;
 
     // Only the parameters are left now
     while (parts.length !== 0) {
@@ -385,7 +385,6 @@ var handlers = {
     'MODE': handleMode,
     'TOPIC': handleTopic,
     'PRIVMSG': handlePrivmsg,
-    'PING': handlePing,
     'ERROR': handleError
 };
 
@@ -403,18 +402,6 @@ function *handleServerText(userId, msg, code) {
         nick: msg.serverName,
         cat: cat,
         body: text
-    });
-}
-
-function *handlePing(userId, msg) {
-    var server = msg.params[0];
-    var resp = 'PONG ' + server;
-
-    yield courier.send('connectionmanager', {
-        type: 'write',
-        userId: userId,
-        network: msg.network,
-        line: resp
     });
 }
 
