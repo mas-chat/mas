@@ -58,6 +58,8 @@ host=localhost
 
 ; OPTIONS FOR THE IRC BACKEND
 
+; rate_limit is in new connections per minute
+
 [irc]
 enabled=true
 identd=false
@@ -65,11 +67,14 @@ identd=false
 [irc.networks.IRCNet]
 host=localhost
 port=6666
+rate_limit=10
 
 [irc.networks.FreeNode]
 host=irc.freenode.net
 port=6667
+rate_limit=10
 
 [irc.networks.W3C]
 host=irc.w3.org
 port=6665
+rate_limit=10
