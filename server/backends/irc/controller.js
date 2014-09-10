@@ -28,8 +28,7 @@ var co = require('co'),
     outbox = require('../../lib/outbox'),
     textLine = require('../../lib/textLine'),
     windowHelper = require('../../lib/windows'),
-    nicks = require('../../lib/nick'),
-    conf = require('../../lib/conf');
+    nicks = require('../../lib/nick');
 
 const OPER = '@';
 const VOICE = '+';
@@ -204,13 +203,8 @@ function *processRestarted() {
 
         for (var ii = 0; ii < networks.length; ii++) {
             if (networks[ii] !== 'MAS') {
-                log.info(userId, 'Connecting to IRC network: ' + networks[ii]);
-                var delay = Math.floor((Math.random() * 1000 * 60 * 10)); // 10 minutes
-
-                co(function *() {
-                    yield wait(delay);
-                    yield connect(userId, networks[ii]);
-                })();
+                log.info(userId, 'Scheduling connect() to IRC network: ' + networks[ii]);
+                yield connect(userId, networks[ii]);
             }
         }
     }
@@ -342,9 +336,7 @@ function *connect(userId, network, skipRetryCountReset) {
         type: 'connect',
         userId: userId,
         nick: nick,
-        network: network,
-        host: conf.get('irc:networks:' + network + ':host'),
-        port: conf.get('irc:networks:' + network + ':port')
+        network: network
     });
 }
 

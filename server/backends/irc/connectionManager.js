@@ -31,6 +31,8 @@ var net = require('net'),
     courier = require('../../lib/courier').createEndPoint('connectionmanager');
 
 var sockets = {};
+var nextNetworkConnectionSlot = {};
+
 const IDENTD_PORT = 113;
 
 courier.sendNoWait('ircparser', 'restarted');
@@ -84,21 +86,36 @@ function handleIdentConnection(conn) {
 
 // Connect
 courier.on('connect', function(params) {
-    var userId = params.userId;
     var network = params.network;
-    var pingTimer;
+
     var options = {
-        port: params.port,
-        host: params.host
+        host: conf.get('irc:networks:' + network + ':host'),
+        port: conf.get('irc:networks:' + network + ':port')
     };
 
+    if (!nextNetworkConnectionSlot[network]) {
+        nextNetworkConnectionSlot = Date.now();
+    }
+
+    var delay = nextNetworkConnectionSlot[network] - Date.now;
+    var rateLimit = conf.get('irc:networks:' + network + ':rate_limit'); // connections per minute
+
+    nextNetworkConnectionSlot[network] += Math.round(60 / rateLimit * 1000);
+
+    setTimeout(function() {
+        connect(options, params.userId, params.nick, network);
+    }, delay);
+});
+
+function connect(options, userId, nick, network) {
+    var pingTimer;
     var client = net.connect(options);
-    client.nick = params.nick;
+    client.nick = nick;
 
     client.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
 
     function sendPing() {
-        client.write('PING ' + params.host + '\r\n');
+        client.write('PING ' + options.host + '\r\n');
     }
 
     client.on('connect', function() {
@@ -146,7 +163,7 @@ courier.on('connect', function(params) {
     });
 
     sockets[userId + ':' + network] = client;
-});
+}
 
 // Disconnect
 courier.on('disconnect', function(params) {
