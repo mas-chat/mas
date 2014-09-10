@@ -222,9 +222,7 @@ function handlePing(socket, line) {
             break;
 
         case '004':
-            // RFC 2813: "<servername> <version> <available user modes> <available channel modes>"
-            socket.ircServerName = parts[1];
-            log.info('IRC server name: ' + socket.servername);
+            socket.ircServerName = parts[1]; // RFC 2812, reply 004
             break;
     }
 }
