@@ -34,6 +34,7 @@ var sockets = {};
 var nextNetworkConnectionSlot = {};
 
 const IDENTD_PORT = 113;
+const LAG_POLL_INTERVAL = 60 * 1000; // 60s
 
 courier.sendNoWait('ircparser', 'restarted');
 
@@ -118,11 +119,12 @@ courier.on('disconnect', function(params) {
 
 // Write
 courier.on('write', function(params) {
+    var socket = sockets[userId + ':' + network];
     var userId = params.userId;
     var network = params.network;
     var data = params.line;
 
-    if (!sockets[userId + ':' + network]) {
+    if (!socket) {
         log.warn(userId, 'Non-existent socket');
         return;
     }
@@ -132,8 +134,10 @@ courier.on('write', function(params) {
     }
 
     for (var i = 0; i < data.length; i++) {
-        sockets[userId + ':' + network].write(data[i] + '\r\n');
+        socket.write(data[i] + '\r\n');
     }
+
+    socket.last = Date.now();
 });
 
 courier.start();
@@ -145,7 +149,10 @@ function connect(options, userId, nick, network) {
     socket.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
 
     function sendPing() {
-        socket.write('PING ' + options.host + '\r\n');
+        if (Date.now() - socket.last > LAG_POLL_INTERVAL) {
+            // Nothing has been sent after previous round
+            socket.write('PING ' + socket.ircServerName + '\r\n');
+        }
     }
 
     socket.on('connect', function() {
@@ -155,12 +162,14 @@ function connect(options, userId, nick, network) {
             network: network
         });
 
-        socket.pingTimer = setInterval(sendPing, 60 * 1000);
+        socket.pingTimer = setInterval(sendPing, LAG_POLL_INTERVAL);
     });
 
     var buffer = '';
 
     socket.on('data', function(data) {
+        socket.last = Date.now();
+
         // IRC protocol doesn't have character set concept, we need to guess.
         // Algorithm is simple. If received binary data is valid utf8 then use
         // that. Else assume that the character set is iso-8859-15.
@@ -171,6 +180,8 @@ function connect(options, userId, nick, network) {
         buffer = lines.pop(); // Save the potential partial line to buffer
 
         lines.forEach(function(line) {
+            handlePing(socket, line);
+
             courier.sendNoWait('ircparser', {
                 type: 'data',
                 userId: userId,
@@ -193,6 +204,29 @@ function connect(options, userId, nick, network) {
     });
 
     sockets[userId + ':' + network] = socket;
+}
+
+// Minimal parser to handle server sent PING command at this level
+function handlePing(socket, line) {
+    var parts = line.split(' ');
+
+    if ((parts[0].charAt(0) === ':')) {
+        parts.shift();
+    }
+
+    var command = parts.shift();
+
+    switch (command) {
+        case 'PING':
+            socket.write('PONG :' + socket.ircServerName + '\r\n');
+            break;
+
+        case '004':
+            // RFC 2813: "<servername> <version> <available user modes> <available channel modes>"
+            socket.ircServerName = parts[1];
+            log.info('IRC server name: ' + socket.servername);
+            break;
+    }
 }
 
 function handleEnd(hadError, userId, network) {
