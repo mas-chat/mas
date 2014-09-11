@@ -28,13 +28,19 @@ module.exports = function *() {
 
     log.info(userId, 'Long poll HTTP request received');
 
-    if (this.mas.newSession) {
-        log.info(userId, 'Initializing new session');
-        yield initSession(userId, sessionId);
-        yield friends.sendFriends(userId, sessionId);
+    if (this.mas.replay) {
+        this.body = yield redis.hget('lastreply', userId + ':' + sessionId);
+    } else {
+        if (this.mas.newSession) {
+            log.info(userId, 'Initializing new session');
+            yield initSession(userId, sessionId);
+            yield friends.sendFriends(userId, sessionId);
+        }
+
+        this.body = yield outbox.flush(userId, sessionId, 25);
+        yield redis.hset('lastreply', userId + ':' + sessionId, this.body);
     }
 
-    this.body = yield outbox.flush(userId, sessionId, 25);
     this.set('Cache-Control', 'private, max-age=0, no-cache');
 };
 
