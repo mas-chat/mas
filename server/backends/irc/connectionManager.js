@@ -181,14 +181,16 @@ function connect(userId, nick, network) {
         buffer = lines.pop(); // Save the potential partial line to buffer
 
         lines.forEach(function(line) {
-            handlePing(socket, line);
+            var proceed = handlePing(socket, line);
 
-            courier.sendNoWait('ircparser', {
-                type: 'data',
-                userId: userId,
-                network: network,
-                line: line
-            });
+            if (proceed) {
+                courier.sendNoWait('ircparser', {
+                    type: 'data',
+                    userId: userId,
+                    network: network,
+                    line: line
+                });
+            }
         });
     });
 
@@ -217,15 +219,14 @@ function handlePing(socket, line) {
 
     var command = parts.shift();
 
-    switch (command) {
-        case 'PING':
-            socket.write('PONG :' + socket.ircServerName + '\r\n');
-            break;
-
-        case '004':
-            socket.ircServerName = parts[1]; // RFC 2812, reply 004
-            break;
+    if (command === 'PING') {
+        socket.write('PONG :' + socket.ircServerName + '\r\n');
+        return(false);
+    } else if (command === '004') {
+        socket.ircServerName = parts[1]; // RFC 2812, reply 004
     }
+
+    return true;
 }
 
 function handleEnd(hadError, userId, network) {
