@@ -609,7 +609,7 @@ function *handleMode(userId, msg) {
 
     yield textLine.sendByWindowId(userId, windowId, {
         cat: 'info',
-        body: 'Mode change: ' + msg.params.join(' ') + ' by ' + msg.nick
+        body: 'Mode change: ' + msg.params.join(' ') + ' by ' + msg.nick ? msg.nick : msg.serverName
     });
 
     var modeParams = msg.params.slice(1);
