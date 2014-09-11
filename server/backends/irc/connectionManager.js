@@ -87,25 +87,22 @@ function handleIdentConnection(conn) {
 
 // Connect
 courier.on('connect', function(params) {
+    var rateLimit = conf.get('irc:networks:' + network + ':rate_limit'); // connections per minute
     var network = params.network;
+    var delay = 0;
 
-    var options = {
-        host: conf.get('irc:networks:' + network + ':host'),
-        port: conf.get('irc:networks:' + network + ':port')
-    };
-
-    if (!nextNetworkConnectionSlot[network]) {
+    if (!nextNetworkConnectionSlot[network] || nextNetworkConnectionSlot[network] < Date.now()) {
+        // Rate limiting not active
         nextNetworkConnectionSlot[network] = Date.now();
+    } else {
+        delay = nextNetworkConnectionSlot[network] - Date.now();
     }
 
-    var delay = nextNetworkConnectionSlot[network] - Date.now();
-    var rateLimit = conf.get('irc:networks:' + network + ':rate_limit'); // connections per minute
+    setTimeout(function() {
+        connect(params.userId, params.nick, network);
+    }, delay);
 
     nextNetworkConnectionSlot[network] += Math.round(60 / rateLimit * 1000);
-
-    setTimeout(function() {
-        connect(options, params.userId, params.nick, network);
-    }, delay);
 });
 
 // Disconnect
@@ -142,10 +139,14 @@ courier.on('write', function(params) {
 
 courier.start();
 
-function connect(options, userId, nick, network) {
+function connect(userId, nick, network) {
     var socket = net.connect(options);
-    socket.nick = nick;
+    var options = {
+        host: conf.get('irc:networks:' + network + ':host'),
+        port: conf.get('irc:networks:' + network + ':port')
+    };
 
+    socket.nick = nick;
     socket.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
 
     function sendPing() {
