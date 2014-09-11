@@ -439,7 +439,7 @@ POST /api/v1/send
 
 HTTP status codes:
 
-```204``` OK
+```204``` OK (No content)
 
 ```401``` (Unauthorized) Unauthenticated. Same as listen request.
 
@@ -605,4 +605,3 @@ UPDATE_PASSWORD_RESP
 ```
 
 Contains ```errorMsg``` property if the status is not ```OK```
-

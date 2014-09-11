@@ -58,9 +58,8 @@ function handleResponseLost(ctx, method) {
         // Client hasn't received the previous send req response. Just send OK back again.
         respond(ctx, 'no content');
     } else {
-        // TBD: Re-send the previous reply
-        respond(ctx, 'not acceptable',
-            'Previous response lost. Listen req resend logic to be implemented.');
+        // Re-send the previous reply
+        ctx.mas.replay = true;
     }
 }
 
