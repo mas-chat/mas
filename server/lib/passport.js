@@ -98,6 +98,7 @@ if (conf.get('googleauth:enabled') === true) {
         clientSecret: conf.get('googleauth:client_secret'),
         callbackURL: conf.get('site:url') + '/auth/google/oauth2callback'
     }, function(accessToken, refreshToken, params, profile, done) {
+        // jshint camelcase: false
         var openIdId = jwt.decode(params.id_token, null, true).openid_id;
         authExt(openIdId, 'google:' + profile.id, profile, done);
     });
