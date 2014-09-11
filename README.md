@@ -53,10 +53,10 @@ Installation
    $ npm install -g gulp
    ```
 
-5. Build the web app
+5. Build the web app and pages
 
    ```bash
-   $ gulp all
+   $ gulp build-assets
    ```
 
 6. Launch the server components

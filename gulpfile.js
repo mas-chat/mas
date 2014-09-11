@@ -183,7 +183,7 @@ gulp.task('clean-assets', function (cb) {
     rimraf('./server/public/dist', cb);
 });
 
-gulp.task('prepare-assets', [ 'browserify', 'libs-client', 'libs-pages', 'less-client',
+gulp.task('build-assets', [ 'browserify', 'libs-client', 'libs-pages', 'less-client',
     'less-pages', 'fonts', 'emojis'], function() {
     if (argv.prod) {
         gulp.src('./server/public/dist/**/*')
