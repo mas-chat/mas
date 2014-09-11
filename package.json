@@ -74,7 +74,7 @@
     "rimraf": "~2.2.8"
   },
   "scripts": {
-    "test": "gulp all && gulp jshint && ./scripts/run-tests.sh"
+    "test": "gulp jshint && gulp build-assets && ./scripts/run-tests.sh"
   },
   "repository": {
     "type": "git",
