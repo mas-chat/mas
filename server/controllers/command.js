@@ -33,7 +33,7 @@ module.exports = function *() {
 
     var result = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
     var name = result[0];
-    var network = result[1];
+    var network = result[1] || command.network;
     var type = result[2];
     var backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
 
