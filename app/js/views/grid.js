@@ -36,7 +36,7 @@ Mas.GridView = Ember.View.extend({
     },
 
     initReady: function() {
-        this.windowAdded(false);
+        Ember.run.next(this, function() { this.layoutWindows(false); });
     }.observes('controller.initDone'),
 
     layoutWindows: function(animate) {
@@ -101,7 +101,10 @@ Mas.GridView = Ember.View.extend({
             top :  dim.top + 'px',
             width: dim.width + 'px',
             height : dim.height + 'px'
-        }, duration);
+        }, {
+            duration: duration,
+            visibility: 'visible'
+        });
     },
 
     _containerDimensions: function() {
