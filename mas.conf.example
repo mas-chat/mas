@@ -8,6 +8,7 @@
 
 [common]
 env=default
+admin=1
 
 [site]
 url=http://localhost:3200
@@ -55,6 +56,11 @@ host=localhost
 enabled=false
 port=9200
 host=localhost
+
+; OPTIONS FOR THE LOOPBACK BACKEND
+
+[loopback]
+initial_groups=lobby,test
 
 ; OPTIONS FOR THE IRC BACKEND
 
