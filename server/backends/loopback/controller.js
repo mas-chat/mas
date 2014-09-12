@@ -22,6 +22,7 @@ require('../../lib/init')('loopback');
 var co = require('co'),
     log = require('../../lib/log'),
     redisModule = require('../../lib/redis'),
+    conf = require('../../lib/conf'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('loopbackparser'),
     textLine = require('../../lib/textLine'),
@@ -30,6 +31,7 @@ var co = require('co'),
 
 co(function *() {
     yield redisModule.loadScripts();
+    yield createInitialGroups();
 
     courier.on('send', processSend);
     courier.on('sendPrivate', processSendPrivate);
@@ -113,4 +115,23 @@ function *joinGroup(params) {
 
     yield outbox.queueAll(params.userId, createCommand);
     yield redis.sadd('groupmembers:' + groupName, params.userId);
+}
+
+function *createInitialGroups() {
+    var groups = conf.get('loopback:initial_groups').split(',');
+    var admin = conf.get('common:admin') || 1;
+
+    for (var i = 0; i < groups.length; i++) {
+        var group = groups[i];
+        var exists = yield redis.exists('group:' + group);
+
+        if (!exists) {
+            log.info('Creating predefined group: ' + group);
+            yield redis.hmset('group:' + group, {
+                owner: admin,
+                password: '',
+                apikey: ''
+            });
+        }
+    }
 }
