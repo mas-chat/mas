@@ -19,7 +19,7 @@
 var _ = require('lodash/dist/lodash');
 
 Mas.GridView = Ember.View.extend({
-    classNames: ['grid', 'flex-1'],
+    classNames: ['grid', 'flex-1', 'flex-grow-row'],
 
     PADDING: 5,
 
