@@ -37,6 +37,7 @@ co(function *() {
     courier.on('sendPrivate', processSendPrivate);
     courier.on('create', processCreate);
     courier.on('join', processJoin);
+    courier.on('close', processClose);
     courier.start();
 })();
 
@@ -106,6 +107,11 @@ function *processCreate(params) {
     });
 
     yield joinGroup(params);
+ }
+
+ function *processClose(params) {
+    params = params;
+    // TBD
  }
 
 function *joinGroup(params) {
