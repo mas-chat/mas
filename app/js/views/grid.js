@@ -103,7 +103,12 @@ Mas.GridView = Ember.View.extend({
             height : dim.height + 'px'
         }, {
             duration: duration,
-            visibility: 'visible'
+            visibility: 'visible',
+            complete: function() {
+                // Make sure window shows the latest messages
+                var view = Ember.View.views[$el.attr('id')];
+                Ember.run.next(view, view.goToBottom);
+            }
         });
     },
 
