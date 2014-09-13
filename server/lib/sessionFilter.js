@@ -24,6 +24,12 @@ var uuid = require('uid2'),
 
 module.exports = function *(next) {
     var userId = this.mas.userId;
+
+    if (!this.request.body) {
+        respond(this, 'unprocessable entity', 'HTTP body missing.');
+        return;
+    }
+
     var sessionId = this.request.body.sessionId;
 
     log.info('Authenticating.');
