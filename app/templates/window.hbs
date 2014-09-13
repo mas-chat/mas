@@ -4,11 +4,11 @@
     </div>
 
     <div>
-        <span {{action "hide"}} class="window-title-button glyphicon glyphicon-minus"></span>
+        <i {{action "hide"}} class="window-title-button fa fa-minus"></i>
         {{#if view.expanded}}
-            <span {{action "compress" target="view"}} class="window-title-button fa fa-compress"></span>
+            <i {{action "compress" target="view"}} class="window-title-button fa fa-compress"></i>
         {{else}}
-            <span {{action "expand" target="view"}} class="window-title-button fa fa-expand"></span>
+            <i {{action "expand" target="view"}} class="window-title-button fa fa-expand"></i>
         {{/if}}
     </div>
 </div>
@@ -52,12 +52,12 @@
 
     <div class="window-buttons flex-row">
         <button type="button" class="btn">
-            <span class="glyphicon glyphicon-link"></span>
+            <i {{action "upload" target="view"}} class="fa fa-cloud-upload"></i>
         </button>
 
         <div class="btn-group dropup">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                <span class="glyphicon glyphicon-align-justify"></span>
+                <i class="fa fa-bars"></i>
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-right">
