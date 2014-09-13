@@ -52,6 +52,17 @@ Mas.Window = Ember.Object.extend({
         return 'Topic: ' + this.get('topic');
     }.property('topic'),
 
+    explainedType: function() {
+        var type = this.get('type');
+        var network = this.get('network');
+
+        if (type === 'group') {
+            return network === 'MAS' ? 'group' : 'IRC channel';
+        } else {
+            return network === 'MAS' ? '1 on 1 conversation' : 'IRC 1 on 1 conversation';
+        }
+    }.property('type'),
+
     syncServer: function() {
         Mas.networkMgr.send({
             id: 'UPDATE',
