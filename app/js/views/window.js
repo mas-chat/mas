@@ -24,6 +24,7 @@ Mas.WindowView = Ember.View.extend({
     row: Ember.computed.alias('controller.model.row'),
     visible: Ember.computed.alias('controller.model.visible'),
     expanded: false,
+    intial: true,
 
     draggable: function() {
         return 'true';
@@ -35,7 +36,6 @@ Mas.WindowView = Ember.View.extend({
 
     $messagePanel: null,
     $images: null,
-    ready: false,
 
     actions: {
         expand: function() {
@@ -49,44 +49,14 @@ Mas.WindowView = Ember.View.extend({
         }
     },
 
-    scrollTo: function(pos) {
-        this.$messagePanel.stop();
-        this.$messagePanel.css('overflow-y', 'hidden');
+    layoutDone: function() {
+        this._goToBottom();
 
-        this.$messagePanel.animate({
-            scrollTop: pos
-        }, 500, function() {
-            this.$messagePanel.css('overflow-y', 'auto');
-        }.bind(this));
-    },
-
-    moveTo: function(pos) {
-        this.$messagePanel.css('overflow-y', 'hidden');
-        this.$messagePanel.scrollTop(pos);
-        this.$messagePanel.css('overflow-y', 'auto');
-    },
-
-    goToBottom: function() {
-        if (this.get('controller.model.scrollLock')) {
-            return;
-        }
-
-        var scrollPos = this.$messagePanel.scrollTop();
-        var bottom = this.$messagePanel.prop('scrollHeight');
-        var height = this.$messagePanel.height();
-
-        if (bottom - scrollPos > 2 * height) {
-            this.moveTo(bottom);
-        } else {
-            this.scrollTo(bottom);
+        if (this.get('initial')) {
+            this._addScrollHandler();
+            this.set('initial', false);
         }
     },
-
-    initReady: function() {
-        if (this.get('controller.initDone')) {
-            this._setupScrolling();
-        }
-    }.observes('controller.initDone'),
 
     didInsertElement: function() {
         var that = this;
@@ -94,12 +64,10 @@ Mas.WindowView = Ember.View.extend({
         this.$messagePanel = this.$('.window-messages');
 
         var observer = new MutationObserver(Ember.run.bind(this, function() {
-            that.goToBottom();
+            that._goToBottom();
             that._updateImages();
         }));
         observer.observe(this.$messagePanel[0], { childList: true });
-
-        this._setupScrolling();
 
         this.$('.window-caption').tooltip();
         this.$messagePanel.tooltip({
@@ -168,19 +136,37 @@ Mas.WindowView = Ember.View.extend({
         this.get('parentView').windowAdded(false);
     },
 
-    _setupScrolling: function() {
-        if (!this.ready) {
-            // Only act on second time, when INITDONE message has been received
-            // and the view is ready
-            this.ready = true;
+    _goToBottom: function() {
+        if (this.get('controller.model.scrollLock')) {
             return;
         }
 
-        this._updateImages();
+        var scrollPos = this.$messagePanel.scrollTop();
+        var bottom = this.$messagePanel.prop('scrollHeight');
+        var height = this.$messagePanel.height();
 
-        this._addScrollHandler();
-        this._showImages();
-        this.goToBottom();
+        if (bottom - scrollPos > 2 * height) {
+            this._moveTo(bottom);
+        } else {
+            this._scrollTo(bottom);
+        }
+    },
+
+    _scrollTo: function(pos) {
+        this.$messagePanel.stop();
+        this.$messagePanel.css('overflow-y', 'hidden');
+
+        this.$messagePanel.animate({
+            scrollTop: pos
+        }, 500, function() {
+            this.$messagePanel.css('overflow-y', 'auto');
+        }.bind(this));
+    },
+
+    _moveTo: function(pos) {
+        this.$messagePanel.css('overflow-y', 'hidden');
+        this.$messagePanel.scrollTop(pos);
+        this.$messagePanel.css('overflow-y', 'auto');
     },
 
     _addScrollHandler: function() {
@@ -201,6 +187,8 @@ Mas.WindowView = Ember.View.extend({
 
             this._showImages();
         }));
+
+        this._showImages();
     },
 
     _updateImages: function() {
@@ -228,7 +216,7 @@ Mas.WindowView = Ember.View.extend({
                 $img.attr('src', $img.data('src'));
                 $img.one('load error', function() {
                     $img.removeAttr('data-src');
-                    that.goToBottom();
+                    that._goToBottom();
                 });
 
                 return false;
