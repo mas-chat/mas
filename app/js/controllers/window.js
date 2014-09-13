@@ -20,8 +20,6 @@ var moment = require('momentjs/moment'),
     sound = require('../helpers/sound');
 
 Mas.WindowController = Ember.ObjectController.extend({
-    needs: ['application'],
-
     actions: {
         hide: function() {
             this.set('visible', false);
