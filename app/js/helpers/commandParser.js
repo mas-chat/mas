@@ -113,7 +113,7 @@ Mas.CommandParser = Ember.Object.extend({
 
         data.names.forEach(function(name) {
             this._removeName(name, targetWindow);
-        });
+        }.bind(this));
     },
 
     _handleUpdate: function(data, targetWindow) {
