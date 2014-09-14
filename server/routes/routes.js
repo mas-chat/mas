@@ -33,6 +33,7 @@ var path = require('path'),
     pagesController = require('../controllers/pages/pages'),
     listenController = require('../controllers/listen'),
     commandController = require('../controllers/command'),
+    userFilesController = require('../controllers/userFiles'),
     forgotPasswordController = require('../controllers/forgotPassword');
 
 exports.register = function(app) {
@@ -80,6 +81,8 @@ exports.register = function(app) {
     app.get(/.html$/, pagesController); // All other pages
 
     // Public assets
+    app.get('/files/:file', userFilesController);
+
     app.use(serve(path.join(__dirname, '..', 'public'), {
         maxage: (1000 * 60 * 60 * 24 * 7) // 1 week
     }));
