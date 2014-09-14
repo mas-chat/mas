@@ -24,7 +24,7 @@ Mas.WindowView = Ember.View.extend({
     row: Ember.computed.alias('controller.model.row'),
     visible: Ember.computed.alias('controller.model.visible'),
     expanded: false,
-    intial: true,
+    initial: true,
 
     draggable: function() {
         return 'true';
