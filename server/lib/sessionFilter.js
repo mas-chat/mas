@@ -32,18 +32,6 @@ module.exports = function *(next) {
 
     var sessionId = this.request.body.sessionId;
 
-    log.info('Authenticating.');
-
-    if (userId === null) {
-        respond(this, 'unauthorized', 'Invalid cookie.');
-        return;
-    }
-
-    if (!this.mas.inUse) {
-        respond(this, 'unauthorized', 'Registration not completed.');
-        return;
-    }
-
     if (!sessionId) {
         // Limit parallel sessions
         var sessionCount = yield redis.zcard('sessionlist:' + userId);
@@ -78,7 +66,6 @@ module.exports = function *(next) {
     yield redis.zadd('sessionlastrequest', ts, userId + ':' + sessionId);
 
     this.mas.sessionId = sessionId;
-    this.mas.userId = userId;
 
     yield next;
 };
