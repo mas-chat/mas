@@ -36,6 +36,7 @@
     "bootstrap-social": "~4.7.0",
     "font-awesome": "~4.2.0",
     "velocity": "~1.0.0",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "jquery.fileapi": "~0.4.4"
   }
 }
