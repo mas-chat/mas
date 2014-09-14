@@ -35,20 +35,9 @@ Mas.WindowController = Ember.ObjectController.extend({
 
         sendMessage: function() {
             var text = this.get('newMessage');
-
-            Mas.networkMgr.send({
-                id: 'SEND',
-                text: text,
-                windowId: this.get('windowId')
-            });
             this.set('newMessage', '');
 
-            this.get('messages').pushObject(Mas.Message.create({
-                body: text,
-                cat: 'mymsg',
-                nick: Mas.nicks[this.get('network')],
-                ts: moment().unix()
-            }));
+            this.sendMessage(text);
         },
 
         chat: function(nick) {
@@ -112,6 +101,21 @@ Mas.WindowController = Ember.ObjectController.extend({
     },
 
     initDone: Ember.computed.alias('controllers.application.initDone'),
+
+    sendMessage: function(text) {
+        Mas.networkMgr.send({
+            id: 'SEND',
+            text: text,
+            windowId: this.get('windowId')
+        });
+
+        this.get('messages').pushObject(Mas.Message.create({
+            body: text,
+            cat: 'mymsg',
+            nick: Mas.nicks[this.get('network')],
+            ts: moment().unix()
+        }));
+    },
 
     newMessageReceived: function() {
         if (!this.get('visible') || this.get('scrollLock')) {
