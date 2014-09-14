@@ -53,9 +53,12 @@ Mas.WindowView = Ember.View.extend({
         this._goToBottom();
 
         if (this.get('initial')) {
+            this._updateImages();
             this._addScrollHandler();
             this.set('initial', false);
         }
+
+        this._showImages();
     },
 
     didInsertElement: function() {
@@ -66,6 +69,7 @@ Mas.WindowView = Ember.View.extend({
         var observer = new MutationObserver(Ember.run.bind(this, function() {
             that._goToBottom();
             that._updateImages();
+            that._showImages();
         }));
         observer.observe(this.$messagePanel[0], { childList: true });
 
@@ -187,8 +191,6 @@ Mas.WindowView = Ember.View.extend({
 
             this._showImages();
         }));
-
-        this._showImages();
     },
 
     _updateImages: function() {
