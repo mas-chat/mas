@@ -18,10 +18,12 @@
 
 var path = require('path'),
     npid = require('npid'),
-    conf = require('./conf');
+    conf = require('./conf'),
+    log = require('./log');
 
 module.exports = function configureProcess(serverName) {
     var processName = 'mas-' + serverName + '-' + conf.get('common:env');
+    var pid;
 
     process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
     process.title = processName;
@@ -33,7 +35,17 @@ module.exports = function configureProcess(serverName) {
             pidDirectory = path.join(__dirname, '..', '..', pidDirectory);
         }
 
-        var pid = npid.create(path.join(pidDirectory, processName + '.pid'));
+        var pidFile = path.join(pidDirectory, processName + '.pid');
+
+        try {
+            pid = npid.create(pidFile);
+        } catch (e) {
+            var msg = e.code === 'EEXIST' ? 'Pid file (' + pidFile + ') exists. ' +
+                'Is the process already running?' : 'Unknown pid file error.';
+            log.error(msg);
+            process.exit(1);
+        }
+
         pid.removeOnExit();
 
         var deletePidAndExit = function() {
