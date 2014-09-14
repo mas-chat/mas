@@ -19,6 +19,16 @@
             {{dayDivider messages _view.contentIndex}}
             <div {{bind-attr class="message.cat :line"}}>{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
         {{/each}}
+
+        <div class="window-upload">
+            <input class="file-upload" type="file" name="filedata">
+            <div class="js-upload">
+                <div class="progress progress-success">
+                    <div class="js-progress bar"></div>
+                </div>
+                <span class="btn-txt">Uploading (<span class="js-size"></span>)</span>
+            </div>
+        </div>
     </div>
 
     {{#if isGroup}}

@@ -46,6 +46,10 @@ Mas.WindowView = Ember.View.extend({
         compress: function() {
             this.set('expanded', false);
             this.get('parentView').windowAdded(true);
+        },
+
+        upload: function() {
+            this.$('.file-upload').click();
         }
     },
 
@@ -134,6 +138,27 @@ Mas.WindowView = Ember.View.extend({
                     return '<small>Link to the original image:</small><a href="' + href +
                         '" target="_newtab">' + href + '</a>';
                 }
+            }
+        });
+
+        this.$('.window-upload').fileapi({
+            url: '/api/v1/upload',
+            multiple: true,
+            maxSize: 20 * FileAPI.MB,
+            autoUpload: true,
+            elements: {
+                size: '.js-size',
+                active: { show: '.js-upload' },
+                progress: '.js-progress'
+            },
+            onFilePrepare: function(evt, ui) {
+                ui.options.data.sessionId = Mas.networkMgr.sessionId;
+            },
+            onFileComplete: function(evt, uiEvt) {
+                var error = uiEvt.error;
+                var url = uiEvt.result.url[0];
+
+                that.get('controller').sendMessage(url);
             }
         });
 
