@@ -34,6 +34,7 @@ var path = require('path'),
     pagesController = require('../controllers/pages/pages'),
     listenController = require('../controllers/listen'),
     commandController = require('../controllers/command'),
+    uploadController = require('../controllers/upload'),
     userFilesController = require('../controllers/userFiles'),
     forgotPasswordController = require('../controllers/forgotPassword');
 
@@ -57,6 +58,9 @@ exports.register = function(app) {
     app.post('/login', bodyParser(), loginController.localLogin);
 
     app.post(/^\/api/, validUserFilter);
+
+    // File upload endpoint
+    app.post('/api/v1/upload', uploadController);
 
     // JSON API endpoints
     app.post('/api/v1/:method', bodyParser(), sessionFilter, sequenceFilter);
