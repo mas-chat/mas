@@ -11,6 +11,7 @@ server/public/dist/
 npm-debug.log
 logs/
 run/
+data/
 
 #Mac files
 .DS_Store
