@@ -19,7 +19,8 @@
 require('./commandParser');
 
 Mas.Network = Ember.Object.extend({
-    _sessionId: 0,
+    sessionId: 0,
+
     _pollSeq: 0,
     _sendSeq: 0,
     _sendQueue: [],
@@ -51,7 +52,7 @@ Mas.Network = Ember.Object.extend({
 
     _sendMsg: function(message) {
         var data = {
-            sessionId: this._sessionId,
+            sessionId: this.sessionId,
             seq: this._sendSeq,
             command: message
         };
@@ -114,7 +115,7 @@ Mas.Network = Ember.Object.extend({
             data.clientName = 'webclient';
             data.clientOS = navigator.platform;
         } else {
-            data.sessionId = this._sessionId;
+            data.sessionId = this.sessionId;
         }
 
         $.ajax({
@@ -153,7 +154,7 @@ Mas.Network = Ember.Object.extend({
                 this._callbacks[command.id](command);
             } else if (command.id === 'SESSIONID') {
                 // Special unsolicited command that can be handle directly here
-                this._sessionId = command.sessionId;
+                this.sessionId = command.sessionId;
             } else {
                 // Other Unsolicited command
                 this._unsolicitedParser.process(command);
