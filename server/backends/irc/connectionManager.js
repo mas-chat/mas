@@ -140,11 +140,11 @@ courier.on('write', function(params) {
 courier.start();
 
 function connect(userId, nick, network) {
-    var socket = net.connect(options);
     var options = {
         host: conf.get('irc:networks:' + network + ':host'),
         port: conf.get('irc:networks:' + network + ':port')
     };
+    var socket = net.connect(options);
 
     socket.nick = nick;
     socket.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
