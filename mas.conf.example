@@ -14,6 +14,10 @@ admin=1
 url=http://localhost:3200
 admin_email=admin@example.com
 
+[files]
+upload_directory=data/uploads/
+cache_directory=data/cache/
+
 ; google auth callback must be /auth/google/oauth2callback
 
 [googleauth]
