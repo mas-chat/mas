@@ -81,6 +81,7 @@
         "URI": false,
         "titlenotifier": false,
         "emojify": false,
+        "FileAPI": false,
         "Mas": false,
         "require": false,
         "define": false,
