@@ -26,6 +26,7 @@ var path = require('path'),
     cacheFilter = require('../lib/cacheFilter'),
     sessionFilter = require('../lib/sessionFilter'),
     sequenceFilter = require('../lib/sequenceFilter'),
+    validUserFilter = require('../lib/validUserFilter'),
     registerController = require('../controllers/register'),
     loginController = require('../controllers/login'),
     indexPageController = require('../controllers/pages'),
@@ -55,10 +56,10 @@ exports.register = function(app) {
 
     app.post('/login', bodyParser(), loginController.localLogin);
 
-    // REST API common filtering
-    app.post('/api/v1/:method', bodyParser(), sessionFilter, sequenceFilter);
+    app.post(/^\/api/, validUserFilter);
 
-    // REST API routes
+    // JSON API endpoints
+    app.post('/api/v1/:method', bodyParser(), sessionFilter, sequenceFilter);
     app.post('/api/v1/listen', listenController);
     app.post('/api/v1/send', commandController);
 
