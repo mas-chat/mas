@@ -29,7 +29,8 @@ module.exports = function *() {
     log.info(userId, 'Long poll HTTP request received');
 
     if (this.mas.replay) {
-        this.body = yield redis.hget('lastreply', userId + ':' + sessionId);
+        var previousReply = yield redis.hget('session:' + userId + ':' + sessionId, 'lastreply');
+        this.body = JSON.parse(previousReply);
     } else {
         if (this.mas.newSession) {
             log.info(userId, 'Initializing new session');
@@ -38,7 +39,10 @@ module.exports = function *() {
         }
 
         this.body = yield outbox.flush(userId, sessionId, 25);
-        yield redis.hset('lastreply', userId + ':' + sessionId, this.body);
+        yield redis.hset('session:' + userId + ':' + sessionId, 'lastreply',
+            JSON.stringify(this.body));
+
+        yield redis.hincrby('session:' + this.mas.userId + ':' + sessionId, 'listenRcvNext', 1);
     }
 
     this.set('Cache-Control', 'private, max-age=0, no-cache');
