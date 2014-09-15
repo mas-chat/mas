@@ -171,6 +171,11 @@ Mas.Network = Ember.Object.extend({
 
         var err = textStatus + ', ' + error;
         console.log('Request Failed: ' + err );
+
+        // Stay positive, keep trying
+        setTimeout(function() {
+            this._pollMsgs();
+        }.bind(this), 2000);
     },
 
     _logout: function() {
