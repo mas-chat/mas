@@ -47,10 +47,6 @@ Mas.WindowView = Ember.View.extend({
             this.set('expanded', false);
             this.get('parentView').windowAdded(true);
         },
-
-        upload: function() {
-            this.$('.file-upload').click();
-        }
     },
 
     layoutDone: function() {
@@ -141,7 +137,7 @@ Mas.WindowView = Ember.View.extend({
             }
         });
 
-        this.$('.window-upload').fileapi({
+        this.$('.btn-file').fileapi({
             url: '/api/v1/upload',
             multiple: true,
             maxSize: 20 * FileAPI.MB,
@@ -154,11 +150,13 @@ Mas.WindowView = Ember.View.extend({
             onFilePrepare: function(evt, ui) {
                 ui.options.data.sessionId = Mas.networkMgr.sessionId;
             },
-            onFileComplete: function(evt, uiEvt) {
-                var error = uiEvt.error;
-                var url = uiEvt.result.url[0];
-
-                that.get('controller').sendMessage(url);
+            onFileComplete: function(event, params) {
+                if (!params.error) {
+                    var url = params.result.url[0];
+                    that.get('controller').sendMessage(url);
+                } else {
+                    that.get('controller').printLine('File upload failed.', 'error');
+                }
             }
         });
 
