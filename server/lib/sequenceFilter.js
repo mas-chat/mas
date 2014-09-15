@@ -40,13 +40,11 @@ module.exports = function *(next) {
 
     if (rcvdSeq === expectedSeq - 1) {
         handleResponseLost(this, method);
-        return;
     } else if (rcvdSeq !== expectedSeq) {
+        // Only broken client can send sequence number that is neither expected or expected - 1
         respond(this, 'not acceptable', 'Invalid sequence number.');
         return;
     }
-
-    yield redis.hincrby('session:' + this.mas.userId + ':' + sessionId, expectedSeqKeyName, 1);
 
     yield next;
 };

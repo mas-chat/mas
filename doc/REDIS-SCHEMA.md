@@ -28,6 +28,7 @@ MAS Redis structures
    sendRcvNext (int)
    listenRcvNext (int)
    timeStamp (int)
+   lastreply (string)
 
  sessionlastrequest (zset)
    userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...

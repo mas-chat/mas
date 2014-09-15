@@ -200,6 +200,8 @@ module.exports = function *() {
 
     // TBD: Add lookup table for commands
 
+    yield redis.hincrby('session:' + this.mas.userId + ':' + sessionId, 'sendRcvNext', 1);
+
     this.set('Cache-Control', 'private, max-age=0, no-cache');
     this.status = 204;
 };
