@@ -40,7 +40,7 @@ module.exports = function *() {
     var part;
     var urls = [];
 
-    while ((part = yield parts) !== null) {
+    while (!!(part = yield parts)) {
         if (part.length) {
             // TDB: Handle if field
             // key: part[0]
