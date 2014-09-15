@@ -109,10 +109,14 @@ Mas.WindowController = Ember.ObjectController.extend({
             windowId: this.get('windowId')
         });
 
+        this.printLine(text, 'mymsg');
+    },
+
+    printLine: function(text, cat) {
         this.get('messages').pushObject(Mas.Message.create({
             body: text,
-            cat: 'mymsg',
-            nick: Mas.nicks[this.get('network')],
+            cat:  cat,
+            nick: cat === 'mymsg' ? Mas.nicks[this.get('network')] : null,
             ts: moment().unix()
         }));
     },
