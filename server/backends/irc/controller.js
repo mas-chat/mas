@@ -405,7 +405,7 @@ var handlers = {
 function *handleServerText(userId, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     var text = msg.params[0];
-    var cat = 'notice';
+    var cat = 'info';
 
     // 375 = MOTD line
     if (code === '372') {
@@ -553,11 +553,11 @@ function *handleError(userId, msg) {
 
     yield textLine.broadcast(userId, msg.network, {
         nick: msg.serverName,
-        cat: 'notice',
-        body: 'Server error: ' + reason
+        cat: 'error',
+        body: 'Connection lost. Server error: ' + reason
     });
 
-    if (reason.indexOf('Too many host connections')) {
+    if (reason.indexOf('Too many host connections') !== -1) {
         log.error(userId, 'Too many connections to: ' + msg.network);
 
         yield textLine.broadcast(userId, msg.network, {
