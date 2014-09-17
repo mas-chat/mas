@@ -22,6 +22,8 @@ window.Mas = Ember.Application.create();
 
 require('../../server/public/dist/client-templates');
 
+require('./helpers/UploadMixin');
+
 require('./routes/application');
 require('./routes/main');
 

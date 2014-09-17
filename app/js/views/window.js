@@ -16,7 +16,7 @@
 
 'use strict';
 
-Mas.WindowView = Ember.View.extend({
+Mas.WindowView = Ember.View.extend(Mas.UploadMixin, {
     classNames: ['window', 'flex-grow-column'],
     classNameBindings: ['expanded:expanded:', 'visible:visible:hidden'],
     attributeBindings: ['row:data-row', 'draggable'],
@@ -137,28 +137,12 @@ Mas.WindowView = Ember.View.extend({
             }
         });
 
-        this.$('.btn-file').fileapi({
-            url: '/api/v1/upload',
-            multiple: true,
-            maxSize: 20 * FileAPI.MB,
-            autoUpload: true,
-            elements: {
-                size: '.js-size',
-                active: { show: '.js-upload' },
-                progress: '.js-progress'
-            },
-            onFilePrepare: function(evt, ui) {
-                ui.options.data.sessionId = Mas.networkMgr.sessionId;
-            },
-            onFileComplete: function(event, params) {
-                if (!params.error) {
-                    var url = params.result.url[0];
-                    that.get('controller').sendMessage(url);
-                } else {
-                    that.get('controller').printLine('File upload failed.', 'error');
-                }
-            }
-        });
+        var fileInput = this.$('.btn-file input')[0];
+
+        FileAPI.event.on(fileInput, 'change', function(evt) {
+            var files = FileAPI.getFiles(evt); // Retrieve file list
+            this.upload(files, this.get('controller'));
+        }.bind(this));
 
         this.get('parentView').windowAdded(false);
     },
