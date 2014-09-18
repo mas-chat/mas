@@ -48,9 +48,9 @@ module.exports = function *() {
         } else {
             // Otherwise, it's a stream
             var name = uuid(20);
-            var firstThree = name.substring(0, 3);
+            var firstTwo = name.substring(0, 2);
 
-            var targetDirectory = path.join(dataDirectory, firstThree);
+            var targetDirectory = path.join(dataDirectory, firstTwo);
 
             try {
                 mkdirp.sync(targetDirectory);
