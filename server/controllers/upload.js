@@ -21,7 +21,8 @@ var fs = require('fs'),
     mkdirp = require('mkdirp'),
     parse = require('co-busboy'),
     uuid = require('uid2'),
-    conf = require('../lib/conf');
+    conf = require('../lib/conf'),
+    log = require('../lib/log');
 
 var dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
@@ -36,6 +37,7 @@ module.exports = function *() {
         return;
     }
 
+    var userId = this.mas.userId;
     var parts = parse(this);
     var part;
     var urls = [];
@@ -62,6 +64,18 @@ module.exports = function *() {
 
             var extension = path.extname(part.filename);
             part.pipe(fs.createWriteStream(path.join(targetDirectory, name + extension)));
+
+            var metaData = {
+                userId: userId,
+                ts: Date.now()
+            };
+
+            fs.writeFile(path.join(targetDirectory, name + '.json'), JSON.stringify(metaData),
+                function(err) {
+                    if (err) {
+                        log.warn(userId, 'Upload metadata write failed, reason: ' + err);
+                    }
+                });
 
             urls.push(conf.get('site:url') + '/files/' + name + extension);
         }
