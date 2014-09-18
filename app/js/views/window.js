@@ -26,6 +26,9 @@ Mas.WindowView = Ember.View.extend(Mas.UploadMixin, {
     expanded: false,
     initial: true,
 
+    // TBD: messages is here because of the mixin. Is there better way?
+    messages: Ember.computed.alias('controller.model.messages'),
+
     draggable: function() {
         return 'true';
     }.property(),
