@@ -407,6 +407,10 @@ function *handleServerText(userId, msg, code) {
     var text = msg.params[0];
     var cat = 'info';
 
+    if (!text) {
+        return;
+    }
+
     // 375 = MOTD line
     if (code === '372') {
         cat = 'banner';
