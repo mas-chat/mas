@@ -29,9 +29,9 @@ if (dataDirectory.charAt(0) !== path.sep) {
 
 module.exports = function *() {
     var file = this.params.file;
-    var firstThree = file.substring(0, 3);
+    var firstTwo = file.substring(0, 2);
 
-    yield send(this, dataDirectory + path.sep + firstThree + path.sep + file, {
+    yield send(this, dataDirectory + path.sep + firstTwo + path.sep + file, {
         maxage: 1000 * 60 * 60 * 24 * 365 // 1 year
     });
 };
