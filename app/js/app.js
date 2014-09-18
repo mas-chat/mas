@@ -33,6 +33,7 @@ require('./views/grid');
 require('./views/window');
 require('./views/logs');
 require('./views/radioButton');
+require('./views/captureModal');
 
 require('./components/modalDialog');
 
@@ -45,6 +46,7 @@ require('./controllers/createGroupModal');
 require('./controllers/joinIrcModal');
 require('./controllers/passwordModal');
 require('./controllers/topicModal');
+require('./controllers/captureModal');
 require('./controllers/alertsModal');
 require('./controllers/infoModal');
 require('./controllers/friends');
