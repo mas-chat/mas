@@ -1,0 +1,12 @@
+{{#modal-dialog title="Take a photo" proceedButton="Upload photo" cancel="cancel" submit="uploadPhoto"}}
+    <div class="webcam">
+        <div class="viewfinder"></div>
+        <div class="shot"></div>
+
+        <div class="activation-note">
+            Allow webcam access in your browser.
+        </div>
+
+        <button {{action "takePhoto" target="view"}} type="button" class="btn btn-primary btn-capture"><i class="fa fa-camera"></i></button>
+    </div>
+{{/modal-dialog}}

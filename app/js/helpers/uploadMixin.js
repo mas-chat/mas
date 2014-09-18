@@ -16,8 +16,10 @@
 
 'use strict';
 
+var moment = require('momentjs/moment');
+
 Mas.UploadMixin = Ember.Mixin.create({
-    upload: function(files, windowController) {
+    upload: function(files) {
         if(files.length === 0) {
             return;
         }
@@ -29,14 +31,33 @@ Mas.UploadMixin = Ember.Mixin.create({
             complete: function(err, xhr) {
                 if (!err) {
                     var url = JSON.parse(xhr.responseText).url[0];
-                    windowController.sendMessage(url);
+                    this._sendMessage(url);
                 } else {
-                    windowController.printLine('File upload failed.', 'error');
+                    this._printLine('File upload failed.', 'error');
                 }
-            },
+            }.bind(this),
             data: {
                 sessionId: Mas.networkMgr.sessionId,
             }
         });
+    },
+
+    _sendMessage: function(text) {
+        Mas.networkMgr.send({
+            id: 'SEND',
+            text: text,
+            windowId: this.get('windowId')
+        });
+
+        this._printLine(text, 'mymsg');
+    },
+
+    _printLine: function(text, cat) {
+        this.get('messages').pushObject(Mas.Message.create({
+            body: text,
+            cat:  cat,
+            nick: cat === 'mymsg' ? Mas.nicks[this.get('network')] : null,
+            ts: moment().unix()
+        }));
     }
 });
