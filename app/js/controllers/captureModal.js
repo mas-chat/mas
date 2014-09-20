@@ -18,6 +18,7 @@
 
 Mas.CaptureModalController = Ember.ObjectController.extend(Mas.UploadMixin, {
     shot: null,
+    note: 'Allow webcam access in your browser.',
 
     actions: {
         cancel: function() {
@@ -25,7 +26,7 @@ Mas.CaptureModalController = Ember.ObjectController.extend(Mas.UploadMixin, {
         },
 
         uploadPhoto: function() {
-            var file = this.get('shot').preview(640, 480);
+            var file = this.get('shot').preview(800, 600);
             this.upload(file);
 
             this.send('closeModal');

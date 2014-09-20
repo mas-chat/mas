@@ -9,11 +9,11 @@
         </div>
         <div class="modal-footer">
             {{#unless noCancel}}
-                <button {{action "cancel"}} type="button" class="btn btn-default">
+                <button {{action "cancel"}} type="button" data-modal="cancel "class="btn btn-default">
                     Cancel
                 </button>
             {{/unless}}
-            <button {{action "submit"}} type="button" class="btn btn-primary">
+            <button {{action "submit"}} type="button" data-modal="submit" class="btn btn-primary">
                 {{proceedButton}}
             </button>
         </div>
