@@ -17,6 +17,8 @@
 'use strict';
 
 Mas.CaptureModalView = Ember.View.extend({
+    // TBD: Ditch FileAPI, use native APIs directly. Allows e.g. to prefer 16:9 aspect ratio.
+
     webcam: null,
 
     actions: {
@@ -25,9 +27,12 @@ Mas.CaptureModalView = Ember.View.extend({
                 alert('camera not active');
             }
 
+            this.$('[data-modal="submit"]').removeClass('disabled');
+            this.$('.btn-capture').blur();
+
             var shot = this.webcam.shot();
 
-            shot.clone().preview(150, 150).get(function(err, img) {
+            shot.clone().preview(160, 120).get(function(err, img) {
                 this.$('.shot').empty();
                 this.$('.shot').append(img);
             }.bind(this));
@@ -39,17 +44,26 @@ Mas.CaptureModalView = Ember.View.extend({
     didInsertElement: function() {
         var box = this.$('.viewfinder')[0];
 
+        this.$('[data-modal="submit"]').addClass('disabled');
+        this.$('.btn-capture').addClass('disabled');
+
         FileAPI.Camera.publish(box, {}, function (err, cam){
+            var newMessage = '';
+
             if (err) {
-                alert('WebCam or Flash not supported :[');
+                newMessage = 'Auch! Webcam is not available.';
             } else {
                 this.webcam = cam;
-                this.$('.activation-note').hide();
+                this.$('.btn-capture').removeClass('disabled');
             }
+
+            this.set('controller.note', newMessage);
         }.bind(this));
     },
 
     willDestroyElement: function() {
-        this.webcam.stop();
+        if (this.webcam) {
+            this.webcam.stop();
+        }
     }
 });
