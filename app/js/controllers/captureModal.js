@@ -27,7 +27,7 @@ Mas.CaptureModalController = Ember.ObjectController.extend(Mas.UploadMixin, {
 
         uploadPhoto: function() {
             var file = this.get('shot').preview(800, 600);
-            this.upload(file);
+            this.upload(file, 'jpeg');
 
             this.send('closeModal');
         }
