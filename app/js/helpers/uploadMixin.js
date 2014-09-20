@@ -19,15 +19,15 @@
 var moment = require('momentjs/moment');
 
 Mas.UploadMixin = Ember.Mixin.create({
-    upload: function(files) {
+    upload: function(files, transform) {
         if(files.length === 0) {
             return;
         }
 
-        FileAPI.upload({
+        var options = {
             url: '/api/v1/upload',
             files: { userFiles: files },
-            progress: function() { /* ... */ },
+            progress: function() { },
             complete: function(err, xhr) {
                 if (!err) {
                     var url = JSON.parse(xhr.responseText).url[0];
@@ -39,7 +39,16 @@ Mas.UploadMixin = Ember.Mixin.create({
             data: {
                 sessionId: Mas.networkMgr.sessionId,
             }
-        });
+        };
+
+        if (transform === 'jpeg') {
+            options.imageTransform = {
+                type: 'image/jpeg',
+                quality: 0.9
+            };
+        }
+
+        FileAPI.upload(options);
     },
 
     _sendMessage: function(text) {
