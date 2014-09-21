@@ -19,7 +19,8 @@
 var path = require('path'),
     fs = require('fs'),
     nconf = require('nconf'),
-    argv = require('yargs').argv;
+    argv = require('yargs').argv,
+    log = require('./log');
 
 require('colors');
 
@@ -49,9 +50,9 @@ exports.get = function(key) {
     var value = nconf.get(key);
 
     if (value === undefined) {
-        console.error('ERROR: '.red + 'Config variable missing in the config file: ' + key);
+        log.error('Config variable missing in the config file: ' + key);
         process.exit(1);
     }
 
     return value;
-}
+};
