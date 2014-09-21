@@ -127,7 +127,7 @@ courier.on('write', function(params) {
     }
 
     if (typeof(data) === 'string') {
-        data = [data];
+        data = [ data ];
     }
 
     for (var i = 0; i < data.length; i++) {
@@ -221,7 +221,7 @@ function handlePing(socket, line) {
 
     if (command === 'PING') {
         socket.write('PONG :' + socket.ircServerName + '\r\n');
-        return(false);
+        return false;
     } else if (command === '004') {
         socket.ircServerName = parts[1]; // RFC 2812, reply 004
     }

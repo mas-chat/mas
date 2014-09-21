@@ -126,7 +126,7 @@ casper.test.begin('Register new user', 11, function suite(test) {
 
     casper.wait(5000);
 
-    casper.waitUntilVisible('.window', function () {
+    casper.waitUntilVisible('.window', function() {
         this.fillSelectors('.window form', {
             '.form-control': 'Works finally!'
         }, true);

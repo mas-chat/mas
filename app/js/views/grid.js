@@ -19,7 +19,7 @@
 var _ = require('lodash/dist/lodash');
 
 Mas.GridView = Ember.View.extend({
-    classNames: ['grid', 'flex-1', 'flex-grow-row'],
+    classNames: [ 'grid', 'flex-1', 'flex-grow-row' ],
 
     PADDING: 5,
 
@@ -49,9 +49,9 @@ Mas.GridView = Ember.View.extend({
         if (expandedWindow) {
             $(expandedWindow).velocity({
                 left: this.PADDING + 'px',
-                top : this.PADDING + 'px',
+                top: this.PADDING + 'px',
                 width: container.width - 2 * this.PADDING + 'px',
-                height : container.height - 2 * this.PADDING + 'px',
+                height: container.height - 2 * this.PADDING + 'px',
             }, duration);
             return;
         }
@@ -98,9 +98,9 @@ Mas.GridView = Ember.View.extend({
 
         $(el).velocity('stop').velocity({
             left:  dim.left + 'px',
-            top :  dim.top + 'px',
+            top:  dim.top + 'px',
             width: dim.width + 'px',
-            height : dim.height + 'px'
+            height: dim.height + 'px'
         }, {
             duration: duration,
             visibility: 'visible',

@@ -17,7 +17,7 @@
 'use strict';
 
 Mas.GridController = Ember.ArrayController.extend({
-    needs: ['application'],
+    needs: [ 'application' ],
 
     actions: {
         joinLobby: function() {
