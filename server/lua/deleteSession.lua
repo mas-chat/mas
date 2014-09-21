@@ -26,9 +26,17 @@ redis.call('DEL', 'outbox:' .. userId .. ':' .. sessionId)
 -- Remove session
 redis.call('DEL', 'session:' .. userId .. ':' .. sessionId)
 
+-- Remove sessionlastrequest entry
+redis.call('ZREM', 'sessionlastrequest', userId .. ':' .. sessionId)
+
 -- Remove from sessionlist
 redis.call('ZREM', 'sessionlist:' .. userId, sessionId)
 
--- Remove sessionlastrequest entry
-redis.call('ZREM', 'sessionlastrequest', userId .. ':' .. sessionId)
+local sessions = tonumber(redis.call('ZCARD', 'sessionlist:' .. userId))
+
+if sessions == 0 then
+    return true
+else
+    return false
+end
 

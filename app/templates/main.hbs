@@ -29,8 +29,11 @@
         </button>
 
         <div class="btn-group dropup pull-left">
-            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            <button type="button" class="btn btn-default btn-friends dropdown-toggle" data-toggle="dropdown">
                 <i class="fa fa-user fa-lg"></i>
+                {{#if friendsOnline}}
+                    <span class="badge">{{friendsOnline}}</span>
+                {{/if}}
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-up">

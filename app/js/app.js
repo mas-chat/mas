@@ -54,6 +54,7 @@ require('./controllers/logs');
 
 require('./models/message');
 require('./models/window');
+require('./models/friend');
 
 require('./helpers/network');
 require('./helpers/handlebars');

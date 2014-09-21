@@ -20,10 +20,12 @@ var uuid = require('uid2'),
     httpStatus = require('statuses'),
     log = require('./log'),
     redis = require('./redis').createClient(),
+    friends = require('./friends'),
     conf = require('./conf');
 
 module.exports = function *(next) {
     var userId = this.mas.userId;
+    var newSession = false;
 
     if (!this.request.body) {
         respond(this, 'unprocessable entity', 'HTTP body missing.');
@@ -35,15 +37,18 @@ module.exports = function *(next) {
     if (!sessionId) {
         // Limit parallel sessions
         var sessionCount = yield redis.zcard('sessionlist:' + userId);
+
         if (sessionCount > conf.get('session:max_parallel')) {
             var oldestSession = yield redis.zrange('sessionlist:' + userId, 0, 0);
             yield redis.run('deleteSession', userId, oldestSession);
 
             log.info(userId, 'Too many sessions. Removing the oldest');
+        } else if (sessionCount === 0) {
+            yield friends.informStateChange(userId, 'login');
         }
 
         //New session, generate session id
-        this.mas.newSession = true;
+        newSession = true;
         sessionId = uuid(15);
 
         yield redis.hmset('session:' + userId + ':' + sessionId, 'sendRcvNext', 0,
@@ -66,6 +71,7 @@ module.exports = function *(next) {
     yield redis.zadd('sessionlastrequest', ts, userId + ':' + sessionId);
 
     this.mas.sessionId = sessionId;
+    this.mas.newSession = newSession;
 
     yield next;
 };

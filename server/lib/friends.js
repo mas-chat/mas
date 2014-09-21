@@ -28,15 +28,56 @@ exports.sendFriends = function *(userId, sessionId) {
     var friendIds = yield redis.smembers('friends:' + userId);
 
     for (var i = 0; i < friendIds.length; i++) {
-        var friendUserId = friendIds[i];
+        var friendUserId = parseInt(friendIds[i]);
 
-        var res = yield redis.hmget('user:' + friendUserId, 'name');
+        var res = yield redis.hmget('user:' + friendUserId, 'name', 'lastlogout');
+        var name =res[0];
+        var last = parseInt(res[1]);
+        var online = last === 0;
 
-        command.friends.push({
+        if (isNaN(last)) {
+            last = -1; // No recorded login or logout
+        }
+
+        var friendData = {
             userId: friendUserId,
-            name: res[0]
-        });
+            name: name,
+            online: online,
+        };
+
+        if (!online) {
+            friendData.last = last;
+        }
+
+        command.friends.push(friendData);
     }
 
     yield outbox.queue(userId, sessionId, command);
+};
+
+exports.informStateChange = function *(userId, eventType) {
+    var command = {
+        id: 'FRIENDSUPDATE',
+        userId: userId
+    };
+    var ts;
+
+    // Zero means the user is currently online
+    if (eventType === 'login') {
+        ts = 0;
+        command.online = true;
+    } else {
+        ts = Date.now() / 1000;
+        command.last = ts;
+        command.online = false;
+    }
+
+    yield redis.hset('user:' + userId, 'lastlogout', ts);
+
+    var friendIds = yield redis.smembers('friends:' + userId);
+
+    for (var i = 0; i < friendIds.length; i++) {
+        var friendUserId = parseInt(friendIds[i]);
+        yield outbox.queueAll(friendUserId, command);
+    }
 };
