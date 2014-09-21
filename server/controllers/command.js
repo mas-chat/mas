@@ -16,12 +16,14 @@
 
 'use strict';
 
-var log = require('../lib/log'),
+var co = require('co'),
+    log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
     courier = require('../lib/courier').createEndPoint('command'),
     textLine = require('../lib/textLine'),
     windowHelper = require('../lib/windows'),
+    friends = require('../lib/friends'),
     nicks = require('../lib/nick');
 
 module.exports = function *() {
@@ -195,6 +197,25 @@ module.exports = function *() {
                     nick: command.nick
                 });
             }
+            break;
+
+        case 'LOGOUT':
+            log.info(userId, 'User ended session. SessionId: ' + sessionId);
+
+            yield outbox.queue(userId, sessionId, {
+                id: 'LOGOUT_RESP',
+            });
+
+            setTimeout(function() {
+                // Give the system some time to deliver LOGOUT_RESP before cleanup
+                co(function *() {
+                    var last = yield redis.run('deleteSession', userId, sessionId);
+
+                    if (last) {
+                        yield friends.informStateChange(userId, 'logout');
+                    }
+                })();
+            }, 5000);
             break;
     }
 
