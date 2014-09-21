@@ -45,4 +45,13 @@ nconf.use('file', {
     format: nconf.formats.ini
 });
 
-module.exports = nconf;
+exports.get = function(key) {
+    var value = nconf.get(key);
+
+    if (value === undefined) {
+        console.error('ERROR: '.red + 'Config variable missing in the config file: ' + key);
+        process.exit(1);
+    }
+
+    return value;
+}
