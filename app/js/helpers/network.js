@@ -170,7 +170,7 @@ Mas.Network = Ember.Object.extend({
         }
 
         var err = textStatus + ', ' + error;
-        console.log('Request Failed: ' + err );
+        Ember.Logger.warn('Request Failed: ' + err );
 
         // Stay positive, keep trying
         setTimeout(function() {
