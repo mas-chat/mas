@@ -7,7 +7,7 @@ MAS Redis structures
    name (string)
    email (string)
    inUse (string)
-   lastlogin (int)
+   lastlogout (int, unix time) (0 = online)
    passwd (string)
    salt (string)
    nick (string)
