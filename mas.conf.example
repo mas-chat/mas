@@ -5,6 +5,7 @@
 ; GENERAL OPTIONS
 
 ; Project root directory is the base if relative paths are used
+; all times are in seconds
 
 [common]
 env=default
@@ -50,7 +51,7 @@ token=nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
 
 [session]
 max_parallel=8
-idle_timeout=360
+idle_timeout=120
 
 [redis]
 port=6379
