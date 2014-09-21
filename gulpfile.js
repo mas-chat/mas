@@ -8,6 +8,7 @@ var path = require('path'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
     jshint = require('gulp-jshint'),
+    jscs = require('gulp-jscs'),
     handlebars = require('gulp-handlebars'),
     wrap = require('gulp-wrap'),
     declare = require('gulp-declare'),
@@ -99,6 +100,14 @@ gulp.task('jshint', function() {
         .concat(paths.testJavaScripts))
         .pipe(jshint())
         .pipe(jshint.reporter('jshint-stylish'));
+});
+
+gulp.task('jscs', function() {
+    return gulp.src(paths.serverJavaScripts
+        .concat(paths.clientJavaScripts)
+        .concat(paths.testJavaScripts))
+        .pipe(jshint())
+        .pipe(jscs());
 });
 
 gulp.task('bower', function() {
