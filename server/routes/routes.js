@@ -52,7 +52,7 @@ exports.register = function(app) {
         app.get('/auth/google/oauth2callback', loginController.googleLogin);
     }
 
-    if (conf.get('yahooauth:enabled') === true) {
+    if (conf.get('yahoooauth:enabled') === true) {
         app.get('/auth/yahoo', passport.authenticate('yahoo'));
         app.get('/auth/yahoo/callback', loginController.yahooLogin);
     }
