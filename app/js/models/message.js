@@ -33,7 +33,7 @@ Mas.Message = Ember.Object.extend({
         var textParts = [];
         var imgUrls = [];
         var pos = 0;
-        var imgSuffixes = ['png', 'jpg', 'jpeg', 'gif'];
+        var imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
 
         URI.withinString(text, function(url, start, end, source) {
             var urlObj = new URI(url);
@@ -78,7 +78,7 @@ Mas.Message = Ember.Object.extend({
         return textSection + imgSection;
     },
 
-    _escHtml: function (string, full) {
+    _escHtml: function(string, full) {
         var res = string.replace(/&/g, '&amp;').replace(/</g, '&lt;');
         return full ? res.replace(/>/g, '&gt;').replace(/"/g, '&quot;') : res;
     }

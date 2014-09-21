@@ -17,9 +17,9 @@
 'use strict';
 
 Mas.WindowView = Ember.View.extend(Mas.UploadMixin, {
-    classNames: ['window', 'flex-grow-column'],
-    classNameBindings: ['expanded:expanded:', 'visible:visible:hidden'],
-    attributeBindings: ['row:data-row', 'draggable'],
+    classNames: [ 'window', 'flex-grow-column' ],
+    classNameBindings: [ 'expanded:expanded:', 'visible:visible:hidden' ],
+    attributeBindings: [ 'row:data-row', 'draggable' ],
 
     row: Ember.computed.alias('controller.model.row'),
     visible: Ember.computed.alias('controller.model.visible'),

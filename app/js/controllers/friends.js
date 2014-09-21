@@ -18,5 +18,5 @@
 
 Mas.FriendsController = Ember.ArrayController.extend({
     sortAscending: false,
-    sortProperties: ['online', 'last']
+    sortProperties: [ 'online', 'last' ]
 });

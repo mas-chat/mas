@@ -17,5 +17,5 @@
 'use strict';
 
 Mas.LogsView = Ember.View.extend({
-    classNames: ['flex-grow-column', 'fullscreen', 'modal']
+    classNames: [ 'flex-grow-column', 'fullscreen', 'modal' ]
 });

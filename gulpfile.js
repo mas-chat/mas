@@ -124,7 +124,7 @@ gulp.task('templates', function() {
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('browserify', ['bower', 'templates'], function() {
+gulp.task('browserify', [ 'bower', 'templates' ], function() {
     return browserify({
             entries: './app/js/app.js',
             paths: [ './bower_components' ],
@@ -137,7 +137,7 @@ gulp.task('browserify', ['bower', 'templates'], function() {
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('libs-client', ['bower'], function() {
+gulp.task('libs-client', [ 'bower' ], function() {
     return gulp.src(paths.clientLibs)
         .pipe(concat('client-libs.js'))
         .pipe(argv.prod ? uglify() : util.noop())
@@ -151,7 +151,7 @@ gulp.task('libs-pages', ['bower'], function() {
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('less-client', ['bower'], function() {
+gulp.task('less-client', [ 'bower' ], function() {
     gulp.src('./app/stylesheets/client.less')
         .pipe(less({
             paths: [ path.join(__dirname, 'bower_components') ]
@@ -160,7 +160,7 @@ gulp.task('less-client', ['bower'], function() {
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('less-pages', ['bower'], function() {
+gulp.task('less-pages', [ 'bower' ], function() {
     gulp.src('./server/pages/stylesheets/pages.less')
         .pipe(less({
             paths: [ path.join(__dirname, 'bower_components') ]
@@ -169,7 +169,7 @@ gulp.task('less-pages', ['bower'], function() {
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('fonts', ['bower'], function() {
+gulp.task('fonts', [ 'bower' ], function() {
     gulp.src([ './bower_components/bootstrap/dist/fonts/*',
         './bower_components/font-awesome/fonts/*' ])
         .pipe(gulp.dest('./server/public/dist/fonts'));
@@ -180,12 +180,12 @@ gulp.task('emojis', ['bower'], function() {
         .pipe(gulp.dest('./server/public/dist/images/emojify'));
 });
 
-gulp.task('clean-assets', function (cb) {
+gulp.task('clean-assets', function(cb) {
     rimraf('./server/public/dist', cb);
 });
 
 gulp.task('build-assets', [ 'browserify', 'libs-client', 'libs-pages', 'less-client',
-    'less-pages', 'fonts', 'emojis'], function() {
+    'less-pages', 'fonts', 'emojis' ], function() {
     if (argv.prod) {
         gulp.src('./server/public/dist/**/*')
             .pipe(rev())
@@ -196,10 +196,10 @@ gulp.task('build-assets', [ 'browserify', 'libs-client', 'libs-pages', 'less-cli
 });
 
 gulp.task('watch', function() {
-    gulp.watch(paths.clientTemplates, ['browserify']);
-    gulp.watch(paths.clientJavaScripts, ['browserify']);
-    gulp.watch(paths.clientCSS, ['less-client']);
-    gulp.watch(paths.pagesCSS, ['less-pages']);
+    gulp.watch(paths.clientTemplates, [ 'browserify' ]);
+    gulp.watch(paths.clientJavaScripts, [ 'browserify' ]);
+    gulp.watch(paths.clientCSS, [ 'less-client' ]);
+    gulp.watch(paths.pagesCSS, [ 'less-pages' ]);
 
     gulp.watch(paths.clientDistFiles, function(file) {
         livereload.changed(file.path);

@@ -17,7 +17,7 @@
 'use strict';
 
 Mas.ModalDialogComponent = Ember.Component.extend({
-    classNames: ['modal', 'fade'],
+    classNames: [ 'modal', 'fade' ],
 
     actions: {
         cancel: function() {
@@ -40,4 +40,3 @@ Mas.ModalDialogComponent = Ember.Component.extend({
         this.$().modal('hide');
     }
 });
-
