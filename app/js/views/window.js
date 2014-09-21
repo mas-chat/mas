@@ -49,7 +49,7 @@ Mas.WindowView = Ember.View.extend(Mas.UploadMixin, {
         compress: function() {
             this.set('expanded', false);
             this.get('parentView').windowAdded(true);
-        },
+        }
     },
 
     layoutDone: function() {

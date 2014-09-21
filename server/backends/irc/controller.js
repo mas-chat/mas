@@ -567,7 +567,8 @@ function *handleError(userId, msg) {
         yield textLine.broadcast(userId, msg.network, {
             nick: msg.serverName,
             cat: 'error',
-            body: msg.network + ' IRC network doesn\'t allow more connections. Close this window and rejoin to try again.'
+            body: msg.network + ' IRC network doesn\'t allow more connections. ' +
+                'Close this window and rejoin to try again.'
         });
 
         // Disable auto-reconnect
