@@ -2,7 +2,15 @@
 
 {{#each}}
     <li class="main-friend-item">
-        <div class="main-friend-idle main-online">NNh</div>
-        <div class="main-friend-name"><span class="glyphicon glyphicon-comment"></span>{{name}}</div>
+        <div class="main-friend-chat"><i class="fa fa-comments"></i></div>
+        <div class="main-friend-name">{{name}}</div>
+        <div class="main-friend-ago">{{timeSince online last}}</div>
+        <div class="main-friend-status">
+            {{#if online}}
+                <i class="online fa fa-circle"></i>
+            {{else}}
+                <i class="offline fa fa-circle-o"></i>
+            {{/if}}
+        </div>
     </li>
 {{/each}}

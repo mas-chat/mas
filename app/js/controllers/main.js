@@ -19,6 +19,8 @@
 Mas.MainController = Ember.ArrayController.extend({
     needs: ['application'],
 
+    friends: null,
+
     actions: {
         show: function(window) {
             window.set('visible', true);
@@ -40,5 +42,9 @@ Mas.MainController = Ember.ArrayController.extend({
         return this.get('model').filter(function(val) {
             return !val.get('visible');
         }).sortBy('timeHidden');
-    }.property('model.@each.visible')
+    }.property('model.@each.visible'),
+
+    friendsOnline: function() {
+        return this.get('friends').filterBy('online', true).length;
+    }.property('friends.@each.online')
 });

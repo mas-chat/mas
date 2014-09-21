@@ -126,7 +126,19 @@ Mas.CommandParser = Ember.Object.extend({
 
     _handleFriends: function(data) {
         Mas.friendCollection.clear();
-        Mas.friendCollection.pushObjects(data.friends);
+
+        data.friends.forEach(function(friend) {
+            var friendRecord = Mas.Friend.create(friend);
+            Mas.friendCollection.pushObject(friendRecord);
+        }.bind(this));
+    },
+
+    _handleFriendsupdate: function(data) {
+        var friend = Mas.friendCollection.findBy('userId', data.userId);
+        friend.set('online', data.online);
+        if (data.last) {
+            friend.set('last', data.last);
+        }
     },
 
     _removeName: function(name, targetWindow) {
