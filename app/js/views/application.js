@@ -17,5 +17,5 @@
 'use strict';
 
 Mas.ApplicationView = Ember.View.extend({
-    classNames: ['ember-root']
+    classNames: [ 'ember-root' ]
 });

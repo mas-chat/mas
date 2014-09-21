@@ -18,20 +18,20 @@
 
 Mas.RadioButton = Ember.View.extend({
     tagName: 'input',
-    attributeBindings: ['type', 'value', 'checked:checked:'],
+    attributeBindings: [ 'type', 'value', 'checked:checked:' ],
     type: 'radio',
 
     selection: null,
 
-    click: function () {
+    click: function() {
         this.set('selection', this.$().val());
     },
 
-    checked: function () {
+    checked: function() {
         return this.get('value') === this.get('selection');
     }.property(),
 
-    updateValue: function () {
+    updateValue: function() {
         if (this.get('selection') === this.$().val()) {
             return this.set('checked', true);
         }

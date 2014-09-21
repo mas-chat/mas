@@ -20,7 +20,7 @@ var moment = require('momentjs/moment');
 
 Mas.UploadMixin = Ember.Mixin.create({
     upload: function(files, transform) {
-        if(files.length === 0) {
+        if (files.length === 0) {
             return;
         }
 

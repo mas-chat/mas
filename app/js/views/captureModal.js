@@ -23,7 +23,7 @@ Mas.CaptureModalView = Ember.View.extend({
 
     actions: {
         takePhoto: function() {
-            if(!this.webcam.isActive()) {
+            if (!this.webcam.isActive()) {
                 alert('camera not active');
             }
 
@@ -47,7 +47,7 @@ Mas.CaptureModalView = Ember.View.extend({
         this.$('[data-modal="submit"]').addClass('disabled');
         this.$('.btn-capture').addClass('disabled');
 
-        FileAPI.Camera.publish(box, {}, function (err, cam){
+        FileAPI.Camera.publish(box, {}, function(err, cam) {
             var newMessage = '';
 
             if (err) {

@@ -22,7 +22,7 @@ Mas.JoinIrcModalController = Ember.ObjectController.extend({
     errorMsg: '',
 
     selectedNetwork: 'IRCNet',
-    networks: ['IRCNet', 'FreeNode', 'W3C'],
+    networks: [ 'IRCNet', 'FreeNode', 'W3C' ],
 
     actions: {
         joinIRC: function() {

@@ -17,5 +17,5 @@
 'use strict';
 
 Mas.MainView = Ember.View.extend({
-    classNames: ['flex-grow-row'],
+    classNames: [ 'flex-grow-row' ],
 });

@@ -17,7 +17,7 @@
 'use strict';
 
 Mas.MainController = Ember.ArrayController.extend({
-    needs: ['application'],
+    needs: [ 'application' ],
 
     friends: null,
 

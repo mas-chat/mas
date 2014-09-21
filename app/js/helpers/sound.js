@@ -21,7 +21,7 @@ var howler = require('howler');
 var playing = false;
 
 var notification = new howler.Howl({
-    urls: ['/sounds/staple_gun.mp3', '/sounds/staple_gun.ogg'],
+    urls: [ '/sounds/staple_gun.mp3', '/sounds/staple_gun.ogg' ],
     volume: 0.5,
     onplay: function() {
         playing = true;
