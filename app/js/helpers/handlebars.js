@@ -53,3 +53,17 @@ Ember.Handlebars.helper('dayDivider', function(list, index) {
             '<div class="date-divider">' + dateForCurrent.format('dddd, MMMM D, YYYY') + '</div>');
     }
 });
+
+Ember.Handlebars.helper('timeSince', function(online, timeStamp) {
+    var res;
+
+    if (online) {
+        res = '';
+    } else if (timeStamp === -1) {
+        res = 'never';
+    } else {
+        res = moment.unix(timeStamp).fromNow(true);
+    }
+
+    return new Handlebars.SafeString(res);
+});

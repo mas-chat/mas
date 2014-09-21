@@ -16,7 +16,5 @@
 
 'use strict';
 
-Mas.FriendsController = Ember.ArrayController.extend({
-    sortAscending: false,
-    sortProperties: ['online', 'last']
+Mas.Friend = Ember.Object.extend({
 });
