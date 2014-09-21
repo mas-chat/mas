@@ -37,7 +37,7 @@ Mas.UploadMixin = Ember.Mixin.create({
                 }
             }.bind(this),
             data: {
-                sessionId: Mas.networkMgr.sessionId,
+                sessionId: Mas.networkMgr.sessionId
             }
         };
 

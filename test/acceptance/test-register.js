@@ -69,7 +69,7 @@ casper.test.begin('Register new user', 11, function suite(test) {
     casper.waitForResource(/jquery\.cookie\.js$/, function() {
         this.fill('form#login-form', {
             emailOrNick: 'bruce@lee.com',
-            password: 'brucelee',
+            password: 'brucelee'
         }, true);
     });
 
@@ -101,7 +101,7 @@ casper.test.begin('Register new user', 11, function suite(test) {
     casper.waitForResource(/jquery\.cookie\.js$/, function() {
         this.fill('form#login-form', {
             emailOrNick: 'jackie@chan.com',
-            password: 'jackiechan',
+            password: 'jackiechan'
         }, true);
     });
 
@@ -141,7 +141,7 @@ casper.test.begin('Register new user', 11, function suite(test) {
     casper.waitForResource(/jquery\.cookie\.js$/, function() {
         this.fill('form#login-form', {
             emailOrNick: 'bruce@lee.com',
-            password: 'brucelee',
+            password: 'brucelee'
         }, true);
     });
 

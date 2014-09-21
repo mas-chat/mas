@@ -30,7 +30,7 @@ var paths = {
     ],
     clientJavaScripts: [
         'app/**/*.js',
-        '!app/tests/**/*', // TBD Remove eventually
+        '!app/tests/**/*' // TBD Remove eventually
     ],
     clientTemplates: [
         'app/templates/**/*.hbs'
@@ -126,15 +126,15 @@ gulp.task('templates', function() {
 
 gulp.task('browserify', [ 'bower', 'templates' ], function() {
     return browserify({
-            entries: './app/js/app.js',
-            paths: [ './bower_components' ],
-            debug: true
-        })
-        .bundle()
-        .on('error', handleError)
-        .pipe(source('client.js'))
-        .pipe(argv.prod ? streamify(uglify()) : util.noop())
-        .pipe(gulp.dest('./server/public/dist/'));
+        entries: './app/js/app.js',
+        paths: [ './bower_components' ],
+        debug: true
+    })
+    .bundle()
+    .on('error', handleError)
+    .pipe(source('client.js'))
+    .pipe(argv.prod ? streamify(uglify()) : util.noop())
+    .pipe(gulp.dest('./server/public/dist/'));
 });
 
 gulp.task('libs-client', [ 'bower' ], function() {
@@ -144,7 +144,7 @@ gulp.task('libs-client', [ 'bower' ], function() {
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('libs-pages', ['bower'], function() {
+gulp.task('libs-pages', [ 'bower' ], function() {
     return gulp.src(paths.pagesLibs)
         .pipe(concat('pages-libs.js'))
         .pipe(argv.prod ? uglify() : util.noop())
@@ -175,7 +175,7 @@ gulp.task('fonts', [ 'bower' ], function() {
         .pipe(gulp.dest('./server/public/dist/fonts'));
 });
 
-gulp.task('emojis', ['bower'], function() {
+gulp.task('emojis', [ 'bower' ], function() {
     gulp.src('./bower_components/emojify.js/images/emoji/*')
         .pipe(gulp.dest('./server/public/dist/images/emojify'));
 });
@@ -207,4 +207,4 @@ gulp.task('watch', function() {
 });
 
 // The default task
-gulp.task('default', ['jshint']);
+gulp.task('default', [ 'jshint' ]);

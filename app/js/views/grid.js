@@ -51,7 +51,7 @@ Mas.GridView = Ember.View.extend({
                 left: this.PADDING + 'px',
                 top: this.PADDING + 'px',
                 width: container.width - 2 * this.PADDING + 'px',
-                height: container.height - 2 * this.PADDING + 'px',
+                height: container.height - 2 * this.PADDING + 'px'
             }, duration);
             return;
         }

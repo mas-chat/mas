@@ -42,8 +42,15 @@ module.exports = function *() {
     var part;
     var urls = [];
 
+    function createMetaDataFileHandler(err) {
+        if (err) {
+            log.warn(userId, 'Upload metadata write failed, reason: ' + err);
+        }
+    }
+
     while (!!(part = yield parts)) {
         if (part.length) {
+            part = part;
             // TDB: Handle if field
             // key: part[0]
             // value: part[1]
@@ -71,11 +78,7 @@ module.exports = function *() {
             };
 
             fs.writeFile(path.join(targetDirectory, name + '.json'), JSON.stringify(metaData),
-                function(err) {
-                    if (err) {
-                        log.warn(userId, 'Upload metadata write failed, reason: ' + err);
-                    }
-                });
+                createMetaDataFileHandler);
 
             urls.push(conf.get('site:url') + '/files/' + name + extension);
         }
