@@ -17,7 +17,6 @@
 }
 
 .main-badge {
- //   background-color: #b94a48;
     background-color: #009900;
     font-size: 11px;
     border-radius: 0px;
@@ -44,43 +43,53 @@
     margin-right: 1px;
 }
 
-.main-friend-item {
-    padding: 0px 20px;
-    width: 230px;
-    float: right;
-    font-size: 12px;
+.btn-friends .badge {
+    font-size: 11px;
+    position: absolute;
+    top: 20px;
+    left: 25px;
+    padding: 2px 5px;
+    background-color: rgb(10, 149, 10);
+    color: white;
 }
 
-.main-friend-name {
-    width: 140px;
-    float: left;
-    padding: 2px 14px 2px 0px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
+.main-friend-item {
+    padding: 0px 20px;
+    width: 280px;
+    font-size: 12px;
+    display: flex;
 
-    .glyphicon-comment {
-        padding-left: 8px;
-        position: relative;
-        top: 2px;
-        right: 8px;
-
-        &:hover {
-            color: @brand-primary;
-            cursor: pointer;
-        }
+    & * {
+        padding-right: 10px;
     }
 }
 
-.main-friend-idle {
-    width: 50px;
-    float: right;
-    padding: 2px 0px;
-    text-align: right;
+.main-friend-chat {
+    width: 20px;
+    &:hover {
+        color: @brand-primary;
+        cursor: pointer;
+    }
 }
 
-.main-online {
-    color: lime;
+.main-friend-name {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.main-friend-ago {
+    color: @brand-info;
+}
+
+.main-friend-status {
+    padding: 0px;
+    width: 10px;
+}
+
+.main-friend-status .online {
+    color: #26D026;
 }
 
 .flex-grow-row {
