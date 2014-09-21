@@ -20,16 +20,19 @@ var co = require('co'),
     cronJob = require('cron').CronJob,
     redis = require('./redis').createClient(),
     log = require('./log'),
+    friends = require('./friends'),
     conf = require('./conf');
 
 exports.init = function() {
-    // Once in 10 minutes
-    new cronJob('* */10 * * * *', deleteIdleSessions, null, true);
+    // Once in a minute
+    new cronJob('0 */1 * * * *', deleteIdleSessions, null, true);
 };
 
 function deleteIdleSessions() {
+    log.info('Running deleteIdleSessions job');
+
     co(function *() {
-        var ts = Math.round(Date.now() / 1000) - conf.get('session:idle_timeout') * 60;
+        var ts = Math.round(Date.now() / 1000) - conf.get('session:idle_timeout');
         var list = yield redis.zrangebyscore('sessionlastrequest', '-inf', ts);
 
         for (var i = 0; i < list.length; i++) {
@@ -37,8 +40,12 @@ function deleteIdleSessions() {
             var userId = fields[0];
             var sessionId = fields[1];
 
-            yield redis.run('deleteSession', userId, sessionId);
+            var last = yield redis.run('deleteSession', userId, sessionId);
             log.info(userId, 'Removed idle session. SessionId: ' + sessionId);
+
+            if (last) {
+                yield friends.informStateChange(userId, 'logout');
+            }
         }
     })();
 }
