@@ -43,7 +43,7 @@ module.exports = function configureProcess(serverName) {
         } catch (e) {
             var msg = e.code === 'EEXIST' ? 'Pid file (' + pidFile + ') exists. ' +
                 'Is the process already running?' : 'Unknown pid file error.';
-            console.log(msg);
+            console.error(msg);
             process.exit(1);
         }
 
