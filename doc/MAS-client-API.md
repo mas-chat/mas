@@ -188,7 +188,7 @@ CLOSE
 
 Close window.
 
-```
+```JSON
 {
    "id":"CLOSE",
 
@@ -226,31 +226,51 @@ Create new window.
 
 ```userMode``` can be ```participant```, ```operator```, ```owner```
 
-FLIST
------
+FRIENDS
+-------
 
-Update information about the user's contacts (friends).
+Full list of user's contacts (friends).
 
 ```JSON
 {
-   "id":"FLIST",
+   "id":"FRIENDS",
 
-   "list":[
+   "friends":[
       {
-         "idleTime":0,
+         "userId":42,
          "name":"Ilkka Oksanen",
-         "nick":"ilkka",
-         "label":"|OK|"
+         "online":true
       },
       {
-         "idleTime":3464,
+         "userId":133,
          "name":"Somebody Else",
-         "nick":"else",
-         "label":"|OK|"
+         "online":false,
+         "last":1411259620
       }
    ]
 }
 ```
+
+```online``` can be ```true```, ```false```. Indicates the current situation.
+
+```last``` is included if ```online``` is ```false```. It's a unix timestamp indicating when this user was logged in last time. Also possible is a special value ```-1``` which means this user hasn't ever logged in.
+
+FRIENDSUPDATE
+-------------
+
+An update to the initial list received with ```FRIENDS``` commands. Contains new information regarding one specific user.
+
+```JSON
+{
+   "id":"FRIENDSUPDATE",
+
+   "userId":42,
+   "online":false,
+   "last":1411259620
+}
+```
+
+Fields are same as in ```FRIENDS``` command.
 
 INFO
 ----
@@ -529,8 +549,22 @@ STARTCHAT_RESP
 LOGOUT
 ------
 
+End session immediately
+
+```
+{
+  "id": "LOGOUT"
+}
+```
+
 LOGOUT_RESP
 -----------
+
+```
+{
+  "id": "LOGOUT_RESP"
+}
+```
 
 SET
 ---
