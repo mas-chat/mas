@@ -106,7 +106,7 @@ if (conf.get('googleauth:enabled') === true) {
     passport.use(google);
 }
 
-if (conf.get('yahoooauth:enabled') === true) {
+if (conf.get('yahooauth:enabled') === true) {
     var yahoo = new YahooStrategy({
         returnURL: conf.get('site:url') + '/auth/yahoo/callback',
         realm: conf.get('site:url')
