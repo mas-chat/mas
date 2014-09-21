@@ -38,6 +38,8 @@ var path = require('path'),
     userFilesController = require('../controllers/userFiles'),
     forgotPasswordController = require('../controllers/forgotPassword');
 
+var ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
+
 exports.register = function(app) {
     app.use(router(app));
 
@@ -89,10 +91,10 @@ exports.register = function(app) {
     app.get('/files/:file', userFilesController);
 
     app.use(serve(path.join(__dirname, '..', 'public'), {
-        maxage: (1000 * 60 * 60 * 24 * 7) // 1 week
+        maxage: ONE_WEEK
     }));
 
     app.use(mount('/fonts/', serve(path.join(__dirname, '..', 'public/dist/fonts'), {
-        maxage: (1000 * 60 * 60 * 24 * 7) // 1 week
+        maxage: ONE_WEEK
     })));
 };

@@ -77,7 +77,7 @@ Mas.Network = Ember.Object.extend({
 
         if (this._state === 'error') {
             this._state = 'normal';
-            //this._.setStatusTextCb.call(this._cbCtx, '');
+            // this._.setStatusTextCb.call(this._cbCtx, '');
         }
 
         this._sendMsgFinished();
@@ -92,13 +92,13 @@ Mas.Network = Ember.Object.extend({
         if (code === 401 || code === 406) {
             this._logout();
         } else {
-           // TBD: Add notification: 'Connection to MAS server lost, trying to reconnect...'
+            // TBD: Add notification: 'Connection to MAS server lost, trying to reconnect...'
 
-           // Stay optimistic and keep trying
-           setTimeout(function() {
-               this._sendMsgFinished();
-           }.bind(this), 2000);
-       }
+            // Stay optimistic and keep trying
+            setTimeout(function() {
+                this._sendMsgFinished();
+            }.bind(this), 2000);
+        }
     },
 
     _sendMsgFinished: function() {
