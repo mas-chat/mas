@@ -22,11 +22,7 @@ var path = require('path'),
 require('colors');
 require('winston-loggly');
 
-var transports = configTransports();
-
-var logger = new (winston.Logger)({
-    transports: transports
-});
+var logger = null;
 
 exports.info = function(userId, msg) {
     logEntry('info', userId, msg);
@@ -43,6 +39,12 @@ exports.error = function(userId, msg) {
 function logEntry(type, userId, msg) {
     var entry = {};
     var message;
+
+    if (logger === null) {
+        logger = new (winston.Logger)({
+            transports: configTransports()
+        });
+    }
 
     if (isNaN(userId)) {
         message = userId;
