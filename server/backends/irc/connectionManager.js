@@ -87,9 +87,9 @@ function handleIdentConnection(conn) {
 
 // Connect
 courier.on('connect', function(params) {
-    var rateLimit = conf.get('irc:networks:' + network + ':rate_limit'); // connections per minute
     var network = params.network;
     var delay = 0;
+    var rateLimit = conf.get('irc:networks:' + network + ':rate_limit'); // connections per minute
 
     if (!nextNetworkConnectionSlot[network] || nextNetworkConnectionSlot[network] < Date.now()) {
         // Rate limiting not active
