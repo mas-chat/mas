@@ -3,6 +3,7 @@
 set -e
 
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
+RET_CODE=1
 
 cd $ROOT
 
@@ -20,6 +21,8 @@ function finish {
     ./scripts/masctl -c stop --configFile test/mas-test.conf
     kill $REDIS_PID
     wait $REDIS_PID
+    echo "Exit code: $RET_CODE"
+    exit $RET_CODE
 }
 
 trap finish EXIT
@@ -27,7 +30,11 @@ trap finish EXIT
 echo "Waiting 3 seconds for the MAS processes to start and init."
 sleep 3
 
-#Verify that all servers are still running
+# Verify that all servers are still running
 ./scripts/masctl status --configFile test/mas-test.conf
 
-casperjs test --engine=slimerjs --verbose $ROOT/test/integration/test-*.js
+# OR part is needed because of set -e
+casperjs test --engine=slimerjs --verbose $ROOT/test/integration/test-*.js || RET_CODE=$?
+
+# All good, return success in the finish trap
+RET_CODE=0
