@@ -76,7 +76,7 @@ var paths = {
     ],
 
     testJavaScripts: [
-        'test/acceptance/**/*.js'
+        'test/integration/**/*.js'
     ]
 };
 
