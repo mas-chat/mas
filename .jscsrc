@@ -4,12 +4,8 @@
     "requireSpaceBeforeBlockStatements": true,
     "requireParenthesesAroundIIFE": true,
     "requireSpacesInConditionalExpression": true,
-    "requireSpacesInFunctionExpression": {
-        "beforeOpeningCurlyBrace": true
-    },
-    "disallowSpacesInFunctionExpression": {
-        "beforeOpeningRoundBrace": true
-    },
+    "requireSpacesInFunctionExpression": { "beforeOpeningCurlyBrace": true },
+    "disallowSpacesInFunctionExpression": { "beforeOpeningRoundBrace": true },
     "requireBlocksOnNewline": 1,
     "disallowEmptyBlocks": true,
     "requireSpacesInsideObjectBrackets": "all",
