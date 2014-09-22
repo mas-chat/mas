@@ -99,7 +99,8 @@ gulp.task('jshint', function() {
         .concat(paths.clientJavaScripts)
         .concat(paths.testJavaScripts))
         .pipe(jshint())
-        .pipe(jshint.reporter('jshint-stylish'));
+        .pipe(jshint.reporter('jshint-stylish'))
+        .pipe(jshint.reporter('fail'));
 });
 
 gulp.task('jscs', function() {
