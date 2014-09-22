@@ -30,4 +30,4 @@ sleep 3
 #Verify that all servers are still running
 ./scripts/masctl status --configFile test/mas-test.conf
 
-casperjs test --engine=slimerjs --verbose $ROOT/test/acceptance/test-*.js
+casperjs test --engine=slimerjs --verbose $ROOT/test/integration/test-*.js
