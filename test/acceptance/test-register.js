@@ -13,14 +13,14 @@ casper.on('page.error', function(msg, trace) {
 
 // Common end. TBD: Split to a separate file when slimerjs is fixed
 
-casper.test.begin('Register new user', 11, function suite(test) {
+casper.test.begin('Register new user', 8, function suite(test) {
+    // Register first user
+
     casper.start('http://localhost:44199/register', function() {
         this.viewport(1024, 768);
     });
 
-    // Register two users
-
-    casper.waitForResource(/jquery\.cookie\.js$/, function() {
+    casper.waitForResource(/pages-libs\.js$/, function() {
         test.assertTitle('MAS - Register', 'MAS register page title is the one expected');
         test.assertExists('form[action="/register"]', 'Main form is found');
         this.fill('form[action="/register"]', {
@@ -34,15 +34,40 @@ casper.test.begin('Register new user', 11, function suite(test) {
     });
 
     casper.then(function() {
-        test.assertTitle('MAS - registration-success', 'Title is ok');
-        test.assertUrlMatch(/registration-success/, 'First registration succeeded');
+        test.assertTextExists('Welcome!', 'First registration succeeded');
+        test.assertUrlMatch(/\/app$/, 'Was redirected to the app');
+        this.click('.fa-plus');
+    });
+
+    casper.waitForText('Join IRC channel…', function() {
+        this.clickLabel('Join IRC channel…');
+    });
+
+    casper.waitUntilVisible('.modal-dialog', function() {
+        this.fillSelectors('.modal-body form', {
+            '#join_irc_name': '#hong_kong'
+        }, false);
+    });
+
+    casper.then(function() {
+        this.clickLabel('OK');
+    });
+
+    casper.waitWhileVisible('.modal-dialog', function() {
+        this.click('.fa-wrench');
+    });
+
+    casper.waitForText('Logout', function() {
+        this.clickLabel('Logout');
     });
 
     casper.wait(1000);
 
+    // Register second user
+
     casper.thenOpen('http://localhost:44199/register');
 
-    casper.waitForResource(/jquery\.cookie\.js$/, function() {
+    casper.waitForResource(/pages-libs\.js$/, function() {
         test.assertTitle('MAS - Register', 'MAS register page title is the one expected');
         test.assertExists('form[action="/register"]', 'Main form is found');
         this.fill('form[action="/register"]', {
@@ -56,80 +81,39 @@ casper.test.begin('Register new user', 11, function suite(test) {
     });
 
     casper.then(function() {
-        test.assertTitle('MAS - registration-success', 'Title is ok');
-        test.assertUrlMatch(/registration-success/, 'Second registration succeeded');
+        test.assertTextExists('Welcome!', 'Second registration succeeded');
+        test.assertUrlMatch(/\/app$/, 'Was redirected to the app');
+        this.click('.fa-plus');
+    });
+
+    casper.waitForText('Join IRC channel…', function() {
+        this.clickLabel('Join IRC channel…');
+    });
+
+    casper.waitUntilVisible('.modal-dialog', function() {
+        this.fillSelectors('.modal-body form', {
+            '#join_irc_name': '#hong_kong'
+        }, false);
+    });
+
+    casper.then(function() {
+        this.clickLabel('OK');
+    });
+
+    casper.waitForText('has joined channel', function() {
+        this.fillSelectors('.window form', {
+            '.form-control': 'Works finally!'
+        }, true);
     });
 
     casper.wait(1000);
 
-    // Log in first user
-
-    casper.thenOpen('http://localhost:44199');
-
-    casper.waitForResource(/jquery\.cookie\.js$/, function() {
-        this.fill('form#login-form', {
-            emailOrNick: 'bruce@lee.com',
-            password: 'brucelee'
-        }, true);
-    });
-
-    casper.waitForUrl('http://localhost:44199/app/', function() {
-        test.assertTitle('MAS', 'Title is ok');
-        this.click('.glyphicon-plus');
-    });
-
     casper.then(function() {
-        this.clickLabel('Join IRC channel…');
+        this.click('.fa-wrench');
     });
 
-    casper.waitUntilVisible('.modal-dialog', function() {
-        this.fillSelectors('.modal-body form', {
-            '#join_irc_name': '#hong_kong'
-        }, false);
-    });
-
-    casper.then(function() {
-        this.clickLabel('OK');
-    });
-
-    casper.wait(5000);
-
-    // Log in second user
-
-    casper.thenOpen('http://localhost:44199');
-
-    casper.waitForResource(/jquery\.cookie\.js$/, function() {
-        this.fill('form#login-form', {
-            emailOrNick: 'jackie@chan.com',
-            password: 'jackiechan'
-        }, true);
-    });
-
-    casper.waitForUrl('http://localhost:44199/app/', function() {
-        test.assertTitle('MAS', 'Title is ok');
-        this.click('.glyphicon-plus');
-    });
-
-    casper.then(function() {
-        this.clickLabel('Join IRC channel…');
-    });
-
-    casper.waitUntilVisible('.modal-dialog', function() {
-        this.fillSelectors('.modal-body form', {
-            '#join_irc_name': '#hong_kong'
-        }, false);
-    });
-
-    casper.then(function() {
-        this.clickLabel('OK');
-    });
-
-    casper.wait(5000);
-
-    casper.waitUntilVisible('.window', function() {
-        this.fillSelectors('.window form', {
-            '.form-control': 'Works finally!'
-        }, true);
+    casper.waitForText('Logout', function() {
+        this.clickLabel('Logout');
     });
 
     casper.wait(1000);
@@ -138,15 +122,14 @@ casper.test.begin('Register new user', 11, function suite(test) {
 
     casper.thenOpen('http://localhost:44199');
 
-    casper.waitForResource(/jquery\.cookie\.js$/, function() {
+    casper.waitForResource(/pages-libs\.js$/, function() {
         this.fill('form#login-form', {
-            emailOrNick: 'bruce@lee.com',
+            username: 'bruce@lee.com',
             password: 'brucelee'
         }, true);
     });
 
-    casper.waitForUrl('http://localhost:44199/app/', function() {
-        test.assertTextExists('Works finally!', 'Message from another user is visible');
+    casper.waitForText('Works finally!', function() {
     });
 
     casper.run(function() {
