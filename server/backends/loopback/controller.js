@@ -111,6 +111,7 @@ function *processCreate(params) {
 
  function *processClose(params) {
     params = params;
+    /* jshint noyield:true */
     // TBD
  }
 
