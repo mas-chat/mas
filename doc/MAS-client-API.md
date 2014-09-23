@@ -226,6 +226,31 @@ Create new window.
 
 ```userMode``` can be ```participant```, ```operator```, ```owner```
 
+USERS
+-----
+
+Information about the other users. Server sends USERS command containing a userId before that userId is used in any other message.
+
+```JSON
+{
+   "id":"USERS",
+
+   "mapping":{
+      "42":{
+         nick:"neo"
+      },
+      "144":{
+         nick:"morpheus"
+      },
+      "300":{
+         nick:"trinity"
+      }
+   }
+}
+```
+
+Server can send USERS command to update information that it sent in earlier USERS command. This happends for example when any user changes his nick.
+
 FRIENDS
 -------
 
