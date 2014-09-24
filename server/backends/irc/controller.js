@@ -865,3 +865,10 @@ function isChannel(text) {
         return element === text.charAt(0);
     });
 }
+
+function getUserId(nick) {
+    // Generate a pseudo userId by base64 encoding the nick name. E.g. 'ilkka' -> 'iaWxra2E'
+    // This is done to make IRC backend to look like the other backends.
+    var userId = new Buffer(nick).toString('base64').replace(/=+$/, '');
+    return 'i' + userId;
+}
