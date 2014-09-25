@@ -37,7 +37,7 @@ if (conf.get('frontend:demo_mode') === true) {
             yield wait(4000);
 
             var demoUserEmail = conf.get('frontend:demo_user_email');
-            var demoUserId = parseInt(yield redis.hget('index:user', demoUserEmail));
+            var demoUserId = yield redis.hget('index:user', demoUserEmail);
             var sentenceLength = Math.floor((Math.random() * 30 ) + 1);
 
             if (demoUserId) {

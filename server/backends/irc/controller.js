@@ -198,7 +198,7 @@ function *processRestarted() {
     var allUsers = yield redis.smembers('userlist');
 
     for (var i = 0; i < allUsers.length; i++) {
-        var userId = parseInt(allUsers[i]);
+        var userId = allUsers[i];
         var networks = yield windowHelper.getNetworks(userId);
 
         for (var ii = 0; ii < networks.length; ii++) {
@@ -448,12 +448,7 @@ function *handle366(userId, msg) {
     var windowId = yield windowHelper.getWindowId(userId, msg.network, channel);
     var names = yield redis.hgetall('names:' + userId + ':' + windowId);
 
-    yield outbox.queueAll(userId, {
-        id: 'UPDATENAMES',
-        reset: true,
-        windowId: windowId,
-        names: names
-    });
+    yield addParticipant(userId, windowId, names, true);
 }
 
 function *handle376(userId, msg) {
@@ -473,11 +468,8 @@ function *handle376(userId, msg) {
     for (var i = 0; i < channels.length; i++) {
         var windowId = yield windowHelper.getWindowId(userId, msg.network, channels[i]);
 
-        yield outbox.queueAll(userId, {
-            id: 'UPDATENAMES',
-            reset: true,
-            windowId: windowId
-        });
+        // Ask client to remove all old stale names
+        yield addParticipant(userId, windowId, {}, true);
 
         yield courier.send('connectionmanager', {
             type: 'write',
@@ -527,12 +519,7 @@ function *handleJoin(userId, msg) {
         var hash = {};
         hash[msg.nick] = USER;
 
-        yield outbox.queueAll(userId, {
-            id: 'UPDATENAMES',
-            reset: false,
-            windowId: windowId,
-            names: hash
-        });
+        yield addParticipant(userId, windowId, hash, false);
     }
 
     yield textLine.send(userId, msg.network, channel, 'group', {
@@ -699,12 +686,7 @@ function *handleMode(userId, msg) {
     }
 
     if (sendUpdateNames) {
-        yield outbox.queueAll(userId, {
-            id: 'UPDATENAMES',
-            reset: false,
-            windowId: windowId,
-            names: names
-        });
+        yield addParticipant(userId, windowId, names, false);
     }
 }
 
@@ -804,11 +786,28 @@ function *removeParticipant(userId, windowId, nick, message) {
         });
 
         yield outbox.queueAll(userId, {
-            id: 'DELNAMES',
+            id: 'DELMEMBERS',
             windowId: windowId,
-            names: [ nick ]
+            members: [ getUserId(nick) ]
         });
     }
+}
+
+function *addParticipant(userId, windowId, nicks, reset) {
+    var members = {};
+
+    for (var key in nicks) {
+        if (nicks.hasOwnProperty(key)) {
+            members[getUserId(key)] = nicks[key];
+        }
+    }
+
+    yield outbox.queueAll(userId, {
+        id: 'ADDMEMBERS',
+        reset: reset,
+        windowId: windowId,
+        members: members
+    });
 }
 
 function *sendIRCPart(userId, network, channel) {
