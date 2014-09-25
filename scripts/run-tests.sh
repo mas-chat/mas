@@ -4,6 +4,7 @@ set -e
 
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
 RET_CODE=1
+CASPER_RET_CODE=0
 
 cd $ROOT
 
@@ -34,7 +35,9 @@ sleep 3
 ./scripts/masctl status --configFile test/mas-test.conf
 
 # OR part is needed because of set -e
-casperjs test --engine=slimerjs --verbose $ROOT/test/integration/test-*.js || RET_CODE=$?
+casperjs test --engine=slimerjs --verbose $ROOT/test/integration/test-*.js || CASPER_RET_CODE=$?
 
-# All good, return success in the finish trap
-RET_CODE=0
+# If all is good, return success in the finish trap
+if [ $CASPER_RET_CODE == "0" ]; then
+    RET_CODE=0
+fi
