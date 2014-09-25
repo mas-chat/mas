@@ -34,10 +34,20 @@ sleep 3
 # Verify that all servers are still running
 ./scripts/masctl status --configFile test/mas-test.conf
 
-# OR part is needed because of set -e
-casperjs test --engine=slimerjs --verbose $ROOT/test/integration/test-*.js || CASPER_RET_CODE=$?
 
-# If all is good, return success in the finish trap
-if [ $CASPER_RET_CODE == "0" ]; then
-    RET_CODE=0
-fi
+#Can't use this because slimerjs exit code is always 0, even in failure case
+#casperjs test --engine=slimerjs --verbose $ROOT/test/integration/test-*.js && RET_CODE=$? || RET_CODE=$?
+
+RET_CODE=0
+
+echo "Running Casper. Can take long time..."
+
+while read i; do
+    echo $i
+
+    if [[ $i == *FAIL* ]]; then
+        RET_CODE=1
+    fi
+done < <(casperjs test --engine=slimerjs --verbose $ROOT/test/integration/test-*.js | sed 1d)
+
+echo "Casper exit code: $RET_CODE"
