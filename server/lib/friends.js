@@ -28,7 +28,7 @@ exports.sendFriends = function *(userId, sessionId) {
     var friendIds = yield redis.smembers('friends:' + userId);
 
     for (var i = 0; i < friendIds.length; i++) {
-        var friendUserId = parseInt(friendIds[i]);
+        var friendUserId = friendIds[i];
 
         var res = yield redis.hmget('user:' + friendUserId, 'name', 'lastlogout');
         var name =res[0];
@@ -77,7 +77,7 @@ exports.informStateChange = function *(userId, eventType) {
     var friendIds = yield redis.smembers('friends:' + userId);
 
     for (var i = 0; i < friendIds.length; i++) {
-        var friendUserId = parseInt(friendIds[i]);
+        var friendUserId = friendIds[i];
         yield outbox.queueAll(friendUserId, command);
     }
 };

@@ -58,11 +58,11 @@ redis.call('LPUSH', outbox, cjson.encode({
 
 --Iterate through windows
 local windows = redis.call('SMEMBERS', 'windowlist:' .. userId)
-local names = {}
 
 for i = 1, #windows do
     local windowId, network = unpack(split(windows[i], ':'))
     local window = hgetall('window:' .. userId .. ':' .. windowId)
+    local names = {}
 
     if window.password == '' then
         window.password = cjson.null
@@ -71,7 +71,6 @@ for i = 1, #windows do
     redis.call('LPUSH', outbox, cjson.encode({
         ['id'] = 'CREATE',
         ['windowId'] = tonumber(windowId),
-
         ['network'] = network,
         ['name'] = window.name,
         ['type'] = window.type,
@@ -88,18 +87,18 @@ for i = 1, #windows do
         local ids = redis.call('SMEMBERS', 'groupmembers:' .. window.name)
 
         for k, v in pairs(ids) do
-            local name = redis.call('HGET', 'user:' .. v, 'nick')
-            names[name] = 'u'
+            names[v] = 'u'
         end
     else
         names = hgetall('names:' .. userId .. ':' .. windowId)
+        --TBD: Convert to pseudo userIds
     end
 
     redis.call('LPUSH', outbox, cjson.encode({
-        ['id'] = 'UPDATENAMES',
+        ['id'] = 'ADDMEMBERS',
         ['windowId'] = tonumber(windowId),
         ['reset'] = true,
-        ['names'] = names
+        ['members'] = names
     }))
 
     local lines = redis.call('LRANGE', 'windowmsgs:' .. userId .. ':' .. windowId, 0, -1);
