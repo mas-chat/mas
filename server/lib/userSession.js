@@ -35,7 +35,7 @@ module.exports = function authenticate() {
             if (data.length !== 3) {
                 valid = false;
             } else {
-                userId = parseInt(data[0]);
+                userId = data[0];
                 secret = data[1]; // TBD: bad name
 
                 if (!userId || !secret) {

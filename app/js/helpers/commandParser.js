@@ -77,7 +77,7 @@ Mas.CommandParser = Ember.Object.extend({
         });
     },
 
-    _handleUpdatenames: function(data, targetWindow) {
+    _handleAddmembers: function(data, targetWindow) {
         if (!targetWindow) {
             return;
         }
@@ -88,31 +88,31 @@ Mas.CommandParser = Ember.Object.extend({
             targetWindow.users.clear();
         }
 
-        for (var name in data.names) { /* jshint -W089 */
-            var userClass = data.names[name];
-            this._removeName(name, targetWindow);
+        for (var userId in data.members) { /* jshint -W089 */
+            var userClass = data.members[userId];
+            this._removeUser(userId, targetWindow);
 
             switch (userClass) {
                 case '@':
-                    targetWindow.operators.pushObject(name);
+                    targetWindow.operators.pushObject(userId);
                     break;
                 case '+':
-                    targetWindow.voices.pushObject(name);
+                    targetWindow.voices.pushObject(userId);
                     break;
                 default:
-                    targetWindow.users.pushObject(name);
+                    targetWindow.users.pushObject(userId);
                     break;
             }
         }
     },
 
-    _handleDelnames: function(data, targetWindow) {
+    _handleDelmembers: function(data, targetWindow) {
         if (!targetWindow) {
             return;
         }
 
-        data.names.forEach(function(name) {
-            this._removeName(name, targetWindow);
+        data.members.forEach(function(userId) {
+            this._removeUser(userId, targetWindow);
         }.bind(this));
     },
 
@@ -141,9 +141,9 @@ Mas.CommandParser = Ember.Object.extend({
         }
     },
 
-    _removeName: function(name, targetWindow) {
-        targetWindow.operators.removeObject(name);
-        targetWindow.voices.removeObject(name);
-        targetWindow.users.removeObject(name);
+    _removeUser: function(userId, targetWindow) {
+        targetWindow.operators.removeObject(userId);
+        targetWindow.voices.removeObject(userId);
+        targetWindow.users.removeObject(userId);
     }
 });
