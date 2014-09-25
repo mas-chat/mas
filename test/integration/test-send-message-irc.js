@@ -130,6 +130,7 @@ casper.test.begin('Register new user', 8, function suite(test) {
     });
 
     casper.waitForText('Works finally!', function() {
+        this.echo('Message from another user exists', 'INFO');
     });
 
     casper.run(function() {
