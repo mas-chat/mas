@@ -80,7 +80,7 @@ Overal server response format to MAS listen request is:
          "cat":"msg",
          "windowId":2,
          "ts":341,
-         "nick":"neo",
+         "userId":"m325324",
          "gid":48929534
     },
     {
@@ -89,7 +89,7 @@ Overal server response format to MAS listen request is:
          "cat":"notice",
          "windowId":2,
          "ts":348,
-         "nick":"morpheus",
+         "userId":"m423342",
          "gid":48929537
     },
 
@@ -123,7 +123,7 @@ Add a new sticky message to window.
    "id":"ADDURL",
 
    "window":1,
-   "noteid":42,
+   "noteId":42,
    "body":"Next meeting tomorrow at 4PM"
 }
 ```
@@ -155,7 +155,7 @@ Add a messge to window.
    "body":"Hello worlds!",
    "cat":"notice",
    "ts":"2093243",
-   "nick":"ilkka2",
+   "userId":"m432454",
    "gid":823458234
 }
 ```
@@ -262,12 +262,12 @@ Full list of user's contacts (friends).
 
    "friends":[
       {
-         "userId":42,
+         "userId":"m42321",
          "name":"Ilkka Oksanen",
          "online":true
       },
       {
-         "userId":133,
+         "userId":"m13323",
          "name":"Somebody Else",
          "online":false,
          "last":1411259620
@@ -289,7 +289,7 @@ An update to the initial list received with ```FRIENDS``` commands. Contains new
 {
    "id":"FRIENDSUPDATE",
 
-   "userId":42,
+   "userId":"m13323",
    "online":false,
    "last":1411259620
 }
@@ -330,44 +330,44 @@ Update Information about user log files.
 ```
 ```
 
-UPDATENAMES
------------
+ADDMEMBERS
+----------
 
 Add or update nicknames in window participant list.
 
 ```JSON
 {
-   "id":"UPDATENAMES"
+   "id":"ADDMEMBERS"
 
    "windowId":1,
    "reset": true,
-   "names":{
-     "trinity": "@",
-     "mranderson: "u",
-     "neo": "+"
+   "members":{
+     "m42238": "@",
+     "m13233": "u",
+     "m32354": "+"
    }
 }
 ```
 
 If ```reset``` is true, then the existing list needs to be cleared. Otherwise the command adds new names to the existing list.
 
-```names``` Object presenting the changes. Property names are new nicknames in the group or existing nicknames whose status has changed. Value is either ```@``` if the nickname is an operator, ```+``` if the nickname has voice, and ```u``` if the nickname is a normal user.
+```members``` is an object presenting the changes. Keys are userIds of new users in this group/IRC channe or users whose status have changed. Value is either ```@``` if the user is an operator, ```+``` if the user has voice, and ```u``` if the user is a normal user.
 
-DELNAMES
---------
+DELMEMBERS
+----------
 
-Remove nicks from window participant list.
+Remove one or more users from window participant list.
 
 ```JSON
 {
-   "id":"DELNAMES",
+   "id":"DELMEMBERS",
 
    "windowId":1,
    "operators":[
      "ilkka"
    ],
-   "users":[
-     "trinity"
+   "members":[
+     "m42238"
    ]
 }
 ```
