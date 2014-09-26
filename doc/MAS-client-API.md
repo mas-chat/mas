@@ -239,13 +239,13 @@ Information about the other users. Server sends USERS command containing a userI
 
    "mapping":{
       "42":{
-         nick:"neo"
+         "nick":"neo"
       },
       "144":{
-         nick:"morpheus"
+         "nick":"morpheus"
       },
       "300":{
-         nick:"trinity"
+         "nick":"trinity"
       }
    }
 }
