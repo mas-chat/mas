@@ -68,14 +68,15 @@ Content-Type: application/json; charset=UTF-8
 | sessionId  | all except first | mandatory | Mandatory in all requests, except in the initial listen request where it must not exist. SessionID must be set to value (string) that the server returned with SESSIONID command. |
 | clientName | first | optional | Client name |
 | clientOS   | first | optional | Client operating system |
-| cachedUpto | first | optional | Every message has a gid field which is ever increasing global id. This parameter communicates the highest ADDTEXT gid that the client has already seen and stored. The server will omit of sending messages with lower gid in the beginning of session. Without this option, the server sends up to 200 ADDTEXT messages for every window to fill the window backlog. |
+| cachedUpto | first | optional | Every ADDTEXT command has a gid field which is ever increasing global id. This parameter communicates the highest the client has already seen and stored. The server will omit of sending messages with lower gid in the beginning of session. Without this option, the server sends up to 200 ADDTEXT messages for every window to fill the window backlog. |
 
 Overal server response format to MAS listen request is:
 
 ```JSON
 [
     {
-         "id":"ADDTEXT"
+         "id":"ADDTEXT",
+
          "body":"How are you?",
          "cat":"msg",
          "windowId":2,
@@ -84,7 +85,8 @@ Overal server response format to MAS listen request is:
          "gid":48929534
     },
     {
-         "id":"ADDTEXT"
+         "id":"ADDTEXT",
+
          "body":"Good, thanks.",
          "cat":"notice",
          "windowId":2,
@@ -176,10 +178,10 @@ Update window ban list.
    "id":"BANLIST",
 
    "window":1,
-   "list":[
+   "list":[{
       "banId":42,
       "info":"IP range 192.168.0.0./16, reason: join flood."
-   ]
+   }]
 }
 ```
 
