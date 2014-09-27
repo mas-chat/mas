@@ -238,13 +238,13 @@ Information about the other users. Server sends USERS command containing a userI
    "id":"USERS",
 
    "mapping":{
-      "42":{
+      "m42":{
          "nick":"neo"
       },
-      "144":{
+      "m144":{
          "nick":"morpheus"
       },
-      "300":{
+      "m300":{
          "nick":"trinity"
       }
    }
