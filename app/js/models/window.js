@@ -42,6 +42,18 @@ Mas.Window = Ember.Object.extend({
     voices: null,
     users: null,
 
+    operatorNames: function() {
+        return this._mapUserIdsToNicks('operators');
+    }.property('operators.@each', 'Mas.userdb.users.@each.nick'),
+
+    voiceNames: function() {
+        return this._mapUserIdsToNicks('voices');
+    }.property('voices.@each', 'Mas.userdb.users.@each.nick'),
+
+    userNames: function() {
+        return this._mapUserIdsToNicks('users');
+    }.property('users.@each', 'Mas.userdb.users.@each.nick'),
+
     simplifiedName: function() {
         var name = this.get('name');
         name = name.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
@@ -70,5 +82,11 @@ Mas.Window = Ember.Object.extend({
             row: this.get('row'),
             visible: this.get('visible')
         });
-    }.observes('visible', 'row')
+    }.observes('visible', 'row'),
+
+    _mapUserIdsToNicks: function(role) {
+        return this.get(role).map(function(userId) {
+            return Mas.userDb.getNick(userId);
+        });
+    }
 });

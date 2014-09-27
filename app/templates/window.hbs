@@ -32,13 +32,13 @@
 
     {{#if isGroup}}
         <div class="window-members">
-            {{#each name in operators}}
+            {{#each name in operatorNames}}
                 <div class="window-operator">{{name}}</div>
             {{/each}}
-            {{#each name in voices}}
+            {{#each name in voiceNames}}
                 <div class="window-voice">{{name}}</div>
             {{/each}}
-            {{#each name in users}}
+            {{#each name in userNames}}
                 <div class="window-user">{{name}}</div>
             {{/each}}
         </div>

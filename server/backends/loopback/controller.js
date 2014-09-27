@@ -44,12 +44,11 @@ co(function *() {
 function *processSend(params) {
     var name = params.name;
     var members = yield redis.smembers('groupmembers:' + name);
-    var nick = yield redis.hget('user:' + params.userId, 'nick');
 
     for (var i = 0; i < members.length; i++) {
         if (members[i] !== params.userId) {
             yield textLine.send(members[i], 'MAS', name, 'group', {
-                nick: nick,
+                userId: params.userId,
                 cat: 'msg',
                 body: params.text
             });
@@ -58,10 +57,8 @@ function *processSend(params) {
 }
 
 function *processSendPrivate(params) {
-    var nick = yield redis.hget('user:' + params.userId, 'nick');
-
     yield textLine.sendFromUserId(params.userId, params.targetUserId, {
-        nick: nick,
+        userId: params.userId,
         cat: 'msg',
         body: params.text
     });
