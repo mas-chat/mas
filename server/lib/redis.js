@@ -27,7 +27,7 @@ var path = require('path'),
 
 var rlh = redisLuaHelper({
     'root': path.join(__dirname, '..', 'lua'),
-    'macro': '--#include',
+    'macro': '#include',
     'extension': 'lua'
 });
 
@@ -54,7 +54,15 @@ function createClient() {
         assert(sha);
 
         var args = [ sha, 0 ].concat(params);
-        return yield coRedisClient.evalsha.apply(this, args);
+        var res;
+
+        try {
+            res = yield coRedisClient.evalsha.apply(this, args);
+        } catch(e) {
+            log.warn('Lua script failed: ' + scriptName + ', ' + e);
+        }
+
+        return res;
     };
 
     return coRedisClient;
@@ -68,7 +76,12 @@ function *loadScripts() {
     var scripts = yield loadDir();
 
     for (var i = 0; i < scripts.length; i++) {
-        log.info('Loading Redis script: ' + scripts[i]);
-        yield redisClient.script('load', rlh.code(scripts[i]));
+        var scriptName = scripts[i];
+        log.info('Loading Redis script: ' + scriptName);
+        try {
+            yield redisClient.script('load', rlh.code(scriptName));
+        } catch(e) {
+            log.error('Lua script loading failed: ' + scriptName + ', ' + e);
+        }
     }
 }
