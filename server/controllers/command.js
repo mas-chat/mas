@@ -23,8 +23,7 @@ var co = require('co'),
     courier = require('../lib/courier').createEndPoint('command'),
     textLine = require('../lib/textLine'),
     windowHelper = require('../lib/windows'),
-    friends = require('../lib/friends'),
-    nicks = require('../lib/nick');
+    friends = require('../lib/friends');
 
 module.exports = function *() {
     var userId = this.mas.userId;
