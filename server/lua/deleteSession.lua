@@ -14,9 +14,6 @@
 --   governing permissions and limitations under the License.
 --
 
--- Initialization of outbox needs to be atomic operation (=Lua script)
--- for streaming to be realiable.
-
 local userId = ARGV[1]
 local sessionId = ARGV[2]
 
