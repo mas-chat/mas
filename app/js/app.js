@@ -58,10 +58,13 @@ require('./models/friend');
 
 require('./helpers/network');
 require('./helpers/handlebars');
+require('./helpers/users');
 
 Mas.nicks = {};
 Mas.windowCollection = Ember.A([]);
 Mas.friendCollection = Ember.A([]);
+
+Mas.userDb = Mas.Users.create();
 
 Mas.Router.map(function() {
     this.route('main', { path: '/' });

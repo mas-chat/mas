@@ -45,8 +45,6 @@ module.exports = function *() {
 
     switch (command.id) {
         case 'SEND':
-            var nick = yield nicks.getCurrentNick(userId, network);
-
             if (network === 'MAS' && type === '1on1') {
                 var targetUserId = yield redis.hget('window:' + userId + ':' + windowId,
                     'targetUserId');
@@ -69,7 +67,7 @@ module.exports = function *() {
 
             // Update user's other sessions
             yield textLine.sendByWindowId(userId, windowId, {
-                nick: nick,
+                userId: userId,
                 cat: 'mymsg',
                 body: command.text
             }, sessionId);

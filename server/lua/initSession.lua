@@ -17,6 +17,8 @@
 -- Initialization of outbox needs to be atomic operation (=Lua script)
 -- for streaming to be realiable.
 
+#include 'lib/base64'
+
 local sessionId = ARGV[1]
 local userId = ARGV[2]
 local outbox = 'outbox:' .. userId .. ':' .. sessionId
@@ -56,13 +58,14 @@ redis.call('LPUSH', outbox, cjson.encode({
     ['settings'] = settings
 }))
 
---Iterate through windows
+-- Iterate through windows
 local windows = redis.call('SMEMBERS', 'windowlist:' .. userId)
+local allUsers = {}
 
 for i = 1, #windows do
     local windowId, network = unpack(split(windows[i], ':'))
     local window = hgetall('window:' .. userId .. ':' .. windowId)
-    local names = {}
+    local members = {}
 
     if window.password == '' then
         window.password = cjson.null
@@ -86,19 +89,27 @@ for i = 1, #windows do
     if network == 'MAS' then
         local ids = redis.call('SMEMBERS', 'groupmembers:' .. window.name)
 
-        for k, v in pairs(ids) do
-            names[v] = 'u'
+        for i, masUserId in pairs(ids) do
+            local nick = redis.call('HGET', 'user:' .. masUserId, 'nick')
+            members[masUserId] = 'u'
+            allUsers[masUserId] = { ['nick'] = nick }
         end
     else
-        names = hgetall('names:' .. userId .. ':' .. windowId)
-        --TBD: Convert to pseudo userIds
+        local ircnicks = hgetall('names:' .. userId .. ':' .. windowId)
+
+        for nick, role in pairs(ircnicks) do
+            local ircUserId = 'i' .. base64enc(nick)
+            members[ircUserId] = role
+            allUsers[ircUserId] = { ['nick'] = nick }
+        end
     end
 
+    -- TBD: Don't send if 1on1
     redis.call('LPUSH', outbox, cjson.encode({
         ['id'] = 'ADDMEMBERS',
         ['windowId'] = tonumber(windowId),
         ['reset'] = true,
-        ['members'] = names
+        ['members'] = members
     }))
 
     local lines = redis.call('LRANGE', 'windowmsgs:' .. userId .. ':' .. windowId, 0, -1);
@@ -107,6 +118,12 @@ for i = 1, #windows do
         redis.call('LPUSH', outbox, lines[ii])
     end
 end
+
+-- Prepend the USERS command so client gets it first
+redis.call('RPUSH', outbox, cjson.encode({
+    ['id'] = 'USERS',
+    ['mapping'] = allUsers
+}))
 
 redis.call('LPUSH', outbox, cjson.encode({
     ['id'] = 'INITDONE'

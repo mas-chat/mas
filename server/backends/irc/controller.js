@@ -417,7 +417,6 @@ function *handleServerText(userId, msg, code) {
     }
 
     yield textLine.broadcast(userId, msg.network, {
-        nick: msg.serverName,
         cat: cat,
         body: text
     });
@@ -492,7 +491,6 @@ function *handle482(userId, msg) {
     var channel = msg.params[0];
 
     yield textLine.send(userId, msg.network, channel, 'group', {
-        nick: msg.serverName,
         cat: 'error',
         body: 'You\'re not channel operator'
     });
@@ -543,7 +541,6 @@ function *handleError(userId, msg) {
     var reason = msg.params[0];
 
     yield textLine.broadcast(userId, msg.network, {
-        nick: msg.serverName,
         cat: 'error',
         body: 'Connection lost. Server error: ' + reason
     });
@@ -552,7 +549,6 @@ function *handleError(userId, msg) {
         log.error(userId, 'Too many connections to: ' + msg.network);
 
         yield textLine.broadcast(userId, msg.network, {
-            nick: msg.serverName,
             cat: 'error',
             body: msg.network + ' IRC network doesn\'t allow more connections. ' +
                 'Close this window and rejoin to try again.'
@@ -730,7 +726,7 @@ function *handlePrivmsg(userId, msg) {
     }
 
     yield textLine.sendByWindowId(userId, windowId, {
-        nick: msg.nick,
+        userId: getUserId(msg.nick),
         cat: 'msg',
         body: text
     });

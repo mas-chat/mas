@@ -20,10 +20,15 @@ Mas.Message = Ember.Object.extend({
     body: null,
     cat: null,
     ts: null,
-    nick: null,
+    userId: null,
     type: null,
 
     ircMotd: false,
+
+    nick: function() {
+        var userId = this.get('userId');
+        return Mas.userDb.getNick(userId);
+    }.property('Mas.userdb.users.@each.nick'),
 
     decoratedBody: function() {
         return this._decorate(this.get('body'));
