@@ -37,8 +37,9 @@ exports.error = function(userId, msg) {
 };
 
 function logEntry(type, userId, msg) {
-    var entry = {};
-    var message;
+    var entry = {
+        process: process.title
+    };
 
     if (logger === null) {
         logger = new (winston.Logger)({
@@ -46,15 +47,13 @@ function logEntry(type, userId, msg) {
         });
     }
 
-    if (isNaN(userId)) {
-        message = userId;
+    if (msg === undefined) {
+        msg = userId;
     } else {
         entry.userId = userId;
-        message = msg;
     }
 
-    entry.process = process.title;
-    logger.log(type, message, entry);
+    logger.log(type, msg, entry);
 }
 
 function configTransports() {
