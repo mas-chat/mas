@@ -13,7 +13,7 @@ casper.on('page.error', function(msg, trace) {
 
 // Common end. TBD: Split to a separate file when slimerjs is fixed
 
-casper.test.begin('Register new user', 8, function suite(test) {
+casper.test.begin('Register new user', 7, function suite(test) {
     // Register first user
 
     casper.start('http://localhost:44199/register', function() {
@@ -33,8 +33,7 @@ casper.test.begin('Register new user', 8, function suite(test) {
         }, true);
     });
 
-    casper.then(function() {
-        test.assertTextExists('Welcome!', 'First registration succeeded');
+    casper.waitForText('Welcome!', function() {
         test.assertUrlMatch(/\/app$/, 'Was redirected to the app');
         this.click('.fa-plus');
     });
