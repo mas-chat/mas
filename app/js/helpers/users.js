@@ -20,6 +20,6 @@ Mas.Users = Ember.Object.extend({
     users: {},
 
     getNick: function(userId) {
-        return this.users[userId] ? user.nick : 'UNKNOWN';
+        return this.users[userId] ? this.users[userId].nick : 'UNKNOWN';
     }
 });
