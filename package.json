@@ -32,7 +32,7 @@
     "redis": "~0.12.1",
     "redis-lua-helper": "~0.2.0",
     "semver": "~4.0.0",
-    "statuses": "~1.1.0",
+    "statuses": "~1.2.0",
     "thunkify": "~2.1.1",
     "winston": "~0.8.0",
     "winston-loggly": "~1.0.1",
