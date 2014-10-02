@@ -37,16 +37,19 @@ for i = 1, #sessions do
         local isKnown = redis.call('SISMEMBER', key, userIdList[ii])
 
         if isKnown == 0 then
+            -- This client session hasn't seen this userId yet
             newUsers[userIdList[ii]] = { ['nick'] = getNick(userIdList[ii]) }
         end
     end
 
     if next(newUsers) ~= nil then
+        -- Send USERS command as there are new userIds the client doesn't know about
         redis.call('LPUSH', outbox, cjson.encode({
             ['id'] = 'USERS',
             ['mapping'] = newUsers
         }))
 
+        -- Mark these new userIds as known
         redis.call('SADD', key, unpack(userIdList))
     end
 end
