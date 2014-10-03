@@ -265,12 +265,10 @@ Full list of user's contacts (friends).
    "friends":[
       {
          "userId":"m42321",
-         "name":"Ilkka Oksanen",
          "online":true
       },
       {
          "userId":"m13323",
-         "name":"Somebody Else",
          "online":false,
          "last":1411259620
       }
@@ -335,7 +333,7 @@ Update Information about user log files.
 ADDMEMBERS
 ----------
 
-Add or update nicknames in window participant list.
+Add or update users in window participant list.
 
 ```JSON
 {
@@ -343,17 +341,23 @@ Add or update nicknames in window participant list.
 
    "windowId":1,
    "reset": true,
-   "members":{
-     "m42238": "@",
-     "m13233": "u",
-     "m32354": "+"
-   }
+   "members":[{
+         userId: "m42238",
+         role: "@"
+      }, {
+         userId: "m13233",
+         role: "u"
+      }, {
+         userId: "m32354",
+         role: "+"
+      }
+   ]
 }
 ```
 
-If ```reset``` is true, then the existing list needs to be cleared. Otherwise the command adds new names to the existing list.
+If ```reset``` is true, then the existing list needs to be cleared. Otherwise the command adds new users or updates existing users' roles on the list.
 
-```members``` is an object presenting the changes. Keys are userIds of new users in this group/IRC channe or users whose status have changed. Value is either ```@``` if the user is an operator, ```+``` if the user has voice, and ```u``` if the user is a normal user.
+```role``` Value is either ```@``` if the user is an operator, ```+``` if the user has voice, and ```u``` if the user is a normal user.
 
 DELMEMBERS
 ----------
@@ -365,11 +369,11 @@ Remove one or more users from window participant list.
    "id":"DELMEMBERS",
 
    "windowId":1,
-   "operators":[
-     "ilkka"
-   ],
-   "members":[
-     "m42238"
+   "members":[{
+         userId: "m42238"
+      }, {
+         userId: "m35345"
+      }
    ]
 }
 ```
