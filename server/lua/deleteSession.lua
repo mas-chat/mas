@@ -23,6 +23,9 @@ redis.call('DEL', 'outbox:' .. userId .. ':' .. sessionId)
 -- Remove session
 redis.call('DEL', 'session:' .. userId .. ':' .. sessionId)
 
+-- Remove sessionknownuserids
+redis.call('DEL', 'sessionknownuserids:' .. userId .. ':' .. sessionId)
+
 -- Remove sessionlastrequest entry
 redis.call('ZREM', 'sessionlastrequest', userId .. ':' .. sessionId)
 
