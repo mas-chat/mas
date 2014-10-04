@@ -119,7 +119,6 @@ for i = 1, #windows do
                 ['id'] = 'ADDMEMBERS',
                 ['windowId'] = tonumber(windowId),
                 ['reset'] = true,
-                ['test'] = test,
                 ['members'] = members
             }))
         end
