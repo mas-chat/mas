@@ -17,18 +17,17 @@
 'use strict';
 
 var util = require('util'),
+    _ = require('lodash'),
     log = require('./log'),
     redisModule = require('./redis'),
     redis = redisModule.createClient();
 
-exports.queue = function *(userId, sessionId) {
-    var commands = normalizeCommands(Array.prototype.slice.call(arguments, 2));
-    yield redis.run.apply(this, [ 'queueOutbox', userId, sessionId ].concat(commands));
+exports.queue = function *(userId, sessionId, commands) {
+    yield queueCommands(userId, sessionId, commands);
 };
 
-exports.queueAll = function *(userId) {
-    var commands = normalizeCommands(Array.prototype.slice.call(arguments, 1));
-    yield redis.run.apply(this, [ 'queueOutbox', userId, 0 ].concat(commands));
+exports.queueAll = function *(userId, commands) {
+    yield queueCommands(userId, 0, commands);
 };
 
 exports.flush = function *(userId, sessionId, timeout) {
@@ -66,20 +65,45 @@ exports.length = function *(userId, sessionId) {
     return parseInt(yield redis.llen('outbox:' + userId + ':' + sessionId));
 };
 
-function normalizeCommands(commands) {
-    var commandArray = [];
+function *queueCommands(userId, sessionId, commands) {
+    if (!util.isArray(commands)) {
+        commands = [ commands ];
+    }
 
-    commands.forEach(function (command) {
-        if (util.isArray(command)) {
-            commandArray = commandArray.concat(command);
-        } else {
-            commandArray.push(command);
-        }
-    });
+    yield handleNewUserIds(userId, sessionId, commands);
 
-    commandArray = commandArray.map(function(value) {
+    commands = commands.map(function(value) {
         return typeof(value) === 'string' ? value : JSON.stringify(value);
     });
 
-    return commandArray;
+    yield redis.run.apply(null, [ 'queueOutbox', userId, sessionId ].concat(commands));
+}
+
+function *handleNewUserIds(userId, sessionId, commands) {
+    var allUserIds = [];
+
+    commands.forEach(function (command) {
+        allUserIds = allUserIds.concat(scanUserIds(command));
+    });
+
+    allUserIds = _.uniq(allUserIds);
+    yield redis.run.apply(null, [ 'introduceNewUserIds', userId, sessionId ].concat(allUserIds));
+}
+
+function scanUserIds(obj) {
+    var res = [];
+
+    if (typeof(obj) === 'string') {
+        obj = JSON.parse(obj);
+    }
+
+    for (var key in obj) {
+        if (typeof obj[key] === 'object') {
+            res = res.concat(scanUserIds(obj[key]));
+        } else if (key === 'userId') {
+            res.push(obj[key]);
+        }
+    }
+
+    return res;
 }
