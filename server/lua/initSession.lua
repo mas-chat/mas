@@ -17,7 +17,7 @@
 -- Initialization of outbox needs to be atomic operation (=Lua script)
 -- for streaming to be realiable.
 
-#include 'lib/base64'
+#include 'lib/userDb'
 
 local sessionId = ARGV[1]
 local userId = ARGV[2]
@@ -65,7 +65,6 @@ local allUsers = {}
 for i = 1, #windows do
     local windowId, network = unpack(split(windows[i], ':'))
     local window = hgetall('window:' .. userId .. ':' .. windowId)
-    local members = {}
 
     if window.password == '' then
         window.password = cjson.null
@@ -86,31 +85,45 @@ for i = 1, #windows do
         ['topic'] = window.topic
     }))
 
-    if network == 'MAS' then
-        local ids = redis.call('SMEMBERS', 'groupmembers:' .. window.name)
+    if window.type == 'group' then
+        local members = {}
 
-        for i, masUserId in pairs(ids) do
-            local nick = redis.call('HGET', 'user:' .. masUserId, 'nick')
-            members[masUserId] = 'u'
-            allUsers[masUserId] = { ['nick'] = nick }
+        if network == 'MAS' then
+            local ids = redis.call('SMEMBERS', 'groupmembers:' .. window.name)
+
+            for i, masUserId in pairs(ids) do
+                local nick = getNick(masUserId)
+                allUsers[masUserId] = { ['nick'] = nick }
+
+                table.insert(members, {
+                    ['userId'] = masUserId,
+                    ['role'] = 'u'
+                })
+            end
+        else
+            local ircnicks = hgetall('names:' .. userId .. ':' .. windowId)
+
+            for nick, role in pairs(ircnicks) do
+                local ircUserId = 'i' .. base64enc(nick)
+                allUsers[ircUserId] = { ['nick'] = nick }
+
+                table.insert(members, {
+                    ['userId'] = ircUserId,
+                    ['role'] = role
+                })
+            end
         end
-    else
-        local ircnicks = hgetall('names:' .. userId .. ':' .. windowId)
 
-        for nick, role in pairs(ircnicks) do
-            local ircUserId = 'i' .. base64enc(nick)
-            members[ircUserId] = role
-            allUsers[ircUserId] = { ['nick'] = nick }
+        if #members > 0 then
+            redis.call('LPUSH', outbox, cjson.encode({
+                ['id'] = 'ADDMEMBERS',
+                ['windowId'] = tonumber(windowId),
+                ['reset'] = true,
+                ['test'] = test,
+                ['members'] = members
+            }))
         end
     end
-
-    -- TBD: Don't send if 1on1
-    redis.call('LPUSH', outbox, cjson.encode({
-        ['id'] = 'ADDMEMBERS',
-        ['windowId'] = tonumber(windowId),
-        ['reset'] = true,
-        ['members'] = members
-    }))
 
     local lines = redis.call('LRANGE', 'windowmsgs:' .. userId .. ':' .. windowId, 0, -1);
 
@@ -124,6 +137,17 @@ redis.call('RPUSH', outbox, cjson.encode({
     ['id'] = 'USERS',
     ['mapping'] = allUsers
 }))
+
+-- Keep track which mappings client knows
+if next(allUsers) ~= nil then
+    local keysArray = {}
+
+    for k,v in pairs(allUsers) do
+        table.insert(keysArray, k)
+    end
+
+    redis.call('SADD', 'sessionknownuserids:' .. userId .. ':' .. sessionId, unpack(keysArray))
+end
 
 redis.call('LPUSH', outbox, cjson.encode({
     ['id'] = 'INITDONE'

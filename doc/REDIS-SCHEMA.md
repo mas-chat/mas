@@ -30,6 +30,9 @@ MAS Redis structures
    timeStamp (int)
    lastreply (string)
 
+ sessionknownuserids:<userId>:<sessionId> set
+   <userId1>, <userId2>, ...
+
  sessionlastrequest (zset)
    userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...
 
@@ -83,7 +86,7 @@ MAS Redis structures
    <msg1>, <msg2>
 
  names:<userId>:<windowId> (hash)
-   <nick1>: (string, '@', '+', 'u')
+   <nick1>: (string, '@', '+', 'u') [TBD: Use userId]
    ...
 
  [TBD] inbox:<userId> (list)
