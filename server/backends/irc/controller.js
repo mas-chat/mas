@@ -772,6 +772,26 @@ function *tryDifferentNick(userId, network) {
     }
 }
 
+function *addParticipant(userId, windowId, nicks, reset) {
+    var members = [];
+
+    for (var key in nicks) {
+        if (nicks.hasOwnProperty(key)) {
+            members.push({
+                userId: getUserId(key),
+                role: nicks[key]
+            });
+        }
+    }
+
+    yield outbox.queueAll(userId, {
+        id: 'ADDMEMBERS',
+        reset: reset,
+        windowId: windowId,
+        members: members
+    });
+}
+
 function *removeParticipant(userId, windowId, nick, message) {
     var removed = yield redis.hdel('names:' + userId + ':' + windowId, nick);
 
@@ -784,26 +804,11 @@ function *removeParticipant(userId, windowId, nick, message) {
         yield outbox.queueAll(userId, {
             id: 'DELMEMBERS',
             windowId: windowId,
-            members: [ getUserId(nick) ]
+            members: [{
+                userId: getUserId(nick)
+            }]
         });
     }
-}
-
-function *addParticipant(userId, windowId, nicks, reset) {
-    var members = {};
-
-    for (var key in nicks) {
-        if (nicks.hasOwnProperty(key)) {
-            members[getUserId(key)] = nicks[key];
-        }
-    }
-
-    yield outbox.queueAll(userId, {
-        id: 'ADDMEMBERS',
-        reset: reset,
-        windowId: windowId,
-        members: members
-    });
 }
 
 function *sendIRCPart(userId, network, channel) {

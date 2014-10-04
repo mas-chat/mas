@@ -95,11 +95,11 @@ Mas.CommandParser = Ember.Object.extend({
             targetWindow.users.clear();
         }
 
-        for (var userId in data.members) { /* jshint -W089 */
-            var userClass = data.members[userId];
+        data.members.forEach(function(member) {
+            var userId = member.userId;
             this._removeUser(userId, targetWindow);
 
-            switch (userClass) {
+            switch (member.role) {
                 case '@':
                     targetWindow.operators.pushObject(userId);
                     break;
@@ -110,7 +110,7 @@ Mas.CommandParser = Ember.Object.extend({
                     targetWindow.users.pushObject(userId);
                     break;
             }
-        }
+        }.bind(this));
     },
 
     _handleDelmembers: function(data, targetWindow) {
@@ -118,8 +118,8 @@ Mas.CommandParser = Ember.Object.extend({
             return;
         }
 
-        data.members.forEach(function(userId) {
-            this._removeUser(userId, targetWindow);
+        data.members.forEach(function(member) {
+            this._removeUser(member.userId, targetWindow);
         }.bind(this));
     },
 
