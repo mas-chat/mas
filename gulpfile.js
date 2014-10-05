@@ -27,7 +27,8 @@ var paths = {
         'gulpfile.js',
         'server/**/*.js',
         '!server/public/dist/**/*.js',
-        'mas-private/**/*.js'
+        'mas-private/**/*.js',
+        'scripts/masctl.js'
     ],
     clientJavaScripts: [
         'app/**/*.js',
