@@ -97,8 +97,6 @@ function stopProcesses() {
 }
 
 function startProcesses() {
-    var alive = {};
-
     for (var component in processes) { /*jshint forin: false */
         var spawnOptions = {
             detached: argv.background,
@@ -113,17 +111,11 @@ function startProcesses() {
         ];
 
         var node = child.spawn('node', commandLineParameters, spawnOptions);
-        alive[component] = true;
 
         if (argv.background) {
             setTimeout(function() {
                 this[0].unref();
-
-                if (!alive[this[1]]) {
-                    console.log('Failed to start:'.red + ' ' + this[1]);
-                } else {
-                    console.log('Launched:'.green + ' ' + this[1]);
-                }
+                console.log('Launched:'.green + ' ' + this[1]);
             }.bind([node, component]), 3000);
         } else {
             node.stdout.on('data', printChildOutput);
@@ -131,12 +123,8 @@ function startProcesses() {
         }
 
         node.on('close', function handleClose(code) {
-            if (argv.background) {
-                alive[this] = false;
-            } else {
-                console.log('ERROR:'.red + ' ' + this + ' terminated (code: ' + code + '). Stopping all MAS processes.');
-                process.exit(1);
-            }
+            console.log('ERROR:'.red + ' ' + this + ' terminated (exit code: ' + code + '). Stopping all MAS processes.');
+            process.exit(1);
         }.bind(component));
 
         console.log('Starting:'.yellow + ' ' + component);
