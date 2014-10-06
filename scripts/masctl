@@ -68,7 +68,7 @@ if (argv.connman === true || action === 'status') {
     processes['mas-irc-connman'] = 'backends/irc/connectionManager.js';
 }
 
-console.log('MAS env: ' + env.yellow);
+console.log('MAS env: ' + env.blue);
 
 if (action === 'stop' || action === 'restart') {
     stopProcesses();
@@ -97,6 +97,8 @@ function stopProcesses() {
 }
 
 function startProcesses() {
+    var alive = {};
+
     for (var component in processes) { /*jshint forin: false */
         var spawnOptions = {
             detached: argv.background,
@@ -111,16 +113,33 @@ function startProcesses() {
         ];
 
         var node = child.spawn('node', commandLineParameters, spawnOptions);
+        alive[component] = true;
 
         if (argv.background) {
-            node.unref();
+            setTimeout(function() {
+                this[0].unref();
+
+                if (!alive[this[1]]) {
+                    console.log('Failed to start:'.red + ' ' + this[1]);
+                } else {
+                    console.log('Launched:'.green + ' ' + this[1]);
+                }
+            }.bind([node, component]), 3000);
         } else {
             node.stdout.on('data', printChildOutput);
             node.stderr.on('data', printChildOutput);
-            node.on('close', handleClose);
         }
 
-        console.log('Starting:'.green + ' ' + component);
+        node.on('close', function handleClose(code) {
+            if (argv.background) {
+                alive[this] = false;
+            } else {
+                console.log('ERROR:'.red + ' ' + this + ' terminated (code: ' + code + '). Stopping all MAS processes.');
+                process.exit(1);
+            }
+        }.bind(component));
+
+        console.log('Starting:'.yellow + ' ' + component);
     }
 }
 
@@ -159,11 +178,6 @@ function getComponentPid(component) {
     }
 
     return pid;
-}
-
-function handleClose(code) {
-    console.log('One of the MAS processes terminated (code: ' + code + '). Stopping all of them.');
-    process.exit(1);
 }
 
 function checkNodeVersion() {
