@@ -56,6 +56,7 @@ var pidDir = getConfigOption('pid:directory');
 var logDir = getConfigOption('log:directory');
 
 mkdirp.sync(getAbsolutePath(logDir)); // Make sure logs directory exists
+mkdirp.sync(getAbsolutePath(pidDir)); // Make sure pids directory exists
 
 var processes = {
     'mas-frontend': 'server.js',
@@ -78,7 +79,8 @@ if (action === 'start' || action === 'restart') {
 }
 
 if (action === 'status') {
-    monitorProcesses();
+    var allRunning = monitorProcesses();
+    process.exit(allRunning ? 0 : 1);
 }
 
 function stopProcesses() {
@@ -123,6 +125,8 @@ function startProcesses() {
 }
 
 function monitorProcesses() {
+    var allRunning = true;
+
     for (var component in processes) { /*jshint forin: false */
         var pid = getComponentPid(component);
 
@@ -130,8 +134,11 @@ function monitorProcesses() {
             console.log(component + ': ' + 'running'.green + ', pid: ' + pid);
         } else {
             console.log(component + ': ' + 'stopped'.red);
+            allRunning = false;
         }
     }
+
+    return allRunning;
 }
 
 function getComponentPid(component) {
