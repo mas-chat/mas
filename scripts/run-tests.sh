@@ -16,7 +16,7 @@ sleep 1
 
 redis-cli -p 44144 flushall
 
-./scripts/masctl -c start --configFile test/mas-test.conf
+./scripts/masctl -b -c start --configFile test/mas-test.conf
 
 function finish {
     ./scripts/masctl -c stop --configFile test/mas-test.conf
@@ -33,7 +33,6 @@ sleep 3
 
 # Verify that all servers are still running
 ./scripts/masctl status --configFile test/mas-test.conf
-
 
 #Can't use this because slimerjs exit code is always 0, even in failure case
 #casperjs test --engine=slimerjs --verbose $ROOT/test/integration/test-*.js && RET_CODE=$? || RET_CODE=$?
