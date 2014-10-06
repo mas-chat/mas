@@ -65,7 +65,7 @@ var processes = {
 };
 
 if (argv.connman === true || action === 'status') {
-    processes['irc-connman'] = 'backends/irc/connectionManager.js';
+    processes['mas-irc-connman'] = 'backends/irc/connectionManager.js';
 }
 
 console.log('MAS env: ' + env.yellow);
