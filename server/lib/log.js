@@ -17,6 +17,7 @@
 var path = require('path'),
     fs = require('fs'),
     winston = require('winston'),
+    masTransport = require('./winstonMasTransport'),
     conf = require('./conf');
 
 require('colors');
@@ -34,6 +35,7 @@ exports.warn = function(userId, msg) {
 
 exports.error = function(userId, msg) {
     logEntry('error', userId, msg);
+    process.exit(1);
 };
 
 function logEntry(type, userId, msg) {
@@ -87,10 +89,7 @@ function configTransports() {
     }
 
     if (conf.get('log:console')) {
-        var consoleTransport = new (winston.transports.Console)({
-            colorize: true,
-            handleExceptions: true
-        });
+        var consoleTransport = new (masTransport)({});
 
         transports.push(consoleTransport);
     }
