@@ -23,13 +23,11 @@ Dependencies:
 - Node.js (version 0.11.10 or later): http://nodejs.org/
 - Redis: http://redis.io/
 
-OS support
-----------
+## OS support
 
 MacOS/Linux/Windows.
 
-Installation
-------------
+## Quick start
 
 1. Install Redis and latest development release of Node.js
 
@@ -65,20 +63,13 @@ Installation
    $ ./scripts/masctl -c start
    ```
 
-7. Check that all four MAS processes are running ([architecture](https://github.com/ilkkao/mas/wiki))
+7. Browse to ```http://localhost:3200/``` and register an account.
 
-   ```bash
-   $ ./scripts/masctl status
-   mas-frontend: running, pid: 95284
-   mas-loopback: running, pid: 95282
-   mas-irc: running, pid: 95280
-   mas-irc-connman: running, pid: 82417
-   ```
+## masctl
 
-8. Browse to ```http://localhost:3200/``` and register an account.
+Masctl is an utility for running MAS processes. `./script/masctl -h` shows the available options. In production, use `-b` parameter to daemonize MAS servers.
 
-Feedback
---------
+## Feedback
 
 iao@iki.fi
 
