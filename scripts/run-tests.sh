@@ -28,12 +28,6 @@ function finish {
 
 trap finish EXIT
 
-echo "Waiting 3 seconds for the MAS processes to start and init."
-sleep 3
-
-# Verify that all servers are still running
-./scripts/masctl status --configFile test/mas-test.conf
-
 #Can't use this because slimerjs exit code is always 0, even in failure case
 #casperjs test --engine=slimerjs --verbose $ROOT/test/integration/test-*.js && RET_CODE=$? || RET_CODE=$?
 
