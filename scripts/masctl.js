@@ -22,7 +22,8 @@ var child = require('child_process'),
     path = require('path'),
     semver = require('semver'),
     yargs = require('yargs'),
-    nconf = require('nconf');
+    nconf = require('nconf'),
+    mkdirp = require('mkdirp');
 
 require('colors');
 
@@ -51,8 +52,10 @@ setupNconf();
 
 var action = argv._[0];
 var env = getConfigOption('common:env');
+var pidDir = getConfigOption('pid:directory');
+var logDir = getConfigOption('log:directory');
 
-console.log('MAS env: ' + env.yellow);
+mkdirp.sync(getAbsolutePath(logDir)); // Make sure logs directory exists
 
 var processes = {
     'mas-frontend': 'server.js',
@@ -64,33 +67,35 @@ if (argv.connman === true || action === 'status') {
     processes['irc-connman'] = 'backends/irc/connectionManager.js';
 }
 
-var pidDir = getConfigOption('pid:directory');
+console.log('MAS env: ' + env.yellow);
 
 if (action === 'stop' || action === 'restart') {
-    // Kill all running MAS processes
-    for (var component in processes) {
-        var pidFile = path.join(getAbsolutePath(pidDir), component + '-' + env + '.pid');
-
-        if (!fs.existsSync(pidFile)) {
-            continue;
-        }
-
-        var pid = parseInt(fs.readFileSync(pidFile));
-
-        try {
-            process.kill(pid);
-        } catch(e) {
-            console.log('Process ' + component + ' (pid: ' + pid +
-                ') was not running even the PID file existed.');
-            fs.unlinkSync(pidFile);
-        }
-
-        console.log('Stopped:'.red + ' ' + component);
-    }
+    stopProcesses();
 }
 
 if (action === 'start' || action === 'restart') {
-    for (var component in processes) {
+    startProcesses();
+}
+
+if (action === 'status') {
+    monitorProcesses();
+}
+
+function stopProcesses() {
+    for (var component in processes) { /*jshint forin: false */
+        var pid = getComponentPid(component);
+
+        if (pid !== 0) {
+            process.kill(pid);
+            console.log('Stopped:'.red + ' ' + component);
+        } else {
+            console.log('Was not running:'.red + ' ' + component);
+        }
+    }
+}
+
+function startProcesses() {
+    for (var component in processes) { /*jshint forin: false */
         var spawnOptions = {
             detached: argv.background,
             stdio: argv.background ? 'ignore' : null
@@ -106,10 +111,10 @@ if (action === 'start' || action === 'restart') {
         var node = child.spawn('node', commandLineParameters, spawnOptions);
 
         if (argv.background) {
-             node.unref();
+            node.unref();
         } else {
-            node.stdout.on('data', prettyPrint);
-            node.stderr.on('data', prettyPrint);
+            node.stdout.on('data', printChildOutput);
+            node.stderr.on('data', printChildOutput);
             node.on('close', handleClose);
         }
 
@@ -117,22 +122,11 @@ if (action === 'start' || action === 'restart') {
     }
 }
 
-if (action === 'status') {
-    for (var component in processes) {
-        var pidFile = path.join(getAbsolutePath(pidDir), component + '-' + env + '.pid');
-        var alive = false;
-        var pid;
+function monitorProcesses() {
+    for (var component in processes) { /*jshint forin: false */
+        var pid = getComponentPid(component);
 
-        if (fs.existsSync(pidFile)) {
-            pid = parseInt(fs.readFileSync(pidFile));
-
-            try {
-                process.kill(pid, 0);
-                alive = true;
-            } catch(e) { }
-        }
-
-        if (alive) {
+        if (pid !== 0) {
             console.log(component + ': ' + 'running'.green + ', pid: ' + pid);
         } else {
             console.log(component + ': ' + 'stopped'.red);
@@ -140,12 +134,28 @@ if (action === 'status') {
     }
 }
 
-function prettyPrint(text) {
-    process.stdout.write(text);
+function getComponentPid(component) {
+    var pidFile = path.join(getAbsolutePath(pidDir), component + '-' + env + '.pid');
+    var pid = 0;
+
+    if (fs.existsSync(pidFile)) {
+        pid = parseInt(fs.readFileSync(pidFile));
+
+        try {
+            process.kill(pid, 0);
+        } catch (e) {
+            pid = 0;
+            console.log('Process ' + component + ' (pid: ' + pid +
+                ') was not running even the PID file existed.');
+            fs.unlinkSync(pidFile);
+        }
+    }
+
+    return pid;
 }
 
 function handleClose(code) {
-    console.log('Exit code: ' + code);
+    console.log('One of the MAS processes terminated (code: ' + code + '). Stopping all of them.');
     process.exit(1);
 }
 
@@ -189,4 +199,8 @@ function getAbsolutePath(origPath) {
     } else {
         return path.join(ROOTPATH, origPath);
     }
+}
+
+function printChildOutput(text) {
+    process.stdout.write(text);
 }
