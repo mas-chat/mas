@@ -57,8 +57,8 @@ Content-Type: application/json; charset=UTF-8
 ```
 ```JSON
 {
-    "seq":123,
-    "sessionId":"YCkmphVXX3GmmJb"
+  "seq": 123,
+  "sessionId": "YCkmphVXX3GmmJb"
 }
 ```
 
@@ -73,31 +73,27 @@ Content-Type: application/json; charset=UTF-8
 Overal server response format to MAS listen request is:
 
 ```JSON
-[
-    {
-         "id":"ADDTEXT",
+[{
+  "id": "ADDTEXT",
 
-         "body":"How are you?",
-         "cat":"msg",
-         "windowId":2,
-         "ts":341,
-         "userId":"m325324",
-         "gid":48929534
-    },
-    {
-         "id":"ADDTEXT",
+  "body": "How are you?",
+  "cat": "msg",
+  "windowId": 2,
+  "ts": 341,
+  "userId": "m325324",
+  "gid": 48929534
+}, {
+  "id": "ADDTEXT",
 
-         "body":"Good, thanks.",
-         "cat":"notice",
-         "windowId":2,
-         "ts":348,
-         "userId":"m423342",
-         "gid":48929537
-    },
-
-    ...
-
-]
+  "body": "Good, thanks.",
+  "cat": "notice",
+  "windowId": 2,
+  "ts": 348,
+  "userId": "m423342",
+  "gid": 48929537
+}, {
+  ...
+}]
 ```
 
 HTTP status codes:
@@ -122,11 +118,11 @@ Add a new sticky message to window.
 
 ```JSON
 {
-   "id":"ADDURL",
+  "id": "ADDURL",
 
-   "window":1,
-   "noteId":42,
-   "body":"Next meeting tomorrow at 4PM"
+  "window": 1,
+  "noteId": 42,
+  "body": "Next meeting tomorrow at 4PM"
 }
 ```
 
@@ -137,10 +133,10 @@ Add a new url to window url list.
 
 ```JSON
 {
-   "id":"ADDURL",
+  "id": "ADDURL",
 
-   "window":1,
-   "url":"http://google.com"
+  "window": 1,
+  "url": "http://google.com"
 }
 ```
 
@@ -151,14 +147,14 @@ Add a messge to window.
 
 ```JSON
 {
-   "id":"ADDTEXT",
+  "id": "ADDTEXT",
 
-   "windowId":1,
-   "body":"Hello worlds!",
-   "cat":"notice",
-   "ts":"2093243",
-   "userId":"m432454",
-   "gid":823458234
+  "windowId": 1,
+  "body": "Hello worlds!",
+  "cat": "notice",
+  "ts": "2093243",
+  "userId": "m432454",
+  "gid": 823458234
 }
 ```
 
@@ -175,13 +171,13 @@ Update window ban list.
 
 ```JSON
 {
-   "id":"BANLIST",
+  "id": "BANLIST",
 
-   "window":1,
-   "list":[{
-      "banId":42,
-      "info":"IP range 192.168.0.0./16, reason: join flood."
-   }]
+  "window": 1,
+  "list": [{
+    "banId": 42,
+     "info": "IP range 192.168.0.0./16, reason: join flood."
+  }]
 }
 ```
 
@@ -192,31 +188,32 @@ Close window.
 
 ```JSON
 {
-   "id":"CLOSE",
+  "id": "CLOSE",
 
-    "window":1
+   "window": 1
 }
 ```
 
 CREATE
 ------
 
-Create new window.
+Create new window. Window identifier is either ```userId``` or ```name```.
 
 ```JSON
 {
-   "id":"CREATE",
+  "id": "CREATE",
 
-   "windowId":1,
-   "name":"testone",
-   "type":"group",
-   "network":"MAS",
-   "password":"",
-   "titleAlert":false,
-   "topic":"We meet tomorrow at 3PM",
-   "visible":true,
-   "userMode":"participant",
-   "sounds":true
+  "windowId": 1,
+  "name": "testone",
+  "userId": "m43544",
+  "type": "group",
+  "network": "MAS",
+  "password": "",
+  "titleAlert": false,
+  "topic": "We meet tomorrow at 3PM",
+  "visible": true,
+  "userMode": "participant",
+  "sounds": true
 }
 ```
 
@@ -228,6 +225,10 @@ Create new window.
 
 ```userMode``` can be ```participant```, ```operator```, ```owner```
 
+```name``` is included only if ```type``` is ```group```
+
+```userId``` is included only if ```type``` is ```1ion1```
+
 USERS
 -----
 
@@ -235,19 +236,19 @@ Information about the other users. Server sends USERS command containing a userI
 
 ```JSON
 {
-   "id":"USERS",
+  "id": "USERS",
 
-   "mapping":{
-      "m42":{
-         "nick":"neo"
-      },
-      "m144":{
-         "nick":"morpheus"
-      },
-      "m300":{
-         "nick":"trinity"
-      }
-   }
+  "mapping": {
+    "m42": {
+      "nick": "neo"
+    },
+    "m144": {
+      "nick": "morpheus"
+    },
+    "m300": {
+      "nick": "trinity"
+    }
+  }
 }
 ```
 
@@ -260,19 +261,17 @@ Full list of user's contacts (friends).
 
 ```JSON
 {
-   "id":"FRIENDS",
+  "id": "FRIENDS",
 
-   "friends":[
-      {
-         "userId":"m42321",
-         "online":true
-      },
-      {
-         "userId":"m13323",
-         "online":false,
-         "last":1411259620
-      }
-   ]
+  "friends": [{
+      "userId": "m42321",
+      "online": true
+    }, {
+      "userId": "m13323",
+      "online": false,
+      "last": 1411259620
+    }
+  ]
 }
 ```
 
@@ -287,11 +286,11 @@ An update to the initial list received with ```FRIENDS``` commands. Contains new
 
 ```JSON
 {
-   "id":"FRIENDSUPDATE",
+  "id": "FRIENDSUPDATE",
 
-   "userId":"m13323",
-   "online":false,
-   "last":1411259620
+  "userId": "m13323",
+  "online": false,
+  "last": 1411259620
 }
 ```
 
@@ -304,9 +303,9 @@ Show a generic info message.
 
 ```JSON
 {
-   "id":"INFO",
+  "id": "INFO",
 
-   "text":"You can't join group Secret. Wrong password."
+  "text": "You can't join group Secret. Wrong password."
 }
 ```
 
@@ -317,7 +316,7 @@ Initialization is complete. Hint that client can now render the UI as all initia
 
 ```JSON
 {
-   "id":"INITDONE"
+  "id": "INITDONE"
 }
 
 ```
@@ -337,21 +336,21 @@ Add or update users in window participant list.
 
 ```JSON
 {
-   "id":"ADDMEMBERS"
+  "id": "ADDMEMBERS",
 
-   "windowId":1,
-   "reset": true,
-   "members":[{
-         userId: "m42238",
-         role: "@"
-      }, {
-         userId: "m13233",
-         role: "u"
-      }, {
-         userId: "m32354",
-         role: "+"
-      }
-   ]
+  "windowId": 1,
+  "reset": true,
+  "members": [{
+      "userId": "m42238",
+      "role": "@"
+    }, {
+      "userId": "m13233",
+      "role": "u"
+    }, {
+      "userId": "m32354",
+      "role": "+"
+    }
+  ]
 }
 ```
 
@@ -366,15 +365,15 @@ Remove one or more users from window participant list.
 
 ```JSON
 {
-   "id":"DELMEMBERS",
+  "id": "DELMEMBERS",
 
-   "windowId":1,
-   "members":[{
-         userId: "m42238"
-      }, {
-         userId: "m35345"
-      }
-   ]
+  "windowId": 1,
+  "members": [{
+      "userId": "m42238"
+    }, {
+      "userId": "m35345"
+    }
+  ]
 }
 ```
 
@@ -409,9 +408,9 @@ Set session ID.
 
 ```JSON
 {
-   "id":"SESSIONID",
+  "id": "SESSIONID",
 
-   "sessionId":856821,
+  "sessionId": 856821
 }
 ```
 
@@ -422,16 +421,15 @@ Update settings.
 
 ```JSON
 {
-   "id":"SET",
+  "id": "SET",
 
-   "settings":{
-      "largeFonts":"0",
-      "showFriendBar":"1",
-      "tz":"4",
-      "firstTime":"0",
-      "sslEnabled":"0",
-      "loggingEnabled":"0"
-   }
+  "settings": {
+    "largeFonts": "0",
+    "showFriendBar": "1",
+    "firstTime": "0",
+    "sslEnabled": "0",
+    "loggingEnabled": "0"
+  }
 }
 ```
 
@@ -450,10 +448,10 @@ Update existing parameter for existing window.
 
 ```JSON
 {
-   "id":"UPDATE",
-   "windowId":1,
+  "id": "UPDATE",
+  "windowId": 1,
 
-   "password":"newsecret"
+  "password": "newsecret"
 }
 ```
 
@@ -472,13 +470,13 @@ POST /api/v1/send
 ```
 ```JSON
 {
-    "seq":12,
-    "sessionId":"YCkmphVXX3GmmJb",
-    "command": {
-        "id": "SEND"
-        "windowId": 2,
-        "text": "Hello world"
-    }
+  "seq": 12,
+  "sessionId": "YCkmphVXX3GmmJb",
+  "command": {
+    "id": "SEND",
+    "windowId": 2,
+    "text": "Hello world"
+  }
 }
 ```
 
@@ -505,7 +503,8 @@ SEND
 
 ```
 {
-  "id": "SEND"
+  "id": "SEND",
+
   "windowId": 2,
   "text": "Hello world"
 }
@@ -521,7 +520,8 @@ Join to new MAS group or IRC channel
 
 ```
 {
-  "id": "JOIN"
+  "id": "JOIN",
+
   "name": "javascript",
   "network": "MAS",
   "password": ""
@@ -538,7 +538,8 @@ Create new MAS group
 
 ```
 {
-  "id": "CREATE"
+  "id": "CREATE",
+
   "name": "javascript",
   "password": ""
 }
@@ -626,10 +627,10 @@ UPDATE_PASSWORD
 
 ```JSON
 {
-   "id":"UPDATE_PASSWORD"
+  "id": "UPDATE_PASSWORD",
 
-   "windowId":1,
-   "password": "pass123",
+  "windowId": 1,
+  "password": "pass123"
 }
 ```
 
@@ -640,8 +641,9 @@ UPDATE_PASSWORD_RESP
 
 ```JSON
 {
-   "id":"UPDATE_PASSWORD_RESP"
-   "status": "OK"
+  "id": "UPDATE_PASSWORD_RESP",
+
+  "status": "OK"
 }
 ```
 
@@ -652,10 +654,10 @@ UPDATE_TOPIC
 
 ```JSON
 {
-   "id":"UPDATE_TOPIC"
+  "id": "UPDATE_TOPIC",
 
-   "windowId":1,
-   "topic": "My new topic",
+  "windowId": 1,
+  "topic": "My new topic"
 }
 ```
 
@@ -664,8 +666,9 @@ UPDATE_PASSWORD_RESP
 
 ```JSON
 {
-   "id":"UPDATE_PASSWORD_RESP"
-   "status": "OK"
+  "id": "UPDATE_PASSWORD_RESP",
+
+  "status": "OK"
 }
 ```
 
