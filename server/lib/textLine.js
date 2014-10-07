@@ -16,57 +16,8 @@
 
 'use strict';
 
-var co = require('co'),
-    wait = require('co-wait'),
-    faker = require('faker'),
-    redis = require('./redis').createClient(),
-    log = require('./log'),
-    windowHelper = require('./windows'),
-    conf = require('./conf');
-
-// TDB Consider options:
-//
-// timestamp
-// type
-// rememberurl
-// hidden
-
-if (conf.get('frontend:demo_mode') === true) {
-    co(function *() {
-        while (1) {
-            yield wait(4000);
-
-            var demoUserEmail = conf.get('frontend:demo_user_email');
-            var demoUserId = yield redis.hget('index:user', demoUserEmail);
-            var sentenceLength = Math.floor((Math.random() * 30 ) + 1);
-
-            if (demoUserId) {
-                var details = yield redis.srandmember('windowlist:' + demoUserId);
-
-                if (details) {
-                    // User has at least one window
-                    var url = '';
-                    if (!(Math.floor(Math.random() * 10 ))) {
-                        var randomImgFileName = Math.floor(Math.random() * 1000000);
-                        url = 'http://placeimg.com/640/480/nature/' + randomImgFileName + '.jpg';
-                    }
-
-                    var windowId = parseInt(details.split(':')[0]);
-                    var msg = {
-                        body: faker.Lorem.sentence(sentenceLength) + ' ' + url,
-                        nick: faker.Name.firstName(),
-                        cat: 'msg',
-                        windowId: windowId
-                    };
-
-                    yield processTextLine(demoUserId, msg, null);
-                }
-            } else {
-                log.error('Demo user doesn\'t exist.');
-            }
-        }
-    })();
-}
+var redis = require('./redis').createClient(),
+    windowHelper = require('./windows');
 
 exports.broadcast = function *(userId, network, msg) {
     var windowIds = yield windowHelper.getWindowIdsForNetwork(userId, network);
