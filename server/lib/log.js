@@ -88,11 +88,11 @@ function configTransports() {
         transports.push(fileTransport);
     }
 
-    if (conf.get('log:console')) {
-        var consoleTransport = new (masTransport)({});
+    var consoleTransport = new (masTransport)({
+        handleExceptions: true
+    });
 
-        transports.push(consoleTransport);
-    }
+    transports.push(consoleTransport);
 
     if (conf.get('loggly:enabled')) {
         var logglyTransport = new (winston.transports.Loggly)({
