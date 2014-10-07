@@ -404,7 +404,7 @@ var handlers = {
 
 function *handleServerText(userId, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
-    var text = msg.params[0];
+    var text = msg.params.join(' ');
     var cat = 'info';
 
     if (!text) {
