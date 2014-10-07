@@ -22,6 +22,8 @@ var util = require('util'),
 require('colors');
 
 var MasConsoleLogger = function (options) {
+    winston.Transport.call(this, options);
+
     this.name = 'masConsoleLogger';
     this.level = options.level || 'info';
 };
