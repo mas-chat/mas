@@ -18,9 +18,8 @@
 
 var path = require('path'),
     npid = require('npid'),
-    conf = require('./conf');
-
-// TBD: Check why log lib doesn't work here
+    conf = require('./conf'),
+    log = require('./log');
 
 module.exports = function configureProcess(serverName) {
     var processName = 'mas-' + serverName + '-' + conf.get('common:env');
@@ -40,18 +39,16 @@ module.exports = function configureProcess(serverName) {
 
         try {
             pid = npid.create(pidFile);
+            pid.removeOnExit();
         } catch (e) {
-            var msg = e.code === 'EEXIST' ? 'Pid file (' + pidFile + ') exists. ' +
-                'Is the process already running?' : 'Unknown pid file error.';
-            console.error(msg);
-            process.exit(1);
+            log.error(e.code === 'EEXIST' ?
+                'Pid file (' + pidFile + ') exists. Is the process already running?' :
+                'Unknown pid file error.');
         }
-
-        pid.removeOnExit();
 
         var deletePidAndExit = function() {
             pid.remove();
-            process.exit();
+            process.exit(0);
         };
 
         process.on('SIGINT', deletePidAndExit);
