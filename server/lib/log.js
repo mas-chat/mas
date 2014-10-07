@@ -26,19 +26,20 @@ require('winston-loggly');
 var logger = null;
 
 exports.info = function(userId, msg) {
-    logEntry('info', userId, msg);
+    logEntry('info', userId, msg, function() {});
 };
 
 exports.warn = function(userId, msg) {
-    logEntry('warn', userId, msg);
+    logEntry('warn', userId, msg, function() {});
 };
 
 exports.error = function(userId, msg) {
-    logEntry('error', userId, msg);
-    process.exit(1);
+    logEntry('error', userId, msg, function() {
+        process.exit(4);
+    });
 };
 
-function logEntry(type, userId, msg) {
+function logEntry(type, userId, msg, callback) {
     var entry = {};
 
     if (logger === null) {
@@ -53,7 +54,7 @@ function logEntry(type, userId, msg) {
         entry.userId = userId;
     }
 
-    logger.log(type, msg, entry);
+    logger.log(type, msg, entry, callback);
 }
 
 function configTransports() {
@@ -70,7 +71,7 @@ function configTransports() {
 
         if (!fs.existsSync(logDirectory)) {
             console.error('ERROR: '.red + 'Log directory ' + logDirectory + ' doesn\'t exist.');
-            process.exit(1);
+            process.exit(5);
         }
 
         if (conf.get('log:clear_at_startup') && fs.existsSync(fileName)) {
