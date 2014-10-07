@@ -25,3 +25,14 @@ local function getNick(userId)
         return base64dec(string.sub(userId, 2, -1))
     end
 end
+
+local function getName(userId)
+    local class = string.sub(userId, 1, 1)
+
+    if class == 'm' then
+        return redis.call('HGET', 'user:' .. userId, 'name')
+    elseif class == 'i' then
+        -- It would be too expensive to ask everybodys name using IRC protocol
+        return ''
+    end
+end
