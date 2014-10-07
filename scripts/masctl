@@ -64,6 +64,8 @@ var processes = {
     'mas-loopback': 'backends/loopback/controller.js'
 };
 
+var handles = {};
+
 if (argv.connman === true || action === 'status') {
     processes['mas-irc-connman'] = 'backends/irc/connectionManager.js';
 }
@@ -89,7 +91,7 @@ function stopProcesses() {
 
         if (pid !== 0) {
             process.kill(pid);
-            console.log('Stopped:'.red + ' ' + component);
+            console.log('Stopped:'.yellow + ' ' + component);
         } else {
             console.log('Was not running:'.red + ' ' + component);
         }
@@ -97,6 +99,8 @@ function stopProcesses() {
 }
 
 function startProcesses() {
+    var shutdownStarted = false;
+
     for (var component in processes) { /*jshint forin: false */
         var spawnOptions = {
             detached: argv.background,
@@ -110,7 +114,7 @@ function startProcesses() {
             argv.configFile
         ];
 
-        var node = child.spawn('node', commandLineParameters, spawnOptions);
+        var node = handles[component] = child.spawn('node', commandLineParameters, spawnOptions);
 
         if (argv.background) {
             setTimeout(function() {
@@ -123,8 +127,17 @@ function startProcesses() {
         }
 
         node.on('close', function handleClose(code) {
-            console.log('ERROR:'.red + ' ' + this + ' terminated (exit code: ' + code + '). Stopping all MAS processes.');
-            process.exit(1);
+            if (!shutdownStarted) {
+                shutdownStarted = true;
+                console.log('ERROR:'.red + ' ' + this + ' terminated (exit code: ' + code + '). Bailing out!');
+
+                for (var shutdownComponent in processes) { /*jshint forin: false */
+                    console.log('Stopped:'.yellow + ' ' + shutdownComponent);
+                    handles[shutdownComponent].kill();
+                }
+
+                process.exit(1);
+            }
         }.bind(component));
 
         console.log('Starting:'.yellow + ' ' + component);
