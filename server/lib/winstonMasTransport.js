@@ -31,14 +31,14 @@ var MasConsoleLogger = function (options) {
 util.inherits(MasConsoleLogger, winston.Transport);
 
 MasConsoleLogger.prototype.log = function (level, msg, meta, callback) {
-    var process = meta.process.split('-')[1];
+    var processName = process.title.split('-')[1];
     var userId = meta.userId;
 
     var processColumn;
     var levelColumn;
     var userIdColumn;
 
-    switch(process) {
+    switch(processName) {
         case 'irc':
             processColumn = 'irc  '.green;
             break;
