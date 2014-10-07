@@ -30,9 +30,9 @@ exports.sendFriends = function *(userId, sessionId) {
     for (var i = 0; i < friendIds.length; i++) {
         var friendUserId = friendIds[i];
 
-        var res = yield redis.hmget('user:' + friendUserId, 'name', 'lastlogout');
-        var name =res[0];
-        var last = parseInt(res[1]);
+        var last = yield redis.hget('user:' + friendUserId, 'lastlogout');
+        last = parseInt(last);
+
         var online = last === 0;
 
         if (isNaN(last)) {
@@ -41,7 +41,6 @@ exports.sendFriends = function *(userId, sessionId) {
 
         var friendData = {
             userId: friendUserId,
-            name: name,
             online: online,
         };
 
