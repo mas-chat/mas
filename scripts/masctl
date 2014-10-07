@@ -120,7 +120,7 @@ function startProcesses() {
             setTimeout(function() {
                 this[0].unref();
                 console.log('Launched:'.green + ' ' + this[1]);
-            }.bind([node, component]), 3000);
+            }.bind([node, component]), 5000);
         } else {
             node.stdout.on('data', printChildOutput);
             node.stderr.on('data', printChildOutput);
@@ -129,7 +129,14 @@ function startProcesses() {
         node.on('close', function handleClose(code) {
             if (!shutdownStarted) {
                 shutdownStarted = true;
-                console.log('ERROR:'.red + ' ' + this + ' terminated (exit code: ' + code + '). Bailing out!');
+
+                var msg = 'ERROR:'.red + ' ' + this + ' terminated (exit code: ' + code + '). Bailing out!';
+
+                if (argv.background) {
+                    msg += ' See the log file for details.';
+                }
+
+                console.log(msg);
 
                 for (var shutdownComponent in processes) { /*jshint forin: false */
                     console.log('Stopped:'.yellow + ' ' + shutdownComponent);
