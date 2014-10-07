@@ -22,7 +22,7 @@ var co = require('co'),
     redis = require('./redis').createClient(),
     log = require('./log'),
     conf = require('./conf'),
-    textLine = require('../../lib/textLine');
+    textLine = require('./textLine');
 
 module.exports.enable = function() {
     co(function *() {
