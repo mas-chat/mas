@@ -68,12 +68,12 @@ MasConsoleLogger.prototype.log = function (level, msg, meta, callback) {
 
     userIdColumn = userId ? userId : 'N/A';
 
-    console.log(
-        new Date().toISOString(),
-        processColumn, '-',
-        levelColumn, '-',
-        userIdColumn, '-',
-        msg);
+    process.stdout.write(
+        new Date().toISOString() + ' ' +
+        processColumn + ' - ' +
+        levelColumn + ' - ' +
+        userIdColumn + ' - ' +
+        msg + '\n');
 
     callback(null, true);
 };
