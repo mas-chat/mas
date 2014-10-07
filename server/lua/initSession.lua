@@ -17,10 +17,10 @@
 -- Initialization of outbox needs to be atomic operation (=Lua script)
 -- for streaming to be realiable.
 
-#include 'lib/userDb'
+#include 'lib/introduceNewUserIds'
 
-local sessionId = ARGV[1]
-local userId = ARGV[2]
+local userId = ARGV[1]
+local sessionId = ARGV[2]
 local outbox = 'outbox:' .. userId .. ':' .. sessionId
 
 local function split(s, delimiter)
@@ -44,6 +44,14 @@ local hgetall = function (key)
         end
     end
     return result
+end
+
+local seenUserIds = {}
+
+local function seenUser(userId)
+    if userId then
+        seenUserIds[userId] = true
+    end
 end
 
 redis.call('LPUSH', outbox, cjson.encode({
@@ -92,8 +100,7 @@ for i = 1, #windows do
             local ids = redis.call('SMEMBERS', 'groupmembers:' .. window.name)
 
             for i, masUserId in pairs(ids) do
-                local nick = getNick(masUserId)
-                allUsers[masUserId] = { ['nick'] = nick }
+                seenUser(masUserId)
 
                 table.insert(members, {
                     ['userId'] = masUserId,
@@ -105,7 +112,7 @@ for i = 1, #windows do
 
             for nick, role in pairs(ircnicks) do
                 local ircUserId = 'i' .. base64enc(nick)
-                allUsers[ircUserId] = { ['nick'] = nick }
+                seenUser(ircUserId)
 
                 table.insert(members, {
                     ['userId'] = ircUserId,
@@ -127,26 +134,21 @@ for i = 1, #windows do
     local lines = redis.call('LRANGE', 'windowmsgs:' .. userId .. ':' .. windowId, 0, -1);
 
     for ii = #lines, 1, -1 do
+        local command = cjson.decode(lines[ii])
+        seenUser(command.userId)
+
         redis.call('LPUSH', outbox, lines[ii])
     end
 end
 
 -- Prepend the USERS command so client gets it first
-redis.call('RPUSH', outbox, cjson.encode({
-    ['id'] = 'USERS',
-    ['mapping'] = allUsers
-}))
+local userIdList = {}
 
--- Keep track which mappings client knows
-if next(allUsers) ~= nil then
-    local keysArray = {}
-
-    for k,v in pairs(allUsers) do
-        table.insert(keysArray, k)
-    end
-
-    redis.call('SADD', 'sessionknownuserids:' .. userId .. ':' .. sessionId, unpack(keysArray))
+for k,v in pairs(seenUserIds) do
+    table.insert(userIdList, k)
 end
+
+introduceNewUserIds(userId, sessionId, userIdList)
 
 redis.call('LPUSH', outbox, cjson.encode({
     ['id'] = 'INITDONE'
