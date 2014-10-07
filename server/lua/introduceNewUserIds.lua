@@ -14,42 +14,10 @@
 --   governing permissions and limitations under the License.
 --
 
-#include 'lib/userDb'
+#include 'lib/introduceNewUserIds'
 
 local userId = table.remove(ARGV, 1)
 local sessionId = table.remove(ARGV, 1)
 local userIdList = ARGV -- Rest of the parameters are userIds
 
-local sessions
-
-if sessionId ~= 0 then
-    sessions = redis.call('ZRANGE', 'sessionlist:' .. userId, 0, -1)
-else
-    sessions = { sessionId }
-end
-
-for i = 1, #sessions do
-    local key = 'sessionknownuserids:' .. userId .. ':' .. sessions[i]
-    local outbox = 'outbox:' .. userId .. ':' .. sessions[i]
-    local newUsers = {}
-
-    for ii = 1, #userIdList do
-        local isKnown = redis.call('SISMEMBER', key, userIdList[ii])
-
-        if isKnown == 0 then
-            -- This client session hasn't seen this userId yet
-            newUsers[userIdList[ii]] = { ['nick'] = getNick(userIdList[ii]) }
-        end
-    end
-
-    if next(newUsers) ~= nil then
-        -- Send USERS command as there are new userIds the client doesn't know about
-        redis.call('LPUSH', outbox, cjson.encode({
-            ['id'] = 'USERS',
-            ['mapping'] = newUsers
-        }))
-
-        -- Mark these new userIds as known
-        redis.call('SADD', key, unpack(userIdList))
-    end
-end
+introduceNewUserIds(userId, sessionId, userIdList)
