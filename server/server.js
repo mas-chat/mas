@@ -31,7 +31,8 @@ var koa = require('koa'),
     passport = require('./lib/passport'),
     userSession = require('./lib/userSession'),
     routes = require('./routes/routes'),
-    scheduler = require('./lib/scheduler');
+    scheduler = require('./lib/scheduler'),
+    demoContent = require('./lib/demoContent');
 
 var app = koa();
 
@@ -61,3 +62,7 @@ co(function *() {
     scheduler.init();
     app.listen(conf.get('frontend:port'));
 })();
+
+if (conf.get('frontend:demo_mode') === true) {
+    demoContent.enable();
+}
