@@ -39,9 +39,7 @@ exports.error = function(userId, msg) {
 };
 
 function logEntry(type, userId, msg) {
-    var entry = {
-        process: process.title
-    };
+    var entry = {};
 
     if (logger === null) {
         logger = new (winston.Logger)({
