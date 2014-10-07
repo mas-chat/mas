@@ -51,9 +51,6 @@ exports.get = function(key) {
 
     if (value === undefined) {
         log.error('Config variable missing in the config file: ' + key);
-        setTimeout(function() {
-            process.exit(1);
-        }, 5000);
     }
 
     return value;
