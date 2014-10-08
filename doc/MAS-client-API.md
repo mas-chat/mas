@@ -31,7 +31,7 @@ For example, the user wants to join a new channel and sends JOIN command. The se
 All MAS listen and send requests must contain an authentication cookie. Cookie format is
 
 ```
-Cookie: ProjectEvergreen=<userId>-<secToken>-n
+Cookie: auth=<userId>-<secToken>-n
 ```
 
 **userId**: User ID (integer). Returned by the server after a successful login.

@@ -32,7 +32,7 @@ Mas.MainController = Ember.ArrayController.extend({
 
         logout: function() {
             Mas.networkMgr.send({ id: 'LOGOUT' }, function() {
-                $.removeCookie('ProjectEvergreen', { path: '/' });
+                $.removeCookie('auth', { path: '/' });
                 window.location = '/';
             });
         }
