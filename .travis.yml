@@ -10,4 +10,4 @@ before_install:
   - sudo /etc/init.d/ircd-irc2 start
 before_script:
   - casperjs --version
-  - ./scripts/travis-install-slimerjs.sh
+  - ./bin/travis-install-slimerjs.sh

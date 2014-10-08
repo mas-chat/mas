@@ -78,7 +78,7 @@ if [ ! -f $CONFIG_FILE ]; then
     exit 1
 fi
 
-source $ROOT/scripts/read_ini.sh
+source $ROOT/bin/read_ini.sh
 
 read_ini $CONFIG_FILE --booleans 0
 

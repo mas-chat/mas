@@ -60,7 +60,7 @@ MacOS/Linux/Windows.
 6. Launch the server components
 
    ```bash
-   $ ./scripts/masctl -c start
+   $ ./bin/masctl -c start
    ```
 
 7. Browse to ```http://localhost:3200/``` and register an account.
