@@ -80,7 +80,7 @@
     "gulp-jscs": "~1.1.2"
   },
   "scripts": {
-    "test": "gulp jshint && gulp build-assets && ./scripts/run-tests.sh"
+    "test": "gulp jshint && gulp build-assets && ./bin/run-tests.sh"
   },
   "repository": {
     "type": "git",

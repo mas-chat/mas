@@ -16,10 +16,10 @@ sleep 1
 
 redis-cli -p 44144 flushall
 
-./scripts/masctl -b -c start --configFile test/mas-test.conf
+./bin/masctl -b -c start --configFile test/mas-test.conf
 
 function finish {
-    ./scripts/masctl -c stop --configFile test/mas-test.conf
+    ./bin/masctl -c stop --configFile test/mas-test.conf
     kill $REDIS_PID
     wait $REDIS_PID
     echo "Exit code: $RET_CODE"
