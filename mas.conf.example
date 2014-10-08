@@ -10,6 +10,7 @@
 [common]
 env=default
 admin=1
+dev_mode=false
 
 [site]
 url=http://localhost:3200
