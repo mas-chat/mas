@@ -22,7 +22,7 @@ module.exports = function authenticate() {
     return function *authenticate(next) {
         var valid = true;
         var userId, secret, data, expect;
-        var cookie = this.cookies.get('ProjectEvergreen');
+        var cookie = this.cookies.get('auth');
         var ts = Math.round(Date.now() / 1000);
 
         if (!cookie) {

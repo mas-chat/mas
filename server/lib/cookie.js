@@ -51,7 +51,7 @@ exports.createSession = function *(userId) {
 };
 
 exports.set = function(userId, secret, expires, ctx) {
-    ctx.cookies.set('ProjectEvergreen', userId + '-' + secret + '-n', {
+    ctx.cookies.set('auth', userId + '-' + secret + '-n', {
         expires: new Date(expires * 1000),
         path: '/',
         httpOnly: false
