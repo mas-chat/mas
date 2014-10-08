@@ -28,7 +28,7 @@ var paths = {
         'server/**/*.js',
         '!server/public/dist/**/*.js',
         'mas-private/**/*.js',
-        'scripts/masctl.js'
+        'bin/masctl.js'
     ],
     clientJavaScripts: [
         'app/**/*.js',
