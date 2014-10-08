@@ -30,7 +30,11 @@ exports.info = function(userId, msg) {
 };
 
 exports.warn = function(userId, msg) {
-    logEntry('warn', userId, msg, function() {});
+    logEntry('warn', userId, msg, function() {
+        if (conf.get('common:dev_mode')) {
+            process.exit(6);
+        }
+    });
 };
 
 exports.error = function(userId, msg) {
