@@ -1,13 +1,11 @@
 
-MAS client API
-==============
+# MAS client API
 
 Version: 1
 
 Work in progress.
 
-Introduction
-============
+# Introduction
 
 MAS protocol is message based, server driven and built on top of long polling. It is designed with WebSockets support in mind. WebSockets transport will be added when all browsers and mobile OSes have adequate support for it.
 
@@ -28,8 +26,7 @@ the client creates a second HTTP connection and sends **MAS send request** conta
 
 For example, the user wants to join a new channel and sends JOIN command. The server responds with HTTP 200 OK and closes the HTTP connection. The server then processes the join command and sends JOIN_RESP as a reply to the active MAS listen HTTP GET request.
 
-Authentication
-==============
+# Authentication
 
 All MAS listen and send requests must contain an authentication cookie. Cookie format is
 
@@ -41,15 +38,13 @@ Cookie: ProjectEvergreen=<userId>-<secToken>-n
 
 **secToken**: Security token (integer). Returned by the server after a successful login.
 
-Session management
-==================
+# Session management
 
 The user is allowed to have multiple active connections to the server. A new session ID is generated after every initial MAS listen request. Client must include session ID to all HTTP requests after initial MAS listen HTTP GET request.
 
 If the session ID becomes invalid because of long break between HTTP listen requests, the server will respond with the HTTP status code ```not acceptable```. In this case the client can initate new sesssion.
 
-MAS listen request
-==================
+# MAS listen request
 
 ```
 POST /api/v1/listen
@@ -111,8 +106,7 @@ An active session is currently deleted after six hours of idle time.
 Below is the list of commands that MAS server can send to a client.
 A command is always request for the client to take some action.
 
-ADDNTF
-------
+## ADDNTF
 
 Add a new sticky message to window.
 
@@ -126,8 +120,7 @@ Add a new sticky message to window.
 }
 ```
 
-ADDURL
-------
+## ADDURL
 
 Add a new url to window url list.
 
@@ -140,8 +133,7 @@ Add a new url to window url list.
 }
 ```
 
-ADDTEXT
--------
+## ADDTEXT
 
 Add a messge to window.
 
@@ -164,8 +156,7 @@ Add a messge to window.
 
 ```gid``` is a globally unique identifier (integer) for the message. Given two messages, a newer one has always larger gid. Gid can increase by more than one between subsequent messages inside a window.
 
-BANLIST
--------
+## BANLIST
 
 Update window ban list.
 
@@ -181,8 +172,7 @@ Update window ban list.
 }
 ```
 
-CLOSE
------
+## CLOSE
 
 Close window.
 
@@ -194,8 +184,7 @@ Close window.
 }
 ```
 
-CREATE
-------
+## CREATE
 
 Create new window. Window identifier is either ```userId``` or ```name```.
 
@@ -229,8 +218,7 @@ Create new window. Window identifier is either ```userId``` or ```name```.
 
 ```userId``` is included only if ```type``` is ```1ion1```
 
-USERS
------
+## USERS
 
 Information about the other users. Server sends USERS command containing a userId before that userId is used in any other message.
 
@@ -254,8 +242,7 @@ Information about the other users. Server sends USERS command containing a userI
 
 Server can send USERS command to update information that it sent in earlier USERS command. This happends for example when any user changes his nick.
 
-FRIENDS
--------
+## FRIENDS
 
 Full list of user's contacts (friends).
 
@@ -279,8 +266,7 @@ Full list of user's contacts (friends).
 
 ```last``` is included if ```online``` is ```false```. It's a unix timestamp indicating when this user was logged in last time. Also possible is a special value ```-1``` which means this user hasn't ever logged in.
 
-FRIENDSUPDATE
--------------
+## FRIENDSUPDATE
 
 An update to the initial list received with ```FRIENDS``` commands. Contains new information regarding one specific user.
 
@@ -296,8 +282,7 @@ An update to the initial list received with ```FRIENDS``` commands. Contains new
 
 Fields are same as in ```FRIENDS``` command.
 
-INFO
-----
+## INFO
 
 Show a generic info message.
 
@@ -309,8 +294,7 @@ Show a generic info message.
 }
 ```
 
-INITDONE
---------
+## INITDONE
 
 Initialization is complete. Hint that client can now render the UI as all initial messages (backlog) have arrived. Allows client to not update UI based on every received ADDTEXT command at session startup. Can lead to more responsive UI.
 
@@ -321,16 +305,15 @@ Initialization is complete. Hint that client can now render the UI as all initia
 
 ```
 
-LOGS
-----
+## LOGS
 
 Update Information about user log files.
 
 ```
+TBD
 ```
 
-ADDMEMBERS
-----------
+## ADDMEMBERS
 
 Add or update users in window participant list.
 
@@ -358,8 +341,7 @@ If ```reset``` is true, then the existing list needs to be cleared. Otherwise th
 
 ```role``` Value is either ```@``` if the user is an operator, ```+``` if the user has voice, and ```u``` if the user is a normal user.
 
-DELMEMBERS
-----------
+## DELMEMBERS
 
 Remove one or more users from window participant list.
 
@@ -377,32 +359,31 @@ Remove one or more users from window participant list.
 }
 ```
 
-NICK
-----
+## NICK
 
 Update user nick names in various networks.
 
 ```
+TBD
 ```
 
-OPERLIST
---------
+## OPERLIST
 
 Update window ban list.
 
 ```
+TBD
 ```
 
-REQF
-----
+## REQF
 
 Show a friend request.
 
 ```
+TBD
 ```
 
-SESSIONID
----------
+## SESSIONID
 
 Set session ID.
 
@@ -414,8 +395,7 @@ Set session ID.
 }
 ```
 
-SET
----
+## SET
 
 Update settings.
 
@@ -433,16 +413,15 @@ Update settings.
 }
 ```
 
-TOPIC
------
+## TOPIC
 
-Update window topic.
+Update window topic. (TBD: merge with UPDATE)
 
 ```
+TBD
 ```
 
-UPDATE
-------
+## UPDATE
 
 Update existing parameter for existing window.
 
@@ -460,8 +439,7 @@ Updates a value initially received in ```CREATE``` command.
 Attributes in ```CREATE``` command that can be update are: ```password```.
 
 
-MAS send request
-================
+# MAS send request
 
 In addition of listening commands from the server, the client can send commands to the server at any time after the initial MAS listen request.
 
@@ -498,8 +476,7 @@ Response body is always empty.
 
 Following commands are supported. Under every command is corresponding response.
 
-SEND
-----
+## SEND
 
 ```
 {
@@ -510,11 +487,9 @@ SEND
 }
 ```
 
-SEND_RESP
----------
+### SEND_RESP
 
-JOIN
-----
+## JOIN
 
 Join to new MAS group or IRC channel
 
@@ -528,11 +503,9 @@ Join to new MAS group or IRC channel
 }
 ```
 
-JOIN_RESP
----------
+### JOIN_RESP
 
-CREATE
-------
+## CREATE
 
 Create new MAS group
 
@@ -545,41 +518,29 @@ Create new MAS group
 }
 ```
 
-CREATE_RESP
------------
+### CREATE_RESP
 
-CLOSE
------
+## CLOSE
 
-CLOSE_RESP
-----------
+### CLOSE_RESP
 
-REST
-----
+## REST
 
-REST_RESP
----------
+### REST_RESP
 
-SEEN
-----
+## SEEN
 
-SEEN_RESP
----------
+### SEEN_RESP
 
-GETLOG
-------
+## GETLOG
 
-GETLOG_RESP
------------
+### GETLOG_RESP
 
-STARTCHAT
----------
+## STARTCHAT
 
-STARTCHAT_RESP
---------------
+### STARTCHAT_RESP
 
-LOGOUT
-------
+## LOGOUT
 
 End session immediately
 
@@ -589,8 +550,7 @@ End session immediately
 }
 ```
 
-LOGOUT_RESP
------------
+### LOGOUT_RESP
 
 ```
 {
@@ -598,32 +558,23 @@ LOGOUT_RESP
 }
 ```
 
-SET
----
+## SET
 
-SET_RESP
---------
+### SET_RESP
 
-ADDF
-----
+## ADDF
 
-ADDF_RESP
----------
+### ADDF_RESP
 
-OKF
----
+## OKF
 
-OKF_RESP
---------
+### OKF_RESP
 
-NOKF
-----
+## NOKF
 
-NOKF_RESP
----------
+### NOKF_RESP
 
-UPDATE_PASSWORD
----------------
+## UPDATE_PASSWORD
 
 ```JSON
 {
@@ -636,8 +587,7 @@ UPDATE_PASSWORD
 
 Password protection will be disabled if ```password``` is ```null```.
 
-UPDATE_PASSWORD_RESP
---------------------
+### UPDATE_PASSWORD_RESP
 
 ```JSON
 {
@@ -649,8 +599,7 @@ UPDATE_PASSWORD_RESP
 
 Contains ```errorMsg``` property if the status is not ```OK```
 
-UPDATE_TOPIC
-------------
+## UPDATE_TOPIC
 
 ```JSON
 {
@@ -661,8 +610,7 @@ UPDATE_TOPIC
 }
 ```
 
-UPDATE_PASSWORD_RESP
---------------------
+### UPDATE_PASSWORD_RESP
 
 ```JSON
 {
