@@ -30,7 +30,7 @@ $(function() {
             $('#login-form').serialize(),
             function(data) {
                 if (data.success === true) {
-                    $.cookie('ProjectEvergreen', data.userId + '-' + data.secret + '-n', {
+                    $.cookie('auth', data.userId + '-' + data.secret + '-n', {
                         path: '/',
                         expires: new Date(data.expires)
                     });
