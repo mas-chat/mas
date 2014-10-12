@@ -28,6 +28,7 @@ Mas.Window = Ember.Object.extend({
 
     windowId: 0,
     name: null,
+    userId: null,
     network: null,
     type: null,
     row: null,
@@ -53,6 +54,29 @@ Mas.Window = Ember.Object.extend({
     userNames: function() {
         return this._mapUserIdsToNicks('users');
     }.property('users.@each', 'Mas.userdb.users.@each.nick'),
+
+
+    decoratedTitle: function() { // (name, topic)
+        var title;
+        var name = this.get('name');
+        var network = this.get('network');
+
+        if (this.get('type') === '1on1') {
+            var conversationNetwork = network === 'MAS' ? '' : network + ' ';
+            title = 'Private ' + conversationNetwork + 'conversation with ' +
+                Mas.userDb.getNick(this.get('userId'));
+        } else if (network === 'MAS') {
+            title = 'Group: ' + name.charAt(0).toUpperCase() + name.substr(1);
+        } else {
+            title = network + ': ' + name;
+        }
+
+        return title;
+    }.property('name', 'network', 'type', 'Mas.userdb.users.@each.nick'),
+
+    decoratedTopic: function() {
+        return this.get('topic') ? '- ' + this.get('topic') : '';
+    }.property('topic'),
 
     simplifiedName: function() {
         var name = this.get('name');
