@@ -1,6 +1,7 @@
+/*global fs*/
 
 var prefix = fs.absolute(fs.workingDirectory + '/test/integration');
-var helpers = require(prefix + '/lib/helpers')
+var helpers = require(prefix + '/lib/helpers');
 
 helpers.setup(casper);
 
