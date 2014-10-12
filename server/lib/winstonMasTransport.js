@@ -31,7 +31,9 @@ var MasConsoleLogger = function (options) {
 util.inherits(MasConsoleLogger, winston.Transport);
 
 MasConsoleLogger.prototype.log = function (level, msg, meta, callback) {
-    var processName = process.title.split('-')[1];
+    var processParts = process.title.split('-');
+    var processName = processParts[1];
+    var processExtension = processParts[2];
     var userId = meta.userId;
 
     var processColumn;
@@ -40,7 +42,7 @@ MasConsoleLogger.prototype.log = function (level, msg, meta, callback) {
 
     switch(processName) {
         case 'irc':
-            processColumn = 'irc  '.green;
+            processColumn = (processExtension === 'connman' ? 'ircco' : 'irc  ').green;
             break;
         case 'frontend':
             processColumn = 'front'.blue;
