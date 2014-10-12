@@ -14,8 +14,6 @@ REDIS_PID=$!
 echo "Waiting 1 second for the redis to start."
 sleep 1
 
-redis-cli -p 44144 flushall
-
 ./bin/masctl -b -c start --configFile test/mas-test.conf
 
 function finish {

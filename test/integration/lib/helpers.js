@@ -1,4 +1,22 @@
 
+exports.setup = function(casper) {
+    function captureAndExit() {
+        casper.log('Test failed. Taking screenshot', 'info');
+        casper.capture('fail.png');
+        casper.exit(1);
+    }
+
+    casper.on('page.error', function(msg, trace) {
+        this.echo('Error on page: ' + msg + 'Trace: ' + trace);
+        captureAndExit();
+    });
+};
+
+exports.clearDb = function(casper) {
+    casper.thenOpen('http://localhost:44199/dev/reset');
+    casper.waitForText('OK');
+};
+
 exports.registerUser = function(casper, test, options) {
     casper.thenOpen('http://localhost:44199/register');
 

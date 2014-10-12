@@ -2,20 +2,7 @@
 var prefix = fs.absolute(fs.workingDirectory + '/test/integration');
 var helpers = require(prefix + '/lib/helpers')
 
-// Common start
-
-function captureAndExit() {
-    casper.log('Test failed. Taking screenshot', 'info');
-    casper.capture('fail.png');
-    casper.exit(1);
-}
-
-casper.on('page.error', function(msg, trace) {
-    this.echo('Error on page: ' + msg + 'Trace: ' + trace);
-    captureAndExit();
-});
-
-// Common end. TBD: Split to a separate file when slimerjs is fixed
+helpers.setup(casper);
 
 casper.test.begin('Register new user', 9, function suite(test) {
     // Register first user
@@ -23,6 +10,8 @@ casper.test.begin('Register new user', 9, function suite(test) {
     casper.start('http://localhost:44199/', function() {
         this.viewport(1024, 768);
     });
+
+    helpers.clearDb(casper);
 
     helpers.registerUser(casper, test, {
         name: 'Bruce Lee',
