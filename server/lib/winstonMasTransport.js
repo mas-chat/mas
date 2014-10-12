@@ -80,4 +80,26 @@ MasConsoleLogger.prototype.log = function (level, msg, meta, callback) {
     callback(null, true);
 };
 
+MasConsoleLogger.prototype.logException = function(msg, meta, callback) {
+    var that = this;
+
+    function onLogged() {
+        that.removeListener('error', onError);
+        callback();
+    }
+
+    function onError() {
+        that.removeListener('logged', onLogged);
+        callback();
+    }
+
+    this.once('logged', onLogged);
+    this.once('error', onError);
+    this.log('error', msg, meta, function() { });
+
+    meta.stack.forEach(function(line) {
+        console.log(line.red);
+    });
+};
+
 module.exports = MasConsoleLogger;
