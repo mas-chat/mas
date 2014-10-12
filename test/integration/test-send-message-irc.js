@@ -1,3 +1,7 @@
+
+var prefix = fs.absolute(fs.workingDirectory + '/test/integration');
+var helpers = require(prefix + '/lib/helpers')
+
 // Common start
 
 function captureAndExit() {
@@ -13,24 +17,18 @@ casper.on('page.error', function(msg, trace) {
 
 // Common end. TBD: Split to a separate file when slimerjs is fixed
 
-casper.test.begin('Register new user', 7, function suite(test) {
+casper.test.begin('Register new user', 9, function suite(test) {
     // Register first user
 
-    casper.start('http://localhost:44199/register', function() {
+    casper.start('http://localhost:44199/', function() {
         this.viewport(1024, 768);
     });
 
-    casper.waitForResource(/pages-libs\.js$/, function() {
-        test.assertTitle('MAS - Register', 'MAS register page title is the one expected');
-        test.assertExists('form[action="/register"]', 'Main form is found');
-        this.fill('form[action="/register"]', {
-            name: 'Bruce Lee',
-            email: 'bruce@lee.com',
-            password: 'brucelee',
-            confirm: 'brucelee',
-            nick: 'bruce',
-            tos: true
-        }, true);
+    helpers.registerUser(casper, test, {
+        name: 'Bruce Lee',
+        email: 'bruce@lee.com',
+        password: 'brucelee',
+        nick: 'bruce'
     });
 
     casper.waitForText('Welcome!', function() {
@@ -64,19 +62,11 @@ casper.test.begin('Register new user', 7, function suite(test) {
 
     // Register second user
 
-    casper.thenOpen('http://localhost:44199/register');
-
-    casper.waitForResource(/pages-libs\.js$/, function() {
-        test.assertTitle('MAS - Register', 'MAS register page title is the one expected');
-        test.assertExists('form[action="/register"]', 'Main form is found');
-        this.fill('form[action="/register"]', {
-            name: 'Jackie Chan',
-            email: 'jackie@chan.com',
-            password: 'jackiechan',
-            confirm: 'jackiechan',
-            nick: 'jackie',
-            tos: true
-        }, true);
+    helpers.registerUser(casper, test, {
+        name: 'Jackie Chan',
+        email: 'jackie@chan.com',
+        password: 'jackiechan',
+        nick: 'jackie'
     });
 
     casper.then(function() {
@@ -119,13 +109,9 @@ casper.test.begin('Register new user', 7, function suite(test) {
 
     // Log in as first user to verify sent text
 
-    casper.thenOpen('http://localhost:44199');
-
-    casper.waitForResource(/pages-libs\.js$/, function() {
-        this.fill('form#login-form', {
-            username: 'bruce@lee.com',
-            password: 'brucelee'
-        }, true);
+    helpers.loginUser(casper, test, {
+        username: 'bruce@lee.com',
+        password: 'brucelee'
     });
 
     casper.waitForText('Works finally!', function() {
