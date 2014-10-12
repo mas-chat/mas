@@ -25,25 +25,6 @@ Ember.Handlebars.helper('decoratedTimestamp', function(timestamp) {
         ts.format('ddd, MMM D') + '">' + ts.format('HH:mm') + '</div>');
 });
 
-Ember.Handlebars.helper('decoratedTitle', function(name, network, type, topic) {
-    var title;
-
-    if (type === '1on1') {
-        var conversationNetwork = network === 'MAS' ? '' : network + ' ';
-        title = 'Private ' + conversationNetwork + 'conversation with ' + name;
-    } else if (network === 'MAS') {
-        title = 'Group: ' + name.charAt(0).toUpperCase() + name.substr(1);
-    } else {
-        title = network + ': ' + name;
-    }
-
-    if (topic) {
-        title += ' - ' + Handlebars.Utils.escapeExpression(topic);
-    }
-
-    return new Handlebars.SafeString(title);
-});
-
 Ember.Handlebars.helper('dayDivider', function(list, index) {
     var dateForCurrent = moment.unix(list[index].get('ts'));
     var dateForPrevious = index === 0 ? null : moment.unix(list[index - 1].get('ts'));
