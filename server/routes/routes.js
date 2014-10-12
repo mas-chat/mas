@@ -22,6 +22,7 @@ var path = require('path'),
     mount = require('koa-mount'),
     bodyParser = require('koa-bodyparser'),
     conf = require('../lib/conf'),
+    redis = require('../lib/redis').createClient(),
     passport = require('../lib/passport'),
     cacheFilter = require('../lib/cacheFilter'),
     sessionFilter = require('../lib/sessionFilter'),
@@ -55,6 +56,13 @@ exports.register = function(app) {
     if (conf.get('yahooauth:enabled') === true) {
         app.get('/auth/yahoo', passport.authenticate('yahoo'));
         app.get('/auth/yahoo/callback', loginController.yahooLogin);
+    }
+
+    if (conf.get('common:test_mode') === true) {
+        app.get('/dev/reset', function *() {
+            yield redis.flushdb();
+            this.status = 200;
+        });
     }
 
     app.post('/login', bodyParser(), loginController.localLogin);
