@@ -11,6 +11,7 @@
 env=default
 admin=1
 dev_mode=false
+test_mode=false
 
 [site]
 url=http://localhost:3200
