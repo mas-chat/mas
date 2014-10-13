@@ -26,13 +26,30 @@ exports.getWindowIdsForNetwork = function *(userId, network) {
     return ids;
 };
 
-exports.getWindowId = function *(userId, network, name, type) {
-    var ids = yield getWindowIds(userId, network, name, type, 'id');
+exports.getGroupWindowIdsForNetwork = function *(userId, network) {
+    var ids = yield getWindowIds(userId, network, null, 'group', 'id');
+
+    return ids;
+};
+
+exports.getGroupWindowId = function *(userId, network, name) {
+    var ids = yield getWindowIds(userId, network, name, 'group', 'id');
 
     if (ids.length === 1) {
         return ids[0];
     } else {
-        log.warn(userId, 'Tried to find non-existing window: ' + name);
+        log.info(userId, 'Tried to find non-existing group window: ' + name);
+        return null;
+    }
+};
+
+exports.get1on1WindowId = function *(userId, network, targetUserId) {
+    var ids = yield getWindowIds(userId, network, targetUserId, '1on1', 'id');
+
+    if (ids.length === 1) {
+        return ids[0];
+    } else {
+        log.info(userId, 'Tried to find non-existing 1on1 window: ' + targetUserId);
         return null;
     }
 };
@@ -51,37 +68,20 @@ exports.getWindowIdByTargetUserId = function *(userId, targetUserId) {
     return null;
 };
 
-exports.getWindowNameAndNetwork = function *(userId, windowId) {
-    var windows = yield redis.smembers('windowlist:' + userId);
-
-    for (var i = 0; i < windows.length; i++) {
-        var details = windows[i].split(':');
-        if (parseInt(details[0]) === windowId) {
-            return [ details[2],  details[1], details[3] ];
-        }
-    }
-
-    return [ null, null, null ];
-};
-
-exports.getWindowNamesForNetwork = function *(userId, network) {
-    var ids = yield getWindowIds(userId, network, null, null, 'name');
-
-    return ids;
-};
-
 exports.getNetworks = function *(userId) {
     var networks = {};
 
     var windows = yield redis.smembers('windowlist:' + userId);
     for (var i = 0; i < windows.length; i++) {
-        var details = windows[i].split(':');
-        var windowNetwork = details[1];
-
+        var windowNetwork = yield redis.hget('window:' + userId + ':' + windows[i], 'network');
         networks[windowNetwork] = true;
     }
 
     return Object.keys(networks);
+};
+
+exports.getWindowNameAndNetwork = function *(userId, windowId) {
+    return yield getWindowNameAndNetwork(userId, windowId);
 };
 
 exports.createNewWindow = function *(userId, network, name, password, type) {
@@ -92,8 +92,6 @@ exports.createNewWindow = function *(userId, network, name, password, type) {
     var newWindow = {
         windowId: windowId,
         network: network,
-
-        name: name,
         type: type,
         sounds: false,
         titleAlert: false,
@@ -104,8 +102,14 @@ exports.createNewWindow = function *(userId, network, name, password, type) {
         topic: ''
     };
 
+    if (type === 'group') {
+        newWindow.name = name;
+    } else {
+        newWindow.userId = name;
+    }
+
     yield redis.hmset('window:' + userId + ':' + windowId, newWindow);
-    yield redis.sadd('windowlist:' + userId, windowId + ':' + network + ':' + name + ':' + type);
+    yield redis.sadd('windowlist:' + userId, windowId);
 
     if (newWindow.password === '') {
         newWindow.password = null; // Undo 'Redis can't store NULL' fix
@@ -114,24 +118,47 @@ exports.createNewWindow = function *(userId, network, name, password, type) {
     return newWindow;
 };
 
-function *getWindowIds(userId, network, name, type, returnType) {
+function *getWindowNameAndNetwork(userId, windowId) {
+    var details = yield redis.hgetall('window:' + userId + ':' + windowId);
+
+    return {
+        name: details ? details.name : null,
+        userId: details ? details.userId : null,
+        network: details ? details.network : null,
+        type: details ? details.type : null
+    };
+}
+
+function *getWindowIds(userId, network, nameOrUserId, type, returnType) {
     var windows = yield redis.smembers('windowlist:' + userId);
     var ret = [];
 
     for (var i = 0; i < windows.length; i++) {
-        var details = windows[i].split(':');
-        var windowId = parseInt(details[0]);
-        var windowNw = details[1];
-        var windowName = details[2];
-        var windowType = details[3];
+        var candidateWindowId = parseInt(windows[i]);
+        var candidate = yield getWindowNameAndNetwork(userId, candidateWindowId);
 
-        if (!network || windowNw === network && (!name || windowName === name) &&
-            (!type || type === windowType)) {
-            if (returnType === 'id') {
-                ret.push(windowId);
-            } else if (returnType === 'name') {
-                ret.push(windowName);
-            }
+        if (network && candidate.network !== network) {
+            continue;
+        }
+
+        if (type && type !== candidate.type) {
+            continue;
+        }
+
+        if (nameOrUserId && type === 'group' && candidate.name !== nameOrUserId) {
+            continue;
+        }
+
+        if (nameOrUserId && type === '1on1' && candidate.userId !== nameOrUserId) {
+            continue;
+        }
+
+        // We have a match
+
+        if (returnType === 'id') {
+            ret.push(candidateWindowId);
+        } else if (returnType === 'name') {
+            ret.push(candidate.name);
         }
     }
 

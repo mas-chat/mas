@@ -28,12 +28,7 @@ exports.broadcast = function *(userId, network, msg) {
     }
 };
 
-exports.send = function *(userId, network, name, type, msg) {
-    msg.windowId = yield windowHelper.getWindowId(userId, network, name, type);
-    yield processTextLine(userId, msg, null);
-};
-
-exports.sendByWindowId = function *(userId, windowId, msg, excludeSession) {
+exports.send = function *(userId, windowId, msg, excludeSession) {
     msg.windowId = windowId;
     yield processTextLine(userId, msg, excludeSession);
 };
