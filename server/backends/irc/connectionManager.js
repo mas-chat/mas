@@ -122,7 +122,7 @@ courier.on('write', function(params) {
     var data = params.line;
 
     if (!socket) {
-        log.warn(userId, 'Non-existent socket');
+        log.info(userId, 'Non-existent socket');
         return;
     }
 
@@ -195,15 +195,15 @@ function connect(userId, nick, network) {
     });
 
     socket.on('end', function() {
-        handleEnd(false, userId, network);
+        handleEnd(userId, network, null);
     });
 
-    socket.on('error', function() {
-        handleEnd(true, userId, network);
+    socket.on('error', function(error) {
+        handleEnd(userId, network, error);
     });
 
-    socket.on('close', function(hadError) {
-        handleEnd(hadError, userId, network);
+    socket.on('close', function() {
+        handleEnd(userId, network, null);
     });
 
     sockets[userId + ':' + network] = socket;
@@ -229,12 +229,12 @@ function handlePing(socket, line) {
     return true;
 }
 
-function handleEnd(hadError, userId, network) {
+function handleEnd(userId, network, error) {
     var socket = sockets[userId + ':' + network];
+    var reason = error ? error.code : 'connection closed by the server';
 
     if (!socket) {
-        // Already handled
-        return;
+        return; // Already handled
     }
 
     delete sockets[userId + ':' + network];
@@ -246,6 +246,6 @@ function handleEnd(hadError, userId, network) {
         type: 'disconnected',
         userId: userId,
         network: network,
-        reason: hadError ? 'transmission error' : 'connection closed by the server'
+        reason: reason
     });
 }
