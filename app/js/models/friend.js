@@ -17,4 +17,10 @@
 'use strict';
 
 Mas.Friend = Ember.Object.extend({
+    userId: null,
+
+    name: function() {
+        var userId = this.get('userId');
+        return Mas.userDb.getName(userId);
+    }.property('Mas.userdb.users.@each.nick'),
 });

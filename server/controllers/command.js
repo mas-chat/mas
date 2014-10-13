@@ -33,9 +33,10 @@ module.exports = function *() {
     var windowId = command.windowId;
 
     var result = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
-    var name = result[0];
-    var network = result[1] || command.network;
-    var type = result[2];
+    var name = result.name;
+    var targetUserId = result.userId;
+    var network = result.network || command.network;
+    var type = result.type;
     var backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
 
     log.info(userId, 'Prosessing command: ' + command.id);
@@ -44,28 +45,17 @@ module.exports = function *() {
 
     switch (command.id) {
         case 'SEND':
-            if (network === 'MAS' && type === '1on1') {
-                var targetUserId = yield redis.hget('window:' + userId + ':' + windowId,
-                    'targetUserId');
-
-                yield courier.send(backend, {
-                    type: 'sendPrivate',
-                    userId: userId,
-                    targetUserId: targetUserId,
-                    text: command.text
-                });
-            } else {
-                yield courier.send(backend, {
-                    type: 'send',
-                    userId: userId,
-                    network: network,
-                    name: name,
-                    text: command.text
-                });
-            }
+            yield courier.send(backend, {
+                type: 'send',
+                userId: userId,
+                network: network,
+                name: name,
+                targetUserId: targetUserId,
+                text: command.text
+            });
 
             // Update user's other sessions
-            yield textLine.sendByWindowId(userId, windowId, {
+            yield textLine.send(userId, windowId, {
                 userId: userId,
                 cat: 'mymsg',
                 body: command.text
@@ -113,8 +103,7 @@ module.exports = function *() {
             });
 
             // Redis cleanup
-            yield redis.srem('windowlist:' + userId,
-                windowId + ':' + network + ':' + name + ':' + type);
+            yield redis.srem('windowlist:' + userId, windowId);
             yield redis.del('window:' + userId + ':' + windowId);
             yield redis.del('windowmsgs:' + userId + ':' + windowId);
             yield redis.del('names:' + userId + ':' + windowId);
@@ -178,20 +167,21 @@ module.exports = function *() {
             break;
 
         case 'CHAT':
-            windowId = yield windowHelper.getWindowId(userId, network, command.nick, '1on1');
+            var targetUserId = command.userId;
+            windowId = yield windowHelper.get1on1WindowId(userId, network, targetUserId, '1on1');
 
             if (windowId !== null) {
                 yield outbox.queue(userId, sessionId, {
                     id: 'CHAT_RESP',
                     status: 'ERROR',
-                    errorMsg: 'You are already chatting with ' + command.nick
+                    errorMsg: 'You are already chatting with this person.'
                 });
             } else {
                 yield courier.send(backend, {
                     type: 'chat',
                     userId: userId,
                     network: network,
-                    nick: command.nick
+                    targetUserId: targetUserId
                 });
             }
             break;

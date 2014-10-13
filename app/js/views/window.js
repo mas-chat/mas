@@ -82,7 +82,7 @@ Mas.WindowView = Ember.View.extend(Mas.UploadMixin, {
             placement: 'right'
         });
 
-        var selectedNick;
+        var selectedUserId;
 
         this.$('.window-members').contextmenu({
             target: '#window-contextMenu',
@@ -94,13 +94,15 @@ Mas.WindowView = Ember.View.extend(Mas.UploadMixin, {
                 }
 
                 e.preventDefault();
-                selectedNick = $target.text();
+                var selectedNick = $target.text();
+                selectedUserId = $target.data('userid');
+
                 this.getMenu().find('li').eq(0).text(selectedNick);
                 return true;
             },
             onItem: function(context, e) {
                 var action = $(e.target).data('action');
-                that.get('controller').send(action, selectedNick);
+                that.get('controller').send(action, selectedUserId);
             }
         });
 

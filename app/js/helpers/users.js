@@ -19,7 +19,17 @@
 Mas.Users = Ember.Object.extend({
     users: {},
 
+    // TBD: Consider ember.map?
+
     getNick: function(userId) {
-        return this.users[userId] ? this.users[userId].nick : 'UNKNOWN';
+        return this._getProperty(userId, 'nick');
+    },
+
+    getName: function(userId) {
+        return this._getProperty(userId, 'name');
+    },
+
+    _getProperty: function(userId, prop) {
+        return this.users[userId] ? this.users[userId][prop] : 'UNKNOWN';
     }
 });

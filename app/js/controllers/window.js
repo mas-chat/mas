@@ -51,11 +51,11 @@ Mas.WindowController = Ember.ObjectController.extend({
             }));
         },
 
-        chat: function(nick) {
+        chat: function(userId) {
             Mas.networkMgr.send({
                 id: 'CHAT',
                 windowId: this.get('windowId'),
-                nick: nick
+                userId: userId
             }, function(resp) {
                 if (resp.status !== 'OK') {
                     this.send('openModal', 'info-modal', { title: 'Error', body: resp.errorMsg });
@@ -63,35 +63,39 @@ Mas.WindowController = Ember.ObjectController.extend({
             }.bind(this));
         },
 
-        whois: function(nick) {
+        whois: function(userId) {
             Mas.networkMgr.send({
                 id: 'WHOIS',
                 windowId: this.get('windowId'),
-                nick: nick
+                userId: userId
             });
         },
 
-        op: function(nick) {
+        op: function(userId) {
             Mas.networkMgr.send({
                 id: 'OP',
                 windowId: this.get('windowId'),
-                nick: nick
+                userId: userId
             });
         },
 
-        kick: function(nick) {
+        requestFriend: function(nick) {
+            nick = nick;
+        },
+
+        kick: function(userId) {
             Mas.networkMgr.send({
                 id: 'KICK',
                 windowId: this.get('windowId'),
-                nick: nick
+                userId: userId
             });
         },
 
-        kickban: function(nick) {
+        kickban: function(userId) {
             Mas.networkMgr.send({
                 id: 'KICKBAN',
                 windowId: this.get('windowId'),
-                nick: nick
+                userId: userId
             });
         },
 

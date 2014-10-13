@@ -34,7 +34,6 @@ co(function *() {
     yield createInitialGroups();
 
     courier.on('send', processSend);
-    courier.on('sendPrivate', processSendPrivate);
     courier.on('create', processCreate);
     courier.on('join', processJoin);
     courier.on('close', processClose);
@@ -43,25 +42,29 @@ co(function *() {
 
 function *processSend(params) {
     var name = params.name;
-    var members = yield redis.smembers('groupmembers:' + name);
 
-    for (var i = 0; i < members.length; i++) {
-        if (members[i] !== params.userId) {
-            yield textLine.send(members[i], 'MAS', name, 'group', {
-                userId: params.userId,
-                cat: 'msg',
-                body: params.text
-            });
+    if (!name) {
+        // 1on1 message
+        yield textLine.sendFromUserId(params.userId, params.targetUserId, {
+            userId: params.userId,
+            cat: 'msg',
+            body: params.text
+        });
+    } else {
+        var members = yield redis.smembers('groupmembers:' + name);
+
+        for (var i = 0; i < members.length; i++) {
+            if (members[i] !== params.userId) {
+                var windowId = yield windowHelper.getGroupWindowId(members[i], 'MAS', name);
+
+                yield textLine.send(members[i], windowId, {
+                    userId: params.userId,
+                    cat: 'msg',
+                    body: params.text
+                });
+            }
         }
     }
-}
-
-function *processSendPrivate(params) {
-    yield textLine.sendFromUserId(params.userId, params.targetUserId, {
-        userId: params.userId,
-        cat: 'msg',
-        body: params.text
-    });
 }
 
 function *processCreate(params) {
