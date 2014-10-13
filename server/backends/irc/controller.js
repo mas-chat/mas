@@ -469,7 +469,6 @@ function *handle376(userId, msg) {
     }
 
     for (var i = 0; i < windowIds.length; i++) {
-        console.log ('searching:' + userId + 'winid:' + windowIds[i])
         var channel = yield windowHelper.getWindowNameAndNetwork(userId, windowIds[i]);
 
         // Ask client to remove all old stale names
