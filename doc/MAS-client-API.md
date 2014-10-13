@@ -536,9 +536,37 @@ Create new MAS group
 
 ### GETLOG_RESP
 
-## STARTCHAT
+## CHAT
 
-### STARTCHAT_RESP
+```
+{
+  "id": 'CHAT',
+
+  "windowId":: 8,
+  "userId": "mr43432"
+}
+```
+
+### CHAT_RESP
+
+```
+{
+  "id": 'CHAT_RESP',
+
+  "status": "OK"
+}
+```
+
+or
+
+```
+{
+  "id": 'CHAT_RESP',
+
+  "status": "ERROR",
+  "errorMsg": "You are already chatting with this person."
+}
+```
 
 ## LOGOUT
 
