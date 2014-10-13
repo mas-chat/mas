@@ -113,7 +113,7 @@ Mas.Window = Ember.Object.extend({
             return {
                 userId: userId,
                 nick: Mas.userDb.getNick(userId)
-            }
+            };
         });
     }
 });
