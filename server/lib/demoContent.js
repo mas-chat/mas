@@ -48,14 +48,14 @@ module.exports.enable = function() {
                     url = 'http://placeimg.com/640/480/nature/' + randomImgFileName + '.jpg';
                 }
 
-                var windowId = parseInt(details.split(':')[0]);
+                var windowId = parseInt(details);
                 var msg = {
                     body: faker.Lorem.sentence(sentenceLength) + ' ' + url,
-                    userId: 'mFIXME',
+                    userId: 'mDEMO', // TBD: This user must exist
                     cat: 'msg'
                 };
 
-                yield textLine.sendByWindowId(demoUserId, windowId, msg, null);
+                yield textLine.send(demoUserId, windowId, msg);
             }
         }
     })();

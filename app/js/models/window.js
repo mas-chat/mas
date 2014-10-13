@@ -110,7 +110,10 @@ Mas.Window = Ember.Object.extend({
 
     _mapUserIdsToNicks: function(role) {
         return this.get(role).map(function(userId) {
-            return Mas.userDb.getNick(userId);
+            return {
+                userId: userId,
+                nick: Mas.userDb.getNick(userId)
+            }
         });
     }
 });

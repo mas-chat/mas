@@ -67,11 +67,11 @@ redis.call('LPUSH', outbox, cjson.encode({
 }))
 
 -- Iterate through windows
-local windows = redis.call('SMEMBERS', 'windowlist:' .. userId)
+local windowIds = redis.call('SMEMBERS', 'windowlist:' .. userId)
 local allUsers = {}
 
-for i = 1, #windows do
-    local windowId, network = unpack(split(windows[i], ':'))
+for i = 1, #windowIds do
+    local windowId = windowIds[i]
     local window = hgetall('window:' .. userId .. ':' .. windowId)
 
     if window.password == '' then
@@ -81,8 +81,9 @@ for i = 1, #windows do
     redis.call('LPUSH', outbox, cjson.encode({
         ['id'] = 'CREATE',
         ['windowId'] = tonumber(windowId),
-        ['network'] = network,
-        ['name'] = window.name,
+        ['network'] = window.network,
+        ['name'] = window.name, -- name is undefined and this property isn't added if the window is 1on1
+        ['userId'] = window.userId, -- userId is undefined and this property isn't added if the window is group
         ['type'] = window.type,
         ['sounds'] = window.sounds == 'true',
         ['titleAlert'] = window.titleAlert == 'true',
@@ -96,7 +97,7 @@ for i = 1, #windows do
     if window.type == 'group' then
         local members = {}
 
-        if network == 'MAS' then
+        if window.network == 'MAS' then
             local ids = redis.call('SMEMBERS', 'groupmembers:' .. window.name)
 
             for i, masUserId in pairs(ids) do
@@ -129,6 +130,9 @@ for i = 1, #windows do
                 ['members'] = members
             }))
         end
+    else
+        -- 1on1
+        seenUser(window.userId)
     end
 
     local lines = redis.call('LRANGE', 'windowmsgs:' .. userId .. ':' .. windowId, 0, -1);
