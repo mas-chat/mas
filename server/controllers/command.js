@@ -167,7 +167,7 @@ module.exports = function *() {
             break;
 
         case 'CHAT':
-            var targetUserId = command.userId;
+            targetUserId = command.userId;
             windowId = yield windowHelper.get1on1WindowId(userId, network, targetUserId, '1on1');
 
             if (windowId !== null) {
