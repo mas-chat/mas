@@ -59,7 +59,7 @@ exports.register = function(app) {
     }
 
     if (conf.get('common:test_mode') === true) {
-        app.get('/dev/reset', function *() {
+        app.get('/dev/reset', function*() {
             yield redis.flushdb();
             this.status = 200;
         });

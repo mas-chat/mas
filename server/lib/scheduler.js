@@ -17,7 +17,7 @@
 'use strict';
 
 var co = require('co'),
-    cronJob = require('cron').CronJob,
+    CronJob = require('cron').CronJob,
     redis = require('./redis').createClient(),
     log = require('./log'),
     friends = require('./friends'),
@@ -25,13 +25,13 @@ var co = require('co'),
 
 exports.init = function() {
     // Once in a minute
-    new cronJob('0 */1 * * * *', deleteIdleSessions, null, true);
+    new CronJob('0 */1 * * * *', deleteIdleSessions, null, true);
 };
 
 function deleteIdleSessions() {
     log.info('Running deleteIdleSessions job');
 
-    co(function *() {
+    co(function*() {
         var ts = Math.round(Date.now() / 1000) - conf.get('session:idle_timeout');
         var list = yield redis.zrangebyscore('sessionlastrequest', '-inf', ts);
 

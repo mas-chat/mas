@@ -17,7 +17,7 @@
 var path = require('path'),
     fs = require('fs'),
     winston = require('winston'),
-    masTransport = require('./winstonMasTransport'),
+    MasTransport = require('./winstonMasTransport'),
     conf = require('./conf');
 
 require('colors');
@@ -91,7 +91,7 @@ function configTransports() {
         transports.push(fileTransport);
     }
 
-    var consoleTransport = new (masTransport)({
+    var consoleTransport = new (MasTransport)({
         handleExceptions: true
     });
 

@@ -27,7 +27,7 @@ if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
-module.exports = function *() {
+module.exports = function*() {
     var file = this.params.file;
     var firstTwo = file.substring(0, 2);
 

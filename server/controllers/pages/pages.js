@@ -16,7 +16,7 @@
 
 'use strict';
 
-module.exports = function *() {
+module.exports = function*() {
     var page = this.request.url.replace(/\/(.*)\.html/, '$1');
 
     yield this.render(page, {

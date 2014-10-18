@@ -30,7 +30,7 @@ var transporter = nodemailer.createTransport();
 var template = handlebars.compile(fs.readFileSync(path.join(
     __dirname, '..', 'emails', 'resetPassword.hbs'), 'utf8'));
 
-exports.create = function *() {
+exports.create = function*() {
     var email = this.request.body.email;
     var userId = yield redis.hget('index:user', email.toLowerCase());
 

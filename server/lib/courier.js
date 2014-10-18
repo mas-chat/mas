@@ -34,8 +34,8 @@ function Courier(name) {
     log.info('New Courier instance created.');
 }
 
-Courier.prototype.start = function () {
-    co(function *() {
+Courier.prototype.start = function() {
+    co(function*() {
         while (1) {
             var result = yield rcvRedis.brpop('inbox:' + this.name, 0);
             var msg = JSON.parse(result[1]);
@@ -54,7 +54,7 @@ Courier.prototype.start = function () {
     }).call(this);
 };
 
-Courier.prototype.send = function *(dest, msg) {
+Courier.prototype.send = function*(dest, msg) {
     var data = convert(msg, this.name, dest);
     yield sendRedis.lpush('inbox:' + dest, data);
 };

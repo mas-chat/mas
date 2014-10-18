@@ -19,7 +19,7 @@
 var redis = require('./redis').createClient(),
     windowHelper = require('./windows');
 
-exports.broadcast = function *(userId, network, msg) {
+exports.broadcast = function*(userId, network, msg) {
     var windowIds = yield windowHelper.getWindowIdsForNetwork(userId, network);
 
     for (var i = 0; i < windowIds.length; i++) {
@@ -28,12 +28,12 @@ exports.broadcast = function *(userId, network, msg) {
     }
 };
 
-exports.send = function *(userId, windowId, msg, excludeSession) {
+exports.send = function*(userId, windowId, msg, excludeSession) {
     msg.windowId = windowId;
     yield processTextLine(userId, msg, excludeSession);
 };
 
-exports.sendFromUserId = function *(userId, targetUserId, msg) {
+exports.sendFromUserId = function*(userId, targetUserId, msg) {
     msg.windowId = yield windowHelper.getWindowIdByTargetUserId(targetUserId, userId);
     yield processTextLine(targetUserId, msg, null);
 };

@@ -34,7 +34,7 @@ const OPER = '@';
 const VOICE = '+';
 const USER = 'u';
 
-co(function *() {
+co(function*() {
     yield redisModule.loadScripts();
 
     courier.on('send', processSend);
@@ -103,7 +103,7 @@ function *processJoin(params) {
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'JOIN_RESP',
-        status: 'OK',
+        status: 'OK'
     });
 
     yield outbox.queueAll(params.userId, createCommand);
@@ -115,7 +115,7 @@ function *processChat(params) {
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'CHAT_RESP',
-        status: 'OK',
+        status: 'OK'
     });
 
     yield outbox.queueAll(params.userId, createCommand);
@@ -159,7 +159,7 @@ function *processUpdatePassword(params) {
 
         yield outbox.queue(params.userId, params.sessionId, {
             id: 'UPDATE_PASSWORD_RESP',
-            status: 'OK',
+            status: 'OK'
         });
     }
 }
@@ -183,7 +183,7 @@ function *processUpdateTopic(params) {
 
         yield outbox.queue(params.userId, params.sessionId, {
             id: 'UPDATE_TOPIC_RESP',
-            status: 'OK',
+            status: 'OK'
         });
     }
 }
@@ -331,7 +331,7 @@ function *processDisconnected(params) {
         body: msg
     });
 
-    co(function *() {
+    co(function*() {
         yield wait(delay);
         yield connect(params.userId, params.network, true);
     })();
@@ -366,7 +366,7 @@ function *disconnect(userId, network) {
     yield courier.send('connectionmanager', {
         type: 'disconnect',
         userId: userId,
-        network: network,
+        network: network
     });
 }
 
@@ -379,33 +379,33 @@ var handlers = {
     '005': handleServerText,
     '020': handleServerText,
     '042': handleServerText,
-    '242': handleServerText,
-    '250': handleServerText,
-    '251': handleServerText,
-    '252': handleServerText,
-    '253': handleServerText,
-    '254': handleServerText,
-    '255': handleServerText,
-    '265': handleServerText,
-    '266': handleServerText,
-    '372': handleServerText,
-    '375': handleServerText,
-    '452': handleServerText,
+    242: handleServerText,
+    250: handleServerText,
+    251: handleServerText,
+    252: handleServerText,
+    253: handleServerText,
+    254: handleServerText,
+    255: handleServerText,
+    265: handleServerText,
+    266: handleServerText,
+    372: handleServerText,
+    375: handleServerText,
+    452: handleServerText,
 
-    '332': handle332,
-    '353': handle353,
-    '366': handle366,
-    '376': handle376,
-    '433': handle433,
-    '482': handle482,
+    332: handle332,
+    353: handle353,
+    366: handle366,
+    376: handle376,
+    433: handle433,
+    482: handle482,
 
-    'JOIN': handleJoin,
-    'PART': handlePart,
-    'QUIT': handleQuit,
-    'MODE': handleMode,
-    'TOPIC': handleTopic,
-    'PRIVMSG': handlePrivmsg,
-    'ERROR': handleError
+    JOIN: handleJoin,
+    PART: handlePart,
+    QUIT: handleQuit,
+    MODE: handleMode,
+    TOPIC: handleTopic,
+    PRIVMSG: handlePrivmsg,
+    ERROR: handleError
 };
 
 function *handleServerText(userId, msg, code) {
@@ -750,17 +750,17 @@ function *tryDifferentNick(userId, network) {
 
     if (nick !== currentNick.substring(0, nick.length)) {
         // Current nick is unique ID, let's try to change it to something unique immediately
-        currentNick = nick + (100 + Math.floor((Math.random()*900)));
+        currentNick = nick + (100 + Math.floor((Math.random() * 900)));
     } else if (currentNick === nick) {
         // Second best choice
         currentNick = nick + '_';
     } else if (currentNick === nick + '_') {
         // Third best choice
-        currentNick = nick + (Math.floor((Math.random()*10)));
+        currentNick = nick + (Math.floor((Math.random() * 10)));
         nickHasNumbers = true;
     } else {
         // If all else fails, keep adding random numbers
-        currentNick = currentNick + (Math.floor((Math.random()*10)));
+        currentNick = currentNick + (Math.floor((Math.random() * 10)));
         nickHasNumbers = true;
     }
 
@@ -810,9 +810,7 @@ function *removeParticipant(userId, windowId, nick, message) {
         yield outbox.queueAll(userId, {
             id: 'DELMEMBERS',
             windowId: windowId,
-            members: [{
-                userId: getUserId(nick)
-            }]
+            members: [ { userId: getUserId(nick) } ]
         });
     }
 }
@@ -867,7 +865,7 @@ function *updateTopic(userId, windowId, topic) {
 }
 
 function isChannel(text) {
-    return ['&', '#', '+', '!'].some(function(element) {
+    return [ '&', '#', '+', '!' ].some(function(element) {
         return element === text.charAt(0);
     });
 }
