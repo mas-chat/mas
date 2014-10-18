@@ -84,7 +84,7 @@ Mas.Window = Ember.Object.extend({
     }.property('name'),
 
     tooltipTopic: function() {
-        var topic = this.get('topic') || '[NOT SET]'
+        var topic = this.get('topic') || '[NOT SET]';
         return 'Topic: ' + topic;
     }.property('topic'),
 
