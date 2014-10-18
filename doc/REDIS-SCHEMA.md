@@ -83,14 +83,14 @@ MAS Redis structures
  groupmembers:<name> (set)
    <userId1>, <userId2> ...
 
- groupbacklog:<name> (list)
+ groupbacklog:<name> (list) ???
    <msg1>, <msg2>
 
  names:<userId>:<windowId> (hash)
    <nick1>: (string, '@', '+', 'u') [TBD: Use userId]
    ...
 
- [TBD] inbox:<userId> (list)
+ [TBD] inbox:<userId> (list) (outdated?)
    msg:<windowid>
    names:<windowid>
 
@@ -108,6 +108,8 @@ MAS Redis structures
 
  passwordresettoken:<token> (string with expiry time)
    <userId>
+
+ ircuserdb [TBD]
 
 ```
 
