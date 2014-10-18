@@ -31,7 +31,7 @@ if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
-module.exports = function *() {
+module.exports = function*() {
     // The body isn't multipart, so busboy can't parse it
     if (!this.request.is('multipart/*')) {
         return;
@@ -63,7 +63,7 @@ module.exports = function *() {
 
             try {
                 mkdirp.sync(targetDirectory);
-            } catch(e) {
+            } catch (e) {
                 if (e.code !== 'EEXIST') {
                     throw e;
                 }

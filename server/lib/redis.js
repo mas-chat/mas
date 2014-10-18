@@ -26,9 +26,9 @@ var path = require('path'),
     conf = require('./conf');
 
 var rlh = redisLuaHelper({
-    'root': path.join(__dirname, '..', 'lua'),
-    'macro': '#include',
-    'extension': 'lua'
+    root: path.join(__dirname, '..', 'lua'),
+    macro: '#include',
+    extension: 'lua'
 });
 
 module.exports = {
@@ -45,7 +45,7 @@ function createClient() {
 
     coRedisClient.plainRedis = redis;
     coRedisClient.plainRedisClient = plainRedisClient;
-    coRedisClient.run = function *() {
+    coRedisClient.run = function*() {
         var params = [].slice.call(arguments);
         var scriptName = params.shift();
         log.info('Running lua script: ' + scriptName);
@@ -58,7 +58,7 @@ function createClient() {
 
         try {
             res = yield coRedisClient.evalsha.apply(this, args);
-        } catch(e) {
+        } catch (e) {
             log.warn('Lua script failed: ' + scriptName + ', ' + e);
         }
 
@@ -70,7 +70,7 @@ function createClient() {
 
 function *loadScripts() {
     var redisClient = createClient();
-    var loadDir = thunkify(function (callback) {
+    var loadDir = thunkify(function(callback) {
         rlh.loadDir(callback);
     });
     var scripts = yield loadDir();
@@ -80,7 +80,7 @@ function *loadScripts() {
         log.info('Loading Redis script: ' + scriptName);
         try {
             yield redisClient.script('load', rlh.code(scriptName));
-        } catch(e) {
+        } catch (e) {
             log.error('Lua script loading failed: ' + scriptName + ', ' + e);
         }
     }

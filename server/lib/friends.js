@@ -19,7 +19,7 @@
 var redis = require('./redis').createClient(),
     outbox = require('./outbox');
 
-exports.sendFriends = function *(userId, sessionId) {
+exports.sendFriends = function*(userId, sessionId) {
     var command = {
         id: 'FRIENDS',
         friends: []
@@ -41,7 +41,7 @@ exports.sendFriends = function *(userId, sessionId) {
 
         var friendData = {
             userId: friendUserId,
-            online: online,
+            online: online
         };
 
         if (!online) {
@@ -54,7 +54,7 @@ exports.sendFriends = function *(userId, sessionId) {
     yield outbox.queue(userId, sessionId, command);
 };
 
-exports.informStateChange = function *(userId, eventType) {
+exports.informStateChange = function*(userId, eventType) {
     var command = {
         id: 'FRIENDSUPDATE',
         userId: userId

@@ -20,7 +20,7 @@ var httpStatus = require('statuses'),
     log = require('../lib/log'),
     redis = require('../lib/redis').createClient();
 
-module.exports = function *(next) {
+module.exports = function*(next) {
     var sessionId = this.mas.sessionId;
     var expectedSeqKeyName;
     var rcvdSeq = this.request.body.seq;

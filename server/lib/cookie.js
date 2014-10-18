@@ -19,8 +19,9 @@
 var uuid = require('uid2'),
     redis = require('../lib/redis').createClient();
 
-exports.createSession = function *(userId) {
+exports.createSession = function*(userId) {
     /* jshint -W106 */
+    /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
     var user = yield redis.hgetall('user:' + userId);
     var useSsl = yield redis.hget('settings:' + userId, 'sslEnabled');
     var ts = Math.round(Date.now() / 1000);

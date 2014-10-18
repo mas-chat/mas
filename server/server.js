@@ -23,7 +23,7 @@ var koa = require('koa'),
     hbs = require('koa-hbs'),
     error = require('koa-error'),
     compress = require('koa-compress'),
-    //logger = require('koa-logger'),
+    // logger = require('koa-logger'),
     co = require('co'),
     handlebarsHelpers = require('./lib/handlebarsHelpers'),
     conf = require('./lib/conf'),
@@ -39,7 +39,7 @@ var app = koa();
 // Development only
 if (app.env === 'development') {
     app.use(error());
-//    app.use(logger());
+    // app.use(logger());
 }
 
 // Enable GZIP compression
@@ -57,7 +57,7 @@ app.use(userSession());
 handlebarsHelpers.registerHelpers(hbs);
 routes.register(app);
 
-co(function *() {
+co(function*() {
     yield redisModule.loadScripts();
     scheduler.init();
     app.listen(conf.get('frontend:port'));

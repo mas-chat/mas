@@ -21,10 +21,10 @@ var passport = require('../lib/passport'),
     redis = require('../lib/redis').createClient(),
     cookie = require('../lib/cookie');
 
-exports.localLogin = function *(next) {
+exports.localLogin = function*(next) {
     var that = this;
 
-    yield passport.authenticate('local', function *(err, userId) {
+    yield passport.authenticate('local', function*(err, userId) {
         if (err === 'useExt') {
             that.body = {
                 success: false,
@@ -43,16 +43,16 @@ exports.localLogin = function *(next) {
     }).call(this, next);
 };
 
-exports.googleLogin = function *(next) {
+exports.googleLogin = function*(next) {
     yield auth(this, next, 'google');
 };
 
-exports.yahooLogin = function *(next) {
+exports.yahooLogin = function*(next) {
     yield auth(this, next, 'yahoo');
 };
 
 function *auth(ctx, next, provider) {
-    yield passport.authenticate(provider, function *(err, userId) {
+    yield passport.authenticate(provider, function*(err, userId) {
         if (err || userId === false) {
             log.warn('Invalid external login attempt.');
             return;

@@ -23,7 +23,7 @@ var uuid = require('uid2'),
     friends = require('./friends'),
     conf = require('./conf');
 
-module.exports = function *(next) {
+module.exports = function*(next) {
     var userId = this.mas.userId;
     var newSession = false;
 
@@ -47,7 +47,7 @@ module.exports = function *(next) {
             yield friends.informStateChange(userId, 'login');
         }
 
-        //New session, generate session id
+        // New session, generate session id
         newSession = true;
         sessionId = uuid(15);
 

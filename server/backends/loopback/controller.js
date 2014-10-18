@@ -29,7 +29,7 @@ var co = require('co'),
     windowHelper = require('../../lib/windows'),
     outbox = require('../../lib/outbox');
 
-co(function *() {
+co(function*() {
     yield redisModule.loadScripts();
     yield createInitialGroups();
 
@@ -100,20 +100,20 @@ function *processCreate(params) {
     yield joinGroup(params);
 }
 
- function *processJoin(params) {
+function *processJoin(params) {
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'JOIN_RESP',
         status: 'OK'
     });
 
     yield joinGroup(params);
- }
+}
 
- function *processClose(params) {
+function *processClose(params) {
     params = params;
     /* jshint noyield:true */
     // TBD
- }
+}
 
 function *joinGroup(params) {
     var groupName = params.name;

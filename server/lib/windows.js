@@ -20,19 +20,19 @@ var assert = require('assert'),
     redis = require('./redis').createClient(),
     log = require('./log');
 
-exports.getWindowIdsForNetwork = function *(userId, network) {
+exports.getWindowIdsForNetwork = function*(userId, network) {
     var ids = yield getWindowIds(userId, network, null, null, 'id');
 
     return ids;
 };
 
-exports.getGroupWindowIdsForNetwork = function *(userId, network) {
+exports.getGroupWindowIdsForNetwork = function*(userId, network) {
     var ids = yield getWindowIds(userId, network, null, 'group', 'id');
 
     return ids;
 };
 
-exports.getGroupWindowId = function *(userId, network, name) {
+exports.getGroupWindowId = function*(userId, network, name) {
     var ids = yield getWindowIds(userId, network, name, 'group', 'id');
 
     if (ids.length === 1) {
@@ -43,7 +43,7 @@ exports.getGroupWindowId = function *(userId, network, name) {
     }
 };
 
-exports.get1on1WindowId = function *(userId, network, targetUserId) {
+exports.get1on1WindowId = function*(userId, network, targetUserId) {
     var ids = yield getWindowIds(userId, network, targetUserId, '1on1', 'id');
 
     if (ids.length === 1) {
@@ -54,7 +54,7 @@ exports.get1on1WindowId = function *(userId, network, targetUserId) {
     }
 };
 
-exports.getWindowIdByTargetUserId = function *(userId, targetUserId) {
+exports.getWindowIdByTargetUserId = function*(userId, targetUserId) {
     var ids = yield getWindowIds(userId, null, null, null, 'id');
 
     for (var i = 0; i < ids.length; i++) {
@@ -68,7 +68,7 @@ exports.getWindowIdByTargetUserId = function *(userId, targetUserId) {
     return null;
 };
 
-exports.getNetworks = function *(userId) {
+exports.getNetworks = function*(userId) {
     var networks = {};
 
     var windows = yield redis.smembers('windowlist:' + userId);
@@ -80,11 +80,11 @@ exports.getNetworks = function *(userId) {
     return Object.keys(networks);
 };
 
-exports.getWindowNameAndNetwork = function *(userId, windowId) {
+exports.getWindowNameAndNetwork = function*(userId, windowId) {
     return yield getWindowNameAndNetwork(userId, windowId);
 };
 
-exports.createNewWindow = function *(userId, network, name, password, type) {
+exports.createNewWindow = function*(userId, network, name, password, type) {
     var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
 
     assert(type === '1on1' || type === 'group');

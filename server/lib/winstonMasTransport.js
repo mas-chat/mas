@@ -21,7 +21,7 @@ var util = require('util'),
 
 require('colors');
 
-var MasConsoleLogger = function (options) {
+var MasConsoleLogger = function(options) {
     winston.Transport.call(this, options);
 
     this.name = 'masConsoleLogger';
@@ -30,7 +30,7 @@ var MasConsoleLogger = function (options) {
 
 util.inherits(MasConsoleLogger, winston.Transport);
 
-MasConsoleLogger.prototype.log = function (level, msg, meta, callback) {
+MasConsoleLogger.prototype.log = function(level, msg, meta, callback) {
     var processParts = process.title.split('-');
     var processName = processParts[1];
     var processExtension = processParts[2];
@@ -40,7 +40,7 @@ MasConsoleLogger.prototype.log = function (level, msg, meta, callback) {
     var levelColumn;
     var userIdColumn;
 
-    switch(processName) {
+    switch (processName) {
         case 'irc':
             processColumn = (processExtension === 'connman' ? 'ircco' : 'irc  ').green;
             break;
@@ -54,7 +54,7 @@ MasConsoleLogger.prototype.log = function (level, msg, meta, callback) {
             processColumn = 'UNKWN'.red;
     }
 
-    switch(level) {
+    switch (level) {
         case 'info':
             levelColumn = 'INFO';
             break;

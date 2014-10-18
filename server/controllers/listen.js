@@ -22,7 +22,7 @@ var log = require('../lib/log'),
     nicks = require('../lib/nick'),
     friends = require('../lib/friends');
 
-module.exports = function *() {
+module.exports = function*() {
     var userId = this.mas.userId;
     var sessionId = this.mas.sessionId;
 

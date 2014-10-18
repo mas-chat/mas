@@ -78,6 +78,7 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
+/* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
 emojify.setConfig({
     img_dir: '/dist/images/emojify',
     ignore_emoticons: true

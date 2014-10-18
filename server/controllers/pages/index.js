@@ -16,7 +16,7 @@
 
 'use strict';
 
-module.exports = function *() {
+module.exports = function*() {
     if (this.mas.userId !== null) {
         this.redirect('/app');
     } else {

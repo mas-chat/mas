@@ -37,7 +37,7 @@ function User(details, settings, friends) {
     this.data.nextwindowid = -1;
 }
 
-User.prototype.load = function *(userId) {
+User.prototype.load = function*(userId) {
     this.data = yield redis.hgetall('user:' + userId);
     this.settings = yield redis.hgetall('settings:' + userId);
     this.friends = yield redis.hgetall('friends:' + userId);
@@ -64,14 +64,14 @@ User.prototype.addSalt = function(sha) {
     this.data.passwd = crypto.createHash('sha256').update(sha + salt, 'utf8').digest('hex');
 };
 
-User.prototype.generateUserId = function *() {
+User.prototype.generateUserId = function*() {
     var userId = yield redis.incr('nextGlobalUserId');
     userId = 'm' + (userId + RESERVED_USERIDS);
     this.data.userId = userId;
     return userId;
 };
 
-User.prototype.save = function *() {
+User.prototype.save = function*() {
     var index = {};
 
     if (this.data.nick) {
