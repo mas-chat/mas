@@ -16,7 +16,7 @@
 
 'use strict';
 
-module.exports = function *(next) {
+module.exports = function*(next) {
     yield next;
     this.set('Cache-Control', 'public, max-age=31536000'); // 1 year
 };

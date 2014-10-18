@@ -30,7 +30,7 @@ var crypto = require('crypto'),
 // TBD: Rename Redis user.openidurl property to user.extAuthToken
 
 function authLocal(username, password, done) {
-    co(function *() {
+    co(function*() {
         var user = null;
         var userId = null;
         var passwordSha, passwordShaNoSalt;
@@ -58,7 +58,7 @@ function authLocal(username, password, done) {
 }
 
 function authExt(openidId, oauthId, profile, done) {
-    co(function *() {
+    co(function*() {
         // Some old users are known by their google OpenID 2.0 identifier. Google is closing down
         // OpenID support so always convert in that case to OAuth 2.0 id.
 
@@ -99,6 +99,7 @@ if (conf.get('googleauth:enabled') === true) {
         callbackURL: conf.get('site:url') + '/auth/google/oauth2callback'
     }, function(accessToken, refreshToken, params, profile, done) {
         // jshint camelcase: false
+        // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
         var openIdId = jwt.decode(params.id_token, null, true).openid_id;
         authExt(openIdId, 'google:' + profile.id, profile, done);
     });

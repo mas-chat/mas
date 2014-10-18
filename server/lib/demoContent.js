@@ -25,7 +25,7 @@ var co = require('co'),
     textLine = require('./textLine');
 
 module.exports.enable = function() {
-    co(function *() {
+    co(function*() {
         while (1) {
             yield wait(2000);
 

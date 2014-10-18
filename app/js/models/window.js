@@ -55,7 +55,6 @@ Mas.Window = Ember.Object.extend({
         return this._mapUserIdsToNicks('users');
     }.property('users.@each', 'Mas.userdb.users.@each.nick'),
 
-
     decoratedTitle: function() { // (name, topic)
         var title;
         var name = this.get('name');

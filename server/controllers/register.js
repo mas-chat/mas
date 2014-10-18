@@ -33,64 +33,64 @@ var formFields = {
         label: 'Your name',
         errorAfterField: true,
         widget: widgets.text({
-            classes: ['form-control'],
-            placeholder: 'First Last',
+            classes: [ 'form-control' ],
+            placeholder: 'First Last'
         }),
         cssClasses: {
-            label: ['control-label']
+            label: [ 'control-label' ]
         },
-        validators: [validators.minlength(6)]
+        validators: [ validators.minlength(6) ]
     }),
     email: fields.email({
         required: true,
         label: 'Email address',
         errorAfterField: true,
         widget: widgets.text({
-            classes: ['form-control'],
-            placeholder: 'me@example.com',
+            classes: [ 'form-control' ],
+            placeholder: 'me@example.com'
         }),
         cssClasses: {
-            label: ['control-label']
+            label: [ 'control-label' ]
         },
-        validators: [validators.email()]
+        validators: [ validators.email() ]
     }),
     password: fields.password({
         required: true,
         label: 'Password',
         errorAfterField: true,
         widget: widgets.password({
-            classes: ['form-control']
+            classes: [ 'form-control' ]
         }),
         cssClasses: {
-            label: ['control-label']
+            label: [ 'control-label' ]
         },
-        validators: [validators.minlength(6)]
+        validators: [ validators.minlength(6) ]
     }),
     confirm: fields.password({
         required: true,
         label: 'Password (again)',
         errorAfterField: true,
         widget: widgets.password({
-            classes: ['form-control']
+            classes: [ 'form-control' ]
         }),
         cssClasses: {
-            label: ['control-label']
+            label: [ 'control-label' ]
         },
-        validators: [validators.matchField('password')]
+        validators: [ validators.matchField('password') ]
     }),
     nick: fields.string({
         required: true,
         label: 'Nickname',
         errorAfterField: true,
         widget: widgets.text({
-            classes: ['form-control'],
-            placeholder: 'Nick',
+            classes: [ 'form-control' ],
+            placeholder: 'Nick'
         }),
         cssClasses: {
-            label: ['control-label']
+            label: [ 'control-label' ]
         },
-        validators: [validators.rangelength(3, 14, 'Nick has to 3-14 characters long.'),
-            validateNick]
+        validators: [ validators.rangelength(3, 14, 'Nick has to 3-14 characters long.'),
+            validateNick ]
     }),
     tos: fields.boolean({
         required: validators.required('You must agree MAS TOS'),
@@ -116,7 +116,7 @@ function validateNick(form, field, callback) {
     if (/[0-9]/.test(nick.charAt(0))) {
         callback('Nick can\'t start with digit');
     } else if (!(/^[A-Z\`a-z0-9[\]\\_\^{|}]+$/.test(nick))) {
-        var valid = ['a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}'];
+        var valid = [ 'a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}' ];
         valid = '<span class="badge">' + valid.join('</span> <span class="badge">') + '</span>';
 
         callback('Illegal characters, allowed are ' + valid);
@@ -152,14 +152,14 @@ function decodeForm(req, inputForm) {
     var deferred = Q.defer();
 
     inputForm.handle(req, {
-        success: function (form) {
+        success: function(form) {
             deferred.resolve(form);
         },
-        error: function (form) {
+        error: function(form) {
             log.info('Registration form data is invalid');
             deferred.resolve(form);
         },
-        empty: function (form) {
+        empty: function(form) {
             log.info('There is no form');
             deferred.resolve(form);
         }
@@ -179,7 +179,7 @@ function *nickOrEmailTaken(nickOrEmail, field, type) {
     }
 }
 
-exports.index = function *() {
+exports.index = function*() {
     var extAuth = this.query.ext === 'true';
     var form, template;
 
@@ -209,7 +209,7 @@ exports.index = function *() {
     });
 };
 
-exports.indexReset = function *() {
+exports.indexReset = function*() {
     var token = this.params.token;
     var userId = yield redis.get('passwordresettoken:' + token);
 
@@ -227,7 +227,7 @@ exports.indexReset = function *() {
     });
 };
 
-exports.create = function *() {
+exports.create = function*() {
     var form = yield decodeForm(this.req, registrationForm);
     var emailInUse = yield nickOrEmailTaken(form.data.email, form.fields.email, 'email address');
     var nickInUse = yield nickOrEmailTaken(form.data.nick, form.fields.nick, 'nick');
@@ -258,7 +258,7 @@ exports.create = function *() {
     }
 };
 
-exports.createExt = function *() {
+exports.createExt = function*() {
     var form = yield decodeForm(this.req, registrationFormExt);
     var emailInUse = yield nickOrEmailTaken(form.data.email, form.fields.email, 'email address');
     var nickInUse = yield nickOrEmailTaken(form.data.nick, form.fields.nick, 'nick');
@@ -286,7 +286,7 @@ exports.createExt = function *() {
     }
 };
 
-exports.createReset = function *() {
+exports.createReset = function*() {
     var form = yield decodeForm(this.req, registrationFormReset);
 
     var userId = yield redis.get('passwordresettoken:' + form.data.token);

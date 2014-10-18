@@ -22,15 +22,15 @@ var util = require('util'),
     redisModule = require('./redis'),
     redis = redisModule.createClient();
 
-exports.queue = function *(userId, sessionId, commands) {
+exports.queue = function*(userId, sessionId, commands) {
     yield queueCommands(userId, sessionId, commands);
 };
 
-exports.queueAll = function *(userId, commands) {
+exports.queueAll = function*(userId, commands) {
     yield queueCommands(userId, 0, commands);
 };
 
-exports.flush = function *(userId, sessionId, timeout) {
+exports.flush = function*(userId, sessionId, timeout) {
     var result,
         command,
         commands = [];
@@ -55,12 +55,12 @@ exports.flush = function *(userId, sessionId, timeout) {
     }
 
     log.info(userId, 'Flushed outbox. SessionId: ' + sessionId + '. Response: ' +
-        JSON.stringify(commands));//.substring(0, 100));
+        JSON.stringify(commands)); // .substring(0, 100));
 
     return commands;
 };
 
-exports.length = function *(userId, sessionId) {
+exports.length = function*(userId, sessionId) {
     // TBD Add helper concat('outbox', userId, sessionId)
     return parseInt(yield redis.llen('outbox:' + userId + ':' + sessionId));
 };
@@ -82,7 +82,7 @@ function *queueCommands(userId, sessionId, commands) {
 function *handleNewUserIds(userId, sessionId, commands) {
     var allUserIds = [];
 
-    commands.forEach(function (command) {
+    commands.forEach(function(command) {
         allUserIds = allUserIds.concat(scanUserIds(command));
     });
 

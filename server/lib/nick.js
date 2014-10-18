@@ -20,17 +20,17 @@ var redis = require('./redis').createClient(),
     outbox = require('./outbox'),
     conf = require('./conf');
 
-exports.sendNickAll = function *(userId) {
+exports.sendNickAll = function*(userId) {
     var command = yield buildCommand(userId);
     yield outbox.queueAll(userId, command);
 };
 
-exports.sendNick = function *(userId, sessionId) {
+exports.sendNick = function*(userId, sessionId) {
     var command = yield buildCommand(userId);
     yield outbox.queue(userId, sessionId, command);
 };
 
-exports.updateCurrentNick = function *(userId, network, nick) {
+exports.updateCurrentNick = function*(userId, network, nick) {
     yield redis.hset('networks:' + userId + ':' + network, 'currentnick', nick);
 };
 

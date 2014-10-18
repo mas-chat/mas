@@ -19,7 +19,7 @@
 var httpStatus = require('statuses'),
     log = require('./log');
 
-module.exports = function *(next) {
+module.exports = function*(next) {
     var userId = this.mas.userId;
 
     if (userId === null) {

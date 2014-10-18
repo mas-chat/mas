@@ -25,7 +25,7 @@ var co = require('co'),
     windowHelper = require('../lib/windows'),
     friends = require('../lib/friends');
 
-module.exports = function *() {
+module.exports = function*() {
     var userId = this.mas.userId;
     var sessionId = this.mas.sessionId;
 
@@ -89,7 +89,7 @@ module.exports = function *() {
             // Ask all session to close this window
             yield outbox.queueAll(userId, {
                 id: 'CLOSE',
-                windowId: windowId,
+                windowId: windowId
             });
 
             // Backend specific cleanup
@@ -110,7 +110,7 @@ module.exports = function *() {
             break;
 
         case 'UPDATE':
-            var accepted = ['visible', 'row', 'sounds', 'titleAlert'];
+            var accepted = [ 'visible', 'row', 'sounds', 'titleAlert' ];
 
             for (var i = 0; i < accepted.length; i++) {
                 var prop = command[accepted[i]];
@@ -190,12 +190,12 @@ module.exports = function *() {
             log.info(userId, 'User ended session. SessionId: ' + sessionId);
 
             yield outbox.queue(userId, sessionId, {
-                id: 'LOGOUT_RESP',
+                id: 'LOGOUT_RESP'
             });
 
             setTimeout(function() {
                 // Give the system some time to deliver LOGOUT_RESP before cleanup
-                co(function *() {
+                co(function*() {
                     var last = yield redis.run('deleteSession', userId, sessionId);
 
                     if (last) {
