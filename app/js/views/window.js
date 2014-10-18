@@ -29,9 +29,7 @@ Mas.WindowView = Ember.View.extend(Mas.UploadMixin, {
     // TBD: messages is here because of the mixin. Is there better way?
     messages: Ember.computed.alias('controller.model.messages'),
 
-    draggable: function() {
-        return 'true';
-    }.property(),
+    draggable: 'true',
 
     visibilityChanged: function() {
         this.get('parentView').windowAdded(true);
@@ -50,6 +48,20 @@ Mas.WindowView = Ember.View.extend(Mas.UploadMixin, {
             this.set('expanded', false);
             this.get('parentView').windowAdded(true);
         }
+    },
+
+    dragStart: function(ev) {
+        $(ev.target).addClass('move');
+    },
+
+    dragEnd: function(ev) {
+        $(ev.target).removeClass('move');
+    },
+
+    dragEnter: function(ev) {
+        console.log('row:' + this.get('controller.model.row'));
+        $('.window.placeholder').attr('data-row', this.get('controller.model.row'));
+        this.get('parentView').windowAdded(false);
     },
 
     layoutDone: function() {

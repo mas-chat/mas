@@ -23,6 +23,20 @@ Mas.GridView = Ember.View.extend({
 
     PADDING: 5,
 
+    dragStart: function(ev) {
+        this.$('.window.placeholder').addClass('visible');
+        this.$('.window.placeholder').removeClass('hidden');
+        this.layoutWindows(false);
+        console.log('start');
+    },
+
+    dragEnd: function(ev) {
+        this.$('.window.placeholder').addClass('hidden');
+        this.$('.window.placeholder').removeClass('visible');
+        this.layoutWindows(false);
+        console.log('sttop');
+    },
+
     didInsertElement: function() {
         $(window).on('resize', Ember.run.bind(this, function() {
             this.layoutWindows(false);
@@ -56,14 +70,14 @@ Mas.GridView = Ember.View.extend({
             return;
         }
 
-        var windows = el.querySelectorAll('.window.visible');
+        var windows = el.querySelectorAll('.window.visible:not(.move)');
         var rowNumbers = _.uniq(_.map(windows,
             function(element) { return element.getAttribute('data-row'); }));
         var rowHeight = (container.height - (rowNumbers.length + 1) * this.PADDING) /
             rowNumbers.length;
 
         _.forEach(rowNumbers, function(row, rowIndex) {
-            var windowsInRow = el.querySelectorAll('.window.visible[data-row="' + row + '"]');
+            var windowsInRow = el.querySelectorAll('.window.visible[data-row="' + row + '"]:not(.move)');
             var windowWidth = (container.width - (windowsInRow.length + 1) * that.PADDING) /
                 windowsInRow.length;
 
