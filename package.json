@@ -77,7 +77,7 @@
     "gulp-define-module": "~0.1.1",
     "gulp-rev": "~1.1.0",
     "rimraf": "~2.2.8",
-    "gulp-jscs": "~1.1.2"
+    "gulp-jscs": "~1.2.0"
   },
   "scripts": {
     "test": "gulp jshint && gulp build-assets && ./bin/run-tests.sh"
