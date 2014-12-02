@@ -17,7 +17,6 @@
 'use strict';
 
 import Ember from 'ember';
-import moment from 'moment';
 import sound from '../helpers/sound';
 
 export default Ember.ObjectController.extend({

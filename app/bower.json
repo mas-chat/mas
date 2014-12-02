@@ -13,6 +13,7 @@
     "ember-qunit-notifications": "0.0.4",
     "qunit": "~1.15.0",
     "momentjs": "~2.8.2",
-    "howler": "~1.1.25"
+    "howler": "~1.1.25",
+    "lodash": "^2.4.0"
   }
 }
