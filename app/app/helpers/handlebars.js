@@ -17,7 +17,6 @@
 'use strict';
 
 import Ember from 'ember';
-import moment from 'moment';
 
 Ember.Handlebars.helper('decoratedTimestamp', function(timestamp) {
     var ts = moment.unix(timestamp);

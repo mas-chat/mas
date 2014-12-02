@@ -17,12 +17,9 @@ var app = new EmberApp();
 // please specify an object with the list of modules as keys
 // along with the exports of each module as its value.
 
-app.import('bower_components/momentjs/moment.js', {
-    exports: { 'moment': [ 'moment' ] }
-});
 
-app.import('bower_components/howler/howler.js', {
-    exports: { 'howler': [ 'howler' ] }
-});
+app.import('bower_components/momentjs/moment.js');
+app.import('bower_components/howler/howler.js');
+app.import('bower_components/lodash/dist/lodash.js');
 
 module.exports = app.toTree();

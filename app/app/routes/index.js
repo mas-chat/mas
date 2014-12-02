@@ -20,11 +20,11 @@ import Ember from 'ember';
 
 export default Ember.Route.extend({
     model: function() {
-        return Mas.windowCollection;
+        return Ember.A([]); // windowCollection
     },
 
     setupController: function(controller, model) {
-        controller.set('friends', Mas.friendCollection);
+        controller.set('friends', Ember.A([])); // friendCollection
         controller.set('model', model);
     }
 });

@@ -17,7 +17,6 @@
 'use strict';
 
 import Ember from 'ember';
-import moment from 'moment';
 
 Mas.UploadMixin = Ember.Mixin.create({
     upload: function(files, transform) {
