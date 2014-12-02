@@ -14,11 +14,11 @@
 //   governing permissions and limitations under the License.
 //
 
+// globals _, moment
+
 'use strict';
 
 import Ember from 'ember';
-
-var _ = require('lodash/dist/lodash');
 
 export default Ember.View.extend({
     classNames: [ 'grid', 'flex-1', 'flex-grow-row' ],
@@ -115,6 +115,13 @@ export default Ember.View.extend({
     },
 
     _containerDimensions: function() {
+        if (!this.$()){
+            return {
+                width: 1,
+                height: 1
+            }
+        } // temp hack
+
         return {
             width: this.$().width(),
             height: this.$().height()

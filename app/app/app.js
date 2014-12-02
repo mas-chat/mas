@@ -33,73 +33,68 @@ loadInitializers(App, config.modulePrefix);
 
 export default App;
 
-//// meeeee
+//// me start
 
-/*jshint camelcase: false */
+//require('../../server/public/dist/client-templates');
 
-window.Mas = Ember.Application.create();
+//require('./helpers/uploadMixin');
 
-require('../../server/public/dist/client-templates');
+//require('./routes/application');
+//require('./routes/main');
 
-require('./helpers/uploadMixin');
+//require('./views/application');
+//require('./views/main');
+//require('./views/grid');
+//require('./views/window');
+//require('./views/logs');
+//require('./views/radioButton');
+//require('./views/captureModal');
 
-require('./routes/application');
-require('./routes/main');
+//require('./components/modalDialog');
 
-require('./views/application');
-require('./views/main');
-require('./views/grid');
-require('./views/window');
-require('./views/logs');
-require('./views/radioButton');
-require('./views/captureModal');
+//require('./controllers/application');
+//require('./controllers/main');
+//require('./controllers/grid');
+//require('./controllers/window');
+//require('./controllers/joinGroupModal');
+//require('./controllers/createGroupModal');
+//require('./controllers/joinIrcModal');
+//require('./controllers/passwordModal');
+//require('./controllers/topicModal');
+//require('./controllers/captureModal');
+//require('./controllers/alertsModal');
+//require('./controllers/infoModal');
+//require('./controllers/friends');
+//require('./controllers/logs');
 
-require('./components/modalDialog');
+//require('./models/message');
 
-require('./controllers/application');
-require('./controllers/main');
-require('./controllers/grid');
-require('./controllers/window');
-require('./controllers/joinGroupModal');
-require('./controllers/createGroupModal');
-require('./controllers/joinIrcModal');
-require('./controllers/passwordModal');
-require('./controllers/topicModal');
-require('./controllers/captureModal');
-require('./controllers/alertsModal');
-require('./controllers/infoModal');
-require('./controllers/friends');
-require('./controllers/logs');
+//require('./helpers/network');
+//require('./helpers/handlebars');
+//require('./helpers/users');
 
-require('./models/message');
-require('./models/window');
-require('./models/friend');
+//Mas.nicks = {};
 
-require('./helpers/network');
-require('./helpers/handlebars');
-require('./helpers/users');
 
-Mas.nicks = {};
-Mas.windowCollection = Ember.A([]);
-Mas.friendCollection = Ember.A([]);
 
-Mas.userDb = Mas.Users.create();
 
-Mas.Router.map(function() {
-    this.route('main', { path: '/' });
-});
+//Mas.userDb = Mas.Users.create();
 
-Mas.networkMgr = Mas.Network.create();
+//Mas.Router.map(function() {
+//    this.route('main', { path: '/' });
+//});
 
-document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-        titlenotifier.reset();
-    }
-});
+//Mas.networkMgr = Mas.Network.create();
+
+//document.addEventListener('visibilitychange', function() {
+//    if (!document.hidden) {
+//        titlenotifier.reset();
+//    }
+//});
 
 /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-emojify.setConfig({
-    img_dir: '/dist/images/emojify',
-    ignore_emoticons: true
-});
+//emojify.setConfig({
+//    img_dir: '/dist/images/emojify',
+//    ignore_emoticons: true
+//});
 
