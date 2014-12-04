@@ -33,8 +33,6 @@ loadInitializers(App, config.modulePrefix);
 
 export default App;
 
-//Mas.userDb = Mas.Users.create();
-
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
         titlenotifier.reset();
