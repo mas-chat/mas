@@ -23,7 +23,7 @@ export default Ember.ArrayController.extend({
 
     actions: {
         joinLobby: function() {
-            Mas.networkMgr.send({
+            this.network.send({
                 id: 'JOIN',
                 network: 'MAS',
                 name: 'lobby'

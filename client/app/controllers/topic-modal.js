@@ -26,7 +26,7 @@ export default Ember.ObjectController.extend({
             // User has clicked 'OK', send the new topic to server
             var newTopic = this.get('modalTopic');
 
-            Mas.networkMgr.send({
+            this.network.send({
                 id: 'UPDATE_TOPIC',
                 windowId: this.get('windowId'),
                 topic: newTopic

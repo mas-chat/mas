@@ -33,7 +33,7 @@ export default Ember.Object.extend({
     init: function() {
         this._super();
         this._pollMsgs();
-        this._unsolicitedParser = Mas.CommandParser.create();
+        this._unsolicitedParser = commandParser.create();
     },
 
     send: function(command, callback) {
@@ -61,7 +61,7 @@ export default Ember.Object.extend({
         $.ajax({
             type: 'POST',
             contentType: 'application/json; charset=utf-8',
-            url: '/api/v1/send',
+            url: ':3200/api/v1/send',
             data: JSON.stringify(data),
             success: this._sendMsgSuccess,
             error: this._sendMsgFailure,
@@ -123,7 +123,7 @@ export default Ember.Object.extend({
             type: 'POST',
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
-            url: '/api/v1/listen',
+            url: 'http://localhost:3200/api/v1/listen',
             data: JSON.stringify(data),
             success: this._pollMsgsSuccess,
             error: this._pollMsgsFailure,
