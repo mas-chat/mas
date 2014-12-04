@@ -33,41 +33,6 @@ loadInitializers(App, config.modulePrefix);
 
 export default App;
 
-// Old code start
-
-//require('./helpers/uploadMixin');
-
-//require('./views/application');
-//require('./views/main');
-//require('./views/grid');
-//require('./views/window');
-//require('./views/logs');
-//require('./views/radioButton');
-//require('./views/captureModal');
-
-//require('./components/modalDialog');
-
-//require('./controllers/application');
-//require('./controllers/main');
-//require('./controllers/grid');
-//require('./controllers/window');
-//require('./controllers/joinGroupModal');
-//require('./controllers/createGroupModal');
-//require('./controllers/joinIrcModal');
-//require('./controllers/passwordModal');
-//require('./controllers/topicModal');
-//require('./controllers/captureModal');
-//require('./controllers/alertsModal');
-//require('./controllers/infoModal');
-//require('./controllers/friends');
-//require('./controllers/logs');
-
-//require('./models/message');
-
-//require('./helpers/users');
-
-//Mas.nicks = {};
-
 //Mas.userDb = Mas.Users.create();
 
 document.addEventListener('visibilitychange', function() {

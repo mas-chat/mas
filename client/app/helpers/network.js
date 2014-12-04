@@ -34,7 +34,8 @@ export default Ember.Object.extend({
         this._super();
         this._pollMsgs();
         this._unsolicitedParser = commandParser.create({
-            friendsModel: this.get('friendsModel')
+            friendsModel: this.get('friendsModel'),
+            nicksModel: this.get('nicksModel')
         });
     },
 
