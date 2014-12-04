@@ -30,10 +30,12 @@ export default Ember.Object.extend({
     _unsolicitedParser: null,
     _state: 'normal',
 
-    init: function() {
+    init: function(friendsModel) {
         this._super();
         this._pollMsgs();
-        this._unsolicitedParser = commandParser.create();
+        this._unsolicitedParser = commandParser.create({
+            friendsModel: this.get('friendsModel')
+        });
     },
 
     send: function(command, callback) {

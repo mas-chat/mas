@@ -16,11 +16,20 @@
 
 'use strict';
 
+import Ember from 'ember';
 import network from '../helpers/network';
 
 export function initialize(container, application) {
-    application.register('network:main', network);
+    var friends = Ember.A([]);
+    var newNetwork = network.create({
+        friendsModel: friends
+    });
+
+    application.register('network:main', newNetwork, { instantiate: false });
     application.inject('controller', 'network', 'network:main');
+
+    application.register('model:friends', friends, { instantiate: false });
+    application.inject('controller', 'friends', 'model:friends');
 }
 
 export default {
