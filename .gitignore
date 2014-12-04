@@ -4,14 +4,17 @@
 .\#*
 
 #Ignore generated files/directories
-mas.conf
-node_modules/
-bower_components/
-server/public/dist/
-npm-debug.log
-logs/
-run/
-data/
+/mas.conf
+/node_modules/
+/server/public/dist/
+/client/dist/
+/client/tmp/
+/client/bower_components/
+/client/node_modules
+/npm-debug.log
+/logs/
+/run/
+/data/
 
 #Mac files
 .DS_Store
