@@ -31,7 +31,6 @@ var path = require('path'),
     registerController = require('../controllers/register'),
     loginController = require('../controllers/login'),
     indexPageController = require('../controllers/pages'),
-    appPageController = require('../controllers/pages/app'),
     pagesController = require('../controllers/pages/pages'),
     listenController = require('../controllers/listen'),
     commandController = require('../controllers/command'),
@@ -90,9 +89,8 @@ exports.register = function(app) {
     // Special filter route for hashed assets
     app.get(/\/dist\/\S+-........\.\w+$/, cacheFilter);
 
-    // Page routes
+    // Web site page routes
     app.get('/', indexPageController);
-    app.get(/^\/app/, appPageController);
     app.get(/.html$/, pagesController); // All other pages
 
     // Public assets
@@ -102,7 +100,8 @@ exports.register = function(app) {
         maxage: ONE_WEEK
     }));
 
-    app.use(mount('/fonts/', serve(path.join(__dirname, '..', 'public/dist/fonts'), {
+    // Ember client assets
+    app.use(mount('/app', serve(path.join(__dirname, '../../client/dist'), {
         maxage: ONE_WEEK
     })));
 };
