@@ -32,7 +32,7 @@ export default Ember.ObjectController.extend({
                 newPassword = this.get('modalPassword');
             }
 
-            Mas.networkMgr.send({
+            this.network.send({
                 id: 'UPDATE_PASSWORD',
                 windowId: this.get('windowId'),
                 password: newPassword
