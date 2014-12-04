@@ -1,8 +1,14 @@
 /* global require, module */
 
-var EmberApp = require('ember-cli/lib/broccoli/ember-app');
+var EmberApp = require('ember-cli/lib/broccoli/ember-app'),
+    pickFiles = require('broccoli-static-compiler'),
+    mergeTrees = require('broccoli-merge-trees');
 
-var app = new EmberApp();
+var app = new EmberApp({
+    lessOptions: {
+        paths: [ 'bower_components' ]
+    }
+});
 
 // Use `app.import` to add additional libraries to the generated
 // output files.
@@ -17,9 +23,38 @@ var app = new EmberApp();
 // please specify an object with the list of modules as keys
 // along with the exports of each module as its value.
 
-
 app.import('bower_components/momentjs/moment.js');
 app.import('bower_components/howler/howler.js');
 app.import('bower_components/lodash/dist/lodash.js');
+app.import('bower_components/bootstrap/dist/js/bootstrap.js');
 
-module.exports = app.toTree();
+app.import('bower_components/uri.js/src/IPv6.js');
+app.import('bower_components/uri.js/src/punycode.js');
+app.import('bower_components/uri.js/src/SecondLevelDomains.js');
+app.import('bower_components/uri.js/src/URI.js');
+
+//app.import('bower_components/jquery/dist/jquery.js');
+app.import('bower_components/jquery-cookie/jquery.cookie.js');
+app.import('bower_components/handlebars/handlebars.js');
+app.import('bower_components/TitleNotifier.js/title_notifier.js');
+app.import('bower_components/jquery.atwho/dist/js/jquery.atwho.js');
+app.import('bower_components/FileAPI/dist/FileAPI.html5.js');
+app.import('bower_components/Caret.js/dist/jquery.caret.min.js');
+app.import('bower_components/emojify.js/emojify.js');
+app.import('bower_components/magnific-popup/dist/jquery.magnific-popup.js');
+app.import('bower_components/bootstrap-contextmenu/bootstrap-contextmenu.js');
+app.import('bower_components/velocity/velocity.js');
+
+// Copy only the relevant files:
+var fontsFontAwesome = pickFiles('bower_components/font-awesome/fonts', {
+   srcDir: '/',
+   destDir: '/assets/fonts'
+});
+
+var fontsBootstrap = pickFiles('bower_components/bootstrap/dist/fonts', {
+   srcDir: '/',
+   destDir: '/assets/fonts'
+});
+
+// Merge the app tree and our new font assets.
+module.exports = mergeTrees([ app.toTree(), fontsFontAwesome, fontsBootstrap ]);
