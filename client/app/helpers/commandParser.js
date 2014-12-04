@@ -17,6 +17,7 @@
 'use strict';
 
 import Ember from 'ember';
+import Friend from '../models/friend';
 
 export default Ember.Object.extend({
     process: function(command) {
@@ -134,16 +135,16 @@ export default Ember.Object.extend({
     },
 
     _handleFriends: function(data) {
-        Mas.friendCollection.clear();
+        this.get('friendsModel').clear();
 
-        data.friends.forEach(function(friend) {
-            var friendRecord = Mas.Friend.create(friend);
-            Mas.friendCollection.pushObject(friendRecord);
+        data.friends.forEach(function(newFriend) {
+            var friendRecord = Friend.create(newFriend);
+            this.get('friendsModel').pushObject(friendRecord);
         }.bind(this));
     },
 
     _handleFriendsupdate: function(data) {
-        var friend = Mas.friendCollection.findBy('userId', data.userId);
+        var friend = this.get('friendsModel').findBy('userId', data.userId);
         friend.set('online', data.online);
         if (data.last) {
             friend.set('last', data.last);
