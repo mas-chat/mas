@@ -24,7 +24,6 @@ export default Ember.Route.extend({
     },
 
     setupController: function(controller, model) {
-        controller.set('friends', Ember.A([])); // friendCollection
         controller.set('model', model);
     }
 });
