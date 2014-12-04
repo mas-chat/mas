@@ -33,14 +33,9 @@ loadInitializers(App, config.modulePrefix);
 
 export default App;
 
-//// me start
-
-//require('../../server/public/dist/client-templates');
+// Old code start
 
 //require('./helpers/uploadMixin');
-
-//require('./routes/application');
-//require('./routes/main');
 
 //require('./views/application');
 //require('./views/main');
@@ -69,32 +64,22 @@ export default App;
 
 //require('./models/message');
 
-//require('./helpers/network');
 //require('./helpers/handlebars');
 //require('./helpers/users');
 
 //Mas.nicks = {};
 
-
-
-
 //Mas.userDb = Mas.Users.create();
 
-//Mas.Router.map(function() {
-//    this.route('main', { path: '/' });
-//});
-
-//Mas.networkMgr = Mas.Network.create();
-
-//document.addEventListener('visibilitychange', function() {
-//    if (!document.hidden) {
-//        titlenotifier.reset();
-//    }
-//});
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        titlenotifier.reset();
+    }
+});
 
 /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-//emojify.setConfig({
-//    img_dir: '/dist/images/emojify',
-//    ignore_emoticons: true
-//});
+emojify.setConfig({
+    img_dir: '/dist/images/emojify',
+    ignore_emoticons: true
+});
 
