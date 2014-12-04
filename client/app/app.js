@@ -64,7 +64,6 @@ export default App;
 
 //require('./models/message');
 
-//require('./helpers/handlebars');
 //require('./helpers/users');
 
 //Mas.nicks = {};
