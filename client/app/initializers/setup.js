@@ -17,15 +17,18 @@
 'use strict';
 
 import Ember from 'ember';
-import network from '../helpers/network';
+import Network from '../helpers/network';
+import Users from '../helpers/users';
 
 export function initialize(container, application) {
     var friends = Ember.A([]);
     var nicks = {};
+    var userDb = Users.create();
 
-    var newNetwork = network.create({
+    var newNetwork = Network.create({
         friendsModel: friends,
-        nicksModel: nicks
+        nicksModel: nicks,
+        usersModel: userDb
     });
 
     application.register('network:main', newNetwork, { instantiate: false });
