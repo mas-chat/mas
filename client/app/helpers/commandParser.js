@@ -83,7 +83,7 @@ export default Ember.Object.extend({
     _handleUsers: function(data) {
         for (var userId in data.mapping) { /* jshint -W089 */
             var user = data.mapping[userId];
-            Mas.userDb.set('users.' + userId, user);
+            this.get('usersModel').set('users.' + userId, user);
         }
     },
 
