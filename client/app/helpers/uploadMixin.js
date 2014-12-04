@@ -37,7 +37,7 @@ Mas.UploadMixin = Ember.Mixin.create({
                 }
             }.bind(this),
             data: {
-                sessionId: Mas.networkMgr.sessionId
+                sessionId: this.network.sessionId
             }
         };
 
@@ -52,7 +52,7 @@ Mas.UploadMixin = Ember.Mixin.create({
     },
 
     _sendMessage: function(text) {
-        Mas.networkMgr.send({
+        this.network.send({
             id: 'SEND',
             text: text,
             windowId: this.get('windowId')

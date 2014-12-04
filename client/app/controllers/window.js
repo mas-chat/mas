@@ -27,7 +27,7 @@ export default Ember.ObjectController.extend({
         },
 
         close: function() {
-            Mas.networkMgr.send({
+            this.network.send({
                 id: 'CLOSE',
                 windowId: this.get('windowId')
             });
@@ -37,7 +37,7 @@ export default Ember.ObjectController.extend({
             var text = this.get('newMessage');
             this.set('newMessage', '');
 
-            Mas.networkMgr.send({
+            this.network.send({
                 id: 'SEND',
                 text: text,
                 windowId: this.get('windowId')
@@ -52,7 +52,7 @@ export default Ember.ObjectController.extend({
         },
 
         chat: function(userId) {
-            Mas.networkMgr.send({
+            this.network.send({
                 id: 'CHAT',
                 windowId: this.get('windowId'),
                 userId: userId
@@ -64,7 +64,7 @@ export default Ember.ObjectController.extend({
         },
 
         whois: function(userId) {
-            Mas.networkMgr.send({
+            this.network.send({
                 id: 'WHOIS',
                 windowId: this.get('windowId'),
                 userId: userId
@@ -72,7 +72,7 @@ export default Ember.ObjectController.extend({
         },
 
         op: function(userId) {
-            Mas.networkMgr.send({
+            this.network.send({
                 id: 'OP',
                 windowId: this.get('windowId'),
                 userId: userId
@@ -84,7 +84,7 @@ export default Ember.ObjectController.extend({
         },
 
         kick: function(userId) {
-            Mas.networkMgr.send({
+            this.network.send({
                 id: 'KICK',
                 windowId: this.get('windowId'),
                 userId: userId
@@ -92,7 +92,7 @@ export default Ember.ObjectController.extend({
         },
 
         kickban: function(userId) {
-            Mas.networkMgr.send({
+            this.network.send({
                 id: 'KICKBAN',
                 windowId: this.get('windowId'),
                 userId: userId

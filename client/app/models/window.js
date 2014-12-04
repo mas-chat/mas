@@ -102,12 +102,13 @@ export default Ember.Object.extend({
     }.property('type'),
 
     syncServer: function() {
-        Mas.networkMgr.send({
-            id: 'UPDATE',
-            windowId: this.get('windowId'),
-            row: this.get('row'),
-            visible: this.get('visible')
-        });
+        // TBD: How?
+        // Mas.networkM.send({
+        //     id: 'UPDATE',
+        //     windowId: this.get('windowId'),
+        //     row: this.get('row'),
+        //     visible: this.get('visible')
+        // });
     }.observes('visible', 'row'),
 
     _mapUserIdsToNicks: function(role) {
