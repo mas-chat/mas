@@ -76,15 +76,12 @@
 
     // Custom Globals
     "globals": {
-        "Ember": false,
-        "Handlebars": false,
         "URI": false,
         "titlenotifier": false,
         "emojify": false,
         "FileAPI": false,
-        "Mas": false,
-        "require": false,
-        "define": false,
+        "moment": false,
+        "howler": false,
 
         "casper": false,
         "it": false,
