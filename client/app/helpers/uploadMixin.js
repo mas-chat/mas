@@ -65,7 +65,7 @@ Mas.UploadMixin = Ember.Mixin.create({
         this.get('messages').pushObject(Mas.Message.create({
             body: text,
             cat:  cat,
-            nick: cat === 'mymsg' ? Mas.nicks[this.get('network')] : null,
+            nick: cat === 'mymsg' ? this.get('nicks')[this.get('network')] : null,
             ts: moment().unix()
         }));
     }

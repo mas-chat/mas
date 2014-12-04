@@ -46,7 +46,7 @@ export default Ember.ObjectController.extend({
             this.get('messages').pushObject(Mas.Message.create({
                 body: text,
                 cat: 'mymsg',
-                nick: Mas.nicks[this.get('network')],
+                nick: this.get('nicks')[this.get('network')],
                 ts: moment().unix()
             }));
         },

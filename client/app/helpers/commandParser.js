@@ -67,7 +67,7 @@ export default Ember.Object.extend({
     },
 
     _handleNick: function(data) {
-        jQuery.extend(Mas.nicks, data);
+        jQuery.extend(this.get('nicksModel'), data);
     },
 
     _handleInitdone: function() {

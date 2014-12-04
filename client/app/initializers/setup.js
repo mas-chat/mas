@@ -21,8 +21,11 @@ import network from '../helpers/network';
 
 export function initialize(container, application) {
     var friends = Ember.A([]);
+    var nicks = {};
+
     var newNetwork = network.create({
-        friendsModel: friends
+        friendsModel: friends,
+        nicksModel: nicks
     });
 
     application.register('network:main', newNetwork, { instantiate: false });
@@ -30,6 +33,9 @@ export function initialize(container, application) {
 
     application.register('model:friends', friends, { instantiate: false });
     application.inject('controller', 'friends', 'model:friends');
+
+    application.register('model:nicks', nicks, { instantiate: false });
+    application.inject('controller', 'nicks', 'model:nicks');
 }
 
 export default {
