@@ -30,13 +30,14 @@ export default Ember.Object.extend({
     _unsolicitedParser: null,
     _state: 'normal',
 
-    init: function(friendsModel) {
+    init: function() {
         this._super();
         this._pollMsgs();
         this._unsolicitedParser = commandParser.create({
+            windowsModel: this.get('windowsModel'),
             friendsModel: this.get('friendsModel'),
             nicksModel: this.get('nicksModel'),
-            usersModel: usersModel
+            usersModel: this.get('usersModel')
         });
     },
 
@@ -65,7 +66,7 @@ export default Ember.Object.extend({
         $.ajax({
             type: 'POST',
             contentType: 'application/json; charset=utf-8',
-            url: ':3200/api/v1/send',
+            url: '/api/v1/send',
             data: JSON.stringify(data),
             success: this._sendMsgSuccess,
             error: this._sendMsgFailure,
