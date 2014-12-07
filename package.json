@@ -14,7 +14,7 @@
     "co-wait": "~0.0.0",
     "colors": "~1.0.2",
     "cron": "~1.0.3",
-    "elasticsearch": "~2.4.0",
+    "elasticsearch": "~3.0.1",
     "faker": "~2.1.1",
     "forms": "~1.0.0",
     "handlebars": "~2.0.0",
