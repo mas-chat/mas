@@ -14,9 +14,9 @@
 //   governing permissions and limitations under the License.
 //
 
-// globals _, moment
-
 'use strict';
+
+/* globals _ */
 
 import Ember from 'ember';
 
@@ -115,13 +115,6 @@ export default Ember.View.extend({
     },
 
     _containerDimensions: function() {
-        if (!this.$()){
-            return {
-                width: 1,
-                height: 1
-            }
-        } // temp hack
-
         return {
             width: this.$().width(),
             height: this.$().height()
