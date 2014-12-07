@@ -17,7 +17,7 @@
 'use strict';
 
 import Ember from 'ember';
-import commandParser from './command-parser';
+import CommandParser from './command-parser';
 
 export default Ember.Object.extend({
     sessionId: 0,
@@ -33,7 +33,7 @@ export default Ember.Object.extend({
     init: function() {
         this._super();
         this._pollMsgs();
-        this._unsolicitedParser = commandParser.create({
+        this._unsolicitedParser = CommandParser.create({
             store: this.get('store'),
             container: this.get('container')
         });

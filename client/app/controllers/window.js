@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* globals titlenotifier, moment */
+
 import Ember from 'ember';
 import { play } from '../helpers/sound';
 
