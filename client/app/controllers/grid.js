@@ -23,7 +23,7 @@ export default Ember.ArrayController.extend({
 
     actions: {
         joinLobby: function() {
-            this.network.send({
+            this.remote.send({
                 id: 'JOIN',
                 network: 'MAS',
                 name: 'lobby'

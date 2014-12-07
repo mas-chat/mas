@@ -27,7 +27,7 @@ export default Ember.ObjectController.extend({
         },
 
         close: function() {
-            this.network.send({
+            this.remote.send({
                 id: 'CLOSE',
                 windowId: this.get('windowId')
             });
@@ -37,7 +37,7 @@ export default Ember.ObjectController.extend({
             var text = this.get('newMessage');
             this.set('newMessage', '');
 
-            this.network.send({
+            this.remote.send({
                 id: 'SEND',
                 text: text,
                 windowId: this.get('windowId')
@@ -54,7 +54,7 @@ export default Ember.ObjectController.extend({
         },
 
         chat: function(userId) {
-            this.network.send({
+            this.remote.send({
                 id: 'CHAT',
                 windowId: this.get('windowId'),
                 userId: userId
@@ -66,7 +66,7 @@ export default Ember.ObjectController.extend({
         },
 
         whois: function(userId) {
-            this.network.send({
+            this.remote.send({
                 id: 'WHOIS',
                 windowId: this.get('windowId'),
                 userId: userId
@@ -74,7 +74,7 @@ export default Ember.ObjectController.extend({
         },
 
         op: function(userId) {
-            this.network.send({
+            this.remote.send({
                 id: 'OP',
                 windowId: this.get('windowId'),
                 userId: userId
@@ -86,7 +86,7 @@ export default Ember.ObjectController.extend({
         },
 
         kick: function(userId) {
-            this.network.send({
+            this.remote.send({
                 id: 'KICK',
                 windowId: this.get('windowId'),
                 userId: userId
@@ -94,7 +94,7 @@ export default Ember.ObjectController.extend({
         },
 
         kickban: function(userId) {
-            this.network.send({
+            this.remote.send({
                 id: 'KICKBAN',
                 windowId: this.get('windowId'),
                 userId: userId

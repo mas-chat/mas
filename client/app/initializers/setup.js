@@ -44,7 +44,7 @@ export function initialize(container, application) {
     application.inject('route', 'store', 'store:main');
     application.inject('model:base', 'store', 'store:main');
 
-    application.inject('controller', 'network', 'network:main');
+    application.inject('controller', 'remote', 'network:main');
 }
 
 export default {

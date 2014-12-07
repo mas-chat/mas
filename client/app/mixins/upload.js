@@ -37,7 +37,7 @@ export default Ember.Mixin.create({
                 }
             }.bind(this),
             data: {
-                sessionId: this.network.sessionId
+                sessionId: this.remote.sessionId
             }
         };
 
@@ -52,7 +52,7 @@ export default Ember.Mixin.create({
     },
 
     _sendMessage: function(text) {
-        this.network.send({
+        this.remote.send({
             id: 'SEND',
             text: text,
             windowId: this.get('windowId')
