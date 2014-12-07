@@ -17,7 +17,7 @@
 'use strict';
 
 import Ember from 'ember';
-import sound from '../helpers/sound';
+import { play } from '../helpers/sound';
 
 export default Ember.ObjectController.extend({
     actions: {
@@ -130,7 +130,7 @@ export default Ember.ObjectController.extend({
 
             // Sound notification
             if (this.get('sounds')) {
-                sound.play();
+                play();
             }
         }
     }.observes('messages.@each'),
