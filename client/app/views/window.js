@@ -17,8 +17,9 @@
 'use strict';
 
 import Ember from 'ember';
+import UploadMixin from '../mixins/upload';
 
-export default Ember.View.extend(Mas.UploadMixin, {
+export default Ember.View.extend(UploadMixin, {
     classNames: [ 'window', 'flex-grow-column' ],
     classNameBindings: [ 'expanded:expanded:', 'visible:visible:hidden' ],
     attributeBindings: [ 'row:data-row', 'draggable' ],
