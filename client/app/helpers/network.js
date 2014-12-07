@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* global $ */
+
 import Ember from 'ember';
 import CommandParser from './command-parser';
 
