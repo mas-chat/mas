@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* global $ */
+
 import Ember from 'ember';
 
 export default Ember.Object.extend({
@@ -67,7 +69,7 @@ export default Ember.Object.extend({
     },
 
     _handleNick: function(data) {
-        jQuery.extend(this.get('store.nicks'), data);
+        $.extend(this.get('store.nicks'), data);
     },
 
     _handleInitdone: function() {

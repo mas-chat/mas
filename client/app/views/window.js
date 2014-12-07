@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals FileAPI, emojify */
+/* globals $, FileAPI, emojify */
 
 import Ember from 'ember';
 import UploadMixin from '../mixins/upload';
