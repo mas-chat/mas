@@ -83,11 +83,17 @@ gulp.task('less-pages', [ 'bower' ], function() {
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
+gulp.task('fonts', [ 'bower' ], function() {
+    gulp.src([ './bower_components/bootstrap/dist/fonts/*',
+        './bower_components/font-awesome/fonts/*' ])
+        .pipe(gulp.dest('./server/public/dist/fonts'));
+});
+
 gulp.task('clean-assets', function(cb) {
     rimraf('./server/public/dist', cb);
 });
 
-gulp.task('build-assets', [ 'libs-pages', 'less-pages' ], function() {
+gulp.task('build-assets', [ 'libs-pages', 'less-pages', 'fonts' ], function() {
     if (argv.prod) {
         gulp.src('./server/public/dist/**/*')
             .pipe(rev())
