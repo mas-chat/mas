@@ -878,5 +878,9 @@ function getUserId(nick) {
 }
 
 function getUserName(userId) {
+    if (!userId) {
+        return '';
+    }
+
     return new Buffer(userId.substring(1), 'base64').toString();
 }
