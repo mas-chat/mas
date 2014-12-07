@@ -46,6 +46,6 @@ document.addEventListener('visibilitychange', function() {
 /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
 /* jshint camelcase: false */
 emojify.setConfig({
-    img_dir: '/dist/images/emojify',
+    img_dir: '/app/assets/images/emoji',
     ignore_emoticons: true
 });
