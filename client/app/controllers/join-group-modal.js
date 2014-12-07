@@ -31,7 +31,7 @@ export default Ember.ObjectController.extend({
                 password = null;
             }
 
-            this.network.send({
+            this.remote.send({
                 id: 'JOIN',
                 network: 'MAS',
                 name: this.get('group'),

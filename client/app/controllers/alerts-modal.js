@@ -28,7 +28,7 @@ export default Ember.ObjectController.extend({
             var newSoundAlert = this.get('modalSoundAlert');
             var newTitleAlert = this.get('modalTitleAlert');
 
-            this.network.send({
+            this.remote.send({
                 id: 'UPDATE',
                 windowId: this.get('windowId'),
                 sounds: newSoundAlert === 'enabled',
