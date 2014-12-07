@@ -1,12 +1,12 @@
 <li class="dropdown-header">Friends:</li>
 
-{{#each}}
+{{#each friend in model}}
     <li class="main-friend-item">
         <div class="main-friend-chat"><i class="fa fa-comments"></i></div>
-        <div class="main-friend-name">{{name}}</div>
-        <div class="main-friend-ago">{{timeSince online last}}</div>
+        <div class="main-friend-name">{{friend.name}}</div>
+        <div class="main-friend-ago">{{friend.timeSince online last}}</div>
         <div class="main-friend-status">
-            {{#if online}}
+            {{#if friend.online}}
                 <i class="online fa fa-circle"></i>
             {{else}}
                 <i class="offline fa fa-circle-o"></i>

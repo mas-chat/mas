@@ -1,5 +1,5 @@
-{{#each}}
-    {{render "window" this}}
+{{#each window in model}}
+    {{render "window" window}}
 {{else}}
     <div class="flex-grow-row flex-1 flex-align-center">
         {{#if initDone}}
