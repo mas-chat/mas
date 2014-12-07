@@ -33,7 +33,7 @@ export default Ember.ArrayController.extend({
         },
 
         logout: function() {
-            this.network.send({ id: 'LOGOUT' }, function() {
+            this.remote.send({ id: 'LOGOUT' }, function() {
                 $.removeCookie('auth', { path: '/' });
                 window.location = '/';
             });
