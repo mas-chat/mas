@@ -26,6 +26,8 @@ export default Ember.Mixin.create({
             return;
         }
 
+        var remote = this.remote || this.controller.remote;
+
         var options = {
             url: '/api/v1/upload',
             files: { userFiles: files },
@@ -38,9 +40,7 @@ export default Ember.Mixin.create({
                     this._printLine('File upload failed.', 'error');
                 }
             }.bind(this),
-            data: {
-                sessionId: this.remote.sessionId
-            }
+            data: { sessionId: remote.sessionId }
         };
 
         if (transform === 'jpeg') {
@@ -54,23 +54,28 @@ export default Ember.Mixin.create({
     },
 
     _sendMessage: function(text) {
-        this.remote.send({
+        var remote = this.remote || this.controller.remote;
+        var windowId = this.windowId || this.controller.windowId;
+
+        remote.send({
             id: 'SEND',
             text: text,
-            windowId: this.get('windowId')
+            windowId: windowId
         });
 
         this._printLine(text, 'mymsg');
     },
 
     _printLine: function(text, cat) {
-        var messageRecord = this.get('container').lookup('model:message').setProperties({
+        var controller = this.controller || this;
+
+        var messageRecord = controller.get('container').lookup('model:message').setProperties({
             body: text,
             cat:  cat,
-            nick: cat === 'mymsg' ? this.get('store.nicks')[this.get('network')] : null,
+            nick: cat === 'mymsg' ? controller.get('store.nicks')[controller.get('network')] : null,
             ts: moment().unix()
         });
 
-        this.get('messages').pushObject(messageRecord);
+        controller.get('messages').pushObject(messageRecord);
     }
 });
