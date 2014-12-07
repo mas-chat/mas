@@ -56,5 +56,15 @@ var fontsBootstrap = pickFiles('bower_components/bootstrap/dist/fonts', {
    destDir: '/assets/fonts'
 });
 
+var emojify = pickFiles('bower_components/emojify.js/images', {
+    srcDir: '/',
+    destDir: '/assets/images'
+});
+
 // Merge the app tree and our new font assets.
-module.exports = mergeTrees([ app.toTree(), fontsFontAwesome, fontsBootstrap ]);
+module.exports = mergeTrees([
+    app.toTree(),
+    fontsFontAwesome,
+    fontsBootstrap,
+    emojify
+]);
