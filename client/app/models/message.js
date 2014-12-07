@@ -29,8 +29,8 @@ export default Ember.Object.extend({
 
     nick: function() {
         var userId = this.get('userId');
-        return Mas.userDb.getNick(userId);
-    }.property('Mas.userdb.users.@each.nick'),
+        return this.get('store.users').getNick(userId);
+    }.property('store.users.users.@each.nick'),
 
     decoratedBody: function() {
         return this._decorate(this.get('body'));

@@ -17,7 +17,7 @@
 'use strict';
 
 import Ember from 'ember';
-import commandParser from './commandParser';
+import commandParser from './command-parser';
 
 export default Ember.Object.extend({
     sessionId: 0,
@@ -34,10 +34,8 @@ export default Ember.Object.extend({
         this._super();
         this._pollMsgs();
         this._unsolicitedParser = commandParser.create({
-            windowsModel: this.get('windowsModel'),
-            friendsModel: this.get('friendsModel'),
-            nicksModel: this.get('nicksModel'),
-            usersModel: this.get('usersModel')
+            store: this.get('store'),
+            container: this.get('container')
         });
     },
 
