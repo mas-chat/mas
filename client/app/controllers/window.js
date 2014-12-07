@@ -46,7 +46,7 @@ export default Ember.ObjectController.extend({
             var messageRecord = this.get('container').lookup('model:message').setProperties({
                 body: text,
                 cat: 'mymsg',
-                nick: this.get('nicks')[this.get('network')],
+                nick: this.get('store.nicks')[this.get('network')],
                 ts: moment().unix()
             });
 
