@@ -25,7 +25,7 @@ var paths = {
         'bin/masctl.js'
     ],
     clientJavaScripts: [
-        'client/**/*.js',
+        'client/app/**/*.js'
     ],
     pagesCSS: [
         'server/pages/stylesheets/*.less'
