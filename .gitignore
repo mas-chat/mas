@@ -6,6 +6,7 @@
 #Ignore generated files/directories
 /mas.conf
 /node_modules/
+/bower_components/
 /server/public/dist/
 /client/dist/
 /client/tmp/
