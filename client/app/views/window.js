@@ -123,7 +123,7 @@ export default Ember.View.extend(UploadMixin, {
 
         var emojiListTemplate =
             '<li data-value=":${name}:">' +
-            '<img src="/dist/images/emojify/${name}.png">${name}' +
+            '<img src="/app/assets/images/emoji/${name}.png">${name}' +
             '</li>';
 
         this.$('.form-control').atwho({
