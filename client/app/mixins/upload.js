@@ -18,7 +18,7 @@
 
 import Ember from 'ember';
 
-Mas.UploadMixin = Ember.Mixin.create({
+export default Ember.Mixin.create({
     upload: function(files, transform) {
         if (files.length === 0) {
             return;
