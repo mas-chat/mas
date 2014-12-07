@@ -17,14 +17,17 @@
 'use strict';
 
 import Ember from 'ember';
+import Users from './users';
 
-export default Ember.Route.extend({
-    model: function() {
-        return this.get('store.windows');
-    },
+export default Ember.Object.extend({
+    nicks: {},
+    friends: null,
+    users: null,
+    windows: null,
 
-    setupController: function(controller, model) {
-        controller.set('model', model);
-        controller.set('friends', this.get('store.friends'));
+    init: function() {
+        this.set('users', Users.create());
+        this.set('friends', Ember.A([]));
+        this.set('windows', Ember.A([]));
     }
 });

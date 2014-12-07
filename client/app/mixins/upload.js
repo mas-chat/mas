@@ -62,11 +62,13 @@ export default Ember.Mixin.create({
     },
 
     _printLine: function(text, cat) {
-        this.get('messages').pushObject(Mas.Message.create({
+        var messageRecord = this.get('container').lookup('model:message').setProperties({
             body: text,
             cat:  cat,
             nick: cat === 'mymsg' ? this.get('nicks')[this.get('network')] : null,
             ts: moment().unix()
-        }));
+        });
+
+        this.get('messages').pushObject(messageRecord);
     }
 });

@@ -23,6 +23,6 @@ export default Ember.Object.extend({
 
     name: function() {
         var userId = this.get('userId');
-        return Mas.userDb.getName(userId);
-    }.property('Mas.userdb.users.@each.nick')
+        return this.get('store.users').getName(userId);
+    }.property('store.users.users.@each.nick')
 });
