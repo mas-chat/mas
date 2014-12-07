@@ -67,7 +67,7 @@ export default Ember.Mixin.create({
         var messageRecord = this.get('container').lookup('model:message').setProperties({
             body: text,
             cat:  cat,
-            nick: cat === 'mymsg' ? this.get('nicks')[this.get('network')] : null,
+            nick: cat === 'mymsg' ? this.get('store.nicks')[this.get('network')] : null,
             ts: moment().unix()
         });
 
