@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* global FileAPI */
+
 import Ember from 'ember';
 
 export default Ember.View.extend({

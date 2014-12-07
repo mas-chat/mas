@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* globals titlenotifier, emojify */
+
 import Ember from 'ember';
 import Resolver from 'ember/resolver';
 import loadInitializers from 'ember/load-initializers';
