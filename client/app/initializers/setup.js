@@ -16,32 +16,38 @@
 
 'use strict';
 
-import Ember from 'ember';
 import Network from '../helpers/network';
-import Users from '../helpers/users';
+import Store from '../helpers/store';
+import FriendModel from '../models/friend';
+import MessageModel from '../models/message';
+import WindowModel from '../models/window';
 
 export function initialize(container, application) {
-    var friends = Ember.A([]);
-    var nicks = {};
-    var userDb = Users.create();
-
-    var newNetwork = Network.create({
-        friendsModel: friends,
-        nicksModel: nicks,
-        usersModel: userDb
+    var store = Store.create();
+    var network = Network.create({
+        store: store,
+        container: container
     });
 
-    application.register('network:main', newNetwork, { instantiate: false });
+    application.register('store:main', store, { instantiate: false });
+    application.register('network:main', network, { instantiate: false });
+
+    // Model factories
+    application.register('model:friend', FriendModel, { singleton: false });
+    application.register('model:message', MessageModel, { singleton: false });
+    application.register('model:window', WindowModel, { singleton: false });
+    application.inject('model:friend', 'store', 'store:main');
+    application.inject('model:message', 'store', 'store:main');
+    application.inject('model:window', 'store', 'store:main');
+
+    application.inject('controller', 'store', 'store:main');
+    application.inject('route', 'store', 'store:main');
+    application.inject('model:base', 'store', 'store:main');
+
     application.inject('controller', 'network', 'network:main');
-
-    application.register('model:friends', friends, { instantiate: false });
-    application.inject('controller', 'friends', 'model:friends');
-
-    application.register('model:nicks', nicks, { instantiate: false });
-    application.inject('controller', 'nicks', 'model:nicks');
 }
 
 export default {
-  name: 'setup',
-  initialize: initialize
+    name: 'setup',
+    initialize: initialize
 };

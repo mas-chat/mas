@@ -47,15 +47,15 @@ export default Ember.Object.extend({
 
     operatorNames: function() {
         return this._mapUserIdsToNicks('operators');
-    }.property('operators.@each', 'Mas.userdb.users.@each.nick'),
+    }.property('operators.@each', 'store.users.users.@each.nick'),
 
     voiceNames: function() {
         return this._mapUserIdsToNicks('voices');
-    }.property('voices.@each', 'Mas.userdb.users.@each.nick'),
+    }.property('voices.@each', 'store.users.users.@each.nick'),
 
     userNames: function() {
         return this._mapUserIdsToNicks('users');
-    }.property('users.@each', 'Mas.userdb.users.@each.nick'),
+    }.property('users.@each', 'store.users.users.@each.nick'),
 
     decoratedTitle: function() { // (name, topic)
         var title;
@@ -65,7 +65,7 @@ export default Ember.Object.extend({
         if (this.get('type') === '1on1') {
             var conversationNetwork = network === 'MAS' ? '' : network + ' ';
             title = 'Private ' + conversationNetwork + 'conversation with ' +
-                Mas.userDb.getNick(this.get('userId'));
+                this.get('store.users').getNick(this.get('userId'));
         } else if (network === 'MAS') {
             title = 'Group: ' + name.charAt(0).toUpperCase() + name.substr(1);
         } else {
@@ -73,7 +73,7 @@ export default Ember.Object.extend({
         }
 
         return title;
-    }.property('name', 'network', 'type', 'Mas.userdb.users.@each.nick'),
+    }.property('name', 'network', 'type', 'store.users.users.@each.nick'),
 
     decoratedTopic: function() {
         return this.get('topic') ? '- ' + this.get('topic') : '';
@@ -115,8 +115,8 @@ export default Ember.Object.extend({
         return this.get(role).map(function(userId) {
             return {
                 userId: userId,
-                nick: Mas.userDb.getNick(userId)
+                nick: this.get('store.users').getNick(userId)
             };
-        });
+        }, this);
     }
 });

@@ -17,7 +17,6 @@
 'use strict';
 
 import Ember from 'ember';
-import Friend from '../models/friend';
 
 export default Ember.Object.extend({
     process: function(command) {
@@ -28,7 +27,7 @@ export default Ember.Object.extend({
         delete command.id;
 
         if (typeof windowId === 'number') {
-            targetWindow = Mas.windowCollection.findBy('windowId', windowId);
+            targetWindow = this.get('store.windows').findBy('windowId', windowId);
         }
 
         var funcName = '_handle' + name.charAt(0) + name.substring(1).toLowerCase();
@@ -41,12 +40,12 @@ export default Ember.Object.extend({
     },
 
     _handleCreate: function(data) {
-        var windowRecord = Mas.Window.create(data);
-        Mas.windowCollection.pushObject(windowRecord);
+        var windowRecord = this.get('container').lookup('model:window').setProperties(data);
+        this.get('store.windows').pushObject(windowRecord);
     },
 
     _handleClose: function(data, targetWindow) {
-        Mas.windowCollection.removeObject(targetWindow);
+        this.get('store.windows').removeObject(targetWindow);
     },
 
     _handleAddtext: function(data, targetWindow) {
@@ -55,7 +54,8 @@ export default Ember.Object.extend({
         }
 
         delete data.windowId;
-        var messageRecord = Mas.Message.create(data);
+        var messageRecord = this.get('container').lookup('model:message').setProperties(data);
+
         var messages = targetWindow.messages;
 
         if (messages.length > 200) {
@@ -67,7 +67,7 @@ export default Ember.Object.extend({
     },
 
     _handleNick: function(data) {
-        jQuery.extend(this.get('nicksModel'), data);
+        jQuery.extend(this.get('store.nicks'), data);
     },
 
     _handleInitdone: function() {
@@ -76,14 +76,14 @@ export default Ember.Object.extend({
         // assumes these updates have been processed. Therefore INITDONE must be
         // processed one run loop round later than everything else.
         Ember.run.next(this, function() {
-            Mas.__container__.lookup('controller:application').set('initDone', true);
+            this.get('container').lookup('controller:application').set('initDone', true);
         });
     },
 
     _handleUsers: function(data) {
         for (var userId in data.mapping) { /* jshint -W089 */
             var user = data.mapping[userId];
-            this.get('usersModel').set('users.' + userId, user);
+            this.get('store.users').set('users.' + userId, user);
         }
     },
 
@@ -135,16 +135,17 @@ export default Ember.Object.extend({
     },
 
     _handleFriends: function(data) {
-        this.get('friendsModel').clear();
+        this.get('store.friends').clear();
 
         data.friends.forEach(function(newFriend) {
-            var friendRecord = Friend.create(newFriend);
-            this.get('friendsModel').pushObject(friendRecord);
+            var friendRecord = this.get('container').lookup('model:friend')
+              .setProperties(newFriend);
+            this.get('store.friends').pushObject(friendRecord);
         }.bind(this));
     },
 
     _handleFriendsupdate: function(data) {
-        var friend = this.get('friendsModel').findBy('userId', data.userId);
+        var friend = this.get('store.friends').findBy('userId', data.userId);
         friend.set('online', data.online);
         if (data.last) {
             friend.set('last', data.last);

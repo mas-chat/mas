@@ -43,12 +43,14 @@ export default Ember.ObjectController.extend({
                 windowId: this.get('windowId')
             });
 
-            this.get('messages').pushObject(Mas.Message.create({
+            var messageRecord = this.get('container').lookup('model:message').setProperties({
                 body: text,
                 cat: 'mymsg',
                 nick: this.get('nicks')[this.get('network')],
                 ts: moment().unix()
-            }));
+            });
+
+            this.get('messages').pushObject(messageRecord);
         },
 
         chat: function(userId) {
