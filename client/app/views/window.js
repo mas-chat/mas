@@ -151,7 +151,8 @@ export default Ember.View.extend(UploadMixin, {
 
         FileAPI.event.on(fileInput, 'change', function(evt) {
             var files = FileAPI.getFiles(evt); // Retrieve file list
-            this.upload(files, this.get('controller'));
+            this.upload(files, 'jpeg', this.get('controller.remote'),
+                this.get('controller.windowId'), this.get('controller'));
         }.bind(this));
 
         this.get('parentView').windowAdded(false);

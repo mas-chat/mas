@@ -21,12 +21,10 @@
 import Ember from 'ember';
 
 export default Ember.Mixin.create({
-    upload: function(files, transform) {
+    upload: function(files, transform, remote, windowId, controller) {
         if (files.length === 0) {
             return;
         }
-
-        var remote = this.remote || this.controller.remote;
 
         var options = {
             url: '/api/v1/upload',
@@ -35,9 +33,9 @@ export default Ember.Mixin.create({
             complete: function(err, xhr) {
                 if (!err) {
                     var url = JSON.parse(xhr.responseText).url[0];
-                    this._sendMessage(url);
+                    this._sendMessage(url, remote, windowId, controller);
                 } else {
-                    this._printLine('File upload failed.', 'error');
+                    this._printLine('File upload failed.', 'error', controller);
                 }
             }.bind(this),
             data: { sessionId: remote.sessionId }
@@ -53,22 +51,17 @@ export default Ember.Mixin.create({
         FileAPI.upload(options);
     },
 
-    _sendMessage: function(text) {
-        var remote = this.remote || this.controller.remote;
-        var windowId = this.windowId || this.controller.windowId;
-
+    _sendMessage: function(text, remote, windowId, controller) {
         remote.send({
             id: 'SEND',
             text: text,
             windowId: windowId
         });
 
-        this._printLine(text, 'mymsg');
+        this._printLine(text, 'mymsg', controller);
     },
 
-    _printLine: function(text, cat) {
-        var controller = this.controller || this;
-
+    _printLine: function(text, cat, controller) {
         var messageRecord = controller.get('container').lookup('model:message').setProperties({
             body: text,
             cat:  cat,
