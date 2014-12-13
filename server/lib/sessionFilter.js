@@ -57,7 +57,7 @@ module.exports = function*(next) {
         var sessionExists = yield redis.zrank('sessionlist:' + userId, sessionId);
 
         if (sessionExists === null) {
-            log.warn(userId, 'Invalid session.');
+            log.info(userId, 'Invalid session.');
             respond(this, 'not acceptable', 'Invalid session.');
             return;
         }
