@@ -20,10 +20,12 @@
 
 import Ember from 'ember';
 
+var SafeString = Ember.Handlebars.Utils.SafeString;
+
 Ember.Handlebars.helper('decoratedTimestamp', function(timestamp) {
     var ts = moment.unix(timestamp);
 
-    return new Ember.Handlebars.SafeString('<div class="timestamp" data-toggle="tooltip" title="' +
+    return new SafeString('<div class="timestamp" data-toggle="tooltip" title="' +
         ts.format('ddd, MMM D') + '">' + ts.format('HH:mm') + '</div>');
 });
 
@@ -32,7 +34,7 @@ Ember.Handlebars.helper('dayDivider', function(list, index) {
     var dateForPrevious = index === 0 ? null : moment.unix(list[index - 1].get('ts'));
 
     if (index === 0 || dateForCurrent.format('l') !== dateForPrevious.format('l')) {
-        return new Ember.Handlebars.SafeString(
+        return new SafeString(
             '<div class="date-divider">' + dateForCurrent.format('dddd, MMMM D, YYYY') + '</div>');
     }
 });
@@ -48,5 +50,5 @@ Ember.Handlebars.helper('timeSince', function(online, timeStamp) {
         res = moment.unix(timeStamp).fromNow(true);
     }
 
-    return new Ember.Handlebars.SafeString(res);
+    return new SafeString(res);
 });
