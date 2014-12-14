@@ -379,6 +379,7 @@ var handlers = {
     '005': handleServerText,
     '020': handleServerText,
     '042': handleServerText,
+    '043': handle043,
     242: handleServerText,
     250: handleServerText,
     251: handleServerText,
@@ -426,6 +427,14 @@ function *handleServerText(userId, msg, code) {
         cat: cat,
         body: text
     });
+}
+
+function *handle043(userId, msg) {
+    // :*.pl 043 AnDy 0PNEAKPLG :nickname collision, forcing nick change to your unique ID.
+    var newNick = msg.params[0];
+    yield nicks.updateCurrentNick(userId, msg.network, newNick);
+
+    yield tryDifferentNick(userId, msg.network);
 }
 
 function *handle332(userId, msg) {
