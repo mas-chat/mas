@@ -9,7 +9,7 @@
 
 [common]
 env=default
-admin=1
+admin=m1
 dev_mode=false
 test_mode=false
 
