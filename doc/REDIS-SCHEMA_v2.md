@@ -44,9 +44,6 @@ MAS Redis structures
    <nick> (int, userId)
    <openidurl> (int, userId)
 
- users (set)
-   <userId1>, <userId2> ...
-
  friends:<userId> (set)
    <userId1>, <userId2> ...
 
@@ -56,37 +53,34 @@ MAS Redis structures
  windowlist:<userId> (set)
    <windowId1>, <windowId2> ...
 
+ window:<userId>:<windowId> (hash)
+   collectionId (string)
+   sounds (bool)
+   titleAlert (bool)
+   visible (bool)
+   row (int)
+
  networks:<userId>:<network> (hash)
    state (string, 'connected', 'connecting', 'disconnected')
    currentnick (text)
    retryCount (int)
 
- window:<userId>:<windowId> (hash)
-   groupid (string)
-   sounds (bool)
-   titleAlert (bool)
-   visible (bool)
-   userMode (string)
-
- msgs:<groupId> (list) [oldest message on the right]
-
- group:<groupId> (hash)
-   owner (int, userId) (mas only)
+ collection:<collectionId> (hash)
+   owner (string, userId) (mas group only)
+   type (string, 'group', '1on1')
+   name (string) (e.g. '#foo', 'bar') ('' if not group)
    network (string, 'mas or 'ircnet', 'freenode', 'w3c')
-   type (string, 'group', or '1on1')
-   name (string) [ #foo (irc), example (mas), i43342-m432343 (irc 1on1), m43123-m98643 (mas 1on1) ]
    topic (string)
    password (string)
    apikey (string)
 
- groupmembers:<groupId> (set)
-   <userId1>, <userId2> ...
-
- names:<userId>:<windowId> (hash)
-   <userId>: (string, '@', '+', 'u')
+ collectionmembers:<collectionId> (hash)
+   <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user))
    ...
 
- notelist:<userId>:<nwid>:<channel_name> (set) TBD: Use windowId
+ collectionmsgs:<collectionId> (list) [oldest message on the right]
+
+ notelist:<collectionId> (list)
    note1, note2 ...
 
  note:<uuid> (hash)
@@ -95,7 +89,7 @@ MAS Redis structures
    timestamp (int)
    msg (text)
 
- urls:<userId>:<nwid>:<channel_name> (list) TBD: Use windowId
+ urls:<collectionId> (list)
    url1, url2 ...
 
  passwordresettoken:<token> (string with expiry time)
@@ -121,4 +115,5 @@ Global IDs
  nextGlobalUserId (string) (integer, counter)
  nextGlobalNoteId (string) (integer, counter)
  nextGlobalMsgId (string) (integer, counter)
+ nextGlobalCollectionId (string) (integer, counter)
 ```
