@@ -201,8 +201,9 @@ Create new window. Window identifier is either ```userId``` or ```name```.
   "titleAlert": false,
   "topic": "We meet tomorrow at 3PM",
   "visible": true,
-  "userMode": "participant",
-  "sounds": true
+  "role": "@",
+  "sounds": true,
+  "row": 3
 }
 ```
 
@@ -212,11 +213,11 @@ Create new window. Window identifier is either ```userId``` or ```name```.
 
 ```password``` null if password protection is disabled, a string otherwise
 
-```userMode``` can be ```participant```, ```operator```, ```owner```
+```role``` can be ```u``` (participant), ```v``` (voice), ```@``` (operator), ```*``` (owner)
 
-```name``` is included only if ```type``` is ```group```
+```name``` is an empty string if ```type``` is ```1on1```
 
-```userId``` is included only if ```type``` is ```1ion1```
+```userId``` is null if ```type``` is ```group```
 
 ## USERS
 
