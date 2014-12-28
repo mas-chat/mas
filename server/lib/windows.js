@@ -16,8 +16,8 @@
 
 'use strict';
 
-var assert = require('assert'),
-    redis = require('./redis').createClient(),
+var redis = require('./redis').createClient(),
+    outbox = require('./outbox'),
     log = require('./log');
 
 exports.getWindowIdsForNetwork = function*(userId, network) {
@@ -84,38 +84,59 @@ exports.getWindowNameAndNetwork = function*(userId, windowId) {
     return yield getWindowNameAndNetwork(userId, windowId);
 };
 
-exports.createNewWindow = function*(userId, network, name, password, type) {
-    var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
+exports.getConversationId = function*(userId, windowId) {
+    return yield getConversationId(userId, windowId);
+};
 
-    assert(type === '1on1' || type === 'group');
+exports.createWindow = function*(userId, conversationId) {
+    var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
+    var conversation = yield redis.hgetall('conversation:' + conversationId);
+    var members = yield redis.hgetall('conversationmembers:' + conversationId);
+    var userId1on1 = null;
 
     var newWindow = {
-        windowId: windowId,
-        network: network,
-        type: type,
+        conversationId: conversationId,
         sounds: false,
         titleAlert: false,
-        userMode: 'owner',
         visible: true,
-        row: 0,
-        password: password === null ? '' : password,
-        topic: ''
+        row: 0
     };
-
-    if (type === 'group') {
-        newWindow.name = name;
-    } else {
-        newWindow.userId = name;
-    }
 
     yield redis.hmset('window:' + userId + ':' + windowId, newWindow);
     yield redis.sadd('windowlist:' + userId, windowId);
 
-    if (newWindow.password === '') {
-        newWindow.password = null; // Undo 'Redis can't store NULL' fix
+    if (conversation.type === '1on1') {
+        var ids = Object.keys(members);
+        userId1on1 = ids[0] === userId ? ids[1] : ids[0];
     }
-    newWindow.id = 'CREATE';
-    return newWindow;
+
+    yield redis.hset('index:windowIds', userId + ':' + conversationId, windowId);
+
+    var createMsg = {
+        id: 'CREATE',
+        windowId: windowId,
+        name: conversation.name,
+        userId: userId1on1,
+        type: conversation.type,
+        network: conversation.network,
+        password: conversation.password || null,
+        topic: conversation.topic,
+        titleAlert: newWindow.titleAlert,
+        visible: newWindow.visible,
+        row: newWindow.row,
+        sounds: newWindow.sounds,
+        role: members[userId]
+    };
+
+    yield outbox.queueAll(userId, createMsg);
+};
+
+exports.deleteWindow = function*(userId, windowId) {
+    var conversationId = yield getConversationId(userId, windowId);
+
+    yield redis.srem('windowlist:' + userId, windowId);
+    yield redis.del('window:' + userId + ':' + windowId);
+    yield redis.hdel('index:windowIds', userId + ':' + conversationId);
 };
 
 function *getWindowNameAndNetwork(userId, windowId) {
@@ -163,4 +184,8 @@ function *getWindowIds(userId, network, nameOrUserId, type, returnType) {
     }
 
     return ret;
+}
+
+function *getConversationId(userId, windowId) {
+    return yield redis.hget('window:' + userId + ':' + windowId, 'conversationId');
 }
