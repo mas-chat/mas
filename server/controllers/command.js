@@ -21,9 +21,23 @@ var co = require('co'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
     courier = require('../lib/courier').createEndPoint('command'),
-    textLine = require('../lib/textLine'),
+    conversation = require('../lib/conversation'),
     windowHelper = require('../lib/windows'),
+    conversation = require('../lib/conversation'),
     friends = require('../lib/friends');
+
+var handlers = {
+    SEND: handleSend,
+    CREATE: handleCreate,
+    JOIN: handleJoin,
+    CLOSE: handleClose,
+    UPDATE: handleUpdate,
+    UPDATE_PASSWORD: handleUpdatePassword,
+    UPDATE_TOPIC: handleUpdateTopic,
+    WHOIS: handleWhois,
+    CHAT: handleChat,
+    LOGOUT: handleLogout
+};
 
 module.exports = function*() {
     var userId = this.mas.userId;
@@ -31,185 +45,192 @@ module.exports = function*() {
 
     var command = this.request.body.command;
     var windowId = command.windowId;
+    var network = command.network;
 
-    var result = yield windowHelper.getWindowNameAndNetwork(userId, windowId);
-    var name = result.name;
-    var targetUserId = result.userId;
-    var network = result.network || command.network;
-    var type = result.type;
+    var conversationId = null;
+    var conversationRecord = null;
+
+    if (!isNaN(windowId)) {
+        conversationId = yield windowHelper.getConversationId(userId, windowId);
+        conversationRecord = yield conversation.get(conversationId);
+        network = conversationRecord.network;
+    }
+
     var backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
 
     log.info(userId, 'Prosessing command: ' + command.id);
 
-    // TBD Check that windowId, network, and name are valid
+    // TBD: Check that windowId, network, and name are valid
 
-    switch (command.id) {
-        case 'SEND':
-            yield courier.send(backend, {
-                type: 'send',
-                userId: userId,
-                network: network,
-                name: name,
-                targetUserId: targetUserId,
-                text: command.text
-            });
-
-            // Update user's other sessions
-            yield textLine.send(userId, windowId, {
-                userId: userId,
-                cat: 'mymsg',
-                body: command.text
-            }, sessionId);
-            break;
-
-        case 'CREATE':
-            yield courier.send('loopbackparser', {
-                type: 'create',
-                userId: userId,
-                sessionId: sessionId,
-                name: command.name,
-                password: command.password
-            });
-            break;
-
-        case 'JOIN':
-            yield courier.send(backend, {
-                type: 'join',
-                userId: userId,
-                sessionId: sessionId,
-                network: command.network,
-                name: command.name,
-                password: command.password
-            });
-            break;
-
-        case 'CLOSE':
-            var ids = yield windowHelper.getWindowIdsForNetwork(userId, network);
-
-            // Ask all session to close this window
-            yield outbox.queueAll(userId, {
-                id: 'CLOSE',
-                windowId: windowId
-            });
-
-            // Backend specific cleanup
-            yield courier.send(backend, {
-                type: 'close',
-                userId: userId,
-                network: network,
-                name: name,
-                windowType: type,
-                last: ids.length === 1
-            });
-
-            // Redis cleanup
-            yield redis.srem('windowlist:' + userId, windowId);
-            yield redis.del('window:' + userId + ':' + windowId);
-            yield redis.del('windowmsgs:' + userId + ':' + windowId);
-            yield redis.del('names:' + userId + ':' + windowId);
-            break;
-
-        case 'UPDATE':
-            var accepted = [ 'visible', 'row', 'sounds', 'titleAlert' ];
-
-            for (var i = 0; i < accepted.length; i++) {
-                var prop = command[accepted[i]];
-
-                if (typeof(prop) !== 'undefined') {
-                    yield redis.hset('window:' + userId + ':' + windowId, accepted[i], prop);
-                }
-            }
-
-            // Notify all sessions. Undefined body properties won't appear in the JSON message
-            yield outbox.queueAll(userId, {
-                id: 'UPDATE',
-                windowId: windowId,
-                visible: command.visible,
-                row: command.row,
-                sounds: command.sounds,
-                titleAlert: command.titleAlert
-            });
-            break;
-
-        case 'UPDATE_PASSWORD':
-            yield courier.send(backend, {
-                type: 'updatePassword',
-                userId: userId,
-                name: name,
-                network: network,
-                password: command.password
-            });
-
-            // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
-
-            // TBD: loopback backend needs to update the password manually in redis and notify
-            // all session using UPDATE command, IRC backend does all this in handleMode() when
-            // the IRC server echoes the MODE command
-            break;
-
-        case 'UPDATE_TOPIC':
-            yield courier.send(backend, {
-                type: 'updateTopic',
-                userId: userId,
-                name: name,
-                network: network,
-                topic: command.topic
-            });
-            break;
-
-        case 'WHOIS':
-            yield courier.send(backend, {
-                type: 'whois',
-                userId: userId,
-                network: network,
-                nick: command.nick
-            });
-            break;
-
-        case 'CHAT':
-            targetUserId = command.userId;
-            windowId = yield windowHelper.get1on1WindowId(userId, network, targetUserId, '1on1');
-
-            if (windowId !== null) {
-                yield outbox.queue(userId, sessionId, {
-                    id: 'CHAT_RESP',
-                    status: 'ERROR',
-                    errorMsg: 'You are already chatting with this person.'
-                });
-            } else {
-                yield courier.send(backend, {
-                    type: 'chat',
-                    userId: userId,
-                    network: network,
-                    targetUserId: targetUserId
-                });
-            }
-            break;
-
-        case 'LOGOUT':
-            log.info(userId, 'User ended session. SessionId: ' + sessionId);
-
-            yield outbox.queue(userId, sessionId, {
-                id: 'LOGOUT_RESP'
-            });
-
-            setTimeout(function() {
-                // Give the system some time to deliver LOGOUT_RESP before cleanup
-                co(function*() {
-                    var last = yield redis.run('deleteSession', userId, sessionId);
-
-                    if (last) {
-                        yield friends.informStateChange(userId, 'logout');
-                    }
-                })();
-            }, 5000);
-            break;
+    if (handlers[command.id]) {
+        yield handlers[command.id]({
+            userId: userId,
+            sessionId: sessionId,
+            windowId: windowId,
+            conversationId: conversationId,
+            backend: backend,
+            network: network,
+            command: command
+        });
     }
-
-    // TBD: Add lookup table for commands
 
     yield redis.hincrby('session:' + this.mas.userId + ':' + sessionId, 'sendRcvNext', 1);
 
     this.set('Cache-Control', 'private, max-age=0, no-cache');
     this.status = 204;
 };
+
+function *handleSend(params) {
+    yield conversation.addMessage(params.conversationId, params.sessionId, {
+        userId: params.userId,
+        cat: 'msg',
+        body: params.command.text
+    });
+
+    yield courier.send(params.backend, {
+        type: 'send',
+        userId: params.userId,
+        sessionId: params.sessionId,
+        conversationId: params.conversationId,
+        text: params.command.text
+    });
+}
+
+function *handleCreate(params) {
+    yield courier.send('loopbackparser', {
+        type: 'create',
+        userId: params.userId,
+        sessionId: params.sessionId,
+        name: params.command.name,
+        password: params.command.password
+    });
+}
+
+function *handleJoin(params) {
+    yield courier.send(params.backend, {
+        type: 'join',
+        userId: params.userId,
+        sessionId: params.sessionId,
+        network: params.command.network,
+        name: params.command.name,
+        password: params.command.password
+    });
+}
+
+function *handleClose(params) {
+    var ids = yield windowHelper.getWindowIdsForNetwork(params.userId, params.network);
+
+    // Ask all sessions to close this window
+    yield outbox.queueAll(params.userId, {
+        id: 'CLOSE',
+        windowId: params.windowId
+    });
+
+    // Backend specific cleanup
+    yield courier.send(params.backend, {
+        type: 'close',
+        userId: params.userId,
+        conversationId: params.conversationId,
+        last: ids.length === 1
+    });
+
+    yield conversation.removeGroupMember(params.conversationId, params.userId);
+    yield windowHelper.removeWindow(params.userId, params.windowId);
+}
+
+function *handleUpdate(params) {
+    var accepted = [ 'visible', 'row', 'sounds', 'titleAlert' ];
+
+    for (var i = 0; i < accepted.length; i++) {
+        var prop = params.command[accepted[i]];
+
+        if (typeof(prop) !== 'undefined') {
+            yield redis.hset('window:' + params.userId + ':' + params.windowId, accepted[i], prop);
+        }
+    }
+
+    // Notify all sessions. Undefined body properties won't appear in the JSON message
+    yield outbox.queueAll(params.userId, {
+        id: 'UPDATE',
+        windowId: params.windowId,
+        visible: params.command.visible,
+        row: params.command.row,
+        sounds: params.command.sounds,
+        titleAlert: params.command.titleAlert
+    });
+}
+
+function *handleUpdatePassword(params) {
+    yield courier.send(params.backend, {
+        type: 'updatePassword',
+        userId: params.userId,
+        name: params.name,
+        network: params.network,
+        password: params.command.password
+    });
+
+    // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
+
+    // TBD: loopback backend needs to update the password manually in redis and notify
+    // all session using UPDATE command, IRC backend does all this in handleMode() when
+    // the IRC server echoes the MODE command
+}
+
+function *handleUpdateTopic(params) {
+    yield courier.send(params.backend, {
+        type: 'updateTopic',
+        userId: params.userId,
+        name: params.name,
+        network: params.network,
+        topic: params.command.topic
+    });
+}
+
+function *handleWhois(params) {
+    yield courier.send(params.backend, {
+        type: 'whois',
+        userId: params.userId,
+        network: params.network,
+        nick: params.command.nick
+    });
+}
+
+function *handleChat(params) {
+    var targetUserId = params.command.userId;
+    var windowId = yield windowHelper.get1on1WindowId(
+        params.userId, params.network, targetUserId, '1on1');
+
+    if (windowId !== null) {
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'CHAT_RESP',
+            status: 'ERROR',
+            errorMsg: 'You are already chatting with this person.'
+        });
+    } else {
+        yield courier.send(params.backend, {
+            type: 'chat',
+            userId: params.userId,
+            network: params.network,
+            targetUserId: targetUserId
+        });
+    }
+}
+
+function *handleLogout(params) {
+    log.info(params.userId, 'User ended session. SessionId: ' + params.sessionId);
+
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'LOGOUT_RESP'
+    });
+
+    setTimeout(function() {
+        // Give the system some time to deliver LOGOUT_RESP before cleanup
+        co(function*() {
+            var last = yield redis.run('deleteSession', params.userId, params.sessionId);
+
+            if (last) {
+                yield friends.informStateChange(params.userId, 'logout');
+            }
+        })();
+    }, 5000);
+}
