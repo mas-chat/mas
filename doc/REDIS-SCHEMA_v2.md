@@ -54,7 +54,7 @@ MAS Redis structures
    <windowId1>, <windowId2> ...
 
  window:<userId>:<windowId> (hash)
-   collectionId (string)
+   conversationId (string)
    sounds (bool)
    titleAlert (bool)
    visible (bool)
@@ -65,7 +65,7 @@ MAS Redis structures
    currentnick (text)
    retryCount (int)
 
- collection:<collectionId> (hash)
+ conversation:<conversationId> (hash)
    owner (string, userId) (mas group only)
    type (string, 'group', '1on1')
    name (string) (e.g. '#foo', 'bar') ('' if not group)
@@ -74,13 +74,17 @@ MAS Redis structures
    password (string)
    apikey (string)
 
- collectionmembers:<collectionId> (hash)
+ index:conversation (hash)
+   group:<network>:<name> (int, conversationId)
+   1on1:<network>:<userId1>:<userId2> (int, conversationId)
+
+ conversationmembers:<conversationId> (hash)
    <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user))
    ...
 
- collectionmsgs:<collectionId> (list) [oldest message on the right]
+ conversationmsgs:<conversationId> (list) [oldest message on the right]
 
- notelist:<collectionId> (list)
+ notelist:<conversationId> (list)
    note1, note2 ...
 
  note:<uuid> (hash)
@@ -89,7 +93,7 @@ MAS Redis structures
    timestamp (int)
    msg (text)
 
- urls:<collectionId> (list)
+ urls:<conversationId> (list)
    url1, url2 ...
 
  passwordresettoken:<token> (string with expiry time)
@@ -115,5 +119,5 @@ Global IDs
  nextGlobalUserId (string) (integer, counter)
  nextGlobalNoteId (string) (integer, counter)
  nextGlobalMsgId (string) (integer, counter)
- nextGlobalCollectionId (string) (integer, counter)
+ nextGlobalConversationId (string) (integer, counter)
 ```
