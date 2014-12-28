@@ -27,6 +27,7 @@ var koa = require('koa'),
     co = require('co'),
     handlebarsHelpers = require('./lib/handlebarsHelpers'),
     conf = require('./lib/conf'),
+    log = require('./lib/log'),
     redisModule = require('./lib/redis'),
     passport = require('./lib/passport'),
     userSession = require('./lib/userSession'),
@@ -58,9 +59,12 @@ handlebarsHelpers.registerHelpers(hbs);
 routes.register(app);
 
 co(function*() {
+    var port = conf.get('frontend:port');
+
     yield redisModule.loadScripts();
     scheduler.init();
-    app.listen(conf.get('frontend:port'));
+    app.listen(port);
+    log.info('MAS server started, http://localhost:' + port + '/');
 })();
 
 if (conf.get('frontend:demo_mode') === true) {
