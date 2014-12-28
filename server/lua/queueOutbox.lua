@@ -16,6 +16,7 @@
 
 local userId = table.remove(ARGV, 1)
 local sessionId = table.remove(ARGV, 1)
+local excludeSessionId = table.remove(ARGV, 1)
 local commands = ARGV -- Rest of the parameters are commands
 local sessions
 
@@ -28,5 +29,7 @@ else
 end
 
 for i = 1, #sessions do
-    redis.call('LPUSH', 'outbox:' .. userId .. ':' .. sessions[i], unpack(commands))
+    if sessions[i] ~= excludeSessionId then
+        redis.call('LPUSH', 'outbox:' .. userId .. ':' .. sessions[i], unpack(commands))
+    end
 end
