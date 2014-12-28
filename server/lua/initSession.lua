@@ -73,75 +73,78 @@ local allUsers = {}
 for i = 1, #windowIds do
     local windowId = windowIds[i]
     local window = hgetall('window:' .. userId .. ':' .. windowId)
+    local conversationId = window.conversationId
+    local conversation = hgetall('conversation:' .. conversationId)
+    local oneOnOneUserId = nil
 
-    if window.password == '' then
+    if conversation.password == '' then
         window.password = cjson.null
+    else
+        window.password = conversation.password
+    end
+
+    local role = redis.call('HGET', 'conversationmembers:' .. conversationId, userId)
+
+    if conversation.type == '1on1' then
+        local users = redis.call('HKEYS', 'conversationmembers:' .. conversationId)
+
+        if users[0] == userId then
+            oneOnOneUserId = users[1]
+        else
+            oneOnOneUserId = users[0]
+        end
     end
 
     redis.call('LPUSH', outbox, cjson.encode({
         ['id'] = 'CREATE',
         ['windowId'] = tonumber(windowId),
-        ['network'] = window.network,
-        ['name'] = window.name, -- name is undefined and this property isn't added if the window is 1on1
-        ['userId'] = window.userId, -- userId is undefined and this property isn't added if the window is group
-        ['type'] = window.type,
+        ['network'] = conversation.network,
+        ['name'] = conversation.name,
+        ['userId'] = oneOnOneUserId, -- added if the window is 1on1
+        ['type'] = conversation.type,
         ['sounds'] = window.sounds == 'true',
         ['titleAlert'] = window.titleAlert == 'true',
-        ['userMode'] = window.userMode,
+        ['role'] = role,
         ['visible'] = window.visible == 'true',
         ['row'] = tonumber(window.row),
-        ['password'] = window.password,
-        ['topic'] = window.topic
+        ['password'] = conversation.password,
+        ['topic'] = conversation.topic
     }))
 
-    if window.type == 'group' then
-        local members = {}
+    local members = {}
+    local ids = hgetall('conversationmembers:' .. conversationId)
 
-        if window.network == 'MAS' then
-            local ids = redis.call('SMEMBERS', 'groupmembers:' .. window.name)
+    for windowUserId, role in pairs(ids) do
+        seenUser(windowUserId)
 
-            for i, masUserId in pairs(ids) do
-                seenUser(masUserId)
-
-                table.insert(members, {
-                    ['userId'] = masUserId,
-                    ['role'] = 'u'
-                })
-            end
-        else
-            local ircnicks = hgetall('names:' .. userId .. ':' .. windowId)
-
-            for nick, role in pairs(ircnicks) do
-                local ircUserId = 'i' .. base64enc(nick)
-                seenUser(ircUserId)
-
-                table.insert(members, {
-                    ['userId'] = ircUserId,
-                    ['role'] = role
-                })
-            end
-        end
-
-        if #members > 0 then
-            redis.call('LPUSH', outbox, cjson.encode({
-                ['id'] = 'ADDMEMBERS',
-                ['windowId'] = tonumber(windowId),
-                ['reset'] = true,
-                ['members'] = members
-            }))
-        end
-    else
-        -- 1on1
-        seenUser(window.userId)
+        table.insert(members, {
+            ['userId'] = windowUserId,
+            ['role'] = role
+        })
     end
 
-    local lines = redis.call('LRANGE', 'windowmsgs:' .. userId .. ':' .. windowId, 0, -1);
+    redis.call('LPUSH', outbox, cjson.encode({
+        ['id'] = 'ADDMEMBERS',
+        ['windowId'] = tonumber(windowId),
+        ['reset'] = true,
+        ['members'] = members
+    }))
+
+    local lines = redis.call('LRANGE', 'conversationmsgs:' .. conversationId, 0, -1);
 
     for ii = #lines, 1, -1 do
+        local windowId = redis.call('HGET', 'index:windowIds', userId .. ':' .. conversationId)
         local command = cjson.decode(lines[ii])
-        seenUser(command.userId)
 
-        redis.call('LPUSH', outbox, lines[ii])
+        command.id = 'ADDTEXT'
+        command.windowId = tonumber(windowId)
+
+        if command.userId == userId then
+            command.cat = 'mymsg'
+        end
+
+        redis.call('LPUSH', outbox, cjson.encode(command))
+        seenUser(command.userId)
     end
 end
 
