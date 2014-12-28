@@ -67,6 +67,11 @@ Courier.prototype.on = function(type, callback) {
     this.handlers[type] = callback;
 };
 
+Courier.prototype.noop = function*() {
+    /* jshint noyield:true */
+    return null;
+};
+
 function convert(msg, sender, dest) {
     if (typeof msg === 'string') {
         msg = { type: msg };
