@@ -76,7 +76,7 @@ function *queueCommands(userId, sessionId, commands) {
         return typeof(value) === 'string' ? value : JSON.stringify(value);
     });
 
-    yield redis.run.apply(null, [ 'queueOutbox', userId, sessionId ].concat(commands));
+    yield redis.run.apply(null, [ 'queueOutbox', userId, sessionId, 0 ].concat(commands));
 }
 
 function *handleNewUserIds(userId, sessionId, commands) {
