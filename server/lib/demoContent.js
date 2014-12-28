@@ -21,8 +21,7 @@ var co = require('co'),
     faker = require('faker'),
     redis = require('./redis').createClient(),
     log = require('./log'),
-    conf = require('./conf'),
-    textLine = require('./textLine');
+    conf = require('./conf');
 
 module.exports.enable = function() {
     co(function*() {
@@ -55,7 +54,8 @@ module.exports.enable = function() {
                     cat: 'msg'
                 };
 
-                yield textLine.send(demoUserId, windowId, msg);
+                // TDB: Use conversation lib instead
+                // yield textLine.send(demoUserId, windowId, msg);
             }
         }
     })();
