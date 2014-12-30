@@ -101,7 +101,7 @@ exports.addMessage = function*(conversationId, excludeSession, msg) {
     yield addMessage(conversationId, excludeSession, msg);
 };
 
-exports.sendAddMembers = function*(userId, conversationId) {
+exports.sendAddMembers = function*(userId, windowId, conversationId) {
     var members = yield redis.hgetall('conversationmembers:' + conversationId);
     var membersList = [];
 
@@ -112,8 +112,9 @@ exports.sendAddMembers = function*(userId, conversationId) {
         });
     });
 
-    yield stream(conversationId, 0, {
+    yield outbox.queueAll(userId, {
         id: 'ADDMEMBERS',
+        windowId: windowId,
         reset: true,
         members: membersList
     });
