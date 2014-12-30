@@ -25,7 +25,7 @@ var co = require('co'),
     conf = require('../../lib/conf'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('loopbackparser'),
-    windowHelper = require('../../lib/windows'),
+    window = require('../../lib/window'),
     outbox = require('../../lib/outbox');
 
 co(function*() {
@@ -101,8 +101,8 @@ function *joinGroup(params) {
 
     yield conversation.addGroupMember(conversationId, userId, 'USER');
 
-    yield windowHelper.createWindow(params.userId, conversationId);
-    yield conversation.sendAddMembers(params.userId, conversationId);
+    var windowId = yield window.create(params.userId, conversationId);
+    yield conversation.sendAddMembers(params.userId, windowId, conversationId);
 }
 
 function *createInitialGroups() {
