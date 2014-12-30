@@ -35,7 +35,20 @@ export default Ember.Object.extend({
     }.property('store.users.users.@each.nick'),
 
     decoratedBody: function() {
-        return this._decorate(this.get('body'));
+        var category = this.get('cat');
+        var nick = this.get('nick');
+        var pre = '<span class="body">';
+        var post = '</span>';
+
+        if (category === 'join') {
+            return pre + nick + ' has joined this group' + post;
+        } else if (category === 'part') {
+            return pre + nick + ' has left this group' + post;
+        } else if (category === 'quit') {
+            return pre + nick + ' has quit irc' + post;
+        } else {
+            return this._decorate(this.get('body'));
+        }
     }.property('body'),
 
     _decorate: function(text) {
