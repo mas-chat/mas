@@ -88,7 +88,7 @@ exports.getConversationId = function*(userId, windowId) {
     return yield getConversationId(userId, windowId);
 };
 
-exports.createWindow = function*(userId, conversationId) {
+exports.create = function*(userId, conversationId) {
     var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
     var conversation = yield redis.hgetall('conversation:' + conversationId);
     var members = yield redis.hgetall('conversationmembers:' + conversationId);
@@ -129,9 +129,11 @@ exports.createWindow = function*(userId, conversationId) {
     };
 
     yield outbox.queueAll(userId, createMsg);
+
+    return windowId;
 };
 
-exports.deleteWindow = function*(userId, windowId) {
+exports.removeWindow = function*(userId, windowId) {
     var conversationId = yield getConversationId(userId, windowId);
 
     yield redis.srem('windowlist:' + userId, windowId);

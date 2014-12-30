@@ -22,8 +22,7 @@ var co = require('co'),
     outbox = require('../lib/outbox'),
     courier = require('../lib/courier').createEndPoint('command'),
     conversation = require('../lib/conversation'),
-    windowHelper = require('../lib/windows'),
-    conversation = require('../lib/conversation'),
+    window = require('../lib/window'),
     friends = require('../lib/friends');
 
 var handlers = {
@@ -51,7 +50,7 @@ module.exports = function*() {
     var conversationRecord = null;
 
     if (!isNaN(windowId)) {
-        conversationId = yield windowHelper.getConversationId(userId, windowId);
+        conversationId = yield window.getConversationId(userId, windowId);
         conversationRecord = yield conversation.get(conversationId);
         network = conversationRecord.network;
     }
@@ -118,7 +117,7 @@ function *handleJoin(params) {
 }
 
 function *handleClose(params) {
-    var ids = yield windowHelper.getWindowIdsForNetwork(params.userId, params.network);
+    var ids = yield window.getWindowIdsForNetwork(params.userId, params.network);
 
     // Ask all sessions to close this window
     yield outbox.queueAll(params.userId, {
@@ -135,7 +134,7 @@ function *handleClose(params) {
     });
 
     yield conversation.removeGroupMember(params.conversationId, params.userId);
-    yield windowHelper.removeWindow(params.userId, params.windowId);
+    yield window.removeWindow(params.userId, params.windowId);
 }
 
 function *handleUpdate(params) {
@@ -197,7 +196,7 @@ function *handleWhois(params) {
 
 function *handleChat(params) {
     var targetUserId = params.command.userId;
-    var windowId = yield windowHelper.get1on1WindowId(
+    var windowId = yield window.get1on1WindowId(
         params.userId, params.network, targetUserId, '1on1');
 
     if (windowId !== null) {
