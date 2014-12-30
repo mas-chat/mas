@@ -139,7 +139,8 @@ for i = 1, #windowIds do
         command.id = 'ADDTEXT'
         command.windowId = tonumber(windowId)
 
-        if command.userId == userId then
+        if command.userId == userId and command.cat ~= 'join' and command.cat ~= 'part' and
+           command.cat ~= 'quit' then
             command.cat = 'mymsg'
         end
 
