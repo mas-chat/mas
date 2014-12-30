@@ -103,13 +103,27 @@ MAS Redis structures
 
 ```
 
- Backends
- ========
+ IRC backend
+ ===========
+
+```
+ inbox:ircparser (list)
+
+ inbox:connectionmanager (list)
+
+ ircuser:<userId>
+   nick (string)
+   network (string)
+
+ index:ircuser (hash)
+   <network>:<nick> (string, userId)
+```
+
+ Loopback backend
+ ================
 
 ```
  inbox:loopbackparser (list)
- inbox:ircparser (list)
- inbox:connectionmanager (list)
 ```
 
 Global IDs
