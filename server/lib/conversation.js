@@ -77,8 +77,9 @@ exports.set1on1Members = function*(conversationId, userId1, userId2) {
 
 exports.addGroupMember = function*(conversationId, userId, role) {
     yield addMessage(conversationId, 0, {
-        body: userId + ' joined.',
-        cat: 'join'
+        userId: userId,
+        cat: 'join',
+        body: ''
     });
 
     yield streamAddMembers(conversationId, userId, role);
@@ -87,8 +88,9 @@ exports.addGroupMember = function*(conversationId, userId, role) {
 
 exports.removeGroupMember = function*(conversationId, userId) {
     yield addMessage(conversationId, 0, {
-        body: userId + ' parted.',
-        cat: 'part'
+        userId: userId,
+        cat: 'part',
+        body: ''
     });
 
     yield streamRemoveMembers(conversationId, userId);
