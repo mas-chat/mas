@@ -104,9 +104,6 @@ MAS Redis structures
 
  passwordresettoken:<token> (string with expiry time)
    <userId>
-
- ircuserdb [TBD]
-
 ```
 
  IRC backend
