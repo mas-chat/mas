@@ -139,6 +139,8 @@ function *handleClose(params) {
 
     yield conversation.removeGroupMember(params.conversationId, params.userId);
     yield window.remove(params.userId, params.windowId);
+
+    // TBD: Remove conversation too if it is 1on1. See how irc backend handlePrivmsg() works
 }
 
 function *handleUpdate(params) {
