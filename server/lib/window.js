@@ -16,83 +16,19 @@
 
 'use strict';
 
-var redis = require('./redis').createClient(),
+var assert = require('assert'),
+    redis = require('./redis').createClient(),
     outbox = require('./outbox'),
     log = require('./log');
-
-exports.getWindowIdsForNetwork = function*(userId, network) {
-    var ids = yield getWindowIds(userId, network, null, null, 'id');
-
-    return ids;
-};
-
-exports.getGroupWindowIdsForNetwork = function*(userId, network) {
-    var ids = yield getWindowIds(userId, network, null, 'group', 'id');
-
-    return ids;
-};
-
-exports.getGroupWindowId = function*(userId, network, name) {
-    var ids = yield getWindowIds(userId, network, name, 'group', 'id');
-
-    if (ids.length === 1) {
-        return ids[0];
-    } else {
-        log.info(userId, 'Tried to find non-existing group window: ' + name);
-        return null;
-    }
-};
-
-exports.get1on1WindowId = function*(userId, network, targetUserId) {
-    var ids = yield getWindowIds(userId, network, targetUserId, '1on1', 'id');
-
-    if (ids.length === 1) {
-        return ids[0];
-    } else {
-        log.info(userId, 'Tried to find non-existing 1on1 window: ' + targetUserId);
-        return null;
-    }
-};
-
-exports.getWindowIdByTargetUserId = function*(userId, targetUserId) {
-    var ids = yield getWindowIds(userId, null, null, null, 'id');
-
-    for (var i = 0; i < ids.length; i++) {
-        var window = yield redis.hgetall('window:' + userId + ':' + ids[i]);
-
-        if (window.targetUserId === targetUserId) {
-            return ids[i];
-        }
-    }
-
-    return null;
-};
-
-exports.getNetworks = function*(userId) {
-    var networks = {};
-
-    var windows = yield redis.smembers('windowlist:' + userId);
-    for (var i = 0; i < windows.length; i++) {
-        var windowNetwork = yield redis.hget('window:' + userId + ':' + windows[i], 'network');
-        networks[windowNetwork] = true;
-    }
-
-    return Object.keys(networks);
-};
-
-exports.getWindowNameAndNetwork = function*(userId, windowId) {
-    return yield getWindowNameAndNetwork(userId, windowId);
-};
-
-exports.getConversationId = function*(userId, windowId) {
-    return yield getConversationId(userId, windowId);
-};
 
 exports.create = function*(userId, conversationId) {
     var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
     var conversation = yield redis.hgetall('conversation:' + conversationId);
     var members = yield redis.hgetall('conversationmembers:' + conversationId);
     var userId1on1 = null;
+
+    assert(conversation);
+    assert(members);
 
     var newWindow = {
         conversationId: conversationId,
@@ -129,11 +65,10 @@ exports.create = function*(userId, conversationId) {
     };
 
     yield outbox.queueAll(userId, createMsg);
-
     return windowId;
 };
 
-exports.removeWindow = function*(userId, windowId) {
+exports.remove = function*(userId, windowId) {
     var conversationId = yield getConversationId(userId, windowId);
 
     yield redis.srem('windowlist:' + userId, windowId);
@@ -141,52 +76,27 @@ exports.removeWindow = function*(userId, windowId) {
     yield redis.hdel('index:windowIds', userId + ':' + conversationId);
 };
 
-function *getWindowNameAndNetwork(userId, windowId) {
-    var details = yield redis.hgetall('window:' + userId + ':' + windowId);
+exports.findByConversationId = function*(userId, conversationId) {
+    assert(conversationId);
 
-    return {
-        name: details ? details.name : null,
-        userId: details ? details.userId : null,
-        network: details ? details.network : null,
-        type: details ? details.type : null
-    };
-}
+    return yield redis.hget('index:windowIds', userId + ':' + conversationId);
+};
 
-function *getWindowIds(userId, network, nameOrUserId, type, returnType) {
+exports.getAllConversationIds = function*(userId) {
     var windows = yield redis.smembers('windowlist:' + userId);
-    var ret = [];
+    var conversationIds = [];
 
     for (var i = 0; i < windows.length; i++) {
-        var candidateWindowId = parseInt(windows[i]);
-        var candidate = yield getWindowNameAndNetwork(userId, candidateWindowId);
-
-        if (network && candidate.network !== network) {
-            continue;
-        }
-
-        if (type && type !== candidate.type) {
-            continue;
-        }
-
-        if (nameOrUserId && type === 'group' && candidate.name !== nameOrUserId) {
-            continue;
-        }
-
-        if (nameOrUserId && type === '1on1' && candidate.userId !== nameOrUserId) {
-            continue;
-        }
-
-        // We have a match
-
-        if (returnType === 'id') {
-            ret.push(candidateWindowId);
-        } else if (returnType === 'name') {
-            ret.push(candidate.name);
-        }
+        var conversationId = yield getConversationId(userId, windows[i]);
+        conversationIds.push(conversationId);
     }
 
-    return ret;
-}
+    return conversationIds;
+};
+
+exports.getConversationId = function*(userId, windowId) {
+    return yield getConversationId(userId, windowId);
+};
 
 function *getConversationId(userId, windowId) {
     return yield redis.hget('window:' + userId + ':' + windowId, 'conversationId');
