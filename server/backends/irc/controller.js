@@ -17,6 +17,8 @@
 
 'use strict';
 
+/*jshint -W079 */
+
 require('../../lib/init')('irc');
 
 var assert = require('assert'),

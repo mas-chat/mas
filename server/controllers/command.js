@@ -16,6 +16,8 @@
 
 'use strict';
 
+/*jshint -W079 */
+
 var co = require('co'),
     log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
