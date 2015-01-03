@@ -44,9 +44,6 @@ MAS Redis structures
    <nick> (int, userId)
    <openidurl> (int, userId)
 
- users (set)
-   <userId1>, <userId2> ...
-
  friends:<userId> (set)
    <userId1>, <userId2> ...
 
@@ -56,45 +53,44 @@ MAS Redis structures
  windowlist:<userId> (set)
    <windowId1>, <windowId2> ...
 
+ window:<userId>:<windowId> (hash)
+   conversationId (string)
+   sounds (bool)
+   titleAlert (bool)
+   visible (bool)
+   row (int)
+
+ index:windowIds (hash)
+   <userId>:<conversationId> (int, windowId)
+
  networks:<userId>:<network> (hash)
    state (string, 'connected', 'connecting', 'disconnected')
    currentnick (text)
    retryCount (int)
 
- window:<userId>:<windowId> (hash)
-   name (string)
-   network (string)
-   userId (string)
-   type (string)
-   sounds (bool)
-   password (string)
-   titleAlert (bool)
-   visible (bool)
+ index:currentnick (hash)
+   <network>:<nick> (string, userId)
+
+ conversation:<conversationId> (hash)
+   owner (string, userId) (mas group only)
+   type (string, 'group', '1on1')
+   name (string) (e.g. '#foo', 'bar') ('' if not group)
+   network (string, 'mas or 'ircnet', 'freenode', 'w3c')
    topic (string)
-   userMode (string)
+   password (string)
+   apikey (string)
 
- windowmsgs:<userId>:<windowId> (list) [oldest message on the right]
+ index:conversation (hash)
+   group:<network>:<name> (int, conversationId)
+   1on1:<network>:<userId1>:<userId2> (int, conversationId)
 
- group:<name> (hash)
-   owner (int, userId)
-   password: (string)
-   apikey: (string)
-
- groupmembers:<name> (set)
-   <userId1>, <userId2> ...
-
- groupbacklog:<name> (list) ???
-   <msg1>, <msg2>
-
- names:<userId>:<windowId> (hash)
-   <nick1>: (string, '@', '+', 'u') [TBD: Use userId]
+ conversationmembers:<conversationId> (hash)
+   <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user))
    ...
 
- [TBD] inbox:<userId> (list) (outdated?)
-   msg:<windowid>
-   names:<windowid>
+ conversationmsgs:<conversationId> (list) [oldest message on the right]
 
- notelist:<userId>:<nwid>:<channel_name> (set) TBD: Use windowId
+ notelist:<conversationId> (list)
    note1, note2 ...
 
  note:<uuid> (hash)
@@ -103,7 +99,7 @@ MAS Redis structures
    timestamp (int)
    msg (text)
 
- urls:<userId>:<nwid>:<channel_name> (list) TBD: Use windowId
+ urls:<conversationId> (list)
    url1, url2 ...
 
  passwordresettoken:<token> (string with expiry time)
@@ -113,13 +109,30 @@ MAS Redis structures
 
 ```
 
- Backends
- ========
+ IRC backend
+ ===========
+
+```
+ inbox:ircparser (list)
+
+ inbox:connectionmanager (list)
+
+ ircuser:<userId>
+   nick (string)
+   network (string)
+
+ index:ircuser (hash)
+   <network>:<nick> (string, userId)
+
+ namesbuffer:<userId>:<conversationId> (hash, expiry 1 min)
+   name1, name2 ...
+```
+
+ Loopback backend
+ ================
 
 ```
  inbox:loopbackparser (list)
- inbox:ircparser (list)
- inbox:connectionmanager (list)
 ```
 
 Global IDs
@@ -129,4 +142,5 @@ Global IDs
  nextGlobalUserId (string) (integer, counter)
  nextGlobalNoteId (string) (integer, counter)
  nextGlobalMsgId (string) (integer, counter)
+ nextGlobalConversationId (string) (integer, counter)
 ```
