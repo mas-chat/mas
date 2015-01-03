@@ -18,13 +18,14 @@
 
 var assert = require('assert'),
     redis = require('./redis').createClient(),
+    conversation = require('./conversation'),
     outbox = require('./outbox'),
     log = require('./log');
 
 exports.create = function*(userId, conversationId) {
     var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
-    var conversation = yield redis.hgetall('conversation:' + conversationId);
-    var members = yield redis.hgetall('conversationmembers:' + conversationId);
+    var conversationRecord = yield conversation.get(conversationId);
+    var members = yield conversation.getMembers(conversationId);
     var userId1on1 = null;
 
     assert(conversation);
@@ -41,7 +42,7 @@ exports.create = function*(userId, conversationId) {
     yield redis.hmset('window:' + userId + ':' + windowId, newWindow);
     yield redis.sadd('windowlist:' + userId, windowId);
 
-    if (conversation.type === '1on1') {
+    if (conversationRecord.type === '1on1') {
         var ids = Object.keys(members);
         userId1on1 = ids[0] === userId ? ids[1] : ids[0];
     }
@@ -51,12 +52,12 @@ exports.create = function*(userId, conversationId) {
     var createMsg = {
         id: 'CREATE',
         windowId: windowId,
-        name: conversation.name,
+        name: conversationRecord.name,
         userId: userId1on1,
-        type: conversation.type,
-        network: conversation.network,
-        password: conversation.password || null,
-        topic: conversation.topic,
+        type: conversationRecord.type,
+        network: conversationRecord.network,
+        password: conversationRecord.password || null,
+        topic: conversationRecord.topic,
         titleAlert: newWindow.titleAlert,
         visible: newWindow.visible,
         row: newWindow.row,
@@ -83,6 +84,29 @@ exports.findByConversationId = function*(userId, conversationId) {
 };
 
 exports.getAllConversationIds = function*(userId) {
+    return yield getAllConversationIds(userId);
+};
+
+exports.getWindowIdsForNetwork = function*(userId, network) {
+    var conversationIds = yield getAllConversationIds();
+    var res = [];
+
+    for (var i = 0; i < conversationIds.length; i++) {
+        var conversationRecord = conversation.get(conversationIds[i]);
+
+        if (conversationRecord.network === network) {
+            res.push(conversationIds[i]);
+        }
+    }
+
+    return res;
+};
+
+exports.getConversationId = function*(userId, windowId) {
+    return yield getConversationId(userId, windowId);
+};
+
+function *getAllConversationIds(userId) {
     var windows = yield redis.smembers('windowlist:' + userId);
     var conversationIds = [];
 
@@ -92,11 +116,7 @@ exports.getAllConversationIds = function*(userId) {
     }
 
     return conversationIds;
-};
-
-exports.getConversationId = function*(userId, windowId) {
-    return yield getConversationId(userId, windowId);
-};
+}
 
 function *getConversationId(userId, windowId) {
     return yield redis.hget('window:' + userId + ':' + windowId, 'conversationId');
