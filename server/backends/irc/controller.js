@@ -556,9 +556,10 @@ function *handle482(userId, msg) {
 function *handleJoin(userId, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
     var channel = msg.params[0];
+    var targetUserId = getOrCreateUserId(msg.nick, msg.network);
     var conversationId = yield conversation.findGroup(channel, msg.network);
 
-    yield conversation.addGroupMember(conversationId, userId);
+    yield conversation.addGroupMember(conversationId, targetUserId);
 }
 
 function *handleQuit(userId, msg) {
