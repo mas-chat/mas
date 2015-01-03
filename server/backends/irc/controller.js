@@ -834,19 +834,19 @@ function isChannel(text) {
 }
 
 function *getOrCreateUserId(nick, network) {
-    var userId = yield nicks.getUserIdFromNick(nick, network);
+    var masUserId = yield nicks.getUserIdFromNick(nick, network);
 
-    if (userId) {
-        return userId;
+    if (masUserId) {
+        return masUserId;
     }
 
-    userId = yield redis.hget('index:ircuser', network + ':' + nick);
+    var ircUserId = yield redis.hget('index:ircuser', network + ':' + nick);
 
-    if (!userId) {
-        userId = yield createUserId(nick, network);
+    if (!ircUserId) {
+        ircUserId = yield createUserId(nick, network);
     }
 
-    return userId;
+    return ircUserId;
 }
 
 function *createUserId(nick, network) {
