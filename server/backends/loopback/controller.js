@@ -26,6 +26,7 @@ var co = require('co'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('loopbackparser'),
     window = require('../../lib/window'),
+    nicks = require('../../lib/nick'),
     outbox = require('../../lib/outbox');
 
 co(function*() {
@@ -98,6 +99,10 @@ function *joinGroup(params) {
         // TBD: Bail out
         return;
     }
+
+    // Backends must maintain currentNick value
+    var nick = yield redis.hget('user:' + userId, 'nick');
+    yield nicks.updateCurrentNick(userId, 'MAS', nick);
 
     yield conversation.addGroupMember(conversationId, userId, 'USER');
 
