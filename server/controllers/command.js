@@ -67,6 +67,7 @@ module.exports = function*() {
             sessionId: sessionId,
             windowId: windowId,
             conversationId: conversationId,
+            conversationRecord: conversationRecord,
             backend: backend,
             network: network,
             command: command
@@ -91,6 +92,9 @@ function *handleSend(params) {
         userId: params.userId,
         sessionId: params.sessionId,
         conversationId: params.conversationId,
+        conversationType: params.conversationRecord.type,
+        conversationName: params.conversationRecord.name,
+        conversationNetwork: params.conversationRecord.network,
         text: params.command.text
     });
 }
