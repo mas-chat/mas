@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
+REDIS_PORT=6379
+
+cd $ROOT
+
+killall -m redis-server
+
+sleep 1
+
+cp $ROOT/test/seeds/db-dump.rdb /usr/local/var/db/redis/dump.rdb
+
+redis-server ./conf/redis.conf --port $REDIS_PORT
