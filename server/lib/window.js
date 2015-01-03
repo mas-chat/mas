@@ -86,6 +86,27 @@ exports.getAllConversationIds = function*(userId) {
     return yield getAllConversationIds(userId);
 };
 
+exports.getAllConversationIdsWithUserId = function*(userId, targetUserId) {
+    var conversationIds = yield getAllConversationIds(userId);
+    var res = [];
+
+    function compare(element) {
+        return element === targetUserId;
+    }
+
+    for (var i = 0; i < conversationIds.length; i++) {
+        var members = conversation.getMembers(conversationIds[i]);
+
+        var exists = members.some(compare);
+
+        if (exists) {
+            res.push(conversationIds[i]);
+        }
+    }
+
+    return res;
+};
+
 exports.getWindowIdsForNetwork = function*(userId, network) {
     var conversationIds = yield getAllConversationIds(userId);
     var res = [];
@@ -97,6 +118,23 @@ exports.getWindowIdsForNetwork = function*(userId, network) {
             res.push(conversationIds[i]);
         }
     }
+
+    return res;
+};
+
+exports.getNetworks = function*(userId) {
+    var conversationIds = yield getAllConversationIds(userId);
+    var networks = {};
+    var res = [];
+
+    for (var i = 0; i < conversationIds.length; i++) {
+        var conversationRecord = conversation.get(conversationIds[i]);
+        networks[conversationRecord.network] = true;
+    }
+
+    Object.keys(networks).forEach(function(key) {
+        res.push(key);
+    });
 
     return res;
 };
