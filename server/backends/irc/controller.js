@@ -19,15 +19,16 @@
 
 require('../../lib/init')('irc');
 
-var co = require('co'),
+var assert = require('assert'),
+    co = require('co'),
     wait = require('co-wait'),
     log = require('../../lib/log'),
     redisModule = require('../../lib/redis'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('ircparser'),
     outbox = require('../../lib/outbox'),
-    textLine = require('../../lib/textLine'),
-    windowHelper = require('../../lib/windows'),
+    conversation = require('../../lib/conversation'),
+    window = require('../../lib/window'),
     nicks = require('../../lib/nick');
 
 const OPER = '@';
@@ -54,16 +55,24 @@ co(function*() {
 // Upper layer messages
 
 function *processSend(params) {
-    var target = params.name;
+    var target = params.conversationName;
 
-    if (!target) {
-        target = getUserName(params.targetUserId);
+    assert(!params.conversationId);
+
+    if (params.conversationType === '1on1') {
+        var targetUserId = yield conversation.getPeerUserId(params.conversationId, params.userId);
+        target = yield getUserNick(targetUserId);
+
+        if (!target) {
+            // Both participants are MAS users, no need to go through IRC
+            return;
+        }
     }
 
     yield courier.send('connectionmanager', {
         type: 'write',
         userId: params.userId,
-        network: params.network,
+        network: params.conversationNetwork,
         line: 'PRIVMSG ' + target + ' :' + params.text
     });
 }
@@ -98,27 +107,41 @@ function *processJoin(params) {
         });
     }
 
-    var createCommand = yield windowHelper.createNewWindow(params.userId, params.network,
-        channelName, params.password, 'group');
+    var conversationId = yield conversation.findGroup(channelName, params.network);
+
+    if (!conversationId) {
+        conversationId = yield conversation.create({
+            owner: params.userId,
+            type: 'group',
+            name: channelName,
+            network: params.network,
+        });
+    }
+
+    var membersHash = {};
+    membersHash[params.userId] = 'u';
+
+    yield conversation.setGroupMembers(conversationId, membersHash, false);
+    yield window.create(params.userId, conversationId);
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'JOIN_RESP',
         status: 'OK'
     });
-
-    yield outbox.queueAll(params.userId, createCommand);
 }
 
 function *processChat(params) {
-    var createCommand = yield windowHelper.createNewWindow(params.userId, params.network,
-        params.targetUserId, null, '1on1');
+    var conversationId = yield conversation.find1on1(
+        params.userId, params.targetUserId, params.network);
+
+    if (!conversationId) {
+        yield setup1on1(params.userId, params.targetUserId, params.network);
+    }
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'CHAT_RESP',
         status: 'OK'
     });
-
-    yield outbox.queueAll(params.userId, createCommand);
 }
 
 function *processClose(params) {
@@ -205,7 +228,7 @@ function *processRestarted() {
 
     for (var i = 0; i < allUsers.length; i++) {
         var userId = allUsers[i];
-        var networks = yield windowHelper.getNetworks(userId);
+        var networks = yield window.getNetworks(userId);
 
         for (var ii = 0; ii < networks.length; ii++) {
             var network = networks[ii];
@@ -213,11 +236,9 @@ function *processRestarted() {
             if (network !== 'MAS') {
                 log.info(userId, 'Scheduling connect() to IRC network: ' + network);
 
-                yield textLine.broadcast(userId, network, {
-                    cat: 'info',
-                    body: 'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
-                        ' server enabled. Next connect will be slow.'
-                });
+                yield addSystemMessage(userId, network,
+                    'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
+                    ' server enabled. Next connect will be slow.');
 
                 yield connect(userId, network);
             }
@@ -280,12 +301,12 @@ function *processData(params) {
 
 // Connected
 function *processConnected(params) {
-    var userInfo = yield redis.hgetall('user:' + params.userId);
+    var user = yield redis.hgetall('user:' + params.userId);
     log.info(params.userId, 'Connected to IRC server');
 
     var commands = [
-        'NICK ' + userInfo.nick,
-        'USER ' + userInfo.nick + ' 8 * :Real Name (Ralph v1.0)'
+        'NICK ' + user.nick,
+        'USER ' + user.nick + ' 8 * :Real Name (Ralph v1.0)'
     ];
 
     yield courier.send('connectionmanager', {
@@ -327,15 +348,34 @@ function *processDisconnected(params) {
             'to retry.';
     }
 
-    yield textLine.broadcast(userId, network, {
-        cat: 'info',
-        body: msg
-    });
+    yield addSystemMessage(userId, network, msg);
 
     co(function*() {
         yield wait(delay);
         yield connect(params.userId, params.network, true);
     })();
+}
+
+function *addSystemMessage(userId, network, body) {
+    var conversationId = yield conversation.find1on1(userId, 'SERVER', network);
+
+    if (!conversationId) {
+        conversationId = yield conversation.create({
+            owner: userId,
+            type: '1on1',
+            network: network,
+            topic: 'IRC SERVER MESSAGES',
+        });
+
+        yield conversation.set1on1Members(conversationId, userId, 'SERVER');
+        yield window.create(userId, conversationId);
+    }
+
+    yield conversation.addMessage(conversationId, 0, {
+        userId: 'SERVER',
+        cat: 'info',
+        body: body
+    });
 }
 
 function *connect(userId, network, skipRetryCountReset) {
@@ -348,10 +388,7 @@ function *connect(userId, network, skipRetryCountReset) {
         yield resetRetryCount(userId, network);
     }
 
-    yield textLine.broadcast(userId, network, {
-        cat: 'info',
-        body: 'Connecting to IRC server...'
-    });
+    yield addSystemMessage(userId, network, 'INFO: Connecting to IRC server...');
 
     yield courier.send('connectionmanager', {
         type: 'connect',
@@ -404,6 +441,7 @@ var handlers = {
     JOIN: handleJoin,
     PART: handlePart,
     QUIT: handleQuit,
+    NICK: handleNick,
     MODE: handleMode,
     TOPIC: handleTopic,
     PRIVMSG: handlePrivmsg,
@@ -424,10 +462,7 @@ function *handleServerText(userId, msg, code) {
         cat = 'banner';
     }
 
-    yield textLine.broadcast(userId, msg.network, {
-        cat: cat,
-        body: text
-    });
+    yield addSystemMessage(userId, msg.network, text);
 }
 
 function *handle043(userId, msg) {
@@ -442,53 +477,62 @@ function *handle332(userId, msg) {
     // :portaali.org 332 ilkka #portaali :Cool topic
     var channel = msg.params[0];
     var topic = msg.params[1];
-    var windowId = yield windowHelper.getGroupWindowId(userId, msg.network, channel);
+    var conversationId = yield conversation.findGroup(channel, msg.network);
 
-    yield updateTopic(userId, windowId, topic);
+    yield conversation.setTopic(conversationId, topic);
 }
 
 function *handle353(userId, msg) {
     // :own.freenode.net 353 drwillie @ #evergreenproject :drwillie ilkkaoks
     var channel = msg.params[1];
-    var windowId = yield windowHelper.getGroupWindowId(userId, msg.network, channel);
+    var conversationId = yield conversation.findGroup(channel, msg.network);
     var names = msg.params[2].split(' ');
 
-    yield updateNamesHash(names, userId, windowId);
+    yield bufferNames(names, userId, msg.network, conversationId);
 }
 
 function *handle366(userId, msg) {
     // :pratchett.freenode.net 366 il3kkaoksWEB #testi1 :End of /NAMES list.
     var channel = msg.params[0];
+    var conversationId = yield conversation.findGroup(channel, msg.network);
+    var namesHash = yield redis.hgetall('namesbuffer:' + userId + ':' + conversationId);
 
-    var windowId = yield windowHelper.getGroupWindowId(userId, msg.network, channel);
-    var names = yield redis.hgetall('names:' + userId + ':' + windowId);
+    yield conversation.setGroupMembers(conversationId, namesHash, true);
 
-    yield addParticipant(userId, windowId, names, true);
+    for (var user in namesHash) {
+        if (namesHash.hasOwnProperty(user) && user.charAt(0) === 'm') {
+            yield conversation.sendAddMembers(user, conversationId);
+        }
+    }
 }
 
 function *handle376(userId, msg) {
     yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'connected');
     yield resetRetryCount(userId, msg.network);
 
-    var windowIds = yield windowHelper.getGroupWindowIdsForNetwork(userId, msg.network);
+    var conversationIds = yield window.getAllConversationIds(userId);
+    var channelsToJoin = [];
 
-    if (windowIds.length === 0) {
+    for (var i = 0; i < conversationIds.length; i++) {
+        var ircConversation = yield conversation.get(conversationIds[i]);
+
+        if (ircConversation.network === msg.network && ircConversation.type === 'group') {
+            channelsToJoin.push(ircConversation.name);
+        }
+    }
+
+    if (channelsToJoin.length === 0) {
         log.info(userId, 'Connected, but no channels/1on1s to join. Disconnecting');
         yield disconnect(userId, msg.network);
         return;
     }
 
-    for (var i = 0; i < windowIds.length; i++) {
-        var channel = yield windowHelper.getWindowNameAndNetwork(userId, windowIds[i]);
-
-        // Ask client to remove all old stale names
-        yield addParticipant(userId, channel.name, {}, true);
-
+    for (i = 0; i < channelsToJoin.length; i++) {
         yield courier.send('connectionmanager', {
             type: 'write',
             userId: userId,
             network: msg.network,
-            line: 'JOIN ' + channel.name
+            line: 'JOIN ' + channelsToJoin[i]
         });
     }
 
@@ -503,71 +547,65 @@ function *handle433(userId, msg) {
 function *handle482(userId, msg) {
     // irc.localhost 482 ilkka #test2 :You're not channel operator
     var channel = msg.params[0];
-    var windowId = yield windowHelper.getGroupWindowId(userId, msg.network, channel);
 
-    yield textLine.send(userId, windowId, {
-        cat: 'error',
-        body: 'You\'re not channel operator'
-    });
+    yield addSystemMessage(userId, msg.network, 'You\'re not channel operator on ' + channel);
 }
 
 function *handleJoin(userId, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
     var channel = msg.params[0];
-    var windowId = yield windowHelper.getGroupWindowId(userId, msg.network, channel);
-    var currentNick = yield nicks.getCurrentNick(userId, msg.network);
+    var conversationId = yield conversation.findGroup(channel, msg.network);
 
-    if (windowId === null) {
-        // User has closed the window very recently
-        yield sendIRCPart(userId, msg.network, channel);
-        return;
-    }
-
-    if (msg.nick === currentNick) {
-        yield redis.del('names:' + userId + ':' + windowId);
-    } else {
-        var names = [ msg.nick ];
-        yield updateNamesHash(names, userId, windowId);
-
-        var hash = {};
-        hash[msg.nick] = USER;
-
-        yield addParticipant(userId, windowId, hash, false);
-    }
-
-    yield textLine.send(userId, windowId, {
-        cat: 'info',
-        body: msg.nick + ' (' + msg.userNameAndHost + ') has joined channel ' + channel
-    });
+    yield conversation.addGroupMember(conversationId, userId);
 }
 
 function *handleQuit(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com QUIT :"leaving"
-    var reason = msg.params[0];
-    var windowIds = yield windowHelper.getWindowIdsForNetwork(userId, msg.network);
+    //var reason = msg.params[0];
+    var targetUserId = getOrCreateUserId(msg.nick, msg.network);
 
-    for (var i = 0; i < windowIds.length; i++) {
-        yield removeParticipant(userId, parseInt(windowIds[i]), msg.nick,
-            msg.nick + ' (' + msg.userNameAndHost + ') has quit IRC. Reason: ' + reason);
+    var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
+
+    for (var i = 0; i < conversationIds.length; i++) {
+        // TBD: Send a real quit message instead of part
+        yield conversation.removeGroupMember(conversationIds[i], targetUserId);
+    }
+}
+
+function *handleNick(userId, msg) {
+    // :ilkkao!~ilkkao@localhost NICK :foobar
+    var newNick = msg.params[0];
+    var currentNick = yield nicks.getCurrentNick(userId, msg.network);
+
+    if (msg.nick === currentNick) {
+        // User's own nick is changing
+        yield nicks.updateCurrentNick(userId, msg.network, newNick);
+    }
+
+    var targetUserId = yield getOrCreateUserId(msg.nick, msg.network);
+    var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
+
+    // TBD: update ircuser database and send USERS update
+
+    for (var i = 0; i < conversationIds.length; i++) {
+        yield conversation.addMessage(conversationIds[i], 0, {
+            cat: 'info',
+            body: msg.nick + ' is now known as ' + newNick
+        });
     }
 }
 
 function *handleError(userId, msg) {
     var reason = msg.params[0];
 
-    yield textLine.broadcast(userId, msg.network, {
-        cat: 'error',
-        body: 'Connection lost. Server error: ' + reason
-    });
+    yield addSystemMessage(userId, msg.network, 'Connection lost. Server error: ' + reason);
 
     if (reason.indexOf('Too many host connections') !== -1) {
         log.error(userId, 'Too many connections to: ' + msg.network);
 
-        yield textLine.broadcast(userId, msg.network, {
-            cat: 'error',
-            body: msg.network + ' IRC network doesn\'t allow more connections. ' +
-                'Close this window and rejoin to try again.'
-        });
+        yield addSystemMessage(userId, msg.network,
+            msg.network + ' IRC network doesn\'t allow more connections. ' +
+            'Close this window and rejoin to try again.');
 
         // Disable auto-reconnect
         yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'closing');
@@ -577,22 +615,11 @@ function *handleError(userId, msg) {
 function *handlePart(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com PART #portaali :
     var channel = msg.params[0];
-    var reason = msg.params[1];
-    var message = 'Yoo have left';
+    //var reason = msg.params[1]; // TBD: Can there be reason?
+    var conversationId = yield conversation.findGroup(channel, msg.network);
+    var targetUserId = yield getOrCreateUserId(msg.nick, msg.network);
 
-    var windowId = yield windowHelper.getGroupWindowId(userId, msg.network, channel);
-    var myNick = yield nicks.getCurrentNick(userId, msg.network);
-
-    if (windowId === null) {
-        return;
-    }
-
-    if (msg.nick !== myNick) {
-        message = msg.nick + ' (' + msg.userNameAndHost + ') has left';
-    }
-
-    yield removeParticipant(userId, windowId, msg.nick,
-        message + ' channel ' + channel + '. ' + reason);
+    yield conversation.removeGroupMember(conversationId, targetUserId);
 }
 
 function *handleMode(userId, msg) {
@@ -604,21 +631,15 @@ function *handleMode(userId, msg) {
         return;
     }
 
-    var windowId = yield windowHelper.getGroupWindowId(userId, msg.network, target);
+    var conversationId = yield conversation.findGroup(target, msg.network);
 
-    if (windowId === null) {
-        return;
-    }
-
-    yield textLine.send(userId, windowId, {
+    yield conversation.addMessage(conversationId, {
         cat: 'info',
         body: 'Mode change: ' + msg.params.join(' ') + ' by ' +
             (msg.nick ? msg.nick : msg.serverName)
     });
 
     var modeParams = msg.params.slice(1);
-    var names = {};
-    var sendUpdateNames = false;
 
     while (modeParams.length !== 0) {
         var command = modeParams.shift();
@@ -633,7 +654,6 @@ function *handleMode(userId, msg) {
 
         for (var i = 0; i < modes.length; i++) {
             var mode = modes[i];
-            var key = 'names:' + userId + ':' + windowId;
             var newClass = null;
 
             if (mode.match(/[klbeIOov]/)) {
@@ -644,6 +664,8 @@ function *handleMode(userId, msg) {
                 }
             }
 
+            var targetUserId = yield getOrCreateUserId(param, msg.network);
+
             if (mode === 'o' && oper === '+') {
                 // Got oper status
                 newClass = OPER;
@@ -651,7 +673,7 @@ function *handleMode(userId, msg) {
                 // Lost oper status
                 newClass = USER;
             } else if (mode === 'v') {
-                var oldClass = yield redis.hget(key, param);
+                var oldClass = yield conversation.getMemberRole(conversationId, targetUserId);
 
                 if (oldClass !== OPER) {
                     if (oper === '+') {
@@ -663,41 +685,13 @@ function *handleMode(userId, msg) {
                     }
                 }
             } else if (mode === 'k') {
-                var password = null;
-                var text = '';
-
-                if (oper === '+') {
-                    password = param;
-                    text = 'The password for this channel has been changed to ' + password + '.';
-                } else {
-                    text = 'Password protection has been removed from this channel.';
-                }
-
-                yield redis.hset('window:' + userId + ':' + windowId, 'password',
-                    password === null ? '' : password);
-
-                yield textLine.send(userId, windowId, {
-                    cat: 'info',
-                    body: text
-                });
-
-                yield outbox.queueAll(userId, {
-                    id: 'UPDATE',
-                    windowId: windowId,
-                    password: password
-                });
+                yield conversation.setPassword(conversationId, oper === '+' ? param : '');
             }
 
             if (newClass) {
-                yield redis.hset(key, param, newClass);
-                names[param] = newClass;
-                sendUpdateNames = true;
+                yield conversation.setMemberRole(conversationId, targetUserId, newClass);
             }
         }
-    }
-
-    if (sendUpdateNames) {
-        yield addParticipant(userId, windowId, names, false);
     }
 }
 
@@ -705,11 +699,11 @@ function *handleTopic(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com TOPIC #portaali :My new topic
     var channel = msg.params[0];
     var topic = msg.params[1];
-    var windowId = yield windowHelper.getGroupWindowId(userId, msg.network, channel);
+    var conversationId = yield conversation.findGroup(channel, msg.network);
 
-    yield updateTopic(userId, windowId, topic);
+    yield conversation.setTopic(conversationId, topic);
 
-    yield textLine.send(userId, windowId, {
+    yield conversation.addMessage(userId, 0, {
         cat: 'info',
         body: msg.nick + ' has changed the topic to: "' + topic + '".'
     });
@@ -719,30 +713,27 @@ function *handlePrivmsg(userId, msg) {
     var target = msg.params[0];
     var text = msg.params[1];
     var currentNick = yield nicks.getCurrentNick(userId, msg.network);
-    var windowId;
+    var conversationId;
 
     if (target === currentNick) {
         // Message is for the user only
-        var targetUserId = getUserId(msg.nick);
-        windowId = yield windowHelper.get1on1WindowId(userId, msg.network, targetUserId);
+        var peerUserId = getOrCreateUserId(msg.nick, msg.network);
+        conversationId = yield conversation.find1on1(userId, peerUserId, msg.network);
 
-        if (windowId === null) {
-            var createCommand = yield windowHelper.createNewWindow(userId, msg.network,
-                targetUserId, null, '1on1');
-            yield outbox.queueAll(userId, createCommand);
-            windowId = createCommand.windowId;
+        if (conversationId === null) {
+            conversationId = yield setup1on1(userId, peerUserId, msg.network);
         }
     } else {
-        windowId = yield windowHelper.getGroupWindowId(userId, msg.network, target);
+        conversationId = yield conversation.findGroup(target, msg.network);
 
-        if (windowId === null) {
+        if (conversationId === null) {
             log.warn(userId, 'Message arrived for an unknown channel');
             return;
         }
     }
 
-    yield textLine.send(userId, windowId, {
-        userId: getUserId(msg.nick),
+    yield conversation.addMessage(conversationId, 0, {
+        userId: getOrCreateUserId(msg.nick, msg.network),
         cat: 'msg',
         body: text
     });
@@ -788,42 +779,7 @@ function *tryDifferentNick(userId, network) {
     }
 }
 
-function *addParticipant(userId, windowId, nicks, reset) {
-    var members = [];
-
-    for (var key in nicks) {
-        if (nicks.hasOwnProperty(key)) {
-            members.push({
-                userId: getUserId(key),
-                role: nicks[key]
-            });
-        }
-    }
-
-    yield outbox.queueAll(userId, {
-        id: 'ADDMEMBERS',
-        reset: reset,
-        windowId: windowId,
-        members: members
-    });
-}
-
-function *removeParticipant(userId, windowId, nick, message) {
-    var removed = yield redis.hdel('names:' + userId + ':' + windowId, nick);
-
-    if (removed) {
-        yield textLine.send(userId, windowId, {
-            cat: 'info',
-            body: message
-        });
-
-        yield outbox.queueAll(userId, {
-            id: 'DELMEMBERS',
-            windowId: windowId,
-            members: [ { userId: getUserId(nick) } ]
-        });
-    }
-}
+//add timer vartin? valein tarkista jonkun userin NAMESILLA kaikki kanavat
 
 function *sendIRCPart(userId, network, channel) {
     yield courier.send('connectionmanager', {
@@ -834,7 +790,7 @@ function *sendIRCPart(userId, network, channel) {
     });
 }
 
-function *updateNamesHash(names, userId, windowId) {
+function *bufferNames(names, userId, network, conversationId) {
     var namesHash = {};
 
     for (var i = 0; i < names.length; i++) {
@@ -854,24 +810,17 @@ function *updateNamesHash(names, userId, windowId) {
             nick = nick.substring(1);
         }
 
-        namesHash[nick] = userClass;
+        var memberUserId = yield getOrCreateUserId(nick, network);
+        namesHash[memberUserId] = userClass;
     }
 
-    yield redis.hmset('names:' + userId + ':' + windowId, namesHash);
+    var key = 'namesbuffer:' + userId + ':' + conversationId;
+    yield redis.hmset(key, namesHash);
+    yield redis.expire(key, 60); // 1 minute. Does cleanup if we never get End of NAMES list reply.
 }
 
 function *resetRetryCount(userId, network) {
     yield redis.hset('networks:' + userId + ':' + network, 'retryCount', 0);
-}
-
-function *updateTopic(userId, windowId, topic) {
-    yield redis.hset('window:' + userId + ':' + windowId, 'topic', topic);
-
-    yield outbox.queueAll(userId, {
-        id: 'UPDATE',
-        windowId: windowId,
-        topic: topic
-    });
 }
 
 function isChannel(text) {
@@ -880,17 +829,49 @@ function isChannel(text) {
     });
 }
 
-function getUserId(nick) {
-    // Generate a pseudo userId by base64 encoding the nick name. E.g. 'ilkka' -> 'iaWxra2E'
-    // This is done to make IRC backend to look like the other backends.
-    var userId = new Buffer(nick).toString('base64').replace(/=+$/, '');
-    return 'i' + userId;
-}
+function *getOrCreateUserId(nick, network) {
+    var userId = yield nicks.getUserIdFromNick(nick, network);
 
-function getUserName(userId) {
-    if (!userId) {
-        return '';
+    if (userId) {
+        return userId;
     }
 
-    return new Buffer(userId.substring(1), 'base64').toString();
+    userId = yield redis.hget('index:ircuser', network + ':' + nick);
+
+    if (!userId) {
+        userId = yield createUserId(nick, network);
+    }
+
+    return userId;
+}
+
+function *createUserId(nick, network) {
+    var userId = yield redis.incr('nextGlobalIrcUserId');
+    userId = 'i' + userId;
+
+    yield redis.hmset('ircuser:' + userId, {
+        nick: nick,
+        network: network
+    });
+    yield redis.hset('index:ircuser', network + ':' + nick, userId);
+
+    return userId;
+}
+
+function *getUserNick(userId) {
+    return yield redis.hget('ircuser:' + userId, 'nick');
+}
+
+function *setup1on1(userId, peerUserId, network) {
+    var conversationId = yield conversation.create({
+        owner: userId,
+        type: '1on1',
+        name: '',
+        network: network,
+    });
+
+    yield conversation.set1on1Members(conversationId, userId, peerUserId);
+    yield window.create(userId, conversationId);
+
+    return conversationId;
 }
