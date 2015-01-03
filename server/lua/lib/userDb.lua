@@ -14,15 +14,13 @@
 --   governing permissions and limitations under the License.
 --
 
-#include 'base64'
-
 local function getNick(userId)
     local class = string.sub(userId, 1, 1)
 
     if class == 'm' then
         return redis.call('HGET', 'user:' .. userId, 'nick')
     elseif class == 'i' then
-        return base64dec(string.sub(userId, 2, -1))
+        return redis.call('HGET', 'ircuser:' .. userId, 'nick')
     end
 end
 
@@ -33,6 +31,6 @@ local function getName(userId)
         return redis.call('HGET', 'user:' .. userId, 'name')
     elseif class == 'i' then
         -- It would be too expensive to ask everybodys name using IRC protocol
-        return ''
+        return 'IRC User'
     end
 end
