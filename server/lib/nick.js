@@ -31,21 +31,33 @@ exports.sendNick = function*(userId, sessionId) {
 };
 
 exports.updateCurrentNick = function*(userId, network, nick) {
+    yield removeCurrentNickFromIndex(userId, network);
+
     yield redis.hset('networks:' + userId + ':' + network, 'currentnick', nick);
+    yield redis.hset('index:currentnick', network + ':' + nick, userId);
+};
+
+exports.removeCurrentNick = function*(userId, network) {
+    yield removeCurrentNickFromIndex(userId, network);
+    yield redis.hset('networks:' + userId + ':' + network, 'currentnick', '');
+};
+
+exports.getUserIdFromNick = function*(nick, network) {
+    return yield redis.hget('index:currentnick', network + ':' + nick);
 };
 
 exports.getCurrentNick = getCurrentNick;
 
 function *getCurrentNick(userId, network) {
-    var nick;
+    return yield redis.hget('networks:' + userId + ':' + network, 'currentnick');
+}
 
-    if (network === 'MAS') {
-        nick = yield redis.hget('user:' + userId, 'nick');
-    } else {
-        nick = yield redis.hget('networks:' + userId + ':' + network, 'currentnick');
+function *removeCurrentNickFromIndex(userId, network) {
+    var oldNick = yield redis.hget('networks:' + userId + ':' + network, 'currentnick');
+
+    if (oldNick) {
+        yield redis.hdel('index:currentnick', network + ':' + oldNick);
     }
-
-    return nick;
 }
 
 function *buildCommand(userId) {
