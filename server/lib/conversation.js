@@ -48,6 +48,15 @@ exports.getMembers = function*(conversationId) {
     return yield redis.hgetall('conversationmembers:' + conversationId);
 };
 
+exports.getMemberRole = function*(conversationId, userId) {
+    return yield redis.hget('conversationmembers:' + conversationId, userId);
+};
+
+exports.setMemBerRole = function*(conversationId, userId, role) {
+    yield redis.hset('conversationmembers:' + conversationId, userId, role);
+    yield streamAddMembers(conversationId, userId, role);
+};
+
 exports.findGroup = function*(name, network) {
     log.info('Searching group: ' + network + ':' + name);
     var conversationId = yield redis.hget('index:conversation', 'group:' + network + ':' + name);
@@ -141,6 +150,24 @@ exports.setTopic = function*(conversationId, topic) {
     yield stream(conversationId, 0, {
         id: 'UPDATE',
         topic: topic
+    });
+};
+
+exports.setPassword = function*(conversationId, password) {
+    yield redis.hset('conversation:' + conversationId, 'password', password);
+
+    yield stream(conversationId, 0, {
+        id: 'UPDATE',
+        password: password
+    });
+
+    var text = password === '' ?
+        'Password protection has been removed from this channel.' :
+        'The password for this channel has been changed to ' + password + '.';
+
+    yield addMessage(conversationId, 0, {
+        cat: 'info',
+        body: text
     });
 };
 
