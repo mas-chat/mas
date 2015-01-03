@@ -303,6 +303,7 @@ function *processDisconnected(params) {
     var previousState = yield redis.hget('networks:' + userId + ':' + network, 'state');
 
     yield redis.hset('networks:' + userId + ':' + network, 'state', 'disconnected');
+    yield nicks.removeCurrentNick(userId, network);
 
     if (previousState === 'closing') {
         // We wanted to close the connection, don't reconnect
