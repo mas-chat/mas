@@ -114,7 +114,7 @@ function *processJoin(params) {
             owner: params.userId,
             type: 'group',
             name: channelName,
-            network: params.network,
+            network: params.network
         });
     }
 
@@ -364,7 +364,7 @@ function *addSystemMessage(userId, network, body) {
             owner: userId,
             type: '1on1',
             network: network,
-            topic: 'IRC SERVER MESSAGES',
+            topic: 'IRC SERVER MESSAGES'
         });
 
         yield conversation.set1on1Members(conversationId, userId, 'SERVER');
@@ -561,7 +561,7 @@ function *handleJoin(userId, msg) {
 
 function *handleQuit(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com QUIT :"leaving"
-    //var reason = msg.params[0];
+    // var reason = msg.params[0];
     var targetUserId = getOrCreateUserId(msg.nick, msg.network);
 
     var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
@@ -615,7 +615,7 @@ function *handleError(userId, msg) {
 function *handlePart(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com PART #portaali :
     var channel = msg.params[0];
-    //var reason = msg.params[1]; // TBD: Can there be reason?
+    // var reason = msg.params[1]; // TBD: Can there be reason?
     var conversationId = yield conversation.findGroup(channel, msg.network);
     var targetUserId = yield getOrCreateUserId(msg.nick, msg.network);
 
@@ -779,7 +779,8 @@ function *tryDifferentNick(userId, network) {
     }
 }
 
-//add timer vartin? valein tarkista jonkun userin NAMESILLA kaikki kanavat
+// TBD: Add a timer (every 15min?) to send one NAMES to every irc channel to make sure memberslist
+// is in sync?
 
 function *sendIRCPart(userId, network, channel) {
     yield courier.send('connectionmanager', {
@@ -867,7 +868,7 @@ function *setup1on1(userId, peerUserId, network) {
         owner: userId,
         type: '1on1',
         name: '',
-        network: network,
+        network: network
     });
 
     yield conversation.set1on1Members(conversationId, userId, peerUserId);
