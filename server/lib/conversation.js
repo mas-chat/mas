@@ -16,6 +16,8 @@
 
 'use strict';
 
+/*jshint -W079 */
+
 var redis = require('./redis').createClient(),
     log = require('./log'),
     outbox = require('./outbox'),
