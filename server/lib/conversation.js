@@ -21,13 +21,6 @@ var redis = require('./redis').createClient(),
     outbox = require('./outbox'),
     window = require('./window');
 
-var roleMap = {
-    OWNER: '*',
-    OPER: '@',
-    VOICE: '+',
-    USER: 'u'
-};
-
 var MSG_BUFFER_SIZE = 200;
 
 // TBD: split to conversation.js and conversationMembers.js
@@ -201,7 +194,7 @@ function *insertMember(conversationId, userId, role) {
     var hash = {};
     hash[userId] = role;
 
-    yield insertMembers(conversationId, hash)
+    yield insertMembers(conversationId, hash);
 }
 
 function *insertMembers(conversationId, members) {
