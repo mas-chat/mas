@@ -18,7 +18,8 @@
 
 var redis = require('./redis').createClient(),
     log = require('./log'),
-    outbox = require('./outbox');
+    outbox = require('./outbox'),
+    window = require('./window');
 
 var roleMap = {
     OWNER: '*',
@@ -51,16 +52,24 @@ exports.get = function*(conversationId) {
 };
 
 exports.findGroup = function*(name, network) {
+    log.info('Searching group: ' + network + ':' + name);
     var conversationId = yield redis.hget('index:conversation', 'group:' + network + ':' + name);
     return conversationId;
 };
 
 exports.find1on1 = function*(userId1, userId2, network) {
+    log.info('Serching 1on1: ' + userId1 + ':' + userId2 + ':' + network);
+
     var userIds = [ userId1, userId2 ].sort();
     var conversationId = yield redis.hget('index:conversation',
         '1on1:' + network + ':' + userIds[0] + ':' + userIds[1]);
 
     return conversationId;
+};
+
+exports.getPeerUserId = function*(conversationId, userId) {
+    var members = yield getMembers(conversationId);
+    return members[0] === userId ? members[1] : members[0];
 };
 
 exports.set1on1Members = function*(conversationId, userId1, userId2) {
@@ -73,6 +82,14 @@ exports.set1on1Members = function*(conversationId, userId1, userId2) {
     // Update 1on1 index
     yield redis.hset('index:conversation',
         '1on1:' + network + ':' + userIds[0] + ':' + userIds[1], conversationId);
+};
+
+exports.setGroupMembers = function*(conversationId, members, reset) {
+    if (reset) {
+        yield redis.del('conversationmembers:' + conversationId);
+    }
+
+    yield insertMembers(conversationId, members);
 };
 
 exports.addGroupMember = function*(conversationId, userId, role) {
@@ -101,8 +118,9 @@ exports.addMessage = function*(conversationId, excludeSession, msg) {
     yield addMessage(conversationId, excludeSession, msg);
 };
 
-exports.sendAddMembers = function*(userId, windowId, conversationId) {
-    var members = yield redis.hgetall('conversationmembers:' + conversationId);
+exports.sendAddMembers = function*(userId, conversationId) {
+    var members = yield getMembers('conversationmembers:' + conversationId);
+    var windowId = yield window.findByConversationId(userId, conversationId);
     var membersList = [];
 
     Object.keys(members).forEach(function(key) {
@@ -114,9 +132,18 @@ exports.sendAddMembers = function*(userId, windowId, conversationId) {
 
     yield outbox.queueAll(userId, {
         id: 'ADDMEMBERS',
-        windowId: windowId,
+        windowId: parseInt(windowId),
         reset: true,
         members: membersList
+    });
+};
+
+exports.setTopic = function*(conversationId, topic) {
+    yield redis.hset('conversation:' + conversationId, 'topic', topic);
+
+    yield stream(conversationId, 0, {
+        id: 'UPDATE',
+        topic: topic
     });
 };
 
@@ -159,7 +186,7 @@ function *stream(conversationId, excludeSession, msg) {
     var members = yield getMembers(conversationId);
 
     for (var i = 0; i < members.length; i++) {
-        var windowId = yield redis.hget('index:windowIds', members[i] + ':' + conversationId);
+        var windowId = yield window.findByConversationId(members[i], conversationId);
         msg.windowId = parseInt(windowId);
 
         yield outbox.queueAll(members[i], msg);
@@ -167,7 +194,14 @@ function *stream(conversationId, excludeSession, msg) {
 }
 
 function *insertMember(conversationId, userId, role) {
-    yield redis.hset('conversationmembers:' + conversationId, userId, roleMap[role]);
+    var hash = {};
+    hash[userId] = role;
+
+    yield insertMembers(conversationId, hash)
+}
+
+function *insertMembers(conversationId, members) {
+    yield redis.hmset('conversationmembers:' + conversationId, members);
 }
 
 function *removeMember(conversationId, userId) {
