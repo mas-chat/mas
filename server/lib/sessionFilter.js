@@ -51,8 +51,10 @@ module.exports = function*(next) {
         newSession = true;
         sessionId = uuid(15);
 
-        yield redis.hmset('session:' + userId + ':' + sessionId, 'sendRcvNext', 0,
-            'listenRcvNext', 0);
+        yield redis.hmset('session:' + userId + ':' + sessionId, {
+            sendRcvNext: 0,
+            listenRcvNext: 0
+        });
     } else {
         var sessionExists = yield redis.zrank('sessionlist:' + userId, sessionId);
 
