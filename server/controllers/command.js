@@ -134,7 +134,7 @@ function *handleClose(params) {
     });
 
     yield conversation.removeGroupMember(params.conversationId, params.userId);
-    yield window.removeWindow(params.userId, params.windowId);
+    yield window.remove(params.userId, params.windowId);
 }
 
 function *handleUpdate(params) {
