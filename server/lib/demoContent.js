@@ -16,10 +16,14 @@
 
 'use strict';
 
+/*jshint -W079 */
+
 var co = require('co'),
     wait = require('co-wait'),
     faker = require('faker'),
     redis = require('./redis').createClient(),
+    window = require('./window'),
+    conversation = require('./conversation'),
     log = require('./log'),
     conf = require('./conf');
 
@@ -37,25 +41,23 @@ module.exports.enable = function() {
                 continue;
             }
 
-            var details = yield redis.srandmember('windowlist:' + demoUserId);
+            var windowId = yield redis.srandmember('windowlist:' + demoUserId);
 
-            if (details) {
+            if (windowId) {
                 // User has at least one window
+                var conversationId = yield window.getConversationId(demoUserId, windowId);
                 var url = '';
+
                 if (!(Math.floor(Math.random() * 10 ))) {
                     var randomImgFileName = Math.floor(Math.random() * 1000000);
                     url = 'http://placeimg.com/640/480/nature/' + randomImgFileName + '.jpg';
                 }
 
-                var windowId = parseInt(details);
-                var msg = {
+                yield conversation.addMessage(conversationId, 0, {
                     body: faker.Lorem.sentence(sentenceLength) + ' ' + url,
                     userId: 'mDEMO', // TBD: This user must exist
                     cat: 'msg'
-                };
-
-                // TDB: Use conversation lib instead
-                // yield textLine.send(demoUserId, windowId, msg);
+                });
             }
         }
     })();

@@ -17,6 +17,8 @@
 
 'use strict';
 
+/*jshint -W079 */
+
 require('../../lib/init')('loopback');
 
 var co = require('co'),
