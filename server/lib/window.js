@@ -19,8 +19,7 @@
 var assert = require('assert'),
     redis = require('./redis').createClient(),
     conversation = require('./conversation'),
-    outbox = require('./outbox'),
-    log = require('./log');
+    outbox = require('./outbox');
 
 exports.create = function*(userId, conversationId) {
     var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
@@ -88,7 +87,7 @@ exports.getAllConversationIds = function*(userId) {
 };
 
 exports.getWindowIdsForNetwork = function*(userId, network) {
-    var conversationIds = yield getAllConversationIds();
+    var conversationIds = yield getAllConversationIds(userId);
     var res = [];
 
     for (var i = 0; i < conversationIds.length; i++) {
