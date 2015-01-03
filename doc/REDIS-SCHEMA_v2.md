@@ -60,10 +60,16 @@ MAS Redis structures
    visible (bool)
    row (int)
 
+ index:windowIds (hash)
+   <userId>:<conversationId> (int, windowId)
+
  networks:<userId>:<network> (hash)
    state (string, 'connected', 'connecting', 'disconnected')
    currentnick (text)
    retryCount (int)
+
+ index:currentnick (hash)
+   <network>:<nick> (string, userId)
 
  conversation:<conversationId> (hash)
    owner (string, userId) (mas group only)
@@ -117,6 +123,9 @@ MAS Redis structures
 
  index:ircuser (hash)
    <network>:<nick> (string, userId)
+
+ namesbuffer:<userId>:<conversationId> (hash, expiry 1 min)
+   name1, name2 ...
 ```
 
  Loopback backend
