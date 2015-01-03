@@ -51,6 +51,10 @@ exports.get = function*(conversationId) {
     return yield redis.hgetall('conversation:' + conversationId);
 };
 
+exports.getMembers = function*(conversationId) {
+    return yield redis.hgetall('conversationmembers:' + conversationId);
+};
+
 exports.findGroup = function*(name, network) {
     log.info('Searching group: ' + network + ':' + name);
     var conversationId = yield redis.hget('index:conversation', 'group:' + network + ':' + name);
