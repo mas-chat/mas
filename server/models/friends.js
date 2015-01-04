@@ -16,8 +16,8 @@
 
 'use strict';
 
-var redis = require('./redis').createClient(),
-    outbox = require('./outbox');
+var redis = require('../lib/redis').createClient(),
+    outbox = require('../lib/outbox');
 
 exports.sendFriends = function*(userId, sessionId) {
     var command = {

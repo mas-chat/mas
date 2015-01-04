@@ -22,10 +22,10 @@ var co = require('co'),
     wait = require('co-wait'),
     faker = require('faker'),
     redis = require('./redis').createClient(),
-    window = require('./window'),
-    conversation = require('./conversation'),
     log = require('./log'),
-    conf = require('./conf');
+    conf = require('./conf'),
+    window = require('../models/window'),
+    conversation = require('../models/conversation');
 
 module.exports.enable = function() {
     co(function*() {

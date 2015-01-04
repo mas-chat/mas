@@ -20,8 +20,8 @@ var co = require('co'),
     CronJob = require('cron').CronJob,
     redis = require('./redis').createClient(),
     log = require('./log'),
-    friends = require('./friends'),
-    conf = require('./conf');
+    conf = require('./conf'),
+    friends = require('../models/friends');
 
 exports.init = function() {
     // Once in a minute

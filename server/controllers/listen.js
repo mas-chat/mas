@@ -19,8 +19,8 @@
 var log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
-    nicks = require('../lib/nick'),
-    friends = require('../lib/friends');
+    nicks = require('../models/nick'),
+    friends = require('../models/friends');
 
 module.exports = function*() {
     var userId = this.mas.userId;
