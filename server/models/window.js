@@ -17,9 +17,9 @@
 'use strict';
 
 var assert = require('assert'),
-    redis = require('./redis').createClient(),
-    conversation = require('./conversation'),
-    outbox = require('./outbox');
+    redis = require('../lib/redis').createClient(),
+    outbox = require('../lib/outbox'),
+    conversation = require('./conversation');
 
 exports.create = function*(userId, conversationId) {
     var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);

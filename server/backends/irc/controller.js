@@ -29,9 +29,9 @@ var assert = require('assert'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('ircparser'),
     outbox = require('../../lib/outbox'),
-    conversation = require('../../lib/conversation'),
-    window = require('../../lib/window'),
-    nicks = require('../../lib/nick');
+    conversation = require('../../models/conversation'),
+    window = require('../../models/window'),
+    nicks = require('../../models/nick');
 
 const OPER = '@';
 const VOICE = '+';

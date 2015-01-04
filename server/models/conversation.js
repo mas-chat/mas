@@ -18,9 +18,9 @@
 
 /*jshint -W079 */
 
-var redis = require('./redis').createClient(),
-    log = require('./log'),
-    outbox = require('./outbox'),
+var redis = require('../lib/redis').createClient(),
+    log = require('../lib/log'),
+    outbox = require('../lib/outbox'),
     window = require('./window');
 
 var MSG_BUFFER_SIZE = 200;

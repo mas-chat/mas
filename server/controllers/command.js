@@ -23,9 +23,9 @@ var co = require('co'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
     courier = require('../lib/courier').createEndPoint('command'),
-    conversation = require('../lib/conversation'),
-    window = require('../lib/window'),
-    friends = require('../lib/friends');
+    conversation = require('../models/conversation'),
+    window = require('../models/window'),
+    friends = require('../models/friends');
 
 var handlers = {
     SEND: handleSend,
