@@ -23,13 +23,13 @@ require('../../lib/init')('loopback');
 
 var co = require('co'),
     redisModule = require('../../lib/redis'),
-    conversation = require('../../lib/conversation'),
     conf = require('../../lib/conf'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('loopbackparser'),
-    window = require('../../lib/window'),
-    nicks = require('../../lib/nick'),
-    outbox = require('../../lib/outbox');
+    outbox = require('../../lib/outbox'),
+    window = require('../../models/window'),
+    nicks = require('../../models/nick'),
+    conversation = require('../../models/conversation');
 
 co(function*() {
     yield redisModule.loadScripts();

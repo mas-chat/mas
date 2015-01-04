@@ -16,9 +16,9 @@
 
 'use strict';
 
-var redis = require('./redis').createClient(),
-    outbox = require('./outbox'),
-    conf = require('./conf');
+var redis = require('../lib/redis').createClient(),
+    outbox = require('../lib/outbox'),
+    conf = require('../lib/conf');
 
 exports.sendNickAll = function*(userId) {
     var command = yield buildCommand(userId);

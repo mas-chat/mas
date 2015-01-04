@@ -20,8 +20,8 @@ var uuid = require('uid2'),
     httpStatus = require('statuses'),
     log = require('./log'),
     redis = require('./redis').createClient(),
-    friends = require('./friends'),
-    conf = require('./conf');
+    conf = require('./conf'),
+    friends = require('../models/friends');
 
 module.exports = function*(next) {
     var userId = this.mas.userId;
