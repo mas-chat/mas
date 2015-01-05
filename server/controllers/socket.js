@@ -45,7 +45,9 @@ exports.setup = function(server) {
 
                 if (!userId || !secret) {
                     log.info('Invalid init socket.io message.');
-                    socket.emit('initfail', 'Invalid init message.');
+                    socket.emit('initfail', {
+                        reason: 'Invalid init message.'
+                    });
                     socket.disconnect();
                     return;
                 }
@@ -55,8 +57,10 @@ exports.setup = function(server) {
                 if (!(userRecord.cookie_expires > ts &&
                     userRecord.cookie === secret &&
                     userRecord.inuse)) {
-                    log.info(userId, 'Init message with incorrect secret or expired session.');
-                    socket.emit('initfail', 'Invalid or expired session.');
+                    log.info(userId, 'Init message with incorrect or expired secret.');
+                    socket.emit('initfail', {
+                        reason: 'Invalid or expired secret.'
+                    });
                     socket.disconnect();
                     return;
                 }
