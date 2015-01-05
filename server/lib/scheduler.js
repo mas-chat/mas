@@ -33,7 +33,7 @@ function deleteIdleSessions() {
 
     co(function*() {
         var ts = Math.round(Date.now() / 1000) - conf.get('session:idle_timeout');
-        var list = yield redis.zrangebyscore('sessionlastrequest', '-inf', ts);
+        var list = yield redis.zrangebyscore('sessionlastheartbeat', '-inf', ts);
 
         for (var i = 0; i < list.length; i++) {
             var fields = list[i].split(':');
