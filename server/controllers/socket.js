@@ -67,7 +67,7 @@ exports.setup = function(server) {
                 socket.emit('initok', { sessionId: sessionId });
 
                 yield redis.zadd('sessionlist:' + userId, ts, sessionId);
-                yield redis.zadd('sessionlastrequest', ts, userId + ':' + sessionId);
+                yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
 
                 log.info(userId, 'Initializing new session: ' + sessionId);
                 yield redis.run('initSession', userId, sessionId);
@@ -122,7 +122,7 @@ exports.setup = function(server) {
                 }
 
                 var ts = Math.round(Date.now() / 1000);
-                yield redis.zadd('sessionlastrequest', ts, userId + ':' + sessionId);
+                yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
             })();
         });
     });

@@ -27,7 +27,7 @@ MAS Redis structures
  sessionknownuserids:<userId>:<sessionId> set
    <userId1>, <userId2>, ...
 
- sessionlastrequest (zset)
+ sessionlastheartbeat (zset)
    userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...
 
  outbox:<userId>:<sessionId> (list)
