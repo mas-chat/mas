@@ -384,18 +384,6 @@ Show a friend request.
 TBD
 ```
 
-## SESSIONID
-
-Set session ID.
-
-```JSON
-{
-  "id": "SESSIONID",
-
-  "sessionId": 856821
-}
-```
-
 ## SET
 
 Update settings.
