@@ -19,6 +19,8 @@
 var redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox');
 
+// TBD: Instead of FRIENDS and FRIENDSUPDATE, use ADDFRIENDS
+
 exports.sendFriends = function*(userId, sessionId) {
     var command = {
         id: 'FRIENDS',
