@@ -25,15 +25,10 @@ var path = require('path'),
     redis = require('../lib/redis').createClient(),
     passport = require('../lib/passport'),
     cacheFilter = require('../lib/cacheFilter'),
-    sessionFilter = require('../lib/sessionFilter'),
-    sequenceFilter = require('../lib/sequenceFilter'),
-    validUserFilter = require('../lib/validUserFilter'),
     registerController = require('../controllers/register'),
     loginController = require('../controllers/login'),
     indexPageController = require('../controllers/pages'),
     pagesController = require('../controllers/pages/pages'),
-    listenController = require('../controllers/listen'),
-    commandController = require('../controllers/command'),
     uploadController = require('../controllers/upload'),
     userFilesController = require('../controllers/userFiles'),
     forgotPasswordController = require('../controllers/forgotPassword');
@@ -66,15 +61,8 @@ exports.register = function(app) {
 
     app.post('/login', bodyParser(), loginController.localLogin);
 
-    app.post(/^\/api/, validUserFilter);
-
     // File upload endpoint
     app.post('/api/v1/upload', uploadController);
-
-    // JSON API endpoints
-    app.post('/api/v1/:method', bodyParser(), sessionFilter, sequenceFilter);
-    app.post('/api/v1/listen', listenController);
-    app.post('/api/v1/send', commandController);
 
     // Registration routes
     app.get('/register', registerController.index);

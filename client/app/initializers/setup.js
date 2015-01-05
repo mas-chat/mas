@@ -16,7 +16,7 @@
 
 'use strict';
 
-import Network from '../helpers/network';
+import Socket from '../helpers/socket';
 import Store from '../helpers/store';
 import FriendModel from '../models/friend';
 import MessageModel from '../models/message';
@@ -24,13 +24,13 @@ import WindowModel from '../models/window';
 
 export function initialize(container, application) {
     var store = Store.create();
-    var network = Network.create({
+    var socket = Socket.create({
         store: store,
         container: container
     });
 
     application.register('store:main', store, { instantiate: false });
-    application.register('network:main', network, { instantiate: false });
+    application.register('socket:main', socket, { instantiate: false });
 
     // Model factories
     application.register('model:friend', FriendModel, { singleton: false });
@@ -44,7 +44,7 @@ export function initialize(container, application) {
     application.inject('route', 'store', 'store:main');
     application.inject('model:base', 'store', 'store:main');
 
-    application.inject('controller', 'remote', 'network:main');
+    application.inject('controller', 'remote', 'socket:main');
 }
 
 export default {
