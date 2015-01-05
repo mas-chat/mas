@@ -6,7 +6,7 @@ MAS Redis structures
  user:<userId> (hash)
    name (string)
    email (string)
-   inUse (string)
+   inuse (string)
    lastlogout (int, unix time) (0 = online)
    passwd (string)
    salt (string)
@@ -24,19 +24,13 @@ MAS Redis structures
  sessionlist:<userId> (zset)
    sessionId1, timeStamp1, sessionId2, timeStamp2 ...
 
- session:<userId>:<sessionId> (hash)
-   sendRcvNext (int)
-   listenRcvNext (int)
-   timeStamp (int)
-   lastreply (string)
-
  sessionknownuserids:<userId>:<sessionId> set
    <userId1>, <userId2>, ...
 
  sessionlastrequest (zset)
    userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...
 
- outbox:<userId>:<sessionId> (list) TBD: rename clientinbox!
+ outbox:<userId>:<sessionId> (list)
    msg1, msg2
 
  index:user (hash)
