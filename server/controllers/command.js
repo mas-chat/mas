@@ -40,11 +40,7 @@ var handlers = {
     LOGOUT: handleLogout
 };
 
-module.exports = function*() {
-    var userId = this.mas.userId;
-    var sessionId = this.mas.sessionId;
-
-    var command = this.request.body.command;
+module.exports = function*(userId, sessionId, command) {
     var windowId = command.windowId;
     var network = command.network;
 
@@ -75,11 +71,6 @@ module.exports = function*() {
             command: command
         });
     }
-
-    yield redis.hincrby('session:' + this.mas.userId + ':' + sessionId, 'sendRcvNext', 1);
-
-    this.set('Cache-Control', 'private, max-age=0, no-cache');
-    this.status = 204;
 };
 
 function *handleSend(params) {
