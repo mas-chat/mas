@@ -45,6 +45,7 @@
     "redis": "~0.12.1",
     "redis-lua-helper": "~0.2.0",
     "semver": "~4.1.0",
+    "socket.io": "~1.2.1",
     "statuses": "~1.2.0",
     "thunkify": "~2.1.1",
     "uid2": "~0.0.3",

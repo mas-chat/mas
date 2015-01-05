@@ -44,6 +44,7 @@ app.import('bower_components/emojify.js/emojify.js');
 app.import('bower_components/magnific-popup/dist/jquery.magnific-popup.js');
 app.import('bower_components/bootstrap-contextmenu/bootstrap-contextmenu.js');
 app.import('bower_components/velocity/velocity.js');
+app.import('bower_components/socket.io-client/socket.io.js');
 
 // Copy only the relevant files:
 var fontsFontAwesome = pickFiles('bower_components/font-awesome/fonts', {

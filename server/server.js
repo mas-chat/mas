@@ -25,6 +25,7 @@ var koa = require('koa'),
     compress = require('koa-compress'),
     // logger = require('koa-logger'),
     co = require('co'),
+    http = require('http'),
     handlebarsHelpers = require('./lib/handlebarsHelpers'),
     conf = require('./lib/conf'),
     log = require('./lib/log'),
@@ -33,7 +34,8 @@ var koa = require('koa'),
     userSession = require('./lib/userSession'),
     routes = require('./routes/routes'),
     scheduler = require('./lib/scheduler'),
-    demoContent = require('./lib/demoContent');
+    demoContent = require('./lib/demoContent'),
+    socketController = require('./controllers/socket');
 
 var app = koa();
 
@@ -58,12 +60,17 @@ app.use(userSession());
 handlebarsHelpers.registerHelpers(hbs);
 routes.register(app);
 
+// This must come after last app.use()
+var server = http.Server(app.callback());
+
+socketController.setup(server);
+
 co(function*() {
     var port = conf.get('frontend:port');
 
     yield redisModule.loadScripts();
     scheduler.init();
-    app.listen(port);
+    server.listen(port);
     log.info('MAS server started, http://localhost:' + port + '/');
 })();
 
