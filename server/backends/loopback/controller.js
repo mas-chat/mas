@@ -108,8 +108,8 @@ function *joinGroup(params) {
 
     yield conversation.addGroupMember(conversationId, userId, 'USER');
 
-    var windowId = yield window.create(params.userId, conversationId);
-    yield conversation.sendAddMembers(params.userId, windowId, conversationId);
+    yield window.create(params.userId, conversationId);
+    yield conversation.sendAddMembers(params.userId, conversationId);
 }
 
 function *createInitialGroups() {
