@@ -47,7 +47,7 @@ exports.get = function*(conversationId) {
 };
 
 exports.getMembers = function*(conversationId) {
-    return yield redis.hgetall('conversationmembers:' + conversationId);
+    return yield getMembersHash(conversationId);
 };
 
 exports.getMemberRole = function*(conversationId, userId) {
@@ -101,6 +101,8 @@ exports.setGroupMembers = function*(conversationId, members, reset) {
 };
 
 exports.addGroupMember = function*(conversationId, userId, role) {
+    yield insertMember(conversationId, userId, role);
+
     yield addMessage(conversationId, 0, {
         userId: userId,
         cat: 'join',
@@ -108,7 +110,6 @@ exports.addGroupMember = function*(conversationId, userId, role) {
     });
 
     yield streamAddMembers(conversationId, userId, role);
-    yield insertMember(conversationId, userId, role); // Must be last
 };
 
 exports.removeGroupMember = function*(conversationId, userId) {
@@ -127,7 +128,7 @@ exports.addMessage = function*(conversationId, excludeSession, msg) {
 };
 
 exports.sendAddMembers = function*(userId, conversationId) {
-    var members = yield getMembers('conversationmembers:' + conversationId);
+    var members = yield getMembersHash(conversationId);
     var windowId = yield window.findByConversationId(userId, conversationId);
     var membersList = [];
 
@@ -236,4 +237,8 @@ function *removeMember(conversationId, userId) {
 
 function *getMembers(conversationId) {
     return yield redis.hkeys('conversationmembers:' + conversationId);
+}
+
+function *getMembersHash(conversationId) {
+    return yield redis.hgetall('conversationmembers:' + conversationId);
 }

@@ -85,7 +85,7 @@ export default Ember.Object.extend({
 
         this.socket.emit('req', command);
 
-        Ember.Logger.info('--> MSG: ' + command.id);
+        Ember.Logger.info('--> REQ: ' + command.id);
     },
 
     _logout: function() {
