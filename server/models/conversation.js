@@ -215,7 +215,7 @@ function *stream(conversationId, excludeSession, msg) {
         var windowId = yield window.findByConversationId(members[i], conversationId);
         msg.windowId = parseInt(windowId);
 
-        yield outbox.queueAll(members[i], msg);
+        yield outbox.queueAll(members[i], msg, excludeSession);
     }
 }
 

@@ -16,43 +16,45 @@
 
 #include 'userDb'
 
-local function introduceNewUserIds(userId, sessionId, userIdList)
+local function introduceNewUserIds(userId, sessionId, excludeSessionId, userIdList)
     local sessions
 
-    if sessionId ~= 0 then
+    if sessionId ~= nil then
         sessions = redis.call('ZRANGE', 'sessionlist:' .. userId, 0, -1)
     else
         sessions = { sessionId }
     end
 
     for i = 1, #sessions do
-        local key = 'sessionknownuserids:' .. userId .. ':' .. sessions[i]
-        local outbox = 'outbox:' .. userId .. ':' .. sessions[i]
-        local newUsers = {}
+        if sessions[i] ~= excludeSessionId then
+            local key = 'sessionknownuserids:' .. userId .. ':' .. sessions[i]
+            local outbox = 'outbox:' .. userId .. ':' .. sessions[i]
+            local newUsers = {}
 
-        for ii = 1, #userIdList do
-            local isKnown = redis.call('SISMEMBER', key, userIdList[ii])
+            for ii = 1, #userIdList do
+                local isKnown = redis.call('SISMEMBER', key, userIdList[ii])
 
-            if isKnown == 0 then
-                -- This client session hasn't seen this userId yet
-                local newUserId = userIdList[ii]
+                if isKnown == 0 then
+                    -- This client session hasn't seen this userId yet
+                    local newUserId = userIdList[ii]
 
-                newUsers[newUserId] = {
-                    ['nick'] = getNick(newUserId),
-                    ['name'] = getName(newUserId)
-                }
+                    newUsers[newUserId] = {
+                        ['nick'] = getNick(newUserId),
+                        ['name'] = getName(newUserId)
+                    }
+                end
             end
-        end
 
-        if next(newUsers) ~= nil then
-            -- Send USERS command as there are new userIds the client doesn't know about
-            redis.call('RPUSH', outbox, cjson.encode({
-                ['id'] = 'USERS',
-                ['mapping'] = newUsers
-            }))
+            if next(newUsers) ~= nil then
+                -- Send USERS command as there are new userIds the client doesn't know about
+                redis.call('RPUSH', outbox, cjson.encode({
+                    ['id'] = 'USERS',
+                    ['mapping'] = newUsers
+                }))
 
-            -- Mark these new userIds as known
-            redis.call('SADD', key, unpack(userIdList))
+                -- Mark these new userIds as known
+                redis.call('SADD', key, unpack(userIdList))
+            end
         end
     end
 end

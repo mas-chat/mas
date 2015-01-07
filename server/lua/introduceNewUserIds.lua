@@ -18,6 +18,7 @@
 
 local userId = table.remove(ARGV, 1)
 local sessionId = table.remove(ARGV, 1)
+local excludeSessionId = table.remove(ARGV, 1)
 local userIdList = ARGV -- Rest of the parameters are userIds
 
-introduceNewUserIds(userId, sessionId, userIdList)
+introduceNewUserIds(userId, sessionId, excludeSessionId, userIdList)
