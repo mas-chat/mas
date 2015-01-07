@@ -10,7 +10,6 @@ var path = require('path'),
     jshint = require('gulp-jshint'),
     jscs = require('gulp-jscs'),
     bower = require('gulp-bower'),
-    livereload = require('gulp-livereload')(),
     less = require('gulp-less'),
     minifyCSS = require('gulp-minify-css'),
     rev = require('gulp-rev'),
@@ -59,7 +58,6 @@ gulp.task('jscs', function() {
     return gulp.src(paths.serverJavaScripts
         .concat(paths.clientJavaScripts)
         .concat(paths.testJavaScripts))
-        .pipe(jshint())
         .pipe(jscs());
 });
 
@@ -105,9 +103,6 @@ gulp.task('build-assets', [ 'libs-pages', 'less-pages', 'fonts' ], function() {
 
 gulp.task('watch', function() {
     gulp.watch(paths.pagesCSS, [ 'less-pages' ]);
-    gulp.watch(paths.clientDistFiles, function(file) {
-        livereload.changed(file.path);
-    });
 });
 
 // The default task
