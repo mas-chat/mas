@@ -23,11 +23,11 @@ var util = require('util'),
     redis = redisModule.createClient();
 
 exports.queue = function*(userId, sessionId, commands) {
-    yield queueCommands(userId, sessionId, commands);
+    yield queueCommands(userId, sessionId, null, commands);
 };
 
-exports.queueAll = function*(userId, commands) {
-    yield queueCommands(userId, 0, commands);
+exports.queueAll = function*(userId, commands, excludeSessionId) {
+    yield queueCommands(userId, null, excludeSessionId, commands);
 };
 
 exports.flush = function*(userId, sessionId, timeout) {
@@ -65,21 +65,21 @@ exports.length = function*(userId, sessionId) {
     return parseInt(yield redis.llen('outbox:' + userId + ':' + sessionId));
 };
 
-function *queueCommands(userId, sessionId, commands) {
+function *queueCommands(userId, sessionId, excludeSessionId, commands) {
     if (!util.isArray(commands)) {
         commands = [ commands ];
     }
 
-    yield handleNewUserIds(userId, sessionId, commands);
+    yield handleNewUserIds(userId, sessionId, excludeSessionId, commands);
 
     commands = commands.map(function(value) {
         return typeof(value) === 'string' ? value : JSON.stringify(value);
     });
 
-    yield redis.run.apply(null, [ 'queueOutbox', userId, sessionId, 0 ].concat(commands));
+    yield redis.run.apply(null, [ 'queueOutbox', userId, sessionId, excludeSessionId ].concat(commands));
 }
 
-function *handleNewUserIds(userId, sessionId, commands) {
+function *handleNewUserIds(userId, sessionId, excludeSessionId, commands) {
     var allUserIds = [];
 
     commands.forEach(function(command) {
@@ -87,7 +87,7 @@ function *handleNewUserIds(userId, sessionId, commands) {
     });
 
     allUserIds = _.uniq(allUserIds);
-    yield redis.run.apply(null, [ 'introduceNewUserIds', userId, sessionId ].concat(allUserIds));
+    yield redis.run.apply(null, [ 'introduceNewUserIds', userId, sessionId, excludeSessionId ].concat(allUserIds));
 }
 
 function scanUserIds(obj) {
