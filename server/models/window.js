@@ -28,7 +28,6 @@ exports.create = function*(userId, conversationId) {
     var userId1on1 = null;
 
     assert(conversation);
-    assert(members);
 
     var newWindow = {
         conversationId: conversationId,
@@ -61,7 +60,7 @@ exports.create = function*(userId, conversationId) {
         visible: newWindow.visible,
         row: newWindow.row,
         sounds: newWindow.sounds,
-        role: members[userId]
+        role: 'u' // Everybody starts as a normal user
     };
 
     yield outbox.queueAll(userId, createMsg);

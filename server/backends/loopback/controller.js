@@ -106,9 +106,8 @@ function *joinGroup(params) {
     var nick = yield redis.hget('user:' + userId, 'nick');
     yield nicks.updateCurrentNick(userId, 'MAS', nick);
 
-    yield conversation.addGroupMember(conversationId, userId, 'USER');
-
     yield window.create(params.userId, conversationId);
+    yield conversation.addGroupMember(conversationId, userId, 'USER');
     yield conversation.sendAddMembers(params.userId, conversationId);
 }
 

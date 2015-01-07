@@ -28,6 +28,8 @@ export default Ember.Object.extend({
 
         delete command.id;
 
+        Ember.Logger.info('<-- NTF: ' + name);
+
         if (typeof windowId === 'number') {
             targetWindow = this.get('store.windows').findBy('windowId', windowId);
         }
