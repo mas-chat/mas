@@ -21,7 +21,6 @@ var uuid = require('uid2'),
 
 exports.createSession = function*(userId) {
     var user = yield redis.hgetall('user:' + userId);
-    var useSsl = yield redis.hget('settings:' + userId, 'sslEnabled');
     var ts = Math.round(Date.now() / 1000);
     var secret = user.secret;
     var expires = user.secretExpires;
@@ -43,8 +42,7 @@ exports.createSession = function*(userId) {
     return {
         userId: userId,
         secret: secret,
-        expires: expires,
-        useSsl: useSsl
+        expires: expires
     };
 };
 
