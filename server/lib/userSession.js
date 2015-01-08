@@ -36,7 +36,7 @@ module.exports = function authenticate() {
                 valid = false;
             } else {
                 userId = data[0];
-                secret = data[1]; // TBD: bad name
+                secret = data[1];
 
                 if (!userId || !secret) {
                     valid = false;
@@ -45,7 +45,7 @@ module.exports = function authenticate() {
         }
 
         if (valid) {
-            expect = yield redis.hmget('user:' + userId, 'cookie_expires', 'cookie', 'inuse',
+            expect = yield redis.hmget('user:' + userId, 'secretExpires', 'secret', 'inuse',
                 'email');
 
             if (!(expect && expect[0] > ts && expect[1] === secret)) {
