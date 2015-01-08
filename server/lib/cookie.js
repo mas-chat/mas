@@ -20,32 +20,29 @@ var uuid = require('uid2'),
     redis = require('../lib/redis').createClient();
 
 exports.createSession = function*(userId) {
-    /* jshint -W106 */
-    /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
     var user = yield redis.hgetall('user:' + userId);
     var useSsl = yield redis.hget('settings:' + userId, 'sslEnabled');
     var ts = Math.round(Date.now() / 1000);
-    var cookie = user.cookie;
-    var expires = user.cookie_expires;
+    var secret = user.secret;
+    var expires = user.secretExpires;
 
-    // TBD: Use word secret everywhere. Rename cookie_expires to cookieExpires
+    // TBD: Use word secret everywhere.
 
-    if (!cookie || ts > expires) {
+    if (!secret || ts > expires) {
         // We need to generate new secret
         expires = ts + (60 * 60 * 24 * 14);
-        cookie = uuid(20);
+        secret = uuid(20);
 
         // Save secret to Redis
         yield redis.hmset('user:' + userId, {
-            cookie: cookie,
-            cookie_expires: expires
+            secret: secret,
+            secretExpires: expires
         });
     }
-    /*jshint +W106 */
 
     return {
         userId: userId,
-        secret: cookie,
+        secret: secret,
         expires: expires,
         useSsl: useSsl
     };

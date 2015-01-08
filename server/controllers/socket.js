@@ -54,8 +54,8 @@ exports.setup = function(server) {
 
                 var userRecord = yield redis.hgetall('user:' + userId);
 
-                if (!(userRecord.cookie_expires > ts &&
-                    userRecord.cookie === secret &&
+                if (!(userRecord.secretExpires > ts &&
+                    userRecord.secret === secret &&
                     userRecord.inuse)) {
                     log.info(userId, 'Init message with incorrect or expired secret.');
                     socket.emit('initfail', {
