@@ -432,7 +432,6 @@ Update settings.
     "largeFonts": "0",
     "showFriendBar": "1",
     "firstTime": "0",
-    "sslEnabled": "0",
     "loggingEnabled": "0"
   }
 }
