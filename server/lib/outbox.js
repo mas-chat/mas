@@ -76,7 +76,8 @@ function *queueCommands(userId, sessionId, excludeSessionId, commands) {
         return typeof(value) === 'string' ? value : JSON.stringify(value);
     });
 
-    yield redis.run.apply(null, [ 'queueOutbox', userId, sessionId, excludeSessionId ].concat(commands));
+    yield redis.run.apply(null,
+        [ 'queueOutbox', userId, sessionId, excludeSessionId ].concat(commands));
 }
 
 function *handleNewUserIds(userId, sessionId, excludeSessionId, commands) {
@@ -87,7 +88,8 @@ function *handleNewUserIds(userId, sessionId, excludeSessionId, commands) {
     });
 
     allUserIds = _.uniq(allUserIds);
-    yield redis.run.apply(null, [ 'introduceNewUserIds', userId, sessionId, excludeSessionId ].concat(allUserIds));
+    yield redis.run.apply(null,
+        [ 'introduceNewUserIds', userId, sessionId, excludeSessionId ].concat(allUserIds));
 }
 
 function scanUserIds(obj) {
