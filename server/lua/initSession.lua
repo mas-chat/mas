@@ -88,10 +88,10 @@ for i = 1, #windowIds do
     if conversation.type == '1on1' then
         local users = redis.call('HKEYS', 'conversationmembers:' .. conversationId)
 
-        if users[0] == userId then
-            oneOnOneUserId = users[1]
+        if users[1] == userId then
+            oneOnOneUserId = users[2]
         else
-            oneOnOneUserId = users[0]
+            oneOnOneUserId = users[1]
         end
     end
 
