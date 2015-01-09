@@ -16,9 +16,10 @@
 
 'use strict';
 
-/*jshint -W079 */
+/* jshint -W079 */
 
-var redis = require('../lib/redis').createClient(),
+var assert = require('assert'),
+    redis = require('../lib/redis').createClient(),
     log = require('../lib/log'),
     outbox = require('../lib/outbox'),
     window = require('./window');
@@ -84,8 +85,8 @@ exports.set1on1Members = function*(conversationId, userId1, userId2) {
     var network = yield redis.hget('conversation:' + conversationId, 'network');
     var userIds = [ userId1, userId2 ].sort();
 
-    yield insertMember(conversationId, userId1, 'USER');
-    yield insertMember(conversationId, userId2, 'USER');
+    yield insertMember(conversationId, userId1, 'u');
+    yield insertMember(conversationId, userId2, 'u');
 
     // Update 1on1 index
     yield redis.hset('index:conversation',
@@ -101,6 +102,8 @@ exports.setGroupMembers = function*(conversationId, members, reset) {
 };
 
 exports.addGroupMember = function*(conversationId, userId, role) {
+    assert (role === 'u' || role === '+' || role === '@' || role === 'o');
+
     yield insertMember(conversationId, userId, role);
 
     yield addMessage(conversationId, 0, {
