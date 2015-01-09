@@ -376,7 +376,7 @@ Add or update users in window participant list.
 
 If ```reset``` is true, then the existing list needs to be cleared. Otherwise the command adds new users or updates existing users' roles on the list.
 
-```role``` Value is either ```@``` if the user is an operator, ```+``` if the user has voice, and ```u``` if the user is a normal user.
+```role``` Value is either ```*``` if the user is the owner, ```@``` if the user is an operator, ```+``` if the user has voice, and ```u``` if the user is a normal user.
 
 ### DELMEMBERS
 
