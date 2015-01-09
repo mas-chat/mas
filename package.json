@@ -4,7 +4,6 @@
   "private": true,
   "description": "MAS Web App",
   "dependencies": {
-    "bluebird": "~2.3.2",
     "carrier": "~0.1.13",
     "chai": "~1.10.0",
     "co": "~3.1.0",
