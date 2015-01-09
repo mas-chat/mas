@@ -31,7 +31,8 @@ var assert = require('assert'),
     outbox = require('../../lib/outbox'),
     conversation = require('../../models/conversation'),
     window = require('../../models/window'),
-    nicks = require('../../models/nick');
+    nicks = require('../../models/nick'),
+    ircUser = require('./ircUser');
 
 const OPER = '@';
 const VOICE = '+';
@@ -63,7 +64,7 @@ function *processSend(params) {
 
     if (params.conversationType === '1on1') {
         var targetUserId = yield conversation.getPeerUserId(params.conversationId, params.userId);
-        target = yield getUserNick(targetUserId);
+        target = yield ircUser.getUserNick(targetUserId);
 
         if (!target) {
             // Both participants are MAS users, no need to go through IRC
@@ -556,7 +557,7 @@ function *handle482(userId, msg) {
 function *handleJoin(userId, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
     var channel = msg.params[0];
-    var targetUserId = getOrCreateUserId(msg.nick, msg.network);
+    var targetUserId = ircUser.getOrCreateUserId(msg.nick, msg.network);
     var conversationId = yield conversation.findGroup(channel, msg.network);
 
     yield conversation.addGroupMember(conversationId, targetUserId);
@@ -565,7 +566,7 @@ function *handleJoin(userId, msg) {
 function *handleQuit(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com QUIT :"leaving"
     // var reason = msg.params[0];
-    var targetUserId = getOrCreateUserId(msg.nick, msg.network);
+    var targetUserId = ircUser.getOrCreateUserId(msg.nick, msg.network);
 
     var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
 
@@ -585,7 +586,7 @@ function *handleNick(userId, msg) {
         yield nicks.updateCurrentNick(userId, msg.network, newNick);
     }
 
-    var targetUserId = yield getOrCreateUserId(msg.nick, msg.network);
+    var targetUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
     var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
 
     // TBD: update ircuser database and send USERS update
@@ -620,7 +621,7 @@ function *handlePart(userId, msg) {
     var channel = msg.params[0];
     // var reason = msg.params[1]; // TBD: Can there be reason?
     var conversationId = yield conversation.findGroup(channel, msg.network);
-    var targetUserId = yield getOrCreateUserId(msg.nick, msg.network);
+    var targetUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
 
     yield conversation.removeGroupMember(conversationId, targetUserId);
 }
@@ -667,7 +668,7 @@ function *handleMode(userId, msg) {
                 }
             }
 
-            var targetUserId = yield getOrCreateUserId(param, msg.network);
+            var targetUserId = yield ircUser.getOrCreateUserId(param, msg.network);
 
             if (mode === 'o' && oper === '+') {
                 // Got oper status
@@ -720,7 +721,7 @@ function *handlePrivmsg(userId, msg) {
 
     if (target === currentNick) {
         // Message is for the user only
-        var peerUserId = getOrCreateUserId(msg.nick, msg.network);
+        var peerUserId = ircUser.getOrCreateUserId(msg.nick, msg.network);
         conversationId = yield conversation.find1on1(userId, peerUserId, msg.network);
 
         if (conversationId === null) {
@@ -736,7 +737,7 @@ function *handlePrivmsg(userId, msg) {
     }
 
     yield conversation.addMessage(conversationId, 0, {
-        userId: getOrCreateUserId(msg.nick, msg.network),
+        userId: ircUser.getOrCreateUserId(msg.nick, msg.network),
         cat: 'msg',
         body: text
     });
@@ -814,7 +815,7 @@ function *bufferNames(names, userId, network, conversationId) {
             nick = nick.substring(1);
         }
 
-        var memberUserId = yield getOrCreateUserId(nick, network);
+        var memberUserId = yield ircUser.getOrCreateUserId(nick, network);
         namesHash[memberUserId] = userClass;
     }
 
@@ -831,39 +832,6 @@ function isChannel(text) {
     return [ '&', '#', '+', '!' ].some(function(element) {
         return element === text.charAt(0);
     });
-}
-
-function *getOrCreateUserId(nick, network) {
-    var masUserId = yield nicks.getUserIdFromNick(nick, network);
-
-    if (masUserId) {
-        return masUserId;
-    }
-
-    var ircUserId = yield redis.hget('index:ircuser', network + ':' + nick);
-
-    if (!ircUserId) {
-        ircUserId = yield createUserId(nick, network);
-    }
-
-    return ircUserId;
-}
-
-function *createUserId(nick, network) {
-    var userId = yield redis.incr('nextGlobalIrcUserId');
-    userId = 'i' + userId;
-
-    yield redis.hmset('ircuser:' + userId, {
-        nick: nick,
-        network: network
-    });
-    yield redis.hset('index:ircuser', network + ':' + nick, userId);
-
-    return userId;
-}
-
-function *getUserNick(userId) {
-    return yield redis.hget('ircuser:' + userId, 'nick');
 }
 
 function *setup1on1(userId, peerUserId, network) {
