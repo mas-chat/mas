@@ -133,7 +133,6 @@ for i = 1, #windowIds do
     local lines = redis.call('LRANGE', 'conversationmsgs:' .. conversationId, 0, -1);
 
     for ii = #lines, 1, -1 do
-        local windowId = redis.call('HGET', 'index:windowIds', userId .. ':' .. conversationId)
         local command = cjson.decode(lines[ii])
 
         command.id = 'ADDTEXT'
