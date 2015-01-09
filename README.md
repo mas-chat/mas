@@ -7,6 +7,8 @@ MAS server and web client
 
 ![Screenshot](http://i.imgur.com/ls0pagX.png)
 
+NOTE: Redis database schema will freeze only after 1.0 release. This is also when the project becomes suitable for general use.
+
 MAS is a web chat application. The server part implements MAS
 HTTP API. [Meetandspeak.com][] is an instance of this application.
 
@@ -16,7 +18,7 @@ fully functional.
 For more info, see
 
 - [Architecture page](https://github.com/ilkkao/mas/wiki)
-- [MAS HTTP client API](https://github.com/ilkkao/mas/blob/master/doc/MAS-client-API.md)
+- [MAS HTTP client API](http://ilkkao.github.io/mas/api.html)
 
 Dependencies:
 
@@ -29,7 +31,7 @@ MacOS/Linux/Windows.
 
 ## Quick start
 
-1. Install Redis and latest development release of Node.js
+1. Install Redis and latest development release of Node.js (or io.js)
 
    On Mac you can install [Homebrew](http://brew.sh/) and then do ```brew install redis nodejs-dev```
 
@@ -45,16 +47,22 @@ MacOS/Linux/Windows.
    $ npm install
    ```
 
-4. Install gulp if you don't have it
+4. Install gulp and ember-cli if you don't have them
 
    ```bash
-   $ npm install -g gulp
+   $ npm install -g gulp ember-cli
    ```
 
-5. Build the web app and pages
+5. Build the web site
 
    ```bash
    $ gulp build-assets
+   ```
+
+6. Build the client web app
+
+   ```bash
+   $ cd client && ember build
    ```
 
 6. Launch the server components
