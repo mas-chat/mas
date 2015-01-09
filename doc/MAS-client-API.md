@@ -468,7 +468,7 @@ In addition of listening notifications from the server, the client can send comm
 
 Following requests are supported. Under every request is corresponding response.
 
-## SEND
+### SEND
 
 ```
 {
@@ -481,7 +481,7 @@ Following requests are supported. Under every request is corresponding response.
 
 ### SEND_RESP
 
-## JOIN
+### JOIN
 
 Join to new MAS group or IRC channel
 
@@ -497,7 +497,7 @@ Join to new MAS group or IRC channel
 
 ### JOIN_RESP
 
-## CREATE
+### CREATE
 
 Create new MAS group
 
@@ -512,23 +512,23 @@ Create new MAS group
 
 ### CREATE_RESP
 
-## CLOSE
+### CLOSE
 
 ### CLOSE_RESP
 
-## REST
+### REST
 
 ### REST_RESP
 
-## SEEN
+### SEEN
 
 ### SEEN_RESP
 
-## GETLOG
+### GETLOG
 
 ### GETLOG_RESP
 
-## CHAT
+### CHAT
 
 ```
 {
@@ -560,7 +560,7 @@ or
 }
 ```
 
-## LOGOUT
+### LOGOUT
 
 End session immediately
 
@@ -578,23 +578,23 @@ End session immediately
 }
 ```
 
-## SET
+### SET
 
 ### SET_RESP
 
-## ADDF
+### ADDF
 
 ### ADDF_RESP
 
-## OKF
+### OKF
 
 ### OKF_RESP
 
-## NOKF
+### NOKF
 
 ### NOKF_RESP
 
-## UPDATE_PASSWORD
+### UPDATE_PASSWORD
 
 ```JSON
 {
@@ -619,7 +619,7 @@ Password protection will be disabled if ```password``` is ```null```.
 
 Contains ```errorMsg``` property if the status is not ```OK```
 
-## UPDATE_TOPIC
+### UPDATE_TOPIC
 
 ```JSON
 {
