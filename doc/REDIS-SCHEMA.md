@@ -68,7 +68,7 @@ MAS Redis structures
    owner (string, userId) (mas group only)
    type (string, 'group', '1on1')
    name (string) (e.g. '#foo', 'bar') ('' if not group)
-   network (string, 'mas or 'ircnet', 'freenode', 'w3c')
+   network (string, 'MAS' or 'IRCNet', 'FreeNode', 'W3C')
    topic (string)
    password (string)
    apikey (string)
@@ -82,18 +82,6 @@ MAS Redis structures
    ...
 
  conversationmsgs:<conversationId> (list) [oldest message on the right]
-
- notelist:<conversationId> (list)
-   note1, note2 ...
-
- note:<uuid> (hash)
-   ver (int)
-   nick (string)
-   timestamp (int)
-   msg (text)
-
- urls:<conversationId> (list)
-   url1, url2 ...
 
  passwordresettoken:<token> (string with expiry time)
    <userId>
