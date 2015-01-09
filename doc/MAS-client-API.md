@@ -1,7 +1,7 @@
 
 # MAS client API
 
-Version: 1
+Protocol version: 1
 
 Work in progress.
 
