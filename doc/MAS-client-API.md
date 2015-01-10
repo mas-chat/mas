@@ -497,6 +497,18 @@ Join to new MAS group or IRC channel
 
 ### JOIN_RESP
 
+```
+{
+  "id": "JOIN_RESP",
+
+  "status": "OK",
+}
+```
+
+Contains ```errorMsg``` property if the status is not ```OK```
+
+Status can be ```OK```, ```NOT_FOUND```, ```INCORRECT_PASSWORD```
+
 ### CREATE
 
 Create new MAS group

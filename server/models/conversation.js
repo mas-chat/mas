@@ -102,7 +102,7 @@ exports.setGroupMembers = function*(conversationId, members, reset) {
 };
 
 exports.addGroupMember = function*(conversationId, userId, role) {
-    assert (role === 'u' || role === '+' || role === '@' || role === 'o');
+    assert (role === 'u' || role === '+' || role === '@' || role === '*');
 
     yield insertMember(conversationId, userId, role);
 
