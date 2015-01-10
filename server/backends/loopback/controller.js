@@ -46,9 +46,9 @@ function *processCreate(params) {
     var userId = params.userId;
     var groupName = params.name;
     var password = params.password;
-    var existingGroup = yield redis.hgetall('group:' + groupName);
+    var conversationId = yield conversation.findGroup(groupName, 'MAS');
 
-    if (existingGroup) {
+    if (conversationId) {
         yield outbox.queue(params.userId, params.sessionId, {
             id: 'CREATE_RESP',
             status: 'error',
@@ -64,7 +64,7 @@ function *processCreate(params) {
         status: 'OK'
     });
 
-    yield conversation.create({
+    conversationId = yield conversation.create({
         owner: userId,
         type: 'group',
         name: groupName,
@@ -74,16 +74,40 @@ function *processCreate(params) {
         apikey: ''
     });
 
-    yield joinGroup(params);
+    yield joinGroup(conversationId, userId, '*');
 }
 
 function *processJoin(params) {
-    yield outbox.queue(params.userId, params.sessionId, {
+    var groupName = params.name;
+    var userId = params.userId;
+    var conversationId = yield conversation.findGroup(groupName, 'MAS');
+    var conversationRecord = yield conversation.get(conversationId);
+
+    if (!conversationId) {
+        yield outbox.queue(userId, params.sessionId, {
+            id: 'JOIN_RESP',
+            status: 'NOT_FOUND',
+            errorMsg: 'Group doesn\'t exist.'
+        });
+        return;
+    } else if (conversationRecord.password !== '' &&
+        conversationRecord.password !== params.password) {
+        yield outbox.queue(userId, params.sessionId, {
+            id: 'JOIN_RESP',
+            status: 'INCORRECT_PASSWORD',
+            errorMsg: 'Incorrect password.'
+        });
+        console.log(conversationRecord.password)
+        console.log(params.password)
+        return;
+    }
+
+    yield outbox.queue(userId, params.sessionId, {
         id: 'JOIN_RESP',
         status: 'OK'
     });
 
-    yield joinGroup(params);
+    yield joinGroup(conversationId, userId, 'u');
 }
 
 function *processClose(params) {
@@ -92,23 +116,14 @@ function *processClose(params) {
     // TBD
 }
 
-function *joinGroup(params) {
-    var groupName = params.name;
-    var userId = params.userId;
-    var conversationId = yield conversation.findGroup(groupName, 'MAS');
-
-    if (!conversationId) {
-        // TBD: Bail out
-        return;
-    }
-
+function *joinGroup(conversationId, userId, role) {
     // Backends must maintain currentNick value
     var nick = yield redis.hget('user:' + userId, 'nick');
     yield nicks.updateCurrentNick(userId, 'MAS', nick);
 
-    yield window.create(params.userId, conversationId);
-    yield conversation.addGroupMember(conversationId, userId, 'USER');
-    yield conversation.sendAddMembers(params.userId, conversationId);
+    yield window.create(userId, conversationId);
+    yield conversation.addGroupMember(conversationId, userId, role);
+    yield conversation.sendAddMembers(userId, conversationId);
 }
 
 function *createInitialGroups() {
