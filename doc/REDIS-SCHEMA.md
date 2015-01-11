@@ -78,7 +78,7 @@ MAS Redis structures
    1on1:<network>:<userId1>:<userId2> (int, conversationId)
 
  conversationmembers:<conversationId> (hash)
-   <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user))
+   <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user), 'd' (detached, only for MAS 1on1s))
    ...
 
  conversationmsgs:<conversationId> (list) [oldest message on the right]
