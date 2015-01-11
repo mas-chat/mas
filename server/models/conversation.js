@@ -179,7 +179,7 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
     yield redis.lpush('conversationmsgs:' + this.conversationId, JSON.stringify(msg));
     yield redis.ltrim('conversationmsgs:' + this.conversationId, 0, MSG_BUFFER_SIZE - 1);
 
-    yield this._streamAddText(excludeSession, msg);
+    yield this._streamAddText(msg, excludeSession);
 };
 
 Conversation.prototype.sendAddMembers = function*(userId) {
@@ -205,7 +205,7 @@ Conversation.prototype.setTopic = function*(topic) {
     this.topic = topic;
     yield redis.hset('conversation:' + this.conversationId, 'topic', topic);
 
-    yield this._stream(0, {
+    yield this._stream({
         id: 'UPDATE',
         topic: topic
     });
@@ -215,7 +215,7 @@ Conversation.prototype.setPassword = function*(password) {
     this.password = password;
     yield redis.hset('conversation:' + this.conversationId, 'password', password);
 
-    yield this._stream(0, {
+    yield this._stream({
         id: 'UPDATE',
         password: password
     });
@@ -230,13 +230,13 @@ Conversation.prototype.setPassword = function*(password) {
     });
 };
 
-Conversation.prototype._streamAddText = function*(excludeSession, msg) {
+Conversation.prototype._streamAddText = function*(msg, excludeSession) {
     msg.id = 'ADDTEXT';
-    yield this._stream(excludeSession, msg);
+    yield this._stream(msg, excludeSession);
 };
 
 Conversation.prototype._streamAddMembers = function*(userId, role) {
-    yield this._stream(0, {
+    yield this._stream({
         id: 'ADDMEMBERS',
         reset: false,
         members: [ {
@@ -247,7 +247,7 @@ Conversation.prototype._streamAddMembers = function*(userId, role) {
 };
 
 Conversation.prototype._streamRemoveMembers = function*(userId) {
-    yield this._stream(0, {
+    yield this._stream({
         id: 'DELMEMBERS',
         members: [ {
             userId: userId
@@ -255,7 +255,7 @@ Conversation.prototype._streamRemoveMembers = function*(userId) {
     });
 };
 
-Conversation.prototype._stream = function*(excludeSession, msg) {
+Conversation.prototype._stream = function*(msg, excludeSession) {
     var members = Object.keys(this.members);
 
     for (var i = 0; i < members.length; i++) {
