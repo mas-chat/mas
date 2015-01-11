@@ -361,18 +361,10 @@ function *processDisconnected(params) {
 }
 
 function *addSystemMessage(userId, network, body) {
-    var conversation = yield conversationFactory.find1on1(userId, 'SERVER', network);
+    var conversation = yield conversationFactory.find1on1(userId, 'iSERVER', network);
 
     if (!conversation) {
-        conversation = yield conversationFactory.create({
-            owner: userId,
-            type: '1on1',
-            network: network,
-            topic: 'IRC SERVER MESSAGES'
-        });
-
-        yield conversation.set1on1Members(userId, 'SERVER');
-        yield window.create(userId, conversation.conversationId);
+        conversation = yield window.setup1on1(userId, 'iSERVER', network);
     }
 
     yield conversation.addMessage({
@@ -562,7 +554,7 @@ function *handleJoin(userId, msg) {
     var targetUserId = ircUser.getOrCreateUserId(msg.nick, msg.network);
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
 
-    yield conversation.addGroupMember(targetUserId);
+    yield conversation.addGroupMember(targetUserId, 'u');
 }
 
 function *handleQuit(userId, msg) {
