@@ -19,11 +19,11 @@
 var assert = require('assert'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
-    conversationModel = require('./conversation');
+    conversationFactory = require('./conversation');
 
 exports.create = function*(userId, conversationId) {
     var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
-    var conversation = yield conversationModel.get(conversationId);
+    var conversation = yield conversationFactory.get(conversationId);
     var userId1on1 = null;
 
     assert(conversation);
@@ -93,7 +93,7 @@ exports.getAllConversationIdsWithUserId = function*(userId, targetUserId) {
     }
 
     for (var i = 0; i < conversationIds.length; i++) {
-        var conversation = yield conversationModel.get(getAllConversationIds[i]);
+        var conversation = yield conversationFactory.get(getAllConversationIds[i]);
         var members = Object.keys(conversation.members);
 
         var exists = members.some(compare);
@@ -111,7 +111,7 @@ exports.getWindowIdsForNetwork = function*(userId, network) {
     var res = [];
 
     for (var i = 0; i < conversationIds.length; i++) {
-        var conversation = yield conversationModel.get(conversationIds[i]);
+        var conversation = yield conversationFactory.get(conversationIds[i]);
 
         if (conversation.network === network) {
             res.push(conversationIds[i]);
@@ -127,7 +127,7 @@ exports.getNetworks = function*(userId) {
     var res = [];
 
     for (var i = 0; i < conversationIds.length; i++) {
-        var conversation = yield conversationModel.get(conversationIds[i]);
+        var conversation = yield conversationFactory.get(conversationIds[i]);
         networks[conversation.network] = true;
     }
 

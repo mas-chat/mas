@@ -29,7 +29,7 @@ var assert = require('assert'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('ircparser'),
     outbox = require('../../lib/outbox'),
-    conversationModel = require('../../models/conversation'),
+    conversationFactory = require('../../models/conversation'),
     window = require('../../models/window'),
     nicks = require('../../models/nick'),
     ircUser = require('./ircUser');
@@ -61,7 +61,7 @@ function *processSend(params) {
     assert(params.conversationId);
 
     var target = params.conversationName;
-    var conversation = yield conversationModel.get(params.conversationId);
+    var conversation = yield conversationFactory.get(params.conversationId);
 
     if (conversation.type === '1on1') {
         var targetUserId = yield conversation.getPeerUserId(params.userId);
@@ -111,10 +111,10 @@ function *processJoin(params) {
         });
     }
 
-    var conversation = yield conversationModel.findGroup(channelName, params.network);
+    var conversation = yield conversationFactory.findGroup(channelName, params.network);
 
     if (!conversation) {
-        conversation = yield conversationModel.create({
+        conversation = yield conversationFactory.create({
             owner: params.userId,
             type: 'group',
             name: channelName,
@@ -135,7 +135,7 @@ function *processJoin(params) {
 }
 
 function *processChat(params) {
-    var conversation = yield conversationModel.find1on1(
+    var conversation = yield conversationFactory.find1on1(
         params.userId, params.targetUserId, params.network);
 
     if (!conversation) {
@@ -361,10 +361,10 @@ function *processDisconnected(params) {
 }
 
 function *addSystemMessage(userId, network, body) {
-    var conversation = yield conversationModel.find1on1(userId, 'SERVER', network);
+    var conversation = yield conversationFactory.find1on1(userId, 'SERVER', network);
 
     if (!conversation) {
-        conversation = yield conversationModel.create({
+        conversation = yield conversationFactory.create({
             owner: userId,
             type: '1on1',
             network: network,
@@ -481,7 +481,7 @@ function *handle332(userId, msg) {
     // :portaali.org 332 ilkka #portaali :Cool topic
     var channel = msg.params[0];
     var topic = msg.params[1];
-    var conversation = yield conversationModel.findGroup(channel, msg.network);
+    var conversation = yield conversationFactory.findGroup(channel, msg.network);
 
     yield conversation.setTopic(topic);
 }
@@ -489,7 +489,7 @@ function *handle332(userId, msg) {
 function *handle353(userId, msg) {
     // :own.freenode.net 353 drwillie @ #evergreenproject :drwillie ilkkaoks
     var channel = msg.params[1];
-    var conversation = yield conversationModel.findGroup(channel, msg.network);
+    var conversation = yield conversationFactory.findGroup(channel, msg.network);
     var names = msg.params[2].split(' ');
 
     yield bufferNames(names, userId, msg.network, conversation.conversationId);
@@ -498,7 +498,7 @@ function *handle353(userId, msg) {
 function *handle366(userId, msg) {
     // :pratchett.freenode.net 366 il3kkaoksWEB #testi1 :End of /NAMES list.
     var channel = msg.params[0];
-    var conversation = yield conversationModel.findGroup(channel, msg.network);
+    var conversation = yield conversationFactory.findGroup(channel, msg.network);
     var namesHash = yield redis.hgetall(
         'namesbuffer:' + userId + ':' + conversation.conversationId);
 
@@ -519,7 +519,7 @@ function *handle376(userId, msg) {
     var channelsToJoin = [];
 
     for (var i = 0; i < conversationIds.length; i++) {
-        var ircConversation = yield conversationModel.get(conversationIds[i]);
+        var ircConversation = yield conversationFactory.get(conversationIds[i]);
 
         if (ircConversation.network === msg.network && ircConversation.type === 'group') {
             channelsToJoin.push(ircConversation.name);
@@ -560,7 +560,7 @@ function *handleJoin(userId, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
     var channel = msg.params[0];
     var targetUserId = ircUser.getOrCreateUserId(msg.nick, msg.network);
-    var conversation = yield conversationModel.findGroup(channel, msg.network);
+    var conversation = yield conversationFactory.findGroup(channel, msg.network);
 
     yield conversation.addGroupMember(targetUserId);
 }
@@ -574,7 +574,7 @@ function *handleQuit(userId, msg) {
 
     for (var i = 0; i < conversationIds.length; i++) {
         // TBD: Send a real quit message instead of part
-        var conversation = yield conversationModel.get(conversationIds[i]);
+        var conversation = yield conversationFactory.get(conversationIds[i]);
         yield conversation.removeGroupMember(targetUserId);
     }
 }
@@ -595,7 +595,7 @@ function *handleNick(userId, msg) {
     // TBD: update ircuser database and send USERS update
 
     for (var i = 0; i < conversationIds.length; i++) {
-        var conversation = yield conversationModel.get(conversationIds[i]);
+        var conversation = yield conversationFactory.get(conversationIds[i]);
         yield conversation.addMessage(0, {
             cat: 'info',
             body: msg.nick + ' is now known as ' + newNick
@@ -624,7 +624,7 @@ function *handlePart(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com PART #portaali :
     var channel = msg.params[0];
     // var reason = msg.params[1]; // TBD: Can there be reason?
-    var conversation = yield conversationModel.findGroup(channel, msg.network);
+    var conversation = yield conversationFactory.findGroup(channel, msg.network);
     var targetUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
 
     yield conversation.removeGroupMember(targetUserId);
@@ -639,7 +639,7 @@ function *handleMode(userId, msg) {
         return;
     }
 
-    var conversation = yield conversationModel.findGroup(target, msg.network);
+    var conversation = yield conversationFactory.findGroup(target, msg.network);
 
     yield conversation.addMessage(0, {
         cat: 'info',
@@ -707,7 +707,7 @@ function *handleTopic(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com TOPIC #portaali :My new topic
     var channel = msg.params[0];
     var topic = msg.params[1];
-    var conversation = yield conversationModel.findGroup(channel, msg.network);
+    var conversation = yield conversationFactory.findGroup(channel, msg.network);
 
     yield conversation.setTopic(topic);
 
@@ -726,13 +726,13 @@ function *handlePrivmsg(userId, msg) {
     if (target === currentNick) {
         // Message is for the user only
         var peerUserId = ircUser.getOrCreateUserId(msg.nick, msg.network);
-        conversation = yield conversationModel.find1on1(userId, peerUserId, msg.network);
+        conversation = yield conversationFactory.find1on1(userId, peerUserId, msg.network);
 
         if (conversation === null) {
             conversation = yield setup1on1(userId, peerUserId, msg.network);
         }
     } else {
-        conversation = yield conversationModel.findGroup(target, msg.network);
+        conversation = yield conversationFactory.findGroup(target, msg.network);
 
         if (conversation === null) {
             log.warn(userId, 'Message arrived for an unknown channel');
@@ -839,7 +839,7 @@ function isChannel(text) {
 }
 
 function *setup1on1(userId, peerUserId, network) {
-    var conversation = yield conversationModel.create({
+    var conversation = yield conversationFactory.create({
         owner: userId,
         type: '1on1',
         name: '',
