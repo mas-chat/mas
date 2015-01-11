@@ -25,7 +25,7 @@ var co = require('co'),
     log = require('./log'),
     conf = require('./conf'),
     window = require('../models/window'),
-    conversation = require('../models/conversation');
+    conversationModel = require('../models/conversation');
 
 module.exports.enable = function() {
     co(function*() {
@@ -46,6 +46,7 @@ module.exports.enable = function() {
             if (windowId) {
                 // User has at least one window
                 var conversationId = yield window.getConversationId(demoUserId, windowId);
+                var conversation = yield conversationModel.get(conversationId);
                 var url = '';
 
                 if (!(Math.floor(Math.random() * 10 ))) {
@@ -53,7 +54,7 @@ module.exports.enable = function() {
                     url = 'http://placeimg.com/640/480/nature/' + randomImgFileName + '.jpg';
                 }
 
-                yield conversation.addMessage(conversationId, 0, {
+                yield conversation.addMessage(0, {
                     body: faker.Lorem.sentence(sentenceLength) + ' ' + url,
                     userId: 'mDEMO', // TBD: This user must exist
                     cat: 'msg'

@@ -29,7 +29,7 @@ var co = require('co'),
     outbox = require('../../lib/outbox'),
     window = require('../../models/window'),
     nicks = require('../../models/nick'),
-    conversation = require('../../models/conversation');
+    conversationModel = require('../../models/conversation');
 
 co(function*() {
     yield redisModule.loadScripts();
@@ -46,9 +46,9 @@ function *processCreate(params) {
     var userId = params.userId;
     var groupName = params.name;
     var password = params.password;
-    var conversationId = yield conversation.findGroup(groupName, 'MAS');
+    var conversation = yield conversationModel.findGroup(groupName, 'MAS');
 
-    if (conversationId) {
+    if (conversation) {
         yield outbox.queue(params.userId, params.sessionId, {
             id: 'CREATE_RESP',
             status: 'error',
@@ -64,7 +64,7 @@ function *processCreate(params) {
         status: 'OK'
     });
 
-    conversationId = yield conversation.create({
+    conversation = yield conversationModel.create({
         owner: userId,
         type: 'group',
         name: groupName,
@@ -74,31 +74,30 @@ function *processCreate(params) {
         apikey: ''
     });
 
-    yield joinGroup(conversationId, userId, '*');
+    yield joinGroup(conversation, userId, '*');
 }
 
 function *processJoin(params) {
     var groupName = params.name;
     var userId = params.userId;
-    var conversationId = yield conversation.findGroup(groupName, 'MAS');
-    var conversationRecord = yield conversation.get(conversationId);
+    var conversation = yield conversationModel.findGroup(groupName, 'MAS');
+    var role = 'u';
 
-    if (!conversationId) {
+    if (!conversation) {
         yield outbox.queue(userId, params.sessionId, {
             id: 'JOIN_RESP',
             status: 'NOT_FOUND',
             errorMsg: 'Group doesn\'t exist.'
         });
         return;
-    } else if (conversationRecord.password !== '' &&
-        conversationRecord.password !== params.password) {
+    } else if (conversation.password !== '' &&
+        conversation.password !== params.password) {
+
         yield outbox.queue(userId, params.sessionId, {
             id: 'JOIN_RESP',
             status: 'INCORRECT_PASSWORD',
             errorMsg: 'Incorrect password.'
         });
-        console.log(conversationRecord.password)
-        console.log(params.password)
         return;
     }
 
@@ -107,7 +106,12 @@ function *processJoin(params) {
         status: 'OK'
     });
 
-    yield joinGroup(conversationId, userId, 'u');
+    if (conversation.owner === userId) {
+        // Owner returned
+        role = '*';
+    }
+
+    yield joinGroup(conversation, userId, role);
 }
 
 function *processClose(params) {
@@ -116,14 +120,14 @@ function *processClose(params) {
     // TBD
 }
 
-function *joinGroup(conversationId, userId, role) {
+function *joinGroup(conversation, userId, role) {
     // Backends must maintain currentNick value
     var nick = yield redis.hget('user:' + userId, 'nick');
     yield nicks.updateCurrentNick(userId, 'MAS', nick);
 
-    yield window.create(userId, conversationId);
-    yield conversation.addGroupMember(conversationId, userId, role);
-    yield conversation.sendAddMembers(userId, conversationId);
+    yield window.create(userId, conversation.conversationId);
+    yield conversation.addGroupMember(userId, role);
+    yield conversation.sendAddMembers(userId);
 }
 
 function *createInitialGroups() {
@@ -132,10 +136,10 @@ function *createInitialGroups() {
 
     for (var i = 0; i < groups.length; i++) {
         var group = groups[i];
-        var existingGroup = yield conversation.findGroup(group, 'MAS');
+        var existingGroup = yield conversationModel.findGroup(group, 'MAS');
 
         if (!existingGroup) {
-            yield conversation.create({
+            yield conversationModel.create({
                 owner: admin,
                 type: 'group',
                 name: group,
