@@ -25,7 +25,7 @@ var co = require('co'),
     log = require('./log'),
     conf = require('./conf'),
     window = require('../models/window'),
-    conversationModel = require('../models/conversation');
+    conversationFactory = require('../models/conversation');
 
 module.exports.enable = function() {
     co(function*() {
@@ -46,7 +46,7 @@ module.exports.enable = function() {
             if (windowId) {
                 // User has at least one window
                 var conversationId = yield window.getConversationId(demoUserId, windowId);
-                var conversation = yield conversationModel.get(conversationId);
+                var conversation = yield conversationFactory.get(conversationId);
                 var url = '';
 
                 if (!(Math.floor(Math.random() * 10 ))) {
