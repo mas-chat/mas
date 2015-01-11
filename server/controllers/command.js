@@ -183,6 +183,13 @@ function *handleUpdatePassword(params) {
             errorMsg: 'New password is invalid.'
         });
         return;
+    } else if (params.conversation.type === '1on1') {
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'UPDATE_PASSWORD_RESP',
+            status: 'ERROR',
+            errorMsg: 'Can\'t set password for 1on1.'
+        });
+        return;
     }
 
     yield params.conversation.setPassword(password);
@@ -202,7 +209,7 @@ function *handleUpdatePassword(params) {
 }
 
 function *handleUpdateTopic(params) {
-    var topic = params.command.topic
+    var topic = params.command.topic;
 
     yield params.conversation.setTopic(topic);
 
