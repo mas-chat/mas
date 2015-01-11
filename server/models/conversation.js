@@ -87,28 +87,24 @@ Conversation.prototype.setMemberRole = function*(userId, role) {
     this.members[userId] = role;
 
     yield redis.hset('conversationmembers:' + this.conversationId, userId, role);
-    yield streamAddMembers(this.conversationId, userId, role);
+    yield this._streamAddMembers(userId, role);
 };
 
 Conversation.prototype.getPeerUserId = function*(userId) {
-    var members = yield getMembers(this.conversationId);
+    /* jshint noyield:true */
+    var members = Object.keys(this.members);
     return members[0] === userId ? members[1] : members[0];
 };
 
-Conversation.prototype.set1on1Members = function*(userId1, userId2) {
-    var network = yield redis.hget('conversation:' + this.conversationId, 'network');
-    var userIds = [ userId1, userId2 ].sort();
+Conversation.prototype.set1on1Members = function*(userId, peerUserId) {
+    var userIds = [ userId, peerUserId ].sort();
 
-    this.members = {};
-    this.members[userId1] = 'u';
-    this.members[userId2] = 'u';
-
-    yield insertMember(this.conversationId, userId1, 'u');
-    yield insertMember(this.conversationId, userId2, 'u');
+    yield this._insertMember(userId, 'u');
+    yield this._insertMember(peerUserId, 'u');
 
     // Update 1on1 index
     yield redis.hset('index:conversation',
-        '1on1:' + network + ':' + userIds[0] + ':' + userIds[1], this.conversationId);
+        '1on1:' + this.network + ':' + userIds[0] + ':' + userIds[1], this.conversationId);
 };
 
 Conversation.prototype.setGroupMembers = function*(members, reset) {
@@ -117,39 +113,32 @@ Conversation.prototype.setGroupMembers = function*(members, reset) {
         this.members = {};
     }
 
-    Object.keys(members).forEach(function(prop) {
-        this.members[prop] = members[prop];
-    });
-
-    yield insertMembers(this.conversationId, members);
+    yield this._insertMembers(members);
 };
 
 Conversation.prototype.addGroupMember = function*(userId, role) {
     assert (role === 'u' || role === '+' || role === '@' || role === '*');
-    this.members[userId] = role;
 
-    yield insertMember(this.conversationId, userId, role);
+    yield this._insertMember(userId, role);
 
-    yield addMessage(this.conversationId, 0, {
+    yield this.addMessage({
         userId: userId,
         cat: 'join',
         body: ''
     });
 
-    yield streamAddMembers(this.conversationId, userId, role);
+    yield this._streamAddMembers(userId, role);
 };
 
 Conversation.prototype.removeGroupMember = function*(userId) {
-    delete this.members[userId];
-
-    yield addMessage(this.conversationId, 0, {
+    yield this.addMessage({
         userId: userId,
         cat: 'part',
         body: ''
     });
 
-    yield streamRemoveMembers(this.conversationId, userId);
-    yield removeMember(this.conversationId, userId);
+    yield this._streamRemoveMembers(userId);
+    yield this._removeMember(userId);
 
     var removeConversation = true;
 
@@ -162,7 +151,19 @@ Conversation.prototype.removeGroupMember = function*(userId) {
     if (removeConversation) {
         log.info(userId,
             'Last member parted, removing conversation, conversationId: ' + this.conversationId);
-        yield remove(this.conversationId, this);
+        yield this._remove(this);
+    }
+};
+
+Conversation.prototype.remove1on1Member = function*(userId) {
+    // First user that quits 1on1 is 'soft' removed, i.e. marked as having 'd'(etached) role
+    this.members[userId] = 'd';
+    yield redis.hset('conversationmembers:' + this.conversationId, userId, 'd');
+
+    var peerUserId = yield this.getPeerUserId(this, userId);
+
+    if (this.members[peerUserId] === 'd') {
+        yield this._remove();
     }
 };
 
@@ -172,7 +173,13 @@ Conversation.prototype.isMember = function*(userId) {
 };
 
 Conversation.prototype.addMessage = function*(msg, excludeSession) {
-    yield addMessage(this.conversationId, excludeSession, msg);
+    msg.gid = yield redis.incr('nextGlobalMsgId');
+    msg.ts = Math.round(Date.now() / 1000);
+
+    yield redis.lpush('conversationmsgs:' + this.conversationId, JSON.stringify(msg));
+    yield redis.ltrim('conversationmsgs:' + this.conversationId, 0, MSG_BUFFER_SIZE - 1);
+
+    yield this._streamAddText(excludeSession, msg);
 };
 
 Conversation.prototype.sendAddMembers = function*(userId) {
@@ -195,18 +202,20 @@ Conversation.prototype.sendAddMembers = function*(userId) {
 };
 
 Conversation.prototype.setTopic = function*(topic) {
+    this.topic = topic;
     yield redis.hset('conversation:' + this.conversationId, 'topic', topic);
 
-    yield stream(this.conversationId, 0, {
+    yield this._stream(0, {
         id: 'UPDATE',
         topic: topic
     });
 };
 
 Conversation.prototype.setPassword = function*(password) {
+    this.password = password;
     yield redis.hset('conversation:' + this.conversationId, 'password', password);
 
-    yield stream(this.conversationId, 0, {
+    yield this._stream(0, {
         id: 'UPDATE',
         password: password
     });
@@ -215,54 +224,19 @@ Conversation.prototype.setPassword = function*(password) {
         'Password protection has been removed from this channel.' :
         'The password for this channel has been changed to ' + password + '.';
 
-    yield addMessage(this.conversationId, 0, {
+    yield this.addMessage({
         cat: 'info',
         body: text
     });
 };
 
-function *get(conversationId) {
-    var record =  yield redis.hgetall('conversation:' + conversationId);
-    var members = yield redis.hgetall('conversationmembers:' + conversationId);
-
-    return record ? new Conversation(conversationId, record, members) : null;
-}
-
-function *remove(conversationId, conversation) {
-    yield redis.del('conversation:' + conversationId);
-    yield redis.del('conversationmembers:' + conversationId);
-    yield redis.del('conversationmsgs:' + conversationId);
-
-    var key;
-
-    if (conversation.type === 'group') {
-        key = 'group:' + conversation.network + ':' + conversation.name;
-    } else {
-        var userIds = yield getMembers(conversationId);
-        userIds = userIds.sort();
-        key = '1on1:' + conversation.network + ':' + userIds[0] + ':' + userIds[1];
-    }
-
-    yield redis.hdel('index:conversation', key);
-}
-
-function *addMessage(conversationId, excludeSession, msg) {
-    msg.gid = yield redis.incr('nextGlobalMsgId');
-    msg.ts = Math.round(Date.now() / 1000);
-
-    yield redis.lpush('conversationmsgs:' + conversationId, JSON.stringify(msg));
-    yield redis.ltrim('conversationmsgs:' + conversationId, 0, MSG_BUFFER_SIZE - 1);
-
-    yield streamAddText(conversationId, excludeSession, msg);
-}
-
-function *streamAddText(conversationId, excludeSession, msg) {
+Conversation.prototype._streamAddText = function*(excludeSession, msg) {
     msg.id = 'ADDTEXT';
-    yield stream(conversationId, excludeSession, msg);
-}
+    yield this._stream(excludeSession, msg);
+};
 
-function *streamAddMembers(conversationId, userId, role) {
-    yield stream(conversationId, 0, {
+Conversation.prototype._streamAddMembers = function*(userId, role) {
+    yield this._stream(0, {
         id: 'ADDMEMBERS',
         reset: false,
         members: [ {
@@ -270,42 +244,77 @@ function *streamAddMembers(conversationId, userId, role) {
             role: role
         } ]
     });
-}
+};
 
-function *streamRemoveMembers(conversationId, userId) {
-    yield stream(conversationId, 0, {
+Conversation.prototype._streamRemoveMembers = function*(userId) {
+    yield this._stream(0, {
         id: 'DELMEMBERS',
         members: [ {
             userId: userId
         } ]
     });
-}
+};
 
-function *stream(conversationId, excludeSession, msg) {
-    var members = yield getMembers(conversationId);
+Conversation.prototype._stream = function*(excludeSession, msg) {
+    var members = Object.keys(this.members);
+
     for (var i = 0; i < members.length; i++) {
-        var windowId = yield window.findByConversationId(members[i], conversationId);
+        var windowId = yield window.findByConversationId(members[i], this.conversationId);
+
+        if (!windowId) {
+            // The case where one of the 1on1 members has closed his window and has 'd' role
+            assert(this.type === '1on1' && this.getMemberRole(members[i]) === 'd');
+            windowId = yield window.create(members[i], this.conversationId);
+            yield this.setMemberRole(members[i], 'u');
+        }
+
         msg.windowId = parseInt(windowId);
 
         yield outbox.queueAll(members[i], msg, excludeSession);
     }
-}
+};
 
-function *insertMember(conversationId, userId, role) {
+Conversation.prototype._insertMember = function*(userId, role) {
     var hash = {};
     hash[userId] = role;
 
-    yield insertMembers(conversationId, hash);
-}
+    yield this._insertMembers(hash);
+};
 
-function *insertMembers(conversationId, members) {
-    yield redis.hmset('conversationmembers:' + conversationId, members);
-}
+Conversation.prototype._insertMembers = function*(members) {
+    Object.keys(members).forEach(function(prop) {
+        this.members[prop] = members[prop];
+    }.bind(this));
 
-function *removeMember(conversationId, userId) {
-    yield redis.hdel('conversationmembers:' + conversationId, userId);
-}
+    yield redis.hmset('conversationmembers:' + this.conversationId, members);
+};
 
-function *getMembers(conversationId) {
-    return yield redis.hkeys('conversationmembers:' + conversationId);
+Conversation.prototype._removeMember = function*(userId) {
+    delete this.members[userId];
+    yield redis.hdel('conversationmembers:' + this.conversationId, userId);
+};
+
+Conversation.prototype._remove = function*() {
+    yield redis.del('conversation:' + this.conversationId);
+    yield redis.del('conversationmembers:' + this.conversationId);
+    yield redis.del('conversationmsgs:' + this.conversationId);
+
+    var key;
+
+    if (this.type === 'group') {
+        key = 'group:' + this.network + ':' + this.name;
+    } else {
+        var userIds = Object.keys(this.members);
+        userIds = userIds.sort();
+        key = '1on1:' + this.network + ':' + userIds[0] + ':' + userIds[1];
+    }
+
+    yield redis.hdel('index:conversation', key);
+};
+
+function *get(conversationId) {
+    var record =  yield redis.hgetall('conversation:' + conversationId);
+    var members = yield redis.hgetall('conversationmembers:' + conversationId);
+
+    return record ? new Conversation(conversationId, record, members) : null;
 }
