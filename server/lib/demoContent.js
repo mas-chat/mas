@@ -54,7 +54,7 @@ module.exports.enable = function() {
                     url = 'http://placeimg.com/640/480/nature/' + randomImgFileName + '.jpg';
                 }
 
-                yield conversation.addMessage(0, {
+                yield conversation.addMessage({
                     body: faker.Lorem.sentence(sentenceLength) + ' ' + url,
                     userId: 'mDEMO', // TBD: This user must exist
                     cat: 'msg'
