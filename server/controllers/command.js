@@ -23,7 +23,7 @@ var co = require('co'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
     courier = require('../lib/courier').createEndPoint('command'),
-    conversationModel = require('../models/conversation'),
+    conversationFactory = require('../models/conversation'),
     window = require('../models/window'),
     friends = require('../models/friends');
 
@@ -48,7 +48,7 @@ module.exports = function*(userId, sessionId, command) {
 
     if (!isNaN(windowId)) {
         var conversationId = yield window.getConversationId(userId, windowId);
-        conversation = yield conversationModel.get(conversationId);
+        conversation = yield conversationFactory.get(conversationId);
         network = conversation.network;
     }
 
@@ -98,7 +98,7 @@ function *handleCreate(params) {
 }
 
 function *handleJoin(params) {
-    var conversation = yield conversationModel.findGroup(
+    var conversation = yield conversationFactory.findGroup(
         params.command.name, params.command.network);
 
     if (conversation) {

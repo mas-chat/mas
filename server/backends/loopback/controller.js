@@ -29,7 +29,7 @@ var co = require('co'),
     outbox = require('../../lib/outbox'),
     window = require('../../models/window'),
     nicks = require('../../models/nick'),
-    conversationModel = require('../../models/conversation');
+    conversationFactory = require('../../models/conversation');
 
 co(function*() {
     yield redisModule.loadScripts();
@@ -46,7 +46,7 @@ function *processCreate(params) {
     var userId = params.userId;
     var groupName = params.name;
     var password = params.password;
-    var conversation = yield conversationModel.findGroup(groupName, 'MAS');
+    var conversation = yield conversationFactory.findGroup(groupName, 'MAS');
 
     if (conversation) {
         yield outbox.queue(params.userId, params.sessionId, {
@@ -64,7 +64,7 @@ function *processCreate(params) {
         status: 'OK'
     });
 
-    conversation = yield conversationModel.create({
+    conversation = yield conversationFactory.create({
         owner: userId,
         type: 'group',
         name: groupName,
@@ -80,7 +80,7 @@ function *processCreate(params) {
 function *processJoin(params) {
     var groupName = params.name;
     var userId = params.userId;
-    var conversation = yield conversationModel.findGroup(groupName, 'MAS');
+    var conversation = yield conversationFactory.findGroup(groupName, 'MAS');
     var role = 'u';
 
     if (!conversation) {
@@ -136,10 +136,10 @@ function *createInitialGroups() {
 
     for (var i = 0; i < groups.length; i++) {
         var group = groups[i];
-        var existingGroup = yield conversationModel.findGroup(group, 'MAS');
+        var existingGroup = yield conversationFactory.findGroup(group, 'MAS');
 
         if (!existingGroup) {
-            yield conversationModel.create({
+            yield conversationFactory.create({
                 owner: admin,
                 type: 'group',
                 name: group,
