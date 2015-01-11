@@ -10,7 +10,7 @@ MAS server and web client
 NOTE: Redis database schema will freeze only after 1.0 release. This is also when the project becomes suitable for general use.
 
 MAS is a web chat application. The server part implements MAS
-HTTP API. [Meetandspeak.com][] is an instance of this application.
+client API. [Meetandspeak.com][] is an instance of this application.
 
 Both the server and web app are currently being rewritten from scratch and are not yet
 fully functional.
@@ -18,7 +18,7 @@ fully functional.
 For more info, see
 
 - [Architecture page](https://github.com/ilkkao/mas/wiki)
-- [MAS HTTP client API](http://ilkkao.github.io/mas/api.html)
+- [MAS client API](http://ilkkao.github.io/mas/api.html)
 
 Dependencies:
 
