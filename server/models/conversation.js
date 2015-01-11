@@ -209,6 +209,11 @@ Conversation.prototype.setTopic = function*(topic) {
         id: 'UPDATE',
         topic: topic
     });
+
+    yield this.addMessage({
+        cat: 'info',
+        body: 'Topic has been changed to: ' + topic
+    });
 };
 
 Conversation.prototype.setPassword = function*(password) {
