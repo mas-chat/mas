@@ -26,10 +26,13 @@ var assert = require('assert'),
 
 var MSG_BUFFER_SIZE = 200;
 
-// TBD: split to conversation.js and conversationMembers.js
-
 exports.create = function*(options) {
     var conversationId = yield redis.incr('nextGlobalConversationId');
+
+    Object.keys(options).forEach(function(prop) {
+        // Can't store null to redis
+        options[prop] = options[prop] === null ? '' : options[prop];
+    });
 
     yield redis.hmset('conversation:' + conversationId, options);
 
@@ -40,107 +43,148 @@ exports.create = function*(options) {
     }
 
     log.info('Created conversation: ' + conversationId);
-    return conversationId;
+    return new Conversation(conversationId, options, {});
 };
 
 exports.get = function*(conversationId) {
-    return yield redis.hgetall('conversation:' + conversationId);
-};
-
-exports.getMembers = function*(conversationId) {
-    return yield getMembersHash(conversationId);
-};
-
-exports.getMemberRole = function*(conversationId, userId) {
-    return yield redis.hget('conversationmembers:' + conversationId, userId);
-};
-
-exports.setMemBerRole = function*(conversationId, userId, role) {
-    yield redis.hset('conversationmembers:' + conversationId, userId, role);
-    yield streamAddMembers(conversationId, userId, role);
+    return yield get(conversationId);
 };
 
 exports.findGroup = function*(name, network) {
     log.info('Searching group: ' + network + ':' + name);
     var conversationId = yield redis.hget('index:conversation', 'group:' + network + ':' + name);
-    return conversationId;
+    return yield get(conversationId);
 };
 
 exports.find1on1 = function*(userId1, userId2, network) {
-    log.info('Serching 1on1: ' + userId1 + ':' + userId2 + ':' + network);
+    log.info('Searching 1on1: ' + userId1 + ':' + userId2 + ':' + network);
 
     var userIds = [ userId1, userId2 ].sort();
     var conversationId = yield redis.hget('index:conversation',
         '1on1:' + network + ':' + userIds[0] + ':' + userIds[1]);
 
-    return conversationId;
+    return yield get(conversationId);
 };
 
-exports.getPeerUserId = function*(conversationId, userId) {
-    var members = yield getMembers(conversationId);
+function Conversation(conversationId, record, members) {
+    this.conversationId = conversationId;
+
+    Object.keys(record).forEach(function(prop) {
+        this[prop] = record[prop];
+    }.bind(this));
+
+    this.members = members;
+
+    return this;
+}
+
+Conversation.prototype.getMemberRole = function*(userId) {
+    /* jshint noyield:true */
+    return this.members[userId];
+};
+
+Conversation.prototype.setMemberRole = function*(userId, role) {
+    this.members[userId] = role;
+
+    yield redis.hset('conversationmembers:' + this.conversationId, userId, role);
+    yield streamAddMembers(this.conversationId, userId, role);
+};
+
+Conversation.prototype.getPeerUserId = function*(userId) {
+    var members = yield getMembers(this.conversationId);
     return members[0] === userId ? members[1] : members[0];
 };
 
-exports.set1on1Members = function*(conversationId, userId1, userId2) {
-    var network = yield redis.hget('conversation:' + conversationId, 'network');
+Conversation.prototype.set1on1Members = function*(userId1, userId2) {
+    var network = yield redis.hget('conversation:' + this.conversationId, 'network');
     var userIds = [ userId1, userId2 ].sort();
 
-    yield insertMember(conversationId, userId1, 'u');
-    yield insertMember(conversationId, userId2, 'u');
+    this.members = {};
+    this.members[userId1] = 'u';
+    this.members[userId2] = 'u';
+
+    yield insertMember(this.conversationId, userId1, 'u');
+    yield insertMember(this.conversationId, userId2, 'u');
 
     // Update 1on1 index
     yield redis.hset('index:conversation',
-        '1on1:' + network + ':' + userIds[0] + ':' + userIds[1], conversationId);
+        '1on1:' + network + ':' + userIds[0] + ':' + userIds[1], this.conversationId);
 };
 
-exports.setGroupMembers = function*(conversationId, members, reset) {
+Conversation.prototype.setGroupMembers = function*(members, reset) {
     if (reset) {
-        yield redis.del('conversationmembers:' + conversationId);
+        yield redis.del('conversationmembers:' + this.conversationId);
+        this.members = {};
     }
 
-    yield insertMembers(conversationId, members);
+    Object.keys(members).forEach(function(prop) {
+        this.members[prop] = members[prop];
+    });
+
+    yield insertMembers(this.conversationId, members);
 };
 
-exports.addGroupMember = function*(conversationId, userId, role) {
+Conversation.prototype.addGroupMember = function*(userId, role) {
     assert (role === 'u' || role === '+' || role === '@' || role === '*');
+    this.members[userId] = role;
 
-    yield insertMember(conversationId, userId, role);
+    yield insertMember(this.conversationId, userId, role);
 
-    yield addMessage(conversationId, 0, {
+    yield addMessage(this.conversationId, 0, {
         userId: userId,
         cat: 'join',
         body: ''
     });
 
-    yield streamAddMembers(conversationId, userId, role);
+    yield streamAddMembers(this.conversationId, userId, role);
 };
 
-exports.removeGroupMember = function*(conversationId, userId) {
-    yield addMessage(conversationId, 0, {
+Conversation.prototype.removeGroupMember = function*(userId) {
+    delete this.members[userId];
+
+    yield addMessage(this.conversationId, 0, {
         userId: userId,
         cat: 'part',
         body: ''
     });
 
-    yield streamRemoveMembers(conversationId, userId);
-    yield removeMember(conversationId, userId);
+    yield streamRemoveMembers(this.conversationId, userId);
+    yield removeMember(this.conversationId, userId);
+
+    var removeConversation = true;
+
+    Object.keys(this.members).forEach(function(member) {
+        if (member.charAt(0) === 'm') {
+            removeConversation = false;
+        }
+    });
+
+    if (removeConversation) {
+        log.info(userId,
+            'Last member parted, removing conversation, conversationId: ' + this.conversationId);
+        yield remove(this.conversationId, this);
+    }
 };
 
-exports.addMessage = function*(conversationId, excludeSession, msg) {
-    yield addMessage(conversationId, excludeSession, msg);
+Conversation.prototype.isMember = function*(userId) {
+    /* jshint noyield:true */
+    return !!this.members[userId];
 };
 
-exports.sendAddMembers = function*(userId, conversationId) {
-    var members = yield getMembersHash(conversationId);
-    var windowId = yield window.findByConversationId(userId, conversationId);
+Conversation.prototype.addMessage = function*(excludeSession, msg) {
+    yield addMessage(this.conversationId, excludeSession, msg);
+};
+
+Conversation.prototype.sendAddMembers = function*(userId) {
+    var windowId = yield window.findByConversationId(userId, this.conversationId);
     var membersList = [];
 
-    Object.keys(members).forEach(function(key) {
+    Object.keys(this.members).forEach(function(key) {
         membersList.push({
             userId: key,
-            role: members[key]
+            role: this.members[key]
         });
-    });
+    }.bind(this));
 
     yield outbox.queueAll(userId, {
         id: 'ADDMEMBERS',
@@ -150,19 +194,19 @@ exports.sendAddMembers = function*(userId, conversationId) {
     });
 };
 
-exports.setTopic = function*(conversationId, topic) {
-    yield redis.hset('conversation:' + conversationId, 'topic', topic);
+Conversation.prototype.setTopic = function*(topic) {
+    yield redis.hset('conversation:' + this.conversationId, 'topic', topic);
 
-    yield stream(conversationId, 0, {
+    yield stream(this.conversationId, 0, {
         id: 'UPDATE',
         topic: topic
     });
 };
 
-exports.setPassword = function*(conversationId, password) {
-    yield redis.hset('conversation:' + conversationId, 'password', password);
+Conversation.prototype.setPassword = function*(password) {
+    yield redis.hset('conversation:' + this.conversationId, 'password', password);
 
-    yield stream(conversationId, 0, {
+    yield stream(this.conversationId, 0, {
         id: 'UPDATE',
         password: password
     });
@@ -171,11 +215,36 @@ exports.setPassword = function*(conversationId, password) {
         'Password protection has been removed from this channel.' :
         'The password for this channel has been changed to ' + password + '.';
 
-    yield addMessage(conversationId, 0, {
+    yield addMessage(this.conversationId, 0, {
         cat: 'info',
         body: text
     });
 };
+
+function *get(conversationId) {
+    var record =  yield redis.hgetall('conversation:' + conversationId);
+    var members = yield redis.hgetall('conversationmembers:' + conversationId);
+
+    return record ? new Conversation(conversationId, record, members) : null;
+}
+
+function *remove(conversationId, conversation) {
+    yield redis.del('conversation:' + conversationId);
+    yield redis.del('conversationmembers:' + conversationId);
+    yield redis.del('conversationmsgs:' + conversationId);
+
+    var key;
+
+    if (conversation.type === 'group') {
+        key = 'group:' + conversation.network + ':' + conversation.name;
+    } else {
+        var userIds = yield getMembers(conversationId);
+        userIds = userIds.sort();
+        key = '1on1:' + conversation.network + ':' + userIds[0] + ':' + userIds[1];
+    }
+
+    yield redis.hdel('index:conversation', key);
+}
 
 function *addMessage(conversationId, excludeSession, msg) {
     msg.gid = yield redis.incr('nextGlobalMsgId');
@@ -214,7 +283,6 @@ function *streamRemoveMembers(conversationId, userId) {
 
 function *stream(conversationId, excludeSession, msg) {
     var members = yield getMembers(conversationId);
-
     for (var i = 0; i < members.length; i++) {
         var windowId = yield window.findByConversationId(members[i], conversationId);
         msg.windowId = parseInt(windowId);
@@ -240,8 +308,4 @@ function *removeMember(conversationId, userId) {
 
 function *getMembers(conversationId) {
     return yield redis.hkeys('conversationmembers:' + conversationId);
-}
-
-function *getMembersHash(conversationId) {
-    return yield redis.hgetall('conversationmembers:' + conversationId);
 }

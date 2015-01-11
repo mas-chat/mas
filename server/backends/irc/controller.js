@@ -29,7 +29,7 @@ var assert = require('assert'),
     redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('ircparser'),
     outbox = require('../../lib/outbox'),
-    conversation = require('../../models/conversation'),
+    conversationModel = require('../../models/conversation'),
     window = require('../../models/window'),
     nicks = require('../../models/nick'),
     ircUser = require('./ircUser');
@@ -58,12 +58,13 @@ co(function*() {
 // Upper layer messages
 
 function *processSend(params) {
+    assert(params.conversationId);
+
     var target = params.conversationName;
+    var conversation = yield conversationModel.get(params.conversationId);
 
-    assert(!params.conversationId);
-
-    if (params.conversationType === '1on1') {
-        var targetUserId = yield conversation.getPeerUserId(params.conversationId, params.userId);
+    if (conversation.type === '1on1') {
+        var targetUserId = yield conversation.getPeerUserId(params.userId);
         target = yield ircUser.getUserNick(targetUserId);
 
         if (!target) {
@@ -75,7 +76,7 @@ function *processSend(params) {
     yield courier.send('connectionmanager', {
         type: 'write',
         userId: params.userId,
-        network: params.conversationNetwork,
+        network: conversation.network,
         line: 'PRIVMSG ' + target + ' :' + params.text
     });
 }
@@ -110,10 +111,10 @@ function *processJoin(params) {
         });
     }
 
-    var conversationId = yield conversation.findGroup(channelName, params.network);
+    var conversation = yield conversationModel.findGroup(channelName, params.network);
 
-    if (!conversationId) {
-        conversationId = yield conversation.create({
+    if (!conversation) {
+        conversation = yield conversationModel.create({
             owner: params.userId,
             type: 'group',
             name: channelName,
@@ -124,8 +125,8 @@ function *processJoin(params) {
     var membersHash = {};
     membersHash[params.userId] = 'u';
 
-    yield conversation.setGroupMembers(conversationId, membersHash, false);
-    yield window.create(params.userId, conversationId);
+    yield conversation.setGroupMembers(membersHash, false);
+    yield window.create(params.userId, conversation.conversationId);
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'JOIN_RESP',
@@ -134,10 +135,10 @@ function *processJoin(params) {
 }
 
 function *processChat(params) {
-    var conversationId = yield conversation.find1on1(
+    var conversation = yield conversationModel.find1on1(
         params.userId, params.targetUserId, params.network);
 
-    if (!conversationId) {
+    if (!conversation) {
         yield setup1on1(params.userId, params.targetUserId, params.network);
     }
 
@@ -360,21 +361,21 @@ function *processDisconnected(params) {
 }
 
 function *addSystemMessage(userId, network, body) {
-    var conversationId = yield conversation.find1on1(userId, 'SERVER', network);
+    var conversation = yield conversationModel.find1on1(userId, 'SERVER', network);
 
-    if (!conversationId) {
-        conversationId = yield conversation.create({
+    if (!conversation) {
+        conversation = yield conversationModel.create({
             owner: userId,
             type: '1on1',
             network: network,
             topic: 'IRC SERVER MESSAGES'
         });
 
-        yield conversation.set1on1Members(conversationId, userId, 'SERVER');
-        yield window.create(userId, conversationId);
+        yield conversation.set1on1Members(userId, 'SERVER');
+        yield window.create(userId, conversation.conversationId);
     }
 
-    yield conversation.addMessage(conversationId, 0, {
+    yield conversation.addMessage(0, {
         userId: 'SERVER',
         cat: 'info',
         body: body
@@ -480,31 +481,32 @@ function *handle332(userId, msg) {
     // :portaali.org 332 ilkka #portaali :Cool topic
     var channel = msg.params[0];
     var topic = msg.params[1];
-    var conversationId = yield conversation.findGroup(channel, msg.network);
+    var conversation = yield conversationModel.findGroup(channel, msg.network);
 
-    yield conversation.setTopic(conversationId, topic);
+    yield conversation.setTopic(topic);
 }
 
 function *handle353(userId, msg) {
     // :own.freenode.net 353 drwillie @ #evergreenproject :drwillie ilkkaoks
     var channel = msg.params[1];
-    var conversationId = yield conversation.findGroup(channel, msg.network);
+    var conversation = yield conversationModel.findGroup(channel, msg.network);
     var names = msg.params[2].split(' ');
 
-    yield bufferNames(names, userId, msg.network, conversationId);
+    yield bufferNames(names, userId, msg.network, conversation.conversationId);
 }
 
 function *handle366(userId, msg) {
     // :pratchett.freenode.net 366 il3kkaoksWEB #testi1 :End of /NAMES list.
     var channel = msg.params[0];
-    var conversationId = yield conversation.findGroup(channel, msg.network);
-    var namesHash = yield redis.hgetall('namesbuffer:' + userId + ':' + conversationId);
+    var conversation = yield conversationModel.findGroup(channel, msg.network);
+    var namesHash = yield redis.hgetall(
+        'namesbuffer:' + userId + ':' + conversation.conversationId);
 
-    yield conversation.setGroupMembers(conversationId, namesHash, true);
+    yield conversation.setGroupMembers(namesHash, true);
 
     for (var user in namesHash) {
         if (namesHash.hasOwnProperty(user) && user.charAt(0) === 'm') {
-            yield conversation.sendAddMembers(user, conversationId);
+            yield conversation.sendAddMembers(user);
         }
     }
 }
@@ -517,7 +519,7 @@ function *handle376(userId, msg) {
     var channelsToJoin = [];
 
     for (var i = 0; i < conversationIds.length; i++) {
-        var ircConversation = yield conversation.get(conversationIds[i]);
+        var ircConversation = yield conversationModel.get(conversationIds[i]);
 
         if (ircConversation.network === msg.network && ircConversation.type === 'group') {
             channelsToJoin.push(ircConversation.name);
@@ -558,9 +560,9 @@ function *handleJoin(userId, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
     var channel = msg.params[0];
     var targetUserId = ircUser.getOrCreateUserId(msg.nick, msg.network);
-    var conversationId = yield conversation.findGroup(channel, msg.network);
+    var conversation = yield conversationModel.findGroup(channel, msg.network);
 
-    yield conversation.addGroupMember(conversationId, targetUserId);
+    yield conversation.addGroupMember(targetUserId);
 }
 
 function *handleQuit(userId, msg) {
@@ -572,7 +574,8 @@ function *handleQuit(userId, msg) {
 
     for (var i = 0; i < conversationIds.length; i++) {
         // TBD: Send a real quit message instead of part
-        yield conversation.removeGroupMember(conversationIds[i], targetUserId);
+        var conversation = yield conversationModel.get(conversationIds[i]);
+        yield conversation.removeGroupMember(targetUserId);
     }
 }
 
@@ -592,7 +595,8 @@ function *handleNick(userId, msg) {
     // TBD: update ircuser database and send USERS update
 
     for (var i = 0; i < conversationIds.length; i++) {
-        yield conversation.addMessage(conversationIds[i], 0, {
+        var conversation = yield conversationModel.get(conversationIds[i]);
+        yield conversation.addMessage(0, {
             cat: 'info',
             body: msg.nick + ' is now known as ' + newNick
         });
@@ -620,10 +624,10 @@ function *handlePart(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com PART #portaali :
     var channel = msg.params[0];
     // var reason = msg.params[1]; // TBD: Can there be reason?
-    var conversationId = yield conversation.findGroup(channel, msg.network);
+    var conversation = yield conversationModel.findGroup(channel, msg.network);
     var targetUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
 
-    yield conversation.removeGroupMember(conversationId, targetUserId);
+    yield conversation.removeGroupMember(targetUserId);
 }
 
 function *handleMode(userId, msg) {
@@ -635,9 +639,9 @@ function *handleMode(userId, msg) {
         return;
     }
 
-    var conversationId = yield conversation.findGroup(target, msg.network);
+    var conversation = yield conversationModel.findGroup(target, msg.network);
 
-    yield conversation.addMessage(conversationId, {
+    yield conversation.addMessage(0, {
         cat: 'info',
         body: 'Mode change: ' + msg.params.join(' ') + ' by ' +
             (msg.nick ? msg.nick : msg.serverName)
@@ -677,7 +681,7 @@ function *handleMode(userId, msg) {
                 // Lost oper status
                 newClass = USER;
             } else if (mode === 'v') {
-                var oldClass = yield conversation.getMemberRole(conversationId, targetUserId);
+                var oldClass = yield conversation.getMemberRole(targetUserId);
 
                 if (oldClass !== OPER) {
                     if (oper === '+') {
@@ -689,11 +693,11 @@ function *handleMode(userId, msg) {
                     }
                 }
             } else if (mode === 'k') {
-                yield conversation.setPassword(conversationId, oper === '+' ? param : '');
+                yield conversation.setPassword(oper === '+' ? param : '');
             }
 
             if (newClass) {
-                yield conversation.setMemberRole(conversationId, targetUserId, newClass);
+                yield conversation.setMemberRole(targetUserId, newClass);
             }
         }
     }
@@ -703,11 +707,11 @@ function *handleTopic(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com TOPIC #portaali :My new topic
     var channel = msg.params[0];
     var topic = msg.params[1];
-    var conversationId = yield conversation.findGroup(channel, msg.network);
+    var conversation = yield conversationModel.findGroup(channel, msg.network);
 
-    yield conversation.setTopic(conversationId, topic);
+    yield conversation.setTopic(topic);
 
-    yield conversation.addMessage(userId, 0, {
+    yield conversation.addMessage(0, {
         cat: 'info',
         body: msg.nick + ' has changed the topic to: "' + topic + '".'
     });
@@ -717,26 +721,26 @@ function *handlePrivmsg(userId, msg) {
     var target = msg.params[0];
     var text = msg.params[1];
     var currentNick = yield nicks.getCurrentNick(userId, msg.network);
-    var conversationId;
+    var conversation;
 
     if (target === currentNick) {
         // Message is for the user only
         var peerUserId = ircUser.getOrCreateUserId(msg.nick, msg.network);
-        conversationId = yield conversation.find1on1(userId, peerUserId, msg.network);
+        conversation = yield conversationModel.find1on1(userId, peerUserId, msg.network);
 
-        if (conversationId === null) {
-            conversationId = yield setup1on1(userId, peerUserId, msg.network);
+        if (conversation === null) {
+            conversation = yield setup1on1(userId, peerUserId, msg.network);
         }
     } else {
-        conversationId = yield conversation.findGroup(target, msg.network);
+        conversation = yield conversationModel.findGroup(target, msg.network);
 
-        if (conversationId === null) {
+        if (conversation === null) {
             log.warn(userId, 'Message arrived for an unknown channel');
             return;
         }
     }
 
-    yield conversation.addMessage(conversationId, 0, {
+    yield conversation.addMessage(0, {
         userId: ircUser.getOrCreateUserId(msg.nick, msg.network),
         cat: 'msg',
         body: text
@@ -835,15 +839,15 @@ function isChannel(text) {
 }
 
 function *setup1on1(userId, peerUserId, network) {
-    var conversationId = yield conversation.create({
+    var conversation = yield conversationModel.create({
         owner: userId,
         type: '1on1',
         name: '',
         network: network
     });
 
-    yield conversation.set1on1Members(conversationId, userId, peerUserId);
-    yield window.create(userId, conversationId);
+    yield conversation.set1on1Members(userId, peerUserId);
+    yield window.create(userId, conversation.conversationId);
 
-    return conversationId;
+    return conversation;
 }
