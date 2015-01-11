@@ -36,6 +36,7 @@ co(function*() {
     yield createInitialGroups();
 
     courier.on('send', courier.noop);
+    courier.on('chat', courier.noop);
     courier.on('create', processCreate);
     courier.on('join', processJoin);
     courier.on('close', processClose);

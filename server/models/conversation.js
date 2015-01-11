@@ -162,7 +162,7 @@ Conversation.prototype.remove1on1Member = function*(userId) {
 
     var peerUserId = yield this.getPeerUserId(this, userId);
 
-    if (this.members[peerUserId] === 'd') {
+    if (this.members[peerUserId] === 'd' || peerUserId.charAt(0) !== 'm') {
         yield this._remove();
     }
 };
