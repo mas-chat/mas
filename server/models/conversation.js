@@ -100,7 +100,7 @@ Conversation.prototype.set1on1Members = function*(userId, peerUserId) {
     var userIds = [ userId, peerUserId ].sort();
 
     yield this._insertMember(userId, 'u');
-    yield this._insertMember(peerUserId, 'u');
+    yield this._insertMember(peerUserId, 'd');
 
     // Update 1on1 index
     yield redis.hset('index:conversation',

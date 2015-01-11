@@ -139,7 +139,7 @@ function *processChat(params) {
         params.userId, params.targetUserId, params.network);
 
     if (!conversation) {
-        yield setup1on1(params.userId, params.targetUserId, params.network);
+        yield window.setup1on1(params.userId, params.targetUserId, params.network);
     }
 
     yield outbox.queue(params.userId, params.sessionId, {
@@ -729,7 +729,7 @@ function *handlePrivmsg(userId, msg) {
         conversation = yield conversationFactory.find1on1(userId, peerUserId, msg.network);
 
         if (conversation === null) {
-            conversation = yield setup1on1(userId, peerUserId, msg.network);
+            conversation = yield window.setup1on1(userId, peerUserId, msg.network);
         }
     } else {
         conversation = yield conversationFactory.findGroup(target, msg.network);
@@ -836,18 +836,4 @@ function isChannel(text) {
     return [ '&', '#', '+', '!' ].some(function(element) {
         return element === text.charAt(0);
     });
-}
-
-function *setup1on1(userId, peerUserId, network) {
-    var conversation = yield conversationFactory.create({
-        owner: userId,
-        type: '1on1',
-        name: '',
-        network: network
-    });
-
-    yield conversation.set1on1Members(userId, peerUserId);
-    yield window.create(userId, conversation.conversationId);
-
-    return conversation;
 }
