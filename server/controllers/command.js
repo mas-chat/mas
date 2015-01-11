@@ -173,28 +173,50 @@ function *handleUpdate(params) {
 }
 
 function *handleUpdatePassword(params) {
+    var password = params.command.password;
+
+    // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
+    if (typeof password !== 'string') {
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'UPDATE_PASSWORD_RESP',
+            status: 'ERROR',
+            errorMsg: 'New password is invalid.'
+        });
+        return;
+    }
+
+    yield params.conversation.setPassword(password);
+
     yield courier.send(params.backend, {
         type: 'updatePassword',
         userId: params.userId,
         name: params.name,
         network: params.network,
-        password: params.command.password
+        password: password
     });
 
-    // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
-
-    // TBD: loopback backend needs to update the password manually in redis and notify
-    // all session using UPDATE command, IRC backend does all this in handleMode() when
-    // the IRC server echoes the MODE command
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'UPDATE_PASSWORD_RESP',
+        status: 'OK'
+    });
 }
 
 function *handleUpdateTopic(params) {
+    var topic = params.command.topic
+
+    yield params.conversation.setTopic(topic);
+
     yield courier.send(params.backend, {
         type: 'updateTopic',
         userId: params.userId,
         name: params.name,
         network: params.network,
-        topic: params.command.topic
+        topic: topic
+    });
+
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'TOPIC_RESP',
+        status: 'OK'
     });
 }
 

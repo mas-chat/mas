@@ -35,7 +35,7 @@ export default Ember.ObjectController.extend({
             this.remote.send({
                 id: 'UPDATE_PASSWORD',
                 windowId: this.get('windowId'),
-                password: newPassword
+                password: newPassword === null ? '' : newPassword
             }, function(resp) {
                 if (resp.status === 'OK') {
                     this.send('closeModal');

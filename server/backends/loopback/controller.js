@@ -37,6 +37,8 @@ co(function*() {
 
     courier.on('send', courier.noop);
     courier.on('chat', courier.noop);
+    courier.on('updateTopic', courier.noop);
+    courier.on('updatePassword', courier.noop);
     courier.on('create', processCreate);
     courier.on('join', processJoin);
     courier.on('close', processClose);
