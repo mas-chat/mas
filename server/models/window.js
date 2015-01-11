@@ -22,48 +22,21 @@ var assert = require('assert'),
     conversationFactory = require('./conversation');
 
 exports.create = function*(userId, conversationId) {
-    var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
-    var conversation = yield conversationFactory.get(conversationId);
-    var userId1on1 = null;
+    return yield create(userId, conversationId);
+};
 
-    assert(conversation);
+exports.setup1on1 = function*(userId, peerUserId, network) {
+    var conversation = yield conversationFactory.create({
+        owner: userId,
+        type: '1on1',
+        name: '',
+        network: network
+    });
 
-    var newWindow = {
-        conversationId: conversationId,
-        sounds: false,
-        titleAlert: false,
-        visible: true,
-        row: 0
-    };
+    yield conversation.set1on1Members(userId, peerUserId);
+    yield create(userId, conversation.conversationId);
 
-    yield redis.hmset('window:' + userId + ':' + windowId, newWindow);
-    yield redis.sadd('windowlist:' + userId, windowId);
-
-    if (conversation.type === '1on1') {
-        var ids = Object.keys(conversation.members);
-        userId1on1 = ids[0] === userId ? ids[1] : ids[0];
-    }
-
-    yield redis.hset('index:windowIds', userId + ':' + conversationId, windowId);
-
-    var createMsg = {
-        id: 'CREATE',
-        windowId: windowId,
-        name: conversation.name,
-        userId: userId1on1,
-        type: conversation.type,
-        network: conversation.network,
-        password: conversation.password || null,
-        topic: conversation.topic,
-        titleAlert: newWindow.titleAlert,
-        visible: newWindow.visible,
-        row: newWindow.row,
-        sounds: newWindow.sounds,
-        role: 'u' // Everybody starts as a normal user
-    };
-
-    yield outbox.queueAll(userId, createMsg);
-    return windowId;
+    return conversation;
 };
 
 exports.remove = function*(userId, windowId) {
@@ -141,6 +114,51 @@ exports.getNetworks = function*(userId) {
 exports.getConversationId = function*(userId, windowId) {
     return yield getConversationId(userId, windowId);
 };
+
+function *create(userId, conversationId) {
+    var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
+    var conversation = yield conversationFactory.get(conversationId);
+    var userId1on1 = null;
+
+    assert(conversation);
+
+    var newWindow = {
+        conversationId: conversationId,
+        sounds: false,
+        titleAlert: false,
+        visible: true,
+        row: 0
+    };
+
+    yield redis.hmset('window:' + userId + ':' + windowId, newWindow);
+    yield redis.sadd('windowlist:' + userId, windowId);
+
+    if (conversation.type === '1on1') {
+        var ids = Object.keys(conversation.members);
+        userId1on1 = ids[0] === userId ? ids[1] : ids[0];
+    }
+
+    yield redis.hset('index:windowIds', userId + ':' + conversationId, windowId);
+
+    var createMsg = {
+        id: 'CREATE',
+        windowId: windowId,
+        name: conversation.name,
+        userId: userId1on1,
+        type: conversation.type,
+        network: conversation.network,
+        password: conversation.password || null,
+        topic: conversation.topic,
+        titleAlert: newWindow.titleAlert,
+        visible: newWindow.visible,
+        row: newWindow.row,
+        sounds: newWindow.sounds,
+        role: 'u' // Everybody starts as a normal user
+    };
+
+    yield outbox.queueAll(userId, createMsg);
+    return windowId;
+}
 
 function *getAllConversationIds(userId) {
     var windows = yield redis.smembers('windowlist:' + userId);
