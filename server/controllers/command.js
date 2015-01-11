@@ -18,7 +18,8 @@
 
 /*jshint -W079 */
 
-var co = require('co'),
+var assert = require('assert'),
+    co = require('co'),
     log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
@@ -54,7 +55,7 @@ module.exports = function*(userId, sessionId, command) {
 
     var backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
 
-    log.info(userId, 'Prosessing command: ' + command.id);
+    log.info(userId, 'Processing command: ' + JSON.stringify(command));
 
     // TBD: Check that windowId, network, and name are valid
 
@@ -141,7 +142,11 @@ function *handleClose(params) {
         last: ids.length === 1
     });
 
-    yield params.conversation.removeGroupMember(params.userId);
+    if (params.conversation.type === 'group') {
+        yield params.conversation.removeGroupMember(params.userId);
+    } else {
+        yield params.conversation.remove1on1Member(params.userId);
+    }
     yield window.remove(params.userId, params.windowId);
 }
 
@@ -203,24 +208,51 @@ function *handleWhois(params) {
 }
 
 function *handleChat(params) {
+    var userId = params.userId;
     var targetUserId = params.command.userId;
-    var windowId = yield window.get1on1WindowId(
-        params.userId, params.network, targetUserId, '1on1');
+    var network = params.network;
 
-    if (windowId !== null) {
-        yield outbox.queue(params.userId, params.sessionId, {
+    if (userId === targetUserId) {
+        yield outbox.queue(userId, params.sessionId, {
             id: 'CHAT_RESP',
             status: 'ERROR',
-            errorMsg: 'You are already chatting with this person.'
+            errorMsg: 'You can\'t chat with yourself.'
         });
-    } else {
-        yield courier.send(params.backend, {
-            type: 'chat',
-            userId: params.userId,
-            network: params.network,
-            targetUserId: targetUserId
-        });
+        return;
     }
+
+    // TDB: Refactor to a method
+    if (targetUserId.charAt(0) === 'm') {
+        // 1on1s between MAS users are forced through MAS
+        network = 'MAS';
+        params.backend = 'loopbackparser';
+    }
+
+    var conversation = yield conversationFactory.find1on1(userId, targetUserId, network);
+
+    if (conversation) {
+        assert(conversation.members[userId]);
+
+        if (conversation.members[userId] !== 'd') {
+            yield outbox.queue(userId, params.sessionId, {
+                id: 'CHAT_RESP',
+                status: 'ERROR',
+                errorMsg: 'You are already chatting with this person.'
+            });
+            return;
+        } else {
+            yield window.create(userId, conversation.conversationId);
+        }
+    } else {
+        yield window.setup1on1(userId, targetUserId, network);
+    }
+
+    yield courier.send(params.backend, {
+        type: 'chat',
+        userId: userId,
+        network: params.network,
+        targetUserId: targetUserId
+    });
 }
 
 function *handleLogout(params) {
