@@ -142,33 +142,6 @@ Another advantage is that client startup phase is not a special case. The server
 Below is the list of notifications that MAS server can send to a client.
 A notification is always a request for the client to take some action.
 
-### ADDNTF
-
-Add a new sticky message to window.
-
-```JSON
-{
-  "id": "ADDURL",
-
-  "window": 1,
-  "noteId": 42,
-  "body": "Next meeting tomorrow at 4PM"
-}
-```
-
-### ADDURL
-
-Add a new url to window url list.
-
-```JSON
-{
-  "id": "ADDURL",
-
-  "window": 1,
-  "url": "http://google.com"
-}
-```
-
 ### ADDTEXT
 
 Add a messge to window.
@@ -437,14 +410,6 @@ Update settings.
 }
 ```
 
-### TOPIC
-
-Update window topic. (TBD: merge with UPDATE)
-
-```
-TBD
-```
-
 ### UPDATE
 
 Update existing parameter for existing window.
@@ -460,7 +425,7 @@ Update existing parameter for existing window.
 
 Updates a value initially received in ```CREATE``` command.
 
-Attributes in ```CREATE``` command that can be update are: ```password```.
+Attributes in ```CREATE``` command that can be update are: ```password```, ```topic```, ```visible```, ```row```, ```sounds```, ```role``` and ```titleAlert```.
 
 # Requests and responses
 
@@ -567,10 +532,11 @@ or
 {
   "id": 'CHAT_RESP',
 
-  "status": "ERROR",
-  "errorMsg": "You are already chatting with this person."
+  "status": "OK",
 }
 ```
+
+Contains ```errorMsg``` property if the status is not ```OK```
 
 ### LOGOUT
 
@@ -617,7 +583,7 @@ End session immediately
 }
 ```
 
-Password protection will be disabled if ```password``` is ```null```.
+Password protection will be disabled if ```password``` is an empty string.
 
 ### UPDATE_PASSWORD_RESP
 
