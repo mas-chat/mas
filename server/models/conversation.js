@@ -171,7 +171,7 @@ Conversation.prototype.isMember = function*(userId) {
     return !!this.members[userId];
 };
 
-Conversation.prototype.addMessage = function*(excludeSession, msg) {
+Conversation.prototype.addMessage = function*(msg, excludeSession) {
     yield addMessage(this.conversationId, excludeSession, msg);
 };
 

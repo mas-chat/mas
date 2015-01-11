@@ -72,11 +72,11 @@ module.exports = function*(userId, sessionId, command) {
 };
 
 function *handleSend(params) {
-    yield params.conversation.addMessage(params.sessionId, {
+    yield params.conversation.addMessage({
         userId: params.userId,
         cat: 'msg',
         body: params.command.text
-    });
+    }, params.sessionId);
 
     yield courier.send(params.backend, {
         type: 'send',

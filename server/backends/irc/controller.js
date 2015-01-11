@@ -375,7 +375,7 @@ function *addSystemMessage(userId, network, body) {
         yield window.create(userId, conversation.conversationId);
     }
 
-    yield conversation.addMessage(0, {
+    yield conversation.addMessage({
         userId: 'SERVER',
         cat: 'info',
         body: body
@@ -596,7 +596,7 @@ function *handleNick(userId, msg) {
 
     for (var i = 0; i < conversationIds.length; i++) {
         var conversation = yield conversationFactory.get(conversationIds[i]);
-        yield conversation.addMessage(0, {
+        yield conversation.addMessage({
             cat: 'info',
             body: msg.nick + ' is now known as ' + newNick
         });
@@ -641,7 +641,7 @@ function *handleMode(userId, msg) {
 
     var conversation = yield conversationFactory.findGroup(target, msg.network);
 
-    yield conversation.addMessage(0, {
+    yield conversation.addMessage({
         cat: 'info',
         body: 'Mode change: ' + msg.params.join(' ') + ' by ' +
             (msg.nick ? msg.nick : msg.serverName)
@@ -711,7 +711,7 @@ function *handleTopic(userId, msg) {
 
     yield conversation.setTopic(topic);
 
-    yield conversation.addMessage(0, {
+    yield conversation.addMessage({
         cat: 'info',
         body: msg.nick + ' has changed the topic to: "' + topic + '".'
     });
@@ -740,7 +740,7 @@ function *handlePrivmsg(userId, msg) {
         }
     }
 
-    yield conversation.addMessage(0, {
+    yield conversation.addMessage({
         userId: ircUser.getOrCreateUserId(msg.nick, msg.network),
         cat: 'msg',
         body: text
