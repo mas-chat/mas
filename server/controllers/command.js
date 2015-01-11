@@ -23,7 +23,7 @@ var co = require('co'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
     courier = require('../lib/courier').createEndPoint('command'),
-    conversation = require('../models/conversation'),
+    conversationModel = require('../models/conversation'),
     window = require('../models/window'),
     friends = require('../models/friends');
 
@@ -44,13 +44,12 @@ module.exports = function*(userId, sessionId, command) {
     var windowId = command.windowId;
     var network = command.network;
 
-    var conversationId = null;
-    var conversationRecord = null;
+    var conversation = null;
 
     if (!isNaN(windowId)) {
-        conversationId = yield window.getConversationId(userId, windowId);
-        conversationRecord = yield conversation.get(conversationId);
-        network = conversationRecord.network;
+        var conversationId = yield window.getConversationId(userId, windowId);
+        conversation = yield conversationModel.get(conversationId);
+        network = conversation.network;
     }
 
     var backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
@@ -64,8 +63,7 @@ module.exports = function*(userId, sessionId, command) {
             userId: userId,
             sessionId: sessionId,
             windowId: windowId,
-            conversationId: conversationId,
-            conversationRecord: conversationRecord,
+            conversation: conversation,
             backend: backend,
             network: network,
             command: command
@@ -74,7 +72,7 @@ module.exports = function*(userId, sessionId, command) {
 };
 
 function *handleSend(params) {
-    yield conversation.addMessage(params.conversationId, params.sessionId, {
+    yield params.conversation.addMessage(params.sessionId, {
         userId: params.userId,
         cat: 'msg',
         body: params.command.text
@@ -84,10 +82,7 @@ function *handleSend(params) {
         type: 'send',
         userId: params.userId,
         sessionId: params.sessionId,
-        conversationId: params.conversationId,
-        conversationType: params.conversationRecord.type,
-        conversationName: params.conversationRecord.name,
-        conversationNetwork: params.conversationRecord.network,
+        conversationId: params.conversation.conversationId,
         text: params.command.text
     });
 }
@@ -103,6 +98,22 @@ function *handleCreate(params) {
 }
 
 function *handleJoin(params) {
+    var conversation = yield conversationModel.findGroup(
+        params.command.name, params.command.network);
+
+    if (conversation) {
+        var isMember = yield conversation.isMember(params.userId);
+
+        if (isMember) {
+            yield outbox.queue(params.userId, params.sessionId, {
+                id: 'JOIN_RESP',
+                status: 'ALREADY_JOINED',
+                errorMsg: 'You have already joined the group.'
+            });
+            return;
+        }
+    }
+
     yield courier.send(params.backend, {
         type: 'join',
         userId: params.userId,
@@ -126,14 +137,12 @@ function *handleClose(params) {
     yield courier.send(params.backend, {
         type: 'close',
         userId: params.userId,
-        conversationId: params.conversationId,
+        conversationId: params.conversation.conversationId,
         last: ids.length === 1
     });
 
-    yield conversation.removeGroupMember(params.conversationId, params.userId);
+    yield params.conversation.removeGroupMember(params.userId);
     yield window.remove(params.userId, params.windowId);
-
-    // TBD: Remove conversation too if it is 1on1. See how irc backend handlePrivmsg() works
 }
 
 function *handleUpdate(params) {

@@ -507,7 +507,7 @@ Join to new MAS group or IRC channel
 
 Contains ```errorMsg``` property if the status is not ```OK```
 
-Status can be ```OK```, ```NOT_FOUND```, ```INCORRECT_PASSWORD```
+Status can be ```OK```, ```NOT_FOUND```, ```INCORRECT_PASSWORD```, ```ALREADY_JOINED```
 
 ### CREATE
 

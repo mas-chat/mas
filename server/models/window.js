@@ -19,12 +19,11 @@
 var assert = require('assert'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
-    conversation = require('./conversation');
+    conversationModel = require('./conversation');
 
 exports.create = function*(userId, conversationId) {
     var windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
-    var conversationRecord = yield conversation.get(conversationId);
-    var members = yield conversation.getMembers(conversationId);
+    var conversation = yield conversationModel.get(conversationId);
     var userId1on1 = null;
 
     assert(conversation);
@@ -40,8 +39,8 @@ exports.create = function*(userId, conversationId) {
     yield redis.hmset('window:' + userId + ':' + windowId, newWindow);
     yield redis.sadd('windowlist:' + userId, windowId);
 
-    if (conversationRecord.type === '1on1') {
-        var ids = Object.keys(members);
+    if (conversation.type === '1on1') {
+        var ids = Object.keys(conversation.members);
         userId1on1 = ids[0] === userId ? ids[1] : ids[0];
     }
 
@@ -50,12 +49,12 @@ exports.create = function*(userId, conversationId) {
     var createMsg = {
         id: 'CREATE',
         windowId: windowId,
-        name: conversationRecord.name,
+        name: conversation.name,
         userId: userId1on1,
-        type: conversationRecord.type,
-        network: conversationRecord.network,
-        password: conversationRecord.password || null,
-        topic: conversationRecord.topic,
+        type: conversation.type,
+        network: conversation.network,
+        password: conversation.password || null,
+        topic: conversation.topic,
         titleAlert: newWindow.titleAlert,
         visible: newWindow.visible,
         row: newWindow.row,
@@ -94,7 +93,8 @@ exports.getAllConversationIdsWithUserId = function*(userId, targetUserId) {
     }
 
     for (var i = 0; i < conversationIds.length; i++) {
-        var members = conversation.getMembers(conversationIds[i]);
+        var conversation = yield conversationModel.get(getAllConversationIds[i]);
+        var members = Object.keys(conversation.members);
 
         var exists = members.some(compare);
 
@@ -111,9 +111,9 @@ exports.getWindowIdsForNetwork = function*(userId, network) {
     var res = [];
 
     for (var i = 0; i < conversationIds.length; i++) {
-        var conversationRecord = conversation.get(conversationIds[i]);
+        var conversation = yield conversationModel.get(conversationIds[i]);
 
-        if (conversationRecord.network === network) {
+        if (conversation.network === network) {
             res.push(conversationIds[i]);
         }
     }
@@ -127,8 +127,8 @@ exports.getNetworks = function*(userId) {
     var res = [];
 
     for (var i = 0; i < conversationIds.length; i++) {
-        var conversationRecord = conversation.get(conversationIds[i]);
-        networks[conversationRecord.network] = true;
+        var conversation = yield conversationModel.get(conversationIds[i]);
+        networks[conversation.network] = true;
     }
 
     Object.keys(networks).forEach(function(key) {
