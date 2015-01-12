@@ -189,7 +189,9 @@ function *processUpdatePassword(params) {
 }
 
 function *processUpdateTopic(params) {
-    var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
+    var conversation = yield conversationFactory.get(params.conversationId);
+    var state = yield redis.hget(
+        'networks:' + params.userId + ':' + conversation.network, 'state');
 
     if (state !== 'connected') {
         yield outbox.queue(params.userId, params.sessionId, {
@@ -201,8 +203,8 @@ function *processUpdateTopic(params) {
         yield courier.send('connectionmanager', {
             type: 'write',
             userId: params.userId,
-            network: params.network,
-            line: 'TOPIC ' + params.name + ' :' + params.topic
+            network: conversation.network,
+            line: 'TOPIC ' + conversation.name + ' :' + params.topic
         });
 
         yield outbox.queue(params.userId, params.sessionId, {
