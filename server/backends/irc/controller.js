@@ -704,12 +704,7 @@ function *handleTopic(userId, msg) {
     var topic = msg.params[1];
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
 
-    yield conversation.setTopic(topic);
-
-    yield conversation.addMessageUnlessDuplicate(userId, {
-        cat: 'info',
-        body: msg.nick + ' has changed the topic to: "' + topic + '".'
-    });
+    yield conversation.setTopic(topic, msg.nick);
 }
 
 function *handlePrivmsg(userId, msg) {

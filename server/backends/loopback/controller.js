@@ -37,7 +37,7 @@ co(function*() {
 
     courier.on('send', courier.noop);
     courier.on('chat', courier.noop);
-    courier.on('updateTopic', courier.noop);
+    courier.on('updateTopic', processUpdateTopic);
     courier.on('updatePassword', courier.noop);
     courier.on('create', processCreate);
     courier.on('join', processJoin);
@@ -121,6 +121,18 @@ function *processClose(params) {
     params = params;
     /* jshint noyield:true */
     // TBD
+}
+
+function *processUpdateTopic(params) {
+    var conversation = yield conversationFactory.get(params.conversationId);
+    var nick = yield nicks.getCurrentNick(params.userId, conversation.network);
+
+    yield conversation.setTopic(params.topic, nick);
+
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'UPDATE_TOPIC_RESP',
+        status: 'OK'
+    });
 }
 
 function *joinGroup(conversation, userId, role) {
