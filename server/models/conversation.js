@@ -268,7 +268,7 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
 
         if (!windowId) {
             // The case where one of the 1on1 members has closed his window and has 'd' role
-            assert(this.type === '1on1' && this.getMemberRole(members[i]) === 'd');
+            assert(this.type === '1on1' && (yield this.getMemberRole(members[i])) === 'd');
             windowId = yield window.create(members[i], this.conversationId);
             yield this.setMemberRole(members[i], 'u');
         }
