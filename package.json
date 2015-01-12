@@ -72,7 +72,7 @@
     "rimraf": "~2.2.8"
   },
   "scripts": {
-    "test": "gulp jshint && gulp jscs && gulp build-assets && ./bin/run-tests.sh"
+    "test": "gulp jshint jscs build-assets && cd client && npm install && bower install && ember build && cd .. && ./bin/run-tests.sh"
   },
   "repository": {
     "type": "git",
