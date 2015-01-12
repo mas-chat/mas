@@ -79,7 +79,7 @@ casper.test.begin('Register new user', 9, function suite(test) {
         this.clickLabel('OK');
     });
 
-    casper.waitForText('has joined channel', function() {
+    casper.waitForText('has joined the group', function() {
         this.fillSelectors('.window form', {
             '.form-control': 'Works finally!'
         }, true);
