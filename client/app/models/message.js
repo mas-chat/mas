@@ -41,11 +41,11 @@ export default Ember.Object.extend({
         var post = '</span>';
 
         if (category === 'join') {
-            return pre + nick + ' has joined this group' + post;
+            return pre + nick + ' has joined the group.' + post;
         } else if (category === 'part') {
-            return pre + nick + ' has left this group' + post;
+            return pre + nick + ' has left the group.' + post;
         } else if (category === 'quit') {
-            return pre + nick + ' has quit irc' + post;
+            return pre + nick + ' has quit irc.' + post;
         } else {
             return this._decorate(this.get('body'));
         }
