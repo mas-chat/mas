@@ -55,8 +55,10 @@ max_parallel=8
 idle_timeout=120
 
 [redis]
+connection_type=socket ; can be socket or unix_socket
 port=6379
 host=localhost
+unix_socket_path=/tmp/redis.sock
 
 [elasticsearch]
 enabled=false
