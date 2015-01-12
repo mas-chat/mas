@@ -191,6 +191,22 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
     yield this._streamAddText(msg, excludeSession);
 };
 
+Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, excludeSession) {
+    // A special filter for IRC backend
+    var key = 'conversationbuffer:' + this.conversationId;
+    var existingReporter = yield redis.hget(key, msg);
+
+    yield redis.expire(key, 45);
+
+    if (existingReporter && existingReporter !== sourceUserId) {
+        // Duplicate
+        return;
+    }
+
+    yield redis.hset(key, msg, sourceUserId);
+    yield this.addMessage(msg, excludeSession);
+};
+
 Conversation.prototype.sendAddMembers = function*(userId) {
     var windowId = yield window.findByConversationId(userId, this.conversationId);
     var membersList = [];
@@ -273,6 +289,10 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
     var members = Object.keys(this.members);
 
     for (var i = 0; i < members.length; i++) {
+        if (members[i].charAt(0) !== 'm') {
+            continue;
+        }
+
         var windowId = yield window.findByConversationId(members[i], this.conversationId);
 
         if (!windowId) {
