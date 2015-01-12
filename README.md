@@ -47,10 +47,10 @@ MacOS/Linux/Windows.
    $ npm install
    ```
 
-4. Install gulp and ember-cli if you don't have them
+4. Install bower, gulp and ember-cli if you don't have them
 
    ```bash
-   $ npm install -g gulp ember-cli
+   $ npm install -g bower gulp ember-cli
    ```
 
 5. Build the web site
@@ -62,7 +62,10 @@ MacOS/Linux/Windows.
 6. Build the client web app
 
    ```bash
-   $ cd client && ember build
+   $ cd client
+   $ npm install
+   $ bower install
+   $ ember build
    ```
 
 6. Launch the server components
