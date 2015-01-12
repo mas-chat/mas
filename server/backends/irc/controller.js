@@ -117,6 +117,10 @@ function *processJoin(params) {
             name: channelName,
             network: params.network
         });
+
+        log.info(params.userId, 'First mas user joined channel: ' + channelName);
+    } else {
+        log.info(params.userId, 'Non-first mas user joined channel: ' + channelName);
     }
 
     yield conversation.addGroupMember(params.userId, 'u');
