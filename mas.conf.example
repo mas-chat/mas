@@ -54,8 +54,10 @@ token=nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
 max_parallel=8
 idle_timeout=120
 
+; Redis connection_type can be socket or unix_socket
+
 [redis]
-connection_type=socket ; can be socket or unix_socket
+connection_type=socket
 port=6379
 host=localhost
 unix_socket_path=/tmp/redis.sock
