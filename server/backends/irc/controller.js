@@ -119,11 +119,9 @@ function *processJoin(params) {
         });
     }
 
-    var membersHash = {};
-    membersHash[params.userId] = 'u';
-
-    yield conversation.setGroupMembers(membersHash, false);
+    yield conversation.addGroupMember(params.userId, 'u');
     yield window.create(params.userId, conversation.conversationId);
+    yield conversation.sendAddMembers(params.userId);
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'JOIN_RESP',
