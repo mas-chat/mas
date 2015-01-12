@@ -37,10 +37,14 @@ module.exports = {
 };
 
 function createClient() {
-    var host = conf.get('redis:host');
-    var port = conf.get('redis:port');
+    var plainRedisClient;
 
-    var plainRedisClient = redis.createClient(port, host);
+    if (conf.get('redis:connection_type') === 'socket') {
+        plainRedisClient = redis.createClient(conf.get('redis:port'), conf.get('redis:host'));
+    } else {
+        plainRedisClient = redis.createClient(conf.get('redis:unix_socket_path'));
+    }
+
     var coRedisClient = coRedis(plainRedisClient);
 
     coRedisClient.plainRedis = redis;
