@@ -20,7 +20,7 @@ var redis = require('../lib/redis').createClient(),
     socketIo = require('socket.io'),
     co = require('co'),
     uuid = require('uid2'),
-    commandController = require('../controllers/command'),
+    requestController = require('../controllers/request'),
     log = require('../lib/log'),
     nicks = require('../models/nick'),
     friends = require('../models/friends'),
@@ -110,7 +110,7 @@ exports.setup = function(server) {
                     return;
                 }
 
-                yield commandController(userId, sessionId, data);
+                yield requestController(userId, sessionId, data);
             })();
         });
 
