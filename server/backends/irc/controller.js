@@ -550,16 +550,18 @@ function *handle482(userId, msg) {
 function *handleJoin(userId, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
     var channel = msg.params[0];
-    var targetUserId = ircUser.getOrCreateUserId(msg.nick, msg.network);
+    var targetUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
 
-    yield conversation.addGroupMember(targetUserId, 'u');
+    if (conversation) {
+        yield conversation.addGroupMember(targetUserId, 'u');
+    }
 }
 
 function *handleQuit(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com QUIT :"leaving"
     // var reason = msg.params[0];
-    var targetUserId = ircUser.getOrCreateUserId(msg.nick, msg.network);
+    var targetUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
 
     var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
 
