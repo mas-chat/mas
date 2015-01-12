@@ -109,8 +109,13 @@ Conversation.prototype.set1on1Members = function*(userId, peerUserId) {
 
 Conversation.prototype.setGroupMembers = function*(members, reset) {
     if (reset) {
-        yield redis.del('conversationmembers:' + this.conversationId);
-        this.members = {};
+        var oldMembers = Object.keys(this.members);
+
+        for (var i = 0; i < oldMembers.length; i++) {
+            if (!members[oldMembers[i]]) {
+                yield this.removeGroupMember(oldMembers[i]);
+            }
+        }
     }
 
     yield this._insertMembers(members);
@@ -119,39 +124,43 @@ Conversation.prototype.setGroupMembers = function*(members, reset) {
 Conversation.prototype.addGroupMember = function*(userId, role) {
     assert (role === 'u' || role === '+' || role === '@' || role === '*');
 
-    yield this._insertMember(userId, role);
+    if (!this.members[userId]) {
+        yield this._insertMember(userId, role);
 
-    yield this.addMessage({
-        userId: userId,
-        cat: 'join',
-        body: ''
-    });
+        yield this.addMessage({
+            userId: userId,
+            cat: 'join',
+            body: ''
+        });
 
-    yield this._streamAddMembers(userId, role);
+        yield this._streamAddMembers(userId, role);
+    }
 };
 
 Conversation.prototype.removeGroupMember = function*(userId) {
-    yield this.addMessage({
-        userId: userId,
-        cat: 'part',
-        body: ''
-    });
+    if (this.members[userId]) {
+        yield this.addMessage({
+            userId: userId,
+            cat: 'part',
+            body: ''
+        });
 
-    yield this._streamRemoveMembers(userId);
-    yield this._removeMember(userId);
+        yield this._streamRemoveMembers(userId);
+        yield this._removeMember(userId);
 
-    var removeConversation = true;
+        var removeConversation = true;
 
-    Object.keys(this.members).forEach(function(member) {
-        if (member.charAt(0) === 'm') {
-            removeConversation = false;
+        Object.keys(this.members).forEach(function(member) {
+            if (member.charAt(0) === 'm') {
+                removeConversation = false;
+            }
+        });
+
+        if (removeConversation) {
+            log.info(userId,
+                'Last member parted, removing conversation, id: ' + this.conversationId);
+            yield this._remove(this);
         }
-    });
-
-    if (removeConversation) {
-        log.info(userId,
-            'Last member parted, removing conversation, conversationId: ' + this.conversationId);
-        yield this._remove(this);
     }
 };
 
