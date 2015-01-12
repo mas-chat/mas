@@ -216,8 +216,7 @@ function *handleUpdateTopic(params) {
     yield courier.send(params.backend, {
         type: 'updateTopic',
         userId: params.userId,
-        name: params.name,
-        network: params.network,
+        conversationId: params.conversation.conversationId,
         topic: topic
     });
 
