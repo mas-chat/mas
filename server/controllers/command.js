@@ -209,20 +209,11 @@ function *handleUpdatePassword(params) {
 }
 
 function *handleUpdateTopic(params) {
-    var topic = params.command.topic;
-
-    yield params.conversation.setTopic(topic);
-
     yield courier.send(params.backend, {
         type: 'updateTopic',
         userId: params.userId,
         conversationId: params.conversation.conversationId,
-        topic: topic
-    });
-
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'TOPIC_RESP',
-        status: 'OK'
+        topic: params.command.topic
     });
 }
 
