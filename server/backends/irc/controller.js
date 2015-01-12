@@ -60,25 +60,22 @@ co(function*() {
 function *processSend(params) {
     assert(params.conversationId);
 
-    var target = params.conversationName;
     var conversation = yield conversationFactory.get(params.conversationId);
+    var target = conversation.name;
 
     if (conversation.type === '1on1') {
         var targetUserId = yield conversation.getPeerUserId(params.userId);
         target = yield ircUser.getUserNick(targetUserId);
-
-        if (!target) {
-            // Both participants are MAS users, no need to go through IRC
-            return;
-        }
     }
 
-    yield courier.send('connectionmanager', {
-        type: 'write',
-        userId: params.userId,
-        network: conversation.network,
-        line: 'PRIVMSG ' + target + ' :' + params.text
-    });
+    if (target) {
+        yield courier.send('connectionmanager', {
+            type: 'write',
+            userId: params.userId,
+            network: conversation.network,
+            line: 'PRIVMSG ' + target + ' :' + params.text
+        });
+    }
 }
 
 function *processJoin(params) {
