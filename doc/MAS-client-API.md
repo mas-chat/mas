@@ -165,22 +165,6 @@ Add a messge to window.
 
 ```gid``` is a globally unique identifier (integer) for the message. Given two messages, a newer one has always larger gid. Gid can increase by more than one between subsequent messages inside a window.
 
-### BANLIST
-
-Update window ban list.
-
-```JSON
-{
-  "id": "BANLIST",
-
-  "window": 1,
-  "list": [{
-    "banId": 42,
-     "info": "IP range 192.168.0.0./16, reason: join flood."
-  }]
-}
-```
-
 ### CLOSE
 
 Close window.
@@ -315,14 +299,6 @@ Initialization is complete. Hint that client can now render the UI as all initia
 
 ```
 
-### LOGS
-
-Update Information about user log files.
-
-```
-TBD
-```
-
 ### ADDMEMBERS
 
 Add or update users in window participant list.
@@ -372,22 +348,6 @@ Remove one or more users from window participant list.
 ### NICK
 
 Update user nick names in various networks.
-
-```
-TBD
-```
-
-### OPERLIST
-
-Update window ban list.
-
-```
-TBD
-```
-
-### REQF
-
-Show a friend request.
 
 ```
 TBD
