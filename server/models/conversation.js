@@ -51,12 +51,16 @@ exports.get = function*(conversationId) {
 };
 
 exports.findGroup = function*(name, network) {
+    assert(network && name);
+
     log.info('Searching group: ' + network + ':' + name);
     var conversationId = yield redis.hget('index:conversation', 'group:' + network + ':' + name);
     return yield get(conversationId);
 };
 
 exports.find1on1 = function*(userId1, userId2, network) {
+    assert (userId1 && userId2 && network);
+
     log.info('Searching 1on1: ' + userId1 + ':' + userId2 + ':' + network);
 
     var userIds = [ userId1, userId2 ].sort();
