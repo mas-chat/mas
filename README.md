@@ -2,8 +2,8 @@ MAS server and web client
 =========================
 
 [![Build Status](https://secure.travis-ci.org/ilkkao/mas.png)](http://travis-ci.org/ilkkao/mas)
-
-[![Dependency Status](https://david-dm.org/ilkkao/mas.png)](http://david-dm.org/ilkkao/mas)
+[![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat)](https://david-dm.org/ilkkao/mas)
+[![devDependency Status](https://david-dm.org/ilkkao/mas/dev-status.svg?style=flat)](https://david-dm.org/ilkkao/mas#info=devDependencies)
 
 ![Screenshot](http://i.imgur.com/ls0pagX.png)
 
