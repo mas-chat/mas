@@ -45,7 +45,9 @@ Courier.prototype.start = function() {
             assert(handler, this.name + ': Missing message handler for: ' + msg.type);
 
             if (isGeneratorFunction(handler)) {
-                yield handler(msg);
+                co(function*() {
+                    yield handler(msg);
+                })();
             } else {
                 // Normal function
                 handler(msg);
@@ -54,21 +56,19 @@ Courier.prototype.start = function() {
     }).call(this);
 };
 
-Courier.prototype.send = function*(dest, msg) {
+Courier.prototype.send = function(dest, msg) {
     var data = convert(msg, this.name, dest);
-    yield sendRedis.lpush('inbox:' + dest, data);
-};
 
-Courier.prototype.sendNoWait = function(dest, msg) {
-    co(this.send).call(this, dest, msg);
+    co(function*() {
+        yield sendRedis.lpush('inbox:' + dest, data);
+    })();
 };
 
 Courier.prototype.on = function(type, callback) {
     this.handlers[type] = callback;
 };
 
-Courier.prototype.noop = function*() {
-    /* jshint noyield:true */
+Courier.prototype.noop = function() {
     return null;
 };
 
