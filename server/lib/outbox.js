@@ -38,7 +38,7 @@ exports.flush = function*(userId, sessionId, timeout) {
     if (timeout) {
         // Wait for first command to appear if timeout is given
         // For every blocking redis call we need to create own redis client. Otherwise
-        // HTTP calls block each other.
+        // socket.io connections block each other.
         var newClient = redisModule.createClient();
         result = yield newClient.brpop('outbox:' + userId + ':' + sessionId, timeout);
         newClient.end();
