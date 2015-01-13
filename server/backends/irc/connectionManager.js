@@ -36,7 +36,7 @@ var nextNetworkConnectionSlot = {};
 const IDENTD_PORT = 113;
 const LAG_POLL_INTERVAL = 60 * 1000; // 60s
 
-courier.sendNoWait('ircparser', 'restarted');
+courier.send('ircparser', 'restarted');
 
 // Start IDENT server
 if (conf.get('irc:identd')) {
@@ -157,7 +157,7 @@ function connect(userId, nick, network) {
     }
 
     socket.on('connect', function() {
-        courier.sendNoWait('ircparser', {
+        courier.send('ircparser', {
             type: 'connected',
             userId: userId,
             network: network
@@ -184,7 +184,7 @@ function connect(userId, nick, network) {
             var proceed = handlePing(socket, line);
 
             if (proceed) {
-                courier.sendNoWait('ircparser', {
+                courier.send('ircparser', {
                     type: 'data',
                     userId: userId,
                     network: network,
@@ -242,7 +242,7 @@ function handleEnd(userId, network, error) {
 
     log.info(userId, 'IRC connection closed by the server or network.');
 
-    courier.sendNoWait('ircparser', {
+    courier.send('ircparser', {
         type: 'disconnected',
         userId: userId,
         network: network,
