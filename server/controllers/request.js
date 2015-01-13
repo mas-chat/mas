@@ -79,7 +79,7 @@ function *handleSend(params) {
         body: params.command.text
     }, params.sessionId);
 
-    yield courier.send(params.backend, {
+    courier.send(params.backend, {
         type: 'send',
         userId: params.userId,
         sessionId: params.sessionId,
@@ -89,7 +89,7 @@ function *handleSend(params) {
 }
 
 function *handleCreate(params) {
-    yield courier.send('loopbackparser', {
+    courier.send('loopbackparser', {
         type: 'create',
         userId: params.userId,
         sessionId: params.sessionId,
@@ -115,7 +115,7 @@ function *handleJoin(params) {
         }
     }
 
-    yield courier.send(params.backend, {
+    courier.send(params.backend, {
         type: 'join',
         userId: params.userId,
         sessionId: params.sessionId,
@@ -135,7 +135,7 @@ function *handleClose(params) {
     });
 
     // Backend specific cleanup
-    yield courier.send(params.backend, {
+    courier.send(params.backend, {
         type: 'close',
         userId: params.userId,
         conversationId: params.conversation.conversationId,
@@ -194,7 +194,7 @@ function *handleUpdatePassword(params) {
 
     yield params.conversation.setPassword(password);
 
-    yield courier.send(params.backend, {
+    courier.send(params.backend, {
         type: 'updatePassword',
         userId: params.userId,
         name: params.name,
@@ -209,7 +209,7 @@ function *handleUpdatePassword(params) {
 }
 
 function *handleUpdateTopic(params) {
-    yield courier.send(params.backend, {
+    courier.send(params.backend, {
         type: 'updateTopic',
         userId: params.userId,
         conversationId: params.conversation.conversationId,
@@ -218,7 +218,7 @@ function *handleUpdateTopic(params) {
 }
 
 function *handleWhois(params) {
-    yield courier.send(params.backend, {
+    courier.send(params.backend, {
         type: 'whois',
         userId: params.userId,
         network: params.network,
@@ -266,7 +266,7 @@ function *handleChat(params) {
         yield window.setup1on1(userId, targetUserId, network);
     }
 
-    yield courier.send(params.backend, {
+    courier.send(params.backend, {
         type: 'chat',
         userId: userId,
         network: params.network,

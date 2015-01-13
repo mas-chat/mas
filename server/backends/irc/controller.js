@@ -69,7 +69,7 @@ function *processSend(params) {
     }
 
     if (target) {
-        yield courier.send('connectionmanager', {
+        courier.send('connectionmanager', {
             type: 'write',
             userId: params.userId,
             network: conversation.network,
@@ -100,7 +100,7 @@ function *processJoin(params) {
     if (!state || state === 'disconnected') {
         yield connect(params.userId, params.network);
     } else if (state === 'connected') {
-        yield courier.send('connectionmanager', {
+        courier.send('connectionmanager', {
             type: 'write',
             userId: params.userId,
             network: params.network,
@@ -176,7 +176,7 @@ function *processUpdatePassword(params) {
             errorMsg: 'Can\'t change the password. You are not connected to the IRC network'
         });
     } else {
-        yield courier.send('connectionmanager', {
+        courier.send('connectionmanager', {
             type: 'write',
             userId: params.userId,
             network: params.network,
@@ -202,7 +202,7 @@ function *processUpdateTopic(params) {
             errorMsg: 'Can\'t change the topic. You are not connected to the IRC network'
         });
     } else {
-        yield courier.send('connectionmanager', {
+        courier.send('connectionmanager', {
             type: 'write',
             userId: params.userId,
             network: conversation.network,
@@ -217,7 +217,7 @@ function *processUpdateTopic(params) {
 }
 
 function *processWhois(params) {
-    yield courier.send('connectionmanager', {
+    courier.send('connectionmanager', {
         type: 'write',
         userId: params.userId,
         network: params.network,
@@ -314,7 +314,7 @@ function *processConnected(params) {
         'USER ' + user.nick + ' 8 * :Real Name (Ralph v1.0)'
     ];
 
-    yield courier.send('connectionmanager', {
+    courier.send('connectionmanager', {
         type: 'write',
         userId: params.userId,
         network: params.network,
@@ -387,7 +387,7 @@ function *connect(userId, network, skipRetryCountReset) {
 
     yield addSystemMessage(userId, network, 'INFO: Connecting to IRC server...');
 
-    yield courier.send('connectionmanager', {
+    courier.send('connectionmanager', {
         type: 'connect',
         userId: userId,
         nick: nick,
@@ -398,7 +398,7 @@ function *connect(userId, network, skipRetryCountReset) {
 function *disconnect(userId, network) {
     yield redis.hset('networks:' + userId + ':' + network, 'state', 'closing');
 
-    yield courier.send('connectionmanager', {
+    courier.send('connectionmanager', {
         type: 'disconnect',
         userId: userId,
         network: network
@@ -526,7 +526,7 @@ function *handle376(userId, msg) {
     }
 
     for (i = 0; i < channelsToJoin.length; i++) {
-        yield courier.send('connectionmanager', {
+        courier.send('connectionmanager', {
             type: 'write',
             userId: userId,
             network: msg.network,
@@ -768,7 +768,7 @@ function *tryDifferentNick(userId, network) {
     // If we are joining IRC try all alternatives. If we are connected,
     // try to get only 'nick' or 'nick_' back
     if (!(state === 'connected' && nickHasNumbers)) {
-        yield courier.send('connectionmanager', {
+        courier.send('connectionmanager', {
             type: 'write',
             userId: userId,
             network: network,
@@ -781,7 +781,7 @@ function *tryDifferentNick(userId, network) {
 // is in sync?
 
 function *sendIRCPart(userId, network, channel) {
-    yield courier.send('connectionmanager', {
+    courier.send('connectionmanager', {
         type: 'write',
         userId: userId,
         network: network,
