@@ -230,7 +230,12 @@ Conversation.prototype.sendAddMembers = function*(userId) {
     });
 };
 
-Conversation.prototype.setTopic = function*(topic) {
+Conversation.prototype.setTopic = function*(topic, nick) {
+    if (topic === this.topic) {
+        // No change
+        return;
+    }
+
     this.topic = topic;
     yield redis.hset('conversation:' + this.conversationId, 'topic', topic);
 
@@ -241,7 +246,7 @@ Conversation.prototype.setTopic = function*(topic) {
 
     yield this.addMessage({
         cat: 'info',
-        body: 'Topic has been changed to: ' + topic
+        body: nick + ' has changed the topic to: "' + topic + '".'
     });
 };
 
