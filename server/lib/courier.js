@@ -45,6 +45,7 @@ Courier.prototype.start = function() {
             assert(handler, this.name + ': Missing message handler for: ' + msg.type);
 
             if (isGeneratorFunction(handler)) {
+                /*jshint -W083 */
                 co(function*() {
                     yield handler(msg);
                 })();

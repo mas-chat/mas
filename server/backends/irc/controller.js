@@ -151,7 +151,7 @@ function *processClose(params) {
     var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
 
     if (state === 'connected' && params.windowType === 'group') {
-        yield sendIRCPart(params.userId, params.network, params.name);
+        sendIRCPart(params.userId, params.network, params.name);
     }
 
     if (params.last) {
@@ -216,7 +216,7 @@ function *processUpdateTopic(params) {
     }
 }
 
-function *processWhois(params) {
+function processWhois(params) {
     courier.send('connectionmanager', {
         type: 'write',
         userId: params.userId,
@@ -784,7 +784,7 @@ function *tryDifferentNick(userId, network) {
 // TBD: Add a timer (every 15min?) to send one NAMES to every irc channel to make sure memberslist
 // is in sync?
 
-function *sendIRCPart(userId, network, channel) {
+function sendIRCPart(userId, network, channel) {
     courier.send('connectionmanager', {
         type: 'write',
         userId: userId,
