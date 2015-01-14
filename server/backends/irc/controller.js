@@ -497,11 +497,7 @@ function *handle366(userId, msg) {
 
     yield conversation.setGroupMembers(namesHash, true);
 
-    for (var user in namesHash) {
-        if (namesHash.hasOwnProperty(user) && user.charAt(0) === 'm') {
-            yield conversation.sendAddMembers(user);
-        }
-    }
+    yield conversation.setGroupMembers(namesHash);
 }
 
 function *handle376(userId, msg) {
