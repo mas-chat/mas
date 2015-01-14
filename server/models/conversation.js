@@ -111,18 +111,24 @@ Conversation.prototype.set1on1Members = function*(userId, peerUserId) {
         '1on1:' + this.network + ':' + userIds[0] + ':' + userIds[1], this.conversationId);
 };
 
-Conversation.prototype.setGroupMembers = function*(members, reset) {
-    if (reset) {
-        var oldMembers = Object.keys(this.members);
+Conversation.prototype.setGroupMembers = function*(members) {
+    var oldMembers = Object.keys(this.members);
 
-        for (var i = 0; i < oldMembers.length; i++) {
-            if (members && !members[oldMembers[i]]) {
-                yield this.removeGroupMember(oldMembers[i], true);
-            }
+    for (var i = 0; i < oldMembers.length; i++) {
+        if (members && !members[oldMembers[i]]) {
+            yield this.removeGroupMember(oldMembers[i], true);
         }
     }
 
     yield this._insertMembers(members);
+
+    var newMembers = Object.keys(members);
+
+    for (i = 0; i < newMembers.length; i++) {
+        if (newMembers[i].charAt(0) === 'm') {
+            yield this.sendAddMembers(newMembers[i]);
+        }
+    }
 };
 
 Conversation.prototype.addGroupMember = function*(userId, role) {
@@ -325,6 +331,8 @@ Conversation.prototype._insertMember = function*(userId, role) {
 };
 
 Conversation.prototype._insertMembers = function*(members) {
+    assert(members);
+
     Object.keys(members).forEach(function(prop) {
         this.members[prop] = members[prop];
     }.bind(this));
