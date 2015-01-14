@@ -354,11 +354,8 @@ function *processDisconnected(params) {
     }
 
     yield addSystemMessage(userId, network, msg);
-
-    co(function*() {
-        yield wait(delay);
-        yield connect(params.userId, params.network, true);
-    })();
+    yield wait(delay);
+    yield connect(params.userId, params.network, true);
 }
 
 function *addSystemMessage(userId, network, body) {
