@@ -116,8 +116,8 @@ Conversation.prototype.setGroupMembers = function*(members, reset) {
         var oldMembers = Object.keys(this.members);
 
         for (var i = 0; i < oldMembers.length; i++) {
-            if (!members[oldMembers[i]]) {
-                yield this.removeGroupMember(oldMembers[i]);
+            if (members && !members[oldMembers[i]]) {
+                yield this.removeGroupMember(oldMembers[i], true);
             }
         }
     }
@@ -141,7 +141,7 @@ Conversation.prototype.addGroupMember = function*(userId, role) {
     }
 };
 
-Conversation.prototype.removeGroupMember = function*(userId) {
+Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp) {
     if (this.members[userId]) {
         yield this.addMessage({
             userId: userId,
@@ -160,7 +160,7 @@ Conversation.prototype.removeGroupMember = function*(userId) {
             }
         });
 
-        if (removeConversation) {
+        if (removeConversation && !skipCleanUp) {
             log.info(userId,
                 'Last member parted, removing conversation, id: ' + this.conversationId);
             yield this._remove(this);
