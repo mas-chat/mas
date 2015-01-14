@@ -712,6 +712,7 @@ function *handlePrivmsg(userId, msg) {
     var text = msg.params[1];
     var currentNick = yield nicks.getCurrentNick(userId, msg.network);
     var conversation;
+    var msgUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
 
     if (target === currentNick) {
         // Message is for the user only
@@ -727,11 +728,14 @@ function *handlePrivmsg(userId, msg) {
         if (conversation === null) {
             log.warn(userId, 'Message arrived for an unknown channel');
             return;
+        } else if (msgUserId.charAt(0) === 'm') {
+            // Message from internal user is processed already
+            return;
         }
     }
 
     yield conversation.addMessageUnlessDuplicate(userId, {
-        userId: yield ircUser.getOrCreateUserId(msg.nick, msg.network),
+        userId: msgUserId,
         cat: 'msg',
         body: text
     });
