@@ -5,8 +5,6 @@ MAS server and web client
 [![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat)](https://david-dm.org/ilkkao/mas)
 [![devDependency Status](https://david-dm.org/ilkkao/mas/dev-status.svg?style=flat)](https://david-dm.org/ilkkao/mas#info=devDependencies)
 
-![Screenshot](http://i.imgur.com/ls0pagX.png)
-
 NOTE: Redis database schema will freeze only after 1.0 release. This is also when the project becomes suitable for general use.
 
 MAS is a web chat application. The server part implements MAS
