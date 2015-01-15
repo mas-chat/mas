@@ -35,6 +35,7 @@ export default Ember.Object.extend({
     type: null,
     row: null,
     visible: false,
+    timeHidden: null,
     messages: null,
 
     newMessagesCount: 0,
@@ -44,6 +45,11 @@ export default Ember.Object.extend({
     operators: null,
     voices: null,
     users: null,
+
+    titleAlert: false,
+    sounds: false,
+
+    password: null,
 
     operatorNames: function() {
         return this._mapUserIdsToNicks('operators');
