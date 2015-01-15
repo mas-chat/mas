@@ -162,8 +162,10 @@ function *processClose(params) {
 }
 
 function *processUpdatePassword(params) {
-    var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
-    var modeline = 'MODE ' + params.name + ' ';
+    var conversation = yield conversationFactory.get(params.conversationId);
+    var state = yield redis.hget(
+        'networks:' + params.userId + ':' + conversation.network, 'state');
+    var modeline = 'MODE ' + conversation.name + ' ';
 
     if (params.password === null) {
         modeline += '-k foobar'; // IRC protocol is odd, -k requires dummy parameter
@@ -181,7 +183,7 @@ function *processUpdatePassword(params) {
         courier.send('connectionmanager', {
             type: 'write',
             userId: params.userId,
-            network: params.network,
+            network: conversation.network,
             line: modeline
         });
 
