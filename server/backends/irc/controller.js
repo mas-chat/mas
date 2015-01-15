@@ -38,7 +38,7 @@ const OPER = '@';
 const VOICE = '+';
 const USER = 'u';
 
-var namesBuffer = {};
+var ircMessageBuffer = {};
 
 co(function*() {
     yield redisModule.loadScripts();
@@ -491,14 +491,10 @@ function *handle366(userId, msg) {
     // :pratchett.freenode.net 366 il3kkaoksWEB #testi1 :End of /NAMES list.
     var channel = msg.params[0];
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
-    var key = userId + conversation.conversationId
+    var key = 'namesbuffer:' + userId + ':' + conversation.conversationId;
 
-    // Race is possible betweem handle353() and handle366() wait two seconds that
-    // all 353s have been prosessed.
-    yield wait(2000); // TBD: Try to switch to fully incremental 353/366 parsing.
-
-    var namesHash = namesBuffer[key];
-    delete namesBuffer[key];
+    var namesHash = yield redis.hgetall(key);
+    yield redis.del(key);
 
     if (Object.keys(namesHash).length > 0) {
         yield conversation.setGroupMembers(namesHash);
@@ -795,11 +791,7 @@ function sendIRCPart(userId, network, channel) {
 }
 
 function *bufferNames(names, userId, network, conversationId) {
-    var key = userId + conversationId;
-
-    if (!namesBuffer[key]) {
-        namesBuffer[key] = {};
-    }
+    var namesHash = {};
 
     for (var i = 0; i < names.length; i++) {
         var nick = names[i];
@@ -819,10 +811,12 @@ function *bufferNames(names, userId, network, conversationId) {
         }
 
         var memberUserId = yield ircUser.getOrCreateUserId(nick, network);
-
-        // TDB: Misbehaving IRC server can cause memory leak
-        namesBuffer[key][memberUserId] = userClass;
+        namesHash[memberUserId] = userClass;
     }
+
+    var key = 'namesbuffer:' + userId + ':' + conversationId;
+    yield redis.hmset(key, namesHash);
+    yield redis.expire(key, 60); // 1 minute. Does cleanup if we never get End of NAMES list reply.
 }
 
 function *resetRetryCount(userId, network) {
