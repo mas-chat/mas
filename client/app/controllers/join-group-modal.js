@@ -18,7 +18,7 @@
 
 import Ember from 'ember';
 
-export default Ember.ObjectController.extend({
+export default Ember.Controller.extend({
     group: '',
     password: '',
     errorMsg: '',

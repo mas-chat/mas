@@ -21,7 +21,7 @@
 import Ember from 'ember';
 import { play } from '../helpers/sound';
 
-export default Ember.ObjectController.extend({
+export default Ember.Controller.extend({
     actions: {
         hide: function() {
             this.set('visible', false);
@@ -36,8 +36,8 @@ export default Ember.ObjectController.extend({
         },
 
         sendMessage: function() {
-            var text = this.get('newMessage');
-            this.set('newMessage', '');
+            var text = this.get('model.newMessage');
+            this.set('model.newMessage', '');
 
             this.remote.send({
                 id: 'SEND',
@@ -52,7 +52,7 @@ export default Ember.ObjectController.extend({
                 ts: moment().unix()
             });
 
-            this.get('messages').pushObject(messageRecord);
+            this.get('model.messages').pushObject(messageRecord);
         },
 
         chat: function(userId) {
@@ -104,15 +104,15 @@ export default Ember.ObjectController.extend({
         },
 
         scrollUp: function() {
-            if (!this.get('deletedLine') && !this.get('scrollLock')) {
-                this.set('scrollLock', true);
+            if (!this.get('deletedLine') && !this.get('model.scrollLock')) {
+                this.set('model.scrollLock', true);
                 Ember.Logger.info('scrollock on');
             }
         },
 
         scrollBottom: function() {
-            if (this.get('scrollLock')) {
-                this.set('scrollLock', false);
+            if (this.get('model.scrollLock')) {
+                this.set('model.scrollLock', false);
                 this.set('newMessagesCount', 0);
                 Ember.Logger.info('scrollock off');
             }
@@ -122,7 +122,7 @@ export default Ember.ObjectController.extend({
     initDone: Ember.computed.alias('controllers.application.initDone'),
 
     newMessageReceived: function() {
-        if (!this.get('visible') || this.get('scrollLock')) {
+        if (!this.get('visible') || this.get('model.scrollLock')) {
             this.incrementProperty('newMessagesCount');
         }
 
@@ -137,20 +137,20 @@ export default Ember.ObjectController.extend({
                 play();
             }
         }
-    }.observes('messages.@each'),
+    }.observes('model.messages.@each'),
 
     isGroup: function() {
-        return this.get('type') === 'group';
-    }.property('type'),
+        return this.get('model.type') === 'group';
+    }.property('model.type'),
 
     cssType: function() {
-        if (this.get('type') === 'group') {
+        if (this.get('model.type') === 'group') {
             return 'group';
         } else {
             // 1on1 is not valid css class name
             return 'private-1on1';
         }
-    }.property('type'),
+    }.property('model.type'),
 
     _seekRow: function(direction) {
         var newRow = this.get('parentController').nextRow(this.get('model'), direction);
