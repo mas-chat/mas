@@ -34,7 +34,7 @@ export default Ember.Controller.extend({
 
             this.remote.send({
                 id: 'UPDATE_PASSWORD',
-                windowId: this.get('windowId'),
+                windowId: this.get('model.windowId'),
                 password: newPassword === null ? '' : newPassword
             }, function(resp) {
                 if (resp.status === 'OK') {
@@ -53,18 +53,18 @@ export default Ember.Controller.extend({
 
     passwordDidChange: function() {
         this._updateModalPassword();
-    }.observes('password').on('init'),
+    }.observes('model.password').on('init'),
 
     modalPasswordDisabled: function() {
         return this.get('modalPasswordStatus') !== 'enabled';
     }.property('modalPasswordStatus'),
 
     passwordTitle: function() {
-        return 'Change Password for \'' + this.get('name') + '\'';
-    }.property('name'),
+        return 'Change Password for \'' + this.get('model.name') + '\'';
+    }.property('model.name'),
 
     _updateModalPassword: function() {
-        var password = this.get('password');
+        var password = this.get('model.password');
 
         this.set('modalPassword', password);
         this.set('modalPasswordStatus', password === null ? 'disabled' : 'enabled');

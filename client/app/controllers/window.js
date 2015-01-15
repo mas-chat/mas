@@ -24,31 +24,31 @@ import { play } from '../helpers/sound';
 export default Ember.Controller.extend({
     actions: {
         hide: function() {
-            this.set('visible', false);
-            this.set('timeHidden', Date.now());
+            this.set('model.visible', false);
+            this.set('model.timeHidden', Date.now());
         },
 
         close: function() {
             this.remote.send({
                 id: 'CLOSE',
-                windowId: this.get('windowId')
+                windowId: this.get('model.windowId')
             });
         },
 
         sendMessage: function() {
-            var text = this.get('model.newMessage');
-            this.set('model.newMessage', '');
+            var text = this.get('newMessage');
+            this.set('newMessage', '');
 
             this.remote.send({
                 id: 'SEND',
                 text: text,
-                windowId: this.get('windowId')
+                windowId: this.get('model.windowId')
             });
 
             var messageRecord = this.get('container').lookup('model:message').setProperties({
                 body: text,
                 cat: 'mymsg',
-                nick: this.get('store.nicks')[this.get('network')],
+                nick: this.get('store.nicks')[this.get('model.network')],
                 ts: moment().unix()
             });
 
@@ -58,7 +58,7 @@ export default Ember.Controller.extend({
         chat: function(userId) {
             this.remote.send({
                 id: 'CHAT',
-                windowId: this.get('windowId'),
+                windowId: this.get('model.windowId'),
                 userId: userId
             }, function(resp) {
                 if (resp.status !== 'OK') {
@@ -70,7 +70,7 @@ export default Ember.Controller.extend({
         whois: function(userId) {
             this.remote.send({
                 id: 'WHOIS',
-                windowId: this.get('windowId'),
+                windowId: this.get('model.windowId'),
                 userId: userId
             });
         },
@@ -78,7 +78,7 @@ export default Ember.Controller.extend({
         op: function(userId) {
             this.remote.send({
                 id: 'OP',
-                windowId: this.get('windowId'),
+                windowId: this.get('model.windowId'),
                 userId: userId
             });
         },
@@ -90,7 +90,7 @@ export default Ember.Controller.extend({
         kick: function(userId) {
             this.remote.send({
                 id: 'KICK',
-                windowId: this.get('windowId'),
+                windowId: this.get('model.windowId'),
                 userId: userId
             });
         },
@@ -98,13 +98,13 @@ export default Ember.Controller.extend({
         kickban: function(userId) {
             this.remote.send({
                 id: 'KICKBAN',
-                windowId: this.get('windowId'),
+                windowId: this.get('model.windowId'),
                 userId: userId
             });
         },
 
         scrollUp: function() {
-            if (!this.get('deletedLine') && !this.get('model.scrollLock')) {
+            if (!this.get('model.deletedLine') && !this.get('model.scrollLock')) {
                 this.set('model.scrollLock', true);
                 Ember.Logger.info('scrollock on');
             }
@@ -113,7 +113,7 @@ export default Ember.Controller.extend({
         scrollBottom: function() {
             if (this.get('model.scrollLock')) {
                 this.set('model.scrollLock', false);
-                this.set('newMessagesCount', 0);
+                this.set('model.newMessagesCount', 0);
                 Ember.Logger.info('scrollock off');
             }
         }
@@ -122,18 +122,18 @@ export default Ember.Controller.extend({
     initDone: Ember.computed.alias('controllers.application.initDone'),
 
     newMessageReceived: function() {
-        if (!this.get('visible') || this.get('model.scrollLock')) {
-            this.incrementProperty('newMessagesCount');
+        if (!this.get('model.visible') || this.get('model.scrollLock')) {
+            this.incrementProperty('model.newMessagesCount');
         }
 
         if (document.hidden) {
             // Browser title notification
-            if (this.get('titleAlert')) {
+            if (this.get('model.titleAlert')) {
                 titlenotifier.add();
             }
 
             // Sound notification
-            if (this.get('sounds')) {
+            if (this.get('model.sounds')) {
                 play();
             }
         }
@@ -154,7 +154,6 @@ export default Ember.Controller.extend({
 
     _seekRow: function(direction) {
         var newRow = this.get('parentController').nextRow(this.get('model'), direction);
-        this.set('row', newRow);
-        this.set('animate', true);
+        this.set('model.row', newRow);
     }
 });
