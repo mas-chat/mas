@@ -703,7 +703,9 @@ function *handleTopic(userId, msg) {
     var topic = msg.params[1];
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
 
-    yield conversation.setTopic(topic, msg.nick);
+    if (conversation) {
+        yield conversation.setTopic(topic, msg.nick);
+    }
 }
 
 function *handlePrivmsg(userId, msg) {
