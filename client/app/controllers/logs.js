@@ -18,7 +18,7 @@
 
 import Ember from 'ember';
 
-export default Ember.ArrayController.extend({
+export default Ember.Controller.extend({
     actions: {
         close: function() {
             this.send('closeFullScreenModal');

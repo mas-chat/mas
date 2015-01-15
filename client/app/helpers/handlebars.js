@@ -20,7 +20,7 @@
 
 import Ember from 'ember';
 
-var SafeString = Ember.Handlebars.Utils.SafeString;
+var SafeString = Ember.Handlebars.SafeString;
 
 Ember.Handlebars.helper('decoratedTimestamp', function(timestamp) {
     var ts = moment.unix(timestamp);
