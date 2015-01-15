@@ -61,14 +61,19 @@ MacOS/Linux/Windows.
    $ bower install
    $ ember build
    ```
+7. Launch redis in one window
 
-6. Launch the server components
+  ```bash
+  $ redis-server
+  ```
+
+8. Launch the server components
 
    ```bash
    $ ./bin/masctl -c start
    ```
 
-7. Browse to ```http://localhost:3200/``` and register an account.
+9. Browse to ```http://localhost:3200/``` and register an account.
 
 ## masctl
 
