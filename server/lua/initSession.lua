@@ -78,9 +78,9 @@ for i = 1, #windowIds do
     local oneOnOneUserId = nil
 
     if conversation.password == '' then
-        window.password = cjson.null
+        conversation.password = cjson.null
     else
-        window.password = conversation.password
+        conversation.password = conversation.password
     end
 
     local role = redis.call('HGET', 'conversationmembers:' .. conversationId, userId)
