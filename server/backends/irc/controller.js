@@ -257,54 +257,24 @@ function *processRestarted() {
 
 // Data
 function *processData(params) {
-    var line = params.line.trim(),
-        parts = line.split(' '),
-        msg = {
-            params: [],
-            network: params.network
-        };
+    var key = params.userId + params.network;
 
-    // See rfc2812
-
-    if ((line.charAt(0) === ':')) {
-        // Prefix exists
-        var prefix = parts.shift();
-
-        var nickEnds = prefix.indexOf('!');
-        var identEnds = prefix.indexOf('@');
-
-        if (nickEnds === -1 && identEnds === -1) {
-            msg.serverName = prefix.substring(1);
-        } else {
-            msg.nick = prefix.substring(1, Math.min(nickEnds, identEnds));
-            msg.userNameAndHost = prefix.substring(Math.min(nickEnds + 1, identEnds + 1));
-        }
+    if (!ircMessageBuffer[key]) {
+        ircMessageBuffer[key] = [];
     }
 
-    msg.command = parts.shift();
+    ircMessageBuffer[key].push(params);
 
-    if (msg.command.match(/^[0-9]+$/) !== null) {
-        // Numeric reply
-        msg.target = parts.shift();
+    // Don't process multiple protocol messages from single connection in parallel.
+    // IRC messages must me processed in the same order they arrive. Especially
+    // response 353 and 366 would race with bad results without this limit.
 
-        if (/^[&#!+]/.test(msg.target)) {
-            // Channel names are case insensitive, always use lower case version
-            msg.target = msg.target.toLowerCase();
+    if (ircMessageBuffer[key].length === 1) {
+        // Works because this function is reentrant!
+        while (ircMessageBuffer[key].length > 0) {
+            yield parseIrcMessage(ircMessageBuffer[key][0]);
+            ircMessageBuffer[key].shift();
         }
-    }
-
-    // Only the parameters are left now
-    while (parts.length !== 0) {
-        if (parts[0].charAt(0) === ':') {
-            msg.params.push(parts.join(' ').substring(1));
-            break;
-        } else {
-            msg.params.push(parts.shift());
-        }
-    }
-
-    if (handlers[msg.command]) {
-        yield handlers[msg.command](params.userId, msg, msg.command);
     }
 }
 
@@ -362,6 +332,58 @@ function *processDisconnected(params) {
     yield connect(params.userId, params.network, true);
 }
 
+function *parseIrcMessage(params) {
+    var line = params.line.trim(),
+        parts = line.split(' '),
+        msg = {
+            params: [],
+            network: params.network
+        };
+
+    // See rfc2812
+
+    if ((line.charAt(0) === ':')) {
+        // Prefix exists
+        var prefix = parts.shift();
+
+        var nickEnds = prefix.indexOf('!');
+        var identEnds = prefix.indexOf('@');
+
+        if (nickEnds === -1 && identEnds === -1) {
+            msg.serverName = prefix.substring(1);
+        } else {
+            msg.nick = prefix.substring(1, Math.min(nickEnds, identEnds));
+            msg.userNameAndHost = prefix.substring(Math.min(nickEnds + 1, identEnds + 1));
+        }
+    }
+
+    msg.command = parts.shift();
+
+    if (msg.command.match(/^[0-9]+$/) !== null) {
+        // Numeric reply
+        msg.target = parts.shift();
+
+        if (/^[&#!+]/.test(msg.target)) {
+            // Channel names are case insensitive, always use lower case version
+            msg.target = msg.target.toLowerCase();
+        }
+    }
+
+    // Only the parameters are left now
+    while (parts.length !== 0) {
+        if (parts[0].charAt(0) === ':') {
+            msg.params.push(parts.join(' ').substring(1));
+            break;
+        } else {
+            msg.params.push(parts.shift());
+        }
+    }
+
+    if (handlers[msg.command]) {
+        yield handlers[msg.command](params.userId, msg, msg.command);
+    }
+}
+
 function *addSystemMessage(userId, network, body) {
     var conversation = yield conversationFactory.find1on1(userId, 'iSERVER', network);
 
@@ -387,6 +409,7 @@ function *connect(userId, network, skipRetryCountReset) {
     }
 
     yield addSystemMessage(userId, network, 'INFO: Connecting to IRC server...');
+    ircMessageBuffer[userId + network] = [];
 
     courier.send('connectionmanager', {
         type: 'connect',
