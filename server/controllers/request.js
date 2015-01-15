@@ -73,6 +73,10 @@ module.exports = function*(userId, sessionId, command) {
 };
 
 function *handleSend(params) {
+    if (!params.conversation) {
+        return;
+    }
+
     yield params.conversation.addMessage({
         userId: params.userId,
         cat: 'msg',
@@ -173,6 +177,10 @@ function *handleUpdate(params) {
 }
 
 function *handleUpdatePassword(params) {
+    if (!params.conversation) {
+        return;
+    }
+
     var password = params.command.password;
 
     // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
@@ -197,8 +205,7 @@ function *handleUpdatePassword(params) {
     courier.send(params.backend, {
         type: 'updatePassword',
         userId: params.userId,
-        name: params.name,
-        network: params.network,
+        conversationId: params.conversation.conversationId,
         password: password
     });
 
@@ -209,6 +216,10 @@ function *handleUpdatePassword(params) {
 }
 
 function handleUpdateTopic(params) {
+    if (!params.conversation) {
+        return;
+    }
+
     courier.send(params.backend, {
         type: 'updateTopic',
         userId: params.userId,
