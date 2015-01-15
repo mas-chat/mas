@@ -19,7 +19,7 @@
 import Ember from 'ember';
 import UploadMixin from '../mixins/upload';
 
-export default Ember.ObjectController.extend(UploadMixin, {
+export default Ember.Controller.extend(UploadMixin, {
     shot: null,
     note: 'Allow webcam access in your browser.',
 
