@@ -28,7 +28,7 @@ export default Ember.Controller.extend({
 
             this.remote.send({
                 id: 'UPDATE_TOPIC',
-                windowId: this.get('windowId'),
+                windowId: this.get('model.windowId'),
                 topic: newTopic
             });
 
@@ -36,16 +36,16 @@ export default Ember.Controller.extend({
         },
 
         cancel: function() {
-            this.set('modalTopic', this.get('topic'));
+            this.set('modalTopic', this.get('model.topic'));
             this.send('closeModal');
         }
     },
 
     topicTitle: function() {
-        return 'Edit topic for \'' + this.get('name') + '\'';
-    }.property('name'),
+        return 'Edit topic for \'' + this.get('model.name') + '\'';
+    }.property('model.name'),
 
     topicDidChange: function() {
-        this.set('modalTopic', this.get('topic'));
-    }.observes('topic').on('init')
+        this.set('modalTopic', this.get('model.topic'));
+    }.observes('model.topic').on('init')
 });

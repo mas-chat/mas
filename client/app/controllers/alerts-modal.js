@@ -30,7 +30,7 @@ export default Ember.Controller.extend({
 
             this.remote.send({
                 id: 'UPDATE',
-                windowId: this.get('windowId'),
+                windowId: this.get('model.windowId'),
                 sounds: newSoundAlert === 'enabled',
                 titleAlert: newTitleAlert === 'enabled'
             });
@@ -46,14 +46,14 @@ export default Ember.Controller.extend({
 
     alertsDidChange: function() {
         this._updateModalAlerts();
-    }.observes('sounds', 'titleAlert').on('init'),
+    }.observes('model.sounds', 'model.titleAlert').on('init'),
 
     alertsTitle: function() {
-        return 'Configure alerts for \'' + this.get('name') + '\'';
-    }.property('name'),
+        return 'Configure alerts for \'' + this.get('model.name') + '\'';
+    }.property('model.name'),
 
     _updateModalAlerts: function() {
-        this.set('modalSoundAlert', this.get('sounds') ? 'enabled' : 'disabled');
-        this.set('modalTitleAlert', this.get('titleAlert') ? 'enabled' : 'disabled');
+        this.set('modalSoundAlert', this.get('model.sounds') ? 'enabled' : 'disabled');
+        this.set('modalTitleAlert', this.get('model.titleAlert') ? 'enabled' : 'disabled');
     }
 });
