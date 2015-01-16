@@ -38,7 +38,7 @@ co(function*() {
     courier.on('send', courier.noop);
     courier.on('chat', courier.noop);
     courier.on('updateTopic', processUpdateTopic);
-    courier.on('updatePassword', courier.noop);
+    courier.on('updatePassword', processUpdatePassword);
     courier.on('create', processCreate);
     courier.on('join', processJoin);
     courier.on('close', processClose);
@@ -121,6 +121,12 @@ function *processClose(params) {
     params = params;
     /* jshint noyield:true */
     // TBD
+}
+
+function *processUpdatePassword(params) {
+    var conversation = yield conversationFactory.get(params.conversationId);
+
+    yield conversation.setPassword(params.password);
 }
 
 function *processUpdateTopic(params) {

@@ -202,8 +202,6 @@ function *handleUpdatePassword(params) {
         return;
     }
 
-    yield params.conversation.setPassword(password);
-
     courier.send(params.backend, {
         type: 'updatePassword',
         userId: params.userId,
