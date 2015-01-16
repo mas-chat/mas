@@ -92,7 +92,9 @@ function *handleSend(params) {
     });
 }
 
-function handleCreate(params) {
+function *handleCreate(params) {
+    /* jshint noyield:true */
+
     courier.send('loopbackparser', {
         type: 'create',
         userId: params.userId,
@@ -215,7 +217,9 @@ function *handleUpdatePassword(params) {
     });
 }
 
-function handleUpdateTopic(params) {
+function *handleUpdateTopic(params) {
+    /* jshint noyield:true */
+
     if (!params.conversation) {
         return;
     }
@@ -228,7 +232,9 @@ function handleUpdateTopic(params) {
     });
 }
 
-function handleWhois(params) {
+function *handleWhois(params) {
+    /* jshint noyield:true */
+
     courier.send(params.backend, {
         type: 'whois',
         userId: params.userId,
