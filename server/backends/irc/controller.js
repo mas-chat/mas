@@ -245,7 +245,7 @@ function *processRestarted() {
             if (network !== 'MAS') {
                 log.info(userId, 'Scheduling connect() to IRC network: ' + network);
 
-                yield addSystemMessage(userId, network,
+                yield addSystemMessage(userId, network, 'info',
                     'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
                     ' server enabled. Next connect will be slow.');
 
@@ -327,7 +327,7 @@ function *processDisconnected(params) {
             'to retry.';
     }
 
-    yield addSystemMessage(userId, network, msg);
+    yield addSystemMessage(userId, network, 'error', msg);
     yield wait(delay);
     yield connect(params.userId, params.network, true);
 }
@@ -384,7 +384,7 @@ function *parseIrcMessage(params) {
     }
 }
 
-function *addSystemMessage(userId, network, body) {
+function *addSystemMessage(userId, network, cat, body) {
     var conversation = yield conversationFactory.find1on1(userId, 'iSERVER', network);
 
     if (!conversation) {
@@ -393,7 +393,7 @@ function *addSystemMessage(userId, network, body) {
 
     yield conversation.addMessage({
         userId: 'SERVER',
-        cat: 'info',
+        cat: cat,
         body: body
     });
 }
@@ -408,7 +408,7 @@ function *connect(userId, network, skipRetryCountReset) {
         yield resetRetryCount(userId, network);
     }
 
-    yield addSystemMessage(userId, network, 'INFO: Connecting to IRC server...');
+    yield addSystemMessage(userId, network, 'info', 'Connecting to IRC server...');
     ircMessageBuffer[userId + network] = [];
 
     courier.send('connectionmanager', {
@@ -472,18 +472,11 @@ var handlers = {
 function *handleServerText(userId, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     var text = msg.params.join(' ');
-    var cat = 'info';
+    var cat = code === '372' ? 'banner' : 'server'; // 372 = MOTD line
 
-    if (!text) {
-        return;
+    if (text) {
+        yield addSystemMessage(userId, msg.network, cat, text);
     }
-
-    // 375 = MOTD line
-    if (code === '372') {
-        cat = 'banner';
-    }
-
-    yield addSystemMessage(userId, msg.network, text);
 }
 
 function *handle043(userId, msg) {
@@ -533,6 +526,7 @@ function *handle366(userId, msg) {
 function *handle376(userId, msg) {
     yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'connected');
     yield resetRetryCount(userId, msg.network);
+    yield addSystemMessage(userId, msg.network, 'server', msg.params.join(' '));
 
     var conversationIds = yield window.getAllConversationIds(userId);
     var channelsToJoin = [];
@@ -572,7 +566,8 @@ function *handle482(userId, msg) {
     // irc.localhost 482 ilkka #test2 :You're not channel operator
     var channel = msg.params[0];
 
-    yield addSystemMessage(userId, msg.network, 'You\'re not channel operator on ' + channel);
+    yield addSystemMessage(
+        userId, msg.network, 'error', 'You\'re not channel operator on ' + channel);
 }
 
 function *handleJoin(userId, msg) {
@@ -627,12 +622,13 @@ function *handleNick(userId, msg) {
 function *handleError(userId, msg) {
     var reason = msg.params[0];
 
-    yield addSystemMessage(userId, msg.network, 'Connection lost. Server error: ' + reason);
+    yield addSystemMessage(
+        userId, msg.network, 'error', 'Connection lost. Server error: ' + reason);
 
     if (reason.indexOf('Too many host connections') !== -1) {
         log.error(userId, 'Too many connections to: ' + msg.network);
 
-        yield addSystemMessage(userId, msg.network,
+        yield addSystemMessage(userId, msg.network, 'error',
             msg.network + ' IRC network doesn\'t allow more connections. ' +
             'Close this window and rejoin to try again.');
 
