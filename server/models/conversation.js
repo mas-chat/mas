@@ -237,7 +237,7 @@ Conversation.prototype.sendAddMembers = function*(userId) {
 };
 
 Conversation.prototype.setTopic = function*(topic, nick) {
-    var changed = yield redis.run('setTopic', this.conversationId, topic);
+    var changed = yield redis.run('setConversationField', this.conversationId, 'topic', topic);
 
     if (!changed) {
         return;
@@ -257,8 +257,14 @@ Conversation.prototype.setTopic = function*(topic, nick) {
 };
 
 Conversation.prototype.setPassword = function*(password) {
+    var changed = yield redis.run(
+        'setConversationField', this.conversationId, 'password', password);
+
+    if (!changed) {
+        return;
+    }
+
     this.password = password;
-    yield redis.hset('conversation:' + this.conversationId, 'password', password);
 
     yield this._stream({
         id: 'UPDATE',
