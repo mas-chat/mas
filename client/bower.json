@@ -19,7 +19,7 @@
     "ember-qunit-notifications": "0.0.4",
     "qunit": "~1.16.0",
     "jquery": "~2.1.1",
-    "momentjs": "~2.8.2",
+    "momentjs": "~2.9.0",
     "howler": "~1.1.25",
     "lodash": "^2.4.0",
     "bootstrap": "~3.3.1",
@@ -34,13 +34,12 @@
     "magnific-popup": "~0.9.9",
     "bootstrap-contextmenu": "~0.3.1",
     "font-awesome": "~4.2.0",
-    "velocity": "~1.1.0",
+    "velocity": "~1.2.1",
     "FileAPI": "~2.0.6",
     "socket.io-client": "~1.2.1"
   },
   "resolutions": {
     "ember": "canary",
-    "jquery": "~2.1.1",
-    "handlebars": ">= 2.0.0 < 3.0.0"
+    "jquery": "~2.1.1"
   }
 }
