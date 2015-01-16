@@ -237,13 +237,13 @@ Conversation.prototype.sendAddMembers = function*(userId) {
 };
 
 Conversation.prototype.setTopic = function*(topic, nick) {
-    if (topic === this.topic) {
-        // No change
+    var changed = yield redis.run('setTopic', this.conversationId, topic);
+
+    if (!changed) {
         return;
     }
 
     this.topic = topic;
-    yield redis.hset('conversation:' + this.conversationId, 'topic', topic);
 
     yield this._stream({
         id: 'UPDATE',
