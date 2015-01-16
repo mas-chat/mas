@@ -152,7 +152,7 @@ Add a messge to window.
 
   "windowId": 1,
   "body": "Hello worlds!",
-  "cat": "notice",
+  "cat": "msg",
   "ts": "2093243",
   "userId": "m432454",
   "gid": 823458234
@@ -161,7 +161,7 @@ Add a messge to window.
 
 ```ts``` is a unix timestamp, seconds since epoch.
 
-```cat``` can be ```msg```, ```info```, ```notice```, ```banner```, ```error```, ```mymsg```, ```mention```, ```action``` or ```robot```
+```cat``` can be ```msg```, ```info```, ```banner```, ```server```, ```error```, ```mymsg```
 
 ```gid``` is a globally unique identifier (integer) for the message. Given two messages, a newer one has always larger gid. Gid can increase by more than one between subsequent messages inside a window.
 
