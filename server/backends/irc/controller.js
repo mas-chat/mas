@@ -500,7 +500,9 @@ function *handle332(userId, msg) {
     var topic = msg.params[1];
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
 
-    yield conversation.setTopic(topic);
+    if (conversation) {
+        yield conversation.setTopic(topic);
+    }
 }
 
 function *handle353(userId, msg) {
@@ -509,7 +511,9 @@ function *handle353(userId, msg) {
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
     var names = msg.params[2].split(' ');
 
-    yield bufferNames(names, userId, msg.network, conversation.conversationId);
+    if (conversation) {
+        yield bufferNames(names, userId, msg.network, conversation.conversationId);
+    }
 }
 
 function *handle366(userId, msg) {
@@ -521,7 +525,7 @@ function *handle366(userId, msg) {
     var namesHash = yield redis.hgetall(key);
     yield redis.del(key);
 
-    if (Object.keys(namesHash).length > 0) {
+    if (conversation && Object.keys(namesHash).length > 0) {
         yield conversation.setGroupMembers(namesHash);
     }
 }
@@ -644,7 +648,9 @@ function *handlePart(userId, msg) {
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
     var targetUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
 
-    yield conversation.removeGroupMember(targetUserId);
+    if (conversation) {
+        yield conversation.removeGroupMember(targetUserId);
+    }
 }
 
 function *handleMode(userId, msg) {
@@ -657,6 +663,10 @@ function *handleMode(userId, msg) {
     }
 
     var conversation = yield conversationFactory.findGroup(target, msg.network);
+
+    if (!conversation) {
+        return;
+    }
 
     yield conversation.addMessageUnlessDuplicate(userId, {
         cat: 'info',
