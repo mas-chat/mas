@@ -68,7 +68,9 @@ export default Ember.Object.extend({
         var name = this.get('name');
         var network = this.get('network');
 
-        if (this.get('type') === '1on1') {
+        if (this.get('type') === '1on1' && this.get('userId') === 'iSERVER') {
+            title = network + ' Server Messages';
+        } else if (this.get('type') === '1on1') {
             var conversationNetwork = network === 'MAS' ? '' : network + ' ';
             title = 'Private ' + conversationNetwork + 'conversation with ' +
                 this.get('store.users').getNick(this.get('userId'));
