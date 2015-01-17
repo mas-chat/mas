@@ -236,6 +236,14 @@ Conversation.prototype.sendAddMembers = function*(userId) {
     });
 };
 
+Conversation.prototype.sendUsers = function*(userId) {
+    var userIds = Object.keys(this.members);
+
+    for (var i = 0; i < userIds.length; i++) {
+        yield redis.run('introduceNewUserIds', userIds[i], null, null, true, userId);
+    }
+};
+
 Conversation.prototype.setTopic = function*(topic, nick) {
     var changed = yield redis.run('setConversationField', this.conversationId, 'topic', topic);
 

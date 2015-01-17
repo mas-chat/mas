@@ -89,7 +89,7 @@ function *handleNewUserIds(userId, sessionId, excludeSessionId, commands) {
 
     allUserIds = _.uniq(allUserIds);
     yield redis.run.apply(null,
-        [ 'introduceNewUserIds', userId, sessionId, excludeSessionId ].concat(allUserIds));
+        [ 'introduceNewUserIds', userId, sessionId, excludeSessionId, false ].concat(allUserIds));
 }
 
 function scanUserIds(obj) {
