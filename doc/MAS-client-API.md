@@ -212,7 +212,7 @@ Create new window. Window identifier is either ```userId``` or ```name```.
 
 ```userId``` is null if ```type``` is ```group```
 
-A fixed userId `iSERVER` is reserved for `1on1` windows that show messages from IRC server when the user is connected to an IRC network. This information can be used to style these special 1on1s differently.
+If the ```type``` is ```1on1``` and the ```userId``` is ```iSERVER``` then the window is an 1on1 with IRC network server. These are normal 1on1s except the user can only send messages starting with `/` character. Other messages are silently ignored.
 
 ### USERS
 
@@ -407,6 +407,15 @@ Following requests are supported. Under every request is corresponding response.
 ```
 
 ### SEND_RESP
+
+```
+{
+  "id": "SEND_RESP",
+
+  "windowId": 2,
+  "status": "OK"
+}
+```
 
 ### JOIN
 
