@@ -63,6 +63,11 @@ function *processSend(params) {
     assert(params.conversationId);
 
     var conversation = yield conversationFactory.get(params.conversationId);
+
+    if (!conversation) {
+        return;
+    }
+
     var target = conversation.name;
 
     if (conversation.type === '1on1') {
@@ -392,7 +397,7 @@ function *addSystemMessage(userId, network, cat, body) {
     }
 
     yield conversation.addMessage({
-        userId: 'SERVER',
+        userId: 'iSERVER',
         cat: cat,
         body: body
     });
@@ -526,7 +531,9 @@ function *handle366(userId, msg) {
 function *handle376(userId, msg) {
     yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'connected');
     yield resetRetryCount(userId, msg.network);
+
     yield addSystemMessage(userId, msg.network, 'server', msg.params.join(' '));
+    yield addSystemMessage(userId, msg.network, 'info', 'Connected to IRC server.');
 
     var conversationIds = yield window.getAllConversationIds(userId);
     var channelsToJoin = [];
@@ -772,14 +779,10 @@ function *handlePrivmsg(userId, msg) {
 }
 
 function *tryDifferentNick(userId, network) {
-    // TBD Set currentnick to nick and send NICK periodically to trigger this
-    // method to try to reclaim the real nick
-
     var nick = yield redis.hget('user:' + userId, 'nick');
     var currentNick = yield nicks.getCurrentNick(userId, network);
 
     var state = yield redis.hget('networks:' + userId + ':' + network, 'state');
-    var nickHasNumbers = false;
 
     if (nick !== currentNick.substring(0, nick.length)) {
         // Current nick is unique ID, let's try to change it to something unique immediately
@@ -790,25 +793,19 @@ function *tryDifferentNick(userId, network) {
     } else if (currentNick === nick + '_') {
         // Third best choice
         currentNick = nick + (Math.floor((Math.random() * 10)));
-        nickHasNumbers = true;
     } else {
         // If all else fails, keep adding random numbers
         currentNick = currentNick + (Math.floor((Math.random() * 10)));
-        nickHasNumbers = true;
     }
 
     yield nicks.updateCurrentNick(userId, network, currentNick);
 
-    // If we are joining IRC try all alternatives. If we are connected,
-    // try to get only 'nick' or 'nick_' back
-    if (!(state === 'connected' && nickHasNumbers)) {
-        courier.send('connectionmanager', {
-            type: 'write',
-            userId: userId,
-            network: network,
-            line: 'NICK ' + currentNick
-        });
-    }
+    courier.send('connectionmanager', {
+        type: 'write',
+        userId: userId,
+        network: network,
+        line: 'NICK ' + currentNick
+    });
 }
 
 // TBD: Add a timer (every 15min?) to send one NAMES to every irc channel to make sure memberslist
