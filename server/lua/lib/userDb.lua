@@ -14,17 +14,42 @@
 --   governing permissions and limitations under the License.
 --
 
-local function getNick(userId)
+local function getNicks(userId)
     local class = string.sub(userId, 1, 1)
+    local nicks = {}
+    local networks = redis.call('SMEMBERS', 'networklist')
 
-    if class == 'm' then
-        return redis.call('HGET', 'user:' .. userId, 'nick')
+    -- Special userIds
+    if userId == 'iSERVER' then
+        for i = 1, #networks do
+            nicks[networks[i]] = 'IRC server'
+        end
+    elseif class == 'm' then
+        for i = 1, #networks do
+            local networkNick = redis.call('HGET',
+                'networks:' .. userId .. ':' .. networks[i], 'currentnick')
+
+            if networkNick then
+                nicks[networks[i]] = networkNick
+            end
+        end
     elseif class == 'i' then
-        return redis.call('HGET', 'ircuser:' .. userId, 'nick')
+        local networkNick = redis.call('HGET', 'ircuser:' .. userId, 'nick')
+
+        for i = 1, #networks do
+            nicks[networks[i]] = networkNick -- This is a shortcut, ircUserId is scoped by network
+        end
     end
+
+    return nicks
 end
 
 local function getName(userId)
+    -- Special userIds
+    if userId == 'iSERVER' then
+        return 'IRC server'
+    end
+
     local class = string.sub(userId, 1, 1)
 
     if class == 'm' then
