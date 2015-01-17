@@ -1,4 +1,4 @@
-<div {{bind-attr class=":window-title :flex-row cssType"}}>
+<div class="window-title flex-row {{cssType}} {{ircServerWindow}}">
     <div class="window-caption flex-1" data-toggle="tooltip" data-placement="bottom" data-delay='{"show": 1500, "hide": 300}' title={{model.tooltipTopic}}>
         {{model.decoratedTitle}} {{model.decoratedTopic}}
     </div>

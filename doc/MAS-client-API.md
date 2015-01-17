@@ -212,6 +212,8 @@ Create new window. Window identifier is either ```userId``` or ```name```.
 
 ```userId``` is null if ```type``` is ```group```
 
+A fixed userId `iSERVER` is reserved for `1on1` windows that show messages from IRC server when the user is connected to an IRC network. This information can be used to style these special 1on1s differently.
+
 ### USERS
 
 Information about the other users. Server sends USERS command containing a userId before that userId is used in any other message.

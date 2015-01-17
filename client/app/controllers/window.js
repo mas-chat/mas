@@ -146,8 +146,9 @@ export default Ember.Controller.extend({
     cssType: function() {
         if (this.get('model.type') === 'group') {
             return 'group';
+        } else if (this.get('model.userId') === 'iSERVER') {
+            return 'server-1on1';
         } else {
-            // 1on1 is not valid css class name
             return 'private-1on1';
         }
     }.property('model.type'),

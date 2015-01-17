@@ -23,8 +23,13 @@ import UploadMixin from '../mixins/upload';
 
 export default Ember.View.extend(UploadMixin, {
     classNames: [ 'window', 'flex-grow-column' ],
-    classNameBindings: [ 'expanded:expanded:', 'visible:visible:hidden' ],
     attributeBindings: [ 'row:data-row', 'draggable' ],
+
+    classNameBindings: [
+        'expanded:expanded:',
+        'visible:visible:hidden',
+        'ircServerWindow:irc-server-window:'
+    ],
 
     row: Ember.computed.alias('controller.model.row'),
     visible: Ember.computed.alias('controller.model.visible'),
@@ -41,6 +46,10 @@ export default Ember.View.extend(UploadMixin, {
     visibilityChanged: function() {
         this.get('parentView').windowAdded(true);
     }.observes('controller.model.visible'),
+
+    ircServerWindow: function() {
+        return this.get('controller.model.userId') === 'iSERVER' ? 'irc-server-window' : '';
+    }.property('controller.model.userId'),
 
     $messagePanel: null,
     $images: null,
