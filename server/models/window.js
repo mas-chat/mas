@@ -66,7 +66,7 @@ exports.getAllConversationIdsWithUserId = function*(userId, targetUserId) {
     }
 
     for (var i = 0; i < conversationIds.length; i++) {
-        var conversation = yield conversationFactory.get(getAllConversationIds[i]);
+        var conversation = yield conversationFactory.get(conversationIds[i]);
         var members = Object.keys(conversation.members);
 
         var exists = members.some(compare);
