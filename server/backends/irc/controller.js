@@ -598,24 +598,24 @@ function *handleQuit(userId, msg) {
 function *handleNick(userId, msg) {
     // :ilkkao!~ilkkao@localhost NICK :foobar
     var newNick = msg.params[0];
-    var currentNick = yield nicks.getCurrentNick(userId, msg.network);
+    var oldNick = msg.nick;
 
-    if (msg.nick === currentNick) {
-        // User's own nick is changing
-        yield nicks.updateCurrentNick(userId, msg.network, newNick);
-    }
+    var targetUserId = yield redis.run('updateNick', userId, msg.network, oldNick, newNick);
 
-    var targetUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
-    var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
+    if (targetUserId) {
+        log.info(userId, 'I\'m first and handle ' + oldNick + ' -> ' + newNick + ' nick change.');
 
-    // TBD: update ircuser database and send USERS update
+        // We havent heard about this change before
+        var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
 
-    for (var i = 0; i < conversationIds.length; i++) {
-        var conversation = yield conversationFactory.get(conversationIds[i]);
-        yield conversation.addMessageUnlessDuplicate(userId, {
-            cat: 'info',
-            body: msg.nick + ' is now known as ' + newNick
-        });
+        for (var i = 0; i < conversationIds.length; i++) {
+            var conversation = yield conversationFactory.get(conversationIds[i]);
+            yield conversation.addMessageUnlessDuplicate(userId, {
+                cat: 'info',
+                body: msg.nick + ' is now known as ' + newNick
+            });
+            yield conversation.sendUsers(targetUserId);
+        }
     }
 }
 

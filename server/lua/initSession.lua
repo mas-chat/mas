@@ -155,7 +155,7 @@ for k,v in pairs(seenUserIds) do
     table.insert(userIdList, k)
 end
 
-introduceNewUserIds(userId, sessionId, nil, userIdList)
+introduceNewUserIds(userId, sessionId, nil, false, userIdList)
 
 redis.call('LPUSH', outbox, cjson.encode({
     ['id'] = 'INITDONE'

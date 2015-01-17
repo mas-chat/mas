@@ -16,7 +16,7 @@
 
 #include 'userDb'
 
-local function introduceNewUserIds(userId, sessionId, excludeSessionId, userIdList)
+local function introduceNewUserIds(userId, sessionId, excludeSessionId, force, userIdList)
     local sessions
 
     if sessionId ~= nil then
@@ -34,12 +34,12 @@ local function introduceNewUserIds(userId, sessionId, excludeSessionId, userIdLi
             for ii = 1, #userIdList do
                 local isKnown = redis.call('SISMEMBER', key, userIdList[ii])
 
-                if isKnown == 0 then
+                if isKnown == 0 or force == "true" then
                     -- This client session hasn't seen this userId yet
                     local newUserId = userIdList[ii]
 
                     newUsers[newUserId] = {
-                        ['nick'] = getNick(newUserId),
+                        ['nick'] = getNicks(newUserId),
                         ['name'] = getName(newUserId)
                     }
                 end
