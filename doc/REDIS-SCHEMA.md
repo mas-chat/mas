@@ -61,6 +61,9 @@ MAS Redis structures
    currentnick (text)
    retryCount (int)
 
+ networklist (set)
+   <network1>, <network2> ...
+
  index:currentnick (hash)
    <network>:<nick> (string, userId)
 

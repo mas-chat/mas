@@ -30,6 +30,7 @@ var koa = require('koa'),
     conf = require('./lib/conf'),
     log = require('./lib/log'),
     redisModule = require('./lib/redis'),
+    redis = redisModule.createClient(),
     passport = require('./lib/passport'),
     userSession = require('./lib/userSession'),
     routes = require('./routes/routes'),
@@ -67,6 +68,10 @@ socketController.setup(server);
 
 co(function*() {
     var port = conf.get('frontend:port');
+
+    yield redis.del('networklist');
+    yield redis.sadd('networklist', 'MAS');
+    yield redis.sadd('networklist', Object.keys(conf.get('irc:networks')));
 
     yield redisModule.loadScripts();
     scheduler.init();
