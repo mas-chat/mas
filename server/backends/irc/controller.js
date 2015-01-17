@@ -472,7 +472,7 @@ var handlers = {
 function *handleServerText(userId, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     var text = msg.params.join(' ');
-    var cat = code === '372' ? 'banner' : 'server'; // 372 = MOTD line
+    var cat = code === '372' || code === '375' ? 'banner' : 'server'; // 372 and 375 = MOTD line
 
     if (text) {
         yield addSystemMessage(userId, msg.network, cat, text);
