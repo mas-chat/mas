@@ -396,8 +396,15 @@ function *parseIrcMessage(params) {
         }
     }
 
-    if (handlers[msg.command]) {
-        yield handlers[msg.command](params.userId, msg, msg.command);
+    var handler = handlers[msg.command];
+
+    if (!handler && !isNaN(msg.command)) {
+        // Default handler for all numeric replies
+        handler = handleServerText;
+    }
+
+    if (handler) {
+        yield handler(params.userId, msg, msg.command);
     }
 }
 
@@ -449,32 +456,16 @@ function *disconnect(userId, network) {
 // Process different IRC commands
 
 var handlers = {
-    '001': handleServerText,
-    '002': handleServerText,
-    '003': handleServerText,
-    '005': handleServerText,
-    '020': handleServerText,
-    '042': handleServerText,
     '043': handle043,
-    242: handleServerText,
-    250: handleServerText,
-    251: handleServerText,
-    252: handleServerText,
-    253: handleServerText,
-    254: handleServerText,
-    255: handleServerText,
-    265: handleServerText,
-    266: handleServerText,
-    372: handleServerText,
-    375: handleServerText,
-    452: handleServerText,
-
     332: handle332,
+    333: handleNoop, // RPL_TOPICWHOTIME: No good place to show
     353: handle353,
     366: handle366,
     376: handle376,
     433: handle433,
     482: handle482,
+
+    // All other numeric replies are processed by handleServerText()
 
     JOIN: handleJoin,
     PART: handlePart,
@@ -485,6 +476,10 @@ var handlers = {
     PRIVMSG: handlePrivmsg,
     ERROR: handleError
 };
+
+function *handleNoop() {
+    /* jshint noyield:true */
+}
 
 function *handleServerText(userId, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
