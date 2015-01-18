@@ -16,8 +16,6 @@
 
 'use strict';
 
-/* global $ */
-
 import Ember from 'ember';
 
 export default Ember.Object.extend({
@@ -57,7 +55,9 @@ export default Ember.Object.extend({
             return;
         }
 
+        data.window = targetWindow;
         delete data.windowId;
+
         var messageRecord = this.get('container').lookup('model:message').setProperties(data);
 
         var messages = targetWindow.messages;
@@ -68,10 +68,6 @@ export default Ember.Object.extend({
         }
 
         messages.pushObject(messageRecord);
-    },
-
-    _handleNick: function(data) {
-        $.extend(this.get('store.nicks'), data);
     },
 
     _handleInitdone: function() {
@@ -89,6 +85,8 @@ export default Ember.Object.extend({
             var user = data.mapping[userId];
             this.get('store.users').set('users.' + userId, user);
         }
+
+        this.get('store.users').incrementProperty('isDirty');
     },
 
     _handleAddmembers: function(data, targetWindow) {

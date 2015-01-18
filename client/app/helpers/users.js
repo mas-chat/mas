@@ -20,18 +20,15 @@ import Ember from 'ember';
 
 export default Ember.Object.extend({
     users: {},
+    isDirty: 0,
 
     // TBD: Consider ember.map?
 
-    getNick: function(userId) {
-        return this._getProperty(userId, 'nick');
+    getNick: function(userId, network) {
+        return this.get('users.' + userId + '.nick.' + network) || 'unknown';
     },
 
     getName: function(userId) {
-        return this._getProperty(userId, 'name');
-    },
-
-    _getProperty: function(userId, prop) {
-        return this.users[userId] ? this.users[userId][prop] : 'UNKNOWN';
+        return this.get('users.' + userId + '.name') || 'UNKNOWN';
     }
 });
