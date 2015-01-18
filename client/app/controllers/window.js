@@ -37,22 +37,37 @@ export default Ember.Controller.extend({
 
         sendMessage: function() {
             var text = this.get('newMessage');
+            var messageRecord = this.get('container').lookup('model:message');
+            var isCommand = text.charAt(0) === '/';
+            var ircServer1on1 = this.get('model.type') === '1on1' &&
+                this.get('model.userId') === 'iSERVER';
+
             this.set('newMessage', '');
 
-            this.remote.send({
-                id: 'SEND',
-                text: text,
-                windowId: this.get('model.windowId')
-            });
+            if (ircServer1on1 && !isCommand) {
+                messageRecord.setProperties({
+                    body: 'Only commands allowed, e.g. /whois john',
+                    cat: 'error',
+                    ts: moment().unix()
+                });
+            } else {
+                this.remote.send({
+                    id: 'SEND',
+                    text: text,
+                    windowId: this.get('model.windowId')
+                });
 
-            var messageRecord = this.get('container').lookup('model:message').setProperties({
-                body: text,
-                cat: 'mymsg',
-                nick: this.get('store.nicks')[this.get('model.network')],
-                ts: moment().unix()
-            });
+                messageRecord.setProperties({
+                    body: text,
+                    cat: 'mymsg',
+                    nick: this.get('store.nicks')[this.get('model.network')],
+                    ts: moment().unix()
+                });
+            }
 
-            this.get('model.messages').pushObject(messageRecord);
+            if (!isCommand) {
+                this.get('model.messages').pushObject(messageRecord);
+            }
         },
 
         chat: function(userId) {
