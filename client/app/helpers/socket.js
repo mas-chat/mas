@@ -40,6 +40,8 @@ export default Ember.Object.extend({
         var userId = params[0];
         var secret = params[1];
 
+        this.set('store.userId', userId);
+
         if (!userId || !secret) {
             this._logout();
         }

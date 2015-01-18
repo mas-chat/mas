@@ -216,7 +216,7 @@ If the ```type``` is ```1on1``` and the ```userId``` is ```iSERVER``` then the w
 
 ### USERS
 
-Information about the other users. Server sends USERS command containing a userId before that userId is used in any other message.
+Information about the userIds. Server sends USERS command containing a userId before that userId is used in any other message.
 
 ```JSON
 {
@@ -224,19 +224,33 @@ Information about the other users. Server sends USERS command containing a userI
 
   "mapping": {
     "m42": {
-      "nick": "neo"
+      "name": "Mr Anderson",
+      "nick": {
+        "MAS": "neo",
+        "IRCNet": "neo__"
+      }
     },
     "m144": {
-      "nick": "morpheus"
+      "name": "Just Morpheus",
+      "nick": {
+        "MAS": "morpheus",
+        "IRCNet": "joe",
+        "FreeNode": "jsguru"
+      }
     },
-    "m300": {
-      "nick": "trinity"
+    "i300": {
+      "name": "T. Rinity",
+      "nick": {
+        IRCNet: "trinity"
+      }
     }
   }
 }
 ```
 
-Server can send USERS command to update information that it sent in earlier USERS command. This happends for example when any user changes his nick.
+Server can send USERS command to update information that it sent in earlier USERS command. This happends for example when any user changes his nick. Note that the ```nick``` attribute is a hash, user can have different nicks in different networks.
+
+The first USERS notification arrives immediately after 'initok' and contains an entry for the API user itself.
 
 ### FRIENDS
 
@@ -345,14 +359,6 @@ Remove one or more users from window participant list.
     }
   ]
 }
-```
-
-### NICK
-
-Update user nick names in various networks.
-
-```
-TBD
 ```
 
 ### SET

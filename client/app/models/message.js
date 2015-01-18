@@ -26,13 +26,19 @@ export default Ember.Object.extend({
     ts: null,
     userId: null,
     type: null,
+    window: null,
+    nick: '',
 
     ircMotd: false,
 
-    nick: function() {
+    userIdDidChange: function() {
         var userId = this.get('userId');
-        return this.get('store.users').getNick(userId);
-    }.property('store.users.users.@each.nick'),
+        var network = this.get('window.network');
+
+        if (userId && network) {
+            this.set('nick', this.get('store.users').getNick(userId, network));
+        }
+    }.observes('userId', 'window').on('init'),
 
     decoratedBody: function() {
         var category = this.get('cat');

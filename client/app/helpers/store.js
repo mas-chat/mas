@@ -20,10 +20,11 @@ import Ember from 'ember';
 import Users from './users';
 
 export default Ember.Object.extend({
-    nicks: {},
     friends: null,
     users: null,
     windows: null,
+
+    userId: null,
 
     init: function() {
         this.set('users', Users.create());

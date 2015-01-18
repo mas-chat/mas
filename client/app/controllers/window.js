@@ -48,7 +48,8 @@ export default Ember.Controller.extend({
                 messageRecord.setProperties({
                     body: 'Only commands allowed, e.g. /whois john',
                     cat: 'error',
-                    ts: moment().unix()
+                    ts: moment().unix(),
+                    window: this
                 });
             } else {
                 this.remote.send({
@@ -60,8 +61,9 @@ export default Ember.Controller.extend({
                 messageRecord.setProperties({
                     body: text,
                     cat: 'mymsg',
-                    nick: this.get('store.nicks')[this.get('model.network')],
-                    ts: moment().unix()
+                    userId: this.get('store.userId'),
+                    ts: moment().unix(),
+                    window: this.get('model')
                 });
             }
 

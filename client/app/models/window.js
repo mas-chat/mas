@@ -28,6 +28,8 @@ export default Ember.Object.extend({
         this.users = Ember.A([]);
     },
 
+    socket: Ember.inject.service(),
+
     windowId: 0,
     name: null,
     userId: null,
@@ -53,15 +55,15 @@ export default Ember.Object.extend({
 
     operatorNames: function() {
         return this._mapUserIdsToNicks('operators');
-    }.property('operators.@each', 'store.users.users.@each.nick'),
+    }.property('operators.@each', 'store.users.isDirty'),
 
     voiceNames: function() {
         return this._mapUserIdsToNicks('voices');
-    }.property('voices.@each', 'store.users.users.@each.nick'),
+    }.property('voices.@each', 'store.users.isDirty'),
 
     userNames: function() {
         return this._mapUserIdsToNicks('users');
-    }.property('users.@each', 'store.users.users.@each.nick'),
+    }.property('users.@each', 'store.users.isDirty'),
 
     decoratedTitle: function() { // (name, topic)
         var title;
@@ -73,7 +75,7 @@ export default Ember.Object.extend({
         } else if (this.get('type') === '1on1') {
             var conversationNetwork = network === 'MAS' ? '' : network + ' ';
             title = 'Private ' + conversationNetwork + 'conversation with ' +
-                this.get('store.users').getNick(this.get('userId'));
+                this.get('store.users').getNick(this.get('userId'), this.get('network'));
         } else if (network === 'MAS') {
             title = 'Group: ' + name.charAt(0).toUpperCase() + name.substr(1);
         } else {
@@ -81,7 +83,7 @@ export default Ember.Object.extend({
         }
 
         return title;
-    }.property('name', 'network', 'type', 'store.users.users.@each.nick'),
+    }.property('name', 'network', 'type', 'store.users.isDirty'),
 
     decoratedTopic: function() {
         return this.get('topic') ? '- ' + this.get('topic') : '';
@@ -110,20 +112,19 @@ export default Ember.Object.extend({
     }.property('type'),
 
     syncServer: function() {
-        // TBD: How?
-        // Mas.networkM.send({
-        //     id: 'UPDATE',
-        //     windowId: this.get('windowId'),
-        //     row: this.get('row'),
-        //     visible: this.get('visible')
-        // });
+        this.get('socket').send({
+            id: 'UPDATE',
+            windowId: this.get('windowId'),
+            row: this.get('row'),
+            visible: this.get('visible')
+        });
     }.observes('visible', 'row'),
 
     _mapUserIdsToNicks: function(role) {
         return this.get(role).map(function(userId) {
             return {
                 userId: userId,
-                nick: this.get('store.users').getNick(userId)
+                nick: this.get('store.users').getNick(userId, this.get('network'))
             };
         }, this);
     }
