@@ -340,8 +340,8 @@ function *processDisconnected(params) {
     } else if (count >= 8) {
         delay = 60 * 60 * 1000; // 1 hour
         msg = 'Error in connection to IRC server after multiple attempts. Waiting one hour ' +
-            'before making another connection attempt. Close this window if you do not wish ' +
-            'to retry.';
+            'before making another connection attempt. Close all windows related to this ' +
+            'IRC network if you do not wish to retry.';
     }
 
     yield addSystemMessage(userId, network, 'error', msg);
@@ -354,7 +354,10 @@ function *parseIrcMessage(params) {
         parts = line.split(' '),
         msg = {
             params: [],
-            network: params.network
+            network: params.network,
+            serverName: null,
+            nick: null,
+            userNameAndHost: null
         };
 
     // See rfc2812
@@ -472,8 +475,10 @@ var handlers = {
     QUIT: handleQuit,
     NICK: handleNick,
     MODE: handleMode,
+    INVITE: handleInvite,
     TOPIC: handleTopic,
     PRIVMSG: handlePrivmsg,
+    NOTICE: handlePrivmsg,
     ERROR: handleError
 };
 
@@ -484,7 +489,8 @@ function *handleNoop() {
 function *handleServerText(userId, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     var text = msg.params.join(' ');
-    var cat = code === '372' || code === '375' ? 'banner' : 'server'; // 372 and 375 = MOTD line
+    // 371, 372 and 375 = MOTD and INFO lines
+    var cat = code === '372' || code === '375' || code === '371' ? 'banner' : 'server';
 
     if (text) {
         yield addSystemMessage(userId, msg.network, cat, text);
@@ -537,39 +543,46 @@ function *handle366(userId, msg) {
 }
 
 function *handle376(userId, msg) {
-    yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'connected');
-    yield resetRetryCount(userId, msg.network);
+    var state = yield redis.hget('networks:' + userId + ':' + msg.network, 'state');
 
     yield addSystemMessage(userId, msg.network, 'server', msg.params.join(' '));
-    yield addSystemMessage(userId, msg.network, 'info', 'Connected to IRC server.');
 
-    var conversationIds = yield window.getAllConversationIds(userId);
-    var channelsToJoin = [];
+    if (state !== 'connected') {
+        yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'connected');
+        yield resetRetryCount(userId, msg.network);
 
-    for (var i = 0; i < conversationIds.length; i++) {
-        var ircConversation = yield conversationFactory.get(conversationIds[i]);
+        yield addSystemMessage(userId, msg.network, 'info', 'Connected to IRC server.');
+        yield addSystemMessage(userId, msg.network, 'info',
+            'You can close this window at any time. It\'ll reappear when needed.');
 
-        if (ircConversation.network === msg.network && ircConversation.type === 'group') {
-            channelsToJoin.push(ircConversation.name);
+        var conversationIds = yield window.getAllConversationIds(userId);
+        var channelsToJoin = [];
+
+        for (var i = 0; i < conversationIds.length; i++) {
+            var ircConversation = yield conversationFactory.get(conversationIds[i]);
+
+            if (ircConversation.network === msg.network && ircConversation.type === 'group') {
+                channelsToJoin.push(ircConversation.name);
+            }
         }
-    }
 
-    if (channelsToJoin.length === 0) {
-        log.info(userId, 'Connected, but no channels/1on1s to join. Disconnecting');
-        yield disconnect(userId, msg.network);
-        return;
-    }
+        if (channelsToJoin.length === 0) {
+            log.info(userId, 'Connected, but no channels/1on1s to join. Disconnecting');
+            yield disconnect(userId, msg.network);
+            return;
+        }
 
-    for (i = 0; i < channelsToJoin.length; i++) {
-        courier.send('connectionmanager', {
-            type: 'write',
-            userId: userId,
-            network: msg.network,
-            line: 'JOIN ' + channelsToJoin[i]
-        });
-    }
+        for (i = 0; i < channelsToJoin.length; i++) {
+            courier.send('connectionmanager', {
+                type: 'write',
+                userId: userId,
+                network: msg.network,
+                line: 'JOIN ' + channelsToJoin[i]
+            });
+        }
 
-    yield nicks.sendNickAll(userId);
+        yield nicks.sendNickAll(userId);
+    }
 }
 
 function *handle433(userId, msg) {
@@ -634,6 +647,14 @@ function *handleError(userId, msg) {
         // Disable auto-reconnect
         yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'closing');
     }
+}
+
+function *handleInvite(userId, msg) {
+    // :ilkkao!~ilkkao@127.0.0.1 INVITE buppe :#test2
+    var channel = msg.params[1];
+
+    yield addSystemMessage(
+        userId, msg.network, 'info', msg.nick + ' has invited you to channel ' + channel);
 }
 
 function *handlePart(userId, msg) {
@@ -737,19 +758,26 @@ function *handleTopic(userId, msg) {
 }
 
 function *handlePrivmsg(userId, msg) {
+    // :ilkkao!~ilkkao@127.0.0.1 NOTICE buppe :foo
+    var conversation;
+    var sourceUserId;
     var target = msg.params[0];
     var text = msg.params[1];
     var currentNick = yield nicks.getCurrentNick(userId, msg.network);
-    var conversation;
-    var msgUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
+
+    if (msg.nick) {
+        sourceUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
+    } else {
+        // Message is frm the server if the nick is missing
+        sourceUserId = 'iSERVER';
+    }
 
     if (target === currentNick) {
         // Message is for the user only
-        var peerUserId = ircUser.getOrCreateUserId(msg.nick, msg.network);
-        conversation = yield conversationFactory.find1on1(userId, peerUserId, msg.network);
+        conversation = yield conversationFactory.find1on1(userId, sourceUserId, msg.network);
 
         if (conversation === null) {
-            conversation = yield window.setup1on1(userId, peerUserId, msg.network);
+            conversation = yield window.setup1on1(userId, sourceUserId, msg.network);
         }
     } else {
         conversation = yield conversationFactory.findGroup(target, msg.network);
@@ -757,14 +785,14 @@ function *handlePrivmsg(userId, msg) {
         if (conversation === null) {
             log.warn(userId, 'Message arrived for an unknown channel');
             return;
-        } else if (msgUserId.charAt(0) === 'm') {
+        } else if (sourceUserId.charAt(0) === 'm') {
             // Message from internal user is processed already
             return;
         }
     }
 
     yield conversation.addMessageUnlessDuplicate(userId, {
-        userId: msgUserId,
+        userId: sourceUserId,
         cat: 'msg',
         body: text
     });
