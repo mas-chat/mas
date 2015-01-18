@@ -24,5 +24,5 @@ export default Ember.Object.extend({
     name: function() {
         var userId = this.get('userId');
         return this.get('store.users').getName(userId);
-    }.property('store.users.users.@each.nick')
+    }.property('store.users.isDirty')
 });

@@ -494,8 +494,9 @@ function *handleServerText(userId, msg, code) {
 function *handle043(userId, msg) {
     // :*.pl 043 AnDy 0PNEAKPLG :nickname collision, forcing nick change to your unique ID.
     var newNick = msg.params[0];
-    yield nicks.updateCurrentNick(userId, msg.network, newNick);
+    var oldNick = msg.target;
 
+    yield updateNick(userId, msg.network, oldNick, newNick);
     yield tryDifferentNick(userId, msg.network);
 }
 
@@ -614,23 +615,7 @@ function *handleNick(userId, msg) {
     var newNick = msg.params[0];
     var oldNick = msg.nick;
 
-    var targetUserId = yield redis.run('updateNick', userId, msg.network, oldNick, newNick);
-
-    if (targetUserId) {
-        log.info(userId, 'I\'m first and handle ' + oldNick + ' -> ' + newNick + ' nick change.');
-
-        // We havent heard about this change before
-        var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
-
-        for (var i = 0; i < conversationIds.length; i++) {
-            var conversation = yield conversationFactory.get(conversationIds[i]);
-            yield conversation.addMessageUnlessDuplicate(userId, {
-                cat: 'info',
-                body: msg.nick + ' is now known as ' + newNick
-            });
-            yield conversation.sendUsers(targetUserId);
-        }
-    }
+    yield updateNick(userId, msg.network, oldNick, newNick);
 }
 
 function *handleError(userId, msg) {
@@ -785,11 +770,29 @@ function *handlePrivmsg(userId, msg) {
     });
 }
 
+function *updateNick(userId, network, oldNick, newNick) {
+    var targetUserId = yield redis.run('updateNick', userId, network, oldNick, newNick);
+
+    if (targetUserId) {
+        log.info(userId, 'I\'m first and handle ' + oldNick + ' -> ' + newNick + ' nick change.');
+
+        // We havent heard about this change before
+        var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
+
+        for (var i = 0; i < conversationIds.length; i++) {
+            var conversation = yield conversationFactory.get(conversationIds[i]);
+            yield conversation.addMessageUnlessDuplicate(userId, {
+                cat: 'info',
+                body: oldNick + ' is now known as ' + newNick
+            });
+            yield conversation.sendUsers(targetUserId);
+        }
+    }
+}
+
 function *tryDifferentNick(userId, network) {
     var nick = yield redis.hget('user:' + userId, 'nick');
     var currentNick = yield nicks.getCurrentNick(userId, network);
-
-    var state = yield redis.hget('networks:' + userId + ':' + network, 'state');
 
     if (nick !== currentNick.substring(0, nick.length)) {
         // Current nick is unique ID, let's try to change it to something unique immediately

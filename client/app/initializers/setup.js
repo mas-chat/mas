@@ -29,6 +29,9 @@ export function initialize(container, application) {
         container: container
     });
 
+    // TBD: Temporary solution, promised!
+    window.socket = socket;
+
     application.register('store:main', store, { instantiate: false });
     application.register('socket:main', socket, { instantiate: false });
 
