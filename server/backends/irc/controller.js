@@ -44,6 +44,7 @@ co(function*() {
     yield redisModule.loadScripts();
 
     courier.on('send', processSend);
+    courier.on('texCommand', processTextCommand);
     courier.on('join', processJoin);
     courier.on('close', processClose);
     courier.on('updatePassword', processUpdatePassword);
@@ -83,6 +84,17 @@ function *processSend(params) {
             line: 'PRIVMSG ' + target + ' :' + params.text
         });
     }
+}
+
+function *processTextCommand(params) {
+    var conversation = yield conversationFactory.get(params.conversationId);
+
+    courier.send('connectionmanager', {
+        type: 'write',
+        userId: params.userId,
+        network: conversation.network,
+        line: params.text
+    });
 }
 
 function *processJoin(params) {
