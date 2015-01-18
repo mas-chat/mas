@@ -105,9 +105,9 @@ export default Ember.Object.extend({
         var network = this.get('network');
 
         if (type === 'group') {
-            return network === 'MAS' ? 'group' : 'IRC channel';
+            return network === 'MAS' ? 'group' : 'channel';
         } else {
-            return network === 'MAS' ? '1 on 1 conversation' : 'IRC 1 on 1 conversation';
+            return '1on1';
         }
     }.property('type'),
 
