@@ -11,10 +11,10 @@
         "log_path": "",
         "host": "127.0.0.1",
         "port": 4444,
+        "build": "travis-build-${TRAVIS_JOB_NUMBER}",
         "cli_args": {
             "webdriver.chrome.driver": "",
             "webdriver.ie.driver": "",
-            "build": "travis-build-${TRAVIS_JOB_NUMBER}"
         }
     },
 
