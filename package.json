@@ -70,7 +70,8 @@
     "mocha-co": "~1.17.1-co.1",
     "mysql": "~2.5.0",
     "nightwatch": "~0.5.36",
-    "rimraf": "~2.2.8"
+    "rimraf": "~2.2.8",
+    "superagent": "~0.21.0"
   },
   "scripts": {
     "test": "gulp jshint && ./bin/bootstrap && ./bin/run-tests saucelabs"
@@ -80,7 +81,8 @@
     "url": "git://github.com/ilkkao/mas.git"
   },
   "keywords": [
-      "chat", "group chat"
+    "chat",
+    "group chat"
   ],
   "author": "Ilkka Oksanen",
   "license": "Apache",
