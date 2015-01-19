@@ -381,5 +381,5 @@ function *get(conversationId) {
     var record =  yield redis.hgetall('conversation:' + conversationId);
     var members = yield redis.hgetall('conversationmembers:' + conversationId);
 
-    return record ? new Conversation(conversationId, record, members) : null;
+    return record ? new Conversation(conversationId, record, members || {}) : null;
 }
