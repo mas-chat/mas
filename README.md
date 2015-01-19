@@ -5,6 +5,8 @@ MAS server and web client
 [![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat)](https://david-dm.org/ilkkao/mas)
 [![devDependency Status](https://david-dm.org/ilkkao/mas/dev-status.svg?style=flat)](https://david-dm.org/ilkkao/mas#info=devDependencies)
 
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/mas-ci.svg)](https://saucelabs.com/u/mas-ci)
+
 NOTE: Redis database schema will freeze only after 1.0 release. This is also when the project becomes suitable for general use.
 
 MAS is a web chat application.
