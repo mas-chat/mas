@@ -1,24 +1,19 @@
 language: node_js
-
 env:
-  - SLIMERJSLAUNCHER=$(which firefox) DISPLAY=:99.0 PATH=$TRAVIS_BUILD_DIR/slimerjs:$PATH
-
+  global:
+    - secure: VQo8YGo8BM+yuBpTl6lQq5TmmW9jSOm0+FML9k/vS+ccSatY7XDL2RLjkqDe8wM/jx0UuU+XVDUU2pTO2OcVYTpaYeIpA81M2Oi60mqpBdl05hQexl291KPuwsvGN+0HRTg/ddoIGW/sgq/ThG0SQ9Uyn1eJmu7SHK6fwLTrnQs=
+    - secure: AHf/cS1Oj3//Gu6iIIjwp4wy1+eso9fL5r1g9+5ihqnWDm1x8qoqDeaekn9PSqtQh9EpBq/BDSUcQAJFvKCYM0CbFRBE/ZbDdjhtPP9iZJqT6l6Wtgh8gfoGpalIXnDs4ik+6WBORU2Xz2vtOwnBEsW9uTGEc+4v/tTnUx0WrDM=
 node_js:
-  - "0.11"
-
+  - '0.11'
+addons:
+  sauce_connect: true
 cache:
   directories:
-      - node_modules
-
+    - node_modules
 before_install:
   - npm config set loglevel warn --global
-  - npm install -g casperjs
   - npm install -g gulp
   - npm install -g ember-cli
   - npm install -g bower
   - sudo apt-get install ircd-irc2
   - sudo /etc/init.d/ircd-irc2 start
-
-before_script:
-  - casperjs --version
-  - ./bin/travis-install-slimerjs.sh

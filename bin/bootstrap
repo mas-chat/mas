@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
+cd $ROOT
+
+gulp build-assets
+
+cd client
+
+npm install
+bower install
+ember build
