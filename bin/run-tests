@@ -28,7 +28,12 @@ if [[ $rc != 0 ]]; then
 fi
 
 if [[ $NIGHTWATCH_ENV == "saucelabs" ]]; then
-    curl -X PUT -s -d "{\"passed\": $PASSED}" -u mas-ci:${SAUCE_ACCESS_KEY} https://saucelabs.com/rest/v1/mas-ci/jobs/travis-build-${TRAVIS_JOB_NUMBER}
+    REPORTING_URL="https://saucelabs.com/rest/v1/mas-ci/jobs/travis-build-$TRAVIS_JOB_NUMBER"
+
+    echo "REPORTING: $PASSED"
+    echo "URL: $REPORTING_URL"
+
+    curl -X PUT -s -d "{\"passed\": $PASSED}" -u mas-ci:$SAUCE_ACCESS_KEY $REPORTING_URL
 fi
 
 ./bin/masctl -c stop --configFile test/mas-test.conf
