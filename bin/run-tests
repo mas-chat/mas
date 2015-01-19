@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+if [ ! $# == 1 ]; then
+    echo "Usage: $0 <env>"
+    exit 1
+fi
+
+NIGHTWATCH_ENV=$1
+
+ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
+cd $ROOT
+
+redis-server --port 44144 &
+REDIS_PID=$!
+
+echo "Waiting 1 second for the redis to start."
+sleep 1
+
+./bin/masctl -b -c start --configFile test/mas-test.conf
+
+./bin/nightwatch --env $NIGHTWATCH_ENV
+
+./bin/masctl -c stop --configFile test/mas-test.conf
+
+kill $REDIS_PID
+wait $REDIS_PID
