@@ -2,6 +2,10 @@
 
 set -e
 
+if [[ $TRAVIS == true ]]; then
+    echo -e "travis_fold:start:Bootstrap"
+fi
+
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
 cd $ROOT
 
@@ -12,3 +16,7 @@ cd client
 npm install
 bower install
 ember build
+
+if [[ $TRAVIS == true ]]; then
+    echo -e "travis_fold:end:Bootstrap"
+fi
