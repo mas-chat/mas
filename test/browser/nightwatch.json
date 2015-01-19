@@ -46,7 +46,10 @@
             "selenium_port": 80,
             "selenium_host": "ondemand.saucelabs.com",
             "username": "mas-ci",
-            "access_key": "${SAUCE_ACCESS_KEY}"
+            "access_key": "${SAUCE_ACCESS_KEY}",
+            "desiredCapabilities": {
+                "tunnel-identifier": "${TRAVIS_JOB_NUMBER}"
+            }
         }
     }
 }
