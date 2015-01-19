@@ -11,7 +11,6 @@
         "log_path": "",
         "host": "127.0.0.1",
         "port": 4444,
-        "build": "travis-build-${TRAVIS_JOB_NUMBER}",
         "cli_args": {
             "webdriver.chrome.driver": "",
             "webdriver.ie.driver": "",
@@ -49,7 +48,8 @@
             "username": "mas-ci",
             "access_key": "${SAUCE_ACCESS_KEY}",
             "desiredCapabilities": {
-                "tunnel-identifier": "${TRAVIS_JOB_NUMBER}"
+                "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
+                "build": "travis-build-${TRAVIS_JOB_NUMBER}"
             }
         }
     }
