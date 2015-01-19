@@ -16,6 +16,7 @@
 /logs/
 /run/
 /data/
+/test/browser/reports
 
 #Mac files
 .DS_Store
