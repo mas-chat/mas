@@ -80,7 +80,7 @@
     "url": "git://github.com/ilkkao/mas.git"
   },
   "keywords": [
-    "chat"
+      "chat", "group chat"
   ],
   "author": "Ilkka Oksanen",
   "license": "Apache",
