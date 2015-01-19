@@ -6,6 +6,7 @@ if [ ! $# == 1 ]; then
 fi
 
 NIGHTWATCH_ENV=$1
+PASSED="true"
 
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
 cd $ROOT
@@ -19,6 +20,16 @@ sleep 1
 ./bin/masctl -b -c start --configFile test/mas-test.conf
 
 ./bin/nightwatch --env $NIGHTWATCH_ENV
+
+rc=$?
+
+if [[ $rc != 0 ]]; then
+   PASSED="false"
+fi
+
+if [[ $NIGHTWATCH_ENV == "saucelabs" ]]; then
+    curl -X PUT -s -d "{\"passed\": $PASSED}" -u mas-ci:${SAUCE_ACCESS_KEY} https://saucelabs.com/rest/v1/mas-ci/jobs/travis-build-${TRAVIS_JOB_NUMBER}
+fi
 
 ./bin/masctl -c stop --configFile test/mas-test.conf
 
