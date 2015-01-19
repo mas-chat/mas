@@ -73,7 +73,7 @@
     "rimraf": "~2.2.8"
   },
   "scripts": {
-    "test": "gulp jshint jscs build-assets && cd client && npm install && bower install && ember build && cd .. && ./bin/run-tests.sh"
+    "test": "gulp jshint && ./bin/bootstrap && ./bin/run-tests saucelabs"
   },
   "repository": {
     "type": "git",
