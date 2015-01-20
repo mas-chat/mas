@@ -20,17 +20,22 @@
     "test_settings": {
         "default": {
             "launch_url": "http://localhost:44199",
-            "selenium_port": 4444,
-            "selenium_host": "localhost",
             "silent": true,
             "screenshots": {
                 "enabled": false,
                 "path": ""
             },
             "desiredCapabilities": {
-                "browserName": "firefox",
                 "javascriptEnabled": true,
                 "acceptSslCerts": true
+            }
+        },
+
+        "local": {
+            "selenium_port": 4444,
+            "selenium_host": "localhost",
+            "desiredCapabilities": {
+                "browserName": "firefox"
             }
         },
 
@@ -40,9 +45,9 @@
             "username": "mas-ci",
             "access_key": "${SAUCE_ACCESS_KEY}",
             "desiredCapabilities": {
-                "browser": "firefox",
-                "os": "OS X 10.10",
-                "browser-version": "34",
+                "browserName": "firefox",
+                "version": "34",
+                "platform": "OS X 10.10",
                 "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
                 "build": "travis-build-${TRAVIS_JOB_NUMBER}"
             }
@@ -54,9 +59,9 @@
             "username": "mas-ci",
             "access_key": "${SAUCE_ACCESS_KEY}",
             "desiredCapabilities": {
-                "browser": "googlechrome",
-                "os": "Linux",
-                "browser-version": "39",
+                "browserName": "chrome",
+                "version": "39",
+                "platform": "Linux",
                 "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
                 "build": "travis-build-${TRAVIS_JOB_NUMBER}"
             }
@@ -68,9 +73,9 @@
             "username": "mas-ci",
             "access_key": "${SAUCE_ACCESS_KEY}",
             "desiredCapabilities": {
-                "browser": "iehta",
-                "os": "Windows 7",
-                "browser-version": "10",
+                "browser": "internet explorer",
+                "version": "11",
+                "platform": "Windows 8.1",
                 "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
                 "build": "travis-build-${TRAVIS_JOB_NUMBER}"
             }
