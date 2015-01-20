@@ -73,7 +73,7 @@
             "username": "mas-ci",
             "access_key": "${SAUCE_ACCESS_KEY}",
             "desiredCapabilities": {
-                "browser": "internet explorer",
+                "browserName": "internet explorer",
                 "version": "11",
                 "platform": "Windows 8.1",
                 "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
