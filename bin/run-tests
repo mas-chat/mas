@@ -18,7 +18,11 @@ sleep 1
 
 ./bin/masctl -b -c start --configFile test/mas-test.conf
 
-./bin/nightwatch --env $NIGHTWATCH_ENV
+if [ "$NIGHTWATCH_ENV" == "default" ]; then
+    ./bin/nightwatch --env default
+else
+    ./bin/nightwatch --env saucelabs-firefox-mac,saucelabs-chrome-linux,saucelabs-ie-win
+fi
 
 ./bin/masctl -c stop --configFile test/mas-test.conf
 
