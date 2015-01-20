@@ -107,6 +107,9 @@ MAS Redis structures
 
  namesbuffer:<userId>:<conversationId> (hash, expiry 1 min)
    name1, name2 ...
+
+ ircnamesreporter:<conversationId> (string with expiry time, userId)
+
 ```
 
  Loopback backend
