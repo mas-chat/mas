@@ -11,7 +11,7 @@ module.exports = {
 
     tearDown: function(done) {
         var userName = this.client.options.username;
-        var accessKey = this.client.options.access_key;
+        var accessKey = this.client.options.accessKey;
 
         console.log('tearDown started');
 
@@ -31,8 +31,7 @@ module.exports = {
                     done();
                 });
         } else {
-            console.log('User name or access key missing, name: ' + userName + ', key: ' + accessKey);
-            console.log(this.client);
+            console.log('Username or access key missing, username: ' + userName);
             done();
         }
     }
