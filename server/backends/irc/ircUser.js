@@ -19,35 +19,17 @@
 var redis = require('../../lib/redis').createClient(),
     nicks = require('../../models/nick');
 
-exports.getOrCreateUserId = function*(nick, network) {
+exports.getUserId = function*(nick, network) {
     var masUserId = yield nicks.getUserIdFromNick(nick, network);
 
     if (masUserId) {
         return masUserId;
     }
 
-    var ircUserId = yield redis.hget('index:ircuser', network + ':' + nick);
+    // UserId for IRC user is created on the fly if the nick in the network hasn't an ID
+    // already. This method therefore never returns null.
 
-    if (!ircUserId) {
-        ircUserId = yield createUserId(nick, network);
-    }
+    var ircUserId = yield redis.run('getOrCreateIrcUserId', nick, network);
 
     return ircUserId;
 };
-
-exports.getUserNick = function*(userId) {
-    return yield redis.hget('ircuser:' + userId, 'nick');
-};
-
-function *createUserId(nick, network) {
-    var userId = yield redis.incr('nextGlobalIrcUserId');
-    userId = 'i' + userId;
-
-    yield redis.hmset('ircuser:' + userId, {
-        nick: nick,
-        network: network
-    });
-    yield redis.hset('index:ircuser', network + ':' + nick, userId);
-
-    return userId;
-}
