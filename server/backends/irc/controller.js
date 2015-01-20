@@ -73,7 +73,7 @@ function *processSend(params) {
 
     if (conversation.type === '1on1') {
         var targetUserId = yield conversation.getPeerUserId(params.userId);
-        target = yield ircUser.getUserNick(targetUserId);
+        target = yield redis.hget('ircuser:' + targetUserId, 'nick');
     }
 
     if (target) {
@@ -601,7 +601,7 @@ function *handle482(userId, msg) {
 function *handleJoin(userId, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
     var channel = msg.params[0];
-    var targetUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
+    var targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
 
     if (conversation) {
@@ -612,7 +612,7 @@ function *handleJoin(userId, msg) {
 function *handleQuit(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com QUIT :"leaving"
     // var reason = msg.params[0];
-    var targetUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
+    var targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
 
     var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
 
@@ -662,7 +662,7 @@ function *handlePart(userId, msg) {
     var channel = msg.params[0];
     // var reason = msg.params[1]; // TBD: Can there be reason?
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
-    var targetUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
+    var targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
 
     if (conversation) {
         yield conversation.removeGroupMember(targetUserId);
@@ -715,7 +715,7 @@ function *handleMode(userId, msg) {
                 }
             }
 
-            var targetUserId = yield ircUser.getOrCreateUserId(param, msg.network);
+            var targetUserId = yield ircUser.getUserId(param, msg.network);
 
             if (mode === 'o' && oper === '+') {
                 // Got oper status
@@ -766,7 +766,7 @@ function *handlePrivmsg(userId, msg) {
     var currentNick = yield nicks.getCurrentNick(userId, msg.network);
 
     if (msg.nick) {
-        sourceUserId = yield ircUser.getOrCreateUserId(msg.nick, msg.network);
+        sourceUserId = yield ircUser.getUserId(msg.nick, msg.network);
     } else {
         // Message is frm the server if the nick is missing
         sourceUserId = 'iSERVER';
@@ -878,7 +878,7 @@ function *bufferNames(names, userId, network, conversationId) {
             nick = nick.substring(1);
         }
 
-        var memberUserId = yield ircUser.getOrCreateUserId(nick, network);
+        var memberUserId = yield ircUser.getUserId(nick, network);
         namesHash[memberUserId] = userClass;
     }
 
