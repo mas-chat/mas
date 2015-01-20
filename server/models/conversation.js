@@ -102,9 +102,12 @@ Conversation.prototype.getPeerUserId = function*(userId) {
 
 Conversation.prototype.set1on1Members = function*(userId, peerUserId) {
     var userIds = [ userId, peerUserId ].sort();
+    var userHash = {};
 
-    yield this._insertMember(userId, 'u');
-    yield this._insertMember(peerUserId, 'd');
+    userHash[userId] = 'u';
+    userHash[peerUserId] = 'd';
+
+    yield this._insertMembers(userHash);
 
     // Update 1on1 index
     yield redis.hset('index:conversation',
@@ -134,8 +137,10 @@ Conversation.prototype.setGroupMembers = function*(members) {
 Conversation.prototype.addGroupMember = function*(userId, role) {
     assert (role === 'u' || role === '+' || role === '@' || role === '*');
 
-    if (!this.members[userId]) {
-        yield this._insertMember(userId, role);
+    var newField = yield redis.hset('conversationmembers:' + this.conversationId, userId, role);
+
+    if (newField) {
+        this.members[userId] = role;
 
         yield this.addMessage({
             userId: userId,
@@ -148,7 +153,11 @@ Conversation.prototype.addGroupMember = function*(userId, role) {
 };
 
 Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp) {
-    if (this.members[userId]) {
+    var removed = yield redis.hdel('conversationmembers:' + this.conversationId, userId);
+
+    if (removed === 1) {
+        delete this.members[userId];
+
         yield this.addMessage({
             userId: userId,
             cat: 'part',
@@ -156,7 +165,6 @@ Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp) {
         });
 
         yield this._streamRemoveMembers(userId);
-        yield this._removeMember(userId);
 
         var removeConversation = true;
 
@@ -337,13 +345,6 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
     }
 };
 
-Conversation.prototype._insertMember = function*(userId, role) {
-    var hash = {};
-    hash[userId] = role;
-
-    yield this._insertMembers(hash);
-};
-
 Conversation.prototype._insertMembers = function*(members) {
     assert(members);
 
@@ -352,11 +353,6 @@ Conversation.prototype._insertMembers = function*(members) {
     }.bind(this));
 
     yield redis.hmset('conversationmembers:' + this.conversationId, members);
-};
-
-Conversation.prototype._removeMember = function*(userId) {
-    delete this.members[userId];
-    yield redis.hdel('conversationmembers:' + this.conversationId, userId);
 };
 
 Conversation.prototype._remove = function*() {
