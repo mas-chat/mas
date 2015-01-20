@@ -538,7 +538,20 @@ function *handle366(userId, msg) {
     yield redis.del(key);
 
     if (conversation && Object.keys(namesHash).length > 0) {
-        yield conversation.setGroupMembers(namesHash);
+        // During the server bootup or reconnect after a network outage it's very possible that
+        // 366 replies get reordered if more than one mas user joins a same channel. Then an
+        // older 366 reply (with fewer names on the list) is used to the reset the group members
+        // data structure, which leads to incorrect bookkeeping. Ircnamesreporter check makes sure
+        // only one 266 reply is parsed from a burst. For rest of the changes we rely on getting
+        // incremental JOINS messages (preferrably from the original reporter.) This leaves some
+        // theoretical error edge cases (left as homework) that maybe are worth of fixing.
+        var noActiveReporter = yield redis.setnx(
+            'ircnamesreporter:' + conversation.conversationId, userId);
+
+        if (noActiveReporter) {
+            yield redis.expire('ircnamesreporter:' + conversation.conversationId, 15); // 15s
+            yield conversation.setGroupMembers(namesHash);
+        }
     }
 }
 
