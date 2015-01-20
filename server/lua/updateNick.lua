@@ -28,9 +28,9 @@ if masUserId then
     return masUserId
 end
 
-local ircUser = redis.call('HGET', 'index:ircuser', network .. ':' .. oldNick)
+local ircUserId = redis.call('HGET', 'index:ircuser', network .. ':' .. oldNick)
 
-if ircUser then
+if ircUserId then
     redis.call('HDEL', 'index:ircuser', network .. ':' .. oldNick)
     redis.call('HSET', 'ircuser:' .. ircUserId, 'nick', newNick)
     redis.call('HSET', 'index:ircuser', network .. ':' .. newNick, ircUserId)
