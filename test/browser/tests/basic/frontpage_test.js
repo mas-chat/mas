@@ -9,9 +9,11 @@ module.exports = {
             .end();
     },
 
-    tearDown: function(callback) {
+    tearDown: function(done) {
         var userName = this.client.options.username;
         var accessKey = this.client.options.access_key;
+
+        console.log('tearDown started');
 
         if (userName && accessKey) {
             request
@@ -25,6 +27,8 @@ module.exports = {
                     } else {
                         console.log('Verdict sent to Sauce Labs, response:' + res.res.statusMessage);
                     }
+
+                    done();
                 });
         }
     }
