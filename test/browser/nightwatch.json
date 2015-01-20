@@ -34,20 +34,43 @@
             }
         },
 
-        "chrome": {
-            "desiredCapabilities": {
-                "browserName": "chrome",
-                "javascriptEnabled": true,
-                "acceptSslCerts": true
-            }
-        },
-
-        "saucelabs": {
+        "saucelabs-firefox-mac": {
             "selenium_port": 80,
             "selenium_host": "ondemand.saucelabs.com",
             "username": "mas-ci",
             "access_key": "${SAUCE_ACCESS_KEY}",
             "desiredCapabilities": {
+                "browser": "firefox",
+                "os": "OS X 10.10",
+                "browser-version": "34",
+                "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
+                "build": "travis-build-${TRAVIS_JOB_NUMBER}"
+            }
+        },
+
+        "saucelabs-chrome-linux": {
+            "selenium_port": 80,
+            "selenium_host": "ondemand.saucelabs.com",
+            "username": "mas-ci",
+            "access_key": "${SAUCE_ACCESS_KEY}",
+            "desiredCapabilities": {
+                "browser": "googlechrome",
+                "os": "Linux",
+                "browser-version": "39",
+                "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
+                "build": "travis-build-${TRAVIS_JOB_NUMBER}"
+            }
+        },
+
+        "saucelabs-ie-win": {
+            "selenium_port": 80,
+            "selenium_host": "ondemand.saucelabs.com",
+            "username": "mas-ci",
+            "access_key": "${SAUCE_ACCESS_KEY}",
+            "desiredCapabilities": {
+                "browser": "iehta",
+                "os": "Windows 7",
+                "browser-version": "10",
                 "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
                 "build": "travis-build-${TRAVIS_JOB_NUMBER}"
             }
