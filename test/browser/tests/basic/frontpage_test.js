@@ -30,6 +30,10 @@ module.exports = {
 
                     done();
                 });
+        } else {
+            console.log('User name or access key missing, name: ' + userName + ', key: ' + accessKey);
+            console.log(this.client);
+            done();
         }
     }
 };
