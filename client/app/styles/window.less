@@ -167,13 +167,23 @@
         }
     }
 
-    .line.part {
+    .line.part, .line.quit, .line.kick {
         .nick {
             display: none;
         }
 
         .body {
             color: red;
+        }
+    }
+
+    .line.action {
+        .nick:after {
+            content: " * ";
+        }
+
+        .body {
+            color: green;
         }
     }
 

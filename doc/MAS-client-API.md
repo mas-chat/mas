@@ -144,7 +144,7 @@ A notification is always a request for the client to take some action.
 
 ### ADDTEXT
 
-Add a messge to window.
+Add a messge line to window.
 
 ```JSON
 {
@@ -161,7 +161,23 @@ Add a messge to window.
 
 ```ts``` is a unix timestamp, seconds since epoch.
 
-```cat``` can be ```msg```, ```info```, ```banner```, ```server```, ```error```, ```mymsg```
+```cat``` can be
+
+| Value   | Description                                                       |
+|---------|-------------------------------------------------------------------|
+| msg     | Normal message                                                    |
+| info    | Info message related to the network status                        |
+| server  | Normal message from the IRC server                                |
+| banner  | Banner message from the IRC server (e.g MOTD line)                |
+| error   | Error message from the IRC server                                 |
+| mymsg   | Message that the user itself has sent earlier                     |
+| join    | Join indication, body is empty                                    |
+| part    | Part indication, body is the part message                         |
+| quit    | Quit indication, body is the quit reason                          |
+| kick    | Kick indication, body is the kick reason                          |
+| action  | Action message                                                    |
+
+Client can for example use different colors for different categories.
 
 ```gid``` is a globally unique identifier (integer) for the message. Given two messages, a newer one has always larger gid. Gid can increase by more than one between subsequent messages inside a window.
 
