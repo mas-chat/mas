@@ -80,18 +80,19 @@ exports.getAllConversationIdsWithUserId = function*(userId, targetUserId) {
 };
 
 exports.getWindowIdsForNetwork = function*(userId, network) {
-    var conversationIds = yield getAllConversationIds(userId);
-    var res = [];
+    var windows = yield redis.smembers('windowlist:' + userId);
+    var windowIds = [];
 
-    for (var i = 0; i < conversationIds.length; i++) {
-        var conversation = yield conversationFactory.get(conversationIds[i]);
+    for (var i = 0; i < windows.length; i++) {
+        var conversationId = yield getConversationId(userId, windows[i]);
+        var conversation = yield conversationFactory.get(conversationId);
 
         if (conversation.network === network) {
-            res.push(conversationIds[i]);
+            windowIds.push(windows[i]);
         }
     }
 
-    return res;
+    return windowIds;
 };
 
 exports.getNetworks = function*(userId) {

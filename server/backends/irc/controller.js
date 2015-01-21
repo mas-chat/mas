@@ -169,36 +169,12 @@ function *processChat(params) {
 function *processClose(params) {
     var conversation = yield conversationFactory.get(params.conversationId);
     var state = yield redis.hget('networks:' + params.userId + ':' + conversation.network, 'state');
-    var windowIds = yield window.getWindowIdsForNetwork(params.userId, conversation.network);
-    var onlyServer1on1Left = false;
 
     if (state === 'connected' && conversation.type === 'group') {
         sendIRCPart(params.userId, conversation.network, conversation.name);
     }
 
-    if (windowIds.length === 2) {
-        // There's only one window left after this close is completed. Is it IRC server 1on1?
-        // If yes, we can disconnect from the server
-        var lastConversationId = yield window.getConversationId(params.userId, windowIds[0]);
-
-        if (lastConversationId === params.conversationId) {
-            lastConversationId = yield window.getConversationId(params.userId, windowIds[1]);
-        }
-
-        var lastConversation = yield conversationFactory.get(lastConversationId);
-
-        if (lastConversation.type === '1on1') {
-            var peeruserId = yield lastConversation.getPeerUserId(params.userId);
-
-            if (peeruserId === 'iSERVER') {
-                onlyServer1on1Left = true;
-            }
-        }
-    }
-
-    if (windowIds.length === 0 || onlyServer1on1Left) {
-        yield disconnect(params.userId, conversation.network);
-    }
+    yield disconnectIfIdle(params.userId, conversation);
 }
 
 function *processUpdatePassword(params) {
@@ -506,6 +482,7 @@ var handlers = {
     NICK: handleNick,
     MODE: handleMode,
     INVITE: handleInvite,
+    KICK: handleKick,
     TOPIC: handleTopic,
     PRIVMSG: handlePrivmsg,
     NOTICE: handlePrivmsg,
@@ -698,6 +675,31 @@ function *handleInvite(userId, msg) {
 
     yield addSystemMessage(
         userId, msg.network, 'info', msg.nick + ' has invited you to channel ' + channel);
+}
+
+function *handleKick(userId, msg) {
+    // :ilkkao!~ilkkao@127.0.0.1 KICK #portaali AnDy :no reason
+    var channel = msg.params[0];
+    var targetNick = msg.params[1];
+    var reason = msg.params[2];
+
+    var conversation = yield conversationFactory.findGroup(channel, msg.network);
+    var targetUserId = yield ircUser.getUserId(targetNick, msg.network);
+
+    if (conversation) {
+        yield conversation.removeGroupMember(targetUserId, false, true, reason);
+    }
+
+    if (targetUserId === userId) {
+        // I was kicked
+        yield addSystemMessage(userId, msg.network,
+            'error', 'You have been kicked from ' + channel + ', Reason: ' + reason);
+
+        var windowId = yield window.findByConversationId(userId, conversation.conversationId);
+        yield window.remove(userId, windowId);
+
+        yield disconnectIfIdle(userId, conversation);
+    }
 }
 
 function *handlePart(userId, msg) {
@@ -900,6 +902,32 @@ function sendIRCPart(userId, network, channel) {
         network: network,
         line: 'PART ' + channel
     });
+}
+
+function *disconnectIfIdle(userId, conversation) {
+    var windowIds = yield window.getWindowIdsForNetwork(userId, conversation.network);
+    var onlyServer1on1Left = false;
+
+    if (windowIds.length === 1) {
+        // There's only one window left, is it IRC server 1on1?
+        // If yes, we can disconnect from the server
+        var lastConversationId = yield window.getConversationId(userId, windowIds[0]);
+        var lastConversation = yield conversationFactory.get(lastConversationId);
+
+        if (lastConversation.type === '1on1') {
+            var peeruserId = yield lastConversation.getPeerUserId(userId);
+
+            if (peeruserId === 'iSERVER') {
+                onlyServer1on1Left = true;
+            }
+        }
+    }
+
+    if (windowIds.length === 0 || onlyServer1on1Left) {
+        yield addSystemMessage(userId, conversation.network,
+            'info', 'No open windows left for this network, disconnecting...');
+        yield disconnect(userId, conversation.network);
+    }
 }
 
 function *bufferNames(names, userId, network, conversationId) {
