@@ -43,18 +43,28 @@ export default Ember.Object.extend({
     decoratedBody: function() {
         var category = this.get('cat');
         var nick = this.get('nick');
-        var pre = '<span class="body">';
-        var post = '</span>';
+        var body = this.get('body');
+        var groupName = this.get('window.name');
+
+        var output = '';
 
         if (category === 'join') {
-            return pre + nick + ' has joined the group.' + post;
+            output = 'has joined ' + groupName + '.';
         } else if (category === 'part') {
-            return pre + nick + ' has left the group.' + post;
+            output = 'has left ' + groupName + '.' + body;
         } else if (category === 'quit') {
-            return pre + nick + ' has quit irc.' + post;
-        } else {
-            return this._decorate(this.get('body'));
+            output = 'has quit irc. Reason: ' + body;
+        } else if (category === 'kick') {
+            output = 'was kicked from ' + groupName + '. Reason: ' + body;
         }
+
+        if (output === '') {
+            output = this._decorate(this.get('body'));
+        } else {
+            output = '<span class="body">' + nick + ' ' + output + '</span>';
+        }
+
+        return output;
     }.property('body'),
 
     _decorate: function(text) {
