@@ -45,6 +45,11 @@ exports.remove = function*(userId, windowId) {
     yield redis.srem('windowlist:' + userId, windowId);
     yield redis.del('window:' + userId + ':' + windowId);
     yield redis.hdel('index:windowIds', userId + ':' + conversationId);
+
+    yield outbox.queueAll(userId, {
+        id: 'CLOSE',
+        windowId: parseInt(windowId)
+    });
 };
 
 exports.findByConversationId = function*(userId, conversationId) {
