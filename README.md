@@ -1,5 +1,5 @@
-MAS server and web client
-=========================
+MAS server and desktop web app
+==============================
 
 [![Build Status](https://secure.travis-ci.org/ilkkao/mas.png)](http://travis-ci.org/ilkkao/mas)
 [![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat)](https://david-dm.org/ilkkao/mas)
