@@ -152,16 +152,18 @@ Conversation.prototype.addGroupMember = function*(userId, role) {
     }
 };
 
-Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp) {
+Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKicked, reason) {
     var removed = yield redis.hdel('conversationmembers:' + this.conversationId, userId);
 
     if (removed === 1) {
+        log.info('User: ' + userId + ' removed from conversation: ' +  this.conversationId);
+
         delete this.members[userId];
 
         yield this.addMessage({
             userId: userId,
-            cat: 'part',
-            body: ''
+            cat: wasKicked ? 'kick' : 'part',
+            body: wasKicked && reason ? reason : ''
         });
 
         yield this._streamRemoveMembers(userId);

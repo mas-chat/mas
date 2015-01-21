@@ -148,20 +148,10 @@ function *handleJoin(params) {
 }
 
 function *handleClose(params) {
-    var ids = yield window.getWindowIdsForNetwork(params.userId, params.network);
-
     // Ask all sessions to close this window
     yield outbox.queueAll(params.userId, {
         id: 'CLOSE',
         windowId: params.windowId
-    });
-
-    // Backend specific cleanup
-    courier.send(params.backend, {
-        type: 'close',
-        userId: params.userId,
-        conversationId: params.conversation.conversationId,
-        last: ids.length === 1
     });
 
     if (params.conversation.type === 'group') {
@@ -169,7 +159,15 @@ function *handleClose(params) {
     } else {
         yield params.conversation.remove1on1Member(params.userId);
     }
+
     yield window.remove(params.userId, params.windowId);
+
+    // Backend specific cleanup
+    courier.send(params.backend, {
+        type: 'close',
+        userId: params.userId,
+        conversationId: params.conversation.conversationId,
+    });
 }
 
 function *handleUpdate(params) {
