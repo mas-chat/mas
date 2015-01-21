@@ -116,7 +116,7 @@ function *processJoin(params) {
         channelName = '#' + channelName;
     }
 
-    if (!state || state === 'disconnected') {
+    if (!state || state === 'disconnected' || state === 'closing') {
         yield connect(params.userId, params.network);
     } else if (state === 'connected') {
         courier.send('connectionmanager', {
@@ -167,14 +167,37 @@ function *processChat(params) {
 }
 
 function *processClose(params) {
-    var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
+    var conversation = yield conversationFactory.get(params.conversationId);
+    var state = yield redis.hget('networks:' + params.userId + ':' + conversation.network, 'state');
+    var windowIds = yield window.getWindowIdsForNetwork(params.userId, conversation.network);
+    var onlyServer1on1Left = false;
 
-    if (state === 'connected' && params.windowType === 'group') {
-        sendIRCPart(params.userId, params.network, params.name);
+    if (state === 'connected' && conversation.type === 'group') {
+        sendIRCPart(params.userId, conversation.network, conversation.name);
     }
 
-    if (params.last) {
-        yield disconnect(params.userId, params.network);
+    if (windowIds.length === 2) {
+        // There's only one window left after this close is completed. Is it IRC server 1on1?
+        // If yes, we can disconnect from the server
+        var lastConversationId = yield window.getConversationId(params.userId, windowIds[0]);
+
+        if (lastConversationId === params.conversationId) {
+            lastConversationId = yield window.getConversationId(params.userId, windowIds[1]);
+        }
+
+        var lastConversation = yield conversationFactory.get(lastConversationId);
+
+        if (lastConversation.type === '1on1') {
+            var peeruserId = yield lastConversation.getPeerUserId(params.userId);
+
+            if (peeruserId === 'iSERVER') {
+                onlyServer1on1Left = true;
+            }
+        }
+    }
+
+    if (windowIds.length === 0 || onlyServer1on1Left) {
+        yield disconnect(params.userId, conversation.network);
     }
 }
 
@@ -450,6 +473,13 @@ function *disconnect(userId, network) {
     yield redis.hset('networks:' + userId + ':' + network, 'state', 'closing');
 
     courier.send('connectionmanager', {
+        type: 'write',
+        userId: userId,
+        network: network,
+        line: 'QUIT :Session ended.'
+    });
+
+    courier.send('connectionmanager', {
         type: 'disconnect',
         userId: userId,
         network: network
@@ -648,7 +678,7 @@ function *handleError(userId, msg) {
     var reason = msg.params[0];
 
     yield addSystemMessage(
-        userId, msg.network, 'error', 'Connection lost. Server error: ' + reason);
+        userId, msg.network, 'error', 'Connection lost. Server reason: ' + reason);
 
     if (reason.indexOf('Too many host connections') !== -1) {
         log.error(userId, 'Too many connections to: ' + msg.network);
@@ -673,12 +703,13 @@ function *handleInvite(userId, msg) {
 function *handlePart(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com PART #portaali :
     var channel = msg.params[0];
-    // var reason = msg.params[1]; // TBD: Can there be reason?
+    var reason = msg.params[1];
+
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
     var targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
 
     if (conversation) {
-        yield conversation.removeGroupMember(targetUserId);
+        yield conversation.removeGroupMember(targetUserId, false, false, reason);
     }
 }
 
