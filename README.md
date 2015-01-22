@@ -1,22 +1,24 @@
 MAS server and desktop web app
 ==============================
 
-[![Build Status](https://secure.travis-ci.org/ilkkao/mas.png)](http://travis-ci.org/ilkkao/mas)
-[![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat)](https://david-dm.org/ilkkao/mas)
-[![devDependency Status](https://david-dm.org/ilkkao/mas/dev-status.svg?style=flat)](https://david-dm.org/ilkkao/mas#info=devDependencies)
-
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/mas-ci.svg)](https://saucelabs.com/u/mas-ci)
+MAS is a web group chat application.
 
 NOTE: Redis database schema will freeze only after 1.0 release. This is also when the project becomes suitable for general use.
-
-MAS is a web chat application.
 
 For more info, see
 
 - [Architecture page](https://github.com/ilkkao/mas/wiki)
 - [MAS client API](http://ilkkao.github.io/mas/api.html)
 
-Dependencies:
+## Status:
+
+[![Build Status](https://secure.travis-ci.org/ilkkao/mas.png)](http://travis-ci.org/ilkkao/mas)
+[![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat)](https://david-dm.org/ilkkao/mas)
+[![devDependency Status](https://david-dm.org/ilkkao/mas/dev-status.svg?style=flat)](https://david-dm.org/ilkkao/mas#info=devDependencies)
+
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/mas-ci.svg)](https://saucelabs.com/u/mas-ci)
+
+## Dependencies:
 
 - Node.js (version 0.11.10 or later): http://nodejs.org/
 - Redis: http://redis.io/
