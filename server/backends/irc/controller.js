@@ -117,6 +117,8 @@ function *processJoin(params) {
     }
 
     if (!state || state === 'disconnected' || state === 'closing') {
+        yield redis.hset('ircpendingjoins:' +
+            params.userId + ':' + params.network, channelName, params.password);
         yield connect(params.userId, params.network);
     } else if (state === 'connected') {
         courier.send('connectionmanager', {
@@ -126,25 +128,6 @@ function *processJoin(params) {
             line: 'JOIN ' + channelName + ' ' + params.password
         });
     }
-
-    var conversation = yield conversationFactory.findGroup(channelName, params.network);
-
-    if (!conversation) {
-        conversation = yield conversationFactory.create({
-            owner: params.userId,
-            type: 'group',
-            name: channelName,
-            network: params.network
-        });
-
-        log.info(params.userId, 'First mas user joined channel: ' + channelName);
-    } else {
-        log.info(params.userId, 'Non-first mas user joined channel: ' + channelName);
-    }
-
-    yield conversation.addGroupMember(params.userId, 'u');
-    yield window.create(params.userId, conversation.conversationId);
-    yield conversation.sendAddMembers(params.userId);
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'JOIN_RESP',
@@ -321,6 +304,8 @@ function *processDisconnected(params) {
     yield redis.hset('networks:' + userId + ':' + network, 'state', 'disconnected');
     yield nicks.removeCurrentNick(userId, network);
 
+    yield redis.del('ircpendingjoins:' + userId + ':' + network);
+
     if (previousState === 'closing') {
         // We wanted to close the connection, don't reconnect
         return;
@@ -474,6 +459,15 @@ var handlers = {
     433: handle433,
     482: handle482,
 
+    474: handleJoinReject, // ERR_BANNEDFROMCHAN
+    473: handleJoinReject, // ERR_INVITEONLYCHAN
+    475: handleJoinReject, // ERR_BADCHANNELKEY
+    471: handleJoinReject, // ERR_CHANNELISFULL
+    403: handleJoinReject, // ERR_NOSUCHCHANNEL
+    405: handleJoinReject, // ERR_TOOMANYCHANNELS
+    407: handleJoinReject, // ERR_TOOMANYTARGETS
+    437: handleJoinReject, // ERR_UNAVAILRESOURCE
+
     // All other numeric replies are processed by handleServerText()
 
     JOIN: handleJoin,
@@ -576,13 +570,20 @@ function *handle376(userId, msg) {
             'You can close this window at any time. It\'ll reappear when needed.');
 
         var conversationIds = yield window.getAllConversationIds(userId);
-        var channelsToJoin = [];
+        var channelsToJoin = yield redis.hgetall('ircpendingjoins:' + userId + ':' + msg.network);
 
+        // Password is needed when join completes if this is a new conversation
+        yield redis.expire('ircpendingjoins:' + userId + ':' + msg.network, 60);
+
+        channelsToJoin = channelsToJoin || {};
+
+        // Merge ircpendingjoins (new channels this user is joining now) with all 'old' channels
+        // we need to join because of server restart or network hiccup.
         for (var i = 0; i < conversationIds.length; i++) {
             var ircConversation = yield conversationFactory.get(conversationIds[i]);
 
             if (ircConversation.network === msg.network && ircConversation.type === 'group') {
-                channelsToJoin.push(ircConversation.name);
+                channelsToJoin[ircConversation.name] = ircConversation.password;
             }
         }
 
@@ -592,14 +593,15 @@ function *handle376(userId, msg) {
             return;
         }
 
-        for (i = 0; i < channelsToJoin.length; i++) {
+        // TBD: Some duplication with processJoin()
+        Object.keys(channelsToJoin).forEach(function(channel) {
             courier.send('connectionmanager', {
                 type: 'write',
                 userId: userId,
                 network: msg.network,
-                line: 'JOIN ' + channelsToJoin[i]
+                line: 'JOIN ' + channel + ' ' + channelsToJoin[channel]
             });
-        }
+        });
 
         yield nicks.sendNickAll(userId);
     }
@@ -623,10 +625,57 @@ function *handleJoin(userId, msg) {
     var channel = msg.params[0];
     var targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
+    var password = yield redis.hget('ircpendingjoins:' + userId + ':' + msg.network, channel);
+
+    if (!conversation) {
+        conversation = yield conversationFactory.create({
+            owner: msg.userId,
+            type: 'group',
+            name: channel,
+            password: password,
+            network: msg.network
+        });
+
+        log.info(userId, 'First mas user joined channel: ' + msg.network + ':' + channel);
+    } else if (password) {
+        // Conversation exists and this user used non empty password successfully to join
+        // the channel. Update conversation password as it's possible that all other
+        // mas users were locked out during a server downtime and conversation.password is
+        // out of date.
+        yield conversation.setPassword(password);
+    }
+
+    if (userId === targetUserId) {
+        var windowId = yield window.findByConversationId(userId, conversation.conversationId);
+
+        if (!windowId) {
+            yield window.create(userId, conversation.conversationId);
+            yield conversation.sendAddMembers(userId);
+        }
+    }
+
+    yield conversation.addGroupMember(targetUserId, 'u');
+}
+
+function *handleJoinReject(userId, msg) {
+    var channel = msg.params[0];
+    var reason = msg.params[1];
+    var conversation = yield conversationFactory.findGroup(channel, msg.network);
+
+    yield addSystemMessage(userId, msg.network,
+        'error', 'Failed to join ' + channel + '. Reason: ' + reason);
 
     if (conversation) {
-        yield conversation.addGroupMember(targetUserId, 'u');
+        yield conversation.removeGroupMember(userId, false, false);
+
+        var windowId = yield window.findByConversationId(userId, conversation.conversationId);
+
+        if (windowId) {
+            yield window.remove(userId, windowId);
+        }
     }
+
+    yield disconnectIfIdle(userId, conversation);
 }
 
 function *handleQuit(userId, msg) {
