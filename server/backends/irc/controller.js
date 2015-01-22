@@ -852,12 +852,13 @@ function *handleTopic(userId, msg) {
     }
 }
 
-function *handlePrivmsg(userId, msg) {
+function *handlePrivmsg(userId, msg, command) {
     // :ilkkao!~ilkkao@127.0.0.1 NOTICE buppe :foo
     var conversation;
     var sourceUserId;
     var target = msg.params[0];
     var text = msg.params[1];
+    var cat = 'msg';
     var currentNick = yield nicks.getCurrentNick(userId, msg.network);
 
     if (msg.nick) {
@@ -865,6 +866,30 @@ function *handlePrivmsg(userId, msg) {
     } else {
         // Message is frm the server if the nick is missing
         sourceUserId = 'iSERVER';
+    }
+
+    if (text.indexOf('\u0001') !== -1 && command === 'PRIVMSG') {
+        var ret = parseCTCPMessage(text);
+        var reply = false;
+
+        if (ret.type === 'ACTION') {
+            cat = 'action';
+            text = ret.data;
+        } else if (ret.type === 'VERSION') {
+            reply = '\u0001VERSION masclient:0.8.0:Linux\u0001';
+        } else if (ret.type === 'PING') {
+            reply = text;
+        }
+
+        if (reply) {
+            courier.send('connectionmanager', {
+                type: 'write',
+                userId: userId,
+                network: msg.network,
+                line: 'NOTICE ' + msg.nick + ' :' + reply
+            });
+            return;
+        }
     }
 
     if (target === currentNick) {
@@ -888,7 +913,7 @@ function *handlePrivmsg(userId, msg) {
 
     yield conversation.addMessageUnlessDuplicate(userId, {
         userId: sourceUserId,
-        cat: 'msg',
+        cat: cat,
         body: text
     });
 }
@@ -1006,6 +1031,28 @@ function *bufferNames(names, userId, network, conversationId) {
     var key = 'namesbuffer:' + userId + ':' + conversationId;
     yield redis.hmset(key, namesHash);
     yield redis.expire(key, 60); // 1 minute. Does cleanup if we never get End of NAMES list reply.
+}
+
+function parseCTCPMessage(text) {
+    var regex = /\u0001(.*?)\u0001/g;
+    var matches;
+
+    // Follow http://www.irchelp.org/irchelp/rfc/ctcpspec.html
+    while (matches = regex.exec(text)) {
+        var msg = matches[1];
+        var dataType;
+        var payload = '';
+
+        if (msg.indexOf(' ') === -1) {
+            dataType = msg;
+        } else {
+            dataType = msg.substr(0, msg.indexOf(' '));
+            payload = msg.substr(msg.indexOf(' ') + 1);
+        }
+
+        // Only one CTCP extended message per PRIVMSG is supported
+        return { type: dataType, data: payload }
+    }
 }
 
 function *resetRetryCount(userId, network) {
