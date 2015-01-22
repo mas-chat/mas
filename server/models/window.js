@@ -40,16 +40,19 @@ exports.setup1on1 = function*(userId, peerUserId, network) {
 };
 
 exports.remove = function*(userId, windowId) {
-    var conversationId = yield getConversationId(userId, windowId);
+    yield remove(userId, windowId);
+};
 
-    yield redis.srem('windowlist:' + userId, windowId);
-    yield redis.del('window:' + userId + ':' + windowId);
-    yield redis.hdel('index:windowIds', userId + ':' + conversationId);
+exports.removeByConversationId = function*(userId, conversationId) {
+    var windows = yield redis.smembers('windowlist:' + userId);
 
-    yield outbox.queueAll(userId, {
-        id: 'CLOSE',
-        windowId: parseInt(windowId)
-    });
+    for (var i = 0; i < windows.length; i++) {
+        var myConversationId = yield getConversationId(userId, windows[i]);
+
+        if (myConversationId === conversationId) {
+            yield remove(userId, windows[i]);
+        }
+    }
 };
 
 exports.findByConversationId = function*(userId, conversationId) {
@@ -180,4 +183,17 @@ function *getAllConversationIds(userId) {
 
 function *getConversationId(userId, windowId) {
     return yield redis.hget('window:' + userId + ':' + windowId, 'conversationId');
+}
+
+function *remove(userId, windowId) {
+    var conversationId = yield getConversationId(userId, windowId);
+
+    yield redis.srem('windowlist:' + userId, windowId);
+    yield redis.del('window:' + userId + ':' + windowId);
+    yield redis.hdel('index:windowIds', userId + ':' + conversationId);
+
+    yield outbox.queueAll(userId, {
+        id: 'CLOSE',
+        windowId: parseInt(windowId)
+    });
 }
