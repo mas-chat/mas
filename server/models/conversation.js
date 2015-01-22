@@ -170,6 +170,11 @@ Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKic
 
         var removeConversation = true;
 
+        if (userId.charAt(0) === 'm') {
+            // Never let window to exist alone without linked conversation
+            yield window.removeByConversationId(userId, this.conversationId);
+        }
+
         Object.keys(this.members).forEach(function(member) {
             if (member.charAt(0) === 'm') {
                 removeConversation = false;
