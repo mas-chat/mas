@@ -81,6 +81,10 @@ MacOS/Linux/Windows.
 
 Masctl is an utility for running MAS processes. `./script/masctl -h` shows the available options. In production, use `-b` parameter to daemonize MAS servers.
 
+## Code Climate
+
+[![Code Climate](https://codeclimate.com/github/ilkkao/mas/badges/gpa.svg)](https://codeclimate.com/github/ilkkao/mas)
+
 ## Feedback
 
 iao@iki.fi
