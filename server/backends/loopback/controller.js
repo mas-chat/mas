@@ -42,7 +42,7 @@ co(function*() {
     courier.on('updatePassword', processUpdatePassword);
     courier.on('create', processCreate);
     courier.on('join', processJoin);
-    courier.on('close', processClose);
+    courier.on('close', courier.noop); // TBD: Should we do something?
     courier.start();
 })();
 
@@ -116,12 +116,6 @@ function *processJoin(params) {
     }
 
     yield joinGroup(conversation, userId, role);
-}
-
-function *processClose(params) {
-    params = params;
-    /* jshint noyield:true */
-    // TBD
 }
 
 function *processUpdatePassword(params) {
