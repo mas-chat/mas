@@ -166,7 +166,8 @@ function *handleClose(params) {
     courier.send(params.backend, {
         type: 'close',
         userId: params.userId,
-        conversationId: params.conversation.conversationId,
+        network: params.network,
+        conversationType: params.conversation.type
     });
 }
 

@@ -150,14 +150,13 @@ function *processChat(params) {
 }
 
 function *processClose(params) {
-    var conversation = yield conversationFactory.get(params.conversationId);
-    var state = yield redis.hget('networks:' + params.userId + ':' + conversation.network, 'state');
+    var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
 
-    if (state === 'connected' && conversation.type === 'group') {
-        sendIRCPart(params.userId, conversation.network, conversation.name);
+    if (state === 'connected' && params.conversationType === 'group') {
+        sendIRCPart(params.userId, params.network, params.name);
     }
 
-    yield disconnectIfIdle(params.userId, conversation);
+    yield disconnectIfIdle(params.userId, params.network);
 }
 
 function *processUpdatePassword(params) {
@@ -675,7 +674,7 @@ function *handleJoinReject(userId, msg) {
         }
     }
 
-    yield disconnectIfIdle(userId, conversation);
+    yield disconnectIfIdle(userId, msg.network);
 }
 
 function *handleQuit(userId, msg) {
@@ -747,7 +746,7 @@ function *handleKick(userId, msg) {
         var windowId = yield window.findByConversationId(userId, conversation.conversationId);
         yield window.remove(userId, windowId);
 
-        yield disconnectIfIdle(userId, conversation);
+        yield disconnectIfIdle(userId, msg.network);
     }
 }
 
@@ -978,8 +977,8 @@ function sendIRCPart(userId, network, channel) {
     });
 }
 
-function *disconnectIfIdle(userId, conversation) {
-    var windowIds = yield window.getWindowIdsForNetwork(userId, conversation.network);
+function *disconnectIfIdle(userId, network) {
+    var windowIds = yield window.getWindowIdsForNetwork(userId, network);
     var onlyServer1on1Left = false;
 
     if (windowIds.length === 1) {
@@ -998,9 +997,9 @@ function *disconnectIfIdle(userId, conversation) {
     }
 
     if (windowIds.length === 0 || onlyServer1on1Left) {
-        yield addSystemMessage(userId, conversation.network,
+        yield addSystemMessage(userId, network,
             'info', 'No open windows left for this network, disconnecting...');
-        yield disconnect(userId, conversation.network);
+        yield disconnect(userId, network);
     }
 }
 
