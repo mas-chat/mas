@@ -1034,10 +1034,11 @@ function *bufferNames(names, userId, network, conversationId) {
 }
 
 function parseCTCPMessage(text) {
+    // Follow http://www.irchelp.org/irchelp/rfc/ctcpspec.html
     var regex = /\u0001(.*?)\u0001/g;
     var matches;
 
-    // Follow http://www.irchelp.org/irchelp/rfc/ctcpspec.html
+    /*jshint -W084 */
     while (matches = regex.exec(text)) {
         var msg = matches[1];
         var dataType;
@@ -1050,9 +1051,10 @@ function parseCTCPMessage(text) {
             payload = msg.substr(msg.indexOf(' ') + 1);
         }
 
-        // Only one CTCP extended message per PRIVMSG is supported
-        return { type: dataType, data: payload }
+        // Only one CTCP extended message per PRIVMSG is supported for now
+        return { type: dataType ? dataType : 'UNKNOWN', data: payload };
     }
+    /*jshint +W084 */
 }
 
 function *resetRetryCount(userId, network) {
