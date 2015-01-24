@@ -17,6 +17,7 @@
 'use strict';
 
 var crypto = require('crypto'),
+    bcrypt = require('bcrypt'),
     co = require('co'),
     jwt = require('jwt-simple'),
     passport = require('koa-passport'),
@@ -33,7 +34,7 @@ function authLocal(username, password, done) {
     co(function*() {
         var user = null;
         var userId = null;
-        var passwordSha, passwordShaNoSalt;
+        var correctPassword = false;
 
         if (username) {
             userId = yield redis.hget('index:user', username.toLowerCase());
@@ -42,14 +43,29 @@ function authLocal(username, password, done) {
         if (userId) {
             user = yield redis.hgetall('user:' + userId);
 
-            passwordShaNoSalt = crypto.createHash('sha256').update(password, 'utf8').digest('hex');
-            passwordSha = crypto.createHash('sha256').update(
-                passwordShaNoSalt + user.salt, 'utf8').digest('hex');
+            var passwordParts = user.password.split(':');
+            var encryptionMethod = passwordParts[0];
+            var encryptedHash = passwordParts[1];
+
+            if (encryptionMethod === 'sha256') {
+                var expectedSha = crypto.createHash(
+                    'sha256').update(password, 'utf8').digest('hex');
+
+                if (encryptedHash === expectedSha) {
+                    correctPassword = true;
+                    // Migrate to bcrypt
+                    var salt = bcrypt.genSaltSync(10);
+                    var hash = bcrypt.hashSync(password, salt);
+                    yield redis.hset('user:' + userId, 'password', 'bcrypt:' + hash);
+                }
+            } else {
+                correctPassword = bcrypt.compareSync(password, encryptedHash);
+            }
         }
 
         if (userId && user.openidurl) {
             done('useExt', false);
-        } else if (!userId || user.passwd !== passwordSha || user.inuse === 0) {
+        } else if (!userId || !correctPassword || user.inuse === 0) {
             done('invalid', false);
         } else {
             done(null, userId);

@@ -248,7 +248,7 @@ exports.create = function*() {
             inuse: '1'
         }, {}, {});
 
-        user.setFinalPasswordSha(form.data.password);
+        user.setPassword(form.data.password);
         var userId = yield user.generateUserId();
         yield user.save();
 
