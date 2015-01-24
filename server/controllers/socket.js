@@ -31,10 +31,34 @@ exports.setup = function(server) {
 
     // Socket.io
     io.on('connection', function(socket) {
-        var authenticated = false;
-        var connected = true;
         var userId = null;
         var sessionId = null;
+        var state = 'connected';
+        // connected, disconnected, authenticated
+
+        function emit(command) {
+            var id = command.id;
+
+            // TBD: Temporary hack
+            if (id.indexOf('_RESP', id.length - 5) !== -1) {
+                socket.emit('resp', command);
+            } else {
+                socket.emit('ntf', command);
+            }
+        }
+
+        function startPushLoop() {
+            co(function*() {
+                while (1) {
+                    var commands = yield outbox.flush(userId, sessionId, 25);
+                    commands.forEach(emit);
+
+                    if (state !== 'authenticated') {
+                        break; // Prevents memory leaks
+                    }
+                }
+            })();
+        }
 
         socket.on('init', function(data) {
             co(function*() {
@@ -45,9 +69,11 @@ exports.setup = function(server) {
 
                 if (!userId || !secret) {
                     log.info('Invalid init socket.io message.');
-                    socket.emit('initfail', {
+                    socket.emit('terminate', {
+                        code: 'INVALID_INIT',
                         reason: 'Invalid init message.'
                     });
+                    state = 'disconnected';
                     socket.disconnect();
                     return;
                 }
@@ -59,14 +85,16 @@ exports.setup = function(server) {
                     userRecord.secret === secret &&
                     userRecord.inuse)) {
                     log.info(userId, 'Init message with incorrect or expired secret.');
-                    socket.emit('initfail', {
+                    socket.emit('terminate', {
+                        code: 'INVALID_SECRET',
                         reason: 'Invalid or expired secret.'
                     });
+                    state = 'disconnected';
                     socket.disconnect();
                     return;
                 }
 
-                authenticated = true;
+                state = 'authenticated';
                 sessionId = uuid(15);
 
                 socket.emit('initok', { sessionId: sessionId });
@@ -81,33 +109,36 @@ exports.setup = function(server) {
                 yield friends.sendFriends(userId, sessionId);
                 yield friends.informStateChange(userId, 'login');
 
-                function emit(command) {
-                    var id = command.id;
+                startPushLoop();
+            })();
+        });
 
-                    // TBD: Temporary hack
-                    if (id.indexOf('_RESP', id.length - 5) !== -1) {
-                        socket.emit('resp', command);
-                    } else {
-                        socket.emit('ntf', command);
-                    }
+        socket.on('resume', function(data) {
+            co(function*() {
+                userId = data.userId;
+                sessionId = data.sessionId;
+
+                var exists = yield redis.zscore('sessionlist:' + userId, sessionId);
+
+                if (!exists) {
+                    socket.emit('terminate', {
+                        code: 'INVALID_SESSION',
+                        reason: 'Invalid or expired session.'
+                    });
+                    state = 'disconnected';
+                    socket.disconnect();
+                    return;
                 }
 
-                co(function*() {
-                    while (1) {
-                        var commands = yield outbox.flush(userId, sessionId, 25);
-                        commands.forEach(emit);
-
-                        if (!connected) {
-                            break; // Prevents memory leaks
-                        }
-                    }
-                })();
+                state = 'authenticated';
+                startPushLoop();
             })();
         });
 
         socket.on('req', function(data) {
             co(function*() {
-                if (!authenticated) {
+                if (state !== 'authenticated') {
+                    state = 'disconnected';
                     socket.disconnect();
                     return;
                 }
@@ -117,13 +148,14 @@ exports.setup = function(server) {
         });
 
         socket.on('disconnect', function() {
-            connected = false;
             // Session is torn down in deleteIdleSessions() handler
+            state = 'disconnected';
         });
 
         socket.conn.on('heartbeat', function() {
             co(function*() {
-                if (!authenticated) {
+                if (state !== 'authenticated') {
+                    state = 'disconnected';
                     socket.disconnect();
                     return;
                 }
