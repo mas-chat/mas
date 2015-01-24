@@ -88,13 +88,58 @@ function *processSend(params) {
 
 function *processTextCommand(params) {
     var conversation = yield conversationFactory.get(params.conversationId);
+    var command = params.text.match(/.*?(?=\W+|$)/)[0].toLowerCase();
+    var payload = params.text.substring(command.length);
+    var data = params.text;
+    var systemMsg = null;
+    var send = true;
 
-    courier.send('connectionmanager', {
-        type: 'write',
-        userId: params.userId,
-        network: conversation.network,
-        line: params.text
-    });
+    switch (command) {
+        case '':
+            systemMsg = 'Space after / character is not allowd.';
+            send = false;
+            break;
+        case 'part':
+            systemMsg = 'Use the window menu instead to leave.';
+            send = false;
+            break;
+        case 'msg':
+            var res = payload.match(/^\W*(\w+)\W+(.*)/);
+
+            if (!res || !res[1] || !res[2]) {
+                send = false;
+                break;
+            }
+
+            var targetUserId = yield ircUser.getUserId(res[2], conversation.network);
+
+            if (targetUserId.charAt(0) === 'm') {
+                systemMsg = '1on1s between MAS users through IRC aren\'t supported. ' +
+                    'Use chat menu instead';
+                send = false;
+            } else {
+                data = 'PRIVMSG ' + res[1] + ' :' + res[2];
+                systemMsg = '-> [' + res[1] + '] ' + res[2] +
+                    ' (A new window opens if you get reply)';
+            }
+            break;
+        case 'me':
+            data = 'PRIVMSG ' + conversation.name + ' :\u0001ACTION ' + payload +'\u0001';
+            break;
+    }
+
+    if (systemMsg) {
+       yield addSystemMessage(params.userId, conversation.network, 'info', systemMsg);
+    }
+
+    if (send) {
+        courier.send('connectionmanager', {
+            type: 'write',
+            userId: params.userId,
+            network: conversation.network,
+            line: data
+        });
+    }
 }
 
 function *processJoin(params) {
