@@ -37,6 +37,10 @@ var argv = yargs
     .alias('c', 'connman')
     .describe('c', 'Also start, stop or restart IRC connman process.')
     .default('c', false)
+    .boolean('o')
+    .alias('o', 'connman-only')
+    .describe('o', 'Only start, stop or restart IRC connman process.')
+    .default('o', false)
     .boolean('b')
     .alias('b', 'background')
     .describe('b', 'Daemonize MAS processes')
@@ -58,15 +62,17 @@ var logDir = getConfigOption('log:directory');
 mkdirp.sync(getAbsolutePath(logDir)); // Make sure logs directory exists
 mkdirp.sync(getAbsolutePath(pidDir)); // Make sure pids directory exists
 
-var processes = {
-    'mas-frontend': 'server.js',
-    'mas-irc': 'backends/irc/controller.js',
-    'mas-loopback': 'backends/loopback/controller.js'
-};
-
 var handles = {};
 
-if (argv.connman === true || action === 'status') {
+var processes = {};
+
+if (!argv['connman-only']) {
+    processes['mas-frontend'] = 'server.js';
+    processes['mas-irc'] = 'backends/irc/controller.js';
+    processes['mas-loopback'] = 'backends/loopback/controller.js';
+}
+
+if (argv.connman || argv['connman-only'] || action === 'status') {
     processes['mas-irc-connman'] = 'backends/irc/connectionManager.js';
 }
 
