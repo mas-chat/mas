@@ -21,7 +21,13 @@
 import Ember from 'ember';
 
 export default Ember.Mixin.create({
-    upload: function(files, transform, remote, windowId, controller) {
+    actions: {
+        upload: function(files, transform) {
+            this.handleUpload(files, transform);
+        }
+    },
+
+    handleUpload: function(files, transform) {
         if (files.length === 0) {
             return;
         }
@@ -33,12 +39,12 @@ export default Ember.Mixin.create({
             complete: function(err, xhr) {
                 if (!err) {
                     var url = JSON.parse(xhr.responseText).url[0];
-                    this._sendMessage(url, remote, windowId, controller);
+                    this._sendMessage(url);
                 } else {
-                    this._printLine('File upload failed.', 'error', controller);
+                    this._printLine('File upload failed.', 'error');
                 }
             }.bind(this),
-            data: { sessionId: remote.sessionId }
+            data: { sessionId: this.remote.sessionId }
         };
 
         if (transform === 'jpeg') {
@@ -51,24 +57,25 @@ export default Ember.Mixin.create({
         FileAPI.upload(options);
     },
 
-    _sendMessage: function(text, remote, windowId, controller) {
-        remote.send({
+    _sendMessage: function(text) {
+        this.remote.send({
             id: 'SEND',
             text: text,
-            windowId: windowId
+            windowId: this.get('model.windowId')
         });
 
-        this._printLine(text, 'mymsg', controller);
+        this._printLine(text, 'mymsg');
     },
 
-    _printLine: function(text, cat, controller) {
-        var messageRecord = controller.get('container').lookup('model:message').setProperties({
+    _printLine: function(text, cat) {
+        var messageRecord = this.get('container').lookup('model:message').setProperties({
             body: text,
             cat:  cat,
-            nick: cat === 'mymsg' ? controller.get('store.nicks')[controller.get('network')] : null,
+            userId: cat === 'mymsg' ?  this.get('store.userId') : null,
+            window: this.get('model'),
             ts: moment().unix()
         });
 
-        controller.get('messages').pushObject(messageRecord);
+        this.get('model.messages').pushObject(messageRecord);
     }
 });
