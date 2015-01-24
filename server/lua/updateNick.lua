@@ -16,8 +16,8 @@
 
 local userId = ARGV[1]
 local network = ARGV[2]
-local oldNick = ARGV[3]
-local newNick = ARGV[4]
+local oldNick = string.lower(ARGV[3])
+local newNick = string.lower(ARGV[4])
 
 local masUserId = redis.call('HGET', 'index:currentnick', network .. ':' .. oldNick)
 
