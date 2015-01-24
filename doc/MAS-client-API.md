@@ -43,7 +43,7 @@ The overall approach is:
 
 2. Immediately after connection the client emits 'init' event.
 
-3. Server responds either with 'initok' or 'initfail' event. If the client receives 'initfail' it needs to login again to get a new secret.
+3. Server responds either with 'initok' or 'terminate' event. If the client receives 'terminate' it needs to login again to get a new secret.
 
 4. After 'initok' the server emits N 'ntf' (notification) events. These notification messages allow the client to draw the initial UI. Event payload contains a JSON message which describes the notification type and other parameters.
 
@@ -51,22 +51,35 @@ The overall approach is:
 
 6. After processing the request, the server sends a 'resp' event. Event payload contains a JSON message which describes the response type and other parameters.
 
-7. Eventually the socket.io socket is disconnected either by the client or server.
+7. The server sends 'ntf' events when something changes.
+
+8. Looping continues between steps 5 and 7.
 
 The user is allowed to have multiple concurrent active sessions (socket.io sockets) towards the server, e.g from different browser tabs or mobile devices.
 
 # Socket.io events
 
-List of used events.
+## Custom MAS events
+
+List of used custom events.
 
 | Socket.io event name | Originator |
 |----------------------|------------|
 | init                 | client     |
 | initok               | server     |
-| initfail             | server     |
+| terminate            | server     |
 | ntf                  | server     |
 | req                  | client     |
 | resp                 | server     |
+| resume               | client     |
+
+## Socket.io client disconnect event
+
+If the client receives 'disconnect' event (network hiccup or server problem) from socket.io and then 'reconnect' event, it can opt to send the 'resume' event to the server instead of sending 'init' event (full restart).
+
+Note that if the time between 'disconnect' and 'reconnect' is long, the server might have deleted the session. In that case the server sends the 'terminate' event as response to 'resume'. Client needs then to create a new session with new socket.io connection and 'init' event.
+
+The server will send all buffered 'ntf' events if the resume is successful. Client can assume that no new chat message is lost.
 
 ## Init event payload
 
@@ -100,9 +113,9 @@ List of used events.
 
 | Parameter  | Type      | Description                                        |
 |------------|-----------|----------------------------------------------------|
-| sessionId  | mandatory | Session identifier. Needed for image uploads.      |
+| sessionId  | mandatory | Session identifier. Needed for image uploads and for resuming the connection after socket.io client 'disconnect' event |
 
-## Initfail event payload
+## Terminate event payload
 
 ```JSON
 {
@@ -113,8 +126,22 @@ List of used events.
 
 | Parameter  | Type      | Description                                        |
 |------------|-----------|----------------------------------------------------|
-| code       | mandatory | Can be "INVALID_SECRET" or "UNSUPPORTED_PROTOCOL_VERSION" |
+| code       | mandatory | Can be "INVALID_SECRET", "INVALID_SESSION", "UNSUPPORTED_PROTOCOL_VERSION" |
 | reason     | mandatory | Textual description of the failure reason.         |
+
+## Resume event payload
+
+```JSON
+{
+    "userId": "m32432",
+    "sessionId": "n433smdkDdRW32fsdxc4fds4Tw"
+}
+```
+
+| Parameter  | Type      | Description                                        |
+|------------|-----------|----------------------------------------------------|
+| userId     | mandatory | User Id                                            |
+| sessionId  | mandatory | Session Id                                         |
 
 ## Ntf, req, and resp event payload
 
