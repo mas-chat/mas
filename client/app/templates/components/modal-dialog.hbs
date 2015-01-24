@@ -1,21 +1,25 @@
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
-            <button {{action "cancel"}} type="button" class="close">&times;</button>
+            {{#unless noControls}}
+                <button {{action "cancel"}} type="button" class="close">&times;</button>
+            {{/unless}}
             <h4 class="modal-title">{{title}}</h4>
         </div>
         <div class="modal-body">
             {{yield}}
         </div>
-        <div class="modal-footer">
-            {{#unless noCancel}}
-                <button {{action "cancel"}} type="button" data-modal="cancel "class="btn btn-default">
-                    Cancel
-                </button>
-            {{/unless}}
-            <button {{action "submit"}} type="button" data-modal="submit" class="btn btn-primary">
-                {{proceedButton}}
-            </button>
-        </div>
+        {{#unless noControls}}
+            <div class="modal-footer">
+                {{#unless noCancel}}
+                    <button {{action "cancel"}} type="button" data-modal="cancel "class="btn btn-default">
+                        Cancel
+                    </button>
+                {{/unless}}
+                    <button {{action "submit"}} type="button" data-modal="submit" class="btn btn-primary">
+                        {{proceedButton}}
+                    </button>
+            </div>
+        {{/unless}}
     </div>
 </div>
