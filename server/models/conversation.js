@@ -226,18 +226,11 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
 
 Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, excludeSession) {
     // A special filter for IRC backend
-    var key = 'conversationbuffer:' + this.conversationId;
-    var existingReporter = yield redis.hget(key, msg);
+    var duplicate = yield redis.run('duplicateMsgFilter', sourceUserId, this.conversationId, msg);
 
-    yield redis.expire(key, 45);
-
-    if (existingReporter && existingReporter !== sourceUserId) {
-        // Duplicate
-        return;
+    if (!duplicate) {
+        yield this.addMessage(msg, excludeSession);
     }
-
-    yield redis.hset(key, msg, sourceUserId);
-    yield this.addMessage(msg, excludeSession);
 };
 
 Conversation.prototype.sendAddMembers = function*(userId) {
