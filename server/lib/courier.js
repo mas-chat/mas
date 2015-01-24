@@ -65,6 +65,10 @@ Courier.prototype.send = function(dest, msg) {
     })();
 };
 
+Courier.prototype.clearInbox = function*(name) {
+    yield sendRedis.del('inbox:' + name);
+};
+
 Courier.prototype.on = function(type, callback) {
     this.handlers[type] = callback;
 };
