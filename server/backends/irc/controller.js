@@ -161,9 +161,10 @@ function *processJoin(params) {
         channelName = '#' + channelName;
     }
 
+    yield redis.hset('ircchannelsubscriptions:' +
+        params.userId + ':' + params.network, channelName, params.password);
+
     if (!state || state === 'disconnected' || state === 'closing') {
-        yield redis.hset('ircpendingjoins:' +
-            params.userId + ':' + params.network, channelName, params.password);
         yield connect(params.userId, params.network);
     } else if (state === 'connected') {
         courier.send('connectionmanager', {
@@ -196,6 +197,9 @@ function *processChat(params) {
 
 function *processClose(params) {
     var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
+
+    yield redis.hdel(
+        'ircchannelsubscriptions:' + params.userId + ':' + params.network, params.name);
 
     if (state === 'connected' && params.conversationType === 'group') {
         sendIRCPart(params.userId, params.network, params.name);
@@ -277,22 +281,31 @@ function processWhois(params) {
 // Restarted
 function *processRestarted() {
     var allUsers = yield redis.smembers('userlist');
+    var networks = yield redis.smembers('networklist');
+
+    if (networks.length === 0 ) {
+        log.error('No networks.');
+    }
 
     for (var i = 0; i < allUsers.length; i++) {
         var userId = allUsers[i];
-        var networks = yield window.getNetworks(userId);
 
         for (var ii = 0; ii < networks.length; ii++) {
             var network = networks[ii];
 
             if (network !== 'MAS') {
-                log.info(userId, 'Scheduling connect() to IRC network: ' + network);
+                var channels = yield redis.hgetall(
+                    'ircchannelsubscriptions:' + userId + ':' + network);
 
-                yield addSystemMessage(userId, network, 'info',
-                    'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
-                    ' server enabled. Next connect will be slow.');
+                if (channels) {
+                    log.info(userId, 'Scheduling connect() to IRC network: ' + network);
 
-                yield connect(userId, network);
+                    yield addSystemMessage(userId, network, 'info',
+                        'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
+                        ' server enabled. Next connect will be slow.');
+
+                    yield connect(userId, network);
+                }
             }
         }
     }
@@ -347,8 +360,6 @@ function *processDisconnected(params) {
 
     yield redis.hset('networks:' + userId + ':' + network, 'state', 'disconnected');
     yield nicks.removeCurrentNick(userId, network);
-
-    yield redis.del('ircpendingjoins:' + userId + ':' + network);
 
     if (previousState === 'closing') {
         // We wanted to close the connection, don't reconnect
@@ -613,25 +624,10 @@ function *handle376(userId, msg) {
         yield addSystemMessage(userId, msg.network, 'info',
             'You can close this window at any time. It\'ll reappear when needed.');
 
-        var conversationIds = yield window.getAllConversationIds(userId);
-        var channelsToJoin = yield redis.hgetall('ircpendingjoins:' + userId + ':' + msg.network);
+        var channelsToJoin = yield redis.hgetall(
+            'ircchannelsubscriptions:' + userId + ':' + msg.network);
 
-        // Password is needed when join completes if this is a new conversation
-        yield redis.expire('ircpendingjoins:' + userId + ':' + msg.network, 60);
-
-        channelsToJoin = channelsToJoin || {};
-
-        // Merge ircpendingjoins (new channels this user is joining now) with all 'old' channels
-        // we need to join because of server restart or network hiccup.
-        for (var i = 0; i < conversationIds.length; i++) {
-            var ircConversation = yield conversationFactory.get(conversationIds[i]);
-
-            if (ircConversation.network === msg.network && ircConversation.type === 'group') {
-                channelsToJoin[ircConversation.name] = ircConversation.password;
-            }
-        }
-
-        if (channelsToJoin.length === 0) {
+        if (!channelsToJoin) {
             log.info(userId, 'Connected, but no channels/1on1s to join. Disconnecting');
             yield disconnect(userId, msg.network);
             return;
@@ -669,7 +665,8 @@ function *handleJoin(userId, msg) {
     var channel = msg.params[0];
     var targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
     var conversation = yield conversationFactory.findGroup(channel, msg.network);
-    var password = yield redis.hget('ircpendingjoins:' + userId + ':' + msg.network, channel);
+    var password = yield redis.hget(
+        'ircchannelsubscriptions:' + userId + ':' + msg.network, channel);
 
     if (!conversation) {
         conversation = yield conversationFactory.create({
@@ -708,6 +705,8 @@ function *handleJoinReject(userId, msg) {
 
     yield addSystemMessage(userId, msg.network,
         'error', 'Failed to join ' + channel + '. Reason: ' + reason);
+
+    yield redis.hdel('ircchannelsubscriptions:' + userId + ':' + msg.network, channel);
 
     if (conversation) {
         yield conversation.removeGroupMember(userId, false, false);
@@ -875,7 +874,11 @@ function *handleMode(userId, msg) {
                     }
                 }
             } else if (mode === 'k') {
-                yield conversation.setPassword(oper === '+' ? param : '');
+                var newPassword = oper === '+' ? param : '';
+
+                yield conversation.setPassword(newPassword);
+                yield redis.hset(
+                    'ircchannelsubscriptions:' + userId + ':' + msg.network, target, newPassword);
             }
 
             if (newClass) {
