@@ -76,6 +76,7 @@ List of used events.
     "secret": "O1BgcLMBBEFC2etpjsRo",
     "clientName": "my_client_app",
     "clientOS": "android",
+    "version": 1,
     "cachedUpto": 3763453
 }
 ```
@@ -86,6 +87,7 @@ List of used events.
 | secret     | mandatory | Secret authentication token                        |
 | clientName | optional  | Client name                                        |
 | clientOS   | optional  | Client operating system                            |
+| version    | mandatory | Must be string "1.0"                               |
 | cachedUpto | optional  | Every ADDTEXT notification has a gid field which is ever increasing global id. This parameter communicates the highest the client has already seen and stored. The server will omit of sending messages with lower gid in the beginning of session. Without this option, the server sends up to 200 ADDTEXT notification for every window to fill the window backlog. |
 
 ## Initok event payload
@@ -104,12 +106,14 @@ List of used events.
 
 ```JSON
 {
+    "code": "INVALID_SECRET",
     "reason": "Invalid or expired secret."
 }
 ```
 
 | Parameter  | Type      | Description                                        |
 |------------|-----------|----------------------------------------------------|
+| code       | mandatory | Can be "INVALID_SECRET" or "UNSUPPORTED_PROTOCOL_VERSION" |
 | reason     | mandatory | Textual description of the failure reason.         |
 
 ## Ntf, req, and resp event payload
