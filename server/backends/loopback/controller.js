@@ -24,7 +24,6 @@ require('../../lib/init')('loopback');
 var co = require('co'),
     redisModule = require('../../lib/redis'),
     conf = require('../../lib/conf'),
-    redis = redisModule.createClient(),
     courier = require('../../lib/courier').createEndPoint('loopbackparser'),
     outbox = require('../../lib/outbox'),
     window = require('../../models/window'),
@@ -137,10 +136,6 @@ function *processUpdateTopic(params) {
 }
 
 function *joinGroup(conversation, userId, role) {
-    // Backends must maintain currentNick value
-    var nick = yield redis.hget('user:' + userId, 'nick');
-    yield nicks.updateCurrentNick(userId, 'MAS', nick);
-
     yield window.create(userId, conversation.conversationId);
     yield conversation.addGroupMember(userId, role);
     yield conversation.sendAddMembers(userId);
