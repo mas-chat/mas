@@ -19,9 +19,8 @@
 /* globals $, FileAPI, emojify */
 
 import Ember from 'ember';
-import UploadMixin from '../mixins/upload';
 
-export default Ember.View.extend(UploadMixin, {
+export default Ember.View.extend({
     classNames: [ 'window', 'flex-grow-column' ],
     attributeBindings: [ 'row:data-row', 'draggable' ],
 
@@ -160,8 +159,7 @@ export default Ember.View.extend(UploadMixin, {
 
         FileAPI.event.on(fileInput, 'change', function(evt) {
             var files = FileAPI.getFiles(evt); // Retrieve file list
-            this.upload(files, 'jpeg', this.get('controller.remote'),
-                this.get('controller.windowId'), this.get('controller'));
+            this.get('controller').send('upload', files, 'jpeg');
         }.bind(this));
 
         this.get('parentView').windowAdded(false);
