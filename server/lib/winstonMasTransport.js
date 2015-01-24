@@ -71,7 +71,7 @@ MasConsoleLogger.prototype.log = function(level, msg, meta, callback) {
     userIdColumn = userId ? userId : 'N/A';
 
     process.stdout.write(
-        new Date().toISOString() + ' ' +
+        new Date().toISOString().yellow + ' ' +
         processColumn + ' - ' +
         levelColumn + ' - ' +
         userIdColumn + ' - ' +
