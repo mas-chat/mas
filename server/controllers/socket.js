@@ -77,7 +77,9 @@ exports.setup = function(server) {
                 log.info(userId, 'Initializing new session: ' + sessionId);
                 yield redis.run('initSession', userId, sessionId);
                 yield nicks.sendNick(userId, sessionId);
+
                 yield friends.sendFriends(userId, sessionId);
+                yield friends.informStateChange(userId, 'login');
 
                 function emit(command) {
                     var id = command.id;
