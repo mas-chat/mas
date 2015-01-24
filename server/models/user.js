@@ -16,7 +16,7 @@
 
 'use strict';
 
-var crypto = require('crypto'),
+var bcrypt = require('bcrypt'),
     redis = require('../lib/redis').createClient();
 
 const RESERVED_USERIDS = 9000;
@@ -51,17 +51,10 @@ User.prototype.load = function*(userId) {
     }
 };
 
-User.prototype.setFinalPasswordSha = function(passwd) {
-    var passwordSha = crypto.createHash('sha256').update(passwd, 'utf8').digest('hex');
-    this.addSalt(passwordSha);
-};
-
-User.prototype.addSalt = function(sha) {
-    // 64-bit salt
-    var salt = crypto.randomBytes(8).toString('hex');
-
-    this.data.salt = salt;
-    this.data.passwd = crypto.createHash('sha256').update(sha + salt, 'utf8').digest('hex');
+User.prototype.setPassword = function(password) {
+    var salt = bcrypt.genSaltSync(10);
+    var hash = bcrypt.hashSync(password, salt);
+    this.data.password = 'bcrypt:' + hash;
 };
 
 User.prototype.generateUserId = function*() {

@@ -4,6 +4,7 @@
   "private": true,
   "description": "MAS Web App",
   "dependencies": {
+    "bcrypt": "~0.8.1",
     "carrier": "~0.1.13",
     "chai": "~1.10.0",
     "co": "~3.1.0",
