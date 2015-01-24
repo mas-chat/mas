@@ -65,8 +65,12 @@ export default Ember.Object.extend({
             this.set('sessionId', data.sessionId);
         }.bind(this));
 
-        this.socket.on('initfail', function() {
-            this._logout();
+        this.socket.on('terminate', function(data) {
+            if (data.code === 'INVALID_SESSION') {
+                window.location.reload();
+            } else {
+                this._logout();
+            }
         }.bind(this));
 
         this.socket.on('ntf', function(data) {
@@ -78,6 +82,24 @@ export default Ember.Object.extend({
             if (this._callbacks[command.id]) {
                 this._callbacks[command.id](command);
             }
+        }.bind(this));
+
+        this.socket.on('disconnect', function() {
+            this.get('container').lookup('route:application').send(
+                'openModal', 'non-interactive-modal', {
+                    title: 'Connection error',
+                    body: 'Connection to server lost. Trying to reconnect…'
+                });
+        }.bind(this));
+
+        this.socket.on('reconnect', function() {
+            this.socket.emit('resume', {
+                userId: userId,
+                sessionId: this.get('sessionId')
+            });
+
+            this.get('container').lookup('route:application').send(
+                'closeModal');
         }.bind(this));
     },
 
