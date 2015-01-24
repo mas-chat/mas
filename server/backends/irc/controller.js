@@ -111,7 +111,7 @@ function *processTextCommand(params) {
                 break;
             }
 
-            var targetUserId = yield ircUser.getUserId(res[2], conversation.network);
+            var targetUserId = yield ircUser.getUserId(res[1], conversation.network);
 
             if (targetUserId.charAt(0) === 'm') {
                 systemMsg = '1on1s between MAS users through IRC aren\'t supported. ' +
