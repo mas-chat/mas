@@ -42,7 +42,9 @@ exports.create = function*(options) {
             'group:' + options.network + ':' + options.name, conversationId);
     }
 
-    log.info('Created conversation: ' + conversationId);
+    log.info('Created ' + options.type + ' conversation: ' + conversationId +
+        (options.name ? ', name: ' + options.name : '') + ' (' + options.network + ')');
+
     return new Conversation(conversationId, options, {});
 };
 
@@ -53,19 +55,25 @@ exports.get = function*(conversationId) {
 exports.findGroup = function*(name, network) {
     assert(network && name);
 
-    log.info('Searching group: ' + network + ':' + name);
     var conversationId = yield redis.hget('index:conversation', 'group:' + network + ':' + name);
+
+    if (!conversationId) {
+        log.info('Searched non-existing group: ' + network + ':' + name);
+    }
+
     return yield get(conversationId);
 };
 
 exports.find1on1 = function*(userId1, userId2, network) {
     assert (userId1 && userId2 && network);
 
-    log.info('Searching 1on1: ' + userId1 + ':' + userId2 + ':' + network);
-
     var userIds = [ userId1, userId2 ].sort();
     var conversationId = yield redis.hget('index:conversation',
         '1on1:' + network + ':' + userIds[0] + ':' + userIds[1]);
+
+    if (!conversationId) {
+        log.info('Searched non-existing 1on1: ' + userId1 + ':' + userId2 + ':' + network);
+    }
 
     return yield get(conversationId);
 };
