@@ -33,6 +33,8 @@ local function getNicks(userId)
                 nicks[networks[i]] = networkNick
             end
         end
+
+        nicks['MAS'] = redis.call('HGET', 'user:' .. userId, 'nick')
     elseif class == 'i' then
         local networkNick = redis.call('HGET', 'ircuser:' .. userId, 'nick')
 
