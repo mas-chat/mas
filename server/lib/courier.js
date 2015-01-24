@@ -40,7 +40,7 @@ Courier.prototype.start = function() {
             var result = yield rcvRedis.brpop('inbox:' + this.name, 0);
             var msg = JSON.parse(result[1]);
             var handler = this.handlers[msg.type];
-            log.info('MSG RCVD [' + msg.__sender + ' -> ' + this.name + '] DATA: ' + result[1]);
+            log.info('MSG RCVD [' + msg.__sender + ' → ' + this.name + '] DATA: ' + result[1]);
 
             assert(handler, this.name + ': Missing message handler for: ' + msg.type);
 
@@ -58,7 +58,7 @@ Courier.prototype.start = function() {
 };
 
 Courier.prototype.send = function(dest, msg) {
-    var data = convert(msg, this.name, dest);
+    var data = convert(msg, this.name);
 
     co(function*() {
         yield sendRedis.lpush('inbox:' + dest, data);
@@ -73,14 +73,14 @@ Courier.prototype.noop = function() {
     return null;
 };
 
-function convert(msg, sender, dest) {
+function convert(msg, sender) {
     if (typeof msg === 'string') {
         msg = { type: msg };
     }
     msg.__sender = sender;
     msg = JSON.stringify(msg);
 
-    log.info('MSG SENT [' + sender + ' -> ' + dest + '] DATA:' + msg);
+    // log.info('MSG SENT [' + sender + ' -> ' + dest + '] DATA:' + msg);
     return msg;
 }
 
