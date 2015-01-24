@@ -57,7 +57,8 @@ export default Ember.Object.extend({
             clientName: 'web',
             clientOS: navigator.platform,
             userId: userId,
-            secret: secret
+            secret: secret,
+            version: '1.0'
         });
 
         this.socket.on('initok', function(data) {
