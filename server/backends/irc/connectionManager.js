@@ -26,6 +26,7 @@ var net = require('net'),
     carrier = require('carrier'),
     isUtf8 = require('is-utf8'),
     iconv = require('iconv-lite'),
+    co = require('co'),
     conf = require('../../lib/conf'),
     log = require('../../lib/log'),
     courier = require('../../lib/courier').createEndPoint('connectionmanager');
@@ -35,8 +36,6 @@ var nextNetworkConnectionSlot = {};
 
 const IDENTD_PORT = 113;
 const LAG_POLL_INTERVAL = 60 * 1000; // 60s
-
-courier.send('ircparser', 'restarted');
 
 // Start IDENT server
 if (conf.get('irc:identd')) {
@@ -137,7 +136,11 @@ courier.on('write', function(params) {
     socket.last = Date.now();
 });
 
-courier.start();
+co(function*() {
+    yield courier.clearInbox('ircparser');
+    courier.send('ircparser', 'restarted');
+    courier.start();
+})();
 
 function connect(userId, nick, network) {
     var options = {
