@@ -97,7 +97,7 @@ export default Ember.Object.extend({
             return url;
         }.bind(this));
 
-        if (pos !== text.length) {
+        if (text && text.length !== pos) {
             textParts.push(this._escHtml(text.substring(pos), false));
         }
 
