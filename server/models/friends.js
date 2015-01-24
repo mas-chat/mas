@@ -29,6 +29,7 @@ exports.sendFriends = function*(userId, sessionId) {
 
     var friendIds = yield redis.smembers('friends:' + userId);
 
+    // TBD: Do the looping in lua to enhance performance
     for (var i = 0; i < friendIds.length; i++) {
         var friendUserId = friendIds[i];
 
