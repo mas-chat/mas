@@ -30,8 +30,7 @@ export default Ember.Controller.extend(UploadMixin, {
 
         uploadPhoto: function() {
             var file = this.get('shot').preview(800, 600);
-            this.upload(file, 'jpeg', this.get('remote'), this.get('windowId'), this);
-
+            this.handleUpload([ file ], 'jpeg');
             this.send('closeModal');
         }
     }

@@ -20,8 +20,9 @@
 
 import Ember from 'ember';
 import { play } from '../helpers/sound';
+import UploadMixin from '../mixins/upload';
 
-export default Ember.Controller.extend({
+export default Ember.Controller.extend(UploadMixin, {
     actions: {
         hide: function() {
             this.set('model.visible', false);
