@@ -34,7 +34,7 @@ exports.updateCurrentNick = function*(userId, network, nick) {
     yield removeCurrentNickFromIndex(userId, network);
 
     yield redis.hset('networks:' + userId + ':' + network, 'currentnick', nick);
-    yield redis.hset('index:currentnick', network + ':' + nick, userId);
+    yield redis.hset('index:currentnick', network + ':' + nick.toLowerCase(), userId);
 };
 
 exports.removeCurrentNick = function*(userId, network) {
@@ -43,7 +43,7 @@ exports.removeCurrentNick = function*(userId, network) {
 };
 
 exports.getUserIdFromNick = function*(nick, network) {
-    return yield redis.hget('index:currentnick', network + ':' + nick);
+    return yield redis.hget('index:currentnick', network + ':' + nick.toLowerCase());
 };
 
 exports.getCurrentNick = getCurrentNick;
