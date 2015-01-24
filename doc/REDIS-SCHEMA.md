@@ -110,7 +110,7 @@ MAS Redis structures
 
  ircnamesreporter:<conversationId> (string with expiry time, userId)
 
- ircpendingjoins:<userId>:<network>
+ ircchannelsubscriptions:<userId>:<network> (hash)
    <channelName> (string, password)
 
 ```
