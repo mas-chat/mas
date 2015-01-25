@@ -1,4 +1,6 @@
 
+'use strict';
+
 let utils = require('../../utils');
 
 module.exports = {

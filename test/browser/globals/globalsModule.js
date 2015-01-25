@@ -1,4 +1,6 @@
 
+'use strict';
+
 let co = require('co'),
     redisModule = require('../../../server/lib/redis'),
     redis = redisModule.createClient();
