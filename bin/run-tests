@@ -19,12 +19,12 @@ sleep 1
 ./bin/masctl -b -c start --configFile test/mas-test.conf
 
 if [ "$NIGHTWATCH_ENV" == "local" ]; then
-    ./bin/nightwatch --env local
+    node --harmony ./bin/nightwatch --env local
 else
     # Can't run in parallel until there are multiple redises.
-    ./bin/nightwatch --env saucelabs-firefox-mac
-    ./bin/nightwatch --env saucelabs-chrome-linux
-    ./bin/nightwatch --env saucelabs-ie-win
+    node --harmony ./bin/nightwatch --env saucelabs-firefox-mac
+    node --harmony ./bin/nightwatch --env saucelabs-chrome-linux
+    node --harmony ./bin/nightwatch --env saucelabs-ie-win
 fi
 
 ./bin/masctl -c stop --configFile test/mas-test.conf
