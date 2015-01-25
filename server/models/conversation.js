@@ -18,13 +18,13 @@
 
 /* jshint -W079 */
 
-var assert = require('assert'),
+let assert = require('assert'),
     redis = require('../lib/redis').createClient(),
     log = require('../lib/log'),
     outbox = require('../lib/outbox'),
     window = require('./window');
 
-var MSG_BUFFER_SIZE = 200;
+let MSG_BUFFER_SIZE = 200;
 
 exports.create = function*(options) {
     let conversationId = yield redis.incr('nextGlobalConversationId');

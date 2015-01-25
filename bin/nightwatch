@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var path = require('path');
+let path = require('path');
 
 process.chdir(path.join(__dirname, '../test/browser'));
 

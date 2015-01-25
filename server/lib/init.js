@@ -16,7 +16,7 @@
 
 'use strict';
 
-var path = require('path'),
+let path = require('path'),
     npid = require('npid'),
     conf = require('./conf'),
     log = require('./log'),

@@ -16,15 +16,15 @@
 
 'use strict';
 
-var assert = require('assert'),
+let assert = require('assert'),
     redisModule = require('./redis'),
     sendRedis = redisModule.createClient(),
     rcvRedis = redisModule.createClient(),
     co = require('co'),
     log = require('./log');
 
-var shutdownInitiated = false;
-var processing = false;
+let shutdownInitiated = false;
+let processing = false;
 
 exports.createEndPoint = function(name) {
     return new Courier(name);

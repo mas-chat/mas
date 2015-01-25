@@ -21,7 +21,7 @@
 
 require('../../lib/init')('loopback');
 
-var co = require('co'),
+let co = require('co'),
     redisModule = require('../../lib/redis'),
     conf = require('../../lib/conf'),
     courier = require('../../lib/courier').createEndPoint('loopbackparser'),

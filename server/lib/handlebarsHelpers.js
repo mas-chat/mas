@@ -16,11 +16,11 @@
 
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
+let fs = require('fs');
+let path = require('path');
 
-var manifest = null;
-var PREFIX = '/dist/';
+let manifest = null;
+let PREFIX = '/dist/';
 
 try {
     manifest = JSON.parse(fs.readFileSync(path.resolve(__dirname,

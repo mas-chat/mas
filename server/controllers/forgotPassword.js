@@ -16,7 +16,7 @@
 
 'use strict';
 
-var fs = require('fs'),
+let fs = require('fs'),
     path = require('path'),
     uuid = require('uid2'),
     nodemailer = require('nodemailer'),
@@ -25,9 +25,9 @@ var fs = require('fs'),
     log = require('../lib/log'),
     conf = require('../lib/conf');
 
-var transporter = nodemailer.createTransport();
+let transporter = nodemailer.createTransport();
 
-var template = handlebars.compile(fs.readFileSync(path.join(
+let template = handlebars.compile(fs.readFileSync(path.join(
     __dirname, '..', 'emails', 'resetPassword.hbs'), 'utf8'));
 
 exports.create = function*() {

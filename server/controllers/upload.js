@@ -16,7 +16,7 @@
 
 'use strict';
 
-var fs = require('fs'),
+let fs = require('fs'),
     path = require('path'),
     mkdirp = require('mkdirp'),
     parse = require('co-busboy'),
@@ -24,7 +24,7 @@ var fs = require('fs'),
     conf = require('../lib/conf'),
     log = require('../lib/log');
 
-var dataDirectory = path.normalize(conf.get('files:upload_directory'));
+let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
 // TBD: move this to library.
 if (dataDirectory.charAt(0) !== path.sep) {

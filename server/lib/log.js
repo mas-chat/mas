@@ -16,7 +16,7 @@
 
 'use strict';
 
-var path = require('path'),
+let path = require('path'),
     fs = require('fs'),
     winston = require('winston'),
     MasTransport = require('./winstonMasTransport'),
@@ -25,7 +25,7 @@ var path = require('path'),
 require('colors');
 require('winston-loggly');
 
-var logger = null;
+let logger = null;
 
 exports.info = function(userId, msg) {
     logEntry('info', userId, msg, function() {});

@@ -1,5 +1,5 @@
 
-var utils = require('../../utils');
+let utils = require('../../utils');
 
 module.exports = {
     'Load front page': function(browser) {
