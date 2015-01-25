@@ -1,5 +1,4 @@
 
-var util = require('util');
 var request = require('superagent');
 
 module.exports = {
