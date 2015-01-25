@@ -42,11 +42,11 @@ export default Ember.View.extend({
     }.observes('controller.initDone'),
 
     layoutWindows: function(animate) {
-        var that = this;
-        var duration = animate ? 600 : 0;
-        var el = this.get('element');
-        var container = this._containerDimensions();
-        var expandedWindow = el.querySelector('.window.expanded');
+        let that = this;
+        let duration = animate ? 600 : 0;
+        let el = this.get('element');
+        let container = this._containerDimensions();
+        let expandedWindow = el.querySelector('.window.expanded');
 
         if (expandedWindow) {
             $(expandedWindow).velocity({
@@ -58,15 +58,15 @@ export default Ember.View.extend({
             return;
         }
 
-        var windows = el.querySelectorAll('.window.visible');
-        var rowNumbers = _.uniq(_.map(windows,
+        let windows = el.querySelectorAll('.window.visible');
+        let rowNumbers = _.uniq(_.map(windows,
             function(element) { return element.getAttribute('data-row'); }));
-        var rowHeight = (container.height - (rowNumbers.length + 1) * this.PADDING) /
+        let rowHeight = (container.height - (rowNumbers.length + 1) * this.PADDING) /
             rowNumbers.length;
 
         _.forEach(rowNumbers, function(row, rowIndex) {
-            var windowsInRow = el.querySelectorAll('.window.visible[data-row="' + row + '"]');
-            var windowWidth = (container.width - (windowsInRow.length + 1) * that.PADDING) /
+            let windowsInRow = el.querySelectorAll('.window.visible[data-row="' + row + '"]');
+            let windowWidth = (container.width - (windowsInRow.length + 1) * that.PADDING) /
                 windowsInRow.length;
 
             _.forEach(windowsInRow, function(element, index) {
@@ -76,10 +76,10 @@ export default Ember.View.extend({
     },
 
     _animate: function(el, columnIndex, rowIndex, width, height, duration) {
-        var $el = $(el);
-        var position = $el.position();
+        let $el = $(el);
+        let position = $el.position();
 
-        var dim = {
+        let dim = {
             currentLeft: position.left,
             currentTop: position.top,
             currentWidth: $el.width(),
@@ -108,7 +108,7 @@ export default Ember.View.extend({
             visibility: 'visible',
             complete: function() {
                 // Make sure window shows the latest messages
-                var view = Ember.View.views[$el.attr('id')];
+                let view = Ember.View.views[$el.attr('id')];
                 Ember.run.next(view, view.layoutDone);
             }
         });

@@ -24,7 +24,7 @@ export default Ember.Controller.extend({
     actions: {
         changeTopic: function() {
             // User has clicked 'OK', send the new topic to server
-            var newTopic = this.get('modalTopic');
+            let newTopic = this.get('modalTopic');
 
             this.remote.send({
                 id: 'UPDATE_TOPIC',

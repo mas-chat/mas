@@ -20,10 +20,10 @@ var uuid = require('uid2'),
     redis = require('../lib/redis').createClient();
 
 exports.createSession = function*(userId) {
-    var user = yield redis.hgetall('user:' + userId);
-    var ts = Math.round(Date.now() / 1000);
-    var secret = user.secret;
-    var expires = user.secretExpires;
+    let user = yield redis.hgetall('user:' + userId);
+    let ts = Math.round(Date.now() / 1000);
+    let secret = user.secret;
+    let expires = user.secretExpires;
 
     // TBD: Use word secret everywhere.
 

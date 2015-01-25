@@ -44,7 +44,7 @@ exports.error = function(userId, msg) {
 };
 
 function logEntry(type, userId, msg, callback) {
-    var entry = {};
+    let entry = {};
 
     if (logger === null) {
         logger = new (winston.Logger)({
@@ -62,16 +62,16 @@ function logEntry(type, userId, msg, callback) {
 }
 
 function configTransports() {
-    var transports = [];
+    let transports = [];
 
     if (conf.get('log:enabled')) {
-        var logDirectory = path.normalize(conf.get('log:directory'));
+        let logDirectory = path.normalize(conf.get('log:directory'));
 
         if (logDirectory.charAt(0) !== path.sep) {
             logDirectory = path.join(__dirname, '..', '..', logDirectory);
         }
 
-        var fileName = path.join(logDirectory, process.title + '.log');
+        let fileName = path.join(logDirectory, process.title + '.log');
 
         if (!fs.existsSync(logDirectory)) {
             console.error('ERROR: '.red + 'Log directory ' + logDirectory + ' doesn\'t exist.');
@@ -82,7 +82,7 @@ function configTransports() {
             fs.unlinkSync(fileName);
         }
 
-        var fileTransport = new (winston.transports.File)({
+        let fileTransport = new (winston.transports.File)({
             filename: fileName,
             colorize: false,
             handleExceptions: true
@@ -91,14 +91,14 @@ function configTransports() {
         transports.push(fileTransport);
     }
 
-    var consoleTransport = new (MasTransport)({
+    let consoleTransport = new (MasTransport)({
         handleExceptions: true
     });
 
     transports.push(consoleTransport);
 
     if (conf.get('loggly:enabled')) {
-        var logglyTransport = new (winston.transports.Loggly)({
+        let logglyTransport = new (winston.transports.Loggly)({
             subdomain: conf.get('loggly:subdomain'),
             inputToken: conf.get('loggly:token'),
             json: true

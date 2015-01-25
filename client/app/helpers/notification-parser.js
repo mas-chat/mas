@@ -20,9 +20,9 @@ import Ember from 'ember';
 
 export default Ember.Object.extend({
     process: function(command) {
-        var name = command.id;
-        var targetWindow = null;
-        var windowId = command.windowId;
+        let name = command.id;
+        let targetWindow = null;
+        let windowId = command.windowId;
 
         delete command.id;
 
@@ -32,7 +32,7 @@ export default Ember.Object.extend({
             targetWindow = this.get('store.windows').findBy('windowId', windowId);
         }
 
-        var funcName = '_handle' + name.charAt(0) + name.substring(1).toLowerCase();
+        let funcName = '_handle' + name.charAt(0) + name.substring(1).toLowerCase();
 
         if (!this[funcName]) {
             Ember.Logger.warn('Unknown command received: ' + name);
@@ -42,7 +42,7 @@ export default Ember.Object.extend({
     },
 
     _handleCreate: function(data) {
-        var windowRecord = this.get('container').lookup('model:window').setProperties(data);
+        let windowRecord = this.get('container').lookup('model:window').setProperties(data);
         this.get('store.windows').pushObject(windowRecord);
     },
 
@@ -58,9 +58,9 @@ export default Ember.Object.extend({
         data.window = targetWindow;
         delete data.windowId;
 
-        var messageRecord = this.get('container').lookup('model:message').setProperties(data);
+        let messageRecord = this.get('container').lookup('model:message').setProperties(data);
 
-        var messages = targetWindow.messages;
+        let messages = targetWindow.messages;
 
         if (messages.length > 200) {
             messages.shiftObject();
@@ -82,7 +82,7 @@ export default Ember.Object.extend({
 
     _handleUsers: function(data) {
         for (var userId in data.mapping) { /* jshint -W089 */
-            var user = data.mapping[userId];
+            let user = data.mapping[userId];
             this.get('store.users').set('users.' + userId, user);
         }
 
@@ -101,7 +101,7 @@ export default Ember.Object.extend({
         }
 
         data.members.forEach(function(member) {
-            var userId = member.userId;
+            let userId = member.userId;
             this._removeUser(userId, targetWindow);
 
             switch (member.role) {
@@ -140,14 +140,14 @@ export default Ember.Object.extend({
         this.get('store.friends').clear();
 
         data.friends.forEach(function(newFriend) {
-            var friendRecord = this.get('container').lookup('model:friend')
+            let friendRecord = this.get('container').lookup('model:friend')
               .setProperties(newFriend);
             this.get('store.friends').pushObject(friendRecord);
         }.bind(this));
     },
 
     _handleFriendsupdate: function(data) {
-        var friend = this.get('store.friends').findBy('userId', data.userId);
+        let friend = this.get('store.friends').findBy('userId', data.userId);
         friend.set('online', data.online);
         if (data.last) {
             friend.set('last', data.last);

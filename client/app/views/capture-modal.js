@@ -34,7 +34,7 @@ export default Ember.View.extend({
             this.$('[data-modal="submit"]').removeClass('disabled');
             this.$('.btn-capture').blur();
 
-            var shot = this.webcam.shot();
+            let shot = this.webcam.shot();
 
             shot.clone().preview(160, 120).get(function(err, img) {
                 this.$('.shot').empty();
@@ -46,13 +46,13 @@ export default Ember.View.extend({
     },
 
     didInsertElement: function() {
-        var box = this.$('.viewfinder')[0];
+        let box = this.$('.viewfinder')[0];
 
         this.$('[data-modal="submit"]').addClass('disabled');
         this.$('.btn-capture').addClass('disabled');
 
         FileAPI.Camera.publish(box, {}, function(err, cam) {
-            var newMessage = '';
+            let newMessage = '';
 
             if (err) {
                 newMessage = 'Auch! Webcam is not available.';

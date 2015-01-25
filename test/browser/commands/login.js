@@ -1,6 +1,6 @@
 
 exports.command = function(nick, password) {
-    var browser = this;
+    let browser = this;
 
     browser
         .url('http://localhost:44199')

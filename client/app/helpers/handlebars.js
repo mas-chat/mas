@@ -23,15 +23,15 @@ import Ember from 'ember';
 var SafeString = Ember.Handlebars.SafeString;
 
 Ember.Handlebars.helper('decoratedTimestamp', function(timestamp) {
-    var ts = moment.unix(timestamp);
+    let ts = moment.unix(timestamp);
 
     return new SafeString('<div class="timestamp" data-toggle="tooltip" title="' +
         ts.format('ddd, MMM D') + '">' + ts.format('HH:mm') + '</div>');
 });
 
 Ember.Handlebars.helper('dayDivider', function(list, index) {
-    var dateForCurrent = moment.unix(list[index].get('ts'));
-    var dateForPrevious = index === 0 ? null : moment.unix(list[index - 1].get('ts'));
+    let dateForCurrent = moment.unix(list[index].get('ts'));
+    let dateForPrevious = index === 0 ? null : moment.unix(list[index - 1].get('ts'));
 
     if (index === 0 || dateForCurrent.format('l') !== dateForPrevious.format('l')) {
         return new SafeString(
@@ -40,7 +40,7 @@ Ember.Handlebars.helper('dayDivider', function(list, index) {
 });
 
 Ember.Handlebars.helper('timeSince', function(online, timeStamp) {
-    var res;
+    let res;
 
     if (online) {
         res = '';

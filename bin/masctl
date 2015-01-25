@@ -87,13 +87,13 @@ if (action === 'start' || action === 'restart') {
 }
 
 if (action === 'status') {
-    var allRunning = monitorProcesses();
+    let allRunning = monitorProcesses();
     process.exit(allRunning ? 0 : 1);
 }
 
 function stopProcesses() {
     for (var component in processes) { /*jshint forin: false */
-        var pid = getComponentPid(component);
+        let pid = getComponentPid(component);
 
         if (pid !== 0) {
             process.kill(pid);
@@ -105,22 +105,22 @@ function stopProcesses() {
 }
 
 function startProcesses() {
-    var shutdownStarted = false;
+    let shutdownStarted = false;
 
     for (var component in processes) { /*jshint forin: false */
-        var spawnOptions = {
+        let spawnOptions = {
             detached: argv.background,
             stdio: argv.background ? 'ignore' : null
         };
 
-        var commandLineParameters = [
+        let commandLineParameters = [
             '--harmony',
             getAbsolutePath(path.join('server', processes[component])),
             '--configFile',
             argv.configFile
         ];
 
-        var node = handles[component] = child.spawn('node', commandLineParameters, spawnOptions);
+        let node = handles[component] = child.spawn('node', commandLineParameters, spawnOptions);
 
         if (argv.background) {
             setTimeout(function() {
@@ -136,7 +136,7 @@ function startProcesses() {
             if (!shutdownStarted) {
                 shutdownStarted = true;
 
-                var msg = 'ERROR:'.red + ' ' + this + ' terminated (exit code: ' + code + '). Bailing out!';
+                let msg = 'ERROR:'.red + ' ' + this + ' terminated (exit code: ' + code + '). Bailing out!';
 
                 if (argv.background) {
                     msg += ' See the log file for details.';
@@ -158,10 +158,10 @@ function startProcesses() {
 }
 
 function monitorProcesses() {
-    var allRunning = true;
+    let allRunning = true;
 
     for (var component in processes) { /*jshint forin: false */
-        var pid = getComponentPid(component);
+        let pid = getComponentPid(component);
 
         if (pid !== 0) {
             console.log(component + ': ' + 'running'.green + ', pid: ' + pid);
@@ -175,8 +175,8 @@ function monitorProcesses() {
 }
 
 function getComponentPid(component) {
-    var pidFile = path.join(getAbsolutePath(pidDir), component + '-' + env + '.pid');
-    var pid = 0;
+    let pidFile = path.join(getAbsolutePath(pidDir), component + '-' + env + '.pid');
+    let pid = 0;
 
     if (fs.existsSync(pidFile)) {
         pid = parseInt(fs.readFileSync(pidFile));
@@ -202,7 +202,7 @@ function checkNodeVersion() {
 }
 
 function setupNconf() {
-    var configFile = getAbsolutePath(argv.configFile);
+    let configFile = getAbsolutePath(argv.configFile);
 
     if (!fs.existsSync(configFile)) {
         console.error('ERROR: '.red + 'Config file ' + configFile + ' missing.');
@@ -216,7 +216,7 @@ function setupNconf() {
 }
 
 function getConfigOption(key) {
-    var value = nconf.get(key);
+    let value = nconf.get(key);
 
     if (value === undefined) {
         console.error('ERROR: '.red + 'Config variable missing in the config file: ' + key);
@@ -227,7 +227,7 @@ function getConfigOption(key) {
 }
 
 function getAbsolutePath(origPath) {
-    var ROOTPATH = path.join(__dirname, '..');
+    let ROOTPATH = path.join(__dirname, '..');
 
     if (origPath.charAt(0) === path.sep) {
         return path.normalize(origPath); // Absolute path

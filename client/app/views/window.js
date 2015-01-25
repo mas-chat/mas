@@ -78,11 +78,11 @@ export default Ember.View.extend({
     },
 
     didInsertElement: function() {
-        var that = this;
+        let that = this;
 
         this.$messagePanel = this.$('.window-messages');
 
-        var observer = new MutationObserver(Ember.run.bind(this, function() {
+        let observer = new MutationObserver(Ember.run.bind(this, function() {
             that._goToBottom();
             that._updateImages();
             that._showImages();
@@ -95,26 +95,26 @@ export default Ember.View.extend({
             placement: 'right'
         });
 
-        var selectedUserId;
+        let selectedUserId;
 
         this.$('.window-members').contextmenu({
             target: '#window-contextMenu',
             before: function(e) {
-                var $target = $(e.target);
+                let $target = $(e.target);
 
                 if ($target.hasClass('window-members')) {
                     return false;
                 }
 
                 e.preventDefault();
-                var selectedNick = $target.text();
+                let selectedNick = $target.text();
                 selectedUserId = $target.data('userid');
 
                 this.getMenu().find('li').eq(0).text(selectedNick);
                 return true;
             },
             onItem: function(context, e) {
-                var action = $(e.target).data('action');
+                let action = $(e.target).data('action');
                 that.get('controller').send(action, selectedUserId);
             }
         });
@@ -125,11 +125,11 @@ export default Ember.View.extend({
             return false;
         });
 
-        var emojisList = $.map(emojify.emojiNames, function(value, i) {
+        let emojisList = $.map(emojify.emojiNames, function(value, i) {
             return { id: i, name: value };
         });
 
-        var emojiListTemplate =
+        let emojiListTemplate =
             '<li data-value=":${name}:">' +
             '<img src="/app/assets/images/emoji/${name}.png">${name}' +
             '</li>';
@@ -147,7 +147,7 @@ export default Ember.View.extend({
             image: {
                 verticalFit: false,
                 titleSrc: function(item) {
-                    var href = item.el.attr('href');
+                    let href = item.el.attr('href');
 
                     return '<small>Link to the original image:</small><a href="' + href +
                         '" target="_newtab">' + href + '</a>';
@@ -155,10 +155,10 @@ export default Ember.View.extend({
             }
         });
 
-        var fileInput = this.$('.btn-file input')[0];
+        let fileInput = this.$('.btn-file input')[0];
 
         FileAPI.event.on(fileInput, 'change', function(evt) {
-            var files = FileAPI.getFiles(evt); // Retrieve file list
+            let files = FileAPI.getFiles(evt); // Retrieve file list
             this.get('controller').send('upload', files, 'jpeg');
         }.bind(this));
 
@@ -170,9 +170,9 @@ export default Ember.View.extend({
             return;
         }
 
-        var scrollPos = this.$messagePanel.scrollTop();
-        var bottom = this.$messagePanel.prop('scrollHeight');
-        var height = this.$messagePanel.height();
+        let scrollPos = this.$messagePanel.scrollTop();
+        let bottom = this.$messagePanel.prop('scrollHeight');
+        let height = this.$messagePanel.height();
 
         if (bottom - scrollPos > 2 * height) {
             this._moveTo(bottom);
@@ -199,11 +199,11 @@ export default Ember.View.extend({
     },
 
     _addScrollHandler: function() {
-        var prevScrollPos = 0;
+        let prevScrollPos = 0;
 
         this.$messagePanel.on('scroll', Ember.run.bind(this, function() {
-            var $panel = this.$messagePanel;
-            var scrollPos = $panel.scrollTop();
+            let $panel = this.$messagePanel;
+            let scrollPos = $panel.scrollTop();
 
             if (prevScrollPos > scrollPos) {
                 this.get('controller').send('scrollUp');
@@ -227,17 +227,17 @@ export default Ember.View.extend({
     },
 
     _showImages: function() {
-        var placeHolderHeight = 31;
-        var panelHeight = this.$messagePanel.height();
-        var that = this;
+        let placeHolderHeight = 31;
+        let panelHeight = this.$messagePanel.height();
+        let that = this;
 
         this.$images = this.$images.filter(function() {
-            var $img = $(this);
+            let $img = $(this);
 
             // We want to know image's position in .window-messages container div. For position()
             // to work correctly, .window-messages has to have position set to 'relative'. See
             // jQuery offsetParent() documentation for details.
-            var pos = $img.position().top;
+            let pos = $img.position().top;
 
             if (pos + placeHolderHeight >= 0 && pos <= panelHeight) {
                 $img.attr('src', $img.data('src'));

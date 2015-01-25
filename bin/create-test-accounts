@@ -51,7 +51,7 @@ co(function *() {
     for (var i = 0; i < names.length; i++) {
         console.log('Adding user: ' + names[i]);
 
-        var user = new User({
+        let user = new User({
             name: names[i],
             email: emails[i],
             nick: nicks[i],

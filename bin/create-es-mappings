@@ -37,12 +37,12 @@ co(function *() {
     for (var i = 0; i < 100; i++) {
         console.log('Setting index: ' + i);
 
-        var ret = yield Q.nsend(client.indices, 'create', {
+        let ret = yield Q.nsend(client.indices, 'create', {
             index: 'messages-' + i
         });
     }
 
-    var ret = yield Q.nsend(client.indices, 'putMapping', {
+    let ret = yield Q.nsend(client.indices, 'putMapping', {
         index: '_all',
         type: 'messages',
         body: {

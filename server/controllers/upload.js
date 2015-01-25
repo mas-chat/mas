@@ -37,10 +37,10 @@ module.exports = function*() {
         return;
     }
 
-    var userId = this.mas.userId;
-    var parts = parse(this);
-    var part;
-    var urls = [];
+    let userId = this.mas.userId;
+    let parts = parse(this);
+    let part;
+    let urls = [];
 
     function createMetaDataFileHandler(err) {
         if (err) {
@@ -56,10 +56,10 @@ module.exports = function*() {
             // value: part[1]
         } else {
             // Otherwise, it's a stream
-            var name = uuid(20);
-            var firstTwo = name.substring(0, 2);
+            let name = uuid(20);
+            let firstTwo = name.substring(0, 2);
 
-            var targetDirectory = path.join(dataDirectory, firstTwo);
+            let targetDirectory = path.join(dataDirectory, firstTwo);
 
             try {
                 mkdirp.sync(targetDirectory);
@@ -69,10 +69,10 @@ module.exports = function*() {
                 }
             }
 
-            var extension = path.extname(part.filename);
+            let extension = path.extname(part.filename);
             part.pipe(fs.createWriteStream(path.join(targetDirectory, name + extension)));
 
-            var metaData = {
+            let metaData = {
                 userId: userId,
                 ts: Date.now()
             };
