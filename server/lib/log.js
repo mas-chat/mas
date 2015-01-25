@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+'use strict';
+
 var path = require('path'),
     fs = require('fs'),
     winston = require('winston'),
