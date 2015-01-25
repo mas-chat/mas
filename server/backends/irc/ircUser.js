@@ -16,7 +16,7 @@
 
 'use strict';
 
-var redis = require('../../lib/redis').createClient(),
+let redis = require('../../lib/redis').createClient(),
     nicks = require('../../models/nick');
 
 exports.getUserId = function*(nick, network) {

@@ -16,7 +16,7 @@
 
 'use strict';
 
-var path = require('path'),
+let path = require('path'),
     router = require('koa-router'),
     serve = require('koa-static'),
     mount = require('koa-mount'),
@@ -32,7 +32,7 @@ var path = require('path'),
     userFilesController = require('../controllers/userFiles'),
     forgotPasswordController = require('../controllers/forgotPassword');
 
-var ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
+let ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
 
 exports.register = function(app) {
     app.use(router(app));

@@ -16,7 +16,7 @@
 
 'use strict';
 
-var forms = require('forms'),
+let forms = require('forms'),
     fields = forms.fields,
     widgets = forms.widgets,
     validators = forms.validators,
@@ -27,7 +27,7 @@ var forms = require('forms'),
     cookie = require('../lib/cookie'),
     User = require('../models/user');
 
-var formFields = {
+let formFields = {
     name: fields.string({
         required: true,
         label: 'Your name',
@@ -125,7 +125,7 @@ function validateNick(form, field, callback) {
     }
 }
 
-var registrationForm = forms.create({
+let registrationForm = forms.create({
     name: formFields.name,
     email: formFields.email,
     password: formFields.password,
@@ -134,7 +134,7 @@ var registrationForm = forms.create({
     tos: formFields.tos
 });
 
-var registrationFormExt = forms.create({
+let registrationFormExt = forms.create({
     name: formFields.name,
     email: formFields.email,
     nick: formFields.nick,
@@ -142,7 +142,7 @@ var registrationFormExt = forms.create({
     registrationType: formFields.registrationType
 });
 
-var registrationFormReset = forms.create({
+let registrationFormReset = forms.create({
     password: formFields.password,
     confirm: formFields.confirm,
     token: formFields.token

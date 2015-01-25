@@ -1,5 +1,5 @@
 
-var request = require('superagent');
+let request = require('superagent');
 
 exports.tearDown = function(done) {
     let passedStatus = this.results.failed === 0 && this.results.errors === 0;

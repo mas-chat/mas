@@ -18,7 +18,7 @@
 
 /*jshint -W079 */
 
-var assert = require('assert'),
+let assert = require('assert'),
     co = require('co'),
     log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
@@ -28,7 +28,7 @@ var assert = require('assert'),
     window = require('../models/window'),
     friends = require('../models/friends');
 
-var handlers = {
+let handlers = {
     SEND: handleSend,
     CREATE: handleCreate,
     JOIN: handleJoin,

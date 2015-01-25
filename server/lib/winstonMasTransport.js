@@ -16,12 +16,12 @@
 
 'use strict';
 
-var util = require('util'),
+let util = require('util'),
     winston = require('winston');
 
 require('colors');
 
-var MasConsoleLogger = function(options) {
+let MasConsoleLogger = function(options) {
     winston.Transport.call(this, options);
 
     this.name = 'masConsoleLogger';

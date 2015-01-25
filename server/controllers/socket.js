@@ -16,7 +16,7 @@
 
 'use strict';
 
-var redis = require('../lib/redis').createClient(),
+let redis = require('../lib/redis').createClient(),
     socketIo = require('socket.io'),
     co = require('co'),
     uuid = require('uid2'),

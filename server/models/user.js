@@ -16,7 +16,7 @@
 
 'use strict';
 
-var bcrypt = require('bcrypt'),
+let bcrypt = require('bcrypt'),
     redis = require('../lib/redis').createClient();
 
 const RESERVED_USERIDS = 9000;

@@ -16,7 +16,7 @@
 
 'use strict';
 
-var co = require('co'),
+let co = require('co'),
     CronJob = require('cron').CronJob,
     redis = require('./redis').createClient(),
     log = require('./log'),

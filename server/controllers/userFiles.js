@@ -16,11 +16,11 @@
 
 'use strict';
 
-var path = require('path'),
+let path = require('path'),
     send = require('koa-send'),
     conf = require('../lib/conf');
 
-var dataDirectory = path.normalize(conf.get('files:upload_directory'));
+let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
 // TBD: move this to library. Add exists check.
 if (dataDirectory.charAt(0) !== path.sep) {

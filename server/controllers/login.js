@@ -16,7 +16,7 @@
 
 'use strict';
 
-var passport = require('../lib/passport'),
+let passport = require('../lib/passport'),
     log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
     cookie = require('../lib/cookie');

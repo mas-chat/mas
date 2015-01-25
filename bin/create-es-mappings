@@ -17,12 +17,12 @@
 
 'use strict';
 
-var co = require('co'),
+let co = require('co'),
     Q = require('q'),
     elasticsearch = require('elasticsearch'),
     argv = require('yargs').argv;
 
-var client = new elasticsearch.Client({
+let client = new elasticsearch.Client({
     host: 'localhost:9200',
 //    log: 'trace'
 });

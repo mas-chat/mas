@@ -22,7 +22,7 @@
 
 require('../../lib/init')('irc-connman');
 
-var net = require('net'),
+let net = require('net'),
     carrier = require('carrier'),
     isUtf8 = require('is-utf8'),
     iconv = require('iconv-lite'),
@@ -31,8 +31,8 @@ var net = require('net'),
     log = require('../../lib/log'),
     courier = require('../../lib/courier').createEndPoint('connectionmanager');
 
-var sockets = {};
-var nextNetworkConnectionSlot = {};
+let sockets = {};
+let nextNetworkConnectionSlot = {};
 
 const IDENTD_PORT = 113;
 const LAG_POLL_INTERVAL = 60 * 1000; // 60s
