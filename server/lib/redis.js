@@ -31,9 +31,35 @@ var rlh = redisLuaHelper({
     extension: 'lua'
 });
 
-module.exports = {
-    createClient: createClient,
-    loadScripts: loadScripts
+
+exports.createClient = function() {
+    return createClient();
+};
+
+exports.loadScripts = function*() {
+    var redisClient = createClient();
+    var loadDir = thunkify(function(callback) {
+        rlh.loadDir(callback);
+    });
+    var scripts = yield loadDir();
+
+    for (var i = 0; i < scripts.length; i++) {
+        var scriptName = scripts[i];
+        log.info('Loading Redis script: ' + scriptName);
+        try {
+            yield redisClient.script('load', rlh.code(scriptName));
+        } catch (e) {
+            log.error('Lua script loading failed: ' + scriptName + ', ' + e);
+        }
+    }
+};
+
+exports.initDB = function*() {
+    var redisClient = createClient();
+
+    var networks = [ 'MAS' ].concat(Object.keys(conf.get('irc:networks')));
+    yield redisClient.del('networklist');
+    yield redisClient.sadd('networklist', networks);
 };
 
 function createClient() {
@@ -70,22 +96,4 @@ function createClient() {
     };
 
     return coRedisClient;
-}
-
-function *loadScripts() {
-    var redisClient = createClient();
-    var loadDir = thunkify(function(callback) {
-        rlh.loadDir(callback);
-    });
-    var scripts = yield loadDir();
-
-    for (var i = 0; i < scripts.length; i++) {
-        var scriptName = scripts[i];
-        log.info('Loading Redis script: ' + scriptName);
-        try {
-            yield redisClient.script('load', rlh.code(scriptName));
-        } catch (e) {
-            log.error('Lua script loading failed: ' + scriptName + ', ' + e);
-        }
-    }
 }

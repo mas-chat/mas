@@ -32,6 +32,7 @@ var co = require('co'),
 
 co(function*() {
     yield redisModule.loadScripts();
+    yield redisModule.initDB();
     yield createInitialGroups();
 
     courier.on('send', courier.noop);
