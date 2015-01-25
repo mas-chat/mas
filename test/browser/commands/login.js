@@ -1,4 +1,6 @@
 
+'use strict';
+
 exports.command = function(nick, password) {
     let browser = this;
 
