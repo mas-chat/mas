@@ -11,9 +11,12 @@ module.exports = {
         var passed = results.failed === 0 && results.errors === 0;
         console.log('Final result: "{ passed: ' + passed + ' }"');
 
+        console.log(this);
+        console.log(results);
+
         if (!this.dontReportSauceLabs) {
-            var userName = this.client.options.username;
-            var accessKey = this.client.options.accessKey;
+            var userName = this.test_settings.username;
+            var accessKey = this.test_settings.access_key;
             var baseUrl = 'https://saucelabs.com/rest/v1/';
 
             console.log('Sending final result to Saucelabs...');
