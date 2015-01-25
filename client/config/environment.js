@@ -1,7 +1,7 @@
 /* jshint node: true */
 
 module.exports = function(environment) {
-    let ENV = {
+    const ENV = {
         modulePrefix: 'mas',
         environment: environment,
         baseURL: '/',
