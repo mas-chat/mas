@@ -94,6 +94,7 @@ function *processTextCommand(params) {
     let data = params.text;
     let systemMsg = null;
     let send = true;
+    let res;
 
     switch (command) {
         case '':
@@ -105,24 +106,9 @@ function *processTextCommand(params) {
             send = false;
             break;
         case 'msg':
-            let res = payload.match(/^\W*(\w+)\W+(.*)/);
-
-            if (!res || !res[1] || !res[2]) {
-                send = false;
-                break;
-            }
-
-            let targetUserId = yield ircUser.getUserId(res[1], conversation.network);
-
-            if (targetUserId.charAt(0) === 'm') {
-                systemMsg = '1on1s between MAS users through IRC aren\'t supported. ' +
-                    'Use chat menu instead';
-                send = false;
-            } else {
-                data = 'PRIVMSG ' + res[1] + ' :' + res[2];
-                systemMsg = '-> [' + res[1] + '] ' + res[2] +
-                    ' (A new window opens if you get reply)';
-            }
+            res = yield handleMsgTextCommand(payload, conversation.network);
+            send = res[0];
+            systemMsg = [1];
             break;
         case 'me':
             data = 'PRIVMSG ' + conversation.name + ' :\u0001ACTION ' + payload +'\u0001';
@@ -1113,4 +1099,28 @@ function isChannel(text) {
     return [ '&', '#', '+', '!' ].some(function(element) {
         return element === text.charAt(0);
     });
+}
+
+function *handleMsgTextCommand(payload, network) {
+    let res = payload.match(/^\W*(\w+)\W+(.*)/);
+    let send = true;
+    let systemMsg = null;
+
+    if (!res || !res[1] || !res[2]) {
+        send = false;
+    } else {
+        let targetUserId = yield ircUser.getUserId(res[1], network);
+
+        if (targetUserId.charAt(0) === 'm') {
+            systemMsg = '1on1s between MAS users through IRC aren\'t supported. ' +
+            'Use chat menu instead';
+            send = false;
+        } else {
+            data = 'PRIVMSG ' + res[1] + ' :' + res[2];
+            systemMsg = '-> [' + res[1] + '] ' + res[2] +
+            ' (A new window opens if you get reply)';
+        }
+    }
+
+    return [ send, systemMsg ];
 }
