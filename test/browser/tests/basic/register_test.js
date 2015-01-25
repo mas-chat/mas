@@ -1,4 +1,6 @@
 
+var utils = require('../../utils');
+
 module.exports = {
     'Register new user': function(browser) {
         browser
@@ -15,7 +17,9 @@ module.exports = {
             .click('#register-form button')
             .waitForElementVisible('.main-welcome-msg', 1000)
             .logout()
-            .login('iao@iki.fi', 'dj3nsd4dse!')
+            .login('iao@iki.fi', 'dj3nsd4dse')
             .end();
-    }
+    },
+
+    tearDown: utils.tearDown
 };
