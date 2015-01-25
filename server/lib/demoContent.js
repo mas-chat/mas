@@ -24,7 +24,7 @@ let co = require('co'),
     redis = require('./redis').createClient(),
     log = require('./log'),
     conf = require('./conf'),
-    window = require('../models/window'),
+    masWindow = require('../models/window'),
     conversationFactory = require('../models/conversation');
 
 module.exports.enable = function() {
@@ -45,7 +45,7 @@ module.exports.enable = function() {
 
             if (windowId) {
                 // User has at least one window
-                let conversationId = yield window.getConversationId(demoUserId, windowId);
+                let conversationId = yield masWindow.getConversationId(demoUserId, windowId);
                 let conversation = yield conversationFactory.get(conversationId);
                 let url = '';
 

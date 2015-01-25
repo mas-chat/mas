@@ -26,7 +26,7 @@ let co = require('co'),
     conf = require('../../lib/conf'),
     courier = require('../../lib/courier').createEndPoint('loopbackparser'),
     outbox = require('../../lib/outbox'),
-    window = require('../../models/window'),
+    masWindow = require('../../models/window'),
     nicks = require('../../models/nick'),
     conversationFactory = require('../../models/conversation');
 
@@ -137,7 +137,7 @@ function *processUpdateTopic(params) {
 }
 
 function *joinGroup(conversation, userId, role) {
-    yield window.create(userId, conversation.conversationId);
+    yield masWindow.create(userId, conversation.conversationId);
     yield conversation.addGroupMember(userId, role);
     yield conversation.sendAddMembers(userId);
 }

@@ -40,6 +40,42 @@ const USER = 'u';
 
 let ircMessageBuffer = {};
 
+// Process different IRC commands
+
+let handlers = {
+    '043': handle043,
+    332: handle332,
+    333: handleNoop, // RPL_TOPICWHOTIME: No good place to show
+    353: handle353,
+    366: handle366,
+    376: handle376,
+    433: handle433,
+    482: handle482,
+
+    474: handleJoinReject, // ERR_BANNEDFROMCHAN
+    473: handleJoinReject, // ERR_INVITEONLYCHAN
+    475: handleJoinReject, // ERR_BADCHANNELKEY
+    471: handleJoinReject, // ERR_CHANNELISFULL
+    403: handleJoinReject, // ERR_NOSUCHCHANNEL
+    405: handleJoinReject, // ERR_TOOMANYCHANNELS
+    407: handleJoinReject, // ERR_TOOMANYTARGETS
+    437: handleJoinReject, // ERR_UNAVAILRESOURCE
+
+    // All other numeric replies are processed by handleServerText()
+
+    JOIN: handleJoin,
+    PART: handlePart,
+    QUIT: handleQuit,
+    NICK: handleNick,
+    MODE: handleMode,
+    INVITE: handleInvite,
+    KICK: handleKick,
+    TOPIC: handleTopic,
+    PRIVMSG: handlePrivmsg,
+    NOTICE: handlePrivmsg,
+    ERROR: handleError
+};
+
 co(function*() {
     yield redisModule.loadScripts();
     yield redisModule.initDB();
@@ -108,7 +144,8 @@ function *processTextCommand(params) {
         case 'msg':
             res = yield handleMsgTextCommand(payload, conversation.network);
             send = res[0];
-            systemMsg = [1];
+            systemMsg = res[1];
+            data = res[2] || data;
             break;
         case 'me':
             data = 'PRIVMSG ' + conversation.name + ' :\u0001ACTION ' + payload +'\u0001';
@@ -488,42 +525,6 @@ function *disconnect(userId, network) {
         network: network
     });
 }
-
-// Process different IRC commands
-
-let handlers = {
-    '043': handle043,
-    332: handle332,
-    333: handleNoop, // RPL_TOPICWHOTIME: No good place to show
-    353: handle353,
-    366: handle366,
-    376: handle376,
-    433: handle433,
-    482: handle482,
-
-    474: handleJoinReject, // ERR_BANNEDFROMCHAN
-    473: handleJoinReject, // ERR_INVITEONLYCHAN
-    475: handleJoinReject, // ERR_BADCHANNELKEY
-    471: handleJoinReject, // ERR_CHANNELISFULL
-    403: handleJoinReject, // ERR_NOSUCHCHANNEL
-    405: handleJoinReject, // ERR_TOOMANYCHANNELS
-    407: handleJoinReject, // ERR_TOOMANYTARGETS
-    437: handleJoinReject, // ERR_UNAVAILRESOURCE
-
-    // All other numeric replies are processed by handleServerText()
-
-    JOIN: handleJoin,
-    PART: handlePart,
-    QUIT: handleQuit,
-    NICK: handleNick,
-    MODE: handleMode,
-    INVITE: handleInvite,
-    KICK: handleKick,
-    TOPIC: handleTopic,
-    PRIVMSG: handlePrivmsg,
-    NOTICE: handlePrivmsg,
-    ERROR: handleError
-};
 
 function *handleNoop() {
     /* jshint noyield:true */
@@ -1105,6 +1106,7 @@ function *handleMsgTextCommand(payload, network) {
     let res = payload.match(/^\W*(\w+)\W+(.*)/);
     let send = true;
     let systemMsg = null;
+    let data = null;
 
     if (!res || !res[1] || !res[2]) {
         send = false;
@@ -1122,5 +1124,5 @@ function *handleMsgTextCommand(payload, network) {
         }
     }
 
-    return [ send, systemMsg ];
+    return [ send, systemMsg, data ];
 }
