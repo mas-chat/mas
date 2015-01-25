@@ -1,4 +1,6 @@
 
+'use strict';
+
 let request = require('superagent');
 
 exports.tearDown = function(done) {
