@@ -35,7 +35,7 @@ var paths = {
         'bootstrap/dist/js/bootstrap.js'
     ],
     testJavaScripts: [
-        'test/integration/**/*.js'
+        'test/browser/**/*.js'
     ]
 };
 

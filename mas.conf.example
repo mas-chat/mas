@@ -7,6 +7,8 @@
 ; Project root directory is the base if relative paths are used
 ; all times are in seconds
 
+; Test_mode is not used for anything currently
+
 [common]
 env=default
 admin=m1
