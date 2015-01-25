@@ -1,4 +1,6 @@
 
+var utils = require('../../utils');
+
 module.exports = {
     'Load front page': function(browser) {
         browser
@@ -6,5 +8,7 @@ module.exports = {
             .waitForElementVisible('body', 1000)
             .assert.containsText('.login', 'Sign in')
             .end();
-    }
+    },
+
+    tearDown: utils.tearDown
 };
