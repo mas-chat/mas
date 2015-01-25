@@ -42,6 +42,7 @@ var ircMessageBuffer = {};
 
 co(function*() {
     yield redisModule.loadScripts();
+    yield redisModule.initDB();
 
     courier.on('send', processSend);
     courier.on('texCommand', processTextCommand);
