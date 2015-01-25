@@ -32,15 +32,15 @@ function deleteIdleSessions() {
     log.info('Running deleteIdleSessions job');
 
     co(function*() {
-        var ts = Math.round(Date.now() / 1000) - conf.get('session:idle_timeout');
-        var list = yield redis.zrangebyscore('sessionlastheartbeat', '-inf', ts);
+        let ts = Math.round(Date.now() / 1000) - conf.get('session:idle_timeout');
+        let list = yield redis.zrangebyscore('sessionlastheartbeat', '-inf', ts);
 
         for (var i = 0; i < list.length; i++) {
-            var fields = list[i].split(':');
-            var userId = fields[0];
-            var sessionId = fields[1];
+            let fields = list[i].split(':');
+            let userId = fields[0];
+            let sessionId = fields[1];
 
-            var last = yield redis.run('deleteSession', userId, sessionId);
+            let last = yield redis.run('deleteSession', userId, sessionId);
             log.info(userId, 'Removed idle session. SessionId: ' + sessionId);
 
             if (last) {

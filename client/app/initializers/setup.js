@@ -23,8 +23,8 @@ import MessageModel from '../models/message';
 import WindowModel from '../models/window';
 
 export function initialize(container, application) {
-    var store = Store.create();
-    var socket = Socket.create({
+    let store = Store.create();
+    let socket = Socket.create({
         store: store,
         container: container
     });

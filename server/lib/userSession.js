@@ -20,10 +20,10 @@ var redis = require('../lib/redis').createClient();
 
 module.exports = function authenticate() {
     return function *authenticate(next) {
-        var valid = true;
-        var userId, secret, data, expect;
-        var cookie = this.cookies.get('auth');
-        var ts = Math.round(Date.now() / 1000);
+        let valid = true;
+        let userId, secret, data;
+        let cookie = this.cookies.get('auth');
+        let ts = Math.round(Date.now() / 1000);
 
         if (!cookie) {
             valid = false;
@@ -44,19 +44,20 @@ module.exports = function authenticate() {
             }
         }
 
-        if (valid) {
-            expect = yield redis.hmget('user:' + userId, 'secretExpires', 'secret', 'inuse',
-                'email');
+        let user;
 
-            if (!(expect && expect[0] > ts && expect[1] === secret)) {
+        if (valid) {
+            user = yield redis.hgetall('user:' + userId);
+
+            if (!(user && user.secretExpires > ts && user.secret === secret)) {
                 valid = false;
             }
         }
 
         this.mas = this.mas || {};
         this.mas.userId = valid ? userId : null;
-        this.mas.email = valid ? expect[3] : null;
-        this.mas.inUse = valid ? expect[2] === '1' : null;
+        this.mas.email = valid ? user.email : null;
+        this.mas.inUse = valid ? user.inuse === '1' : null;
 
         yield next;
     };

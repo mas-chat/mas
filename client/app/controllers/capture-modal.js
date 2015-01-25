@@ -29,7 +29,7 @@ export default Ember.Controller.extend(UploadMixin, {
         },
 
         uploadPhoto: function() {
-            var file = this.get('shot').preview(800, 600);
+            let file = this.get('shot').preview(800, 600);
             this.handleUpload([ file ], 'jpeg');
             this.send('closeModal');
         }

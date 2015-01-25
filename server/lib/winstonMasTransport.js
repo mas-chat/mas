@@ -31,14 +31,14 @@ var MasConsoleLogger = function(options) {
 util.inherits(MasConsoleLogger, winston.Transport);
 
 MasConsoleLogger.prototype.log = function(level, msg, meta, callback) {
-    var processParts = process.title.split('-');
-    var processName = processParts[1];
-    var processExtension = processParts[2];
-    var userId = meta.userId;
+    let processParts = process.title.split('-');
+    let processName = processParts[1];
+    let processExtension = processParts[2];
+    let userId = meta.userId;
 
-    var processColumn;
-    var levelColumn;
-    var userIdColumn;
+    let processColumn;
+    let levelColumn;
+    let userIdColumn;
 
     switch (processName) {
         case 'irc':
@@ -81,7 +81,7 @@ MasConsoleLogger.prototype.log = function(level, msg, meta, callback) {
 };
 
 MasConsoleLogger.prototype.logException = function(msg, meta, callback) {
-    var that = this;
+    let that = this;
 
     function onLogged() {
         that.removeListener('error', onError);

@@ -43,19 +43,19 @@ if (conf.get('irc:identd')) {
 }
 
 function handleIdentConnection(conn) {
-    var timer = setTimeout(function() {
+    let timer = setTimeout(function() {
         if (conn) {
             conn.destroy();
         }
     }, 3000);
 
     carrier.carry(conn, function(line) {
-        var ports = line.split(',');
-        var localPort = parseInt(ports[0]);
-        var remotePort = parseInt(ports[1]);
-        var prefix = localPort + ', ' + remotePort;
-        var found = false;
-        var resp;
+        let ports = line.split(',');
+        let localPort = parseInt(ports[0]);
+        let remotePort = parseInt(ports[1]);
+        let prefix = localPort + ', ' + remotePort;
+        let found = false;
+        let resp;
 
         if (!isNaN(localPort) && !isNaN(remotePort)) {
             for (var userId in sockets) {
@@ -86,9 +86,9 @@ function handleIdentConnection(conn) {
 
 // Connect
 courier.on('connect', function(params) {
-    var network = params.network;
-    var delay = 0;
-    var rateLimit = conf.get('irc:networks:' + network + ':rate_limit'); // connections per minute
+    let network = params.network;
+    let delay = 0;
+    let rateLimit = conf.get('irc:networks:' + network + ':rate_limit'); // connections per minute
 
     if (!nextNetworkConnectionSlot[network] || nextNetworkConnectionSlot[network] < Date.now()) {
         // Rate limiting not active
@@ -106,8 +106,8 @@ courier.on('connect', function(params) {
 
 // Disconnect
 courier.on('disconnect', function(params) {
-    var userId = params.userId;
-    var network = params.network;
+    let userId = params.userId;
+    let network = params.network;
 
     sockets[userId + ':' + network].end();
     delete sockets[userId + ':' + network];
@@ -115,10 +115,10 @@ courier.on('disconnect', function(params) {
 
 // Write
 courier.on('write', function(params) {
-    var userId = params.userId;
-    var network = params.network;
-    var socket = sockets[userId + ':' + network];
-    var data = params.line;
+    let userId = params.userId;
+    let network = params.network;
+    let socket = sockets[userId + ':' + network];
+    let data = params.line;
 
     if (!socket) {
         log.info(userId, 'Non-existent socket');
@@ -143,11 +143,11 @@ co(function*() {
 })();
 
 function connect(userId, nick, network) {
-    var options = {
+    let options = {
         host: conf.get('irc:networks:' + network + ':host'),
         port: conf.get('irc:networks:' + network + ':port')
     };
-    var socket = net.connect(options);
+    let socket = net.connect(options);
 
     socket.nick = nick;
     socket.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
@@ -169,7 +169,7 @@ function connect(userId, nick, network) {
         socket.pingTimer = setInterval(sendPing, LAG_POLL_INTERVAL);
     });
 
-    var buffer = '';
+    let buffer = '';
 
     socket.on('data', function(data) {
         socket.last = Date.now();
@@ -180,11 +180,11 @@ function connect(userId, nick, network) {
         data = isUtf8(data) ? data.toString() : iconv.decode(data, 'iso-8859-15');
         data = buffer + data;
 
-        var lines = data.split(/\r\n/);
+        let lines = data.split(/\r\n/);
         buffer = lines.pop(); // Save the potential partial line to buffer
 
         lines.forEach(function(line) {
-            var proceed = handlePing(socket, line);
+            let proceed = handlePing(socket, line);
 
             if (proceed) {
                 courier.send('ircparser', {
@@ -214,13 +214,13 @@ function connect(userId, nick, network) {
 
 // Minimal parser to handle server sent PING command at this level
 function handlePing(socket, line) {
-    var parts = line.split(' ');
+    let parts = line.split(' ');
 
     if ((parts[0].charAt(0) === ':')) {
         parts.shift();
     }
 
-    var command = parts.shift();
+    let command = parts.shift();
 
     if (command === 'PING') {
         socket.write('PONG :' + socket.ircServerName + '\r\n');
@@ -233,8 +233,8 @@ function handlePing(socket, line) {
 }
 
 function handleEnd(userId, network, error) {
-    var socket = sockets[userId + ':' + network];
-    var reason = error ? error.code : 'connection closed by the server';
+    let socket = sockets[userId + ':' + network];
+    let reason = error ? error.code : 'connection closed by the server';
 
     if (!socket) {
         return; // Already handled

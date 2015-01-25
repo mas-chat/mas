@@ -21,12 +21,12 @@ var redis = require('../lib/redis').createClient(),
     conf = require('../lib/conf');
 
 exports.sendNickAll = function*(userId) {
-    var command = yield buildCommand(userId);
+    let command = yield buildCommand(userId);
     yield outbox.queueAll(userId, command);
 };
 
 exports.sendNick = function*(userId, sessionId) {
-    var command = yield buildCommand(userId);
+    let command = yield buildCommand(userId);
     yield outbox.queue(userId, sessionId, command);
 };
 
@@ -53,7 +53,7 @@ function *getCurrentNick(userId, network) {
 }
 
 function *removeCurrentNickFromIndex(userId, network) {
-    var oldNick = yield redis.hget('networks:' + userId + ':' + network, 'currentnick');
+    let oldNick = yield redis.hget('networks:' + userId + ':' + network, 'currentnick');
 
     if (oldNick) {
         yield redis.hdel('index:currentnick', network + ':' + oldNick);
@@ -61,14 +61,14 @@ function *removeCurrentNickFromIndex(userId, network) {
 }
 
 function *buildCommand(userId) {
-    var command = {
+    let command = {
         id: 'NICK',
         MAS: yield redis.hget('user:' + userId, 'nick')
     };
 
     // Add IRC networks
     for (var network in conf.get('irc:networks')) { /* jshint -W089 */
-        var nick = yield getCurrentNick(userId, network);
+        let nick = yield getCurrentNick(userId, network);
 
         if (nick !== null) {
             command[network] = nick;

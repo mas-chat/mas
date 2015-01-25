@@ -48,12 +48,12 @@ function Courier(name) {
 Courier.prototype.start = function() {
     co(function*() {
         while (1) {
-            var result = yield rcvRedis.brpop('inbox:' + this.name, 0);
+            let result = yield rcvRedis.brpop('inbox:' + this.name, 0);
 
             processing = true;
 
-            var msg = JSON.parse(result[1]);
-            var handler = this.handlers[msg.type];
+            let msg = JSON.parse(result[1]);
+            let handler = this.handlers[msg.type];
             log.info('MSG RCVD [' + msg.__sender + ' → ' + this.name + '] DATA: ' + result[1]);
 
             assert(handler, this.name + ': Missing message handler for: ' + msg.type);
@@ -78,7 +78,7 @@ Courier.prototype.start = function() {
 };
 
 Courier.prototype.send = function(dest, msg) {
-    var data = convert(msg, this.name);
+    let data = convert(msg, this.name);
 
     co(function*() {
         yield sendRedis.lpush('inbox:' + dest, data);

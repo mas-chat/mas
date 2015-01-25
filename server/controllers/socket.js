@@ -27,17 +27,17 @@ var redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox');
 
 exports.setup = function(server) {
-    var io = socketIo(server);
+    let io = socketIo(server);
 
     // Socket.io
     io.on('connection', function(socket) {
-        var userId = null;
-        var sessionId = null;
-        var state = 'connected';
+        let userId = null;
+        let sessionId = null;
+        let state = 'connected';
         // connected, disconnected, authenticated
 
         function emit(command) {
-            var id = command.id;
+            let id = command.id;
 
             // TBD: Temporary hack
             if (id.indexOf('_RESP', id.length - 5) !== -1) {
@@ -50,7 +50,7 @@ exports.setup = function(server) {
         function startPushLoop() {
             co(function*() {
                 while (1) {
-                    var commands = yield outbox.flush(userId, sessionId, 25);
+                    let commands = yield outbox.flush(userId, sessionId, 25);
                     commands.forEach(emit);
 
                     if (state !== 'authenticated') {
@@ -62,8 +62,8 @@ exports.setup = function(server) {
 
         socket.on('init', function(data) {
             co(function*() {
-                var ts = Math.round(Date.now() / 1000);
-                var secret = data.secret;
+                let ts = Math.round(Date.now() / 1000);
+                let secret = data.secret;
 
                 userId = data.userId;
 
@@ -78,7 +78,7 @@ exports.setup = function(server) {
                     return;
                 }
 
-                var userRecord = yield redis.hgetall('user:' + userId);
+                let userRecord = yield redis.hgetall('user:' + userId);
 
                 if (!(userRecord &&
                     userRecord.secretExpires > ts &&
@@ -118,7 +118,7 @@ exports.setup = function(server) {
                 userId = data.userId;
                 sessionId = data.sessionId;
 
-                var exists = yield redis.zscore('sessionlist:' + userId, sessionId);
+                let exists = yield redis.zscore('sessionlist:' + userId, sessionId);
 
                 if (!exists) {
                     socket.emit('terminate', {
@@ -160,7 +160,7 @@ exports.setup = function(server) {
                     return;
                 }
 
-                var ts = Math.round(Date.now() / 1000);
+                let ts = Math.round(Date.now() / 1000);
                 yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
             })();
         });

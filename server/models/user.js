@@ -52,20 +52,20 @@ User.prototype.load = function*(userId) {
 };
 
 User.prototype.setPassword = function(password) {
-    var salt = bcrypt.genSaltSync(10);
-    var hash = bcrypt.hashSync(password, salt);
+    let salt = bcrypt.genSaltSync(10);
+    let hash = bcrypt.hashSync(password, salt);
     this.data.password = 'bcrypt:' + hash;
 };
 
 User.prototype.generateUserId = function*() {
-    var userId = yield redis.incr('nextGlobalUserId');
+    let userId = yield redis.incr('nextGlobalUserId');
     userId = 'm' + (userId + RESERVED_USERIDS);
     this.data.userId = userId;
     return userId;
 };
 
 User.prototype.save = function*() {
-    var index = {};
+    let index = {};
 
     if (this.data.nick) {
         index[this.data.nick.toLowerCase()] = this.data.userId;

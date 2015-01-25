@@ -30,15 +30,15 @@ export default Ember.Object.extend({
     init: function() {
         this._super();
 
-        var authCookie = $.cookie('auth');
+        let authCookie = $.cookie('auth');
 
         if (!authCookie) {
             this._logout();
         }
 
-        var params = authCookie.split('-');
-        var userId = params[0];
-        var secret = params[1];
+        let params = authCookie.split('-');
+        let userId = params[0];
+        let secret = params[1];
 
         this.set('store.userId', userId);
 

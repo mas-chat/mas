@@ -22,27 +22,27 @@ var redis = require('../lib/redis').createClient(),
 // TBD: Instead of FRIENDS and FRIENDSUPDATE, use ADDFRIENDS
 
 exports.sendFriends = function*(userId, sessionId) {
-    var command = {
+    let command = {
         id: 'FRIENDS',
         friends: []
     };
 
-    var friendIds = yield redis.smembers('friends:' + userId);
+    let friendIds = yield redis.smembers('friends:' + userId);
 
     // TBD: Do the looping in lua to enhance performance
     for (var i = 0; i < friendIds.length; i++) {
-        var friendUserId = friendIds[i];
+        let friendUserId = friendIds[i];
 
-        var last = yield redis.hget('user:' + friendUserId, 'lastlogout');
+        let last = yield redis.hget('user:' + friendUserId, 'lastlogout');
         last = parseInt(last);
 
-        var online = last === 0;
+        let online = last === 0;
 
         if (isNaN(last)) {
             last = -1; // No recorded login or logout
         }
 
-        var friendData = {
+        let friendData = {
             userId: friendUserId,
             online: online
         };
@@ -58,11 +58,11 @@ exports.sendFriends = function*(userId, sessionId) {
 };
 
 exports.informStateChange = function*(userId, eventType) {
-    var command = {
+    let command = {
         id: 'FRIENDSUPDATE',
         userId: userId
     };
-    var ts;
+    let ts;
 
     // Zero means the user is currently online
     if (eventType === 'login') {
@@ -76,10 +76,10 @@ exports.informStateChange = function*(userId, eventType) {
 
     yield redis.hset('user:' + userId, 'lastlogout', ts);
 
-    var friendIds = yield redis.smembers('friends:' + userId);
+    let friendIds = yield redis.smembers('friends:' + userId);
 
     for (var i = 0; i < friendIds.length; i++) {
-        var friendUserId = friendIds[i];
+        let friendUserId = friendIds[i];
         yield outbox.queueAll(friendUserId, command);
     }
 };

@@ -31,14 +31,14 @@ var template = handlebars.compile(fs.readFileSync(path.join(
     __dirname, '..', 'emails', 'resetPassword.hbs'), 'utf8'));
 
 exports.create = function*() {
-    var email = this.request.body.email;
-    var userId = yield redis.hget('index:user', email.toLowerCase());
+    let email = this.request.body.email;
+    let userId = yield redis.hget('index:user', email.toLowerCase());
 
     if (userId) {
-        var token = uuid(30);
-        var user = yield redis.hgetall('user:' + userId);
+        let token = uuid(30);
+        let user = yield redis.hgetall('user:' + userId);
 
-        var body = template({
+        let body = template({
             name: user.name,
             url: conf.get('site:url') + '/reset-password/' + token
         });

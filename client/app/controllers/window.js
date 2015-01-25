@@ -37,10 +37,10 @@ export default Ember.Controller.extend(UploadMixin, {
         },
 
         sendMessage: function() {
-            var text = this.get('newMessage');
-            var messageRecord = this.get('container').lookup('model:message');
-            var isCommand = text.charAt(0) === '/';
-            var ircServer1on1 = this.get('model.type') === '1on1' &&
+            let text = this.get('newMessage');
+            let messageRecord = this.get('container').lookup('model:message');
+            let isCommand = text.charAt(0) === '/';
+            let ircServer1on1 = this.get('model.type') === '1on1' &&
                 this.get('model.userId') === 'iSERVER';
 
             this.set('newMessage', '');
@@ -172,7 +172,7 @@ export default Ember.Controller.extend(UploadMixin, {
     }.property('model.type'),
 
     _seekRow: function(direction) {
-        var newRow = this.get('parentController').nextRow(this.get('model'), direction);
+        let newRow = this.get('parentController').nextRow(this.get('model'), direction);
         this.set('model.row', newRow);
     }
 });

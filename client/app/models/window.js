@@ -66,20 +66,20 @@ export default Ember.Object.extend({
     }.property('users.@each', 'store.users.isDirty'),
 
     decoratedTitle: function() { // (name, topic)
-        var title;
-        var name = this.get('name');
-        var network = this.get('network');
+        let title;
+        let windowName = this.get('name');
+        let network = this.get('network');
 
         if (this.get('type') === '1on1' && this.get('userId') === 'iSERVER') {
             title = network + ' Server Messages';
         } else if (this.get('type') === '1on1') {
-            var conversationNetwork = network === 'MAS' ? '' : network + ' ';
+            let conversationNetwork = network === 'MAS' ? '' : network + ' ';
             title = 'Private ' + conversationNetwork + 'conversation with ' +
                 this.get('store.users').getNick(this.get('userId'), this.get('network'));
         } else if (network === 'MAS') {
-            title = 'Group: ' + name.charAt(0).toUpperCase() + name.substr(1);
+            title = 'Group: ' + windowName.charAt(0).toUpperCase() + windowName.substr(1);
         } else {
-            title = network + ': ' + name;
+            title = network + ': ' + windowName;
         }
 
         return title;
@@ -90,19 +90,19 @@ export default Ember.Object.extend({
     }.property('topic'),
 
     simplifiedName: function() {
-        var name = this.get('name');
+        let name = this.get('name');
         name = name.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
         return name;
     }.property('name'),
 
     tooltipTopic: function() {
-        var topic = this.get('topic') || '[NOT SET]';
+        let topic = this.get('topic') || '[NOT SET]';
         return 'Topic: ' + topic;
     }.property('topic'),
 
     explainedType: function() {
-        var type = this.get('type');
-        var network = this.get('network');
+        let type = this.get('type');
+        let network = this.get('network');
 
         if (type === 'group') {
             return network === 'MAS' ? 'group' : 'channel';

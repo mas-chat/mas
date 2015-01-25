@@ -47,7 +47,7 @@ nconf.use('file', {
 });
 
 exports.get = function(key) {
-    var value = nconf.get(key);
+    let value = nconf.get(key);
 
     if (value === undefined) {
         log.error('Config variable missing in the config file: ' + key);

@@ -47,10 +47,10 @@ co(function*() {
 })();
 
 function *processCreate(params) {
-    var userId = params.userId;
-    var groupName = params.name;
-    var password = params.password;
-    var conversation = yield conversationFactory.findGroup(groupName, 'MAS');
+    let userId = params.userId;
+    let groupName = params.name;
+    let password = params.password;
+    let conversation = yield conversationFactory.findGroup(groupName, 'MAS');
 
     if (conversation) {
         yield outbox.queue(params.userId, params.sessionId, {
@@ -82,10 +82,10 @@ function *processCreate(params) {
 }
 
 function *processJoin(params) {
-    var groupName = params.name;
-    var userId = params.userId;
-    var conversation = yield conversationFactory.findGroup(groupName, 'MAS');
-    var role = 'u';
+    let groupName = params.name;
+    let userId = params.userId;
+    let conversation = yield conversationFactory.findGroup(groupName, 'MAS');
+    let role = 'u';
 
     if (!conversation) {
         yield outbox.queue(userId, params.sessionId, {
@@ -119,14 +119,14 @@ function *processJoin(params) {
 }
 
 function *processUpdatePassword(params) {
-    var conversation = yield conversationFactory.get(params.conversationId);
+    let conversation = yield conversationFactory.get(params.conversationId);
 
     yield conversation.setPassword(params.password);
 }
 
 function *processUpdateTopic(params) {
-    var conversation = yield conversationFactory.get(params.conversationId);
-    var nick = yield nicks.getCurrentNick(params.userId, conversation.network);
+    let conversation = yield conversationFactory.get(params.conversationId);
+    let nick = yield nicks.getCurrentNick(params.userId, conversation.network);
 
     yield conversation.setTopic(params.topic, nick);
 
@@ -143,12 +143,12 @@ function *joinGroup(conversation, userId, role) {
 }
 
 function *createInitialGroups() {
-    var groups = conf.get('loopback:initial_groups').split(',');
-    var admin = conf.get('common:admin') || 1;
+    let groups = conf.get('loopback:initial_groups').split(',');
+    let admin = conf.get('common:admin') || 1;
 
     for (var i = 0; i < groups.length; i++) {
-        var group = groups[i];
-        var existingGroup = yield conversationFactory.findGroup(group, 'MAS');
+        let group = groups[i];
+        let existingGroup = yield conversationFactory.findGroup(group, 'MAS');
 
         if (!existingGroup) {
             yield conversationFactory.create({

@@ -28,7 +28,7 @@ export default Ember.Controller.extend({
 
     actions: {
         joinIRC: function() {
-            var password = this.get('password').trim();
+            let password = this.get('password').trim();
 
             if (password === '') {
                 password = null;

@@ -49,7 +49,7 @@ export default Ember.Route.extend({
                 parentView: 'application'
             });
 
-            var nextModal = this.modalQueue.shiftObject();
+            let nextModal = this.modalQueue.shiftObject();
 
             if (nextModal) {
                 Ember.run.later(this, function() {

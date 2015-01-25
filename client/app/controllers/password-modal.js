@@ -26,7 +26,7 @@ export default Ember.Controller.extend({
     actions: {
         changePassword: function() {
             // User has clicked 'OK', send the new password to server
-            var newPassword = null;
+            let newPassword = null;
 
             if (this.get('modalPasswordStatus') === 'enabled') {
                 newPassword = this.get('modalPassword');
@@ -64,7 +64,7 @@ export default Ember.Controller.extend({
     }.property('model.name'),
 
     _updateModalPassword: function() {
-        var password = this.get('model.password');
+        let password = this.get('model.password');
 
         this.set('modalPassword', password);
         this.set('modalPasswordStatus', password === null ? 'disabled' : 'enabled');
