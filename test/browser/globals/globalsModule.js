@@ -1,5 +1,5 @@
 
-var co = require('co'),
+let co = require('co'),
     redisModule = require('../../../server/lib/redis'),
     redis = redisModule.createClient();
 

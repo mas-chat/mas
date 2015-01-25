@@ -16,7 +16,7 @@
 
 'use strict';
 
-var uuid = require('uid2'),
+let uuid = require('uid2'),
     redis = require('../lib/redis').createClient();
 
 exports.createSession = function*(userId) {

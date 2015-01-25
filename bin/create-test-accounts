@@ -17,10 +17,10 @@
 
 'use strict';
 
-var co = require('co'),
+let co = require('co'),
     User = require('../server/models/user.js');
 
-var names = [
+let names = [
     'Alfa User',
     'Beta User',
     'Gamma User',
@@ -29,7 +29,7 @@ var names = [
     'Zeta User'
     ];
 
-var emails = [
+let emails = [
     'user1@mas.com',
     'user2@mas.com',
     'user3@mas.com',
@@ -38,7 +38,7 @@ var emails = [
     'user6@mas.com'
     ];
 
-var nicks = [
+let nicks = [
     'user1',
     'user2',
     'user3',

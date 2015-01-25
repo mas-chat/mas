@@ -21,7 +21,7 @@
 
 require('../../lib/init')('irc');
 
-var assert = require('assert'),
+let assert = require('assert'),
     co = require('co'),
     wait = require('co-wait'),
     log = require('../../lib/log'),
@@ -38,7 +38,7 @@ const OPER = '@';
 const VOICE = '+';
 const USER = 'u';
 
-var ircMessageBuffer = {};
+let ircMessageBuffer = {};
 
 co(function*() {
     yield redisModule.loadScripts();
@@ -491,7 +491,7 @@ function *disconnect(userId, network) {
 
 // Process different IRC commands
 
-var handlers = {
+let handlers = {
     '043': handle043,
     332: handle332,
     333: handleNoop, // RPL_TOPICWHOTIME: No good place to show

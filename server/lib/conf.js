@@ -16,7 +16,7 @@
 
 'use strict';
 
-var path = require('path'),
+let path = require('path'),
     fs = require('fs'),
     nconf = require('nconf'),
     argv = require('yargs').argv,
@@ -24,8 +24,8 @@ var path = require('path'),
 
 require('colors');
 
-var configFileOption = argv.configFile;
-var configFile;
+let configFileOption = argv.configFile;
+let configFile;
 
 if (configFileOption && configFileOption.charAt(0) === path.sep) {
     // Absolute path

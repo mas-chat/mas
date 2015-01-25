@@ -16,7 +16,7 @@
 
 'use strict';
 
-var crypto = require('crypto'),
+let crypto = require('crypto'),
     bcrypt = require('bcrypt'),
     co = require('co'),
     jwt = require('jwt-simple'),
@@ -134,7 +134,7 @@ if (conf.get('yahooauth:enabled') === true) {
     passport.use(yahoo);
 }
 
-var local = new LocalStrategy(authLocal);
+let local = new LocalStrategy(authLocal);
 passport.use(local);
 
 module.exports = passport;

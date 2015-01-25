@@ -16,7 +16,7 @@
 
 'use strict';
 
-var assert = require('assert'),
+let assert = require('assert'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
     conversationFactory = require('./conversation');

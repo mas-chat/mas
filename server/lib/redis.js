@@ -16,7 +16,7 @@
 
 'use strict';
 
-var path = require('path'),
+let path = require('path'),
     assert = require('assert'),
     coRedis = require('co-redis'),
     redis = require('redis'),
@@ -25,7 +25,7 @@ var path = require('path'),
     log = require('./log'),
     conf = require('./conf');
 
-var rlh = redisLuaHelper({
+let rlh = redisLuaHelper({
     root: path.join(__dirname, '..', 'lua'),
     macro: '#include',
     extension: 'lua'

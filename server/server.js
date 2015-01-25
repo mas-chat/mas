@@ -19,7 +19,7 @@
 
 require('./lib/init')('frontend');
 
-var koa = require('koa'),
+let koa = require('koa'),
     hbs = require('koa-hbs'),
     error = require('koa-error'),
     compress = require('koa-compress'),
@@ -37,7 +37,7 @@ var koa = require('koa'),
     demoContent = require('./lib/demoContent'),
     socketController = require('./controllers/socket');
 
-var app = koa();
+let app = koa();
 
 // Development only
 if (app.env === 'development') {
@@ -61,7 +61,7 @@ handlebarsHelpers.registerHelpers(hbs);
 routes.register(app);
 
 // This must come after last app.use()
-var server = http.Server(app.callback());
+let server = http.Server(app.callback());
 
 socketController.setup(server);
 

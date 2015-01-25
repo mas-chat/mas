@@ -16,7 +16,7 @@
 
 'use strict';
 
-var util = require('util'),
+let util = require('util'),
     _ = require('lodash'),
     log = require('./log'),
     redisModule = require('./redis'),

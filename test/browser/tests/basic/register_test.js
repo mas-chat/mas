@@ -1,5 +1,5 @@
 
-var utils = require('../../utils');
+let utils = require('../../utils');
 
 module.exports = {
     'Register new user': function(browser) {

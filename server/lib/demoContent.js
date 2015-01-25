@@ -18,7 +18,7 @@
 
 /*jshint -W079 */
 
-var co = require('co'),
+let co = require('co'),
     wait = require('co-wait'),
     faker = require('faker'),
     redis = require('./redis').createClient(),
