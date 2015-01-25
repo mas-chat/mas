@@ -60,6 +60,7 @@ exports.initDB = function*() {
     var networks = [ 'MAS' ].concat(Object.keys(conf.get('irc:networks')));
     yield redisClient.del('networklist');
     yield redisClient.sadd('networklist', networks);
+    yield redisClient.quit();
 };
 
 function createClient() {
