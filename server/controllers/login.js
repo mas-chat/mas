@@ -22,7 +22,7 @@ var passport = require('../lib/passport'),
     cookie = require('../lib/cookie');
 
 exports.localLogin = function*(next) {
-    var that = this;
+    let that = this;
 
     yield passport.authenticate('local', function*(err, userId) {
         if (err === 'useExt') {
@@ -60,10 +60,10 @@ function *auth(ctx, next, provider) {
 
         log.info('External login finished');
 
-        var resp = yield cookie.createSession(userId);
+        let resp = yield cookie.createSession(userId);
         cookie.set(userId, resp.secret, resp.expires, ctx);
 
-        var inUse = yield redis.hget('user:' + userId, 'inuse');
+        let inUse = yield redis.hget('user:' + userId, 'inuse');
 
         if (inUse === '1') {
             ctx.redirect('/app/');

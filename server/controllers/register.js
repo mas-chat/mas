@@ -111,12 +111,12 @@ var formFields = {
 };
 
 function validateNick(form, field, callback) {
-    var nick = field.data;
+    let nick = field.data;
 
     if (/[0-9]/.test(nick.charAt(0))) {
         callback('Nick can\'t start with digit');
     } else if (!(/^[A-Z\`a-z0-9[\]\\_\^{|}]+$/.test(nick))) {
-        var valid = [ 'a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}' ];
+        let valid = [ 'a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}' ];
         valid = '<span class="badge">' + valid.join('</span> <span class="badge">') + '</span>';
 
         callback('Illegal characters, allowed are ' + valid);
@@ -149,7 +149,7 @@ var registrationFormReset = forms.create({
 });
 
 function decodeForm(req, inputForm) {
-    var deferred = Q.defer();
+    let deferred = Q.defer();
 
     inputForm.handle(req, {
         success: function(form) {
@@ -169,7 +169,7 @@ function decodeForm(req, inputForm) {
 }
 
 function *nickOrEmailTaken(nickOrEmail, field, type) {
-    var userId = yield redis.hget('index:user', nickOrEmail.toLowerCase());
+    let userId = yield redis.hget('index:user', nickOrEmail.toLowerCase());
 
     if (userId) {
         field.error = 'This ' + type + ' is already reserved.';
@@ -180,8 +180,8 @@ function *nickOrEmailTaken(nickOrEmail, field, type) {
 }
 
 exports.index = function*() {
-    var extAuth = this.query.ext === 'true';
-    var form, template;
+    let extAuth = this.query.ext === 'true';
+    let form, template;
 
     if (extAuth) {
         if (!this.mas.userId) {
@@ -191,7 +191,7 @@ exports.index = function*() {
 
         template = 'register-ext';
 
-        var user = yield redis.hgetall('user:' + this.mas.userId);
+        let user = yield redis.hgetall('user:' + this.mas.userId);
         form = registrationFormExt.bind({
             name: user.name,
             email: user.email,
@@ -210,15 +210,15 @@ exports.index = function*() {
 };
 
 exports.indexReset = function*() {
-    var token = this.params.token;
-    var userId = yield redis.get('passwordresettoken:' + token);
+    let token = this.params.token;
+    let userId = yield redis.get('passwordresettoken:' + token);
 
     if (!userId) {
         this.body = 'Expired or invalid password reset link.';
         return;
     }
 
-    var form = registrationFormReset.bind({ token: token });
+    let form = registrationFormReset.bind({ token: token });
 
     yield this.render('register-reset', {
         page: 'register',
@@ -228,9 +228,9 @@ exports.indexReset = function*() {
 };
 
 exports.create = function*() {
-    var form = yield decodeForm(this.req, registrationForm);
-    var emailInUse = yield nickOrEmailTaken(form.data.email, form.fields.email, 'email address');
-    var nickInUse = yield nickOrEmailTaken(form.data.nick, form.fields.nick, 'nick');
+    let form = yield decodeForm(this.req, registrationForm);
+    let emailInUse = yield nickOrEmailTaken(form.data.email, form.fields.email, 'email address');
+    let nickInUse = yield nickOrEmailTaken(form.data.nick, form.fields.nick, 'nick');
 
     if (!form.isValid() || emailInUse || nickInUse) {
         yield this.render('register', {
@@ -241,7 +241,7 @@ exports.create = function*() {
     } else {
         log.info('Registration form data is valid');
 
-        var user = new User({
+        let user = new User({
             name: form.data.name,
             email: form.data.email,
             nick: form.data.nick,
@@ -249,19 +249,19 @@ exports.create = function*() {
         }, {}, {});
 
         user.setPassword(form.data.password);
-        var userId = yield user.generateUserId();
+        let userId = yield user.generateUserId();
         yield user.save();
 
-        var resp = yield cookie.createSession(userId);
+        let resp = yield cookie.createSession(userId);
         cookie.set(userId, resp.secret, resp.expires, this);
         this.response.redirect('/app');
     }
 };
 
 exports.createExt = function*() {
-    var form = yield decodeForm(this.req, registrationFormExt);
-    var emailInUse = yield nickOrEmailTaken(form.data.email, form.fields.email, 'email address');
-    var nickInUse = yield nickOrEmailTaken(form.data.nick, form.fields.nick, 'nick');
+    let form = yield decodeForm(this.req, registrationFormExt);
+    let emailInUse = yield nickOrEmailTaken(form.data.email, form.fields.email, 'email address');
+    let nickInUse = yield nickOrEmailTaken(form.data.nick, form.fields.nick, 'nick');
 
     if (!this.mas.userId) {
         this.status = httpStatus('bad request');
@@ -287,9 +287,9 @@ exports.createExt = function*() {
 };
 
 exports.createReset = function*() {
-    var form = yield decodeForm(this.req, registrationFormReset);
+    let form = yield decodeForm(this.req, registrationFormReset);
 
-    var userId = yield redis.get('passwordresettoken:' + form.data.token);
+    let userId = yield redis.get('passwordresettoken:' + form.data.token);
 
     if (!userId) {
         this.status = httpStatus('bad request');
@@ -305,7 +305,7 @@ exports.createReset = function*() {
     } else {
         yield redis.del('passwordresettoken:' + form.data.token);
 
-        var user = new User();
+        let user = new User();
         yield user.load(userId);
         user.setFinalPasswordSha(form.data.password);
         yield user.save();

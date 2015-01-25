@@ -64,16 +64,16 @@ co(function*() {
 function *processSend(params) {
     assert(params.conversationId);
 
-    var conversation = yield conversationFactory.get(params.conversationId);
+    let conversation = yield conversationFactory.get(params.conversationId);
 
     if (!conversation) {
         return;
     }
 
-    var target = conversation.name;
+    let target = conversation.name;
 
     if (conversation.type === '1on1') {
-        var targetUserId = yield conversation.getPeerUserId(params.userId);
+        let targetUserId = yield conversation.getPeerUserId(params.userId);
         target = yield redis.hget('ircuser:' + targetUserId, 'nick');
     }
 
@@ -88,12 +88,12 @@ function *processSend(params) {
 }
 
 function *processTextCommand(params) {
-    var conversation = yield conversationFactory.get(params.conversationId);
-    var command = params.text.match(/.*?(?=\W+|$)/)[0].toLowerCase();
-    var payload = params.text.substring(command.length);
-    var data = params.text;
-    var systemMsg = null;
-    var send = true;
+    let conversation = yield conversationFactory.get(params.conversationId);
+    let command = params.text.match(/.*?(?=\W+|$)/)[0].toLowerCase();
+    let payload = params.text.substring(command.length);
+    let data = params.text;
+    let systemMsg = null;
+    let send = true;
 
     switch (command) {
         case '':
@@ -105,14 +105,14 @@ function *processTextCommand(params) {
             send = false;
             break;
         case 'msg':
-            var res = payload.match(/^\W*(\w+)\W+(.*)/);
+            let res = payload.match(/^\W*(\w+)\W+(.*)/);
 
             if (!res || !res[1] || !res[2]) {
                 send = false;
                 break;
             }
 
-            var targetUserId = yield ircUser.getUserId(res[1], conversation.network);
+            let targetUserId = yield ircUser.getUserId(res[1], conversation.network);
 
             if (targetUserId.charAt(0) === 'm') {
                 systemMsg = '1on1s between MAS users through IRC aren\'t supported. ' +
@@ -144,10 +144,10 @@ function *processTextCommand(params) {
 }
 
 function *processJoin(params) {
-    var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
-    var channelName = params.name;
-    var hasChannelPrefixRegex = /^[&#!+]/;
-    var illegalNameRegEx = /\s|\cG|,/; // See RFC2812, section 1.3
+    let state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
+    let channelName = params.name;
+    let hasChannelPrefixRegex = /^[&#!+]/;
+    let illegalNameRegEx = /\s|\cG|,/; // See RFC2812, section 1.3
 
     if (!channelName || channelName === '' || illegalNameRegEx.test(channelName)) {
         yield outbox.queue(params.userId, params.sessionId, {
@@ -183,7 +183,7 @@ function *processJoin(params) {
 }
 
 function *processChat(params) {
-    var conversation = yield conversationFactory.find1on1(
+    let conversation = yield conversationFactory.find1on1(
         params.userId, params.targetUserId, params.network);
 
     if (!conversation) {
@@ -197,7 +197,7 @@ function *processChat(params) {
 }
 
 function *processClose(params) {
-    var state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
+    let state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
 
     yield redis.hdel(
         'ircchannelsubscriptions:' + params.userId + ':' + params.network, params.name);
@@ -210,10 +210,10 @@ function *processClose(params) {
 }
 
 function *processUpdatePassword(params) {
-    var conversation = yield conversationFactory.get(params.conversationId);
-    var state = yield redis.hget(
+    let conversation = yield conversationFactory.get(params.conversationId);
+    let state = yield redis.hget(
         'networks:' + params.userId + ':' + conversation.network, 'state');
-    var modeline = 'MODE ' + conversation.name + ' ';
+    let modeline = 'MODE ' + conversation.name + ' ';
 
     if (params.password === null) {
         modeline += '-k foobar'; // IRC protocol is odd, -k requires dummy parameter
@@ -243,8 +243,8 @@ function *processUpdatePassword(params) {
 }
 
 function *processUpdateTopic(params) {
-    var conversation = yield conversationFactory.get(params.conversationId);
-    var state = yield redis.hget(
+    let conversation = yield conversationFactory.get(params.conversationId);
+    let state = yield redis.hget(
         'networks:' + params.userId + ':' + conversation.network, 'state');
 
     if (state !== 'connected') {
@@ -281,21 +281,21 @@ function processWhois(params) {
 
 // Restarted
 function *processRestarted() {
-    var allUsers = yield redis.smembers('userlist');
-    var networks = yield redis.smembers('networklist');
+    let allUsers = yield redis.smembers('userlist');
+    let networks = yield redis.smembers('networklist');
 
     if (networks.length === 0 ) {
         log.error('No networks.');
     }
 
     for (var i = 0; i < allUsers.length; i++) {
-        var userId = allUsers[i];
+        let userId = allUsers[i];
 
         for (var ii = 0; ii < networks.length; ii++) {
-            var network = networks[ii];
+            let network = networks[ii];
 
             if (network !== 'MAS') {
-                var channels = yield redis.hgetall(
+                let channels = yield redis.hgetall(
                     'ircchannelsubscriptions:' + userId + ':' + network);
 
                 if (channels) {
@@ -314,7 +314,7 @@ function *processRestarted() {
 
 // Data
 function *processData(params) {
-    var key = params.userId + params.network;
+    let key = params.userId + params.network;
 
     if (!ircMessageBuffer[key]) {
         ircMessageBuffer[key] = [];
@@ -337,10 +337,10 @@ function *processData(params) {
 
 // Connected
 function *processConnected(params) {
-    var user = yield redis.hgetall('user:' + params.userId);
+    let user = yield redis.hgetall('user:' + params.userId);
     log.info(params.userId, 'Connected to IRC server');
 
-    var commands = [
+    let commands = [
         'NICK ' + user.nick,
         'USER ' + user.nick + ' 8 * :Real Name (Ralph v1.0)'
     ];
@@ -355,9 +355,9 @@ function *processConnected(params) {
 
 // Disconnected
 function *processDisconnected(params) {
-    var userId = params.userId;
-    var network = params.network;
-    var previousState = yield redis.hget('networks:' + userId + ':' + network, 'state');
+    let userId = params.userId;
+    let network = params.network;
+    let previousState = yield redis.hget('networks:' + userId + ':' + network, 'state');
 
     yield redis.hset('networks:' + userId + ':' + network, 'state', 'disconnected');
     yield nicks.removeCurrentNick(userId, network);
@@ -367,9 +367,9 @@ function *processDisconnected(params) {
         return;
     }
 
-    var delay = 30 * 1000; // 30s
-    var msg = 'Lost connection to IRC server (' + params.reason + '). Will try to reconnect in ';
-    var count = yield redis.hincrby('networks:' + userId + ':' + network, 'retryCount', 1);
+    let delay = 30 * 1000; // 30s
+    let msg = 'Lost connection to IRC server (' + params.reason + '). Will try to reconnect in ';
+    let count = yield redis.hincrby('networks:' + userId + ':' + network, 'retryCount', 1);
 
     // Set the backoff timer
     if (count < 4) {
@@ -390,7 +390,7 @@ function *processDisconnected(params) {
 }
 
 function *parseIrcMessage(params) {
-    var line = params.line.trim(),
+    let line = params.line.trim(),
         parts = line.split(' '),
         msg = {
             params: [],
@@ -404,10 +404,10 @@ function *parseIrcMessage(params) {
 
     if ((line.charAt(0) === ':')) {
         // Prefix exists
-        var prefix = parts.shift();
+        let prefix = parts.shift();
 
-        var nickEnds = prefix.indexOf('!');
-        var identEnds = prefix.indexOf('@');
+        let nickEnds = prefix.indexOf('!');
+        let identEnds = prefix.indexOf('@');
 
         if (nickEnds === -1 && identEnds === -1) {
             msg.serverName = prefix.substring(1);
@@ -439,7 +439,7 @@ function *parseIrcMessage(params) {
         }
     }
 
-    var handler = handlers[msg.command];
+    let handler = handlers[msg.command];
 
     if (!handler && !isNaN(msg.command)) {
         // Default handler for all numeric replies
@@ -452,7 +452,7 @@ function *parseIrcMessage(params) {
 }
 
 function *addSystemMessage(userId, network, cat, body) {
-    var conversation = yield conversationFactory.find1on1(userId, 'iSERVER', network);
+    let conversation = yield conversationFactory.find1on1(userId, 'iSERVER', network);
 
     if (!conversation) {
         conversation = yield window.setup1on1(userId, 'iSERVER', network);
@@ -466,7 +466,7 @@ function *addSystemMessage(userId, network, cat, body) {
 }
 
 function *connect(userId, network, skipRetryCountReset) {
-    var nick = yield redis.hget('user:' + userId, 'nick');
+    let nick = yield redis.hget('user:' + userId, 'nick');
     yield nicks.updateCurrentNick(userId, network, nick);
 
     yield redis.hset('networks:' + userId + ':' + network, 'state', 'connecting');
@@ -545,9 +545,9 @@ function *handleNoop() {
 
 function *handleServerText(userId, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
-    var text = msg.params.join(' ');
+    let text = msg.params.join(' ');
     // 371, 372 and 375 = MOTD and INFO lines
-    var cat = code === '372' || code === '375' || code === '371' ? 'banner' : 'server';
+    let cat = code === '372' || code === '375' || code === '371' ? 'banner' : 'server';
 
     if (text) {
         yield addSystemMessage(userId, msg.network, cat, text);
@@ -556,8 +556,8 @@ function *handleServerText(userId, msg, code) {
 
 function *handle043(userId, msg) {
     // :*.pl 043 AnDy 0PNEAKPLG :nickname collision, forcing nick change to your unique ID.
-    var newNick = msg.params[0];
-    var oldNick = msg.target;
+    let newNick = msg.params[0];
+    let oldNick = msg.target;
 
     yield updateNick(userId, msg.network, oldNick, newNick);
     yield tryDifferentNick(userId, msg.network);
@@ -565,9 +565,9 @@ function *handle043(userId, msg) {
 
 function *handle332(userId, msg) {
     // :portaali.org 332 ilkka #portaali :Cool topic
-    var channel = msg.params[0];
-    var topic = msg.params[1];
-    var conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let channel = msg.params[0];
+    let topic = msg.params[1];
+    let conversation = yield conversationFactory.findGroup(channel, msg.network);
 
     if (conversation) {
         yield conversation.setTopic(topic);
@@ -576,9 +576,9 @@ function *handle332(userId, msg) {
 
 function *handle353(userId, msg) {
     // :own.freenode.net 353 drwillie @ #evergreenproject :drwillie ilkkaoks
-    var channel = msg.params[1];
-    var conversation = yield conversationFactory.findGroup(channel, msg.network);
-    var names = msg.params[2].split(' ');
+    let channel = msg.params[1];
+    let conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let names = msg.params[2].split(' ');
 
     if (conversation) {
         yield bufferNames(names, userId, msg.network, conversation.conversationId);
@@ -587,11 +587,11 @@ function *handle353(userId, msg) {
 
 function *handle366(userId, msg) {
     // :pratchett.freenode.net 366 il3kkaoksWEB #testi1 :End of /NAMES list.
-    var channel = msg.params[0];
-    var conversation = yield conversationFactory.findGroup(channel, msg.network);
-    var key = 'namesbuffer:' + userId + ':' + conversation.conversationId;
+    let channel = msg.params[0];
+    let conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let key = 'namesbuffer:' + userId + ':' + conversation.conversationId;
 
-    var namesHash = yield redis.hgetall(key);
+    let namesHash = yield redis.hgetall(key);
     yield redis.del(key);
 
     if (conversation && Object.keys(namesHash).length > 0) {
@@ -602,7 +602,7 @@ function *handle366(userId, msg) {
         // only one 266 reply is parsed from a burst. For rest of the changes we rely on getting
         // incremental JOINS messages (preferrably from the original reporter.) This leaves some
         // theoretical error edge cases (left as homework) that maybe are worth of fixing.
-        var noActiveReporter = yield redis.setnx(
+        let noActiveReporter = yield redis.setnx(
             'ircnamesreporter:' + conversation.conversationId, userId);
 
         if (noActiveReporter) {
@@ -613,7 +613,7 @@ function *handle366(userId, msg) {
 }
 
 function *handle376(userId, msg) {
-    var state = yield redis.hget('networks:' + userId + ':' + msg.network, 'state');
+    let state = yield redis.hget('networks:' + userId + ':' + msg.network, 'state');
 
     yield addSystemMessage(userId, msg.network, 'server', msg.params.join(' '));
 
@@ -625,7 +625,7 @@ function *handle376(userId, msg) {
         yield addSystemMessage(userId, msg.network, 'info',
             'You can close this window at any time. It\'ll reappear when needed.');
 
-        var channelsToJoin = yield redis.hgetall(
+        let channelsToJoin = yield redis.hgetall(
             'ircchannelsubscriptions:' + userId + ':' + msg.network);
 
         if (!channelsToJoin) {
@@ -655,7 +655,7 @@ function *handle433(userId, msg) {
 
 function *handle482(userId, msg) {
     // irc.localhost 482 ilkka #test2 :You're not channel operator
-    var channel = msg.params[0];
+    let channel = msg.params[0];
 
     yield addSystemMessage(
         userId, msg.network, 'error', 'You\'re not channel operator on ' + channel);
@@ -663,10 +663,10 @@ function *handle482(userId, msg) {
 
 function *handleJoin(userId, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
-    var channel = msg.params[0];
-    var targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
-    var conversation = yield conversationFactory.findGroup(channel, msg.network);
-    var password = yield redis.hget(
+    let channel = msg.params[0];
+    let targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
+    let conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let password = yield redis.hget(
         'ircchannelsubscriptions:' + userId + ':' + msg.network, channel);
 
     if (!conversation) {
@@ -688,7 +688,7 @@ function *handleJoin(userId, msg) {
     }
 
     if (userId === targetUserId) {
-        var windowId = yield window.findByConversationId(userId, conversation.conversationId);
+        let windowId = yield window.findByConversationId(userId, conversation.conversationId);
 
         if (!windowId) {
             yield window.create(userId, conversation.conversationId);
@@ -700,9 +700,9 @@ function *handleJoin(userId, msg) {
 }
 
 function *handleJoinReject(userId, msg) {
-    var channel = msg.params[0];
-    var reason = msg.params[1];
-    var conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let channel = msg.params[0];
+    let reason = msg.params[1];
+    let conversation = yield conversationFactory.findGroup(channel, msg.network);
 
     yield addSystemMessage(userId, msg.network,
         'error', 'Failed to join ' + channel + '. Reason: ' + reason);
@@ -712,7 +712,7 @@ function *handleJoinReject(userId, msg) {
     if (conversation) {
         yield conversation.removeGroupMember(userId, false, false);
 
-        var windowId = yield window.findByConversationId(userId, conversation.conversationId);
+        let windowId = yield window.findByConversationId(userId, conversation.conversationId);
 
         if (windowId) {
             yield window.remove(userId, windowId);
@@ -724,28 +724,28 @@ function *handleJoinReject(userId, msg) {
 
 function *handleQuit(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com QUIT :"leaving"
-    // var reason = msg.params[0];
-    var targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
+    // let reason = msg.params[0];
+    let targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
 
-    var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
+    let conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
 
     for (var i = 0; i < conversationIds.length; i++) {
         // TBD: Send a real quit message instead of part
-        var conversation = yield conversationFactory.get(conversationIds[i]);
+        let conversation = yield conversationFactory.get(conversationIds[i]);
         yield conversation.removeGroupMember(targetUserId);
     }
 }
 
 function *handleNick(userId, msg) {
     // :ilkkao!~ilkkao@localhost NICK :foobar
-    var newNick = msg.params[0];
-    var oldNick = msg.nick;
+    let newNick = msg.params[0];
+    let oldNick = msg.nick;
 
     yield updateNick(userId, msg.network, oldNick, newNick);
 }
 
 function *handleError(userId, msg) {
-    var reason = msg.params[0];
+    let reason = msg.params[0];
 
     yield addSystemMessage(
         userId, msg.network, 'error', 'Connection lost. Server reason: ' + reason);
@@ -764,7 +764,7 @@ function *handleError(userId, msg) {
 
 function *handleInvite(userId, msg) {
     // :ilkkao!~ilkkao@127.0.0.1 INVITE buppe :#test2
-    var channel = msg.params[1];
+    let channel = msg.params[1];
 
     yield addSystemMessage(
         userId, msg.network, 'info', msg.nick + ' has invited you to channel ' + channel);
@@ -772,12 +772,12 @@ function *handleInvite(userId, msg) {
 
 function *handleKick(userId, msg) {
     // :ilkkao!~ilkkao@127.0.0.1 KICK #portaali AnDy :no reason
-    var channel = msg.params[0];
-    var targetNick = msg.params[1];
-    var reason = msg.params[2];
+    let channel = msg.params[0];
+    let targetNick = msg.params[1];
+    let reason = msg.params[2];
 
-    var conversation = yield conversationFactory.findGroup(channel, msg.network);
-    var targetUserId = yield ircUser.getUserId(targetNick, msg.network);
+    let conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let targetUserId = yield ircUser.getUserId(targetNick, msg.network);
 
     if (conversation) {
         yield conversation.removeGroupMember(targetUserId, false, true, reason);
@@ -788,7 +788,7 @@ function *handleKick(userId, msg) {
         yield addSystemMessage(userId, msg.network,
             'error', 'You have been kicked from ' + channel + ', Reason: ' + reason);
 
-        var windowId = yield window.findByConversationId(userId, conversation.conversationId);
+        let windowId = yield window.findByConversationId(userId, conversation.conversationId);
         yield window.remove(userId, windowId);
 
         yield disconnectIfIdle(userId, msg.network);
@@ -797,11 +797,11 @@ function *handleKick(userId, msg) {
 
 function *handlePart(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com PART #portaali :
-    var channel = msg.params[0];
-    var reason = msg.params[1];
+    let channel = msg.params[0];
+    let reason = msg.params[1];
 
-    var conversation = yield conversationFactory.findGroup(channel, msg.network);
-    var targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
+    let conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
 
     if (conversation) {
         yield conversation.removeGroupMember(targetUserId, false, false, reason);
@@ -810,14 +810,14 @@ function *handlePart(userId, msg) {
 
 function *handleMode(userId, msg) {
     // :ilkka9!~ilkka9@localhost.myrootshell.com MODE #sunnuntai +k foobar3
-    var target = msg.params[0];
+    let target = msg.params[0];
 
     if (!isChannel(target)) {
         // TDB: Handle user's mode change
         return;
     }
 
-    var conversation = yield conversationFactory.findGroup(target, msg.network);
+    let conversation = yield conversationFactory.findGroup(target, msg.network);
 
     if (!conversation) {
         return;
@@ -829,13 +829,13 @@ function *handleMode(userId, msg) {
             (msg.nick ? msg.nick : msg.serverName)
     });
 
-    var modeParams = msg.params.slice(1);
+    let modeParams = msg.params.slice(1);
 
     while (modeParams.length !== 0) {
-        var command = modeParams.shift();
-        var oper = command.charAt(0);
-        var modes = command.substring(1).split('');
-        var param;
+        let command = modeParams.shift();
+        let oper = command.charAt(0);
+        let modes = command.substring(1).split('');
+        let param;
 
         if (!(oper === '+' || oper === '-' )) {
             log.warn(userId, 'Received broken MODE command');
@@ -843,8 +843,8 @@ function *handleMode(userId, msg) {
         }
 
         for (var i = 0; i < modes.length; i++) {
-            var mode = modes[i];
-            var newClass = null;
+            let mode = modes[i];
+            let newClass = null;
 
             if (mode.match(/[klbeIOov]/)) {
                 param = modeParams.shift();
@@ -854,7 +854,7 @@ function *handleMode(userId, msg) {
                 }
             }
 
-            var targetUserId = yield ircUser.getUserId(param, msg.network);
+            let targetUserId = yield ircUser.getUserId(param, msg.network);
 
             if (mode === 'o' && oper === '+') {
                 // Got oper status
@@ -863,7 +863,7 @@ function *handleMode(userId, msg) {
                 // Lost oper status
                 newClass = USER;
             } else if (mode === 'v') {
-                var oldClass = yield conversation.getMemberRole(targetUserId);
+                let oldClass = yield conversation.getMemberRole(targetUserId);
 
                 if (oldClass !== OPER) {
                     if (oper === '+') {
@@ -875,7 +875,7 @@ function *handleMode(userId, msg) {
                     }
                 }
             } else if (mode === 'k') {
-                var newPassword = oper === '+' ? param : '';
+                let newPassword = oper === '+' ? param : '';
 
                 yield conversation.setPassword(newPassword);
                 yield redis.hset(
@@ -891,9 +891,9 @@ function *handleMode(userId, msg) {
 
 function *handleTopic(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com TOPIC #portaali :My new topic
-    var channel = msg.params[0];
-    var topic = msg.params[1];
-    var conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let channel = msg.params[0];
+    let topic = msg.params[1];
+    let conversation = yield conversationFactory.findGroup(channel, msg.network);
 
     if (conversation) {
         yield conversation.setTopic(topic, msg.nick);
@@ -902,12 +902,12 @@ function *handleTopic(userId, msg) {
 
 function *handlePrivmsg(userId, msg, command) {
     // :ilkkao!~ilkkao@127.0.0.1 NOTICE buppe :foo
-    var conversation;
-    var sourceUserId;
-    var target = msg.params[0];
-    var text = msg.params[1];
-    var cat = 'msg';
-    var currentNick = yield nicks.getCurrentNick(userId, msg.network);
+    let conversation;
+    let sourceUserId;
+    let target = msg.params[0];
+    let text = msg.params[1];
+    let cat = 'msg';
+    let currentNick = yield nicks.getCurrentNick(userId, msg.network);
 
     if (msg.nick) {
         sourceUserId = yield ircUser.getUserId(msg.nick, msg.network);
@@ -917,8 +917,8 @@ function *handlePrivmsg(userId, msg, command) {
     }
 
     if (text.indexOf('\u0001') !== -1 && command === 'PRIVMSG') {
-        var ret = parseCTCPMessage(text);
-        var reply = false;
+        let ret = parseCTCPMessage(text);
+        let reply = false;
 
         if (ret.type === 'ACTION') {
             cat = 'action';
@@ -967,16 +967,16 @@ function *handlePrivmsg(userId, msg, command) {
 }
 
 function *updateNick(userId, network, oldNick, newNick) {
-    var targetUserId = yield redis.run('updateNick', userId, network, oldNick, newNick);
+    let targetUserId = yield redis.run('updateNick', userId, network, oldNick, newNick);
 
     if (targetUserId) {
         log.info(userId, 'I\'m first and handle ' + oldNick + ' -> ' + newNick + ' nick change.');
 
         // We havent heard about this change before
-        var conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
+        let conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
 
         for (var i = 0; i < conversationIds.length; i++) {
-            var conversation = yield conversationFactory.get(conversationIds[i]);
+            let conversation = yield conversationFactory.get(conversationIds[i]);
             yield conversation.addMessageUnlessDuplicate(userId, {
                 cat: 'info',
                 body: oldNick + ' is now known as ' + newNick
@@ -987,8 +987,8 @@ function *updateNick(userId, network, oldNick, newNick) {
 }
 
 function *tryDifferentNick(userId, network) {
-    var nick = yield redis.hget('user:' + userId, 'nick');
-    var currentNick = yield nicks.getCurrentNick(userId, network);
+    let nick = yield redis.hget('user:' + userId, 'nick');
+    let currentNick = yield nicks.getCurrentNick(userId, network);
 
     if (nick !== currentNick.substring(0, nick.length)) {
         // Current nick is unique ID, let's try to change it to something unique immediately
@@ -1027,17 +1027,17 @@ function sendIRCPart(userId, network, channel) {
 }
 
 function *disconnectIfIdle(userId, network) {
-    var windowIds = yield window.getWindowIdsForNetwork(userId, network);
-    var onlyServer1on1Left = false;
+    let windowIds = yield window.getWindowIdsForNetwork(userId, network);
+    let onlyServer1on1Left = false;
 
     if (windowIds.length === 1) {
         // There's only one window left, is it IRC server 1on1?
         // If yes, we can disconnect from the server
-        var lastConversationId = yield window.getConversationId(userId, windowIds[0]);
-        var lastConversation = yield conversationFactory.get(lastConversationId);
+        let lastConversationId = yield window.getConversationId(userId, windowIds[0]);
+        let lastConversation = yield conversationFactory.get(lastConversationId);
 
         if (lastConversation.type === '1on1') {
-            var peeruserId = yield lastConversation.getPeerUserId(userId);
+            let peeruserId = yield lastConversation.getPeerUserId(userId);
 
             if (peeruserId === 'iSERVER') {
                 onlyServer1on1Left = true;
@@ -1053,11 +1053,11 @@ function *disconnectIfIdle(userId, network) {
 }
 
 function *bufferNames(names, userId, network, conversationId) {
-    var namesHash = {};
+    let namesHash = {};
 
     for (var i = 0; i < names.length; i++) {
-        var nick = names[i];
-        var userClass = USER;
+        let nick = names[i];
+        let userClass = USER;
 
         switch (nick.charAt(0)) {
             case '@':
@@ -1072,25 +1072,25 @@ function *bufferNames(names, userId, network, conversationId) {
             nick = nick.substring(1);
         }
 
-        var memberUserId = yield ircUser.getUserId(nick, network);
+        let memberUserId = yield ircUser.getUserId(nick, network);
         namesHash[memberUserId] = userClass;
     }
 
-    var key = 'namesbuffer:' + userId + ':' + conversationId;
+    let key = 'namesbuffer:' + userId + ':' + conversationId;
     yield redis.hmset(key, namesHash);
     yield redis.expire(key, 60); // 1 minute. Does cleanup if we never get End of NAMES list reply.
 }
 
 function parseCTCPMessage(text) {
     // Follow http://www.irchelp.org/irchelp/rfc/ctcpspec.html
-    var regex = /\u0001(.*?)\u0001/g;
-    var matches;
+    let regex = /\u0001(.*?)\u0001/g;
+    let matches;
 
     /*jshint -W084 */
     while (matches = regex.exec(text)) {
-        var msg = matches[1];
-        var dataType;
-        var payload = '';
+        let msg = matches[1];
+        let dataType;
+        let payload = '';
 
         if (msg.indexOf(' ') === -1) {
             dataType = msg;

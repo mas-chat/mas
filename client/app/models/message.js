@@ -32,8 +32,8 @@ export default Ember.Object.extend({
     ircMotd: false,
 
     userIdDidChange: function() {
-        var userId = this.get('userId');
-        var network = this.get('window.network');
+        let userId = this.get('userId');
+        let network = this.get('window.network');
 
         if (userId && network) {
             this.set('nick', this.get('store.users').getNick(userId, network));
@@ -41,12 +41,12 @@ export default Ember.Object.extend({
     }.observes('userId', 'window').on('init'),
 
     decoratedBody: function() {
-        var category = this.get('cat');
-        var nick = this.get('nick');
-        var body = this.get('body');
-        var groupName = this.get('window.name');
+        let category = this.get('cat');
+        let nick = this.get('nick');
+        let body = this.get('body');
+        let groupName = this.get('window.name');
 
-        var output = '';
+        let output = '';
 
         if (category === 'join') {
             output = 'has joined ' + groupName + '.';
@@ -68,14 +68,14 @@ export default Ember.Object.extend({
     }.property('body'),
 
     _decorate: function(text) {
-        var textParts = [];
-        var imgUrls = [];
-        var pos = 0;
-        var imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
+        let textParts = [];
+        let imgUrls = [];
+        let pos = 0;
+        let imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
 
         URI.withinString(text, function(url, start, end, source) {
-            var urlObj = new URI(url);
-            var visibleLink;
+            let urlObj = new URI(url);
+            let visibleLink;
 
             if (start !== pos) {
                 textParts.push(this._escHtml(source.substring(pos, start), false));
@@ -101,7 +101,7 @@ export default Ember.Object.extend({
             textParts.push(this._escHtml(text.substring(pos), false));
         }
 
-        var processedText = textParts.join('');
+        let processedText = textParts.join('');
 
         // Legacy thumb up emoji
         processedText = processedText.replace('*thumb up*', ':thumbsup: ');
@@ -109,15 +109,15 @@ export default Ember.Object.extend({
         // Other emojis
         processedText = emojify.replace(processedText);
 
-        var imgSection = imgUrls.length ? '<ul class="user-image">' + imgUrls.join(' ') +
+        let imgSection = imgUrls.length ? '<ul class="user-image">' + imgUrls.join(' ') +
             '</ul>' : '';
-        var textSection = '<span class="body">' + processedText + '</span>';
+        let textSection = '<span class="body">' + processedText + '</span>';
 
         return textSection + imgSection;
     },
 
     _escHtml: function(string, full) {
-        var res = string.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+        let res = string.replace(/&/g, '&amp;').replace(/</g, '&lt;');
         return full ? res.replace(/>/g, '&gt;').replace(/"/g, '&quot;') : res;
     }
 });

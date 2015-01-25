@@ -31,7 +31,7 @@ exports.queueAll = function*(userId, commands, excludeSessionId) {
 };
 
 exports.flush = function*(userId, sessionId, timeout) {
-    var result,
+    let result,
         command,
         commands = [];
 
@@ -39,7 +39,7 @@ exports.flush = function*(userId, sessionId, timeout) {
         // Wait for first command to appear if timeout is given
         // For every blocking redis call we need to create own redis client. Otherwise
         // socket.io connections block each other.
-        var newClient = redisModule.createClient();
+        let newClient = redisModule.createClient();
         result = yield newClient.brpop('outbox:' + userId + ':' + sessionId, timeout);
         newClient.end();
 
@@ -81,7 +81,7 @@ function *queueCommands(userId, sessionId, excludeSessionId, commands) {
 }
 
 function *handleNewUserIds(userId, sessionId, excludeSessionId, commands) {
-    var allUserIds = [];
+    let allUserIds = [];
 
     commands.forEach(function(command) {
         allUserIds = allUserIds.concat(scanUserIds(command));
@@ -93,7 +93,7 @@ function *handleNewUserIds(userId, sessionId, excludeSessionId, commands) {
 }
 
 function scanUserIds(obj) {
-    var res = [];
+    let res = [];
 
     if (typeof(obj) === 'string') {
         obj = JSON.parse(obj);

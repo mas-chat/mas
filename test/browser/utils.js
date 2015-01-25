@@ -2,16 +2,14 @@
 var request = require('superagent');
 
 exports.tearDown = function(done) {
-    console.log(this)
-
-    var passedStatus = this.results.failed === 0 && this.results.errors === 0;
+    let passedStatus = this.results.failed === 0 && this.results.errors === 0;
     console.log('Final result: "{ passed: ' + passedStatus + ' }"');
 
     if (!this.client.globals.dontReportSauceLabs) {
-        var userName = this.client.options.username;
-        var accessKey = this.client.options.accessKey;
-        var sessionId =this.client.sessionId;
-        var baseUrl = 'https://saucelabs.com/rest/v1/';
+        let userName = this.client.options.username;
+        let accessKey = this.client.options.accessKey;
+        let sessionId =this.client.sessionId;
+        let baseUrl = 'https://saucelabs.com/rest/v1/';
 
         console.log('Sending final result to Saucelabs...');
 

@@ -1,6 +1,6 @@
 
 exports.command = function() {
-    var browser = this;
+    let browser = this;
 
     browser
         .click('.fa-wrench')

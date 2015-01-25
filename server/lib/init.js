@@ -23,20 +23,20 @@ var path = require('path'),
     courier = require('./courier');
 
 module.exports = function configureProcess(serverName) {
-    var processName = 'mas-' + serverName + '-' + conf.get('common:env');
-    var pid;
+    let processName = 'mas-' + serverName + '-' + conf.get('common:env');
+    let pid;
 
     process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
     process.title = processName;
 
     if (conf.get('pid:enabled')) {
-        var pidDirectory = conf.get('pid:directory');
+        let pidDirectory = conf.get('pid:directory');
 
         if (pidDirectory.charAt(0) !== path.sep) {
             pidDirectory = path.join(__dirname, '..', '..', pidDirectory);
         }
 
-        var pidFile = path.join(pidDirectory, processName + '.pid');
+        let pidFile = path.join(pidDirectory, processName + '.pid');
 
         try {
             pid = npid.create(pidFile);
@@ -47,7 +47,7 @@ module.exports = function configureProcess(serverName) {
                 'Unknown pid file error.');
         }
 
-        var deletePidAndExit = function() {
+        let deletePidAndExit = function() {
             pid.remove();
             courier.shutdown();
         };

@@ -37,14 +37,14 @@ exports.createClient = function() {
 };
 
 exports.loadScripts = function*() {
-    var redisClient = createClient();
-    var loadDir = thunkify(function(callback) {
+    let redisClient = createClient();
+    let loadDir = thunkify(function(callback) {
         rlh.loadDir(callback);
     });
-    var scripts = yield loadDir();
+    let scripts = yield loadDir();
 
     for (var i = 0; i < scripts.length; i++) {
-        var scriptName = scripts[i];
+        let scriptName = scripts[i];
         log.info('Loading Redis script: ' + scriptName);
         try {
             yield redisClient.script('load', rlh.code(scriptName));
@@ -55,16 +55,16 @@ exports.loadScripts = function*() {
 };
 
 exports.initDB = function*() {
-    var redisClient = createClient();
+    let redisClient = createClient();
 
-    var networks = [ 'MAS' ].concat(Object.keys(conf.get('irc:networks')));
+    let networks = [ 'MAS' ].concat(Object.keys(conf.get('irc:networks')));
     yield redisClient.del('networklist');
     yield redisClient.sadd('networklist', networks);
     yield redisClient.quit();
 };
 
 function createClient() {
-    var plainRedisClient;
+    let plainRedisClient;
 
     if (conf.get('redis:connection_type') === 'socket') {
         plainRedisClient = redis.createClient(conf.get('redis:port'), conf.get('redis:host'));
@@ -72,20 +72,20 @@ function createClient() {
         plainRedisClient = redis.createClient(conf.get('redis:unix_socket_path'));
     }
 
-    var coRedisClient = coRedis(plainRedisClient);
+    let coRedisClient = coRedis(plainRedisClient);
 
     coRedisClient.plainRedis = redis;
     coRedisClient.plainRedisClient = plainRedisClient;
 
     coRedisClient.run = function*() {
-        var params = [].slice.call(arguments);
-        var scriptName = params.shift();
-        var sha = rlh.shasum(scriptName);
+        let params = [].slice.call(arguments);
+        let scriptName = params.shift();
+        let sha = rlh.shasum(scriptName);
 
         assert(sha);
 
-        var args = [ sha, 0 ].concat(params);
-        var res;
+        let args = [ sha, 0 ].concat(params);
+        let res;
 
         try {
             res = yield coRedisClient.evalsha.apply(this, args);

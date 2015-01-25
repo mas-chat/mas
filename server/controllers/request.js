@@ -42,18 +42,18 @@ var handlers = {
 };
 
 module.exports = function*(userId, sessionId, command) {
-    var windowId = command.windowId;
-    var network = command.network;
+    let windowId = command.windowId;
+    let network = command.network;
 
-    var conversation = null;
+    let conversation = null;
 
     if (!isNaN(windowId)) {
-        var conversationId = yield window.getConversationId(userId, windowId);
+        let conversationId = yield window.getConversationId(userId, windowId);
         conversation = yield conversationFactory.get(conversationId);
         network = conversation.network;
     }
 
-    var backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
+    let backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
 
     log.info(userId, 'Processing command: ' + JSON.stringify(command));
 
@@ -121,11 +121,11 @@ function *handleCreate(params) {
 }
 
 function *handleJoin(params) {
-    var conversation = yield conversationFactory.findGroup(
+    let conversation = yield conversationFactory.findGroup(
         params.command.name, params.command.network);
 
     if (conversation) {
-        var isMember = yield conversation.isMember(params.userId);
+        let isMember = yield conversation.isMember(params.userId);
 
         if (isMember) {
             yield outbox.queue(params.userId, params.sessionId, {
@@ -172,10 +172,10 @@ function *handleClose(params) {
 }
 
 function *handleUpdate(params) {
-    var accepted = [ 'visible', 'row', 'sounds', 'titleAlert' ];
+    let accepted = [ 'visible', 'row', 'sounds', 'titleAlert' ];
 
     for (var i = 0; i < accepted.length; i++) {
-        var prop = params.command[accepted[i]];
+        let prop = params.command[accepted[i]];
 
         if (typeof(prop) !== 'undefined') {
             yield redis.hset('window:' + params.userId + ':' + params.windowId, accepted[i], prop);
@@ -198,7 +198,7 @@ function *handleUpdatePassword(params) {
         return;
     }
 
-    var password = params.command.password;
+    let password = params.command.password;
 
     // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
     if (typeof password !== 'string') {
@@ -257,9 +257,9 @@ function *handleWhois(params) {
 }
 
 function *handleChat(params) {
-    var userId = params.userId;
-    var targetUserId = params.command.userId;
-    var network = params.network;
+    let userId = params.userId;
+    let targetUserId = params.command.userId;
+    let network = params.network;
 
     if (userId === targetUserId) {
         yield outbox.queue(userId, params.sessionId, {
@@ -277,7 +277,7 @@ function *handleChat(params) {
         params.backend = 'loopbackparser';
     }
 
-    var conversation = yield conversationFactory.find1on1(userId, targetUserId, network);
+    let conversation = yield conversationFactory.find1on1(userId, targetUserId, network);
 
     if (conversation) {
         assert(conversation.members[userId]);
@@ -314,7 +314,7 @@ function *handleLogout(params) {
     setTimeout(function() {
         // Give the system some time to deliver LOGOUT_RESP before cleanup
         co(function*() {
-            var last = yield redis.run('deleteSession', params.userId, params.sessionId);
+            let last = yield redis.run('deleteSession', params.userId, params.sessionId);
 
             if (last) {
                 yield friends.informStateChange(params.userId, 'logout');

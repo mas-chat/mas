@@ -32,9 +32,9 @@ var crypto = require('crypto'),
 
 function authLocal(username, password, done) {
     co(function*() {
-        var user = null;
-        var userId = null;
-        var correctPassword = false;
+        let user = null;
+        let userId = null;
+        let correctPassword = false;
 
         if (username) {
             userId = yield redis.hget('index:user', username.toLowerCase());
@@ -43,19 +43,19 @@ function authLocal(username, password, done) {
         if (userId) {
             user = yield redis.hgetall('user:' + userId);
 
-            var passwordParts = user.password.split(':');
-            var encryptionMethod = passwordParts[0];
-            var encryptedHash = passwordParts[1];
+            let passwordParts = user.password.split(':');
+            let encryptionMethod = passwordParts[0];
+            let encryptedHash = passwordParts[1];
 
             if (encryptionMethod === 'sha256') {
-                var expectedSha = crypto.createHash(
+                let expectedSha = crypto.createHash(
                     'sha256').update(password, 'utf8').digest('hex');
 
                 if (encryptedHash === expectedSha) {
                     correctPassword = true;
                     // Migrate to bcrypt
-                    var salt = bcrypt.genSaltSync(10);
-                    var hash = bcrypt.hashSync(password, salt);
+                    let salt = bcrypt.genSaltSync(10);
+                    let hash = bcrypt.hashSync(password, salt);
                     yield redis.hset('user:' + userId, 'password', 'bcrypt:' + hash);
                 }
             } else {
@@ -78,7 +78,7 @@ function authExt(openidId, oauthId, profile, done) {
         // Some old users are known by their google OpenID 2.0 identifier. Google is closing down
         // OpenID support so always convert in that case to OAuth 2.0 id.
 
-        var userId = yield redis.hget('index:user', openidId);
+        let userId = yield redis.hget('index:user', openidId);
 
         if (oauthId) {
             if (userId) {
@@ -93,7 +93,7 @@ function authExt(openidId, oauthId, profile, done) {
         }
 
         if (userId === null) {
-            var user = new User({
+            let user = new User({
                 name: profile.displayName,
                 email: profile.emails[0].value,
                 extAuthId: oauthId || openidId,
@@ -109,14 +109,14 @@ function authExt(openidId, oauthId, profile, done) {
 }
 
 if (conf.get('googleauth:enabled') === true) {
-    var google = new GoogleStrategy({
+    let google = new GoogleStrategy({
         clientID: conf.get('googleauth:client_id'),
         clientSecret: conf.get('googleauth:client_secret'),
         callbackURL: conf.get('site:url') + '/auth/google/oauth2callback'
     }, function(accessToken, refreshToken, params, profile, done) {
         // jshint camelcase: false
         // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-        var openIdId = jwt.decode(params.id_token, null, true).openid_id;
+        let openIdId = jwt.decode(params.id_token, null, true).openid_id;
         authExt(openIdId, 'google:' + profile.id, profile, done);
     });
 
@@ -124,7 +124,7 @@ if (conf.get('googleauth:enabled') === true) {
 }
 
 if (conf.get('yahooauth:enabled') === true) {
-    var yahoo = new YahooStrategy({
+    let yahoo = new YahooStrategy({
         returnURL: conf.get('site:url') + '/auth/yahoo/callback',
         realm: conf.get('site:url')
     }, function(openIdId, profile, done) {

@@ -20,7 +20,7 @@ var redis = require('../../lib/redis').createClient(),
     nicks = require('../../models/nick');
 
 exports.getUserId = function*(nick, network) {
-    var masUserId = yield nicks.getUserIdFromNick(nick, network);
+    let masUserId = yield nicks.getUserIdFromNick(nick, network);
 
     if (masUserId) {
         return masUserId;
@@ -29,7 +29,7 @@ exports.getUserId = function*(nick, network) {
     // UserId for IRC user is created on the fly if the nick in the network hasn't an ID
     // already. This method therefore never returns null.
 
-    var ircUserId = yield redis.run('getOrCreateIrcUserId', nick, network);
+    let ircUserId = yield redis.run('getOrCreateIrcUserId', nick, network);
 
     return ircUserId;
 };

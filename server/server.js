@@ -66,7 +66,7 @@ var server = http.Server(app.callback());
 socketController.setup(server);
 
 co(function*() {
-    var port = conf.get('frontend:port');
+    let port = conf.get('frontend:port');
 
     yield redisModule.loadScripts();
     yield redisModule.initDB();
