@@ -1,4 +1,4 @@
-#!/usr/bin/env node --harmony
+#!/usr/bin/env node
 //
 //   Copyright 2009-2014 Ilkka Oksanen <iao@iki.fi>
 //
