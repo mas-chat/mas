@@ -8,14 +8,15 @@ module.exports = {
     },
 
     reporter: function(results, done) {
+        var passed = results.failed === 0 && results.errors === 0;
+        console.log('Final result: "{ passed: ' + passed + ' }"');
+
         if (!this.dontReportSauceLabs) {
             var userName = this.client.options.username;
             var accessKey = this.client.options.accessKey;
             var baseUrl = 'https://saucelabs.com/rest/v1/';
 
-            var passed = results.failed === 0 && results.errors === 0;
-
-            console.log('Sending test result "{ passed: ' + passed + ' }" to Saucelabs...');
+            console.log('Sending final result to Saucelabs...');
 
             if (userName && accessKey) {
                 request
