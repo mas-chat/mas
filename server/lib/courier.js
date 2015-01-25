@@ -23,8 +23,19 @@ var assert = require('assert'),
     co = require('co'),
     log = require('./log');
 
+var shutdownInitiated = false;
+var processing = false;
+
 exports.createEndPoint = function(name) {
     return new Courier(name);
+};
+
+exports.shutdown = function() {
+    if (!processing) {
+        exit();
+    } else {
+        shutdownInitiated = true;
+    }
 };
 
 function Courier(name) {
@@ -38,6 +49,9 @@ Courier.prototype.start = function() {
     co(function*() {
         while (1) {
             var result = yield rcvRedis.brpop('inbox:' + this.name, 0);
+
+            processing = true;
+
             var msg = JSON.parse(result[1]);
             var handler = this.handlers[msg.type];
             log.info('MSG RCVD [' + msg.__sender + ' → ' + this.name + '] DATA: ' + result[1]);
@@ -52,6 +66,12 @@ Courier.prototype.start = function() {
             } else {
                 // Normal function
                 handler(msg);
+            }
+
+            processing = false;
+
+            if (shutdownInitiated) {
+                exit();
             }
         }
     }).call(this);
@@ -90,4 +110,9 @@ function convert(msg, sender) {
 
 function isGeneratorFunction(obj) {
     return obj && obj.constructor && obj.constructor.name === 'GeneratorFunction';
+}
+
+function exit() {
+    log.info('Courier ready. Exiting.');
+    process.exit(0);
 }
