@@ -8,23 +8,21 @@ module.exports = {
     },
 
     reporter: function(results, done) {
-        var passed = results.failed === 0 && results.errors === 0;
-        console.log('Final result: "{ passed: ' + passed + ' }"');
+        var passedStatus = results.failed === 0 && results.errors === 0;
+        console.log('Final result: "{ passed: ' + passedStatus + ' }"');
 
-        console.log(this);
-        console.log(results);
-
-        if (!this.dontReportSauceLabs) {
-            var userName = this.test_settings.username;
-            var accessKey = this.test_settings.access_key;
+        if (!this.client.globals.dontReportSauceLabs) {
+            var userName = this.client.options.username;
+            var accessKey = this.client.options.accessKey;
+            var sessionId =this.client.sessionId;
             var baseUrl = 'https://saucelabs.com/rest/v1/';
 
             console.log('Sending final result to Saucelabs...');
 
             if (userName && accessKey) {
                 request
-                    .put(baseUrl + userName + '/jobs/' + this.client.sessionId)
-                    .send({ passed: true })
+                    .put(baseUrl + userName + '/jobs/' + sessionId)
+                    .send({ passed: passedStatus })
                     .auth(userName, accessKey)
                     .end(function(error, res){
                         if (error) {
