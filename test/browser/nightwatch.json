@@ -1,9 +1,9 @@
 {
-    "src_folders": ["."],
+    "src_folders": [ "tests" ],
     "output_folder": "./reports",
     "custom_commands_path": "",
     "custom_assertions_path": "",
-    "globals_path": "",
+    "globals_path": "globals/globalsModule.js",
 
     "selenium": {
         "start_process": false,

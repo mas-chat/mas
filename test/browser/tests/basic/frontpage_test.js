@@ -1,4 +1,3 @@
-var request = require('superagent');
 
 module.exports = {
     "Load front page": function(browser) {
@@ -7,32 +6,5 @@ module.exports = {
             .waitForElementVisible('body', 1000)
             .assert.containsText('.login', 'Sign in')
             .end();
-    },
-
-    tearDown: function(done) {
-        var userName = this.client.options.username;
-        var accessKey = this.client.options.accessKey;
-
-        console.log('tearDown started');
-
-        if (userName && accessKey) {
-            request
-                .put('https://saucelabs.com/rest/v1/' + userName + '/jobs/' + this.client.sessionId)
-                .send({ passed: true })
-                .auth(userName, accessKey)
-                .end(function(error, res){
-                    if (error) {
-                        console.log('ERROR sending verdict');
-                        console.log(error);
-                    } else {
-                        console.log('Verdict sent to Sauce Labs, response:' + res.res.statusMessage);
-                    }
-
-                    done();
-                });
-        } else {
-            console.log('Username or access key missing, username: ' + userName);
-            done();
-        }
     }
 };
