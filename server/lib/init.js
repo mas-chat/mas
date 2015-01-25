@@ -19,7 +19,8 @@
 var path = require('path'),
     npid = require('npid'),
     conf = require('./conf'),
-    log = require('./log');
+    log = require('./log'),
+    courier = require('./courier');
 
 module.exports = function configureProcess(serverName) {
     var processName = 'mas-' + serverName + '-' + conf.get('common:env');
@@ -48,7 +49,7 @@ module.exports = function configureProcess(serverName) {
 
         var deletePidAndExit = function() {
             pid.remove();
-            process.exit(0);
+            courier.shutdown();
         };
 
         process.on('SIGINT', deletePidAndExit);
