@@ -70,7 +70,7 @@
     "jshint-stylish": "~1.0.0",
     "mocha-co": "~1.17.1-co.1",
     "mysql": "~2.5.0",
-    "nightwatch": "~0.5.36",
+    "nightwatch": "ilkkao/nightwatch",
     "rimraf": "~2.2.8",
     "superagent": "~0.21.0"
   },
