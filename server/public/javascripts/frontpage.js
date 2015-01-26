@@ -32,7 +32,7 @@ $(function() {
                 if (data.success === true) {
                     $.cookie('auth', data.userId + '-' + data.secret + '-n', {
                         path: '/',
-                        expires: new Date(data.expires)
+                        expires: new Date(data.expires * 1000)
                     });
 
                     window.location.pathname = '/app/';

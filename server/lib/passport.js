@@ -16,17 +16,18 @@
 
 'use strict';
 
-let crypto = require('crypto'),
-    bcrypt = require('bcrypt'),
-    co = require('co'),
-    jwt = require('jwt-simple'),
-    passport = require('koa-passport'),
-    LocalStrategy = require('passport-local').Strategy,
-    GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
-    YahooStrategy = require('passport-yahoo').Strategy,
-    redis = require('./redis').createClient(),
-    User = require('../models/user'),
-    conf = require('./conf');
+const crypto = require('crypto'),
+      bcrypt = require('bcrypt'),
+      co = require('co'),
+      jwt = require('jwt-simple'),
+      passport = require('koa-passport'),
+      LocalStrategy = require('passport-local').Strategy,
+      GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
+      YahooStrategy = require('passport-yahoo').Strategy,
+      redis = require('./redis').createClient(),
+      User = require('../models/user'),
+      conf = require('./conf'),
+      log = require('./log');
 
 // TBD: Rename Redis user.openidurl property to user.extAuthToken
 
@@ -63,11 +64,11 @@ function authLocal(username, password, done) {
             } else if (encryptionMethod === 'plain') {
                 // Only used in testing
                 correctPassword = password === encryptedHash;
+                log.info('Login attempt with unencrypted password, result:' + correctPassword);
             } else {
                 done('invalid', false);
                 return;
             }
-
         }
 
         if (userId && user.openidurl) {

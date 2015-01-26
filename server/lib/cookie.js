@@ -23,7 +23,7 @@ exports.createSession = function*(userId) {
     let user = yield redis.hgetall('user:' + userId);
     let ts = Math.round(Date.now() / 1000);
     let secret = user.secret;
-    let expires = user.secretExpires;
+    let expires = user.secretExpires || 0;
 
     // TBD: Use word secret everywhere.
 
