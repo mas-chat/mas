@@ -55,10 +55,10 @@ co(function *() {
             name: names[i],
             email: emails[i],
             nick: nicks[i],
-            inuse: '1'
-        }, {}, {});
+            inuse: 'true'
+        }, {}, []);
 
-        user.setFinalPasswordSha('12345');
+        user.setPassword('12345');
         yield user.generateUserId();
         yield user.save();
     }

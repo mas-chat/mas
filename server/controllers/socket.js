@@ -83,7 +83,7 @@ exports.setup = function(server) {
                 if (!(userRecord &&
                     userRecord.secretExpires > ts &&
                     userRecord.secret === secret &&
-                    userRecord.inuse)) {
+                    userRecord.inuse === 'true')) {
                     log.info(userId, 'Init message with incorrect or expired secret.');
                     socket.emit('terminate', {
                         code: 'INVALID_SECRET',

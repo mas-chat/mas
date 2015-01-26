@@ -57,7 +57,7 @@ module.exports = function authenticate() {
         this.mas = this.mas || {};
         this.mas.userId = valid ? userId : null;
         this.mas.email = valid ? user.email : null;
-        this.mas.inUse = valid ? user.inuse === '1' : null;
+        this.mas.inUse = valid ? user.inuse === 'true' : null;
 
         yield next;
     };
