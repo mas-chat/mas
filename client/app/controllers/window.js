@@ -169,10 +169,5 @@ export default Ember.Controller.extend(UploadMixin, {
         } else {
             return 'private-1on1';
         }
-    }.property('model.type'),
-
-    _seekRow: function(direction) {
-        let newRow = this.get('parentController').nextRow(this.get('model'), direction);
-        this.set('model.row', newRow);
-    }
+    }.property('model.type')
 });

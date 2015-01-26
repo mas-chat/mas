@@ -32,23 +32,4 @@ export default Ember.ArrayController.extend({
     },
 
     initDone: Ember.computed.alias('controllers.application.initDone'),
-
-    nextRow: function(item, direction) {
-        let windows = this.get('model').filter(function(val) {
-            return val.get('visible');
-        }).sortBy('row');
-
-        let index =  windows.indexOf(item);
-        let row = windows[index].get('row');
-
-        for (var i = index + direction; i >= 0 && i < windows.length; i += direction) {
-            let currentRow = windows[i].get('row');
-
-            if (currentRow !== row) {
-                return currentRow;
-            }
-        }
-
-        return row + direction;
-    }
 });
