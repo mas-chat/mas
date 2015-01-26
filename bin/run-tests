@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 
-if [ ! $# == 1 ]; then
-    echo "Usage: $0 <env>"
+if [[ ( $# < 1 ) ]]; then
+    echo "Usage: $0 <env> [test]"
     exit 1
 fi
 
 NIGHTWATCH_ENV=$1
+
+if [[ -z "$2" ]]; then
+    SINGLE_TEST=""
+else
+    SINGLE_TEST="--test $2"
+fi
 
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
 cd $ROOT
@@ -19,7 +25,7 @@ sleep 1
 ./bin/masctl -b -c start --configFile test/mas-test.conf
 
 if [ "$NIGHTWATCH_ENV" == "local" ]; then
-    node --harmony ./bin/nightwatch --env local --configFile test/mas-test.conf
+    node --harmony ./bin/nightwatch --env local $SINGLE_TEST --configFile test/mas-test.conf
 else
     # Can't run in parallel until there are multiple redises.
     node --harmony ./bin/nightwatch --env saucelabs-firefox-mac --configFile test/mas-test.conf
