@@ -101,12 +101,19 @@
 .flex-row {
     display: flex;
     flex-direction: row;
+    min-height: 1px; // See: http://stackoverflow.com/questions/27424831/firefox-flexbox-overflow
 }
 
 .flex-grow-column {
     display: flex;
     flex-direction: column;
     width: 100%;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 1px;
 }
 
 .flex-align-center {
