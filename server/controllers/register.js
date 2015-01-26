@@ -245,7 +245,7 @@ exports.create = function*() {
             name: form.data.name,
             email: form.data.email,
             nick: form.data.nick,
-            inuse: '1'
+            inuse: 'true'
         }, {}, {});
 
         user.setPassword(form.data.password);
@@ -279,7 +279,7 @@ exports.createExt = function*() {
             name: form.data.name,
             email: form.data.email,
             nick: form.data.nick,
-            inuse: '1'
+            inuse: 'true'
         });
 
         this.response.redirect('/app');
