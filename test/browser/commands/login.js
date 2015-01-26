@@ -6,11 +6,11 @@ exports.command = function(nick, password) {
 
     browser
         .url('http://localhost:44199')
-        .waitForElementVisible('body', 1000)
+        .waitForElementVisible('body', 3000)
         .setValue('input[name="username"]', nick)
         .setValue('input[name="password"]', password)
         .click('#login-form button')
-        .waitForElementVisible('.fa-wrench', 1000);
+        .waitForElementVisible('.fa-wrench', 3000);
 
     return this;
 };
