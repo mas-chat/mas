@@ -65,7 +65,7 @@ function *auth(ctx, next, provider) {
 
         let inUse = yield redis.hget('user:' + userId, 'inuse');
 
-        if (inUse === '1') {
+        if (inUse === 'true') {
             ctx.redirect('/app/');
         } else {
             ctx.redirect('/register?ext=true');

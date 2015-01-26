@@ -58,14 +58,21 @@ function authLocal(username, password, done) {
                     let hash = bcrypt.hashSync(password, salt);
                     yield redis.hset('user:' + userId, 'password', 'bcrypt:' + hash);
                 }
-            } else {
+            } else if (encryptionMethod === 'bcrypt') {
                 correctPassword = bcrypt.compareSync(password, encryptedHash);
+            } else if (encryptionMethod === 'plain') {
+                // Only used in testing
+                correctPassword = password === encryptedHash;
+            } else {
+                done('invalid', false);
+                return;
             }
+
         }
 
         if (userId && user.openidurl) {
             done('useExt', false);
-        } else if (!userId || !correctPassword || user.inuse === 0) {
+        } else if (!userId || !correctPassword || user.inuse !== 'true') {
             done('invalid', false);
         } else {
             done(null, userId);
@@ -97,8 +104,8 @@ function authExt(openidId, oauthId, profile, done) {
                 name: profile.displayName,
                 email: profile.emails[0].value,
                 extAuthId: oauthId || openidId,
-                inuse: '0'
-            }, {}, {});
+                inuse: 'false'
+            }, {}, []);
 
             userId = yield user.generateUserId();
             yield user.save();
