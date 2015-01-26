@@ -7,7 +7,7 @@ module.exports = {
     'Register new user': function(browser) {
         browser
             .url('http://localhost:44199/register')
-            .waitForElementVisible('body', 1000)
+            .waitForElementVisible('body', 3000)
             .assert.title('MAS - Register')
             .assert.elementPresent('form[action="/register"]')
             .setValue('input#id_name', 'Ilkka Oksanen')
@@ -17,7 +17,7 @@ module.exports = {
             .setValue('input#id_nick', 'ilkka')
             .click('input#id_tos')
             .click('#register-form button')
-            .waitForElementVisible('.main-welcome-msg', 1000)
+            .waitForElementVisible('.main-welcome-msg', 3000)
             .logout()
             .login('iao@iki.fi', 'dj3nsd4dse')
             .end();
