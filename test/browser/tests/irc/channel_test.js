@@ -30,7 +30,7 @@ module.exports = {
 
                 client.addListener('message', function(from, to, message) {
                     if (message === 'ping1on1') {
-                        client.say(from, 'pong1on1')
+                        client.say(from, 'pong1on1');
                     }
                 });
             })
