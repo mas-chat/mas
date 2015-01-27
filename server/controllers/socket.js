@@ -22,7 +22,6 @@ let redis = require('../lib/redis').createClient(),
     uuid = require('uid2'),
     requestController = require('../controllers/request'),
     log = require('../lib/log'),
-    nicks = require('../models/nick'),
     friends = require('../models/friends'),
     outbox = require('../lib/outbox');
 
@@ -104,7 +103,6 @@ exports.setup = function(server) {
 
                 log.info(userId, 'Initializing new session: ' + sessionId);
                 yield redis.run('initSession', userId, sessionId);
-                yield nicks.sendNick(userId, sessionId);
 
                 yield friends.sendFriends(userId, sessionId);
                 yield friends.informStateChange(userId, 'login');
