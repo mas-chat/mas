@@ -91,7 +91,13 @@ export default Ember.Object.extend({
 
     simplifiedName: function() {
         let name = this.get('name');
-        name = name.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
+        let type = this.get('type');
+
+        if (type === 'group') {
+            name = name.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
+        } else {
+            name = this.get('store.users').getNick(this.get('userId'), this.get('network'));
+        }
         return name;
     }.property('name'),
 
