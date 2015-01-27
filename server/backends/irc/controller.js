@@ -631,7 +631,8 @@ function *handle376(userId, msg) {
             });
         });
 
-        yield nicks.sendNickAll(userId);
+        // Tell the client nick we got
+        yield redis.run('introduceNewUserIds', userId, null, null, true, userId);
     }
 }
 
