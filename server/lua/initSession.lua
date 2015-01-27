@@ -151,7 +151,7 @@ end
 -- Prepend the USERS command so client gets it first
 local userIdList = {}
 
--- Alway include info about the user itself
+-- Always include info about the user itself
 table.insert(userIdList, userId)
 
 for k,v in pairs(seenUserIds) do
