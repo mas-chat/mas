@@ -90,15 +90,15 @@ export default Ember.Object.extend({
     }.property('topic'),
 
     simplifiedName: function() {
-        let name = this.get('name');
+        let windowName = this.get('name');
         let type = this.get('type');
 
         if (type === 'group') {
-            name = name.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
+            windowName = windowName.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
         } else {
-            name = this.get('store.users').getNick(this.get('userId'), this.get('network'));
+            windowName = this.get('store.users').getNick(this.get('userId'), this.get('network'));
         }
-        return name;
+        return windowName;
     }.property('name'),
 
     tooltipTopic: function() {
