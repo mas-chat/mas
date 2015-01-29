@@ -185,7 +185,7 @@ export default Ember.View.extend({
         this.$messagePanel.stop();
         this.$messagePanel.css('overflow-y', 'hidden');
 
-        this.$messagePanel.animate({
+        this.$messagePanel.velocity({
             scrollTop: pos
         }, 500, function() {
             this.$messagePanel.css('overflow-y', 'auto');
