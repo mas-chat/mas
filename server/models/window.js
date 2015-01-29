@@ -66,6 +66,8 @@ exports.getAllConversationIds = function*(userId) {
 };
 
 exports.getAllConversationIdsWithUserId = function*(userId, targetUserId) {
+    assert(userId !== targetUserId);
+
     let conversationIds = yield getAllConversationIds(userId);
     let res = [];
 

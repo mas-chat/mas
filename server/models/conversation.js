@@ -143,7 +143,7 @@ Conversation.prototype.setGroupMembers = function*(members) {
 };
 
 Conversation.prototype.addGroupMember = function*(userId, role) {
-    assert (role === 'u' || role === '+' || role === '@' || role === '*');
+    assert(role === 'u' || role === '+' || role === '@' || role === '*');
 
     let newField = yield redis.hset('conversationmembers:' + this.conversationId, userId, role);
 
@@ -161,6 +161,8 @@ Conversation.prototype.addGroupMember = function*(userId, role) {
 };
 
 Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKicked, reason) {
+    assert(this.type === 'group');
+
     let removed = yield redis.hdel('conversationmembers:' + this.conversationId, userId);
 
     if (removed === 1) {
