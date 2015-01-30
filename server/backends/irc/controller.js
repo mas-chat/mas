@@ -721,13 +721,17 @@ function *handleQuit(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com QUIT :"leaving"
     // let reason = msg.params[0];
     let targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
-
-    let conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
+    let conversationIds = yield window.getAllConversationIds(userId);
 
     for (var i = 0; i < conversationIds.length; i++) {
         // TBD: Send a real quit message instead of part
         let conversation = yield conversationFactory.get(conversationIds[i]);
-        yield conversation.removeGroupMember(targetUserId);
+
+        if (conversation.network === msg.network && conversation.type === 'group') {
+            // No need to check if the targetUser is on this channel,
+            // removeGroupMember() is clever enough
+            yield conversation.removeGroupMember(targetUserId);
+        }
     }
 }
 
