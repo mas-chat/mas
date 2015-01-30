@@ -90,6 +90,7 @@ co(function*() {
     courier.on('chat', processChat);
     courier.on('restarted', processRestarted);
     courier.on('data', processData);
+    courier.on('noconnection', processNoConnection);
     courier.on('connected', processConnected);
     courier.on('disconnected', processDisconnected);
     courier.start();
@@ -356,6 +357,12 @@ function *processData(params) {
             ircMessageBuffer[key].shift();
         }
     }
+}
+
+// No connection
+function *processNoConnection(params) {
+    yield addSystemMessage(params.userId, params.network, 'error',
+        'Can\'t send. Not connected to IRC currently.');
 }
 
 // Connected

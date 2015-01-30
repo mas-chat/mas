@@ -121,7 +121,11 @@ courier.on('write', function(params) {
     let data = params.line;
 
     if (!socket) {
-        log.info(userId, 'Non-existent socket');
+        courier.send('ircparser', {
+            type: 'noconnection',
+            userId: userId,
+            network: network
+        });
         return;
     }
 
