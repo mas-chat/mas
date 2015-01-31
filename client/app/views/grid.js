@@ -59,7 +59,7 @@ export default Ember.View.extend({
         let cursor = this._calculateCursorPosition(x, y);
 
         if (!this.cursor || this.cursor.x !== cursor.x || this.cursor.y !== cursor.y ||
-            this.cursor.section !== cursor.section) {
+            (cursor.section !== 'middle' && this.cursor.section !== cursor.section)) {
             this.cursor = cursor;
 
             this._drawCursor(cursor);
@@ -137,21 +137,22 @@ export default Ember.View.extend({
 
         let rowCount = this.dimensions.length;
         let columnCount = this.dimensions[y].length;
+        let section = cursor.section;
 
-        if (cursor.section === 'top' || cursor.section === 'bottom') {
-            if ((cursor.y === y && cursor.section === 'top') ||
-                (y > 0 && cursor.y === y - 1 && cursor.section === 'bottom' )) {
+        if (section === 'top' || section === 'bottom') {
+            if ((cursor.y === y && section === 'top') ||
+                (y > 0 && cursor.y === y - 1 && section === 'bottom' )) {
                 masWindow.cursor = 'top';
-            } else if ((cursor.y === y && cursor.section === 'bottom') ||
-                (y < rowCount - 1 && cursor.y === y + 1 && cursor.section === 'top' )) {
+            } else if ((cursor.y === y && section === 'bottom') ||
+                (y < rowCount - 1 && cursor.y === y + 1 && section === 'top' )) {
                 masWindow.cursor = 'bottom';
             }
         } else {
-            if (cursor.y === y && ((cursor.section === 'left' && cursor.x === x) ||
-                (x > 0 && cursor.x === x - 1 && cursor.section === 'right')))  {
+            if (cursor.y === y && ((section === 'left' && cursor.x === x) ||
+                (x > 0 && cursor.x === x - 1 && section === 'right')))  {
                 masWindow.cursor = 'left';
-            } else if (cursor.y === y && ((cursor.section === 'right' && cursor.x === x) ||
-                (x < columnCount - 1 && cursor.x - 1 === x && cursor.section === 'left'))) {
+            } else if (cursor.y === y && ((section === 'right' && cursor.x === x) ||
+                (x < columnCount - 1 && cursor.x - 1 === x && section === 'left'))) {
                 masWindow.cursor = 'right';
             }
         }
@@ -161,22 +162,23 @@ export default Ember.View.extend({
         let container = this._containerDimensions();
         let cursorPos = {};
         let cursorWindow = this.dimensions[cursor.y][cursor.x];
+        let section = cursor.section;
 
-        if (cursor.section === 'top' || cursor.section === 'bottom') {
+        if (section === 'top' || section === 'bottom') {
             cursorPos = {
                 left: 0,
                 width: container.width,
-                top: (cursor.section === 'top' ?
+                top: (section === 'top' ?
                     cursorWindow.top : cursorWindow.top + cursorWindow.height) - CURSORWIDTH / 2,
                 height: CURSORWIDTH
             };
         } else {
             cursorPos = {
-                left: (cursor.section === 'left' ?
+                left: (section === 'left' ?
                     cursorWindow.left : cursorWindow.left + cursorWindow.width) - CURSORWIDTH / 2,
-                width: cursor.x === 0 && cursor.section === 'left' ||
-                    (cursor.x === this.dimensions[cursor.y].length - 1 &&
-                        cursor.section === 'right') ? CURSORWIDTH / 2 : CURSORWIDTH,
+                width: cursor.x === 0 && section === 'left' ||
+                    (cursor.x === this.dimensions[cursor.y].length - 1 && section === 'right') ?
+                    CURSORWIDTH / 2 : CURSORWIDTH,
                 top: this.dimensions[cursor.y][0].top,
                 height: this.dimensions[cursor.y][0].height
             };
@@ -239,8 +241,9 @@ export default Ember.View.extend({
     },
 
     _calculateCursorPosition: function(x, y) {
-        var windowX = 0;
-        var windowY = 0;
+        let windowX = 0;
+        let windowY = 0;
+        let masWindow;
 
         this.dimensions.forEach(function(row, index) {
             if (row[0].top < y) {
@@ -251,13 +254,18 @@ export default Ember.View.extend({
         this.dimensions[windowY].forEach(function(column, index) {
             if (column.left < x) {
                 windowX = index;
+                masWindow = column;
             }
         });
 
-        return this._whichSection({ x: windowX, y: windowY }, x, y);
+        return {
+            x: windowX,
+            y: windowY,
+            section: this._whichSection(masWindow, x, y)
+        }
     },
 
-    _whichSection: function(windowIndex, x, y) {
+    _whichSection: function(windowDim, x, y) {
         // -----------------
         // |\      a      /|
         // | \           / |
@@ -268,17 +276,15 @@ export default Ember.View.extend({
         // |/             \|
         // -----------------
 
-        const border = 50;
+        const BORDER = 50; // Defines the non-active area ('n' in the figure)
 
         let ab = true;
         let cb = false;
         let section;
 
-        var windowDim = this.dimensions[windowIndex.y][windowIndex.x];
-
-        if (windowDim.left + border < x && windowDim.left + windowDim.width - border > x &&
-            windowDim.top + border < y && windowDim.top + windowDim.height - border > y) {
-            return false;
+        if (windowDim.left + BORDER < x && windowDim.left + windowDim.width - BORDER > x &&
+            windowDim.top + BORDER < y && windowDim.top + windowDim.height - BORDER > y) {
+            return 'middle';
         } else {
             if (windowDim.height * (x - windowDim.left) < windowDim.width * (y - windowDim.top)) {
                 ab = false;
@@ -290,16 +296,14 @@ export default Ember.View.extend({
             }
 
             if (ab && !cb) {
-                section = 'top';
+                return 'top'; // a
             } else if (ab && cb) {
-                section = 'right';
+                return 'right'; // b
             } else if (!ab && cb) {
-                section = 'bottom';
+                return 'bottom'; // c
             } else if (!ab && !cb) {
-                section = 'left';
+                return 'left'; // d
             }
-
-            return { x: windowIndex.x, y: windowIndex.y, section: section };
         }
     }
 });
