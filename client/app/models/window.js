@@ -120,7 +120,7 @@ export default Ember.Object.extend({
         }
     }.property('type'),
 
-    syncServer: function() {
+    syncServerPosition: function() {
         if (!window.disableUpdate) {
             this.get('socket').send({
                 id: 'UPDATE',
@@ -131,6 +131,15 @@ export default Ember.Object.extend({
             });
         }
     }.observes('visible', 'row', 'column'),
+
+    syncServerAlerts: function() {
+        this.get('socket').send({
+            id: 'UPDATE',
+            windowId: this.get('windowId'),
+            sounds: this.get('sounds'),
+            titleAlert: this.get('titleAlert')
+        });
+    }.observes('titleAlert', 'sounds'),
 
     _mapUserIdsToNicks: function(role) {
         return this.get(role).map(function(userId) {
