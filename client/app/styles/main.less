@@ -54,6 +54,10 @@
     color: white;
 }
 
+.grid {
+    padding: @grid-padding;
+}
+
 .main-friend-item {
     padding: 0px 20px;
     width: 280px;
@@ -203,12 +207,16 @@
 #window-cursor {
     position: absolute;
     display: none;
-    width: 15px;
-    height: 300px;
-    background-color: yellow;
-    opacity: 0.7;
-    z-index: 100;
+    color: #E43868;
+    z-index: -10;
+}
 
-    border: 4px dotted black;
-    border-radius: 5px;
+#window-cursor-inner {
+    position: absolute;
+    background-color: #E43868;
+    z-index: 100;
+    top: @grid-padding;
+    bottom: @grid-padding;
+    left: @grid-padding;
+    right: @grid-padding;
 }

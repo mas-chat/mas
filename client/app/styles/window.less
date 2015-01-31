@@ -6,10 +6,10 @@
 @window-title-bg-color: #142F40;
 
 .window {
-    background-color: @window-bg-color;
     font-size: 14px;
     color: #333333;
     position: absolute;
+    padding: @grid-padding;
 
     // Initial value, overwritten by velocity animation
     visibility: hidden;
@@ -28,7 +28,9 @@
     }
 
     &.irc-server-window {
-        background-color: rgb(241, 242, 244);
+        .window-content {
+            background-color: rgb(241, 242, 244);
+        }
 
         .window-title {
             background-color: rgb(32, 147, 185);
@@ -40,7 +42,10 @@
         background-color: @window-title-bg-color;
         border-bottom: 1px solid @window-outer-line-color;
         color: whitesmoke;
-        cursor: move;
+    }
+
+    .window-content {
+        background-color: @window-bg-color;
     }
 
     .window-title.private-1on1 {
@@ -49,7 +54,12 @@
 
     .window-title-button {
         cursor: pointer;
-        opacity: 0.5;
+        opacity: 0.4;
+        margin-left: 2px;
+    }
+
+    .window-title-button.fa-arrows {
+        cursor: move;
     }
 
     .window-title-button:hover {
@@ -247,6 +257,7 @@
 
     .window-toolbar {
         border-top: 1px solid @window-line-color;
+        background-color: whitesmoke;
         height: 32px;
 
         .btn {

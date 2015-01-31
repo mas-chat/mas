@@ -20,10 +20,13 @@
 
 import Ember from 'ember';
 
+const CURSORWIDTH = 50;
+
 export default Ember.View.extend({
     classNames: [ 'grid', 'flex-1', 'flex-grow-row' ],
 
-    PADDING: 5,
+    dimensions: null,
+    cursor: null,
 
     didInsertElement: function() {
         $(window).on('resize', Ember.run.bind(this, function() {
@@ -41,8 +44,48 @@ export default Ember.View.extend({
         Ember.run.next(this, function() { this.layoutWindows(false); });
     }.observes('controller.initDone'),
 
+    dragWindowStart: function() {
+        $('#window-cursor').show();
+    },
+
+    dragWindow: function(event) {
+        let x = event.originalEvent.clientX;
+        let y = event.originalEvent.clientY;
+
+        if (x === 0 && y === 0) {
+            return;
+        }
+
+        let cursor = this._calculateCursorPosition(x, y);
+
+        if (!this.cursor || this.cursor.x !== cursor.x || this.cursor.y !== cursor.y ||
+            this.cursor.section !== cursor.section) {
+            this.cursor = cursor;
+
+            this._drawCursor(cursor);
+
+            this.dimensions.forEach(function(row, rowIndex) {
+                row.forEach(function(masWindow, columnIndex) {
+                    this._markWindow(masWindow, columnIndex, rowIndex, cursor);
+                }.bind(this));
+            }.bind(this));
+
+            this._animate(200);
+        }
+    },
+
+    dragWindowEnd: function() {
+        this.dimensions.forEach(function(row) {
+            row.forEach(function(masWindow) {
+                masWindow.cursor = 'none';
+            });
+        });
+
+        $('#window-cursor').hide();
+        this._animate(200);
+    },
+
     layoutWindows: function(animate) {
-        let that = this;
         let duration = animate ? 600 : 0;
         let el = this.get('element');
         let container = this._containerDimensions();
@@ -50,10 +93,10 @@ export default Ember.View.extend({
 
         if (expandedWindow) {
             $(expandedWindow).velocity({
-                left: this.PADDING + 'px',
-                top: this.PADDING + 'px',
-                width: container.width - 2 * this.PADDING + 'px',
-                height: container.height - 2 * this.PADDING + 'px'
+                left: 0,
+                top: 0,
+                width: container.width,
+                height: container.height,
             }, duration);
             return;
         }
@@ -61,56 +104,130 @@ export default Ember.View.extend({
         let windows = el.querySelectorAll('.window.visible');
         let rowNumbers = _.uniq(_.map(windows,
             function(element) { return element.getAttribute('data-row'); }));
-        let rowHeight = (container.height - (rowNumbers.length + 1) * this.PADDING) /
-            rowNumbers.length;
+        let rowHeight = Math.round(container.height / rowNumbers.length);
+
+        let dimensions = [];
 
         _.forEach(rowNumbers, function(row, rowIndex) {
             let windowsInRow = el.querySelectorAll('.window.visible[data-row="' + row + '"]');
-            let windowWidth = (container.width - (windowsInRow.length + 1) * that.PADDING) /
-                windowsInRow.length;
+            let windowWidth = Math.round(container.width / windowsInRow.length);
 
-            _.forEach(windowsInRow, function(element, index) {
-                that._animate(element, index, rowIndex, windowWidth, rowHeight, duration);
+            dimensions.push([]);
+
+            _.forEach(windowsInRow, function(element, columnIndex) {
+                let dim = {
+                    left: columnIndex * windowWidth,
+                    top: rowIndex * rowHeight,
+                    width: windowWidth,
+                    height: rowHeight,
+                    el: element
+                };
+
+                dimensions[rowIndex].push(dim);
             });
         });
+
+        this.dimensions = dimensions;
+
+        this._animate(duration);
     },
 
-    _animate: function(el, columnIndex, rowIndex, width, height, duration) {
-        let $el = $(el);
-        let position = $el.position();
+    _markWindow: function(masWindow, x, y, cursor) {
+        masWindow.cursor = 'none';
 
-        let dim = {
-            currentLeft: position.left,
-            currentTop: position.top,
-            currentWidth: $el.width(),
-            currentHeight: $el.height(),
-            left: columnIndex * width + (columnIndex + 1) * this.PADDING,
-            top: rowIndex * height + (rowIndex + 1) * this.PADDING,
-            width: width,
-            height: height
-        };
+        let rowCount = this.dimensions.length;
+        let columnCount = this.dimensions[y].length;
 
-        dim = _.mapValues(dim, function(val) { return Math.round(val); });
+        if (cursor.section === 'top' || cursor.section === 'bottom') {
+            if ((cursor.y === y && cursor.section === 'top') ||
+                (y > 0 && cursor.y === y - 1 && cursor.section === 'bottom' )) {
+                masWindow.cursor = 'top';
+            } else if ((cursor.y === y && cursor.section === 'bottom') ||
+                (y < rowCount - 1 && cursor.y === y + 1 && cursor.section === 'top' )) {
+                masWindow.cursor = 'bottom';
+            }
+        } else {
+            if (cursor.y === y && ((cursor.section === 'left' && cursor.x === x) ||
+                (x > 0 && cursor.x === x - 1 && cursor.section === 'right')))  {
+                masWindow.cursor = 'left';
+            } else if (cursor.y === y && ((cursor.section === 'right' && cursor.x === x) ||
+                (x < columnCount - 1 && cursor.x - 1 === x && cursor.section === 'left'))) {
+                masWindow.cursor = 'right';
+            }
+        }
+    },
 
-        if (dim.left === dim.currentLeft && dim.top === dim.currentTop &&
-            dim.width === dim.currentWidth && dim.height === dim.currentHeight) {
-            // Nothing to animate
-            return;
+    _drawCursor: function(cursor) {
+        let container = this._containerDimensions();
+        let cursorPos = {};
+        let cursorWindow = this.dimensions[cursor.y][cursor.x];
+
+        if (cursor.section === 'top' || cursor.section === 'bottom') {
+            cursorPos = {
+                left: 0,
+                width: container.width,
+                top: (cursor.section === 'top' ?
+                    cursorWindow.top : cursorWindow.top + cursorWindow.height) - CURSORWIDTH / 2,
+                height: CURSORWIDTH
+            };
+        } else {
+            cursorPos = {
+                left: (cursor.section === 'left' ?
+                    cursorWindow.left : cursorWindow.left + cursorWindow.width) - CURSORWIDTH / 2,
+                width: cursor.x === 0 && cursor.section === 'left' ||
+                    (cursor.x === this.dimensions[cursor.y].length - 1 &&
+                        cursor.section === 'right') ? CURSORWIDTH / 2 : CURSORWIDTH,
+                top: this.dimensions[cursor.y][0].top,
+                height: this.dimensions[cursor.y][0].height
+            };
         }
 
-        $(el).velocity('stop').velocity({
-            left:  dim.left + 'px',
-            top:  dim.top + 'px',
-            width: dim.width + 'px',
-            height: dim.height + 'px'
-        }, {
-            duration: duration,
-            visibility: 'visible',
-            complete: function() {
-                // Make sure window shows the latest messages
-                let view = Ember.View.views[$el.attr('id')];
-                Ember.run.next(view, view.layoutDone);
-            }
+        $('#window-cursor').css(cursorPos);
+    },
+
+    _animate: function(duration) {
+        const halfCursorWidth = Math.round(CURSORWIDTH / 2);
+
+        this.dimensions.forEach(function(row) {
+            row.forEach(function(windowDim) {
+                let $el = $(windowDim.el);
+                let position = $el.position();
+
+                // Keep all values in hash to make rounding easy in the next step
+                let oldDim = {
+                    left: position.left,
+                    top: position.top,
+                    width: $el.width(),
+                    height: $el.height(),
+                };
+
+                let newDim = {
+                    left: windowDim.cursor === 'left' ?
+                        windowDim.left + halfCursorWidth : windowDim.left,
+                    top: windowDim.cursor === 'top' ?
+                        windowDim.top + halfCursorWidth :  windowDim.top,
+                    width: windowDim.cursor === 'left' || windowDim.cursor === 'right' ?
+                        windowDim.width - halfCursorWidth : windowDim.width,
+                    height: windowDim.cursor === 'top' || windowDim.cursor === 'bottom' ?
+                        windowDim.height - halfCursorWidth : windowDim.height
+                };
+
+                if (newDim.left === oldDim.left && newDim.top === oldDim.top &&
+                    newDim.width === oldDim.width && newDim.height === oldDim.height) {
+                    // Nothing to animate
+                    return;
+                }
+
+                $el.velocity('stop').velocity(newDim, {
+                    duration: duration,
+                    visibility: 'visible',
+                    complete: function() {
+                        // Make sure window shows the latest messages
+                        let view = Ember.View.views[$el.attr('id')];
+                        Ember.run.next(view, view.layoutDone);
+                    }
+                });
+            });
         });
     },
 
@@ -119,5 +236,70 @@ export default Ember.View.extend({
             width: this.$().width(),
             height: this.$().height()
         };
+    },
+
+    _calculateCursorPosition: function(x, y) {
+        var windowX = 0;
+        var windowY = 0;
+
+        this.dimensions.forEach(function(row, index) {
+            if (row[0].top < y) {
+                windowY = index;
+            }
+        });
+
+        this.dimensions[windowY].forEach(function(column, index) {
+            if (column.left < x) {
+                windowX = index;
+            }
+        });
+
+        return this._whichSection({ x: windowX, y: windowY }, x, y);
+    },
+
+    _whichSection: function(windowIndex, x, y) {
+        // -----------------
+        // |\      a      /|
+        // | \           / |
+        // |  -----------  |
+        // |d |    n    | b|
+        // |  -----------  |
+        // | /     c     \ |
+        // |/             \|
+        // -----------------
+
+        const border = 50;
+
+        let ab = true;
+        let cb = false;
+        let section;
+
+        var windowDim = this.dimensions[windowIndex.y][windowIndex.x];
+
+        if (windowDim.left + border < x && windowDim.left + windowDim.width - border > x &&
+            windowDim.top + border < y && windowDim.top + windowDim.height - border > y) {
+            return false;
+        } else {
+            if (windowDim.height * (x - windowDim.left) < windowDim.width * (y - windowDim.top)) {
+                ab = false;
+            }
+
+            if (windowDim.height * (windowDim.left + windowDim.width - x) <
+                windowDim.width * (y - windowDim.top)) {
+                cb = true;
+            }
+
+            if (ab && !cb) {
+                section = 'top';
+            } else if (ab && cb) {
+                section = 'right';
+            } else if (!ab && cb) {
+                section = 'bottom';
+            } else if (!ab && !cb) {
+                section = 'left';
+            }
+
+            return { x: windowIndex.x, y: windowIndex.y, section: section };
+        }
     }
 });
