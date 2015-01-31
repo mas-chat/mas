@@ -243,7 +243,8 @@ Create new window. Window identifier is either ```userId``` or ```name```.
   "visible": true,
   "role": "@",
   "sounds": true,
-  "row": 3
+  "row": 3,
+  "column": 2
 }
 ```
 
@@ -440,7 +441,7 @@ Update existing parameter for existing window.
 
 Updates a value initially received in ```CREATE``` command.
 
-Attributes in ```CREATE``` command that can be update are: ```password```, ```topic```, ```visible```, ```row```, ```sounds```, ```role``` and ```titleAlert```.
+Attributes in ```CREATE``` command that can be update are: ```password```, ```topic```, ```visible```, ```row```, ```column```, ```sounds```, ```role``` and ```titleAlert```.
 
 # Requests and responses
 
