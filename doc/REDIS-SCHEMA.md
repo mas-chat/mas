@@ -13,7 +13,6 @@ MAS Redis structures
    secret (string)
    secretExpires (int, unix time)
    lastip (string)
-   ads (int)
    maxwindows (int)
    openidurl (string)
    registrationtime (int, unix time)
@@ -51,6 +50,8 @@ MAS Redis structures
    titleAlert (bool)
    visible (bool)
    row (int)
+   column (int)
+   group (int)
 
  index:windowIds (hash)
    <userId>:<conversationId> (int, windowId)
