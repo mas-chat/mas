@@ -166,22 +166,18 @@ export default Ember.View.extend({
         let columnCount = this.dimensions[y].length;
         let section = cursor.section;
 
-        if (section === 'top' || section === 'bottom') {
-            if ((cursor.y === y && section === 'top') ||
-                (y > 0 && cursor.y === y - 1 && section === 'bottom' )) {
-                masWindow.cursor = 'top';
-            } else if ((cursor.y === y && section === 'bottom') ||
-                (y < rowCount - 1 && cursor.y === y + 1 && section === 'top' )) {
-                masWindow.cursor = 'bottom';
-            }
-        } else {
-            if (cursor.y === y && ((section === 'left' && cursor.x === x) ||
-                (x > 0 && cursor.x === x - 1 && section === 'right')))  {
-                masWindow.cursor = 'left';
-            } else if (cursor.y === y && ((section === 'right' && cursor.x === x) ||
-                (x < columnCount - 1 && cursor.x - 1 === x && section === 'left'))) {
-                masWindow.cursor = 'right';
-            }
+        if ((cursor.y === y && section === 'top') ||
+            (y > 0 && cursor.y === y - 1 && section === 'bottom' )) {
+            masWindow.cursor = 'top';
+        } else if ((cursor.y === y && section === 'bottom') ||
+            (y < rowCount - 1 && cursor.y === y + 1 && section === 'top' )) {
+            masWindow.cursor = 'bottom';
+        } else if (cursor.y === y && ((section === 'left' && cursor.x === x) ||
+            (x > 0 && cursor.x === x - 1 && section === 'right'))) {
+            masWindow.cursor = 'left';
+        } else if (cursor.y === y && ((section === 'right' && cursor.x === x) ||
+            (x < columnCount - 1 && cursor.x - 1 === x && section === 'left'))) {
+            masWindow.cursor = 'right';
         }
     },
 
@@ -215,10 +211,8 @@ export default Ember.View.extend({
     },
 
     _animate: function(duration) {
-        const halfCursorWidth = Math.round(CURSORWIDTH / 2);
-
-        this.dimensions.forEach(function(row) {
-            row.forEach(function(windowDim) {
+        this.dimensions.forEach(function(row, rowIndex) {
+            row.forEach(function(windowDim, columnIndex) {
                 let $el = $(windowDim.el);
                 let position = $el.position();
 
@@ -230,15 +224,18 @@ export default Ember.View.extend({
                     height: $el.height(),
                 };
 
+                let cursorSpace = this._calculateSpaceForCursor(
+                    columnIndex, rowIndex, windowDim.cursor);
+
                 let newDim = {
                     left: windowDim.cursor === 'left' ?
-                        windowDim.left + halfCursorWidth : windowDim.left,
+                        windowDim.left + cursorSpace : windowDim.left,
                     top: windowDim.cursor === 'top' ?
-                        windowDim.top + halfCursorWidth :  windowDim.top,
+                        windowDim.top + cursorSpace :  windowDim.top,
                     width: windowDim.cursor === 'left' || windowDim.cursor === 'right' ?
-                        windowDim.width - halfCursorWidth : windowDim.width,
+                        windowDim.width - cursorSpace : windowDim.width,
                     height: windowDim.cursor === 'top' || windowDim.cursor === 'bottom' ?
-                        windowDim.height - halfCursorWidth : windowDim.height
+                        windowDim.height - cursorSpace : windowDim.height
                 };
 
                 if (newDim.left === oldDim.left && newDim.top === oldDim.top &&
@@ -256,8 +253,21 @@ export default Ember.View.extend({
                         Ember.run.next(view, view.layoutDone);
                     }
                 });
-            });
-        });
+            }.bind(this));
+        }.bind(this));
+    },
+
+    _calculateSpaceForCursor: function(x, y, cursor) {
+        let width = Math.round(CURSORWIDTH / 2);
+        let rows = this.dimensions.length;
+        let columns = this.dimensions[y].length;
+
+        if ((y === 0 && cursor === 'top') || (y === rows - 1 && cursor === 'bottom') ||
+            (x === 0 && cursor === 'left') || (x === columns - 1 && cursor === 'right')) {
+            width = CURSORWIDTH;
+        }
+
+        return width;
     },
 
     _containerDimensions: function() {
