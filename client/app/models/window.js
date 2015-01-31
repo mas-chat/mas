@@ -102,8 +102,8 @@ export default Ember.Object.extend({
     }.property('name'),
 
     tooltipTopic: function() {
-        let topic = this.get('topic') || '[NOT SET]';
-        return 'Topic: ' + topic;
+        let topic = this.get('topic');
+        return topic ? 'Topic: ' + topic : 'Topic not set.';
     }.property('topic'),
 
     explainedType: function() {
