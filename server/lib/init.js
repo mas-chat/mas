@@ -17,6 +17,7 @@
 'use strict';
 
 let path = require('path'),
+    fs = require('fs'),
     npid = require('npid'),
     conf = require('./conf'),
     log = require('./log'),
@@ -42,9 +43,24 @@ module.exports = function configureProcess(serverName) {
             pid = npid.create(pidFile);
             pid.removeOnExit();
         } catch (e) {
-            log.error(e.code === 'EEXIST' ?
-                'Pid file (' + pidFile + ') exists. Is the process already running?' :
-                'Unknown pid file error.');
+            if (e.code === 'EEXIST') {
+                let pid = parseInt(fs.readFileSync(pidFile));
+
+                try {
+                    process.kill(pid, 0);
+                } catch (e) {
+                    // Process mentioned in the pid file is not running anymore
+                    log.info ('Removing stale pid file: ' + pidFile);
+                    fs.unlinkSync(pidFile);
+                    pid = 0;
+                }
+
+                if (pid !== 0) {
+                    log.error('Pid file (' + pidFile + ') exists. Process is already running.');
+                }
+            } else {
+                log.error('Unknown pid file error.');
+            }
         }
 
         let deletePidAndExit = function() {
