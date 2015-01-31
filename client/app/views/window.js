@@ -22,7 +22,7 @@ import Ember from 'ember';
 
 export default Ember.View.extend({
     classNames: [ 'window', 'flex-grow-column' ],
-    attributeBindings: [ 'row:data-row', 'draggable' ],
+    attributeBindings: [ 'row:data-row' ],
 
     classNameBindings: [
         'expanded:expanded:',
@@ -37,10 +37,6 @@ export default Ember.View.extend({
 
     // TBD: messages is here because of the mixin. Is there better way?
     messages: Ember.computed.alias('controller.model.messages'),
-
-    draggable: function() {
-        return 'true';
-    }.property(),
 
     visibilityChanged: function() {
         this.get('parentView').windowAdded(true);
@@ -63,6 +59,18 @@ export default Ember.View.extend({
             this.set('expanded', false);
             this.get('parentView').windowAdded(true);
         }
+    },
+
+    dragStart: function(event) {
+        this.get('parentView').dragWindowStart(event);
+    },
+
+    drag: function(event) {
+        this.get('parentView').dragWindow(event);
+    },
+
+    dragEnd: function(event) {
+        this.get('parentView').dragWindowEnd(event);
     },
 
     layoutDone: function() {

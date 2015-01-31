@@ -4,6 +4,7 @@
     </div>
 
     <div>
+        <i class="window-title-button fa fa-arrows" draggable="true"></i>
         <i {{action "hide"}} class="window-title-button fa fa-minus"></i>
         {{#if view.expanded}}
             <i {{action "compress" target="view"}} class="window-title-button fa fa-compress"></i>
@@ -13,7 +14,7 @@
     </div>
 </div>
 
-<div class="flex-grow-row flex-1">
+<div class="flex-row flex-1 window-content">
     <div class="window-messages flex-1">
         {{#each message in model.messages}}
             {{dayDivider model.messages _view.contentIndex}}
