@@ -24,7 +24,6 @@ export default Ember.Controller.extend({
 
     actions: {
         changeAlerts: function() {
-            // User has clicked 'OK', send the new settings to server
             let newSoundAlert = this.get('modalSoundAlert');
             let newTitleAlert = this.get('modalTitleAlert');
 
