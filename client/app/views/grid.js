@@ -188,20 +188,34 @@ export default Ember.View.extend({
         let section = cursor.section;
 
         if (section === 'top' || section === 'bottom') {
+            let top = (section === 'top' ?
+                cursorWindow.top : cursorWindow.top + cursorWindow.height) - CURSORWIDTH / 2;
+
+            if (cursor.y === 0 && section === 'top') {
+                top = cursorWindow.top;
+            } else if (cursor.y === this.dimensions.length - 1 && section === 'bottom') {
+                top = cursorWindow.top + cursorWindow.height - CURSORWIDTH;
+            }
+
             cursorPos = {
                 left: 0,
                 width: container.width,
-                top: (section === 'top' ?
-                    cursorWindow.top : cursorWindow.top + cursorWindow.height) - CURSORWIDTH / 2,
+                top: top,
                 height: CURSORWIDTH
             };
         } else {
+            let left = (section === 'left' ?
+                cursorWindow.left : cursorWindow.left + cursorWindow.width) - CURSORWIDTH / 2;
+
+            if (cursor.x === 0 && section === 'left') {
+                left = cursorWindow.left;
+            } else if (cursor.x === this.dimensions[cursor.y].length - 1 && section === 'right') {
+                left = cursorWindow.left + cursorWindow.width - CURSORWIDTH;
+            }
+
             cursorPos = {
-                left: (section === 'left' ?
-                    cursorWindow.left : cursorWindow.left + cursorWindow.width) - CURSORWIDTH / 2,
-                width: cursor.x === 0 && section === 'left' ||
-                    (cursor.x === this.dimensions[cursor.y].length - 1 && section === 'right') ?
-                    CURSORWIDTH / 2 : CURSORWIDTH,
+                left: left,
+                width: CURSORWIDTH,
                 top: this.dimensions[cursor.y][0].top,
                 height: this.dimensions[cursor.y][0].height
             };
