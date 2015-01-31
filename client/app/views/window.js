@@ -22,7 +22,7 @@ import Ember from 'ember';
 
 export default Ember.View.extend({
     classNames: [ 'window', 'flex-grow-column' ],
-    attributeBindings: [ 'row:data-row' ],
+    attributeBindings: [ 'row:data-row', 'column:data-column' ],
 
     classNameBindings: [
         'expanded:expanded:',
@@ -31,16 +31,18 @@ export default Ember.View.extend({
     ],
 
     row: Ember.computed.alias('controller.model.row'),
+    column: Ember.computed.alias('controller.model.column'),
     visible: Ember.computed.alias('controller.model.visible'),
+
     expanded: false,
     initial: true,
 
     // TBD: messages is here because of the mixin. Is there better way?
     messages: Ember.computed.alias('controller.model.messages'),
 
-    visibilityChanged: function() {
-        this.get('parentView').windowAdded(true);
-    }.observes('controller.model.visible'),
+    windowChanged: function() {
+        this.get('parentView').windowChanged(true);
+    }.observes('visible', 'row', 'column'),
 
     ircServerWindow: function() {
         return this.get('controller.model.userId') === 'iSERVER' ? 'irc-server-window' : '';
@@ -52,17 +54,17 @@ export default Ember.View.extend({
     actions: {
         expand: function() {
             this.set('expanded', true);
-            this.get('parentView').windowAdded(true);
+            this.get('parentView').windowChanged(true);
         },
 
         compress: function() {
             this.set('expanded', false);
-            this.get('parentView').windowAdded(true);
+            this.get('parentView').windowChanged(true);
         }
     },
 
     dragStart: function(event) {
-        this.get('parentView').dragWindowStart(event);
+        this.get('parentView').dragWindowStart(event, this);
     },
 
     drag: function(event) {
@@ -170,7 +172,7 @@ export default Ember.View.extend({
             this.get('controller').send('upload', files, 'jpeg');
         }.bind(this));
 
-        this.get('parentView').windowAdded(false);
+        this.get('parentView').windowChanged(false);
     },
 
     _goToBottom: function() {

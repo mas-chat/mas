@@ -23,8 +23,12 @@
     }
 
     &.velocity-animating {
-        box-shadow: 0px 0px 25px #4E4755;
         z-index: 5;
+    }
+
+    &.moving {
+        -webkit-filter: blur(2px);
+        filter: blur(2px);
     }
 
     &.irc-server-window {
