@@ -107,6 +107,7 @@ for i = 1, #windowIds do
         ['role'] = role,
         ['visible'] = window.visible == 'true',
         ['row'] = tonumber(window.row),
+        ['column'] = tonumber(window.column),
         ['password'] = conversation.password,
         ['topic'] = conversation.topic
     }))

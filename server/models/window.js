@@ -138,7 +138,8 @@ function *create(userId, conversationId) {
         sounds: false,
         titleAlert: false,
         visible: true,
-        row: 0
+        row: 0,
+        column: 0
     };
 
     yield redis.hmset('window:' + userId + ':' + windowId, newWindow);
@@ -163,6 +164,7 @@ function *create(userId, conversationId) {
         titleAlert: newWindow.titleAlert,
         visible: newWindow.visible,
         row: newWindow.row,
+        column: newWindow.column,
         sounds: newWindow.sounds,
         role: 'u' // Everybody starts as a normal user
     };

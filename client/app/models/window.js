@@ -35,7 +35,10 @@ export default Ember.Object.extend({
     userId: null,
     network: null,
     type: null,
-    row: null,
+
+    row: 0,
+    column: 0,
+
     visible: false,
     timeHidden: null,
     messages: null,
@@ -118,13 +121,16 @@ export default Ember.Object.extend({
     }.property('type'),
 
     syncServer: function() {
-        this.get('socket').send({
-            id: 'UPDATE',
-            windowId: this.get('windowId'),
-            row: this.get('row'),
-            visible: this.get('visible')
-        });
-    }.observes('visible', 'row'),
+        if (!window.disableUpdate) {
+            this.get('socket').send({
+                id: 'UPDATE',
+                windowId: this.get('windowId'),
+                row: this.get('row'),
+                column: this.get('column'),
+                visible: this.get('visible')
+            });
+        }
+    }.observes('visible', 'row', 'column'),
 
     _mapUserIdsToNicks: function(role) {
         return this.get(role).map(function(userId) {

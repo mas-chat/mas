@@ -27,6 +27,7 @@ export default Ember.View.extend({
 
     dimensions: null,
     cursor: null,
+    movingWindow: null,
 
     didInsertElement: function() {
         $(window).on('resize', Ember.run.bind(this, function() {
@@ -34,7 +35,7 @@ export default Ember.View.extend({
         }));
     },
 
-    windowAdded: function(animate) {
+    windowChanged: function(animate) {
         if (this.get('controller.initDone')) {
             Ember.run.next(this, function() { this.layoutWindows(animate); });
         }
@@ -44,22 +45,22 @@ export default Ember.View.extend({
         Ember.run.next(this, function() { this.layoutWindows(false); });
     }.observes('controller.initDone'),
 
-    dragWindowStart: function() {
+    dragWindowStart: function(event, view) {
+        this.movingWindow = view;
+
+        view.$().addClass('moving');
         $('#window-cursor').show();
     },
 
     dragWindow: function(event) {
-        let x = event.originalEvent.clientX;
-        let y = event.originalEvent.clientY;
+        let cursor = this._calculateCursorPosition(event);
 
-        if (x === 0 && y === 0) {
+        if (!cursor) {
             return;
         }
 
-        let cursor = this._calculateCursorPosition(x, y);
-
         if (!this.cursor || this.cursor.x !== cursor.x || this.cursor.y !== cursor.y ||
-            (cursor.section !== 'middle' && this.cursor.section !== cursor.section)) {
+            (cursor.section !== 'middle' && cursor.section !== this.cursor.section)) {
             this.cursor = cursor;
 
             this._drawCursor(cursor);
@@ -75,14 +76,36 @@ export default Ember.View.extend({
     },
 
     dragWindowEnd: function() {
-        this.dimensions.forEach(function(row) {
-            row.forEach(function(masWindow) {
+        let cursor = this.cursor;
+
+        this.movingWindow.$().removeClass('moving');
+        $('#window-cursor').hide();
+
+        this.dimensions.forEach(function(row, rowIndex) {
+            row.forEach(function(masWindow, columnIndex) {
                 masWindow.cursor = 'none';
+
+                let deltaX = 0;
+                let deltaY = 0;
+
+                if (cursor.section === 'top' || cursor.section === 'bottom') {
+                    deltaY = rowIndex > cursor.y || (rowIndex === cursor.y &&
+                        cursor.section === 'top') ? 1 : 0;
+                } else {
+                    deltaX = rowIndex === cursor.y && (columnIndex > cursor.x ||
+                        (columnIndex === cursor.x && cursor.section === 'left')) ? 1 : 0;
+                }
+
+                let view = Ember.View.views[masWindow.el.getAttribute('id')];
+                view.set('controller.model.row', rowIndex + deltaY);
+                view.set('controller.model.column', columnIndex + deltaX);
             });
         });
 
-        $('#window-cursor').hide();
-        this._animate(200);
+        this.movingWindow.set('controller.model.row',
+            this.cursor.y + (this.cursor.section === 'bottom' ? 1 : 0));
+        this.movingWindow.set('controller.model.column',
+            this.cursor.x + (this.cursor.section === 'right' ? 1 : 0));
     },
 
     layoutWindows: function(animate) {
@@ -103,7 +126,7 @@ export default Ember.View.extend({
 
         let windows = el.querySelectorAll('.window.visible');
         let rowNumbers = _.uniq(_.map(windows,
-            function(element) { return element.getAttribute('data-row'); }));
+            function(element) { return parseInt(element.getAttribute('data-row')); })).sort();
         let rowHeight = Math.round(container.height / rowNumbers.length);
 
         let dimensions = [];
@@ -113,6 +136,10 @@ export default Ember.View.extend({
             let windowWidth = Math.round(container.width / windowsInRow.length);
 
             dimensions.push([]);
+
+            windowsInRow = _.sortBy(windowsInRow, function(element) {
+                return parseInt(element.getAttribute('data-column'));
+            });
 
             _.forEach(windowsInRow, function(element, columnIndex) {
                 let dim = {
@@ -240,7 +267,10 @@ export default Ember.View.extend({
         };
     },
 
-    _calculateCursorPosition: function(x, y) {
+    _calculateCursorPosition: function(event) {
+        let x = event.originalEvent.clientX;
+        let y = event.originalEvent.clientY;
+
         let windowX = 0;
         let windowY = 0;
         let masWindow;
@@ -258,10 +288,14 @@ export default Ember.View.extend({
             }
         });
 
-        return {
-            x: windowX,
-            y: windowY,
-            section: this._whichSection(masWindow, x, y)
+        if (!masWindow) {
+            return null;
+        } else {
+            return {
+                x: windowX,
+                y: windowY,
+                section: this._whichSection(masWindow, x, y)
+            };
         }
     },
 
@@ -280,7 +314,6 @@ export default Ember.View.extend({
 
         let ab = true;
         let cb = false;
-        let section;
 
         if (windowDim.left + BORDER < x && windowDim.left + windowDim.width - BORDER > x &&
             windowDim.top + BORDER < y && windowDim.top + windowDim.height - BORDER > y) {

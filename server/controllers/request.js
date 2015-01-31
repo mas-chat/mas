@@ -172,25 +172,31 @@ function *handleClose(params) {
 }
 
 function *handleUpdate(params) {
-    let accepted = [ 'visible', 'row', 'sounds', 'titleAlert' ];
+    let accepted = [ 'visible', 'row', 'column', 'sounds', 'titleAlert' ];
+    let oldValues = yield redis.hgetall('window:' + params.userId + ':' + params.windowId);
+    let update = false;
 
     for (var i = 0; i < accepted.length; i++) {
         let prop = params.command[accepted[i]];
 
-        if (typeof(prop) !== 'undefined') {
+        if (typeof(prop) !== 'undefined' && prop !== oldValues[accepted[i]]) {
+            update = true;
             yield redis.hset('window:' + params.userId + ':' + params.windowId, accepted[i], prop);
         }
     }
 
-    // Notify all sessions. Undefined body properties won't appear in the JSON message
-    yield outbox.queueAll(params.userId, {
-        id: 'UPDATE',
-        windowId: params.windowId,
-        visible: params.command.visible,
-        row: params.command.row,
-        sounds: params.command.sounds,
-        titleAlert: params.command.titleAlert
-    });
+    if (update) {
+        // Notify all sessions. Undefined body properties won't appear in the JSON message
+        yield outbox.queueAll(params.userId, {
+            id: 'UPDATE',
+            windowId: params.windowId,
+            visible: params.command.visible,
+            row: params.command.row,
+            column: params.command.column,
+            sounds: params.command.sounds,
+            titleAlert: params.command.titleAlert
+        }, params.sessionId);
+    }
 }
 
 function *handleUpdatePassword(params) {
