@@ -42,7 +42,12 @@ export default Ember.Object.extend({
     },
 
     _handleCreate: function(data) {
+        // This hack can be removed if there's a way to create and init the object in one go as
+        // syncServer() observer doesn't have .on('init').
+        window.disableUpdate = true;
         let windowRecord = this.get('container').lookup('model:window').setProperties(data);
+        window.disableUpdate = false;
+
         this.get('store.windows').pushObject(windowRecord);
     },
 
@@ -133,7 +138,10 @@ export default Ember.Object.extend({
             return;
         }
 
+        // A hack to prevent the client to echo new values immediately back to the server.
+        window.disableUpdate = true;
         targetWindow.setProperties(data);
+        window.disableUpdate = false;
     },
 
     _handleFriends: function(data) {

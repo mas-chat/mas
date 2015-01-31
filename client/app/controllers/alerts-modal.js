@@ -28,12 +28,8 @@ export default Ember.Controller.extend({
             let newSoundAlert = this.get('modalSoundAlert');
             let newTitleAlert = this.get('modalTitleAlert');
 
-            this.remote.send({
-                id: 'UPDATE',
-                windowId: this.get('model.windowId'),
-                sounds: newSoundAlert === 'enabled',
-                titleAlert: newTitleAlert === 'enabled'
-            });
+            this.set('model.sounds', newSoundAlert === 'enabled');
+            this.set('model.titleAlert', newTitleAlert === 'enabled');
 
             this.send('closeModal');
         },
