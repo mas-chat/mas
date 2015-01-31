@@ -207,16 +207,21 @@
 #window-cursor {
     position: absolute;
     display: none;
-    color: #E43868;
-    z-index: -10;
+    z-index: 10;
 }
 
 #window-cursor-inner {
     position: absolute;
-    background-color: #E43868;
+    display: flex;
+    color: white;
+    background-color: #C6C7CF;
     z-index: 100;
     top: @grid-padding;
     bottom: @grid-padding;
     left: @grid-padding;
     right: @grid-padding;
+
+    .fa {
+        margin: auto;
+    }
 }
