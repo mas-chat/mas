@@ -40,7 +40,8 @@ local function introduceNewUserIds(userId, sessionId, excludeSessionId, force, u
 
                     newUsers[newUserId] = {
                         ['nick'] = getNicks(newUserId),
-                        ['name'] = getName(newUserId)
+                        ['name'] = getName(newUserId),
+                        ['gravatar'] = getAvatarHash(newUserId)
                     }
                 end
             end

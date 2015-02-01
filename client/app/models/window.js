@@ -143,9 +143,12 @@ export default Ember.Object.extend({
 
     _mapUserIdsToNicks: function(role) {
         return this.get(role).map(function(userId) {
+            let users = this.get('store.users');
+
             return {
                 userId: userId,
-                nick: this.get('store.users').getNick(userId, this.get('network'))
+                nick: users.getNick(userId, this.get('network')),
+                gravatar: users.getAvatarHash(userId)
             };
         }, this);
     }

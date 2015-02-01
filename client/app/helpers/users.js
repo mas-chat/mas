@@ -30,5 +30,9 @@ export default Ember.Object.extend({
 
     getName: function(userId) {
         return this.get('users.' + userId + '.name') || 'UNKNOWN';
+    },
+
+    getAvatarHash: function(userId) {
+        return this.get('users.' + userId + '.gravatar') || 'na';
     }
 });
