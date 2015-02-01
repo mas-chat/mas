@@ -173,7 +173,7 @@ function *handleClose(params) {
 
 function *handleUpdate(params) {
     let accepted = [ 'visible', 'row', 'column', 'sounds', 'titleAlert' ];
-    let oldValues = yield redis.hgetall('window:' + params.userId + ':' + params.windowId);
+    let oldValues = yield redis.hgetall(`window:${params.userId}:${params.windowId}`);
     let update = false;
 
     for (var i = 0; i < accepted.length; i++) {
@@ -181,7 +181,7 @@ function *handleUpdate(params) {
 
         if (typeof(prop) !== 'undefined' && prop !== oldValues[accepted[i]]) {
             update = true;
-            yield redis.hset('window:' + params.userId + ':' + params.windowId, accepted[i], prop);
+            yield redis.hset(`window:${params.userId}:${params.windowId}`, accepted[i], prop);
         }
     }
 

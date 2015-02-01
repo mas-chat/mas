@@ -21,13 +21,13 @@ const redis = require('../lib/redis').createClient();
 exports.updateCurrentNick = function*(userId, network, nick) {
     yield removeCurrentNickFromIndex(userId, network);
 
-    yield redis.hset('networks:' + userId + ':' + network, 'currentnick', nick);
+    yield redis.hset(`networks:${userId}:${network}`, 'currentnick', nick);
     yield redis.hset('index:currentnick', network + ':' + nick.toLowerCase(), userId);
 };
 
 exports.removeCurrentNick = function*(userId, network) {
     yield removeCurrentNickFromIndex(userId, network);
-    yield redis.hset('networks:' + userId + ':' + network, 'currentnick', '');
+    yield redis.hset(`networks:${userId}:${network}`, 'currentnick', '');
 };
 
 exports.getUserIdFromNick = function*(nick, network) {
@@ -39,11 +39,11 @@ exports.getCurrentNick = function*(userId, network) {
 };
 
 function *getCurrentNick(userId, network) {
-    return yield redis.hget('networks:' + userId + ':' + network, 'currentnick');
+    return yield redis.hget(`networks:${userId}:${network}`, 'currentnick');
 }
 
 function *removeCurrentNickFromIndex(userId, network) {
-    let oldNick = yield redis.hget('networks:' + userId + ':' + network, 'currentnick');
+    let oldNick = yield redis.hget(`networks:${userId}:${network}`, 'currentnick');
 
     if (oldNick) {
         yield redis.hdel('index:currentnick', network + ':' + oldNick);
