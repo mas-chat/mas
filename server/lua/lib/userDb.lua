@@ -24,6 +24,10 @@ local function getNicks(userId)
         for i = 1, #networks do
             nicks[networks[i]] = 'IRC server'
         end
+    elseif userId == 'mDEMO' then
+        for i = 1, #networks do
+            nicks[networks[i]] = 'John'
+        end
     elseif class == 'm' then
         for i = 1, #networks do
             local networkNick = redis.call('HGET',
@@ -50,6 +54,8 @@ local function getName(userId)
     -- Special userIds
     if userId == 'iSERVER' then
         return 'IRC server'
+    elseif userId == 'mDEMO' then
+        return 'John Q. Random'
     end
 
     local class = string.sub(userId, 1, 1)

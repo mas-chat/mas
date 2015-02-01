@@ -55,8 +55,8 @@ module.exports.enable = function() {
                 }
 
                 yield conversation.addMessage({
-                    body: faker.Lorem.sentence(sentenceLength) + ' ' + url,
-                    userId: 'mDEMO', // TBD: This user must exist
+                    body: faker.lorem.sentence(sentenceLength) + ' ' + url,
+                    userId: 'mDEMO',
                     cat: 'msg'
                 });
             }
