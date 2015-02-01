@@ -111,7 +111,7 @@ function *processSend(params) {
 
     if (conversation.type === '1on1') {
         let targetUserId = yield conversation.getPeerUserId(params.userId);
-        target = yield redis.hget('ircuser:' + targetUserId, 'nick');
+        target = yield redis.hget(`ircuser:${targetUserId}`, 'nick');
     }
 
     if (target) {
@@ -168,7 +168,7 @@ function *processTextCommand(params) {
 }
 
 function *processJoin(params) {
-    let state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
+    let state = yield redis.hget(`networks:${params.userId}:${params.network}`, 'state');
     let channelName = params.name;
     let hasChannelPrefixRegex = /^[&#!+]/;
     let illegalNameRegEx = /\s|\cG|,/; // See RFC2812, section 1.3
@@ -186,8 +186,8 @@ function *processJoin(params) {
         channelName = '#' + channelName;
     }
 
-    yield redis.hset('ircchannelsubscriptions:' +
-        params.userId + ':' + params.network, channelName, params.password);
+    yield redis.hset(`ircchannelsubscriptions:${params.userId}:${params.network}`,
+        channelName, params.password);
 
     if (!state || state === 'disconnected' || state === 'closing') {
         yield connect(params.userId, params.network);
@@ -221,10 +221,9 @@ function *processChat(params) {
 }
 
 function *processClose(params) {
-    let state = yield redis.hget('networks:' + params.userId + ':' + params.network, 'state');
+    let state = yield redis.hget(`networks:${params.userId}:${params.network}`, 'state');
 
-    yield redis.hdel(
-        'ircchannelsubscriptions:' + params.userId + ':' + params.network, params.name);
+    yield redis.hdel(`ircchannelsubscriptions:${params.userId}:${params.network}`, params.name);
 
     if (state === 'connected' && params.conversationType === 'group') {
         sendIRCPart(params.userId, params.network, params.name);
@@ -235,8 +234,7 @@ function *processClose(params) {
 
 function *processUpdatePassword(params) {
     let conversation = yield conversationFactory.get(params.conversationId);
-    let state = yield redis.hget(
-        'networks:' + params.userId + ':' + conversation.network, 'state');
+    let state = yield redis.hget(`networks:${params.userId}:${conversation.network}`, 'state');
     let modeline = 'MODE ' + conversation.name + ' ';
 
     if (params.password === null) {
@@ -268,8 +266,7 @@ function *processUpdatePassword(params) {
 
 function *processUpdateTopic(params) {
     let conversation = yield conversationFactory.get(params.conversationId);
-    let state = yield redis.hget(
-        'networks:' + params.userId + ':' + conversation.network, 'state');
+    let state = yield redis.hget(`networks:${params.userId}:${conversation.network}`, 'state');
 
     if (state !== 'connected') {
         yield outbox.queue(params.userId, params.sessionId, {
@@ -319,8 +316,7 @@ function *processRestarted() {
             let network = networks[ii];
 
             if (network !== 'MAS') {
-                let channels = yield redis.hgetall(
-                    'ircchannelsubscriptions:' + userId + ':' + network);
+                let channels = yield redis.hgetall(`ircchannelsubscriptions:${userId}:${network}`);
 
                 if (channels) {
                     log.info(userId, 'Scheduling connect() to IRC network: ' + network);
@@ -367,7 +363,7 @@ function *processNoConnection(params) {
 
 // Connected
 function *processConnected(params) {
-    let user = yield redis.hgetall('user:' + params.userId);
+    let user = yield redis.hgetall(`user:${params.userId}`);
     log.info(params.userId, 'Connected to IRC server');
 
     let commands = [
@@ -387,9 +383,9 @@ function *processConnected(params) {
 function *processDisconnected(params) {
     let userId = params.userId;
     let network = params.network;
-    let previousState = yield redis.hget('networks:' + userId + ':' + network, 'state');
+    let previousState = yield redis.hget(`networks:${userId}:${network}`, 'state');
 
-    yield redis.hset('networks:' + userId + ':' + network, 'state', 'disconnected');
+    yield redis.hset(`networks:${userId}:${network}`, 'state', 'disconnected');
     yield nicks.removeCurrentNick(userId, network);
 
     if (previousState === 'closing') {
@@ -399,7 +395,7 @@ function *processDisconnected(params) {
 
     let delay = 30 * 1000; // 30s
     let msg = 'Lost connection to IRC server (' + params.reason + '). Will try to reconnect in ';
-    let count = yield redis.hincrby('networks:' + userId + ':' + network, 'retryCount', 1);
+    let count = yield redis.hincrby(`networks:${userId}:${network}`, 'retryCount', 1);
 
     // Set the backoff timer
     if (count < 4) {
@@ -496,10 +492,10 @@ function *addSystemMessage(userId, network, cat, body) {
 }
 
 function *connect(userId, network, skipRetryCountReset) {
-    let nick = yield redis.hget('user:' + userId, 'nick');
+    let nick = yield redis.hget(`user:${userId}`, 'nick');
     yield nicks.updateCurrentNick(userId, network, nick);
 
-    yield redis.hset('networks:' + userId + ':' + network, 'state', 'connecting');
+    yield redis.hset(`networks:${userId}:${network}`, 'state', 'connecting');
 
     if (!skipRetryCountReset) {
         yield resetRetryCount(userId, network);
@@ -517,7 +513,7 @@ function *connect(userId, network, skipRetryCountReset) {
 }
 
 function *disconnect(userId, network) {
-    yield redis.hset('networks:' + userId + ':' + network, 'state', 'closing');
+    yield redis.hset(`networks:${userId}:${network}`, 'state', 'closing');
 
     courier.send('connectionmanager', {
         type: 'write',
@@ -597,22 +593,22 @@ function *handle366(userId, msg) {
         // incremental JOINS messages (preferrably from the original reporter.) This leaves some
         // theoretical error edge cases (left as homework) that maybe are worth of fixing.
         let noActiveReporter = yield redis.setnx(
-            'ircnamesreporter:' + conversation.conversationId, userId);
+            `ircnamesreporter:${conversation.conversationId}`, userId);
 
         if (noActiveReporter) {
-            yield redis.expire('ircnamesreporter:' + conversation.conversationId, 15); // 15s
+            yield redis.expire(`ircnamesreporter:${conversation.conversationId}`, 15); // 15s
             yield conversation.setGroupMembers(namesHash);
         }
     }
 }
 
 function *handle376(userId, msg) {
-    let state = yield redis.hget('networks:' + userId + ':' + msg.network, 'state');
+    let state = yield redis.hget(`networks:${userId}:${msg.network}`, 'state');
 
     yield addSystemMessage(userId, msg.network, 'server', msg.params.join(' '));
 
     if (state !== 'connected') {
-        yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'connected');
+        yield redis.hset(`networks:${userId}:${msg.network}`, 'state', 'connected');
         yield resetRetryCount(userId, msg.network);
 
         yield addSystemMessage(userId, msg.network, 'info', 'Connected to IRC server.');
@@ -620,7 +616,7 @@ function *handle376(userId, msg) {
             'You can close this window at any time. It\'ll reappear when needed.');
 
         let channelsToJoin = yield redis.hgetall(
-            'ircchannelsubscriptions:' + userId + ':' + msg.network);
+            `ircchannelsubscriptions:${userId}:${msg.network}`);
 
         if (!channelsToJoin) {
             log.info(userId, 'Connected, but no channels/1on1s to join. Disconnecting');
@@ -661,8 +657,7 @@ function *handleJoin(userId, msg) {
     let channel = msg.params[0];
     let targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
     let conversation = yield conversationFactory.findGroup(channel, msg.network);
-    let password = yield redis.hget(
-        'ircchannelsubscriptions:' + userId + ':' + msg.network, channel);
+    let password = yield redis.hget(`ircchannelsubscriptions:${userId}:${msg.network}`, channel);
 
     if (!conversation) {
         conversation = yield conversationFactory.create({
@@ -702,7 +697,7 @@ function *handleJoinReject(userId, msg) {
     yield addSystemMessage(userId, msg.network,
         'error', 'Failed to join ' + channel + '. Reason: ' + reason);
 
-    yield redis.hdel('ircchannelsubscriptions:' + userId + ':' + msg.network, channel);
+    yield redis.hdel(`ircchannelsubscriptions:${userId}:${msg.network}`, channel);
 
     if (conversation) {
         yield conversation.removeGroupMember(userId, false, false);
@@ -757,7 +752,7 @@ function *handleError(userId, msg) {
             'Close this window and rejoin to try again.');
 
         // Disable auto-reconnect
-        yield redis.hset('networks:' + userId + ':' + msg.network, 'state', 'closing');
+        yield redis.hset(`networks:${userId}:${msg.network}`, 'state', 'closing');
     }
 }
 
@@ -878,7 +873,7 @@ function *handleMode(userId, msg) {
 
                 yield conversation.setPassword(newPassword);
                 yield redis.hset(
-                    'ircchannelsubscriptions:' + userId + ':' + msg.network, target, newPassword);
+                    `ircchannelsubscriptions:${userId}:${msg.network}`, target, newPassword);
             }
 
             if (newClass) {
@@ -986,7 +981,7 @@ function *updateNick(userId, network, oldNick, newNick) {
 }
 
 function *tryDifferentNick(userId, network) {
-    let nick = yield redis.hget('user:' + userId, 'nick');
+    let nick = yield redis.hget(`user:${userId}`, 'nick');
     let currentNick = yield nicks.getCurrentNick(userId, network);
 
     if (nick !== currentNick.substring(0, nick.length)) {
@@ -1105,7 +1100,7 @@ function parseCTCPMessage(text) {
 }
 
 function *resetRetryCount(userId, network) {
-    yield redis.hset('networks:' + userId + ':' + network, 'retryCount', 0);
+    yield redis.hset(`networks:${userId}:${network}`, 'retryCount', 0);
 }
 
 function isChannel(text) {
