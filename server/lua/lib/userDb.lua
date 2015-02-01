@@ -61,3 +61,13 @@ local function getName(userId)
         return 'IRC User'
     end
 end
+
+local function getAvatarHash(userId)
+    local class = string.sub(userId, 1, 1)
+
+    if class == 'm' then
+        return redis.call('HGET', 'user:' .. userId, 'emailMD5')
+    else
+        return 'foo'
+    end
+end
