@@ -63,7 +63,7 @@ function *auth(ctx, next, provider) {
         let resp = yield cookie.createSession(userId);
         cookie.set(userId, resp.secret, resp.expires, ctx);
 
-        let inUse = yield redis.hget('user:' + userId, 'inuse');
+        let inUse = yield redis.hget(`user:${userId}`, 'inuse');
 
         if (inUse === 'true') {
             ctx.redirect('/app/');

@@ -20,7 +20,7 @@ let uuid = require('uid2'),
     redis = require('../lib/redis').createClient();
 
 exports.createSession = function*(userId) {
-    let user = yield redis.hgetall('user:' + userId);
+    let user = yield redis.hgetall(`user:${userId}`);
     let ts = Math.round(Date.now() / 1000);
     let secret = user.secret;
     let expires = user.secretExpires || 0;
@@ -33,7 +33,7 @@ exports.createSession = function*(userId) {
         secret = uuid(20);
 
         // Save secret to Redis
-        yield redis.hmset('user:' + userId, {
+        yield redis.hmset(`user:${userId}`, {
             secret: secret,
             secretExpires: expires
         });

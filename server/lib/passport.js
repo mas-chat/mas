@@ -42,7 +42,7 @@ function authLocal(username, password, done) {
         }
 
         if (userId) {
-            user = yield redis.hgetall('user:' + userId);
+            user = yield redis.hgetall(`user:${userId}`);
 
             let passwordParts = user.password.split(':');
             let encryptionMethod = passwordParts[0];
@@ -57,7 +57,7 @@ function authLocal(username, password, done) {
                     // Migrate to bcrypt
                     let salt = bcrypt.genSaltSync(10);
                     let hash = bcrypt.hashSync(password, salt);
-                    yield redis.hset('user:' + userId, 'password', 'bcrypt:' + hash);
+                    yield redis.hset(`user:${userId}`, 'password', 'bcrypt:' + hash);
                 }
             } else if (encryptionMethod === 'bcrypt') {
                 correctPassword = bcrypt.compareSync(password, encryptedHash);
@@ -92,7 +92,7 @@ function authExt(openidId, oauthId, profile, done) {
             if (userId) {
                 // User is identified by his OpenID 2.0 identifier even we know his OAuth 2.0 id.
                 // Start to solely use OAuth 2.0 id.
-                yield redis.hset('user:' + userId, 'openidurl', oauthId);
+                yield redis.hset(`user:${userId}`, 'openidurl', oauthId);
                 yield redis.hdel('index:user', openidId);
                 yield redis.hset('index:user', oauthId, userId);
             } else {

@@ -191,7 +191,7 @@ exports.index = function*() {
 
         template = 'register-ext';
 
-        let user = yield redis.hgetall('user:' + this.mas.userId);
+        let user = yield redis.hgetall(`user:${this.mas.userId}`);
         form = registrationFormExt.bind({
             name: user.name,
             email: user.email,
@@ -211,7 +211,7 @@ exports.index = function*() {
 
 exports.indexReset = function*() {
     let token = this.params.token;
-    let userId = yield redis.get('passwordresettoken:' + token);
+    let userId = yield redis.get(`passwordresettoken:${token}`);
 
     if (!userId) {
         this.body = 'Expired or invalid password reset link.';
@@ -275,7 +275,7 @@ exports.createExt = function*() {
             registrationForm: form.toHTML()
         });
     } else {
-        yield redis.hmset('user:' + this.mas.userId, {
+        yield redis.hmset(`user:${this.mas.userId}`, {
             name: form.data.name,
             email: form.data.email,
             nick: form.data.nick,
@@ -289,7 +289,7 @@ exports.createExt = function*() {
 exports.createReset = function*() {
     let form = yield decodeForm(this.req, registrationFormReset);
 
-    let userId = yield redis.get('passwordresettoken:' + form.data.token);
+    let userId = yield redis.get(`passwordresettoken:${form.data.token}`);
 
     if (!userId) {
         this.status = httpStatus('bad request');
@@ -303,7 +303,7 @@ exports.createReset = function*() {
             registrationForm: form.toHTML()
         });
     } else {
-        yield redis.del('passwordresettoken:' + form.data.token);
+        yield redis.del(`passwordresettoken:${form.data.token}`);
 
         let user = new User();
         yield user.load(userId);

@@ -41,7 +41,7 @@ module.exports.enable = function() {
                 continue;
             }
 
-            let windowId = yield redis.srandmember('windowlist:' + demoUserId);
+            let windowId = yield redis.srandmember(`windowlist:${demoUserId}`);
 
             if (windowId) {
                 // User has at least one window
