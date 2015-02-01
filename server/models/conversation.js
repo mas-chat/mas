@@ -34,7 +34,7 @@ exports.create = function*(options) {
         options[prop] = options[prop] === null ? '' : options[prop];
     });
 
-    yield redis.hmset('conversation:' + conversationId, options);
+    yield redis.hmset(`conversation:${conversationId}`, options);
 
     if (options.type === 'group') {
         // Update group index
@@ -98,7 +98,7 @@ Conversation.prototype.getMemberRole = function*(userId) {
 Conversation.prototype.setMemberRole = function*(userId, role) {
     this.members[userId] = role;
 
-    yield redis.hset('conversationmembers:' + this.conversationId, userId, role);
+    yield redis.hset(`conversationmembers:${this.conversationId}`, userId, role);
     yield this._streamAddMembers(userId, role);
 };
 
@@ -145,7 +145,7 @@ Conversation.prototype.setGroupMembers = function*(members) {
 Conversation.prototype.addGroupMember = function*(userId, role) {
     assert(role === 'u' || role === '+' || role === '@' || role === '*');
 
-    let newField = yield redis.hset('conversationmembers:' + this.conversationId, userId, role);
+    let newField = yield redis.hset(`conversationmembers:${this.conversationId}`, userId, role);
 
     if (newField) {
         this.members[userId] = role;
@@ -163,7 +163,7 @@ Conversation.prototype.addGroupMember = function*(userId, role) {
 Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKicked, reason) {
     assert(this.type === 'group');
 
-    let removed = yield redis.hdel('conversationmembers:' + this.conversationId, userId);
+    let removed = yield redis.hdel(`conversationmembers:${this.conversationId}`, userId);
 
     if (removed === 1) {
         log.info('User: ' + userId + ' removed from conversation: ' +  this.conversationId);
@@ -202,7 +202,7 @@ Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKic
 Conversation.prototype.remove1on1Member = function*(userId) {
     // First user that quits 1on1 is 'soft' removed, i.e. marked as having 'd'(etached) role
     this.members[userId] = 'd';
-    yield redis.hset('conversationmembers:' + this.conversationId, userId, 'd');
+    yield redis.hset(`conversationmembers:${this.conversationId}`, userId, 'd');
 
     let peerUserId = yield this.getPeerUserId(this, userId);
 
@@ -220,8 +220,8 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
     msg.gid = yield redis.incr('nextGlobalMsgId');
     msg.ts = Math.round(Date.now() / 1000);
 
-    yield redis.lpush('conversationmsgs:' + this.conversationId, JSON.stringify(msg));
-    yield redis.ltrim('conversationmsgs:' + this.conversationId, 0, MSG_BUFFER_SIZE - 1);
+    yield redis.lpush(`conversationmsgs:${this.conversationId}`, JSON.stringify(msg));
+    yield redis.ltrim(`conversationmsgs:${this.conversationId}`, 0, MSG_BUFFER_SIZE - 1);
 
     yield this._streamAddText(msg, excludeSession);
 };
@@ -362,13 +362,13 @@ Conversation.prototype._insertMembers = function*(members) {
         this.members[prop] = members[prop];
     }.bind(this));
 
-    yield redis.hmset('conversationmembers:' + this.conversationId, members);
+    yield redis.hmset(`conversationmembers:${this.conversationId}`, members);
 };
 
 Conversation.prototype._remove = function*() {
-    yield redis.del('conversation:' + this.conversationId);
-    yield redis.del('conversationmembers:' + this.conversationId);
-    yield redis.del('conversationmsgs:' + this.conversationId);
+    yield redis.del(`conversation:${this.conversationId}`);
+    yield redis.del(`conversationmembers:${this.conversationId}`);
+    yield redis.del(`conversationmsgs:${this.conversationId}`);
 
     let key;
 
@@ -384,8 +384,8 @@ Conversation.prototype._remove = function*() {
 };
 
 function *get(conversationId) {
-    let record =  yield redis.hgetall('conversation:' + conversationId);
-    let members = yield redis.hgetall('conversationmembers:' + conversationId);
+    let record =  yield redis.hgetall(`conversation:${conversationId}`);
+    let members = yield redis.hgetall(`conversationmembers:${conversationId}`);
 
     return record ? new Conversation(conversationId, record, members || {}) : null;
 }

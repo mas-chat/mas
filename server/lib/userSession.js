@@ -47,7 +47,7 @@ module.exports = function authenticate() {
         let user;
 
         if (valid) {
-            user = yield redis.hgetall('user:' + userId);
+            user = yield redis.hgetall(`user:${userId}`);
 
             if (!(user && user.secretExpires > ts && user.secret === secret)) {
                 valid = false;

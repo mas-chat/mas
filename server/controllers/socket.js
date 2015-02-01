@@ -77,7 +77,7 @@ exports.setup = function(server) {
                     return;
                 }
 
-                let userRecord = yield redis.hgetall('user:' + userId);
+                let userRecord = yield redis.hgetall(`user:${userId}`);
 
                 if (!(userRecord &&
                     userRecord.secretExpires > ts &&
@@ -98,7 +98,7 @@ exports.setup = function(server) {
 
                 socket.emit('initok', { sessionId: sessionId });
 
-                yield redis.zadd('sessionlist:' + userId, ts, sessionId);
+                yield redis.zadd(`sessionlist:${userId}`, ts, sessionId);
                 yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
 
                 log.info(userId, 'Initializing new session: ' + sessionId);
@@ -116,7 +116,7 @@ exports.setup = function(server) {
                 userId = data.userId;
                 sessionId = data.sessionId;
 
-                let exists = yield redis.zscore('sessionlist:' + userId, sessionId);
+                let exists = yield redis.zscore(`sessionlist:${userId}`, sessionId);
 
                 if (!exists) {
                     socket.emit('terminate', {

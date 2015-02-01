@@ -36,7 +36,7 @@ exports.create = function*() {
 
     if (userId) {
         let token = uuid(30);
-        let user = yield redis.hgetall('user:' + userId);
+        let user = yield redis.hgetall(`user:${userId}`);
 
         let body = template({
             name: user.name,
@@ -50,8 +50,8 @@ exports.create = function*() {
             text: body
         });
 
-        yield redis.set('passwordresettoken:' + token, userId);
-        yield redis.expire('passwordresettoken:' + token, 60 * 60 * 24); // 24 hours
+        yield redis.set(`passwordresettoken:${token}`, userId);
+        yield redis.expire(`passwordresettoken:${token}`, 60 * 60 * 24); // 24 hours
 
         log.info(userId, 'Password reset email sent');
     } else {

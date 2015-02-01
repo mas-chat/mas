@@ -50,7 +50,7 @@ exports.flush = function*(userId, sessionId, timeout) {
     }
 
     // Retrieve other commands if there are any
-    while ((command = yield redis.rpop('outbox:' + userId + ':' + sessionId)) !== null) {
+    while ((command = yield redis.rpop(`outbox:${userId}:${sessionId}`)) !== null) {
         commands.push(JSON.parse(command));
     }
 
@@ -62,7 +62,7 @@ exports.flush = function*(userId, sessionId, timeout) {
 
 exports.length = function*(userId, sessionId) {
     // TBD Add helper concat('outbox', userId, sessionId)
-    return parseInt(yield redis.llen('outbox:' + userId + ':' + sessionId));
+    return parseInt(yield redis.llen(`outbox:${userId}:${sessionId}`));
 };
 
 function *queueCommands(userId, sessionId, excludeSessionId, commands) {

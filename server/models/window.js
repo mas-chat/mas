@@ -44,7 +44,7 @@ exports.remove = function*(userId, windowId) {
 };
 
 exports.removeByConversationId = function*(userId, conversationId) {
-    let windows = yield redis.smembers('windowlist:' + userId);
+    let windows = yield redis.smembers(`windowlist:${userId}`);
 
     for (var i = 0; i < windows.length; i++) {
         let myConversationId = yield getConversationId(userId, windows[i]);
@@ -90,7 +90,7 @@ exports.getAllConversationIdsWithUserId = function*(userId, targetUserId) {
 };
 
 exports.getWindowIdsForNetwork = function*(userId, network) {
-    let windows = yield redis.smembers('windowlist:' + userId);
+    let windows = yield redis.smembers(`windowlist:${userId}`);
     let windowIds = [];
 
     for (var i = 0; i < windows.length; i++) {
@@ -127,7 +127,7 @@ exports.getConversationId = function*(userId, windowId) {
 };
 
 function *create(userId, conversationId) {
-    let windowId = yield redis.hincrby('user:' + userId, 'nextwindowid', 1);
+    let windowId = yield redis.hincrby(`user:${userId}`, 'nextwindowid', 1);
     let conversation = yield conversationFactory.get(conversationId);
     let userId1on1 = null;
 
@@ -142,8 +142,8 @@ function *create(userId, conversationId) {
         column: 0
     };
 
-    yield redis.hmset('window:' + userId + ':' + windowId, newWindow);
-    yield redis.sadd('windowlist:' + userId, windowId);
+    yield redis.hmset(`window:${userId}:${windowId}`, newWindow);
+    yield redis.sadd(`windowlist:${userId}`, windowId);
 
     if (conversation.type === '1on1') {
         let ids = Object.keys(conversation.members);
@@ -174,7 +174,7 @@ function *create(userId, conversationId) {
 }
 
 function *getAllConversationIds(userId) {
-    let windows = yield redis.smembers('windowlist:' + userId);
+    let windows = yield redis.smembers(`windowlist:${userId}`);
     let conversationIds = [];
 
     for (var i = 0; i < windows.length; i++) {
@@ -186,14 +186,14 @@ function *getAllConversationIds(userId) {
 }
 
 function *getConversationId(userId, windowId) {
-    return yield redis.hget('window:' + userId + ':' + windowId, 'conversationId');
+    return yield redis.hget(`window:${userId}:${windowId}`, 'conversationId');
 }
 
 function *remove(userId, windowId) {
     let conversationId = yield getConversationId(userId, windowId);
 
-    yield redis.srem('windowlist:' + userId, windowId);
-    yield redis.del('window:' + userId + ':' + windowId);
+    yield redis.srem(`windowlist:${userId}`, windowId);
+    yield redis.del(`window:${userId}:${windowId}`);
     yield redis.hdel('index:windowIds', userId + ':' + conversationId);
 
     yield outbox.queueAll(userId, {

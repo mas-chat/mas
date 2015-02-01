@@ -48,7 +48,7 @@ function Courier(name) {
 Courier.prototype.start = function() {
     co(function*() {
         while (1) {
-            let result = yield rcvRedis.brpop('inbox:' + this.name, 0);
+            let result = yield rcvRedis.brpop(`inbox:${this.name}`, 0);
 
             processing = true;
 
@@ -81,12 +81,12 @@ Courier.prototype.send = function(dest, msg) {
     let data = convert(msg, this.name);
 
     co(function*() {
-        yield sendRedis.lpush('inbox:' + dest, data);
+        yield sendRedis.lpush(`inbox:${dest}`, data);
     })();
 };
 
 Courier.prototype.clearInbox = function*(name) {
-    yield sendRedis.del('inbox:' + name);
+    yield sendRedis.del(`inbox:${name}`);
 };
 
 Courier.prototype.on = function(type, callback) {
