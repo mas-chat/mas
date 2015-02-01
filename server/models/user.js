@@ -17,6 +17,7 @@
 'use strict';
 
 let bcrypt = require('bcrypt'),
+    md5 = require('MD5'),
     redis = require('../lib/redis').createClient();
 
 const RESERVED_USERIDS = 9000;
@@ -66,18 +67,21 @@ User.prototype.generateUserId = function*() {
 
 User.prototype.save = function*() {
     let index = {};
+    let normalizedEmail = this.data.nick.toLowerCase().trim();
 
     if (this.data.nick) {
-        index[this.data.nick.toLowerCase()] = this.data.userId;
+        index[this.data.nick.toLowerCase().trim()] = this.data.userId;
     }
 
     if (this.data.email) {
-        index[this.data.email.toLowerCase()] = this.data.userId;
+        index[normalizedEmail] = this.data.userId;
     }
 
     if (this.data.extAuthId) {
         index[this.data.extAuthId] = this.data.userId;
     }
+
+    this.data.emailMD5 = md5(normalizedEmail); // For gravatar support
 
     yield redis.hmset(`user:${this.data.userId}`, this.data);
     yield redis.hmset('index:user', index);

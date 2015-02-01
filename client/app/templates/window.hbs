@@ -34,13 +34,28 @@
     {{#if isGroup}}
         <div class="window-members">
             {{#each name in model.operatorNames}}
-                <div class="window-operator" {{bind-attr data-userid=name.userId}}>{{name.nick}}</div>
+                <div>
+                    <img class="gravatar" align="left" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <div class="window-operator" data-userid={{name.userId}}>
+                        {{name.nick}}
+                    </div>
+                </div>
             {{/each}}
             {{#each name in model.voiceNames}}
-                <div class="window-voice" {{bind-attr data-userid=name.userId}}>{{name.nick}}</div>
+                <div>
+                    <img class="gravatar" align="left" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <div class="window-voice" data-userid={{name.userId}}>
+                        {{name.nick}}
+                    </div>
+                </div>
             {{/each}}
             {{#each name in model.userNames}}
-                <div class="window-user" {{bind-attr data-userid=name.userId}}>{{name.nick}}</div>
+                <div>
+                    <img class="gravatar" align="left" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <div class="window-user" data-userid={{name.userId}}>
+                        {{name.nick}}
+                    </div>
+                </div>
             {{/each}}
         </div>
     {{/if}}
