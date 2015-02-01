@@ -20,7 +20,7 @@ For more info, see
 
 ## Dependencies:
 
-- Node.js (version 0.11.10 or later): http://nodejs.org/
+- io.js: http://iojs.org/
 - Redis: http://redis.io/
 
 ## OS support
@@ -29,9 +29,9 @@ MacOS/Linux/Windows.
 
 ## Quick start
 
-1. Install Redis and latest development release of Node.js (or io.js)
+1. Install Redis and latest release of io.js
 
-   On Mac you can install [Homebrew](http://brew.sh/) and then do ```brew install redis nodejs-dev```
+   On Mac to get redis you can install [Homebrew](http://brew.sh/) and then do ```brew install redis```
 
 2. Create the configuration file. You don't need to edit it, default options should work.
 
