@@ -67,10 +67,11 @@ User.prototype.generateUserId = function*() {
 
 User.prototype.save = function*() {
     let index = {};
-    let normalizedEmail = this.data.nick.toLowerCase().trim();
+    let normalizedEmail = this.data.email.toLowerCase().trim();
+    let normalizedNick = this.data.nick.toLowerCase().trim();
 
     if (this.data.nick) {
-        index[this.data.nick.toLowerCase().trim()] = this.data.userId;
+        index[normalizedNick] = this.data.userId;
     }
 
     if (this.data.email) {
