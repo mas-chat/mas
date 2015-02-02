@@ -325,41 +325,41 @@ export default Ember.View.extend({
 
     _whichSection: function(windowDim, x, y) {
         // -----------------
-        // |\      a      /|
+        // |\      t      /|
         // | \           / |
         // |  -----------  |
-        // |d |    n    | b|
+        // |l |    m    | r|
         // |  -----------  |
-        // | /     c     \ |
+        // | /     b     \ |
         // |/             \|
         // -----------------
 
         const BORDER = 50; // Defines the non-active area ('n' in the figure)
 
-        let ab = true;
-        let cb = false;
+        let topOrRight = true;
+        let bottomOrRight = false;
 
         if (windowDim.left + BORDER < x && windowDim.left + windowDim.width - BORDER > x &&
             windowDim.top + BORDER < y && windowDim.top + windowDim.height - BORDER > y) {
-            return 'middle';
+            return 'middle'; // m
         } else {
             if (windowDim.height * (x - windowDim.left) < windowDim.width * (y - windowDim.top)) {
-                ab = false;
+                topOrRight = false;
             }
 
             if (windowDim.height * (windowDim.left + windowDim.width - x) <
                 windowDim.width * (y - windowDim.top)) {
-                cb = true;
+                bottomOrRight = true;
             }
 
-            if (ab && !cb) {
-                return 'top'; // a
-            } else if (ab && cb) {
-                return 'right'; // b
-            } else if (!ab && cb) {
-                return 'bottom'; // c
-            } else if (!ab && !cb) {
-                return 'left'; // d
+            if (topOrRight && !bottomOrRight) {
+                return 'top'; // t
+            } else if (topOrRight && bottomOrRight) {
+                return 'right'; // r
+            } else if (!topOrRight && bottomOrRight) {
+                return 'bottom'; // b
+            } else if (!topOrRight && !bottomOrRight) {
+                return 'left'; // l
             }
         }
     }
