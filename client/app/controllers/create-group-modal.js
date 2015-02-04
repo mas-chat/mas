@@ -23,6 +23,8 @@ export default Ember.Controller.extend({
     password: '',
     errorMsg: '',
 
+    socket: Ember.inject.service(),
+
     actions: {
         newGroup: function() {
             let password = this.get('password').trim();
@@ -31,7 +33,7 @@ export default Ember.Controller.extend({
                 password = null;
             }
 
-            this.remote.send({
+            this.get('socket').send({
                 id: 'CREATE',
                 name: this.get('group'),
                 password: password

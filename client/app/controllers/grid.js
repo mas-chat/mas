@@ -21,9 +21,11 @@ import Ember from 'ember';
 export default Ember.ArrayController.extend({
     needs: [ 'application' ],
 
+    socket: Ember.inject.service(),
+
     actions: {
         joinLobby: function() {
-            this.remote.send({
+            this.get('socket').send({
                 id: 'JOIN',
                 network: 'MAS',
                 name: 'lobby'

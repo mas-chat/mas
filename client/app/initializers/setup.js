@@ -39,6 +39,7 @@ export function initialize(container, application) {
     application.register('model:friend', FriendModel, { singleton: false });
     application.register('model:message', MessageModel, { singleton: false });
     application.register('model:window', WindowModel, { singleton: false });
+
     application.inject('model:friend', 'store', 'store:main');
     application.inject('model:message', 'store', 'store:main');
     application.inject('model:window', 'store', 'store:main');
@@ -46,8 +47,6 @@ export function initialize(container, application) {
     application.inject('controller', 'store', 'store:main');
     application.inject('route', 'store', 'store:main');
     application.inject('model:base', 'store', 'store:main');
-
-    application.inject('controller', 'remote', 'socket:main');
 }
 
 export default {
