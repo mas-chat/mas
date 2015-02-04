@@ -23,6 +23,8 @@ import { play } from '../helpers/sound';
 import UploadMixin from '../mixins/upload';
 
 export default Ember.Controller.extend(UploadMixin, {
+    socket: Ember.inject.service(),
+
     actions: {
         hide: function() {
             this.set('model.visible', false);
@@ -30,7 +32,7 @@ export default Ember.Controller.extend(UploadMixin, {
         },
 
         close: function() {
-            this.remote.send({
+            this.get('socket').send({
                 id: 'CLOSE',
                 windowId: this.get('model.windowId')
             });
@@ -53,7 +55,7 @@ export default Ember.Controller.extend(UploadMixin, {
                     window: this
                 });
             } else {
-                this.remote.send({
+                this.get('socket').send({
                     id: 'SEND',
                     text: text,
                     windowId: this.get('model.windowId')
@@ -74,7 +76,7 @@ export default Ember.Controller.extend(UploadMixin, {
         },
 
         chat: function(userId) {
-            this.remote.send({
+            this.get('socket').send({
                 id: 'CHAT',
                 windowId: this.get('model.windowId'),
                 userId: userId
@@ -86,7 +88,7 @@ export default Ember.Controller.extend(UploadMixin, {
         },
 
         whois: function(userId) {
-            this.remote.send({
+            this.get('socket').send({
                 id: 'WHOIS',
                 windowId: this.get('model.windowId'),
                 userId: userId
@@ -94,7 +96,7 @@ export default Ember.Controller.extend(UploadMixin, {
         },
 
         op: function(userId) {
-            this.remote.send({
+            this.get('socket').send({
                 id: 'OP',
                 windowId: this.get('model.windowId'),
                 userId: userId
@@ -106,7 +108,7 @@ export default Ember.Controller.extend(UploadMixin, {
         },
 
         kick: function(userId) {
-            this.remote.send({
+            this.get('socket').send({
                 id: 'KICK',
                 windowId: this.get('model.windowId'),
                 userId: userId
@@ -114,7 +116,7 @@ export default Ember.Controller.extend(UploadMixin, {
         },
 
         kickban: function(userId) {
-            this.remote.send({
+            this.get('socket').send({
                 id: 'KICKBAN',
                 windowId: this.get('model.windowId'),
                 userId: userId

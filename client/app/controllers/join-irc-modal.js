@@ -26,6 +26,8 @@ export default Ember.Controller.extend({
     selectedNetwork: 'IRCNet',
     networks: [ 'IRCNet', 'FreeNode', 'W3C' ],
 
+    socket: Ember.inject.service(),
+
     actions: {
         joinIRC: function() {
             let password = this.get('password').trim();
@@ -34,7 +36,7 @@ export default Ember.Controller.extend({
                 password = null;
             }
 
-            this.remote.send({
+            this.get('socket').send({
                 id: 'JOIN',
                 network: this.get('selectedNetwork'),
                 name: this.get('channel'),

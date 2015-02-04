@@ -21,6 +21,8 @@
 import Ember from 'ember';
 
 export default Ember.Mixin.create({
+    socket: Ember.inject.service(),
+
     actions: {
         upload: function(files, transform) {
             this.handleUpload(files, transform);
@@ -44,7 +46,7 @@ export default Ember.Mixin.create({
                     this._printLine('File upload failed.', 'error');
                 }
             }.bind(this),
-            data: { sessionId: this.remote.sessionId }
+            data: { sessionId: this.get('socket').sessionId }
         };
 
         if (transform === 'jpeg') {
@@ -58,7 +60,7 @@ export default Ember.Mixin.create({
     },
 
     _sendMessage: function(text) {
-        this.remote.send({
+        this.get('socket').send({
             id: 'SEND',
             text: text,
             windowId: this.get('model.windowId')
