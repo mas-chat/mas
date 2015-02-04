@@ -21,12 +21,14 @@ import Ember from 'ember';
 export default Ember.Controller.extend({
     modalTopic: null,
 
+    socket: Ember.inject.service(),
+
     actions: {
         changeTopic: function() {
             // User has clicked 'OK', send the new topic to server
             let newTopic = this.get('modalTopic');
 
-            this.remote.send({
+            this.get('socket').send({
                 id: 'UPDATE_TOPIC',
                 windowId: this.get('model.windowId'),
                 topic: newTopic

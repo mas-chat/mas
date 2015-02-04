@@ -25,6 +25,8 @@ export default Ember.ArrayController.extend({
 
     friends: null,
 
+    socket: Ember.inject.service(),
+
     actions: {
         show: function(window) {
             window.set('visible', true);
@@ -35,7 +37,7 @@ export default Ember.ArrayController.extend({
         },
 
         logout: function() {
-            this.remote.send({ id: 'LOGOUT' }, function() {
+            this.get('socket').send({ id: 'LOGOUT' }, function() {
                 $.removeCookie('auth', { path: '/' });
                 window.location = '/';
             });

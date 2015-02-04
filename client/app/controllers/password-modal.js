@@ -23,6 +23,8 @@ export default Ember.Controller.extend({
     modalPasswordStatus: null,
     errorMsg: '',
 
+    socket: Ember.inject.service(),
+
     actions: {
         changePassword: function() {
             // User has clicked 'OK', send the new password to server
@@ -32,7 +34,7 @@ export default Ember.Controller.extend({
                 newPassword = this.get('modalPassword');
             }
 
-            this.remote.send({
+            this.get('socket').send({
                 id: 'UPDATE_PASSWORD',
                 windowId: this.get('model.windowId'),
                 password: newPassword === null ? '' : newPassword
