@@ -19,5 +19,39 @@
 import Ember from 'ember';
 
 export default Ember.Controller.extend({
-    initDone: false
+    initDone: false,
+    currentAlert: null,
+
+    socket: Ember.inject.service(),
+
+    actions: {
+        ackAlert: function() {
+            this.get('socket').send({
+                id: 'ACKALERT',
+                alertId: this.get('currentAlert.alertId')
+            });
+
+            this.set('currentAlert', null);
+            this._setCurrentAlert();
+        },
+
+        hideAlert: function() {
+            console.log('hull')
+
+            this.set('currentAlert', null);
+            this._setCurrentAlert();
+        }
+    },
+
+    alerts: function() {
+        this._setCurrentAlert();
+    }.observes('store.alerts.@each'),
+
+    _setCurrentAlert: function() {
+        let alerts = this.get('store.alerts');
+
+        if (this.get('currentAlert') === null && alerts.length > 0) {
+            this.set('currentAlert', alerts.shift());
+        }
+    }
 });

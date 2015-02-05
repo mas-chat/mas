@@ -23,14 +23,14 @@ import Ember from 'ember';
 const CURSORWIDTH = 50;
 
 export default Ember.View.extend({
-    classNames: [ 'grid', 'flex-1', 'flex-grow-row' ],
+    classNames: [ 'grid', 'flex-1', 'flex-grow-column' ],
 
     dimensions: null,
     cursor: null,
     movingWindow: null,
 
     didInsertElement: function() {
-        $(window).on('resize', Ember.run.bind(this, function() {
+        this.$().on('resize', Ember.run.bind(this, function() {
             this.layoutWindows(false);
         }));
     },
