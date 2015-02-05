@@ -1,4 +1,4 @@
-MAS server and desktop web app
+TEST MAS server and desktop web app
 ==============================
 
 MAS is a web group chat application.
