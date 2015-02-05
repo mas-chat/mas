@@ -30,7 +30,7 @@ export default Ember.View.extend({
     movingWindow: null,
 
     didInsertElement: function() {
-        this.$().on('resize', Ember.run.bind(this, function() {
+        $(window).on('resize', Ember.run.bind(this, function() {
             this.layoutWindows(false);
         }));
     },
