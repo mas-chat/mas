@@ -55,7 +55,8 @@
 }
 
 .grid {
-    padding: @grid-padding;
+    margin: @grid-padding;
+    position: relative;
 }
 
 .main-friend-item {
@@ -223,5 +224,16 @@
 
     .fa {
         margin: auto;
+    }
+}
+
+.announcement {
+    width: 100%;
+    background-color: @gray;
+    align-items: center;
+    padding-right: 15px;
+
+    & > * {
+        padding: 10px 0px 10px 15px;
     }
 }

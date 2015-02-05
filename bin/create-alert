@@ -1,0 +1,93 @@
+#!/usr/bin/env node
+//
+//   Copyright 2015 Ilkka Oksanen <iao@iki.fi>
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing,
+//   software distributed under the License is distributed on an "AS
+//   IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+//   express or implied.  See the License for the specific language
+//   governing permissions and limitations under the License.
+//
+
+'use strict';
+
+let readlineSync = require('readline-sync'),
+    co = require('co'),
+    redisModule = require('../server/lib/redis'),
+    redis = redisModule.createClient(),
+    outbox = require('../server/lib/outbox');
+
+let message = readlineSync.question('Message: ');
+let expiresInHours = readlineSync.question('Expires in (hours): ');
+let report = yesOrNo('Require report?');
+let dismissible = yesOrNo('Can be dismissed?');
+
+let now = Math.round(Date.now() / 1000);
+let ts = now + expiresInHours * 60 * 60;
+
+co(function*() {
+    yield redisModule.loadScripts();
+
+    let alertId = yield redis.incr('nextGlobalAlertId');
+
+    let alert = {
+        message: message,
+        expires: ts,
+        dismissible: dismissible,
+        report: report
+    };
+
+    yield redis.hmset(`alert:${alertId}`, alert);
+    yield redis.sadd('alertlist', alertId);
+
+    let allIds = yield redis.smembers('alertlist');
+
+    // Delete expired alerts
+    for (let i = 0; i < allIds.length; i++) {
+        let oldAlert = yield redis.hgetall(`alert:${allIds[i]}`);
+
+        if (now > oldAlert.expires) {
+            redis.del('`alert:${allIds[i]})`');
+            redis.srem('alertlist', allIds[i]);
+        }
+    }
+
+    // Deliver the alert
+    console.log('Delivering the alert to all logged in users...');
+
+    let allUsers = yield redis.keys('user:*'); // TBD: Doesn't scale
+
+    alert.id = 'ALERT';
+    alert.alertId = alertId;
+
+    for (let i = 0; i < allUsers.length; i++) {
+        let userId = allUsers[i].split(':')[1];
+
+        yield redis.sadd(`activealerts:${userId}`, alertId);
+        yield outbox.queueAll(userId, alert);
+    }
+
+    console.log('Done. Use CONTROL-C to quit.');
+})();
+
+function yesOrNo(label) {
+    let result = null;
+
+    while (result === null) {
+        let response = readlineSync.question(label + ' [yes/no]: ');
+
+        if (response === 'yes') {
+            result = true;
+        } else if (response === 'no') {
+            result = false;
+        }
+    }
+
+    return result;
+}

@@ -23,6 +23,7 @@ export default Ember.Object.extend({
     friends: null,
     users: null,
     windows: null,
+    alerts: null,
 
     userId: null,
 
@@ -30,5 +31,6 @@ export default Ember.Object.extend({
         this.set('users', Users.create());
         this.set('friends', Ember.A([]));
         this.set('windows', Ember.A([]));
+        this.set('alerts', Ember.A([]));
     }
 });
