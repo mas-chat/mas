@@ -69,7 +69,7 @@ exports.informStateChange = function*(userId, eventType) {
         ts = 0;
         command.online = true;
     } else {
-        ts = Date.now() / 1000;
+        ts = Math.round(Date.now() / 1000);
         command.last = ts;
         command.online = false;
     }
