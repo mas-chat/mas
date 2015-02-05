@@ -74,7 +74,7 @@ module.exports = function*() {
 
             let metaData = {
                 userId: userId,
-                ts: Date.now()
+                ts: Math.round(Date.now() / 1000)
             };
 
             fs.writeFile(path.join(targetDirectory, name + '.json'), JSON.stringify(metaData),
