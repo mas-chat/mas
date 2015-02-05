@@ -136,7 +136,8 @@ function startProcesses() {
             if (!shutdownStarted) {
                 shutdownStarted = true;
 
-                var msg = 'ERROR:'.red + ' ' + this + ' terminated (exit code: ' + code + '). Bailing out!';
+                var msg = 'ERROR:'.red + ' ' + this +
+                   ' terminated (exit code: ' + code + '). Bailing out!';
 
                 if (argv.background) {
                     msg += ' See the log file for details.';
