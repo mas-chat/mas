@@ -18,6 +18,18 @@
 
 import Ember from 'ember';
 
-export default Ember.View.extend({
-    classNames: [ 'flex-1 flex-row' ]
+export default Ember.Component.extend({
+    classNames: [ 'flex-row', 'announcement' ],
+
+    actions: {
+        ack: function() {
+            this.set('message', '');
+            this.sendAction();
+        },
+
+        hide: function() {
+            this.set('message', '');
+            this.sendAction('hide');
+        }
+    }
 });

@@ -19,10 +19,16 @@
 @import "logs";
 @import "dialog";
 
-body, html, .ember-root {
-    height: 100%;
-    overflow: hidden;
+html {
     font-family: 'Roboto', sans-serif;
+}
+
+.ember-root {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .error-text {

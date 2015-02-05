@@ -1,0 +1,14 @@
+{{#if alert}}
+    <div class="flex-1 announcement-message">
+        {{alert.message}}
+    </div>
+
+    {{#if alert.dismissible}}
+        <div>
+            <button {{action "hide"}} type="button" class="btn btn-default">Show again later</button>
+        </div>
+        <div>
+            <button {{action "ack"}} type="button" class="btn btn-primary">Dismiss</button>
+        </div>
+    {{/if}}
+{{/if}}

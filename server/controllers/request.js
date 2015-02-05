@@ -38,6 +38,7 @@ let handlers = {
     UPDATE_TOPIC: handleUpdateTopic,
     WHOIS: handleWhois,
     CHAT: handleChat,
+    ACKALERT: handleAckAlert,
     LOGOUT: handleLogout
 };
 
@@ -307,6 +308,17 @@ function *handleChat(params) {
         userId: userId,
         network: params.network,
         targetUserId: targetUserId
+    });
+}
+
+function *handleAckAlert(params) {
+    let alertId = params.command.alertId;
+
+    yield redis.srem(`activealerts:${params.userId}`, alertId);
+
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'ACKALERT_RESP',
+        status: 'OK'
     });
 }
 

@@ -44,6 +44,7 @@
     "passport-local": "~1.0.0",
     "passport-yahoo": "~0.3.0",
     "q": "~2.0.2",
+    "readline-sync": "~0.5.2",
     "redis": "~0.12.1",
     "redis-lua-helper": "~0.2.0",
     "semver": "~4.2.0",

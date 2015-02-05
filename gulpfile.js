@@ -21,7 +21,8 @@ var paths = {
         'server/**/*.js',
         '!server/public/dist/**/*.js',
         'mas-private/**/*.js',
-        'bin/masctl.js'
+        'bin/masctl',
+        'bin/create-alert'
     ],
     clientJavaScripts: [
         'client/app/**/*.js'

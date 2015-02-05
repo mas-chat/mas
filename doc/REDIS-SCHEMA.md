@@ -88,6 +88,19 @@ MAS Redis structures
 
  passwordresettoken:<token> (string with expiry time)
    <userId>
+
+ alert:<id> (hash)
+   message (text)
+   expires (unix time)
+   dismissible (bool)
+   report (bool)
+
+ alertlist (set)
+   <id1>, <id2> ...
+
+ activealerts:<userId> (set)
+   <id3>, <id4> ...
+
 ```
 
  IRC backend
@@ -130,4 +143,5 @@ Global IDs
  nextGlobalNoteId (string) (integer, counter)
  nextGlobalMsgId (string) (integer, counter)
  nextGlobalConversationId (string) (integer, counter)
+ nextGlobalAnnouncementId (string) (integer, counter)
 ```

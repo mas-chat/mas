@@ -162,6 +162,10 @@ export default Ember.Object.extend({
         }
     },
 
+    _handleAlert: function(data) {
+        this.get('store.alerts').pushObject(data);
+    },
+
     _removeUser: function(userId, targetWindow) {
         targetWindow.operators.removeObject(userId);
         targetWindow.voices.removeObject(userId);

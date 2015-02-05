@@ -23,6 +23,7 @@ let redis = require('../lib/redis').createClient(),
     requestController = require('../controllers/request'),
     log = require('../lib/log'),
     friends = require('../models/friends'),
+    alerts = require('../lib/alert'),
     outbox = require('../lib/outbox');
 
 exports.setup = function(server) {
@@ -106,6 +107,7 @@ exports.setup = function(server) {
 
                 yield friends.sendFriends(userId, sessionId);
                 yield friends.informStateChange(userId, 'login');
+                yield alerts.sendAlerts(userId, sessionId);
 
                 startPushLoop();
             })();
