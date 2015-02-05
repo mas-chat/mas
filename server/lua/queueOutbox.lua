@@ -29,7 +29,10 @@ else
 end
 
 for i = 1, #sessions do
-    if sessions[i] ~= excludeSessionId then
-        redis.call('LPUSH', 'outbox:' .. userId .. ':' .. sessions[i], unpack(commands))
+    local key = 'outbox:' .. userId .. ':' .. sessions[i]
+    local exists = redis.call('EXISTS', key)
+
+    if sessions[i] ~= excludeSessionId and exists then
+        redis.call('LPUSH', key, unpack(commands))
     end
 end
