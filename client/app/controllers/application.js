@@ -36,8 +36,6 @@ export default Ember.Controller.extend({
         },
 
         hideAlert: function() {
-            console.log('hull')
-
             this.set('currentAlert', null);
             this._setCurrentAlert();
         }
@@ -53,5 +51,10 @@ export default Ember.Controller.extend({
         if (this.get('currentAlert') === null && alerts.length > 0) {
             this.set('currentAlert', alerts.shift());
         }
+
+        Ember.run.next(this, function() {
+            // A trick to trigger window relayout, see resize handler in views/grid.js
+            $(window).trigger('resize');
+        });
     }
 });
