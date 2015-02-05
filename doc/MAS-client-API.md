@@ -352,6 +352,23 @@ Show a generic info message.
 }
 ```
 
+### ALERT
+
+Show a generic alert info message.
+
+```JSON
+{
+  "id": "ALERT",
+
+  "alertId": 32433
+  "message": "There will be service break on Monday",
+  "dismissible": true
+  "report": false
+}
+```
+
+If ```report``` is true then the client must send ```ACKALERT``` request when the user has dismissed the alert.
+
 ### INITDONE
 
 Initialization is complete. Hint that client can now render the UI as all initial messages (backlog) have arrived. Allows client to not update UI based on every received ADDTEXT command at session startup. Can lead to more responsive UI.
@@ -578,6 +595,22 @@ End session immediately
 ```
 {
   "id": "LOGOUT_RESP"
+}
+```
+
+### ACKALERT
+
+{
+  "id": "ACKALERT"
+  "alertId": 34253
+}
+
+### ACKALERT_RESP
+
+```
+{
+  "id": "ACKALERT_RESP"
+  "status": "OK"
 }
 ```
 

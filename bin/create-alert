@@ -63,8 +63,10 @@ co(function*() {
 
     let allUsers = yield redis.keys('user:*'); // TBD: Doesn't scale
 
+    // Conver object to MAS notification
     alert.id = 'ALERT';
     alert.alertId = alertId;
+    delete alert.expires;
 
     for (let i = 0; i < allUsers.length; i++) {
         let userId = allUsers[i].split(':')[1];
