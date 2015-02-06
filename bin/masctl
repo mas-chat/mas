@@ -104,7 +104,7 @@ function stopProcesses() {
     }
 }
 
-function startProcesses() {
+function startProcesses() { /*jshint -W083 */
     var shutdownStarted = false;
 
     for (var component in processes) { /*jshint forin: false */
@@ -123,10 +123,7 @@ function startProcesses() {
         var node = handles[component] = child.spawn('node', commandLineParameters, spawnOptions);
 
         if (argv.background) {
-            setTimeout(function() {
-                this[0].unref();
-                console.log('Launched:'.green + ' ' + this[1]);
-            }.bind([node, component]), 5000);
+            waitAndUnref(node, component);
         } else {
             node.stdout.on('data', printChildOutput);
             node.stderr.on('data', printChildOutput);
@@ -193,6 +190,13 @@ function getComponentPid(component) {
     }
 
     return pid;
+}
+
+function waitAndUnref(node, component) {
+    setTimeout(function() {
+        node.unref();
+        console.log('Launched:'.green + ' ' + component);
+    }, 5000);
 }
 
 function checkNodeVersion() {
