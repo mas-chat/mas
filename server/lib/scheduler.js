@@ -35,8 +35,8 @@ function deleteIdleSessions() {
         let ts = Math.round(Date.now() / 1000) - conf.get('session:idle_timeout');
         let list = yield redis.zrangebyscore('sessionlastheartbeat', '-inf', ts);
 
-        for (var i = 0; i < list.length; i++) {
-            let fields = list[i].split(':');
+        for (let item of list) {
+            let fields = item.split(':');
             let userId = fields[0];
             let sessionId = fields[1];
 

@@ -49,28 +49,26 @@ co(function*() {
     let allIds = yield redis.smembers('alertlist');
 
     // Delete expired alerts
-    for (let i = 0; i < allIds.length; i++) {
-        let oldAlert = yield redis.hgetall(`alert:${allIds[i]}`);
+    for (let oldAlertId of allIds) {
+        let oldAlert = yield redis.hgetall(`alert:${oldAlertId}`);
 
         if (now > oldAlert.expires) {
-            redis.del('`alert:${allIds[i]})`');
-            redis.srem('alertlist', allIds[i]);
+            redis.del('`alert:${oldAlertId})`');
+            redis.srem('alertlist', oldAlertId);
         }
     }
 
     // Deliver the alert
     console.log('Delivering the alert to all logged in users...');
 
-    let allUsers = yield redis.keys('user:*'); // TBD: Doesn't scale
+    let allUsers = yield redis.smembers('userlist');
 
     // Conver object to MAS notification
     alert.id = 'ALERT';
     alert.alertId = alertId;
     delete alert.expires;
 
-    for (let i = 0; i < allUsers.length; i++) {
-        let userId = allUsers[i].split(':')[1];
-
+    for (let userId of allUsers) {
         yield redis.sadd(`activealerts:${userId}`, alertId);
         yield outbox.queueAll(userId, alert);
     }

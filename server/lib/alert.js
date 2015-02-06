@@ -23,17 +23,17 @@ exports.sendAlerts = function*(userId, sessionId) {
     let now = Math.round(Date.now() / 1000);
     let alertIds = yield redis.smembers(`activealerts:${userId}`);
 
-    for (let i = 0; i < alertIds.length; i++) {
-        let alert = yield redis.hgetall(`alert:${alertIds[i]}`);
+    for (let alertId of alertIds) {
+        let alert = yield redis.hgetall(`alert:${alertId}`);
 
         if (alert && now < alert.expires) {
             alert.id = 'ALERT';
-            alert.alertId = alertIds[i];
+            alert.alertId = alertId;
 
             yield outbox.queue(userId, sessionId, alert);
         } else {
             // Alert has expired
-            yield redis.srem(`activealerts:${userId}`, alertIds[i]);
+            yield redis.srem(`activealerts:${userId}`, alertId);
         }
     }
 };

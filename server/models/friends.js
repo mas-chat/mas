@@ -30,9 +30,7 @@ exports.sendFriends = function*(userId, sessionId) {
     let friendIds = yield redis.smembers(`friends:${userId}`);
 
     // TBD: Do the looping in lua to enhance performance
-    for (var i = 0; i < friendIds.length; i++) {
-        let friendUserId = friendIds[i];
-
+    for (let friendUserId of friendIds) {
         let last = yield redis.hget(`user:${friendUserId}`, 'lastlogout');
         last = parseInt(last);
 
@@ -78,8 +76,7 @@ exports.informStateChange = function*(userId, eventType) {
 
     let friendIds = yield redis.smembers(`friends:${userId}`);
 
-    for (var i = 0; i < friendIds.length; i++) {
-        let friendUserId = friendIds[i];
+    for (let friendUserId of friendIds) {
         yield outbox.queueAll(friendUserId, command);
     }
 };

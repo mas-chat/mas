@@ -46,11 +46,11 @@ exports.remove = function*(userId, windowId) {
 exports.removeByConversationId = function*(userId, conversationId) {
     let windows = yield redis.smembers(`windowlist:${userId}`);
 
-    for (var i = 0; i < windows.length; i++) {
-        let myConversationId = yield getConversationId(userId, windows[i]);
+    for (let masWindow of windows) {
+        let myConversationId = yield getConversationId(userId, masWindow);
 
         if (myConversationId === conversationId) {
-            yield remove(userId, windows[i]);
+            yield remove(userId, masWindow);
         }
     }
 };
@@ -75,14 +75,14 @@ exports.getAllConversationIdsWithUserId = function*(userId, targetUserId) {
         return element === targetUserId;
     }
 
-    for (var i = 0; i < conversationIds.length; i++) {
-        let conversation = yield conversationFactory.get(conversationIds[i]);
+    for (let conversationId of conversationIds) {
+        let conversation = yield conversationFactory.get(conversationId);
         let members = Object.keys(conversation.members);
 
         let exists = members.some(compare);
 
         if (exists) {
-            res.push(conversationIds[i]);
+            res.push(conversationId);
         }
     }
 
@@ -93,12 +93,12 @@ exports.getWindowIdsForNetwork = function*(userId, network) {
     let windows = yield redis.smembers(`windowlist:${userId}`);
     let windowIds = [];
 
-    for (var i = 0; i < windows.length; i++) {
-        let conversationId = yield getConversationId(userId, windows[i]);
+    for (let masWindow of windows) {
+        let conversationId = yield getConversationId(userId, masWindow);
         let conversation = yield conversationFactory.get(conversationId);
 
         if (conversation.network === network) {
-            windowIds.push(windows[i]);
+            windowIds.push(masWindow);
         }
     }
 
@@ -110,8 +110,8 @@ exports.getNetworks = function*(userId) {
     let networks = {};
     let res = [];
 
-    for (var i = 0; i < conversationIds.length; i++) {
-        let conversation = yield conversationFactory.get(conversationIds[i]);
+    for (let conversationId of conversationIds) {
+        let conversation = yield conversationFactory.get(conversationId);
         networks[conversation.network] = true;
     }
 
@@ -177,8 +177,8 @@ function *getAllConversationIds(userId) {
     let windows = yield redis.smembers(`windowlist:${userId}`);
     let conversationIds = [];
 
-    for (var i = 0; i < windows.length; i++) {
-        let conversationId = yield getConversationId(userId, windows[i]);
+    for (let masWindow of windows) {
+        let conversationId = yield getConversationId(userId, masWindow);
         conversationIds.push(conversationId);
     }
 

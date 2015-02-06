@@ -146,8 +146,7 @@ function *createInitialGroups() {
     let groups = conf.get('loopback:initial_groups').split(',');
     let admin = conf.get('common:admin') || 1;
 
-    for (var i = 0; i < groups.length; i++) {
-        let group = groups[i];
+    for (let group of groups) {
         let existingGroup = yield conversationFactory.findGroup(group, 'MAS');
 
         if (!existingGroup) {

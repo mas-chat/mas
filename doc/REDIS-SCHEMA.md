@@ -18,6 +18,9 @@ MAS Redis structures
    registrationtime (int, unix time)
    nextwindowid (int)
 
+ userlist (set)
+   <userId1>, <userId2> ...
+
  sessionlist:<userId> (zset)
    sessionId1, timeStamp1, sessionId2, timeStamp2 ...
 
