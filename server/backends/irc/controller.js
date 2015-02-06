@@ -309,12 +309,8 @@ function *processRestarted() {
         log.error('No networks.');
     }
 
-    for (var i = 0; i < allUsers.length; i++) {
-        let userId = allUsers[i];
-
-        for (var ii = 0; ii < networks.length; ii++) {
-            let network = networks[ii];
-
+    for (let userId of allUsers) {
+        for (let network of networks) {
             if (network !== 'MAS') {
                 let channels = yield redis.hgetall(`ircchannelsubscriptions:${userId}:${network}`);
 
@@ -718,9 +714,9 @@ function *handleQuit(userId, msg) {
     let targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
     let conversationIds = yield window.getAllConversationIds(userId);
 
-    for (var i = 0; i < conversationIds.length; i++) {
+    for (let conversationId of conversationIds) {
         // TBD: Send a real quit message instead of part
-        let conversation = yield conversationFactory.get(conversationIds[i]);
+        let conversation = yield conversationFactory.get(conversationId);
 
         if (conversation.network === msg.network && conversation.type === 'group') {
             // No need to check if the targetUser is on this channel,
@@ -836,8 +832,7 @@ function *handleMode(userId, msg) {
             continue;
         }
 
-        for (var i = 0; i < modes.length; i++) {
-            let mode = modes[i];
+        for (let mode of modes) {
             let newClass = null;
 
             if (mode.match(/[klbeIOov]/)) {
@@ -969,12 +964,14 @@ function *updateNick(userId, network, oldNick, newNick) {
         // We havent heard about this change before
         let conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
 
-        for (var i = 0; i < conversationIds.length; i++) {
-            let conversation = yield conversationFactory.get(conversationIds[i]);
+        for (let conversationId of conversationIds) {
+            let conversation = yield conversationFactory.get(conversationId);
+
             yield conversation.addMessageUnlessDuplicate(userId, {
                 cat: 'info',
                 body: oldNick + ' is now known as ' + newNick
             });
+
             yield conversation.sendUsers(targetUserId);
         }
     }
@@ -1049,8 +1046,7 @@ function *disconnectIfIdle(userId, network) {
 function *bufferNames(names, userId, network, conversationId) {
     let namesHash = {};
 
-    for (var i = 0; i < names.length; i++) {
-        let nick = names[i];
+    for (let nick of names) {
         let userClass = USER;
 
         switch (nick.charAt(0)) {

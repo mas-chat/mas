@@ -177,12 +177,12 @@ function *handleUpdate(params) {
     let oldValues = yield redis.hgetall(`window:${params.userId}:${params.windowId}`);
     let update = false;
 
-    for (var i = 0; i < accepted.length; i++) {
-        let prop = params.command[accepted[i]];
+    for (let parameter of accepted) {
+        let prop = params.command[parameter];
 
-        if (typeof(prop) !== 'undefined' && prop !== oldValues[accepted[i]]) {
+        if (typeof(prop) !== 'undefined' && prop !== oldValues[parameter]) {
             update = true;
-            yield redis.hset(`window:${params.userId}:${params.windowId}`, accepted[i], prop);
+            yield redis.hset(`window:${params.userId}:${params.windowId}`, parameter, prop);
         }
     }
 

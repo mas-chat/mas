@@ -133,8 +133,8 @@ courier.on('write', function(params) {
         data = [ data ];
     }
 
-    for (var i = 0; i < data.length; i++) {
-        socket.write(data[i] + '\r\n');
+    for (let line of data) {
+        socket.write(line + '\r\n');
     }
 
     socket.last = Date.now();

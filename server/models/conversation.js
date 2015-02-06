@@ -125,9 +125,9 @@ Conversation.prototype.set1on1Members = function*(userId, peerUserId) {
 Conversation.prototype.setGroupMembers = function*(members) {
     let oldMembers = Object.keys(this.members);
 
-    for (var i = 0; i < oldMembers.length; i++) {
-        if (members && !members[oldMembers[i]]) {
-            yield this.removeGroupMember(oldMembers[i], true);
+    for (let userId of oldMembers) {
+        if (members && !members[userId]) {
+            yield this.removeGroupMember(userId, true);
         }
     }
 
@@ -135,9 +135,9 @@ Conversation.prototype.setGroupMembers = function*(members) {
 
     let newMembers = Object.keys(members);
 
-    for (i = 0; i < newMembers.length; i++) {
-        if (newMembers[i].charAt(0) === 'm') {
-            yield this.sendAddMembers(newMembers[i]);
+    for (let userId of newMembers) {
+        if (userId.charAt(0) === 'm') {
+            yield this.sendAddMembers(userId);
         }
     }
 };
@@ -257,8 +257,8 @@ Conversation.prototype.sendAddMembers = function*(userId) {
 Conversation.prototype.sendUsers = function*(userId) {
     let userIds = Object.keys(this.members);
 
-    for (var i = 0; i < userIds.length; i++) {
-        yield redis.run('introduceNewUserIds', userIds[i], null, null, true, userId);
+    for (let masUserId of userIds) {
+        yield redis.run('introduceNewUserIds', masUserId, null, null, true, userId);
     }
 };
 
@@ -335,23 +335,24 @@ Conversation.prototype._streamRemoveMembers = function*(userId) {
 Conversation.prototype._stream = function*(msg, excludeSession) {
     let members = Object.keys(this.members);
 
-    for (var i = 0; i < members.length; i++) {
-        if (members[i].charAt(0) !== 'm') {
+
+    for (let userId of members) {
+        if (userId.charAt(0) !== 'm') {
             continue;
         }
 
-        let windowId = yield window.findByConversationId(members[i], this.conversationId);
+        let windowId = yield window.findByConversationId(userId, this.conversationId);
 
         if (!windowId && this.type === '1on1') {
             // The case where one of the 1on1 members has closed his window and has 'd' role
-            assert((yield this.getMemberRole(members[i])) === 'd');
-            windowId = yield window.create(members[i], this.conversationId);
-            yield this.setMemberRole(members[i], 'u');
+            assert((yield this.getMemberRole(userId)) === 'd');
+            windowId = yield window.create(userId, this.conversationId);
+            yield this.setMemberRole(userId, 'u');
         }
 
         msg.windowId = parseInt(windowId);
 
-        yield outbox.queueAll(members[i], msg, excludeSession);
+        yield outbox.queueAll(userId, msg, excludeSession);
     }
 };
 

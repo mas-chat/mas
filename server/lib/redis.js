@@ -43,8 +43,7 @@ exports.loadScripts = function*() {
     });
     let scripts = yield loadDir();
 
-    for (var i = 0; i < scripts.length; i++) {
-        let scriptName = scripts[i];
+    for (let scriptName of scripts) {
         log.info('Loading Redis script: ' + scriptName);
         try {
             yield redisClient.script('load', rlh.code(scriptName));
