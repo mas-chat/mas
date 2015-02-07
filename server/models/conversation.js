@@ -19,12 +19,28 @@
 /* jshint -W079 */
 
 let assert = require('assert'),
+    elasticsearch = require('elasticsearch'),
+    conf = require('../lib/conf'),
     redis = require('../lib/redis').createClient(),
     log = require('../lib/log'),
     outbox = require('../lib/outbox'),
     window = require('./window');
 
 let MSG_BUFFER_SIZE = 200;
+let elasticSearchClient = null;
+
+if (conf.get('elasticsearch:enabled')) {
+    let elasticsearchUrl = conf.get('elasticsearch:host') + ':' + conf.get('elasticsearch:port');
+
+    log.info('Connecting to elasticsearch: ' + elasticsearchUrl);
+
+    elasticSearchClient = new elasticsearch.Client({
+        host: elasticsearchUrl,
+        keepAlive: true,
+        maxSockets: 15,
+        minSockets: 10
+    });
+}
 
 exports.create = function*(options) {
     let conversationId = yield redis.incr('nextGlobalConversationId');
@@ -224,6 +240,10 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
     yield redis.ltrim(`conversationmsgs:${this.conversationId}`, 0, MSG_BUFFER_SIZE - 1);
 
     yield this._streamAddText(msg, excludeSession);
+
+    if (elasticSearchClient) {
+        yield this._storeNewMessage(msg);
+    }
 };
 
 Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, excludeSession) {
@@ -381,6 +401,25 @@ Conversation.prototype._remove = function*() {
     }
 
     yield redis.hdel('index:conversation', key);
+};
+
+Conversation.prototype._storeNewMessage = function*(msg) {
+    elasticSearchClient.create({
+        index: 'messages',
+        type: 'message',
+        id: msg.gid,
+        body: {
+            ts: msg.ts,
+            body: msg.body,
+            cat: msg.cat,
+            userId: msg.userId,
+            conversationId: this.conversationId
+        }
+    }, function(error, response) {
+        if (error) {
+            log.warn(msg.userId, 'Elasticsearch error. Failed to index messsage.');
+        }
+    });
 };
 
 function *get(conversationId) {
