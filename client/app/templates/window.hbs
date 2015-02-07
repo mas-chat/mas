@@ -34,25 +34,25 @@
     {{#if isGroup}}
         <div class="window-members">
             {{#each name in model.operatorNames}}
-                <div>
-                    <img class="gravatar" align="left" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="window-operator" data-userid={{name.userId}}>
+                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <div class="window-operator">
                         {{name.nick}}
                     </div>
                 </div>
             {{/each}}
             {{#each name in model.voiceNames}}
-                <div>
-                    <img class="gravatar" align="left" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="window-voice" data-userid={{name.userId}}>
+                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <div class="window-voice">
                         {{name.nick}}
                     </div>
                 </div>
             {{/each}}
             {{#each name in model.userNames}}
-                <div>
-                    <img class="gravatar" align="left" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="window-user" data-userid={{name.userId}}>
+                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <div class="window-user">
                         {{name.nick}}
                     </div>
                 </div>

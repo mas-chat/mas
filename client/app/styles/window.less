@@ -232,11 +232,12 @@
         width: 100px;
         border-left: 1px solid @window-line-color;
         line-height: 150%;
-        overflow-y: auto;
+        overflow-y: scroll;
+        padding-top: 3px;
 
         & > * {
             cursor: default;
-            padding: 1px 8px;
+            padding: 1px 5px;
 
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -258,8 +259,9 @@
         }
 
         .gravatar {
-            height: 20px;
+            height: 21px;
             padding-right: 5px;
+            float: left;
         }
     }
 
