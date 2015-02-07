@@ -29,22 +29,30 @@ let client = new elasticsearch.Client({
 
 co(function *() {
     if (argv.deleteIndices) {
-        yield Q.nsend(client.indices, 'delete', {
+        console.log('Deleting all indices...');
+        yield Q.ninvoke(client.indices, 'delete', {
             index: '_all'
         });
     }
 
-    for (var i = 0; i < 100; i++) {
-        console.log('Setting index: ' + i);
+    console.log('Creating index "messages1"...');
 
-        let ret = yield Q.nsend(client.indices, 'create', {
-            index: 'messages-' + i
-        });
-    }
+    yield Q.ninvoke(client.indices, 'create', {
+        index: 'messages1'
+    });
 
-    let ret = yield Q.nsend(client.indices, 'putMapping', {
-        index: '_all',
-        type: 'messages',
+    console.log('Creating alias "messages", points to "messages1"...');
+
+    yield Q.ninvoke(client.indices, 'putAlias', {
+        name: 'messages',
+        index: 'messages1'
+    });
+
+    console.log('Setting mapping for "messages1"...')
+
+    yield Q.ninvoke(client.indices, 'putMapping', {
+        index: 'messages1',
+        type: 'message',
         body: {
             properties: {
                 ts: {
@@ -56,23 +64,13 @@ co(function *() {
                 cat: {
                     type: 'string'
                 },
-                nick: {
-                    type: 'string'
-                },
                 userId: {
+                    type: 'string'
+                },
+                conversationId: {
                     type: 'long'
-                },
-                name: {
-                    type: 'string'
-                },
-                type: {
-                    type: 'string'
-		},
-                network: {
-                    type: 'string'
                 }
             }
         }
     });
 })();
-
