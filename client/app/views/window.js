@@ -65,6 +65,8 @@ export default Ember.View.extend({
 
     dragStart: function(event) {
         this.get('parentView').dragWindowStart(event, this);
+        this.$().css('z-index', 200);
+        $('.blocker').show();
     },
 
     drag: function(event) {
@@ -72,7 +74,9 @@ export default Ember.View.extend({
     },
 
     dragEnd: function(event) {
+        this.$().css('z-index', '');
         this.get('parentView').dragWindowEnd(event);
+        $('.blocker').hide();
     },
 
     layoutDone: function() {
