@@ -31,7 +31,6 @@ let rlh = redisLuaHelper({
     extension: 'lua'
 });
 
-
 exports.createClient = function() {
     return createClient();
 };

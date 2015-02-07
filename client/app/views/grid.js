@@ -119,7 +119,7 @@ export default Ember.View.extend({
                 left: 0,
                 top: 0,
                 width: container.width,
-                height: container.height,
+                height: container.height
             }, duration);
             return;
         }
@@ -235,7 +235,7 @@ export default Ember.View.extend({
                     left: position.left,
                     top: position.top,
                     width: $el.width(),
-                    height: $el.height(),
+                    height: $el.height()
                 };
 
                 let cursorSpace = this._calculateSpaceForCursor(

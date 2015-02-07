@@ -12,16 +12,16 @@ module.exports = {
             .createUser()
             .perform(function(client, done) {
                 client = new irc.Client('localhost', 'ircuser', {
-                    channels: ['#test'],
+                    channels: [ '#test' ]
                 });
 
-                client.addListener('join#test', function () {
+                client.addListener('join#test', function() {
                     // Greet everybody who joins
                     client.say('#test', 'welcome!');
                     done();
                 });
 
-                client.addListener('message', function (from, to, message) {
+                client.addListener('message', function(from, to, message) {
                     // Respond pong if somebody says ping
                     if (message === 'ping') {
                         client.say(to, 'pong');
@@ -53,7 +53,7 @@ module.exports = {
             .useCss()
 
             // Request pong
-            .setValue('.window:not(.irc-server-window) input', ['ping', browser.Keys.ENTER])
+            .setValue('.window:not(.irc-server-window) input', [ 'ping', browser.Keys.ENTER ])
 
             // Very that bot's pong reply gets delivered
             .useXpath()
@@ -61,7 +61,7 @@ module.exports = {
             .useCss()
 
             // Receive msg from an another IRC user. Window not open
-            .setValue('.window:not(.irc-server-window) input', ['ping1on1', browser.Keys.ENTER])
+            .setValue('.window:not(.irc-server-window) input', [ 'ping1on1', browser.Keys.ENTER ])
             .useXpath()
             .waitForElementVisible('//*[contains(text(), "pong1on1")]', 5000)
             .useXpath()

@@ -119,7 +119,6 @@ export default Ember.View.extend({
                 e.preventDefault();
                 let $row = $target.closest('.member-row');
 
-
                 let selectedNick = $row.data('nick');
                 let avatar = $row.find('.gravatar').attr('src');
                 selectedUserId = $row.data('userid');
