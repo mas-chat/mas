@@ -209,18 +209,12 @@ function *handleUpdatePassword(params) {
 
     // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
     if (typeof password !== 'string') {
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'UPDATE_PASSWORD_RESP',
-            status: 'ERROR',
-            errorMsg: 'New password is invalid.'
-        });
+        yield respondError('UPDATE_PASSWORD_RESP', params.userId, params.sessionId,
+            'New password is invalid.');
         return;
     } else if (params.conversation.type === '1on1') {
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'UPDATE_PASSWORD_RESP',
-            status: 'ERROR',
-            errorMsg: 'Can\'t set password for 1on1.'
-        });
+        yield respondError('UPDATE_PASSWORD_RESP', params.userId, params.sessionId,
+            'Can\'t set password for 1on1.');
         return;
     }
 
@@ -268,12 +262,13 @@ function *handleChat(params) {
     let targetUserId = params.command.userId;
     let network = params.network;
 
+    if (!targetUserId || typeof targetUserId !== 'string') {
+        yield respondError('CHAT_RESP', userId, params.sessionId, 'Malformed request.');
+        return;
+    }
+
     if (userId === targetUserId) {
-        yield outbox.queue(userId, params.sessionId, {
-            id: 'CHAT_RESP',
-            status: 'ERROR',
-            errorMsg: 'You can\'t chat with yourself.'
-        });
+        yield respondError('CHAT_RESP', userId, params.sessionId, 'You can\'t chat with yourself.');
         return;
     }
 
@@ -290,11 +285,8 @@ function *handleChat(params) {
         assert(conversation.members[userId]);
 
         if (conversation.members[userId] !== 'd') {
-            yield outbox.queue(userId, params.sessionId, {
-                id: 'CHAT_RESP',
-                status: 'ERROR',
-                errorMsg: 'You are already chatting with this person.'
-            });
+            yield respondError('CHAT_RESP', userId, params.sessionId,
+                'You are already chatting with this person.');
             return;
         } else {
             yield window.create(userId, conversation.conversationId);
@@ -339,4 +331,12 @@ function *handleLogout(params) {
             }
         })();
     }, 5000);
+}
+
+function *respondError(resp, userId, sessionId, msg, errorStatus) {
+    yield outbox.queue(userId, sessionId, {
+        id: resp,
+        status: errorStatus || 'ERROR',
+        errorMsg: msg
+    });
 }
