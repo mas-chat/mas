@@ -200,7 +200,7 @@ export default Ember.View.extend({
     },
 
     _scrollTo: function(pos) {
-        this.$messagePanel.stop();
+        this.$messagePanel.velocity('stop');
         this.$messagePanel.css('overflow-y', 'hidden');
 
         this.$messagePanel.velocity({
