@@ -10,7 +10,7 @@ exports.tearDown = function(done) {
     if (!this.client.globals.dontReportSauceLabs) {
         let userName = this.client.options.username;
         let accessKey = this.client.options.accessKey;
-        let sessionId =this.client.sessionId;
+        let sessionId = this.client.sessionId;
         let baseUrl = 'https://saucelabs.com/rest/v1/';
 
         console.log('Sending final result to Saucelabs...');
@@ -20,7 +20,7 @@ exports.tearDown = function(done) {
             .put(baseUrl + userName + '/jobs/' + sessionId)
             .send({ passed: passedStatus })
             .auth(userName, accessKey)
-            .end(function(error, res){
+            .end(function(error, res) {
                 if (error) {
                     console.log('ERROR sending verdict');
                     console.log(error);

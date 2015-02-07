@@ -77,7 +77,7 @@
     "superagent": "~0.21.0"
   },
   "scripts": {
-    "test": "gulp jshint && ./bin/bootstrap && ./bin/run-tests saucelabs"
+    "test": "gulp jshint jscs && ./bin/bootstrap && ./bin/run-tests saucelabs"
   },
   "repository": {
     "type": "git",

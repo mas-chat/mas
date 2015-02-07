@@ -149,12 +149,12 @@ function *processTextCommand(params) {
             data = res[2] || data;
             break;
         case 'me':
-            data = 'PRIVMSG ' + conversation.name + ' :\u0001ACTION ' + payload +'\u0001';
+            data = 'PRIVMSG ' + conversation.name + ' :\u0001ACTION ' + payload + '\u0001';
             break;
     }
 
     if (systemMsg) {
-       yield addSystemMessage(params.userId, conversation.network, 'info', systemMsg);
+        yield addSystemMessage(params.userId, conversation.network, 'info', systemMsg);
     }
 
     if (send) {

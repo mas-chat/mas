@@ -335,7 +335,6 @@ Conversation.prototype._streamRemoveMembers = function*(userId) {
 Conversation.prototype._stream = function*(msg, excludeSession) {
     let members = Object.keys(this.members);
 
-
     for (let userId of members) {
         if (userId.charAt(0) !== 'm') {
             continue;

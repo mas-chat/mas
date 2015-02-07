@@ -33,5 +33,5 @@ export default Ember.ArrayController.extend({
         }
     },
 
-    initDone: Ember.computed.alias('controllers.application.initDone'),
+    initDone: Ember.computed.alias('controllers.application.initDone')
 });
