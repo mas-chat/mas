@@ -39,5 +39,5 @@
     "validateQuoteMarks": "'",
     "validateIndentation": 4,
     "validateParameterSeparator": ", ",
-    "safeContextKeyword": ["that"]
+    "safeContextKeyword": [ "that", "browser" ]
 }
