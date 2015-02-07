@@ -117,10 +117,15 @@ export default Ember.View.extend({
                 }
 
                 e.preventDefault();
-                let selectedNick = $target.text();
-                selectedUserId = $target.data('userid');
+                let $row = $target.closest('.member-row');
 
-                this.getMenu().find('li').eq(0).text(selectedNick);
+
+                let selectedNick = $row.data('nick');
+                let avatar = $row.find('.gravatar').attr('src');
+                selectedUserId = $row.data('userid');
+
+                this.getMenu().find('li').eq(0).html(
+                    '<img class="menu-avatar" src="' + avatar + '">' +  selectedNick);
                 return true;
             },
             onItem: function(context, e) {
