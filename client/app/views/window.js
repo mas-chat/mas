@@ -248,8 +248,10 @@ export default Ember.View.extend({
             let pos = $img.position().top;
 
             if (pos + placeHolderHeight >= 0 && pos <= panelHeight) {
+                $img.addClass('loader loader-small-dark');
                 $img.attr('src', $img.data('src'));
                 $img.one('load error', function() {
+                    $img.removeClass('loader loader-small-dark');
                     $img.removeAttr('data-src');
                     that._goToBottom();
                 });
