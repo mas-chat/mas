@@ -242,7 +242,7 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
     yield this._streamAddText(msg, excludeSession);
 
     if (elasticSearchClient) {
-        yield this._storeNewMessage(msg);
+        this._storeNewMessage(msg);
     }
 };
 
@@ -403,7 +403,7 @@ Conversation.prototype._remove = function*() {
     yield redis.hdel('index:conversation', key);
 };
 
-Conversation.prototype._storeNewMessage = function*(msg) {
+Conversation.prototype._storeNewMessage = function(msg) {
     elasticSearchClient.create({
         index: 'messages',
         type: 'message',
@@ -415,7 +415,7 @@ Conversation.prototype._storeNewMessage = function*(msg) {
             userId: msg.userId,
             conversationId: this.conversationId
         }
-    }, function(error, response) {
+    }, function(error) {
         if (error) {
             log.warn(msg.userId, 'Elasticsearch error. Failed to index messsage.');
         }
