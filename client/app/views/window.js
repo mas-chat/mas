@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals $, FileAPI, emojify */
+/* globals $, _, FileAPI, emojify */
 
 import Ember from 'ember';
 
@@ -36,6 +36,8 @@ export default Ember.View.extend({
 
     expanded: false,
     initial: true,
+    animating: false,
+    scrolling: false,
 
     // TBD: messages is here because of the mixin. Is there better way?
     messages: Ember.computed.alias('controller.model.messages'),
@@ -188,52 +190,40 @@ export default Ember.View.extend({
             return;
         }
 
-        let scrollPos = this.$messagePanel.scrollTop();
-        let bottom = this.$messagePanel.prop('scrollHeight');
-        let height = this.$messagePanel.height();
-
-        if (bottom - scrollPos > 2 * height) {
-            this._moveTo(bottom);
-        } else {
-            this._scrollTo(bottom);
-        }
-    },
-
-    _scrollTo: function(pos) {
-        this.$messagePanel.velocity('stop');
-        this.$messagePanel.css('overflow-y', 'hidden');
-
-        this.$messagePanel.velocity({
-            scrollTop: pos
-        }, 500, function() {
-            this.$messagePanel.css('overflow-y', 'auto');
-        }.bind(this));
-    },
-
-    _moveTo: function(pos) {
-        this.$messagePanel.css('overflow-y', 'hidden');
-        this.$messagePanel.scrollTop(pos);
-        this.$messagePanel.css('overflow-y', 'auto');
+        this.$('.window-messages > div:last-child').velocity('stop').velocity('scroll', {
+            container: this.$messagePanel,
+            duration: 300,
+            easing: 'spring',
+            begin: function() {
+                this.$messagePanel.css('overflow-y', 'hidden');
+                this.set('scrolling', true);
+            }.bind(this),
+            complete: function() {
+                this.$messagePanel.css('overflow-y', 'auto');
+                this.set('scrolling', false);
+            }.bind(this)
+        });
     },
 
     _addScrollHandler: function() {
-        let prevScrollPos = 0;
+        this.$messagePanel.on('scroll', _.throttle(Ember.run.bind(this, function() {
+            if (this.get('animating') || this.get('scrolling')) {
+                return;
+            }
 
-        this.$messagePanel.on('scroll', Ember.run.bind(this, function() {
             let $panel = this.$messagePanel;
             let scrollPos = $panel.scrollTop();
 
-            if (prevScrollPos > scrollPos) {
-                this.get('controller').send('scrollUp');
-            } else if (scrollPos + $panel.innerHeight() >= $panel.prop('scrollHeight')) {
+            if (scrollPos + $panel.innerHeight() >= $panel.prop('scrollHeight')) {
                 this.get('controller').send('scrollBottom');
+            } else {
+                this.get('controller').send('scrollUp');
             }
 
-            prevScrollPos = scrollPos;
             this.set('controller.model.deletedLine', false); // Hack
 
             this._showImages();
-        }));
+        }, 100)));
     },
 
     _updateImages: function() {
