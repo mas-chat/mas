@@ -19,6 +19,7 @@
     "faker": "~2.1.1",
     "forms": "~1.1.1",
     "handlebars": "~2.0.0",
+    "hiredis": "^0.2.0",
     "iconv-lite": "~0.4.0",
     "is-utf8": "~0.2.0",
     "jwt-simple": "~0.2.0",
