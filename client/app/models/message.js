@@ -82,15 +82,16 @@ export default Ember.Object.extend({
             }
 
             if (imgSuffixes.indexOf(urlObj.suffix()) !== -1) {
-                imgUrls.push('<li><a href="' + this._escHtml(url, true) + '" class="user-img">' +
-                    '<img src="" data-src="' + this._escHtml(url, true) + '"></a></li>');
+                url = this._escHtml(url, true);
+
+                imgUrls.push('<li><a href="' + url + '" class="user-img"><img ' +
+                    'class="loader loader-small-dark" src="" data-src="' + url + '"></a></li>');
                 visibleLink = this._escHtml(urlObj.filename(), false);
             } else {
                 visibleLink = this._escHtml(urlObj.readable(), false);
             }
 
-            textParts.push('<a href="' + this._escHtml(url, true) + '" target="_newtab">' +
-                visibleLink + '</a>');
+            textParts.push('<a href="' + url + '" target="_newtab">' + visibleLink + '</a>');
             pos = end;
 
             return url;
