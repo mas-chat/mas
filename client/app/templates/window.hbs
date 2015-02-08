@@ -20,7 +20,6 @@
             {{dayDivider model.messages _view.contentIndex}}
             <div class="line {{message.cat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
         {{/each}}
-
         <div class="window-upload">
             <div class="js-upload">
                 <div class="progress progress-success">
@@ -66,7 +65,7 @@
         <form {{action "sendMessage" on="submit"}}>
             {{input placeholder="Write here…" class="form-control" valueBinding="newMessage"}}
             {{#if model.scrollLock}}
-                {{#if newMessagesCount}}
+                {{#if model.newMessagesCount}}
                     <div class="window-new-messages">
                         <span class="glyphicon glyphicon-arrow-down"></span> New messages
                     </div>
