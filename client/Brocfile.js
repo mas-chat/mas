@@ -35,7 +35,6 @@ app.import('bower_components/uri.js/src/URI.js');
 
 //app.import('bower_components/jquery/dist/jquery.js');
 app.import('bower_components/jquery-cookie/jquery.cookie.js');
-app.import('bower_components/handlebars/handlebars.js');
 app.import('bower_components/TitleNotifier.js/title_notifier.js');
 app.import('bower_components/jquery.atwho/dist/js/jquery.atwho.js');
 app.import('bower_components/FileAPI/dist/FileAPI.html5.js');
