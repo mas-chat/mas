@@ -124,18 +124,16 @@ export default Ember.Controller.extend(UploadMixin, {
         },
 
         scrollUp: function() {
-            if (!this.get('model.deletedLine') && !this.get('model.scrollLock')) {
+            if (!this.get('model.deletedLine')) {
                 this.set('model.scrollLock', true);
                 Ember.Logger.info('scrollock on');
             }
         },
 
         scrollBottom: function() {
-            if (this.get('model.scrollLock')) {
-                this.set('model.scrollLock', false);
-                this.set('model.newMessagesCount', 0);
-                Ember.Logger.info('scrollock off');
-            }
+            this.set('model.scrollLock', false);
+            this.set('model.newMessagesCount', 0);
+            Ember.Logger.info('scrollock off');
         }
     },
 
