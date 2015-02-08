@@ -258,13 +258,19 @@ export default Ember.View.extend({
                     return;
                 }
 
+                let windowView = Ember.View.views[$el.attr('id')];
+
                 $el.velocity('stop').velocity(newDim, {
                     duration: duration,
                     visibility: 'visible',
+                    begin: function() {
+                        windowView.set('animating', true);
+                    },
                     complete: function() {
+                        windowView.set('animating', false);
+
                         // Make sure window shows the latest messages
-                        let view = Ember.View.views[$el.attr('id')];
-                        Ember.run.next(view, view.layoutDone);
+                        Ember.run.next(windowView, windowView.layoutDone);
                     }
                 });
             }.bind(this));
