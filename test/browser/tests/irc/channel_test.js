@@ -37,7 +37,7 @@ module.exports = {
 
             // Open Join IRC channel modal
             .login('user1', '123456')
-            .click('.fa-plus')
+            .click('.lower-sidebar .fa-plus')
             .useXpath()
             .click('//a[text()="Join IRC channel…"]')
             .useCss()
