@@ -7,6 +7,9 @@ var EmberApp = require('ember-cli/lib/broccoli/ember-app'),
 var app = new EmberApp({
     lessOptions: {
         paths: [ 'bower_components' ]
+    },
+    vendorFiles: {
+        'handlebars.js': null // Hopefully temporary hack, see ember 1.10 release blog post.
     }
 });
 
