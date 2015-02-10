@@ -19,12 +19,23 @@
 import Ember from 'ember';
 
 export default Ember.Object.extend({
-    process: function(command) {
-        let name = command.id;
-        let targetWindow = null;
-        let windowId = command.windowId;
+    initReceived: false,
+    initBuffer: [],
 
-        delete command.id;
+    process: function(notification) {
+        if (!this.initReceived && notification.id !== 'INITDONE') {
+            this.initBuffer.push(notification);
+        } else {
+            this.handleNotification(notification);
+        }
+    },
+
+    handleNotification: function(notification) {
+        let name = notification.id;
+        let targetWindow = null;
+        let windowId = notification.windowId;
+
+        delete notification.id;
 
         Ember.Logger.info('<-- NTF: ' + name);
 
@@ -35,9 +46,9 @@ export default Ember.Object.extend({
         let funcName = '_handle' + name.charAt(0) + name.substring(1).toLowerCase();
 
         if (!this[funcName]) {
-            Ember.Logger.warn('Unknown command received: ' + name);
+            Ember.Logger.warn('Unknown notification received: ' + name);
         } else {
-            this[funcName](command, targetWindow);
+            this[funcName](notification, targetWindow);
         }
     },
 
@@ -76,13 +87,19 @@ export default Ember.Object.extend({
     },
 
     _handleInitdone: function() {
-        // INITDONE command usually arrives together with another commands. These
-        // other commands update property bindings. INITDONE triggers code that
+        // INITDONE notification usually arrives together with another notifications. These
+        // other notifications update property bindings. INITDONE triggers code that
         // assumes these updates have been processed. Therefore INITDONE must be
         // processed one run loop round later than everything else.
+        this.initBuffer.forEach(function(notification) {
+            this.handleNotification(notification);
+        }.bind(this));
+
         Ember.run.next(this, function() {
             this.get('container').lookup('controller:application').set('initDone', true);
         });
+
+        this.set('initReceived', true);
     },
 
     _handleUsers: function(data) {
