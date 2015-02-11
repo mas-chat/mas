@@ -156,7 +156,7 @@ export default Ember.View.extend({
 
         this.$('.form-control').atwho({
             at: ':',
-            tpl: emojiListTemplate,
+            displayTpl: emojiListTemplate,
             data: emojisList
         });
 
