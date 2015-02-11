@@ -1,0 +1,17 @@
+{
+    "env": {
+        // TBD: Split this file for client and server
+        "browser": true,
+        "node": true
+    },
+    "rules": {
+        "strict": [2, "global"],
+        "quotes": [2, "single", "avoid-escape"]
+    },
+    "ecmaFeatures": {
+        "blockBindings": true,
+        "forOf": true,
+        "templateStrings": true,
+        "generators": true
+    },
+}

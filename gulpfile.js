@@ -8,6 +8,7 @@ var path = require('path'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
     jshint = require('gulp-jshint'),
+    eslint = require('gulp-eslint'),
     jscs = require('gulp-jscs'),
     bower = require('gulp-bower'),
     less = require('gulp-less'),
@@ -62,6 +63,15 @@ gulp.task('jscs', function() {
         .pipe(jscs());
 });
 
+gulp.task('eslint', function() {
+    return gulp.src(paths.serverJavaScripts
+        .concat(paths.clientJavaScripts)
+        .concat(paths.testJavaScripts))
+        .pipe(eslint())
+        .pipe(eslint.format());
+ //       .pipe(eslint.failOnError());
+});
+
 gulp.task('bower', function() {
     return bower();
 });
@@ -107,4 +117,4 @@ gulp.task('watch', function() {
 });
 
 // The default task
-gulp.task('default', [ 'jshint' ]);
+gulp.task('default', [ 'jshint', 'jscs', 'eslint' ]);
