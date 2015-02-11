@@ -39,7 +39,7 @@ module.exports = {
             .login('user1', '123456')
             .click('.lower-sidebar .fa-plus')
             .useXpath()
-            .click('//a[text()="Join IRC channel…"]')
+            .click('//a[contains(text(), "Join IRC channel")]')
             .useCss()
 
             // Join #test IRC channel
