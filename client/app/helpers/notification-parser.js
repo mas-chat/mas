@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* globals _ */
+
 import Ember from 'ember';
 
 export default Ember.Object.extend({
@@ -87,15 +89,36 @@ export default Ember.Object.extend({
     },
 
     _handleInitdone: function() {
-        // INITDONE notification usually arrives together with another notifications. These
-        // other notifications update property bindings. INITDONE triggers code that
-        // assumes these updates have been processed. Therefore INITDONE must be
-        // processed one run loop round later than everything else.
+        // An optimization to handle ADDTEXT notifications separately in batches
+        let addTexts = _.remove(this.initBuffer, function(notification) {
+            return notification.id === 'ADDTEXT';
+        });
+
         this.initBuffer.forEach(function(notification) {
             this.handleNotification(notification);
         }.bind(this));
 
+        let grouped = _.groupBy(addTexts, function(notification) {
+            return notification.windowId;
+        });
+
+        Object.keys(grouped).forEach(function(windowId) {
+            let messages = _.map(grouped[windowId], function(notification) {
+                delete notification.windowId;
+                return this.get('container').lookup('model:message').setProperties(notification);
+            }.bind(this));
+
+            let targetWindow = this.get('store.windows').findBy('windowId', parseInt(windowId));
+
+            // Now we are able to update the whole window backlog in one go.
+            targetWindow.messages.pushObjects(messages);
+        }.bind(this));
+
         Ember.run.next(this, function() {
+            // INITDONE notification usually arrives together with another notifications. These
+            // other notifications update property bindings. INITDONE triggers code that
+            // assumes these updates have been processed. Therefore initDone must be
+            // triggered one run loop round later than everything else.
             this.get('container').lookup('controller:application').set('initDone', true);
         });
 
