@@ -19,7 +19,8 @@
 
 require('./lib/init')('frontend');
 
-let koa = require('koa'),
+let path = require('path'),
+    koa = require('koa'),
     hbs = require('koa-hbs'),
     error = require('koa-error'),
     compress = require('koa-compress'),
@@ -52,7 +53,7 @@ app.use(passport.initialize());
 
 app.use(hbs.middleware({
     defaultLayout: 'layouts/main',
-    viewPath: __dirname + '/views'
+    viewPath: path.join(__dirname, 'views')
 }));
 
 app.use(userSession());
