@@ -149,14 +149,12 @@ export default Ember.View.extend({
             return { id: i, name: value };
         });
 
-        let emojiListTemplate =
-            '<li data-value=":${name}:">' +
-            '<img src="/app/assets/images/emoji/${name}.png">${name}' +
-            '</li>';
+        let emojiListTemplate = '<li><img src="/app/assets/images/emoji/${name}.png"> ${name}</li>';
 
         this.$('.form-control').atwho({
             at: ':',
             displayTpl: emojiListTemplate,
+            insertTpl: ':${name}:',
             data: emojisList
         });
 

@@ -28,7 +28,7 @@ var app = new EmberApp({
 
 app.import('bower_components/momentjs/moment.js');
 app.import('bower_components/howler/howler.js');
-app.import('bower_components/lodash/dist/lodash.js');
+app.import('bower_components/lodash/lodash.js');
 app.import('bower_components/bootstrap/dist/js/bootstrap.js');
 
 app.import('bower_components/uri.js/src/IPv6.js');
@@ -42,7 +42,7 @@ app.import('bower_components/TitleNotifier.js/title_notifier.js');
 app.import('bower_components/jquery.atwho/dist/js/jquery.atwho.js');
 app.import('bower_components/FileAPI/dist/FileAPI.html5.js');
 app.import('bower_components/Caret.js/dist/jquery.caret.min.js');
-app.import('bower_components/emojify.js/emojify.js');
+app.import('bower_components/emojify.js/dist/js/emojify.js');
 app.import('bower_components/magnific-popup/dist/jquery.magnific-popup.js');
 app.import('bower_components/bootstrap-contextmenu/bootstrap-contextmenu.js');
 app.import('bower_components/velocity/velocity.js');
@@ -59,9 +59,9 @@ var fontsBootstrap = pickFiles('bower_components/bootstrap/dist/fonts', {
    destDir: '/assets/fonts'
 });
 
-var emojify = pickFiles('bower_components/emojify.js/images', {
+var emojify = pickFiles('bower_components/emojify.js/dist/images/basic', {
     srcDir: '/',
-    destDir: '/assets/images'
+    destDir: '/assets/images/emoji'
 });
 
 // Merge the app tree and our new font assets.
