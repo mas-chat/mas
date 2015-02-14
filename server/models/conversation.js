@@ -64,6 +64,25 @@ exports.create = function*(options) {
     return new Conversation(conversationId, options, {});
 };
 
+exports.delete = function*(conversationId) {
+    let conversation = yield get(conversationId);
+
+    yield redis.del(`conversation:${conversationId}`);
+
+    if (conversation.type === 'group') {
+        yield redis.hdel('index:conversation',
+            'group:' + conversation.network + ':' + conversation.name);
+    } else {
+        let userIds = Object.keys(conversation.members).sort();
+
+        yield redis.hdel('index:conversation',
+            '1on1:' + conversation.network + ':' + userIds[0] + ':' + userIds[1]);
+    }
+
+    yield redis.del(`conversationmembers:${conversationId}`);
+    yield redis.del(`conversationmsgs:${conversationId}`);
+};
+
 exports.get = function*(conversationId) {
     return yield get(conversationId);
 };
