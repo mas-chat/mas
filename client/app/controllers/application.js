@@ -21,6 +21,7 @@ import Ember from 'ember';
 export default Ember.Controller.extend({
     initDone: false,
     currentAlert: null,
+    alerts: null,
 
     socket: Ember.inject.service(),
 
@@ -41,12 +42,12 @@ export default Ember.Controller.extend({
         }
     },
 
-    alerts: function() {
+    observeAlerts: function() {
         this._setCurrentAlert();
-    }.observes('store.alerts.@each'),
+    }.observes('alerts.@each'),
 
     _setCurrentAlert: function() {
-        let alerts = this.get('store.alerts');
+        let alerts = this.get('alerts');
 
         if (this.get('currentAlert') === null && alerts.length > 0) {
             this.set('currentAlert', alerts.shift());

@@ -21,6 +21,8 @@
 import Ember from 'ember';
 
 export default Ember.Object.extend({
+    store: Ember.inject.service(),
+
     initReceived: false,
     initBuffer: [],
 
@@ -103,12 +105,17 @@ export default Ember.Object.extend({
         });
 
         Object.keys(grouped).forEach(function(windowId) {
+            windowId = parseInt(windowId);
+            let windowObject = this.get('store.windows').findBy('windowId', windowId);
+
             let messages = _.map(grouped[windowId], function(notification) {
                 delete notification.windowId;
+                notification.window = windowObject;
+
                 return this.get('container').lookup('model:message').setProperties(notification);
             }.bind(this));
 
-            let targetWindow = this.get('store.windows').findBy('windowId', parseInt(windowId));
+            let targetWindow = this.get('store.windows').findBy('windowId', windowId);
 
             // Now we are able to update the whole window backlog in one go.
             targetWindow.messages.pushObjects(messages);

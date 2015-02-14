@@ -22,6 +22,12 @@ export default Ember.Route.extend({
     modalOpen: false,
     modalQueue: Ember.A([]),
 
+    store: Ember.inject.service(),
+
+    setupController: function(controller) {
+        controller.set('alerts', this.get('store.alerts'));
+    },
+
     actions: {
         openModal: function(modalName, model) {
             if (this.get('modalOpen')) {

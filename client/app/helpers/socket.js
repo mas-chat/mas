@@ -22,6 +22,8 @@ import Ember from 'ember';
 import NotificationParser from './notification-parser';
 
 export default Ember.Object.extend({
+    store: Ember.inject.service(),
+
     sessionId: 0,
 
     _callbacks: {},
