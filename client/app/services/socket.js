@@ -17,9 +17,14 @@
 'use strict';
 
 import Ember from 'ember';
+import Socket from '../helpers/socket';
+
+let socket = Socket.create({
+    container: window.container
+});
 
 export default Ember.Service.extend({
     send: function(command, callback) {
-        window.socket.send(command, callback);
+        socket.send(command, callback);
     }
 });

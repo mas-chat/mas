@@ -17,9 +17,9 @@
 'use strict';
 
 import Ember from 'ember';
-import Users from './users';
+import Users from '../helpers/users';
 
-export default Ember.Object.extend({
+export default Ember.Service.extend({
     friends: null,
     users: null,
     windows: null,
@@ -32,5 +32,7 @@ export default Ember.Object.extend({
         this.set('friends', Ember.A([]));
         this.set('windows', Ember.A([]));
         this.set('alerts', Ember.A([]));
+
+        return this._super();
     }
 });

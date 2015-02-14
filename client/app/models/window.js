@@ -29,6 +29,7 @@ export default Ember.Object.extend({
     },
 
     socket: Ember.inject.service(),
+    store: Ember.inject.service(),
 
     windowId: 0,
     name: null,

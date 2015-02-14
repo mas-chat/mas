@@ -19,6 +19,8 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
+    store: Ember.inject.service(),
+
     model: function() {
         return this.get('store.windows');
     },
@@ -26,5 +28,6 @@ export default Ember.Route.extend({
     setupController: function(controller, model) {
         controller.set('model', model);
         controller.set('friends', this.get('store.friends'));
+        controller.set('userId', this.get('store.userId'));
     }
 });

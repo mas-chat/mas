@@ -23,7 +23,14 @@ import { play } from '../helpers/sound';
 import UploadMixin from '../mixins/upload';
 
 export default Ember.Controller.extend(UploadMixin, {
+    userId: null,
+
     socket: Ember.inject.service(),
+
+    // TBD: Only routes should access store. But as this controller is instantiated through
+    // {{render}}, there's no way to add extra data in addition to model. Component based
+    // architecture should fix this.
+    store: Ember.inject.service(),
 
     actions: {
         hide: function() {
