@@ -155,6 +155,15 @@ Conversation.prototype.set1on1Members = function*(userId, peerUserId) {
     // Update 1on1 index
     yield redis.hset('index:conversation',
         '1on1:' + this.network + ':' + userIds[0] + ':' + userIds[1], this.conversationId);
+
+    // Update 1on1conversationlist
+    if (userId.charAt(0) === 'm') {
+        yield redis.sadd(`1on1conversationlist:${userId}`, this.conversationId);
+    }
+
+    if (peerUserId.charAt(0) === 'm') {
+        yield redis.sadd(`1on1conversationlist:${peerUserId}`, this.conversationId);
+    }
 };
 
 Conversation.prototype.setGroupMembers = function*(members) {

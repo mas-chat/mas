@@ -83,6 +83,9 @@ MAS Redis structures
    group:<network>:<name> (int, conversationId)
    1on1:<network>:<userId1>:<userId2> (int, conversationId)
 
+ 1on1conversationlist:<userId> (list)
+   <conversationId1>, <conversationId2>
+
  conversationmembers:<conversationId> (hash)
    <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user), 'd' (detached, only for MAS 1on1s))
    ...
