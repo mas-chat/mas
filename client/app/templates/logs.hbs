@@ -1,17 +1,45 @@
-<div class="logs-content flex-grow-column flex-1">
-    <div>
-        <ul class="nav nav-tabs modal-header" role="tablist">
-            <li class="active"><a href="#browse" role="tab" data-toggle="tab">Browse</a></li>
-            <li><a href="#search" role="tab" data-toggle="tab">Search</a></li>
-        </ul>
+<div class="logs-controls flex-row">
+    <div class="logs-title">
+        Conversation logs
+    </div>
 
-        <div class="tab-content flex-grow-column flex-1">
-            {{partial "logs-browse"}}
-            {{partial "logs-search"}}
+    <div class="logs-mode flex-1">
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                Browse <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="#"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Browse</a></li>
+                <li><a href="#">Search</a></li>
+            </ul>
         </div>
     </div>
 
-    <div class="logs-controls flex-grow-column modal-footer">
-        <button {{action "close"}} type="button" class="btn flex-1 btn-primary">Close</button>
+    <div class="logs-dateselector flex-row">
+        <button type="button" class="btn btn-primary"><i class="fa fa-chevron-left"></i></button>
+        <div class="logs-date">23.4.2014</div>
+        <button type="button" class="btn btn-primary"><i class="fa fa-chevron-right"></i></button>
     </div>
+
+    <div class="logs-conversationselector">
+        <select class="form-control">
+            <option>Linux</option>
+            <option>Emberjs</option>
+            <option>Copenhagen</option>
+            <option>Finland</option>
+            <option>JavaScript</option>
+        </select>
+    </div>
+</div>
+
+<div class="flex-row">
+    <div class="logs-emulated-window-title group flex-row">
+        <div class="flex-1">
+            IRC Channel: foobar
+        </div>
+    </div>
+</div>
+
+<div class="flex-grow-row flex-1 logs-channel">
+    DATA
 </div>

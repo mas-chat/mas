@@ -141,6 +141,10 @@
     flex: 1;
 }
 
+.btn.toggle-button:active, .btn.toggle-button.active {
+    background-color: #4e5d6c;
+}
+
 .sidebar {
     width: 50px;
     align-items: center;
@@ -150,6 +154,10 @@
 .lower-sidebar {
     .btn {
         width: 100%;
+    }
+
+    .btn.focus {
+        outline: none;
     }
 
     & button {
@@ -182,7 +190,9 @@
 }
 
 .fullscreen {
-    background-color: @body-bg;
+    background-color: #4e5d6c;
+    right: 51px;
+    padding: 10px;
 }
 
 .webcam {
