@@ -19,5 +19,5 @@
 import Ember from 'ember';
 
 export default Ember.View.extend({
-    classNames: [ 'flex-grow-column', 'fullscreen', 'modal' ]
+    classNames: [ 'flex-column', 'fullscreen', 'modal' ]
 });
