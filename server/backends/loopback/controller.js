@@ -50,6 +50,16 @@ function *processCreate(params) {
     let userId = params.userId;
     let groupName = params.name;
     let password = params.password;
+
+    if (!groupName) {
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'CREATE_RESP',
+            status: 'error',
+            errorMsg: 'Name can\'t be empty.'
+        });
+        return;
+    }
+
     let conversation = yield conversationFactory.findGroup(groupName, 'MAS');
 
     if (conversation) {
