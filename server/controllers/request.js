@@ -39,7 +39,8 @@ let handlers = {
     WHOIS: handleWhois,
     CHAT: handleChat,
     ACKALERT: handleAckAlert,
-    LOGOUT: handleLogout
+    LOGOUT: handleLogout,
+    LIST_CONVERSATIONS: handleListConversations
 };
 
 module.exports = function*(userId, sessionId, command) {
@@ -331,6 +332,28 @@ function *handleLogout(params) {
             }
         })();
     }, 5000);
+}
+
+function *handleListConversations(params) {
+    // For now, we report all current conversations.
+    // TBD: Report also past 1on1s, see redis '1on1conversationlist'
+    let conversationIds = yield window.getAllConversationIds(params.userId);
+    let conversations = [];
+
+    for (let conversationId of conversationIds) {
+        let conversation = yield conversationFactory.get(conversationId);
+        conversations.push({
+            conversationId: conversation.conversationId,
+            type: conversation.type,
+            network: conversation.network,
+            name: conversation.name
+        });
+    }
+
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'LIST_CONVERSATIONS_RESP',
+        conversations: conversations
+    });
 }
 
 function *respondError(resp, userId, sessionId, msg, errorStatus) {
