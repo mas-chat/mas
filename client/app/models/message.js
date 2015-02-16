@@ -83,7 +83,7 @@ export default Ember.Object.extend({
                 textParts.push(this._escHtml(source.substring(pos, start), false));
             }
 
-            if (imgSuffixes.indexOf(urlObj.suffix()) !== -1) {
+            if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
                 url = this._escHtml(url, true);
 
                 imgUrls.push('<li><a href="' + url + '" class="user-img"><img ' +
