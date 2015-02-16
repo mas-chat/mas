@@ -186,7 +186,7 @@ function *getAllConversationIds(userId) {
 }
 
 function *getConversationId(userId, windowId) {
-    return yield redis.hget(`window:${userId}:${windowId}`, 'conversationId');
+    return parseInt(yield redis.hget(`window:${userId}:${windowId}`, 'conversationId'));
 }
 
 function *remove(userId, windowId) {
