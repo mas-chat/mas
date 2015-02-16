@@ -305,7 +305,7 @@ function *processRestarted() {
     let allUsers = yield redis.smembers('userlist');
     let networks = yield redis.smembers('networklist');
 
-    if (networks.length === 0 ) {
+    if (networks.length === 0) {
         log.error('No networks.');
     }
 
