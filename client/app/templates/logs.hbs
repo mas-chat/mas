@@ -9,37 +9,31 @@
                 Browse <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
-                <li><a href="#"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Browse</a></li>
-                <li><a href="#">Search</a></li>
+                <li><a {{action "switch" "browse"}} href="#"><i class="fa fa-check"></i> Browse</a></li>
+                <li><a {{action "logout" "search"}} href="#">Search (coming soon)</a></li>
             </ul>
         </div>
     </div>
 
     <div class="logs-dateselector flex-row">
-        <button type="button" class="btn btn-primary"><i class="fa fa-chevron-left"></i></button>
-        <div class="logs-date">23.4.2014</div>
-        <button type="button" class="btn btn-primary"><i class="fa fa-chevron-right"></i></button>
+        <button {{action "previousDay" target="view"}} type="button" class="btn btn-primary"><i class="fa fa-chevron-left"></i></button>
+        <input class="logs-date">
+        <button {{action "nextDay" target="view"}} type="button" class="btn btn-primary"><i class="fa fa-chevron-right"></i></button>
     </div>
 
     <div class="logs-conversationselector">
-        <select class="form-control">
-            <option>Linux</option>
-            <option>Emberjs</option>
-            <option>Copenhagen</option>
-            <option>Finland</option>
-            <option>JavaScript</option>
-        </select>
+        {{view "select" optionLabelPath="content.label" optionValuePath="content.conversationId" content=view.conversations value=view.selectedConversation classNames="form-control"}}
     </div>
 </div>
 
 <div class="flex-row">
     <div class="logs-emulated-window-title group flex-row">
         <div class="flex-1">
-            IRC Channel: foobar
+            {{view.selectedConversationLabel}}
         </div>
     </div>
 </div>
 
 <div class="flex-grow-row flex-1 logs-channel">
-    DATA
+    {{view.data}}
 </div>
