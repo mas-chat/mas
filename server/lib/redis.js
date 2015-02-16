@@ -55,6 +55,7 @@ exports.loadScripts = function*() {
 exports.initDB = function*() {
     let redisClient = createClient();
 
+    // TBD: Make race safe. DEL and SADD must be atomic.
     let networks = [ 'MAS' ].concat(Object.keys(conf.get('irc:networks')));
     yield redisClient.del('networklist');
     yield redisClient.sadd('networklist', networks);
