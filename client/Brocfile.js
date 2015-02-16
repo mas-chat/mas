@@ -31,6 +31,8 @@ app.import('bower_components/howler/howler.js');
 app.import('bower_components/lodash/lodash.js');
 app.import('bower_components/bootstrap/dist/js/bootstrap.js');
 
+app.import('bower_components/bootstrap-datepicker/js/bootstrap-datepicker.js');
+
 app.import('bower_components/uri.js/src/IPv6.js');
 app.import('bower_components/uri.js/src/punycode.js');
 app.import('bower_components/uri.js/src/SecondLevelDomains.js');
