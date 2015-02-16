@@ -17,6 +17,9 @@
 'use strict';
 
 import Ember from 'ember';
+import TitleBuilder from '../helpers/title-builder';
+
+let titleBuilder = TitleBuilder.create();
 
 export default Ember.Object.extend({
     init: function() {
@@ -70,23 +73,13 @@ export default Ember.Object.extend({
     }.property('users.@each', 'store.users.isDirty'),
 
     decoratedTitle: function() { // (name, topic)
-        let title;
-        let windowName = this.get('name');
-        let network = this.get('network');
-
-        if (this.get('type') === '1on1' && this.get('userId') === 'iSERVER') {
-            title = network + ' Server Messages';
-        } else if (this.get('type') === '1on1') {
-            let conversationNetwork = network === 'MAS' ? '' : network + ' ';
-            title = 'Private ' + conversationNetwork + 'conversation with ' +
-                this.get('store.users').getNick(this.get('userId'), this.get('network'));
-        } else if (network === 'MAS') {
-            title = 'Group: ' + windowName.charAt(0).toUpperCase() + windowName.substr(1);
-        } else {
-            title = network + ': ' + windowName;
-        }
-
-        return title;
+        return titleBuilder.build({
+            name: this.get('name'),
+            network: this.get('network'),
+            type: this.get('type'),
+            userId: this.get('userId'),
+            store: this.get('store')
+        });
     }.property('name', 'network', 'type', 'store.users.isDirty'),
 
     decoratedTopic: function() {
