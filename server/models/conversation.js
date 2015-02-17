@@ -19,9 +19,9 @@
 /* jshint -W079 */
 
 const assert = require('assert'),
-      elasticSearchClient = require('../lib/elasticSearch').getClient(),
       redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
+      search = require('../lib/search'),
       outbox = require('../lib/outbox'),
       window = require('./window');
 
@@ -254,9 +254,7 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
 
     yield this._streamAddText(msg, excludeSession);
 
-    if (elasticSearchClient) {
-        this._storeNewMessage(msg);
-    }
+    search.storeMessage(msg);
 };
 
 Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, excludeSession) {
@@ -414,25 +412,6 @@ Conversation.prototype._remove = function*() {
     }
 
     yield redis.hdel('index:conversation', key);
-};
-
-Conversation.prototype._storeNewMessage = function(msg) {
-    elasticSearchClient.create({
-        index: 'messages',
-        type: 'message',
-        id: msg.gid,
-        body: {
-            ts: msg.ts * 1000,
-            body: msg.body,
-            cat: msg.cat,
-            userId: msg.userId,
-            conversationId: this.conversationId
-        }
-    }, function(error) {
-        if (error) {
-            log.warn(msg.userId, 'Elasticsearch error. Failed to index messsage:' + error);
-        }
-    });
 };
 
 function *get(conversationId) {

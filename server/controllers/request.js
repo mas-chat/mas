@@ -23,6 +23,7 @@ let assert = require('assert'),
     log = require('../lib/log'),
     redis = require('../lib/redis').createClient(),
     outbox = require('../lib/outbox'),
+    search = require('../lib/search'),
     courier = require('../lib/courier').createEndPoint('command'),
     conversationFactory = require('../models/conversation'),
     window = require('../models/window'),
@@ -40,7 +41,8 @@ let handlers = {
     CHAT: handleChat,
     ACKALERT: handleAckAlert,
     LOGOUT: handleLogout,
-    LIST_CONVERSATIONS: handleListConversations
+    LIST_CONVERSATIONS: handleListConversations,
+    GET_CONVERSATION_LOG: handleGetConversationLog
 };
 
 module.exports = function*(userId, sessionId, command) {
@@ -339,20 +341,48 @@ function *handleListConversations(params) {
     // TBD: Report also past 1on1s, see redis '1on1conversationlist'
     let conversationIds = yield window.getAllConversationIds(params.userId);
     let conversations = [];
+    let peerUserId;
 
     for (let conversationId of conversationIds) {
         let conversation = yield conversationFactory.get(conversationId);
-        conversations.push({
-            conversationId: conversation.conversationId,
-            type: conversation.type,
-            network: conversation.network,
-            name: conversation.name
-        });
+
+        if (conversation.type === '1on1') {
+            peerUserId = yield conversation.getPeerUserId(params.userId);
+        }
+
+        if (peerUserId !== 'iSERVER') {
+            conversations.push({
+                conversationId: conversation.conversationId,
+                type: conversation.type,
+                network: conversation.network,
+                name: conversation.name,
+                userId: peerUserId
+            });
+        }
     }
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'LIST_CONVERSATIONS_RESP',
         conversations: conversations
+    });
+}
+
+function *handleGetConversationLog(params) {
+    /* jshint noyield:true */
+
+    let command = params.command;
+    let conversationId = command.conversationId;
+
+    // TBD: Only accept user's conversationIds
+
+    search.getMessagesForDay(conversationId, command.start, command.end, function(results) {
+        co(function*() {
+            yield outbox.queue(params.userId, params.sessionId, {
+                id: 'GET_CONVERSATION_LOG_RESP',
+                status: results === null ? 'ERROR' : 'OK',
+                results: results
+            });
+        })();
     });
 }
 

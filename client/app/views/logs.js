@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* globals moment */
+
 import Ember from 'ember';
 import TitleBuilder from '../helpers/title-builder';
 
@@ -90,11 +92,19 @@ export default Ember.View.extend({
     },
 
     _fetchData: function() {
-        let epochTs = moment(this.$dateInput.datepicker('getDate')).unix();
-        let daysSinceEpoch = Math.floor(epochTs / 3600 / 24);
+        // Beginning and end of the selected day in unix time format
+        let date = this.$dateInput.datepicker('getDate');
+        let epochTsStart = moment(date).startOf('day').unix();
+        let epochTsEnd = moment(date).endOf('day').unix();
 
-        // TBD
-        daysSinceEpoch = daysSinceEpoch;
+        this.get('socket').send({
+            id: 'GET_CONVERSATION_LOG',
+            conversationId: this.get('selectedConversation'),
+            start: epochTsStart,
+            end: epochTsEnd
+        }, function(resp) {
+            this.set('data', JSON.stringify(resp));
+        }.bind(this));
     },
 
     _fetchConversations: function() {
