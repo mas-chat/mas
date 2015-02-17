@@ -18,29 +18,14 @@
 
 /* jshint -W079 */
 
-let assert = require('assert'),
-    elasticsearch = require('elasticsearch'),
-    conf = require('../lib/conf'),
-    redis = require('../lib/redis').createClient(),
-    log = require('../lib/log'),
-    outbox = require('../lib/outbox'),
-    window = require('./window');
+const assert = require('assert'),
+      elasticSearchClient = require('../lib/elasticSearch').getClient(),
+      redis = require('../lib/redis').createClient(),
+      log = require('../lib/log'),
+      outbox = require('../lib/outbox'),
+      window = require('./window');
 
 let MSG_BUFFER_SIZE = 200;
-let elasticSearchClient = null;
-
-if (conf.get('elasticsearch:enabled')) {
-    let elasticsearchUrl = conf.get('elasticsearch:host') + ':' + conf.get('elasticsearch:port');
-
-    log.info('Connecting to elasticsearch: ' + elasticsearchUrl);
-
-    elasticSearchClient = new elasticsearch.Client({
-        host: elasticsearchUrl,
-        keepAlive: true,
-        maxSockets: 15,
-        minSockets: 10
-    });
-}
 
 exports.create = function*(options) {
     let conversationId = yield redis.incr('nextGlobalConversationId');
@@ -437,7 +422,7 @@ Conversation.prototype._storeNewMessage = function(msg) {
         type: 'message',
         id: msg.gid,
         body: {
-            ts: msg.ts,
+            ts: msg.ts * 1000,
             body: msg.body,
             cat: msg.cat,
             userId: msg.userId,
@@ -445,7 +430,7 @@ Conversation.prototype._storeNewMessage = function(msg) {
         }
     }, function(error) {
         if (error) {
-            log.warn(msg.userId, 'Elasticsearch error. Failed to index messsage.');
+            log.warn(msg.userId, 'Elasticsearch error. Failed to index messsage:' + error);
         }
     });
 };
