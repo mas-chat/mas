@@ -29,11 +29,17 @@
 <div class="flex-row">
     <div class="logs-emulated-window-title group flex-row">
         <div class="flex-1">
-            {{view.selectedConversationLabel}}
+            {{view.selectedConversationLabel}} on {{view.friendlyDate}}
         </div>
     </div>
 </div>
 
-<div class="flex-grow-row flex-1 logs-channel">
-    {{view.data}}
+<div class="flex-1 flex-column logs-channel window-messages">
+    {{#each message in view.messages}}
+        <div class="line {{message.cat}}">00:00<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
+    {{else}}
+        <div class='logs-no-messages flex-1'>
+            <div>No recorded messages on {{view.friendlyDate}}.</div>
+        </div>
+    {{/each}}
 </div>

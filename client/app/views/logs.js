@@ -30,9 +30,10 @@ export default Ember.View.extend({
     store: Ember.inject.service(),
 
     $dateInput: null,
+    currentDate: null,
     conversations: null,
     selectedConversation: null,
-    data: 'JEEE',
+    messages: null,
 
     selectedConversationLabel: function() {
         if (!this.get('conversations')) {
@@ -51,6 +52,14 @@ export default Ember.View.extend({
         return this.get('conversations')[selected].label;
     }.property('selectedConversation', 'conversations.@each'),
 
+    selectedConversationChanged: function() {
+        this._fetchData();
+    }.observes('selectedConversation'),
+
+    friendlyDate: function() {
+        return moment(this.get('currentDate')).format('dddd, MMMM Do YYYY');
+    }.property('currentDate'),
+
     actions: {
         nextDay: function() {
             this._seek(1);
@@ -64,6 +73,9 @@ export default Ember.View.extend({
     init: function() {
         this._super();
 
+        this.set('currentDate', new Date());
+
+        this.messages = Ember.A([]);
         this.conversationLabels = Ember.A([ 'Loading…' ]);
     },
 
@@ -79,21 +91,23 @@ export default Ember.View.extend({
         });
 
         this.$dateInput.datepicker().on('changeDate', function() {
+            this.set('currentDate', this.$dateInput.datepicker('getDate'));
             this._fetchData();
         }.bind(this));
-
-        this.$dateInput.datepicker('update', new Date());
     },
 
     _seek: function(days) {
-        let currentDate = this.$dateInput.datepicker('getDate');
-        this.$dateInput.datepicker('update', moment(currentDate).add(days, 'd').toDate());
+        let newDate = moment(this.get('currentDate')).add(days, 'd').toDate();
+
+        this.set('currentDate', newDate);
+        this.$dateInput.datepicker('update', newDate);
+
         this._fetchData();
     },
 
     _fetchData: function() {
         // Beginning and end of the selected day in unix time format
-        let date = this.$dateInput.datepicker('getDate');
+        let date = this.get('currentDate');
         let epochTsStart = moment(date).startOf('day').unix();
         let epochTsEnd = moment(date).endOf('day').unix();
 
@@ -103,7 +117,14 @@ export default Ember.View.extend({
             start: epochTsStart,
             end: epochTsEnd
         }, function(resp) {
-            this.set('data', JSON.stringify(resp));
+            let messages = this.get('messages');
+            let container = this.get('container');
+            messages.clear();
+
+            resp.results.forEach(function(message) {
+                let messageRecord = container.lookup('model:message').setProperties(message);
+                messages.pushObject(messageRecord);
+            }.bind(this));
         }.bind(this));
     },
 
@@ -125,6 +146,7 @@ export default Ember.View.extend({
             }.bind(this)));
 
             this.set('selectedConversation', resp.conversations[0].conversationId);
+            this._seek(0);
         }.bind(this));
     }
 });
