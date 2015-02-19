@@ -254,7 +254,7 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
 
     yield this._streamAddText(msg, excludeSession);
 
-    search.storeMessage(msg);
+    search.storeMessage(this.conversationId, msg);
 };
 
 Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, excludeSession) {

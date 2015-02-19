@@ -19,7 +19,7 @@
 const elasticSearchClient = require('./elasticSearch').getClient(),
       log = require('./log');
 
-exports.storeMessage = function(msg) {
+exports.storeMessage = function(conversationId, msg) {
     if (!elasticSearchClient) {
         warn();
         return false;
@@ -34,7 +34,7 @@ exports.storeMessage = function(msg) {
             body: msg.body,
             cat: msg.cat,
             userId: msg.userId,
-            conversationId: this.conversationId
+            conversationId: conversationId
         }
     }, function(error) {
         if (error) {
