@@ -45,6 +45,10 @@ export default Ember.Controller.extend(UploadMixin, {
             });
         },
 
+        browse: function() {
+            this.set('logModeEnabled', true);
+        },
+
         sendMessage: function() {
             let text = this.get('newMessage');
             let messageRecord = this.get('container').lookup('model:message');
@@ -144,6 +148,7 @@ export default Ember.Controller.extend(UploadMixin, {
         }
     },
 
+    logModeEnabled: false,
     initDone: Ember.computed.alias('controllers.application.initDone'),
 
     newMessageReceived: function() {

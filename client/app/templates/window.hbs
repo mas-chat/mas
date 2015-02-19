@@ -15,48 +15,52 @@
 </div>
 
 <div class="flex-row flex-1 window-content">
-    <div class="window-messages flex-1">
-        {{#each message in model.messages}}
-            {{dayDivider model.messages _view.contentIndex}}
-            <div class="line {{message.cat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
-        {{/each}}
-        <div class="window-upload">
-            <div class="js-upload">
-                <div class="progress progress-success">
-                    <div class="js-progress bar"></div>
+    {{#if logModeEnabled}}
+        {{log-panel enabled=logModeEnabled window=model}}
+    {{else}}
+        <div class="window-messages flex-1">
+            {{#each message in model.messages}}
+                {{dayDivider model.messages _view.contentIndex}}
+                <div class="line {{message.cat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
+            {{/each}}
+            <div class="window-upload">
+                <div class="js-upload">
+                    <div class="progress progress-success">
+                        <div class="js-progress bar"></div>
+                    </div>
+                    <span class="btn-txt">Uploading (<span class="js-size"></span>)</span>
                 </div>
-                <span class="btn-txt">Uploading (<span class="js-size"></span>)</span>
             </div>
         </div>
-    </div>
 
-    {{#if isGroup}}
-        <div class="window-members">
-            {{#each name in model.operatorNames}}
-                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="window-operator">
-                        {{name.nick}}
+        {{#if isGroup}}
+            <div class="window-members">
+                {{#each name in model.operatorNames}}
+                    <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                        <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                        <div class="window-operator">
+                            {{name.nick}}
+                        </div>
                     </div>
-                </div>
-            {{/each}}
-            {{#each name in model.voiceNames}}
-                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="window-voice">
-                        {{name.nick}}
+                {{/each}}
+                {{#each name in model.voiceNames}}
+                    <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                        <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                        <div class="window-voice">
+                            {{name.nick}}
+                        </div>
                     </div>
-                </div>
-            {{/each}}
-            {{#each name in model.userNames}}
-                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="window-user">
-                        {{name.nick}}
+                {{/each}}
+                {{#each name in model.userNames}}
+                    <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                        <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                        <div class="window-user">
+                            {{name.nick}}
+                        </div>
                     </div>
-                </div>
-            {{/each}}
-        </div>
+                {{/each}}
+            </div>
+        {{/if}}
     {{/if}}
 </div>
 
@@ -89,6 +93,9 @@
                 <li {{action "openModal" "password-modal" model}}><a href="#">Change password&hellip;</a></li>
                 <li {{action "openModal" "topic-modal" model}}><a href="#">Edit topic&hellip;</a></li>
                 <li {{action "openModal" "alerts-modal" model}}><a href="#">Configure alerts&hellip;</a></li>
+                <li class="divider"></li>
+                <li {{action "browse"}}><a href="#">Browse history&hellip;</a></li>
+                <li {{action "search"}}><a href="#">Search history&hellip;</a></li>
                 <li class="divider"></li>
                 <li {{action "openModal" "capture-modal" model}}><a href="#">Take and upload photo&hellip;</a></li>
                 <li class="divider"></li>

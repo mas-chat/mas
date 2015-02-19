@@ -23,38 +23,19 @@ import TitleBuilder from '../helpers/title-builder';
 
 let titleBuilder = TitleBuilder.create();
 
-export default Ember.View.extend({
-    classNames: [ 'flex-column', 'fullscreen', 'modal' ],
+export default Ember.Component.extend({
+    classNames: [ 'flex-column', 'flex-1' ],
+    classNameBindings: [ 'enabled:visible:hidden' ],
 
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
+    enabled: true,
+    window: null,
+
     $dateInput: null,
     currentDate: null,
-    conversations: null,
-    selectedConversation: null,
     messages: null,
-
-    selectedConversationLabel: function() {
-        if (!this.get('conversations')) {
-            return 'No conversations.';
-        }
-
-        let selected = 0;
-
-        this.get('conversations').some(function(elem, index) {
-            if (elem.conversationId === parseInt(this.get('selectedConversation'))) {
-                selected = index;
-                return true;
-            }
-        }.bind(this));
-
-        return this.get('conversations')[selected].label;
-    }.property('selectedConversation', 'conversations.@each'),
-
-    selectedConversationChanged: function() {
-        this._fetchData();
-    }.observes('selectedConversation'),
 
     friendlyDate: function() {
         return moment(this.get('currentDate')).format('dddd, MMMM Do YYYY');
@@ -67,6 +48,10 @@ export default Ember.View.extend({
 
         previousDay: function() {
             this._seek(-1);
+        },
+
+        exit: function() {
+            this.set('enabled', false);
         }
     },
 
@@ -76,12 +61,9 @@ export default Ember.View.extend({
         this.set('currentDate', new Date());
 
         this.messages = Ember.A([]);
-        this.conversationLabels = Ember.A([ 'Loading…' ]);
     },
 
     didInsertElement: function() {
-        this._fetchConversations();
-
         this.$dateInput = this.$('.logs-date');
 
         this.$dateInput.datepicker({
@@ -94,6 +76,8 @@ export default Ember.View.extend({
             this.set('currentDate', this.$dateInput.datepicker('getDate'));
             this._fetchData();
         }.bind(this));
+
+        this._seek(0);
     },
 
     _seek: function(days) {
@@ -113,40 +97,20 @@ export default Ember.View.extend({
 
         this.get('socket').send({
             id: 'GET_CONVERSATION_LOG',
-            conversationId: this.get('selectedConversation'),
+            windowId: this.get('window.windowId'),
             start: epochTsStart,
             end: epochTsEnd
         }, function(resp) {
+            let windowObject = this.get('window');
             let messages = this.get('messages');
             let container = this.get('container');
             messages.clear();
 
             resp.results.forEach(function(message) {
                 let messageRecord = container.lookup('model:message').setProperties(message);
+                messageRecord.set('window', windowObject);
                 messages.pushObject(messageRecord);
             }.bind(this));
         }.bind(this));
     },
-
-    _fetchConversations: function() {
-        this.get('socket').send({
-            id: 'LIST_CONVERSATIONS'
-        }, function(resp) {
-            this.set('conversations', resp.conversations.map(function(elem) {
-                return {
-                    conversationId: elem.conversationId,
-                    label: titleBuilder.build({
-                        name: elem.name,
-                        network: elem.network,
-                        type: elem.type,
-                        userId: elem.userId,
-                        store: this.get('store')
-                    })
-                };
-            }.bind(this)));
-
-            this.set('selectedConversation', resp.conversations[0].conversationId);
-            this._seek(0);
-        }.bind(this));
-    }
 });

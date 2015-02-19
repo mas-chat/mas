@@ -1,0 +1,29 @@
+<div class="flex-row logs-controls">
+    <button {{action "exit"}} type="button" class="btn btn-primary">Back to normal view</button>
+
+    <div class="logs-mode flex-1">
+        <div class="btn-group">
+            <ul class="dropdown-menu" role="menu">
+                <li><a {{action "switch" "browse"}} href="#"><i class="fa fa-check"></i> Browse</a></li>
+                <li><a {{action "logout" "search"}} href="#">Search (coming soon)</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="logs-dateselector flex-row">
+        <button {{action "previousDay"}} type="button" class="btn btn-primary"><i class="fa fa-chevron-left"></i></button>
+        <input class="logs-date">
+        <button {{action "nextDay"}} type="button" class="btn btn-primary"><i class="fa fa-chevron-right"></i></button>
+    </div>
+</div>
+
+<div class="flex-1 flex-column logs-channel window-messages">
+    {{#each message in view.messages}}
+        {{dayDivider view.messages _view.contentIndex}}
+        <div class="line {{message.cat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
+    {{else}}
+        <div class='logs-no-messages flex-1'>
+            <div>No recorded messages on {{view.friendlyDate}}.</div>
+        </div>
+    {{/each}}
+</div>
