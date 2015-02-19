@@ -19,9 +19,6 @@
 /* globals moment */
 
 import Ember from 'ember';
-import TitleBuilder from '../helpers/title-builder';
-
-let titleBuilder = TitleBuilder.create();
 
 export default Ember.Component.extend({
     classNames: [ 'flex-column', 'flex-1' ],
@@ -112,5 +109,5 @@ export default Ember.Component.extend({
                 messages.pushObject(messageRecord);
             }.bind(this));
         }.bind(this));
-    },
+    }
 });

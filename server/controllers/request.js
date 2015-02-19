@@ -341,7 +341,7 @@ function *handleGetConversationLog(params) {
     if (!params.conversation) {
         yield outbox.queue(params.userId, params.sessionId, {
             id: 'GET_CONVERSATION_LOG_RESP',
-            status: 'ERROR',
+            status: 'ERROR'
         });
         return;
     }
