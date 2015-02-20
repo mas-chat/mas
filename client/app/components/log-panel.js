@@ -112,7 +112,19 @@ export default Ember.Component.extend({
                 let messageRecord = container.lookup('model:message').setProperties(message);
                 messageRecord.set('window', windowObject);
                 messages.pushObject(messageRecord);
+                this._loadImages();
             }.bind(this));
         }.bind(this));
+    },
+
+    _loadImages: function() {
+        Ember.run.next(this, function() {
+            this.$('img[data-src]').each(function() {
+                let $img = $(this);
+                $img.attr('src', $img.data('src')).one('load error', function() {
+                    $img.removeClass('loader loader-small-dark');
+                });
+            });
+        });
     }
 });
