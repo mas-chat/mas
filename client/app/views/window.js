@@ -158,6 +158,19 @@ export default Ember.View.extend({
             data: emojisList
         });
 
+        function getNick(item) {
+            return item.nick;
+        }
+
+        let nickList = this.get('controller.model.operatorNames').map(getNick)
+            .concat(this.get('controller.model.voiceNames').map(getNick))
+            .concat(this.get('controller.model.userNames').map(getNick));
+
+        this.$('.form-control').atwho({
+            at: '@',
+            data: nickList
+        });
+
         this.$messagePanel.magnificPopup({
             type: 'image',
             delegate: '.user-img',
