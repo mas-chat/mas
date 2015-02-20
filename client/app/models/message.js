@@ -66,7 +66,7 @@ export default Ember.Object.extend({
             output = '<span class="body">' + nick + ' ' + output + '</span>';
         }
 
-        if (body.indexOf('@' + this.get('window.userNick')) != -1) {
+        if (body.indexOf('@' + this.get('window.userNick')) !== -1) {
             this.set('cat', 'mention');
         }
 
