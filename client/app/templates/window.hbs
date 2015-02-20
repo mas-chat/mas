@@ -17,54 +17,54 @@
 <div class="flex-row flex-1 window-content">
     {{#if logModeEnabled}}
         {{log-panel enabled=logModeEnabled window=model}}
-    {{else}}
-        <div class="window-messages flex-1">
-            {{#each message in model.messages}}
-                {{dayDivider model.messages _view.contentIndex}}
-                <div class="line {{message.cat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
-            {{/each}}
-            <div class="window-upload">
-                <div class="js-upload">
-                    <div class="progress progress-success">
-                        <div class="js-progress bar"></div>
-                    </div>
-                    <span class="btn-txt">Uploading (<span class="js-size"></span>)</span>
+    {{/if}}
+
+    <div {{bind-attr class=":window-messages :flex-1 logModeEnabled:hidden"}}>
+        {{#each message in model.messages}}
+            {{dayDivider model.messages _view.contentIndex}}
+            <div class="line {{message.cat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
+        {{/each}}
+        <div class="window-upload">
+            <div class="js-upload">
+                <div class="progress progress-success">
+                    <div class="js-progress bar"></div>
                 </div>
+                <span class="btn-txt">Uploading (<span class="js-size"></span>)</span>
             </div>
         </div>
+    </div>
 
-        {{#if isGroup}}
-            <div class="window-members">
-                {{#each name in model.operatorNames}}
-                    <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                        <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                        <div class="window-operator">
-                            {{name.nick}}
-                        </div>
+    {{#if isGroup}}
+        <div {{bind-attr class=":window-members logModeEnabled:hidden"}}>
+            {{#each name in model.operatorNames}}
+                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <div class="window-operator">
+                        {{name.nick}}
                     </div>
-                {{/each}}
-                {{#each name in model.voiceNames}}
-                    <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                        <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                        <div class="window-voice">
-                            {{name.nick}}
-                        </div>
+                </div>
+            {{/each}}
+            {{#each name in model.voiceNames}}
+                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <div class="window-voice">
+                        {{name.nick}}
                     </div>
-                {{/each}}
-                {{#each name in model.userNames}}
-                    <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                        <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                        <div class="window-user">
-                            {{name.nick}}
-                        </div>
+                </div>
+            {{/each}}
+            {{#each name in model.userNames}}
+                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <div class="window-user">
+                        {{name.nick}}
                     </div>
-                {{/each}}
-            </div>
-        {{/if}}
+                </div>
+            {{/each}}
+        </div>
     {{/if}}
 </div>
 
-<div class="window-toolbar flex-row">
+<div {{bind-attr class=":window-toolbar :flex-row logModeEnabled:hidden"}}>
     <div class="window-add-text-container flex-1">
         <form {{action "sendMessage" on="submit"}}>
             {{input placeholder="Write here…" class="form-control" valueBinding="newMessage"}}
