@@ -60,6 +60,12 @@ export default Ember.Object.extend({
 
     password: null,
 
+    userNick: function() {
+        // Here so that not every message object needs to fetch user's nick separately
+        let userId = this.get('store.userId');
+        return this.get('store.users').getNick(userId, this.get('network'));
+    }.property('network'),
+
     operatorNames: function() {
         return this._mapUserIdsToNicks('operators');
     }.property('operators.@each', 'store.users.isDirty'),

@@ -66,8 +66,12 @@ export default Ember.Object.extend({
             output = '<span class="body">' + nick + ' ' + output + '</span>';
         }
 
+        if (body.indexOf('@' + this.get('window.userNick')) != -1) {
+            this.set('cat', 'mention');
+        }
+
         return output;
-    }.property('body'),
+    }.property('body', 'window.userNick'),
 
     _decorate: function(text) {
         let textParts = [];
