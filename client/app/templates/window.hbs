@@ -35,11 +35,11 @@
     </div>
 
     {{#if isGroup}}
-        <div {{bind-attr class=":window-members logModeEnabled:hidden"}}>
+        <div {{bind-attr class=":window-members logModeEnabled:hidden wideMemberList:window-members-wide"}}>
             {{#each name in model.operatorNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="window-operator">
+                    <div {{bind-attr class=":window-operator wideMemberList::hidden"}}>
                         {{name.nick}}
                     </div>
                 </div>
@@ -47,7 +47,7 @@
             {{#each name in model.voiceNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="window-voice">
+                    <div {{bind-attr class=":window-voice wideMemberList::hidden"}}>
                         {{name.nick}}
                     </div>
                 </div>
@@ -55,7 +55,7 @@
             {{#each name in model.userNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="window-user">
+                    <div {{bind-attr class=":window-user wideMemberList::hidden"}}>
                         {{name.nick}}
                     </div>
                 </div>
@@ -93,6 +93,7 @@
                 <li {{action "openModal" "password-modal" model}}><a href="#">Change password&hellip;</a></li>
                 <li {{action "openModal" "topic-modal" model}}><a href="#">Edit topic&hellip;</a></li>
                 <li {{action "openModal" "alerts-modal" model}}><a href="#">Configure alerts&hellip;</a></li>
+                <li {{action "toggleMemberListWidth"}}><a href="#">Toggle member list width</a></li>
                 <li class="divider"></li>
                 <li {{action "browse"}}><a href="#">Browse history&hellip;</a></li>
                 <li class="divider"></li>
