@@ -16,11 +16,11 @@
 
 'use strict';
 
-let util = require('util'),
-    _ = require('lodash'),
-    log = require('./log'),
-    redisModule = require('./redis'),
-    redis = redisModule.createClient();
+const util = require('util'),
+      _ = require('lodash'),
+      log = require('./log'),
+      redisModule = require('./redis'),
+      redis = redisModule.createClient();
 
 exports.queue = function*(userId, sessionId, commands) {
     yield queueCommands(userId, sessionId, null, commands);
@@ -99,7 +99,7 @@ function scanUserIds(obj) {
         obj = JSON.parse(obj);
     }
 
-    for (var key in obj) {
+    for (let key in obj) {
         if (typeof obj[key] === 'object') {
             res = res.concat(scanUserIds(obj[key]));
         } else if (key === 'userId') {

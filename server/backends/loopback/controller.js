@@ -21,14 +21,14 @@
 
 require('../../lib/init')('loopback');
 
-let co = require('co'),
-    redisModule = require('../../lib/redis'),
-    conf = require('../../lib/conf'),
-    courier = require('../../lib/courier').createEndPoint('loopbackparser'),
-    outbox = require('../../lib/outbox'),
-    masWindow = require('../../models/window'),
-    nicks = require('../../models/nick'),
-    conversationFactory = require('../../models/conversation');
+const co = require('co'),
+      redisModule = require('../../lib/redis'),
+      conf = require('../../lib/conf'),
+      courier = require('../../lib/courier').createEndPoint('loopbackparser'),
+      outbox = require('../../lib/outbox'),
+      masWindow = require('../../models/window'),
+      nicks = require('../../models/nick'),
+      conversationFactory = require('../../models/conversation');
 
 co(function*() {
     yield redisModule.loadScripts();

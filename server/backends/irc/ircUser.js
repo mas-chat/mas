@@ -16,8 +16,8 @@
 
 'use strict';
 
-let redis = require('../../lib/redis').createClient(),
-    nicks = require('../../models/nick');
+const redis = require('../../lib/redis').createClient(),
+      nicks = require('../../models/nick');
 
 exports.getUserId = function*(nick, network) {
     let masUserId = yield nicks.getUserIdFromNick(nick, network);

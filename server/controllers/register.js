@@ -16,16 +16,16 @@
 
 'use strict';
 
-let forms = require('forms'),
-    fields = forms.fields,
-    widgets = forms.widgets,
-    validators = forms.validators,
-    Q = require('q'),
-    httpStatus = require('statuses'),
-    redis = require('../lib/redis').createClient(),
-    log = require('../lib/log'),
-    cookie = require('../lib/cookie'),
-    User = require('../models/user');
+const forms = require('forms'),
+      fields = forms.fields,
+      widgets = forms.widgets,
+      validators = forms.validators,
+      Q = require('q'),
+      httpStatus = require('statuses'),
+      redis = require('../lib/redis').createClient(),
+      log = require('../lib/log'),
+      cookie = require('../lib/cookie'),
+      User = require('../models/user');
 
 let formFields = {
     name: fields.string({

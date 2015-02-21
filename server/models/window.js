@@ -16,10 +16,10 @@
 
 'use strict';
 
-let assert = require('assert'),
-    redis = require('../lib/redis').createClient(),
-    outbox = require('../lib/outbox'),
-    conversationFactory = require('./conversation');
+const assert = require('assert'),
+      redis = require('../lib/redis').createClient(),
+      outbox = require('../lib/outbox'),
+      conversationFactory = require('./conversation');
 
 exports.create = function*(userId, conversationId) {
     return yield create(userId, conversationId);

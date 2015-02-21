@@ -16,14 +16,14 @@
 
 'use strict';
 
-let fs = require('fs'),
-    path = require('path'),
-    uuid = require('uid2'),
-    nodemailer = require('nodemailer'),
-    handlebars = require('handlebars'),
-    redis = require('../lib/redis').createClient(),
-    log = require('../lib/log'),
-    conf = require('../lib/conf');
+const fs = require('fs'),
+      path = require('path'),
+      uuid = require('uid2'),
+      nodemailer = require('nodemailer'),
+      handlebars = require('handlebars'),
+      redis = require('../lib/redis').createClient(),
+      log = require('../lib/log'),
+      conf = require('../lib/conf');
 
 let transporter = nodemailer.createTransport();
 

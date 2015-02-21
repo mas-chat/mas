@@ -16,12 +16,12 @@
 
 'use strict';
 
-let assert = require('assert'),
-    redisModule = require('./redis'),
-    sendRedis = redisModule.createClient(),
-    rcvRedis = redisModule.createClient(),
-    co = require('co'),
-    log = require('./log');
+const assert = require('assert'),
+      redisModule = require('./redis'),
+      sendRedis = redisModule.createClient(),
+      rcvRedis = redisModule.createClient(),
+      co = require('co'),
+      log = require('./log');
 
 let shutdownInitiated = false;
 let processing = false;

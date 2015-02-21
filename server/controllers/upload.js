@@ -16,13 +16,13 @@
 
 'use strict';
 
-let fs = require('fs'),
-    path = require('path'),
-    mkdirp = require('mkdirp'),
-    parse = require('co-busboy'),
-    uuid = require('uid2'),
-    conf = require('../lib/conf'),
-    log = require('../lib/log');
+const fs = require('fs'),
+      path = require('path'),
+      mkdirp = require('mkdirp'),
+      parse = require('co-busboy'),
+      uuid = require('uid2'),
+      conf = require('../lib/conf'),
+      log = require('../lib/log');
 
 let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 

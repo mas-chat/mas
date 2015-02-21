@@ -16,8 +16,8 @@
 
 'use strict';
 
-let uuid = require('uid2'),
-    redis = require('../lib/redis').createClient();
+const uuid = require('uid2'),
+      redis = require('../lib/redis').createClient();
 
 exports.createSession = function*(userId) {
     let user = yield redis.hgetall(`user:${userId}`);

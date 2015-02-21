@@ -16,8 +16,8 @@
 
 'use strict';
 
-let util = require('util'),
-    winston = require('winston');
+const util = require('util'),
+      winston = require('winston');
 
 require('colors');
 

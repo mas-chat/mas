@@ -16,10 +16,10 @@
 
 'use strict';
 
-let passport = require('../lib/passport'),
-    log = require('../lib/log'),
-    redis = require('../lib/redis').createClient(),
-    cookie = require('../lib/cookie');
+const passport = require('../lib/passport'),
+      log = require('../lib/log'),
+      redis = require('../lib/redis').createClient(),
+      cookie = require('../lib/cookie');
 
 exports.localLogin = function*(next) {
     let that = this;

@@ -18,18 +18,18 @@
 
 /*jshint -W079 */
 
-let assert = require('assert'),
-    co = require('co'),
-    log = require('../lib/log'),
-    redis = require('../lib/redis').createClient(),
-    outbox = require('../lib/outbox'),
-    search = require('../lib/search'),
-    courier = require('../lib/courier').createEndPoint('command'),
-    conversationFactory = require('../models/conversation'),
-    window = require('../models/window'),
-    friends = require('../models/friends');
+const assert = require('assert'),
+      co = require('co'),
+      log = require('../lib/log'),
+      redis = require('../lib/redis').createClient(),
+      outbox = require('../lib/outbox'),
+      search = require('../lib/search'),
+      courier = require('../lib/courier').createEndPoint('command'),
+      conversationFactory = require('../models/conversation'),
+      window = require('../models/window'),
+      friends = require('../models/friends');
 
-let handlers = {
+const handlers = {
     SEND: handleSend,
     CREATE: handleCreate,
     JOIN: handleJoin,

@@ -1,7 +1,7 @@
 // let chai = require('chai');
 // let expect = chai.expect;
 
-let User = require('../models/user');
+const User = require('../models/user');
 
 describe('User', function() {
     describe('constructor', function() {

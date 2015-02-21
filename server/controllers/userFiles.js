@@ -16,9 +16,9 @@
 
 'use strict';
 
-let path = require('path'),
-    send = require('koa-send'),
-    conf = require('../lib/conf');
+const path = require('path'),
+      send = require('koa-send'),
+      conf = require('../lib/conf');
 
 let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
