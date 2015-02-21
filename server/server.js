@@ -75,7 +75,7 @@ co(function*() {
     scheduler.init();
     server.listen(port);
 
-    log.info('MAS server started, http://localhost:' + port + '/');
+    log.info(`MAS server started, http://localhost:${port}/`);
 })();
 
 if (conf.get('frontend:demo_mode') === true) {
