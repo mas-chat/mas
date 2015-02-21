@@ -1,7 +1,3 @@
-
-Currently the only backend. MAS internal groups use a local IRC server
-until native mas-backend is ready.
-
 Notes:
 ------
 
