@@ -21,18 +21,18 @@
 
 require('../../lib/init')('irc');
 
-let assert = require('assert'),
-    co = require('co'),
-    wait = require('co-wait'),
-    log = require('../../lib/log'),
-    redisModule = require('../../lib/redis'),
-    redis = redisModule.createClient(),
-    courier = require('../../lib/courier').createEndPoint('ircparser'),
-    outbox = require('../../lib/outbox'),
-    conversationFactory = require('../../models/conversation'),
-    window = require('../../models/window'),
-    nicks = require('../../models/nick'),
-    ircUser = require('./ircUser');
+const assert = require('assert'),
+      co = require('co'),
+      wait = require('co-wait'),
+      log = require('../../lib/log'),
+      redisModule = require('../../lib/redis'),
+      redis = redisModule.createClient(),
+      courier = require('../../lib/courier').createEndPoint('ircparser'),
+      outbox = require('../../lib/outbox'),
+      conversationFactory = require('../../models/conversation'),
+      window = require('../../models/window'),
+      nicks = require('../../models/nick'),
+      ircUser = require('./ircUser');
 
 const OPER = '@';
 const VOICE = '+';

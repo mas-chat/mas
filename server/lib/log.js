@@ -16,11 +16,11 @@
 
 'use strict';
 
-let path = require('path'),
-    fs = require('fs'),
-    winston = require('winston'),
-    MasTransport = require('./winstonMasTransport'),
-    conf = require('./conf');
+const path = require('path'),
+      fs = require('fs'),
+      winston = require('winston'),
+      MasTransport = require('./winstonMasTransport'),
+      conf = require('./conf');
 
 require('colors');
 require('winston-loggly');

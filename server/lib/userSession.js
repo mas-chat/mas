@@ -16,7 +16,7 @@
 
 'use strict';
 
-let redis = require('../lib/redis').createClient();
+const redis = require('../lib/redis').createClient();
 
 module.exports = function authenticate() {
     return function *authenticate(next) {

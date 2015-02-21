@@ -16,23 +16,23 @@
 
 'use strict';
 
-let path = require('path'),
-    router = require('koa-router'),
-    serve = require('koa-static'),
-    mount = require('koa-mount'),
-    bodyParser = require('koa-bodyparser'),
-    conf = require('../lib/conf'),
-    passport = require('../lib/passport'),
-    cacheFilter = require('../lib/cacheFilter'),
-    registerController = require('../controllers/register'),
-    loginController = require('../controllers/login'),
-    indexPageController = require('../controllers/pages'),
-    pagesController = require('../controllers/pages/pages'),
-    uploadController = require('../controllers/upload'),
-    userFilesController = require('../controllers/userFiles'),
-    forgotPasswordController = require('../controllers/forgotPassword');
+const path = require('path'),
+      router = require('koa-router'),
+      serve = require('koa-static'),
+      mount = require('koa-mount'),
+      bodyParser = require('koa-bodyparser'),
+      conf = require('../lib/conf'),
+      passport = require('../lib/passport'),
+      cacheFilter = require('../lib/cacheFilter'),
+      registerController = require('../controllers/register'),
+      loginController = require('../controllers/login'),
+      indexPageController = require('../controllers/pages'),
+      pagesController = require('../controllers/pages/pages'),
+      uploadController = require('../controllers/upload'),
+      userFilesController = require('../controllers/userFiles'),
+      forgotPasswordController = require('../controllers/forgotPassword');
 
-let ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
+const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
 
 exports.register = function(app) {
     app.use(router(app));

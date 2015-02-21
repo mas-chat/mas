@@ -16,11 +16,11 @@
 
 'use strict';
 
-let path = require('path'),
-    fs = require('fs'),
-    nconf = require('nconf'),
-    argv = require('yargs').argv,
-    log = require('./log');
+const path = require('path'),
+      fs = require('fs'),
+      nconf = require('nconf'),
+      argv = require('yargs').argv,
+      log = require('./log');
 
 require('colors');
 

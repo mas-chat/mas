@@ -22,14 +22,14 @@
 
 require('../../lib/init')('irc-connman');
 
-let net = require('net'),
-    carrier = require('carrier'),
-    isUtf8 = require('is-utf8'),
-    iconv = require('iconv-lite'),
-    co = require('co'),
-    conf = require('../../lib/conf'),
-    log = require('../../lib/log'),
-    courier = require('../../lib/courier').createEndPoint('connectionmanager');
+const net = require('net'),
+      carrier = require('carrier'),
+      isUtf8 = require('is-utf8'),
+      iconv = require('iconv-lite'),
+      co = require('co'),
+      conf = require('../../lib/conf'),
+      log = require('../../lib/log'),
+      courier = require('../../lib/courier').createEndPoint('connectionmanager');
 
 let sockets = {};
 let nextNetworkConnectionSlot = {};
@@ -58,7 +58,7 @@ function handleIdentConnection(conn) {
         let resp;
 
         if (!isNaN(localPort) && !isNaN(remotePort)) {
-            for (var userId in sockets) {
+            for (let userId in sockets) {
                 if (sockets[userId].localPort === localPort &&
                     sockets[userId].remotePort === remotePort &&
                     sockets[userId].remoteAddress === conn.remoteAddress) {

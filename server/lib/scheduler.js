@@ -16,12 +16,12 @@
 
 'use strict';
 
-let co = require('co'),
-    CronJob = require('cron').CronJob,
-    redis = require('./redis').createClient(),
-    log = require('./log'),
-    conf = require('./conf'),
-    friends = require('../models/friends');
+const co = require('co'),
+      CronJob = require('cron').CronJob,
+      redis = require('./redis').createClient(),
+      log = require('./log'),
+      conf = require('./conf'),
+      friends = require('../models/friends');
 
 exports.init = function() {
     // Once in a minute

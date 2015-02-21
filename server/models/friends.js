@@ -16,8 +16,8 @@
 
 'use strict';
 
-let redis = require('../lib/redis').createClient(),
-    outbox = require('../lib/outbox');
+const redis = require('../lib/redis').createClient(),
+      outbox = require('../lib/outbox');
 
 // TBD: Instead of FRIENDS and FRIENDSUPDATE, use ADDFRIENDS
 

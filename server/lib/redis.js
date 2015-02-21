@@ -16,14 +16,14 @@
 
 'use strict';
 
-let path = require('path'),
-    assert = require('assert'),
-    coRedis = require('co-redis'),
-    redis = require('redis'),
-    thunkify = require('thunkify'),
-    redisLuaHelper = require('redis-lua-helper'),
-    log = require('./log'),
-    conf = require('./conf');
+const path = require('path'),
+      assert = require('assert'),
+      coRedis = require('co-redis'),
+      redis = require('redis'),
+      thunkify = require('thunkify'),
+      redisLuaHelper = require('redis-lua-helper'),
+      log = require('./log'),
+      conf = require('./conf');
 
 let rlh = redisLuaHelper({
     root: path.join(__dirname, '..', 'lua'),

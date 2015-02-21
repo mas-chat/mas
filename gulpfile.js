@@ -1,22 +1,22 @@
 'use strict';
 
-var path = require('path'),
-    argv = require('yargs').argv,
-    gulp = require('gulp'),
-//  debug = require('gulp-debug'),
-    util = require('gulp-util'),
-    concat = require('gulp-concat'),
-    uglify = require('gulp-uglify'),
-    jshint = require('gulp-jshint'),
-    eslint = require('gulp-eslint'),
-    jscs = require('gulp-jscs'),
-    bower = require('gulp-bower'),
-    less = require('gulp-less'),
-    minifyCSS = require('gulp-minify-css'),
-    rev = require('gulp-rev'),
-    rimraf = require('rimraf');
+const path = require('path'),
+      argv = require('yargs').argv,
+      gulp = require('gulp'),
+//    debug = require('gulp-debug'),
+      util = require('gulp-util'),
+      concat = require('gulp-concat'),
+      uglify = require('gulp-uglify'),
+      jshint = require('gulp-jshint'),
+      eslint = require('gulp-eslint'),
+      jscs = require('gulp-jscs'),
+      bower = require('gulp-bower'),
+      less = require('gulp-less'),
+      minifyCSS = require('gulp-minify-css'),
+      rev = require('gulp-rev'),
+      rimraf = require('rimraf');
 
-var paths = {
+const paths = {
     serverJavaScripts: [
         'gulpfile.js',
         'server/**/*.js',

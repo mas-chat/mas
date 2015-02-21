@@ -19,26 +19,26 @@
 
 require('./lib/init')('frontend');
 
-let path = require('path'),
-    koa = require('koa'),
-    hbs = require('koa-hbs'),
-    error = require('koa-error'),
-    compress = require('koa-compress'),
-    // logger = require('koa-logger'),
-    co = require('co'),
-    http = require('http'),
-    handlebarsHelpers = require('./lib/handlebarsHelpers'),
-    conf = require('./lib/conf'),
-    log = require('./lib/log'),
-    redisModule = require('./lib/redis'),
-    passport = require('./lib/passport'),
-    userSession = require('./lib/userSession'),
-    routes = require('./routes/routes'),
-    scheduler = require('./lib/scheduler'),
-    demoContent = require('./lib/demoContent'),
-    socketController = require('./controllers/socket');
+const path = require('path'),
+      koa = require('koa'),
+      hbs = require('koa-hbs'),
+      error = require('koa-error'),
+      compress = require('koa-compress'),
+      // logger = require('koa-logger'),
+      co = require('co'),
+      http = require('http'),
+      handlebarsHelpers = require('./lib/handlebarsHelpers'),
+      conf = require('./lib/conf'),
+      log = require('./lib/log'),
+      redisModule = require('./lib/redis'),
+      passport = require('./lib/passport'),
+      userSession = require('./lib/userSession'),
+      routes = require('./routes/routes'),
+      scheduler = require('./lib/scheduler'),
+      demoContent = require('./lib/demoContent'),
+      socketController = require('./controllers/socket');
 
-let app = koa();
+const app = koa();
 
 // Development only
 if (app.env === 'development') {

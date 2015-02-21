@@ -16,12 +16,12 @@
 
 'use strict';
 
-let path = require('path'),
-    fs = require('fs'),
-    npid = require('npid'),
-    conf = require('./conf'),
-    log = require('./log'),
-    courier = require('./courier');
+const path = require('path'),
+      fs = require('fs'),
+      npid = require('npid'),
+      conf = require('./conf'),
+      log = require('./log'),
+      courier = require('./courier');
 
 module.exports = function configureProcess(serverName) {
     let processName = 'mas-' + serverName + '-' + conf.get('common:env');

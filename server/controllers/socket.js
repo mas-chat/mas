@@ -16,15 +16,15 @@
 
 'use strict';
 
-let redis = require('../lib/redis').createClient(),
-    socketIo = require('socket.io'),
-    co = require('co'),
-    uuid = require('uid2'),
-    requestController = require('../controllers/request'),
-    log = require('../lib/log'),
-    friends = require('../models/friends'),
-    alerts = require('../lib/alert'),
-    outbox = require('../lib/outbox');
+const redis = require('../lib/redis').createClient(),
+      socketIo = require('socket.io'),
+      co = require('co'),
+      uuid = require('uid2'),
+      requestController = require('../controllers/request'),
+      log = require('../lib/log'),
+      friends = require('../models/friends'),
+      alerts = require('../lib/alert'),
+      outbox = require('../lib/outbox');
 
 exports.setup = function(server) {
     let io = socketIo(server);
