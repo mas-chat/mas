@@ -39,9 +39,6 @@ export default Ember.View.extend({
     animating: false,
     scrolling: false,
 
-    // TBD: messages is here because of the mixin. Is there better way?
-    messages: Ember.computed.alias('controller.model.messages'),
-
     windowChanged: function() {
         this.get('parentView').windowChanged(true);
     }.observes('visible', 'row', 'column'),
