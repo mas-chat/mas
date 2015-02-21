@@ -50,7 +50,7 @@ exports.setup = function(server) {
         function startPushLoop() {
             co(function*() {
                 while (1) {
-                    let commands = yield outbox.flush(userId, sessionId, 25);
+                    let commands = yield outbox.waitMsg(userId, sessionId, 25);
                     commands.forEach(emit);
 
                     if (state !== 'authenticated') {

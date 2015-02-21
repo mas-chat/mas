@@ -30,17 +30,16 @@ exports.queueAll = function*(userId, commands, excludeSessionId) {
     yield queueCommands(userId, null, excludeSessionId, commands);
 };
 
-exports.flush = function*(userId, sessionId, timeout) {
-    let result,
-        command,
-        commands = [];
+exports.waitMsg = function*(userId, sessionId, timeout) {
+    let command;
+    let commands = [];
 
     if (timeout) {
-        // Wait for first command to appear if timeout is given
+        // Wait for first req/ntf to appear if timeout is given
         // For every blocking redis call we need to create own redis client. Otherwise
         // socket.io connections block each other.
         let newClient = redisModule.createClient();
-        result = yield newClient.brpop('outbox:' + userId + ':' + sessionId, timeout);
+        let result = yield newClient.brpop(`outbox:${userId}:${sessionId}`, timeout);
         newClient.end();
 
         if (result) {
