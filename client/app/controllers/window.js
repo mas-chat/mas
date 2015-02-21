@@ -49,6 +49,10 @@ export default Ember.Controller.extend(UploadMixin, {
             this.set('logModeEnabled', true);
         },
 
+        toggleMemberListWidth: function() {
+            this.toggleProperty('wideMemberList');
+        },
+
         sendMessage: function() {
             let text = this.get('newMessage');
             let messageRecord = this.get('container').lookup('model:message');
@@ -149,6 +153,7 @@ export default Ember.Controller.extend(UploadMixin, {
     },
 
     logModeEnabled: false,
+    wideMemberList: true,
     initDone: Ember.computed.alias('controllers.application.initDone'),
 
     newMessageReceived: function() {
