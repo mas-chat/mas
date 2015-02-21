@@ -25,8 +25,6 @@ exports.createSession = function*(userId) {
     let secret = user.secret;
     let expires = user.secretExpires || 0;
 
-    // TBD: Use word secret everywhere.
-
     if (!secret || ts > expires) {
         // We need to generate new secret
         expires = ts + (60 * 60 * 24 * 14);

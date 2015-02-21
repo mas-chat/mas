@@ -93,7 +93,6 @@ User.prototype.save = function*() {
     }
 
     if (this.friends.length > 0) {
-        // TBD: Check if this is correct, this.friends is array
         yield redis.sadd(`friends:${this.data.userId}`, this.friends);
     }
 };
