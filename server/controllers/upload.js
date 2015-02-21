@@ -48,7 +48,7 @@ module.exports = function*() {
         }
     }
 
-    while (!!(part = yield parts)) {
+    while ((part = yield parts)) {
         if (part.length) {
             part = part;
             // TDB: Handle if field
