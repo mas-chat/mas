@@ -18,14 +18,14 @@
 
 /*jshint -W079 */
 
-let co = require('co'),
-    wait = require('co-wait'),
-    faker = require('faker'),
-    redis = require('./redis').createClient(),
-    log = require('./log'),
-    conf = require('./conf'),
-    masWindow = require('../models/window'),
-    conversationFactory = require('../models/conversation');
+const co = require('co'),
+      wait = require('co-wait'),
+      faker = require('faker'),
+      redis = require('./redis').createClient(),
+      log = require('./log'),
+      conf = require('./conf'),
+      masWindow = require('../models/window'),
+      conversationFactory = require('../models/conversation');
 
 module.exports.enable = function() {
     co(function*() {
