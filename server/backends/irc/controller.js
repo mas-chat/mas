@@ -740,7 +740,7 @@ function *handleError(userId, msg) {
     yield addSystemMessage(
         userId, msg.network, 'error', 'Connection lost. Server reason: ' + reason);
 
-    if (reason.indexOf('Too many host connections') !== -1) {
+    if (reason.includes('Too many host connections')) {
         log.error(userId, 'Too many connections to: ' + msg.network);
 
         yield addSystemMessage(userId, msg.network, 'error',
@@ -905,7 +905,7 @@ function *handlePrivmsg(userId, msg, command) {
         sourceUserId = 'iSERVER';
     }
 
-    if (text.indexOf('\u0001') !== -1 && command === 'PRIVMSG') {
+    if (text.includes('\u0001') && command === 'PRIVMSG') {
         let ret = parseCTCPMessage(text);
         let reply = false;
 
@@ -1082,11 +1082,11 @@ function parseCTCPMessage(text) {
         let dataType;
         let payload = '';
 
-        if (msg.indexOf(' ') === -1) {
-            dataType = msg;
-        } else {
+        if (msg.includes(' ')) {
             dataType = msg.substr(0, msg.indexOf(' '));
             payload = msg.substr(msg.indexOf(' ') + 1);
+        } else {
+            dataType = msg;
         }
 
         // Only one CTCP extended message per PRIVMSG is supported for now
