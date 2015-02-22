@@ -37,14 +37,7 @@ exports.setup = function(server) {
         // connected, disconnected, authenticated
 
         function emit(command) {
-            let id = command.id;
-
-            // TBD: Temporary hack
-            if (id.indexOf('_RESP', id.length - 5) !== -1) {
-                socket.emit('resp', command);
-            } else {
-                socket.emit('ntf', command);
-            }
+            socket.emit(command.id.endsWith('_RESP') ? 'resp' : 'ntf', command);
         }
 
         function startPushLoop() {
