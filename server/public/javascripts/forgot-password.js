@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* globals $ */
+
 $(function() {
     $('input[name="email"]').focus();
 });
