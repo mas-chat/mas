@@ -45,7 +45,7 @@ export default Ember.View.extend({
         Ember.run.next(this, function() { this.layoutWindows(false); });
     }.observes('controller.initDone'),
 
-    dragWindowStart: function(event, view) {
+    dragWindowStart: function(view) {
         this.movingWindow = view;
 
         view.$().addClass('moving');
@@ -298,8 +298,8 @@ export default Ember.View.extend({
     },
 
     _calculateCursorPosition: function(event) {
-        let x = event.originalEvent.clientX;
-        let y = event.originalEvent.clientY;
+        let x = event.clientX;
+        let y = event.clientY;
 
         let windowX = 0;
         let windowY = 0;

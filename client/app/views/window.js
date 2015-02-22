@@ -59,23 +59,36 @@ export default Ember.View.extend({
         compress: function() {
             this.set('expanded', false);
             this.get('parentView').windowChanged(true);
+        },
+
+        move: function() {
+            let gridView = this.get('parentView');
+            let $root = this.$();
+
+            gridView.dragWindowStart(this);
+
+            $root.css('z-index', 200);
+            $('.blocker').show();
+
+            function handleDragMove(event) {
+                gridView.dragWindow(event);
+                event.preventDefault();
+            };
+
+            function handleDragEnd(event) {
+                gridView.dragWindowEnd(event);
+                event.preventDefault();
+
+                $root.css('z-index', '');
+                $('.blocker').hide();
+
+                document.removeEventListener('mousemove', handleDragMove, false);
+                document.removeEventListener('mouseup', handleDragEnd, false);
+            };
+
+            document.addEventListener('mousemove', handleDragMove, false);
+            document.addEventListener('mouseup', handleDragEnd, false);
         }
-    },
-
-    dragStart: function(event) {
-        this.get('parentView').dragWindowStart(event, this);
-        this.$().css('z-index', 200);
-        $('.blocker').show();
-    },
-
-    drag: function(event) {
-        this.get('parentView').dragWindow(event);
-    },
-
-    dragEnd: function(event) {
-        this.$().css('z-index', '');
-        this.get('parentView').dragWindowEnd(event);
-        $('.blocker').hide();
     },
 
     layoutDone: function() {
