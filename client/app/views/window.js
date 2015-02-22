@@ -65,7 +65,7 @@ export default Ember.View.extend({
     mouseDown: function(event) {
         console.log(event);
 
-        if(!$(event.target).hasClass('fa-arrows')) {
+        if (!$(event.target).hasClass('fa-arrows')) {
             return; // Not moving the window
         }
 
