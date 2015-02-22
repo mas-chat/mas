@@ -59,36 +59,35 @@ export default Ember.View.extend({
         compress: function() {
             this.set('expanded', false);
             this.get('parentView').windowChanged(true);
-        },
-
-        move: function() {
-            let gridView = this.get('parentView');
-            let $root = this.$();
-
-            gridView.dragWindowStart(this);
-
-            $root.css('z-index', 200);
-            $('.blocker').show();
-
-            function handleDragMove(event) {
-                gridView.dragWindow(event);
-                event.preventDefault();
-            };
-
-            function handleDragEnd(event) {
-                gridView.dragWindowEnd(event);
-                event.preventDefault();
-
-                $root.css('z-index', '');
-                $('.blocker').hide();
-
-                document.removeEventListener('mousemove', handleDragMove, false);
-                document.removeEventListener('mouseup', handleDragEnd, false);
-            };
-
-            document.addEventListener('mousemove', handleDragMove, false);
-            document.addEventListener('mouseup', handleDragEnd, false);
         }
+    },
+
+    mouseDown: function(event) {
+        console.log(event);
+
+        if(!$(event.target).hasClass('fa-arrows')) {
+            return; // Not moving the window
+        }
+
+        let gridView = this.get('parentView');
+
+        gridView.dragWindowStart(this, event);
+
+        function handleDragMove(event) {
+            gridView.dragWindow(event);
+            event.preventDefault();
+        }
+
+        function handleDragEnd(event) {
+            gridView.dragWindowEnd(event);
+            event.preventDefault();
+
+            document.removeEventListener('mousemove', handleDragMove, false);
+            document.removeEventListener('mouseup', handleDragEnd, false);
+        }
+
+        document.addEventListener('mousemove', handleDragMove, false);
+        document.addEventListener('mouseup', handleDragEnd, false);
     },
 
     layoutDone: function() {

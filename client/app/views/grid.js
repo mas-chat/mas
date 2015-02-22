@@ -45,11 +45,14 @@ export default Ember.View.extend({
         Ember.run.next(this, function() { this.layoutWindows(false); });
     }.observes('controller.initDone'),
 
-    dragWindowStart: function(view) {
+    dragWindowStart: function(view, event) {
         this.movingWindow = view;
 
-        view.$().addClass('moving');
+        this.movingWindow.$().addClass('moving').css('z-index', 200);
         $('#window-cursor').show();
+        $('.blocker').show();
+
+        this.dragWindow(event);
     },
 
     dragWindow: function(event) {
@@ -78,8 +81,9 @@ export default Ember.View.extend({
     dragWindowEnd: function() {
         let cursor = this.cursor;
 
-        this.movingWindow.$().removeClass('moving');
+        this.movingWindow.$().removeClass('moving').css('z-index', '');
         $('#window-cursor').hide();
+        $('.blocker').hide();
 
         this.dimensions.forEach(function(row, rowIndex) {
             row.forEach(function(masWindow, columnIndex) {
