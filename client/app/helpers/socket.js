@@ -38,15 +38,13 @@ export default Ember.Object.extend({
             this._logout();
         }
 
-        let params = authCookie.split('-');
-        let userId = params[0];
-        let secret = params[1];
-
-        this.set('store.userId', userId);
+        let [ userId, secret ] = authCookie.split('-');
 
         if (!userId || !secret) {
             this._logout();
         }
+
+        this.set('store.userId', userId);
 
         this._notificationParser = NotificationParser.create({
             store: this.get('store'),
@@ -80,6 +78,8 @@ export default Ember.Object.extend({
         }));
 
         this.socket.on('resp', Ember.run.bind(this, function(command) {
+            Ember.Logger.info('← RESP: ' + command.id);
+
             // Command is a response to command we sent earlier
             if (this._callbacks[command.id]) {
                 this._callbacks[command.id](command);
@@ -112,7 +112,7 @@ export default Ember.Object.extend({
 
         this.socket.emit('req', command);
 
-        Ember.Logger.info('--> REQ: ' + command.id);
+        Ember.Logger.info('→ REQ: ' + command.id);
     },
 
     _logout() {

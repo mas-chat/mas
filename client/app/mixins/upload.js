@@ -37,7 +37,6 @@ export default Ember.Mixin.create({
         let options = {
             url: '/api/v1/upload',
             files: { userFiles: files },
-            progress() { },
             complete: function(err, xhr) {
                 if (!err) {
                     let url = JSON.parse(xhr.responseText).url[0];

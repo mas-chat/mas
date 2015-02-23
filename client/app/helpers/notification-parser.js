@@ -41,7 +41,7 @@ export default Ember.Object.extend({
 
         delete notification.id;
 
-        Ember.Logger.info('<-- NTF: ' + name);
+        Ember.Logger.info('← NTF: ' + name);
 
         if (typeof windowId === 'number') {
             targetWindow = this.get('store.windows').findBy('windowId', windowId);
