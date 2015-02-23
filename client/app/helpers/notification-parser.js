@@ -26,7 +26,7 @@ export default Ember.Object.extend({
     initReceived: false,
     initBuffer: [],
 
-    process: function(notification) {
+    process(notification) {
         if (!this.initReceived && notification.id !== 'INITDONE') {
             this.initBuffer.push(notification);
         } else {
@@ -34,7 +34,7 @@ export default Ember.Object.extend({
         }
     },
 
-    handleNotification: function(notification) {
+    handleNotification(notification) {
         let name = notification.id;
         let targetWindow = null;
         let windowId = notification.windowId;
@@ -56,7 +56,7 @@ export default Ember.Object.extend({
         }
     },
 
-    _handleCreate: function(data) {
+    _handleCreate(data) {
         // This hack can be removed if there's a way to create and init the object in one go as
         // syncServer() observer doesn't have .on('init').
         window.disableUpdate = true;
@@ -66,11 +66,11 @@ export default Ember.Object.extend({
         this.get('store.windows').pushObject(windowRecord);
     },
 
-    _handleClose: function(data, targetWindow) {
+    _handleClose(data, targetWindow) {
         this.get('store.windows').removeObject(targetWindow);
     },
 
-    _handleAddtext: function(data, targetWindow) {
+    _handleAddtext(data, targetWindow) {
         if (!targetWindow) {
             return;
         }
@@ -90,7 +90,7 @@ export default Ember.Object.extend({
         messages.pushObject(messageRecord);
     },
 
-    _handleInitdone: function() {
+    _handleInitdone() {
         // An optimization to handle ADDTEXT notifications separately in batches
         let addTexts = _.remove(this.initBuffer, function(notification) {
             return notification.id === 'ADDTEXT';
@@ -132,7 +132,7 @@ export default Ember.Object.extend({
         this.set('initReceived', true);
     },
 
-    _handleUsers: function(data) {
+    _handleUsers(data) {
         for (var userId in data.mapping) { /* jshint -W089 */
             let user = data.mapping[userId];
             this.get('store.users').set('users.' + userId, user);
@@ -141,7 +141,7 @@ export default Ember.Object.extend({
         this.get('store.users').incrementProperty('isDirty');
     },
 
-    _handleAddmembers: function(data, targetWindow) {
+    _handleAddmembers(data, targetWindow) {
         if (!targetWindow) {
             return;
         }
@@ -170,7 +170,7 @@ export default Ember.Object.extend({
         }.bind(this));
     },
 
-    _handleDelmembers: function(data, targetWindow) {
+    _handleDelmembers(data, targetWindow) {
         if (!targetWindow) {
             return;
         }
@@ -180,7 +180,7 @@ export default Ember.Object.extend({
         }.bind(this));
     },
 
-    _handleUpdate: function(data, targetWindow) {
+    _handleUpdate(data, targetWindow) {
         if (!targetWindow) {
             return;
         }
@@ -191,7 +191,7 @@ export default Ember.Object.extend({
         window.disableUpdate = false;
     },
 
-    _handleFriends: function(data) {
+    _handleFriends(data) {
         this.get('store.friends').clear();
 
         data.friends.forEach(function(newFriend) {
@@ -201,7 +201,7 @@ export default Ember.Object.extend({
         }.bind(this));
     },
 
-    _handleFriendsupdate: function(data) {
+    _handleFriendsupdate(data) {
         let friend = this.get('store.friends').findBy('userId', data.userId);
         friend.set('online', data.online);
         if (data.last) {
@@ -209,11 +209,11 @@ export default Ember.Object.extend({
         }
     },
 
-    _handleAlert: function(data) {
+    _handleAlert(data) {
         this.get('store.alerts').pushObject(data);
     },
 
-    _removeUser: function(userId, targetWindow) {
+    _removeUser(userId, targetWindow) {
         targetWindow.operators.removeObject(userId);
         targetWindow.voices.removeObject(userId);
         targetWindow.users.removeObject(userId);

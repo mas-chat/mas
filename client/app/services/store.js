@@ -27,7 +27,7 @@ export default Ember.Service.extend({
 
     userId: null,
 
-    init: function() {
+    init() {
         this.set('users', Users.create());
         this.set('friends', Ember.A([]));
         this.set('windows', Ember.A([]));

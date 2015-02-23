@@ -22,23 +22,23 @@ export default Ember.Component.extend({
     classNames: [ 'modal', 'fade' ],
 
     actions: {
-        cancel: function() {
+        cancel() {
             this.sendAction('cancel');
         },
 
-        submit: function() {
+        submit() {
             this.sendAction('submit');
         }
     },
 
-    didInsertElement: function() {
+    didInsertElement() {
         this.$().modal({
             backdrop: 'static',
             keyboard: false
         });
     },
 
-    willDestroyElement: function() {
+    willDestroyElement() {
         this.$().modal('hide');
     }
 });

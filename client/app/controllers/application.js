@@ -26,7 +26,7 @@ export default Ember.Controller.extend({
     socket: Ember.inject.service(),
 
     actions: {
-        ackAlert: function() {
+        ackAlert() {
             this.get('socket').send({
                 id: 'ACKALERT',
                 alertId: this.get('currentAlert.alertId')
@@ -36,7 +36,7 @@ export default Ember.Controller.extend({
             this._setCurrentAlert();
         },
 
-        hideAlert: function() {
+        hideAlert() {
             this.set('currentAlert', null);
             this._setCurrentAlert();
         }
@@ -46,7 +46,7 @@ export default Ember.Controller.extend({
         this._setCurrentAlert();
     }.observes('alerts.@each'),
 
-    _setCurrentAlert: function() {
+    _setCurrentAlert() {
         let alerts = this.get('alerts');
 
         if (this.get('currentAlert') === null && alerts.length > 0) {

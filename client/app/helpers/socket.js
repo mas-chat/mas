@@ -29,7 +29,7 @@ export default Ember.Object.extend({
     _callbacks: {},
     _notificationParser: null,
 
-    init: function() {
+    init() {
         this._super();
 
         let authCookie = $.cookie('auth');
@@ -105,7 +105,7 @@ export default Ember.Object.extend({
         }));
     },
 
-    send: function(command, callback) {
+    send(command, callback) {
         if (callback) {
             this._callbacks[command.id + '_RESP'] = callback;
         }
@@ -115,7 +115,7 @@ export default Ember.Object.extend({
         Ember.Logger.info('--> REQ: ' + command.id);
     },
 
-    _logout: function() {
+    _logout() {
         $.removeCookie('auth', { path: '/' });
         window.location = '/';
     }

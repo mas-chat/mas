@@ -23,7 +23,7 @@ export default Ember.Controller.extend({
     modalTitleAlert: null,
 
     actions: {
-        changeAlerts: function() {
+        changeAlerts() {
             let newSoundAlert = this.get('modalSoundAlert');
             let newTitleAlert = this.get('modalTitleAlert');
 
@@ -33,7 +33,7 @@ export default Ember.Controller.extend({
             this.send('closeModal');
         },
 
-        cancel: function() {
+        cancel() {
             this._updateModalAlerts();
             this.send('closeModal');
         }
@@ -47,7 +47,7 @@ export default Ember.Controller.extend({
         return 'Configure alerts for \'' + this.get('model.name') + '\'';
     }.property('model.name'),
 
-    _updateModalAlerts: function() {
+    _updateModalAlerts() {
         this.set('modalSoundAlert', this.get('model.sounds') ? 'enabled' : 'disabled');
         this.set('modalTitleAlert', this.get('model.titleAlert') ? 'enabled' : 'disabled');
     }

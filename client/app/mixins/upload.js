@@ -24,12 +24,12 @@ export default Ember.Mixin.create({
     socket: Ember.inject.service(),
 
     actions: {
-        upload: function(files, transform) {
+        upload(files, transform) {
             this.handleUpload(files, transform);
         }
     },
 
-    handleUpload: function(files, transform) {
+    handleUpload(files, transform) {
         if (files.length === 0) {
             return;
         }
@@ -37,7 +37,7 @@ export default Ember.Mixin.create({
         let options = {
             url: '/api/v1/upload',
             files: { userFiles: files },
-            progress: function() { },
+            progress() { },
             complete: function(err, xhr) {
                 if (!err) {
                     let url = JSON.parse(xhr.responseText).url[0];
@@ -59,7 +59,7 @@ export default Ember.Mixin.create({
         FileAPI.upload(options);
     },
 
-    _sendMessage: function(text) {
+    _sendMessage(text) {
         this.get('socket').send({
             id: 'SEND',
             text: text,
@@ -69,7 +69,7 @@ export default Ember.Mixin.create({
         this._printLine(text, 'mymsg');
     },
 
-    _printLine: function(text, cat) {
+    _printLine(text, cat) {
         let messageRecord = this.get('container').lookup('model:message').setProperties({
             body: text,
             cat:  cat,

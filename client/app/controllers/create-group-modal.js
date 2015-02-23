@@ -26,7 +26,7 @@ export default Ember.Controller.extend({
     socket: Ember.inject.service(),
 
     actions: {
-        newGroup: function() {
+        newGroup() {
             let password = this.get('password').trim();
 
             if (password === '') {

@@ -21,11 +21,11 @@ import Ember from 'ember';
 export default Ember.Route.extend({
     store: Ember.inject.service(),
 
-    model: function() {
+    model() {
         return this.get('store.windows');
     },
 
-    setupController: function(controller, model) {
+    setupController(controller, model) {
         controller.set('model', model);
         controller.set('friends', this.get('store.friends'));
         controller.set('userId', this.get('store.userId'));

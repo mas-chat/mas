@@ -33,27 +33,27 @@ export default Ember.Controller.extend(UploadMixin, {
     store: Ember.inject.service(),
 
     actions: {
-        hide: function() {
+        hide() {
             this.set('model.visible', false);
             this.set('model.timeHidden', Date.now());
         },
 
-        close: function() {
+        close() {
             this.get('socket').send({
                 id: 'CLOSE',
                 windowId: this.get('model.windowId')
             });
         },
 
-        browse: function() {
+        browse() {
             this.set('logModeEnabled', true);
         },
 
-        toggleMemberListWidth: function() {
+        toggleMemberListWidth() {
             this.toggleProperty('wideMemberList');
         },
 
-        sendMessage: function() {
+        sendMessage() {
             let text = this.get('newMessage');
             let messageRecord = this.get('container').lookup('model:message');
             let isCommand = text.charAt(0) === '/';
@@ -90,7 +90,7 @@ export default Ember.Controller.extend(UploadMixin, {
             }
         },
 
-        chat: function(userId) {
+        chat(userId) {
             this.get('socket').send({
                 id: 'CHAT',
                 windowId: this.get('model.windowId'),
@@ -102,7 +102,7 @@ export default Ember.Controller.extend(UploadMixin, {
             }.bind(this));
         },
 
-        whois: function(userId) {
+        whois(userId) {
             this.get('socket').send({
                 id: 'WHOIS',
                 windowId: this.get('model.windowId'),
@@ -110,7 +110,7 @@ export default Ember.Controller.extend(UploadMixin, {
             });
         },
 
-        op: function(userId) {
+        op(userId) {
             this.get('socket').send({
                 id: 'OP',
                 windowId: this.get('model.windowId'),
@@ -118,11 +118,11 @@ export default Ember.Controller.extend(UploadMixin, {
             });
         },
 
-        requestFriend: function(nick) {
+        requestFriend(nick) {
             nick = nick;
         },
 
-        kick: function(userId) {
+        kick(userId) {
             this.get('socket').send({
                 id: 'KICK',
                 windowId: this.get('model.windowId'),
@@ -130,7 +130,7 @@ export default Ember.Controller.extend(UploadMixin, {
             });
         },
 
-        kickban: function(userId) {
+        kickban(userId) {
             this.get('socket').send({
                 id: 'KICKBAN',
                 windowId: this.get('model.windowId'),
@@ -138,14 +138,14 @@ export default Ember.Controller.extend(UploadMixin, {
             });
         },
 
-        scrollUp: function() {
+        scrollUp() {
             if (!this.get('model.deletedLine')) {
                 this.set('model.scrollLock', true);
                 Ember.Logger.info('scrollock on');
             }
         },
 
-        scrollBottom: function() {
+        scrollBottom() {
             this.set('model.scrollLock', false);
             this.set('model.newMessagesCount', 0);
             Ember.Logger.info('scrollock off');

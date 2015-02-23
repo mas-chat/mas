@@ -22,7 +22,7 @@ import TitleBuilder from '../helpers/title-builder';
 let titleBuilder = TitleBuilder.create();
 
 export default Ember.Object.extend({
-    init: function() {
+    init() {
         this._super();
 
         this.messages = Ember.A([]);
@@ -141,7 +141,7 @@ export default Ember.Object.extend({
         });
     }.observes('titleAlert', 'sounds'),
 
-    _mapUserIdsToNicks: function(role) {
+    _mapUserIdsToNicks(role) {
         return this.get(role).map(function(userId) {
             let users = this.get('store.users');
 

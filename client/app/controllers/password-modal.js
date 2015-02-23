@@ -26,7 +26,7 @@ export default Ember.Controller.extend({
     socket: Ember.inject.service(),
 
     actions: {
-        changePassword: function() {
+        changePassword() {
             // User has clicked 'OK', send the new password to server
             let newPassword = null;
 
@@ -47,7 +47,7 @@ export default Ember.Controller.extend({
             }.bind(this));
         },
 
-        cancel: function() {
+        cancel() {
             this._updateModalPassword();
             this.send('closeModal');
         }
@@ -65,7 +65,7 @@ export default Ember.Controller.extend({
         return 'Change Password for \'' + this.get('model.name') + '\'';
     }.property('model.name'),
 
-    _updateModalPassword: function() {
+    _updateModalPassword() {
         let password = this.get('model.password');
 
         this.set('modalPassword', password);

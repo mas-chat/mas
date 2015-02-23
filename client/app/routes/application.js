@@ -25,12 +25,12 @@ export default Ember.Route.extend({
 
     store: Ember.inject.service(),
 
-    setupController: function(controller) {
+    setupController(controller) {
         controller.set('alerts', this.get('store.alerts'));
     },
 
     actions: {
-        openModal: function(modalName, model) {
+        openModal(modalName, model) {
             if (this.get('modalOpen')) {
                 // New modal goes to a queue if there's already a modal open.
                 this.modalQueue.pushObject({
@@ -42,7 +42,7 @@ export default Ember.Route.extend({
             }
         },
 
-        toggleFullScreenModal: function(modalName, model) {
+        toggleFullScreenModal(modalName, model) {
             if (this.get('fullScreenModalOpen')) {
                 this.disconnectOutlet({
                     outlet: 'fullscreen-modal',
@@ -61,7 +61,7 @@ export default Ember.Route.extend({
             }
         },
 
-        closeModal: function() {
+        closeModal() {
             this.disconnectOutlet({
                 outlet: 'modal',
                 parentView: 'application'
@@ -79,7 +79,7 @@ export default Ember.Route.extend({
         }
     },
 
-    _open: function(modalName, model) {
+    _open(modalName, model) {
         this.render(modalName, {
             into: 'application',
             outlet: 'modal',

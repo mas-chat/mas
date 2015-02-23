@@ -73,7 +73,7 @@ export default Ember.Object.extend({
         return output;
     }.property('body', 'window.userNick'),
 
-    _decorate: function(text) {
+    _decorate(text) {
         let textParts = [];
         let imgUrls = [];
         let pos = 0;
@@ -122,7 +122,7 @@ export default Ember.Object.extend({
         return textSection + imgSection;
     },
 
-    _escHtml: function(string, full) {
+    _escHtml(string, full) {
         let res = string.replace(/&/g, '&amp;').replace(/</g, '&lt;');
         return full ? res.replace(/>/g, '&gt;').replace(/"/g, '&quot;') : res;
     }

@@ -24,7 +24,7 @@ let socket = Socket.create({
 });
 
 export default Ember.Service.extend({
-    send: function(command, callback) {
+    send(command, callback) {
         socket.send(command, callback);
     }
 });

@@ -26,7 +26,7 @@ export default Ember.View.extend({
     webcam: null,
 
     actions: {
-        takePhoto: function() {
+        takePhoto() {
             if (!this.webcam.isActive()) {
                 alert('camera not active');
             }
@@ -45,7 +45,7 @@ export default Ember.View.extend({
         }
     },
 
-    didInsertElement: function() {
+    didInsertElement() {
         let box = this.$('.viewfinder')[0];
 
         this.$('[data-modal="submit"]').addClass('disabled');
@@ -65,7 +65,7 @@ export default Ember.View.extend({
         }.bind(this));
     },
 
-    willDestroyElement: function() {
+    willDestroyElement() {
         if (this.webcam) {
             this.webcam.stop();
         }

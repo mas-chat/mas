@@ -29,7 +29,7 @@ export default Ember.Controller.extend({
     socket: Ember.inject.service(),
 
     actions: {
-        joinIRC: function() {
+        joinIRC() {
             let password = this.get('password').trim();
 
             if (password === '') {

@@ -51,18 +51,18 @@ export default Ember.View.extend({
     $images: null,
 
     actions: {
-        expand: function() {
+        expand() {
             this.set('expanded', true);
             this.get('parentView').windowChanged(true);
         },
 
-        compress: function() {
+        compress() {
             this.set('expanded', false);
             this.get('parentView').windowChanged(true);
         }
     },
 
-    mouseDown: function(event) {
+    mouseDown(event) {
         console.log(event);
 
         if (!$(event.target).hasClass('fa-arrows')) {
@@ -90,7 +90,7 @@ export default Ember.View.extend({
         document.addEventListener('mouseup', handleDragEnd, false);
     },
 
-    layoutDone: function() {
+    layoutDone() {
         this._goToBottom();
 
         if (this.get('initial')) {
@@ -102,7 +102,7 @@ export default Ember.View.extend({
         this._showImages();
     },
 
-    didInsertElement: function() {
+    didInsertElement() {
         let that = this;
 
         this.$messagePanel = this.$('.window-messages');
@@ -124,7 +124,7 @@ export default Ember.View.extend({
 
         this.$('.window-members').contextmenu({
             target: '#window-contextMenu',
-            before: function(e) {
+            before(e) {
                 let $target = $(e.target);
 
                 if ($target.hasClass('window-members')) {
@@ -142,7 +142,7 @@ export default Ember.View.extend({
                     '<img class="menu-avatar" src="' + avatar + '">' +  selectedNick);
                 return true;
             },
-            onItem: function(context, e) {
+            onItem(context, e) {
                 let action = $(e.target).data('action');
                 that.get('controller').send(action, selectedUserId);
             }
@@ -186,7 +186,7 @@ export default Ember.View.extend({
             closeOnContentClick: true,
             image: {
                 verticalFit: false,
-                titleSrc: function(item) {
+                titleSrc(item) {
                     let href = item.el.attr('href');
 
                     return '<small>Link to the original image:</small><a href="' + href +
@@ -205,7 +205,7 @@ export default Ember.View.extend({
         this.get('parentView').windowChanged(false);
     },
 
-    _goToBottom: function() {
+    _goToBottom() {
         if (this.get('controller.model.scrollLock')) {
             return;
         }
@@ -225,7 +225,7 @@ export default Ember.View.extend({
         });
     },
 
-    _addScrollHandler: function() {
+    _addScrollHandler() {
         this.$messagePanel.on('scroll', _.throttle(Ember.run.bind(this, function() {
             if (this.get('animating') || this.get('scrolling')) {
                 return;
@@ -246,7 +246,7 @@ export default Ember.View.extend({
         }, 100)));
     },
 
-    _updateImages: function() {
+    _updateImages() {
         if (this.$images === null) {
             this.$images = $([]);
         }
@@ -254,7 +254,7 @@ export default Ember.View.extend({
         this.$images = this.$images.add(this.$('img[data-src]'));
     },
 
-    _showImages: function() {
+    _showImages() {
         let placeHolderHeight = 31;
         let panelHeight = this.$messagePanel.height();
         let that = this;

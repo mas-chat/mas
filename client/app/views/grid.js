@@ -29,13 +29,13 @@ export default Ember.View.extend({
     cursor: null,
     movingWindow: null,
 
-    didInsertElement: function() {
+    didInsertElement() {
         $(window).on('resize', Ember.run.bind(this, function() {
             this.layoutWindows(false);
         }));
     },
 
-    windowChanged: function(animate) {
+    windowChanged(animate) {
         if (this.get('controller.initDone')) {
             Ember.run.next(this, function() { this.layoutWindows(animate); });
         }
@@ -45,7 +45,7 @@ export default Ember.View.extend({
         Ember.run.next(this, function() { this.layoutWindows(false); });
     }.observes('controller.initDone'),
 
-    dragWindowStart: function(view, event) {
+    dragWindowStart(view, event) {
         this.movingWindow = view;
 
         this.movingWindow.$().addClass('moving').css('z-index', 200);
@@ -55,7 +55,7 @@ export default Ember.View.extend({
         this.dragWindow(event);
     },
 
-    dragWindow: function(event) {
+    dragWindow(event) {
         let cursor = this._calculateCursorPosition(event);
 
         if (!cursor) {
@@ -78,7 +78,7 @@ export default Ember.View.extend({
         }
     },
 
-    dragWindowEnd: function() {
+    dragWindowEnd() {
         let cursor = this.cursor;
 
         this.movingWindow.$().removeClass('moving').css('z-index', '');
@@ -112,7 +112,7 @@ export default Ember.View.extend({
             this.cursor.x + (this.cursor.section === 'right' ? 1 : 0));
     },
 
-    layoutWindows: function(animate) {
+    layoutWindows(animate) {
         let duration = animate ? 600 : 0;
         let el = this.get('element');
         let container = this._containerDimensions();
@@ -163,7 +163,7 @@ export default Ember.View.extend({
         this._animate(duration);
     },
 
-    _markWindow: function(masWindow, x, y, cursor) {
+    _markWindow(masWindow, x, y, cursor) {
         masWindow.cursor = 'none';
 
         let rowCount = this.dimensions.length;
@@ -185,7 +185,7 @@ export default Ember.View.extend({
         }
     },
 
-    _drawCursor: function(cursor) {
+    _drawCursor(cursor) {
         let container = this._containerDimensions();
         let cursorPos = {};
         let cursorWindow = this.dimensions[cursor.y][cursor.x];
@@ -228,7 +228,7 @@ export default Ember.View.extend({
         $('#window-cursor').css(cursorPos);
     },
 
-    _animate: function(duration) {
+    _animate(duration) {
         this.dimensions.forEach(function(row, rowIndex) {
             row.forEach(function(windowDim, columnIndex) {
                 let $el = $(windowDim.el);
@@ -267,10 +267,10 @@ export default Ember.View.extend({
                 $el.velocity('stop').velocity(newDim, {
                     duration: duration,
                     visibility: 'visible',
-                    begin: function() {
+                    begin() {
                         windowView.set('animating', true);
                     },
-                    complete: function() {
+                    complete() {
                         windowView.set('animating', false);
 
                         // Make sure window shows the latest messages
@@ -281,7 +281,7 @@ export default Ember.View.extend({
         }.bind(this));
     },
 
-    _calculateSpaceForCursor: function(x, y, cursor) {
+    _calculateSpaceForCursor(x, y, cursor) {
         let width = Math.round(CURSORWIDTH / 2);
         let rows = this.dimensions.length;
         let columns = this.dimensions[y].length;
@@ -294,14 +294,14 @@ export default Ember.View.extend({
         return width;
     },
 
-    _containerDimensions: function() {
+    _containerDimensions() {
         return {
             width: this.$().width(),
             height: this.$().height()
         };
     },
 
-    _calculateCursorPosition: function(event) {
+    _calculateCursorPosition(event) {
         let x = event.clientX;
         let y = event.clientY;
 
@@ -333,7 +333,7 @@ export default Ember.View.extend({
         }
     },
 
-    _whichSection: function(windowDim, x, y) {
+    _whichSection(windowDim, x, y) {
         // -----------------
         // |\      t      /|
         // | \           / |

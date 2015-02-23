@@ -24,7 +24,7 @@ export default Ember.Controller.extend({
     socket: Ember.inject.service(),
 
     actions: {
-        changeTopic: function() {
+        changeTopic() {
             // User has clicked 'OK', send the new topic to server
             let newTopic = this.get('modalTopic');
 
@@ -37,7 +37,7 @@ export default Ember.Controller.extend({
             this.send('closeModal');
         },
 
-        cancel: function() {
+        cancel() {
             this.set('modalTopic', this.get('model.topic'));
             this.send('closeModal');
         }

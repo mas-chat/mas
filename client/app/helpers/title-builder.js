@@ -19,7 +19,7 @@ import Ember from 'ember';
 export default Ember.Object.extend({
     store: Ember.inject.service(),
 
-    build: function(params) {
+    build(params) {
         let title;
 
         if (params.type === '1on1' && params.userId === 'iSERVER') {

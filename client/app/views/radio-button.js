@@ -25,7 +25,7 @@ export default Ember.View.extend({
 
     selection: null,
 
-    click: function() {
+    click() {
         this.set('selection', this.$().val());
     },
 

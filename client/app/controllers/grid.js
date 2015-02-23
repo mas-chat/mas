@@ -24,7 +24,7 @@ export default Ember.ArrayController.extend({
     socket: Ember.inject.service(),
 
     actions: {
-        joinLobby: function() {
+        joinLobby() {
             this.get('socket').send({
                 id: 'JOIN',
                 network: 'MAS',

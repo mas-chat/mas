@@ -24,15 +24,15 @@ export default Ember.Object.extend({
 
     // TBD: Consider ember.map?
 
-    getNick: function(userId, network) {
+    getNick(userId, network) {
         return this.get('users.' + userId + '.nick.' + network) || 'unknown';
     },
 
-    getName: function(userId) {
+    getName(userId) {
         return this.get('users.' + userId + '.name') || 'UNKNOWN';
     },
 
-    getAvatarHash: function(userId) {
+    getAvatarHash(userId) {
         return this.get('users.' + userId + '.gravatar') || 'na';
     }
 });

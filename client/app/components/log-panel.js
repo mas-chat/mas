@@ -39,20 +39,20 @@ export default Ember.Component.extend({
     }.property('currentDate'),
 
     actions: {
-        nextDay: function() {
+        nextDay() {
             this._seek(1);
         },
 
-        previousDay: function() {
+        previousDay() {
             this._seek(-1);
         },
 
-        exit: function() {
+        exit() {
             this.set('enabled', false);
         }
     },
 
-    init: function() {
+    init() {
         this._super();
 
         this.set('currentDate', new Date());
@@ -60,7 +60,7 @@ export default Ember.Component.extend({
         this.messages = Ember.A([]);
     },
 
-    didInsertElement: function() {
+    didInsertElement() {
         this.$().velocity('slideDown', {
             duration: 700,
             easing: 'easeInOutQuad'
@@ -82,7 +82,7 @@ export default Ember.Component.extend({
         this._seek(0);
     },
 
-    _seek: function(days) {
+    _seek(days) {
         let newDate = moment(this.get('currentDate')).add(days, 'd').toDate();
 
         this.set('currentDate', newDate);
@@ -91,7 +91,7 @@ export default Ember.Component.extend({
         this._fetchData();
     },
 
-    _fetchData: function() {
+    _fetchData() {
         // Beginning and end of the selected day in unix time format
         let date = this.get('currentDate');
         let epochTsStart = moment(date).startOf('day').unix();
@@ -117,7 +117,7 @@ export default Ember.Component.extend({
         }.bind(this));
     },
 
-    _loadImages: function() {
+    _loadImages() {
         Ember.run.next(this, function() {
             this.$('img[data-src]').each(function() {
                 let $img = $(this);

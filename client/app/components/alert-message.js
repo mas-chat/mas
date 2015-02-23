@@ -22,12 +22,12 @@ export default Ember.Component.extend({
     classNames: [ 'flex-row', 'announcement' ],
 
     actions: {
-        ack: function() {
+        ack() {
             this.set('message', '');
             this.sendAction();
         },
 
-        hide: function() {
+        hide() {
             this.set('message', '');
             this.sendAction('hide');
         }

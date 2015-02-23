@@ -28,7 +28,7 @@ export default Ember.ArrayController.extend({
     socket: Ember.inject.service(),
 
     actions: {
-        show: function(window) {
+        show(window) {
             window.set('visible', true);
 
             if (!window.get('scrollLock')) {
@@ -36,7 +36,7 @@ export default Ember.ArrayController.extend({
             }
         },
 
-        logout: function() {
+        logout() {
             this.get('socket').send({ id: 'LOGOUT' }, function() {
                 $.removeCookie('auth', { path: '/' });
                 window.location = '/';
