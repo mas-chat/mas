@@ -51,9 +51,9 @@ export default Ember.Object.extend({
             container: this.get('container')
         });
 
-        this.socket = io.connect();
+        let socket = this.socket = io.connect();
 
-        this.socket.emit('init', {
+        socket.emit('init', {
             clientName: 'web',
             clientOS: navigator.platform,
             userId: userId,
@@ -61,7 +61,7 @@ export default Ember.Object.extend({
             version: '1.0'
         });
 
-        this.socket.on('initok', Ember.run.bind(this, function(data) {
+        socket.on('initok', Ember.run.bind(this, function(data) {
             this.set('sessionId', data.sessionId);
         }));
 
@@ -73,11 +73,11 @@ export default Ember.Object.extend({
             }
         }));
 
-        this.socket.on('ntf', Ember.run.bind(this, function(data) {
+        socket.on('ntf', Ember.run.bind(this, function(data) {
             this._notificationParser.process(data);
         }));
 
-        this.socket.on('resp', Ember.run.bind(this, function(command) {
+        socket.on('resp', Ember.run.bind(this, function(command) {
             Ember.Logger.info('← RESP: ' + command.id);
 
             // Command is a response to command we sent earlier
@@ -86,7 +86,7 @@ export default Ember.Object.extend({
             }
         }));
 
-        this.socket.on('disconnect', Ember.run.bind(this, function() {
+        socket.on('disconnect', Ember.run.bind(this, function() {
             this.get('container').lookup('route:application').send(
                 'openModal', 'non-interactive-modal', {
                     title: 'Connection error',
@@ -94,8 +94,8 @@ export default Ember.Object.extend({
                 });
         }));
 
-        this.socket.on('reconnect', Ember.run.bind(this, function() {
-            this.socket.emit('resume', {
+        socket.on('reconnect', Ember.run.bind(this, function() {
+            socket.emit('resume', {
                 userId: userId,
                 sessionId: this.get('sessionId')
             });
