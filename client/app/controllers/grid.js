@@ -19,8 +19,6 @@
 import Ember from 'ember';
 
 export default Ember.ArrayController.extend({
-    needs: [ 'application' ],
-
     socket: Ember.inject.service(),
 
     actions: {
@@ -31,7 +29,5 @@ export default Ember.ArrayController.extend({
                 name: 'lobby'
             });
         }
-    },
-
-    initDone: Ember.computed.alias('controllers.application.initDone')
+    }
 });

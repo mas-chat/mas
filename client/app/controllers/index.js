@@ -21,8 +21,6 @@
 import Ember from 'ember';
 
 export default Ember.ArrayController.extend({
-    needs: [ 'application' ],
-
     friends: null,
 
     socket: Ember.inject.service(),
@@ -43,8 +41,6 @@ export default Ember.ArrayController.extend({
             });
         }
     },
-
-    initDone: Ember.computed.alias('controllers.application.initDone'),
 
     sortedHiddenWindows: function() {
         return this.get('model').filter(function(val) {

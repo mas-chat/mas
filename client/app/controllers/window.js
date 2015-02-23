@@ -154,7 +154,6 @@ export default Ember.Controller.extend(UploadMixin, {
 
     logModeEnabled: false,
     wideMemberList: true,
-    initDone: Ember.computed.alias('controllers.application.initDone'),
 
     newMessageReceived: function() {
         if (!this.get('model.visible') || this.get('model.scrollLock')) {

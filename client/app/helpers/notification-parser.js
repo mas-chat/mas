@@ -126,7 +126,7 @@ export default Ember.Object.extend({
             // other notifications update property bindings. INITDONE triggers code that
             // assumes these updates have been processed. Therefore initDone must be
             // triggered one run loop round later than everything else.
-            this.get('container').lookup('controller:application').set('initDone', true);
+            this.set('store.initDone', true);
         });
 
         this.set('initReceived', true);

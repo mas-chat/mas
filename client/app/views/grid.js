@@ -29,6 +29,10 @@ export default Ember.View.extend({
     cursor: null,
     movingWindow: null,
 
+    store: Ember.inject.service(),
+
+    initDone: Ember.computed.alias('store.initDone'),
+
     didInsertElement() {
         $(window).on('resize', Ember.run.bind(this, function() {
             this.layoutWindows(false);
@@ -36,14 +40,14 @@ export default Ember.View.extend({
     },
 
     windowChanged(animate) {
-        if (this.get('controller.initDone')) {
+        if (this.get('initDone')) {
             Ember.run.next(this, function() { this.layoutWindows(animate); });
         }
     },
 
     initReady: function() {
         Ember.run.next(this, function() { this.layoutWindows(false); });
-    }.observes('controller.initDone'),
+    }.observes('initDone'),
 
     dragWindowStart(view, event) {
         this.movingWindow = view;

@@ -26,6 +26,7 @@ export default Ember.Service.extend({
     alerts: null,
 
     userId: null,
+    initDone: false,
 
     init() {
         this.set('users', Users.create());
