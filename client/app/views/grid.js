@@ -30,8 +30,19 @@ export default Ember.View.extend({
     movingWindow: null,
 
     store: Ember.inject.service(),
+    socket: Ember.inject.service(),
 
     initDone: Ember.computed.alias('store.initDone'),
+
+    actions: {
+        joinLobby() {
+            this.get('socket').send({
+                id: 'JOIN',
+                network: 'MAS',
+                name: 'lobby'
+            });
+        }
+    },
 
     didInsertElement() {
         $(window).on('resize', Ember.run.bind(this, function() {
