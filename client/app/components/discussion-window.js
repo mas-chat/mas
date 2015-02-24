@@ -19,8 +19,10 @@
 /* globals $, _, FileAPI, emojify */
 
 import Ember from 'ember';
+import { play } from '../helpers/sound';
+import UploadMixin from '../mixins/upload';
 
-export default Ember.View.extend({
+export default Ember.Component.extend(UploadMixin, {
     classNames: [ 'window', 'flex-grow-column' ],
     attributeBindings: [ 'row:data-row', 'column:data-column' ],
 
@@ -30,25 +32,59 @@ export default Ember.View.extend({
         'ircServerWindow:irc-server-window:'
     ],
 
-    row: Ember.computed.alias('controller.model.row'),
-    column: Ember.computed.alias('controller.model.column'),
-    visible: Ember.computed.alias('controller.model.visible'),
-
     expanded: false,
     initial: true,
     animating: false,
     scrolling: false,
+
+    $messagePanel: null,
+    $images: null,
+    logModeEnabled: false,
+    wideMemberList: true,
+
+    row: Ember.computed.alias('content.row'),
+    column: Ember.computed.alias('content.column'),
+    visible: Ember.computed.alias('content.visible'),
 
     windowChanged: function() {
         this.get('parentView').windowChanged(true);
     }.observes('visible', 'row', 'column'),
 
     ircServerWindow: function() {
-        return this.get('controller.model.userId') === 'iSERVER' ? 'irc-server-window' : '';
-    }.property('controller.model.userId'),
+        return this.get('content.userId') === 'iSERVER' ? 'irc-server-window' : '';
+    }.property('content.userId'),
 
-    $messagePanel: null,
-    $images: null,
+    isGroup: function() {
+        return this.get('content.type') === 'group';
+    }.property('content.type'),
+
+    cssType: function() {
+        if (this.get('content.type') === 'group') {
+            return 'group';
+        } else if (this.get('content.userId') === 'iSERVER') {
+            return 'server-1on1';
+        } else {
+            return 'private-1on1';
+        }
+    }.property('content.type'),
+
+    newMessageReceived: function() {
+        if (!this.get('visible') || this.get('content.scrollLock')) {
+            this.incrementProperty('content.newMessagesCount');
+        }
+
+        if (document.hidden) {
+            // Browser title notification
+            if (this.get('content.titleAlert')) {
+                titlenotifier.add();
+            }
+
+            // Sound notification
+            if (this.get('content.sounds')) {
+                play();
+            }
+        }
+    }.observes('content.messages.@each'),
 
     actions: {
         expand() {
@@ -59,6 +95,56 @@ export default Ember.View.extend({
         compress() {
             this.set('expanded', false);
             this.get('parentView').windowChanged(true);
+        },
+
+        hide() {
+            this.set('content.visible', false);
+            this.set('content.timeHidden', Date.now());
+        },
+
+        browse() {
+            this.set('logModeEnabled', true);
+        },
+
+        toggleMemberListWidth() {
+            this.toggleProperty('wideMemberList');
+        },
+
+        sendMessage() {
+            this.sendAction('action', 'sendMessage', this.content, this.get('newMessage'));
+            this.set('newMessage', '');
+        },
+
+        chat(userId) {
+            this.sendAction('action', 'chat', userId);
+        },
+
+        whois(userId) {
+            this.sendAction('action', 'whois', this.content, userId);
+        },
+
+        op(userId) {
+            this.sendAction('action', 'op', this.content, userId);
+        },
+
+        requestFriend(nick) {
+            nick = nick;
+        },
+
+        kick(userId) {
+            this.sendAction('action', 'kick', this.content, userId);
+        },
+
+        kickban(userId) {
+            this.sendAction('action', 'kickban', this.content, userId);
+        },
+
+        close() {
+            this.sendAction('action', 'close', this.content);
+        },
+
+        menu(operation) {
+            this.sendAction('menuAction', operation, this.content);
         }
     },
 
@@ -144,7 +230,7 @@ export default Ember.View.extend({
             },
             onItem(context, e) {
                 let action = $(e.target).data('action');
-                that.get('controller').send(action, selectedUserId);
+                that.send(action, selectedUserId);
             }
         });
 
@@ -171,9 +257,9 @@ export default Ember.View.extend({
             return item.nick;
         }
 
-        let nickList = this.get('controller.model.operatorNames').map(getNick)
-            .concat(this.get('controller.model.voiceNames').map(getNick))
-            .concat(this.get('controller.model.userNames').map(getNick));
+        let nickList = this.get('content.operatorNames').map(getNick)
+            .concat(this.get('content.voiceNames').map(getNick))
+            .concat(this.get('content.userNames').map(getNick));
 
         this.$('.form-control').atwho({
             at: '@',
@@ -199,14 +285,14 @@ export default Ember.View.extend({
 
         FileAPI.event.on(fileInput, 'change', function(evt) {
             let files = FileAPI.getFiles(evt); // Retrieve file list
-            this.get('controller').send('upload', files, 'jpeg');
+            this.send('upload', files, 'jpeg');
         }.bind(this));
 
         this.get('parentView').windowChanged(false);
     },
 
     _goToBottom() {
-        if (this.get('controller.model.scrollLock')) {
+        if (this.get('content.scrollLock')) {
             return;
         }
 
@@ -235,13 +321,15 @@ export default Ember.View.extend({
             let scrollPos = $panel.scrollTop();
 
             if (scrollPos + $panel.innerHeight() >= $panel.prop('scrollHeight')) {
-                this.get('controller').send('scrollBottom');
-            } else {
-                this.get('controller').send('scrollUp');
+                this.set('content.scrollLock', false);
+                this.set('content.newMessagesCount', 0);
+                Ember.Logger.info('scrollock off');
+            } else if (!this.get('content.deletedLine')) {
+                this.set('content.scrollLock', true);
+                Ember.Logger.info('scrollock on');
             }
 
-            this.set('controller.model.deletedLine', false); // Hack
-
+            this.set('content.deletedLine', false); // Hack
             this._showImages();
         }, 100)));
     },

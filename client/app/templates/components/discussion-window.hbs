@@ -1,27 +1,27 @@
 <div class="window-title flex-row {{cssType}} {{ircServerWindow}}">
-    <div class="window-caption flex-1" data-toggle="tooltip" data-placement="bottom" data-delay='{"show": 1500, "hide": 300}' title={{model.tooltipTopic}}>
-        {{model.decoratedTitle}} {{model.decoratedTopic}}
+    <div class="window-caption flex-1" data-toggle="tooltip" data-placement="bottom" data-delay='{"show": 1500, "hide": 300}' title={{content.tooltipTopic}}>
+        {{content.decoratedTitle}} {{content.decoratedTopic}}
     </div>
 
     <div>
         <i class="window-title-button fa fa-arrows"></i>
         <i {{action "hide"}} class="window-title-button fa fa-minus"></i>
-        {{#if view.expanded}}
-            <i {{action "compress" target="view"}} class="window-title-button fa fa-compress"></i>
+        {{#if expanded}}
+            <i {{action "compress"}} class="window-title-button fa fa-compress"></i>
         {{else}}
-            <i {{action "expand" target="view"}} class="window-title-button fa fa-expand"></i>
+            <i {{action "expand"}} class="window-title-button fa fa-expand"></i>
         {{/if}}
     </div>
 </div>
 
 <div class="flex-row flex-1 window-content">
     {{#if logModeEnabled}}
-        {{log-panel enabled=logModeEnabled window=model}}
+        {{log-panel enabled=logModeEnabled window=content}}
     {{/if}}
 
     <div {{bind-attr class=":window-messages :flex-1 logModeEnabled:hidden"}}>
-        {{#each message in model.messages}}
-            {{dayDivider model.messages _view.contentIndex}}
+        {{#each message in content.messages}}
+            {{dayDivider content.messages _view.contentIndex}}
             <div class="line {{message.cat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
         {{/each}}
         <div class="window-upload">
@@ -36,7 +36,7 @@
 
     {{#if isGroup}}
         <div {{bind-attr class=":window-members logModeEnabled:hidden wideMemberList:window-members-wide"}}>
-            {{#each name in model.operatorNames}}
+            {{#each name in content.operatorNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div {{bind-attr class=":window-operator wideMemberList::hidden"}}>
@@ -44,7 +44,7 @@
                     </div>
                 </div>
             {{/each}}
-            {{#each name in model.voiceNames}}
+            {{#each name in content.voiceNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div {{bind-attr class=":window-voice wideMemberList::hidden"}}>
@@ -52,7 +52,7 @@
                     </div>
                 </div>
             {{/each}}
-            {{#each name in model.userNames}}
+            {{#each name in content.userNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div {{bind-attr class=":window-user wideMemberList::hidden"}}>
@@ -68,8 +68,8 @@
     <div class="window-add-text-container flex-1">
         <form {{action "sendMessage" on="submit"}}>
             {{input placeholder="Write here…" class="form-control" valueBinding="newMessage"}}
-            {{#if model.scrollLock}}
-                {{#if model.newMessagesCount}}
+            {{#if content.scrollLock}}
+                {{#if content.newMessagesCount}}
                     <div class="window-new-messages">
                         <span class="fa fa-chevron-down"></span> New messages
                     </div>
@@ -90,16 +90,16 @@
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-right">
-                <li {{action "openModal" "password-modal" model}}><a href="#">Change password&hellip;</a></li>
-                <li {{action "openModal" "topic-modal" model}}><a href="#">Edit topic&hellip;</a></li>
-                <li {{action "openModal" "alerts-modal" model}}><a href="#">Configure alerts&hellip;</a></li>
+                <li {{action "menu" "editPassword"}}><a href="#">Change password&hellip;</a></li>
+                <li {{action "menu" "editTopic"}}><a href="#">Edit topic&hellip;</a></li>
+                <li {{action "menu" "editAlerts"}}><a href="#">Configure alerts&hellip;</a></li>
                 <li {{action "toggleMemberListWidth"}}><a href="#">Toggle member list width</a></li>
                 <li class="divider"></li>
                 <li {{action "browse"}}><a href="#">Browse history&hellip;</a></li>
                 <li class="divider"></li>
-                <li {{action "openModal" "capture-modal" model}}><a href="#">Take and upload photo&hellip;</a></li>
+                <li {{action "menu" "takePhoto"}}><a href="#">Take and upload photo&hellip;</a></li>
                 <li class="divider"></li>
-                <li {{action "close"}}><a href="#">Close window and exit this {{model.explainedType}}</a></li>
+                <li {{action "close"}}><a href="#">Close window and exit this {{content.explainedType}}</a></li>
             </ul>
         </div>
     </div>

@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* global $ */
+/* global $, _, moment */
 
 import Ember from 'ember';
 
@@ -24,6 +24,7 @@ export default Ember.ArrayController.extend({
     friends: null,
 
     socket: Ember.inject.service(),
+    store: Ember.inject.service(),
 
     actions: {
         show(window) {
@@ -39,6 +40,21 @@ export default Ember.ArrayController.extend({
                 $.removeCookie('auth', { path: '/' });
                 window.location = '/';
             });
+        },
+
+        windowAction(command, window, value) {
+            this['_handle' + _.capitalize(command)](window, value);
+        },
+
+        menuAction(command, window) {
+            let modals = {
+                editPassword: 'password-modal',
+                editTopic: 'topic-modal',
+                editAlerts: 'alerts-modal',
+                takePhoto: 'capture-modal'
+            };
+
+            this.send('openModal', modals[command], window);
         }
     },
 
@@ -50,5 +66,88 @@ export default Ember.ArrayController.extend({
 
     friendsOnline: function() {
         return this.get('friends').filterBy('online', true).length;
-    }.property('friends.@each.online')
+    }.property('friends.@each.online'),
+
+    _handleSendMessage(window, text) {
+        let messageRecord = this.get('container').lookup('model:message');
+        let isCommand = text.charAt(0) === '/';
+        let ircServer1on1 = window.get('type') === '1on1' && window.get('userId') === 'iSERVER';
+
+        if (ircServer1on1 && !isCommand) {
+            messageRecord.setProperties({
+                body: 'Only commands allowed, e.g. /whois john',
+                cat: 'error',
+                ts: moment().unix(),
+                window: window
+            });
+        } else {
+            this.get('socket').send({
+                id: 'SEND',
+                text: text,
+                windowId: window.get('windowId')
+            });
+
+            messageRecord.setProperties({
+                body: text,
+                cat: 'mymsg',
+                userId: this.get('store.userId'),
+                ts: moment().unix(),
+                window: window
+            });
+        }
+
+        if (!isCommand) {
+            window.get('messages').pushObject(messageRecord);
+        }
+    },
+
+    _handleChat(userId) {
+        this.get('socket').send({
+            id: 'CHAT',
+            userId: userId
+        }, function(resp) {
+            if (resp.status !== 'OK') {
+                this.send('openModal', 'info-modal', { title: 'Error', body: resp.errorMsg });
+            }
+        }.bind(this));
+    },
+
+    _handleWhois(window, userId) {
+        this.get('socket').send({
+            id: 'WHOIS',
+            windowId: window.get('windowId'),
+            userId: userId
+        });
+    },
+
+    _handleOp(window, userId) {
+        this.get('socket').send({
+            id: 'OP',
+            windowId: window.get('windowId'),
+            userId: userId
+        });
+    },
+
+    _handleKick(window, userId) {
+        this.get('socket').send({
+            id: 'KICK',
+            windowId: this.get('content.windowId'),
+            userId: userId
+        });
+    },
+
+    _handleKickban(window, userId) {
+        this.get('socket').send({
+            id: 'KICKBAN',
+            windowId: window.get('windowId'),
+            userId: userId
+        });
+    },
+
+    _handleClose(window) {
+        this.get('socket').send({
+            id: 'CLOSE',
+            windowId: window.get('windowId')
+        });
+    }
 });

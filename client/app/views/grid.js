@@ -116,15 +116,13 @@ export default Ember.View.extend({
                 }
 
                 let view = Ember.View.views[masWindow.el.getAttribute('id')];
-                view.set('controller.model.row', rowIndex + deltaY);
-                view.set('controller.model.column', columnIndex + deltaX);
+                view.set('row', rowIndex + deltaY);
+                view.set('column', columnIndex + deltaX);
             });
         });
 
-        this.movingWindow.set('controller.model.row',
-            this.cursor.y + (this.cursor.section === 'bottom' ? 1 : 0));
-        this.movingWindow.set('controller.model.column',
-            this.cursor.x + (this.cursor.section === 'right' ? 1 : 0));
+        this.movingWindow.set('row', this.cursor.y + (this.cursor.section === 'bottom' ? 1 : 0));
+        this.movingWindow.set('column', this.cursor.x + (this.cursor.section === 'right' ? 1 : 0));
     },
 
     layoutWindows(animate) {
