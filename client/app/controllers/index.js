@@ -101,7 +101,7 @@ export default Ember.ArrayController.extend({
         }
     },
 
-    _handleChat(userId) {
+    _handleChat(window, userId) {
         this.get('socket').send({
             id: 'CHAT',
             userId: userId

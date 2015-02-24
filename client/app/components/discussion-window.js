@@ -115,34 +115,6 @@ export default Ember.Component.extend(UploadMixin, {
             this.set('newMessage', '');
         },
 
-        chat(userId) {
-            this.sendAction('action', 'chat', userId);
-        },
-
-        whois(userId) {
-            this.sendAction('action', 'whois', this.content, userId);
-        },
-
-        op(userId) {
-            this.sendAction('action', 'op', this.content, userId);
-        },
-
-        requestFriend(nick) {
-            nick = nick;
-        },
-
-        kick(userId) {
-            this.sendAction('action', 'kick', this.content, userId);
-        },
-
-        kickban(userId) {
-            this.sendAction('action', 'kickban', this.content, userId);
-        },
-
-        close() {
-            this.sendAction('action', 'close', this.content);
-        },
-
         menu(operation) {
             this.sendAction('menuAction', operation, this.content);
         }
@@ -230,7 +202,7 @@ export default Ember.Component.extend(UploadMixin, {
             },
             onItem(context, e) {
                 let action = $(e.target).data('action');
-                that.send(action, selectedUserId);
+                that.sendAction('action', action, that.content, selectedUserId);
             }
         });
 
