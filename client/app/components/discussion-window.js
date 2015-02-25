@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals $, _, FileAPI, emojify */
+/* globals $, _, FileAPI, emojify, titlenotifier */
 
 import Ember from 'ember';
 import { play } from '../helpers/sound';
@@ -33,7 +33,7 @@ export default Ember.Component.extend(UploadMixin, {
     ],
 
     expanded: false,
-    initial: true,
+    initialAddition: true,
     animating: false,
     scrolling: false,
 
@@ -52,10 +52,16 @@ export default Ember.Component.extend(UploadMixin, {
 
     lineAdded: function() {
         Ember.run.debounce(this, function() {
-            this._goToBottom();
+            let initialAddition = this.get('initialAddition');
+
+            if (initialAddition) {
+                this._addScrollHandler();
+                this.set('initialAddition', false);
+            }
+
             this._updateImages();
-            this._showImages();
-        }, 100);
+            this._goToBottom(!initialAddition);
+        }, 200);
 
         if (!this.get('visible') || this.get('content.scrollLock')) {
             this.incrementProperty('content.newMessagesCount');
@@ -153,15 +159,7 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     layoutDone() {
-        this._goToBottom();
-
-        if (this.get('initial')) {
-            this._updateImages();
-            this._addScrollHandler();
-            this.set('initial', false);
-        }
-
-        this._showImages();
+        this._goToBottom(false);
     },
 
     didInsertElement() {
@@ -260,14 +258,16 @@ export default Ember.Component.extend(UploadMixin, {
         this.get('parentView').windowChanged(false);
     },
 
-    _goToBottom() {
+    _goToBottom(animate) {
         if (this.get('content.scrollLock')) {
             return;
         }
 
+        let duration = animate ? 3000 : 0;
+
         this.$('.window-messages > div:last-child').velocity('stop').velocity('scroll', {
             container: this.$messagePanel,
-            duration: 300,
+            duration: duration,
             easing: 'spring',
             begin: function() {
                 this.$messagePanel.css('overflow-y', 'hidden');
@@ -276,6 +276,7 @@ export default Ember.Component.extend(UploadMixin, {
             complete: function() {
                 this.$messagePanel.css('overflow-y', 'auto');
                 this.set('scrolling', false);
+                this._showImages();
             }.bind(this)
         });
     },
@@ -329,7 +330,7 @@ export default Ember.Component.extend(UploadMixin, {
                 $img.one('load error', function() {
                     $img.removeClass('loader loader-small-dark');
                     $img.removeAttr('data-src');
-                    that._goToBottom();
+                    that._goToBottom(true);
                 });
 
                 return false;
