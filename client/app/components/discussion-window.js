@@ -127,6 +127,10 @@ export default Ember.Component.extend(UploadMixin, {
             this.set('newMessage', '');
         },
 
+        close() {
+            this.sendAction('action', 'close', this.content)
+        },
+
         menu(operation) {
             this.sendAction('menuAction', operation, this.content);
         }
@@ -256,6 +260,14 @@ export default Ember.Component.extend(UploadMixin, {
         }.bind(this));
 
         this.get('parentView').windowChanged(false);
+    },
+
+    willDestroyElement() {
+        let gridView = this.get('parentView');
+
+        Ember.run.next(this, function() {
+            gridView.windowChanged(true);
+        });
     },
 
     _goToBottom(animate) {
