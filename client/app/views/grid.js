@@ -46,18 +46,18 @@ export default Ember.View.extend({
 
     didInsertElement() {
         $(window).on('resize', Ember.run.bind(this, function() {
-            this.layoutWindows(false);
+            this._layoutWindows(false);
         }));
     },
 
     windowChanged(animate) {
         if (this.get('initDone')) {
-            Ember.run.next(this, function() { this.layoutWindows(animate); });
+            Ember.run.next(this, function() { this._layoutWindows(animate); });
         }
     },
 
     initReady: function() {
-        Ember.run.next(this, function() { this.layoutWindows(false); });
+        Ember.run.next(this, function() { this._layoutWindows(false); });
     }.observes('initDone'),
 
     dragWindowStart(view, event) {
@@ -125,7 +125,7 @@ export default Ember.View.extend({
         this.movingWindow.set('column', this.cursor.x + (this.cursor.section === 'right' ? 1 : 0));
     },
 
-    layoutWindows(animate) {
+    _layoutWindows(animate) {
         let duration = animate ? 600 : 0;
         let el = this.get('element');
         let container = this._containerDimensions();
