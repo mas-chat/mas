@@ -16,9 +16,11 @@
 
 'use strict';
 
+/* globals moment */
+
 import Ember from 'ember';
 
-export default Ember.ArrayController.extend({
-    sortAscending: false,
-    sortProperties: [ 'online', 'last' ]
+export default Ember.Component.extend({
+    sortProperties: [ 'online', 'last', 'name' ],
+    sortedFriends: Ember.computed.sort('friends', 'sortProperties')
 });
