@@ -50,6 +50,30 @@ export default Ember.Component.extend(UploadMixin, {
         this.get('parentView').windowChanged(true);
     }.observes('visible', 'row', 'column'),
 
+    lineAdded: function() {
+        Ember.run.debounce(this, function() {
+            this._goToBottom();
+            this._updateImages();
+            this._showImages();
+        }, 100);
+
+        if (!this.get('visible') || this.get('content.scrollLock')) {
+            this.incrementProperty('content.newMessagesCount');
+        }
+
+        if (document.hidden) {
+            // Browser title notification
+            if (this.get('content.titleAlert')) {
+                titlenotifier.add();
+            }
+
+            // Sound notification
+            if (this.get('content.sounds')) {
+                play();
+            }
+        }
+    }.observes('content.messages.@each').on('init'),
+
     ircServerWindow: function() {
         return this.get('content.userId') === 'iSERVER' ? 'irc-server-window' : '';
     }.property('content.userId'),
@@ -67,24 +91,6 @@ export default Ember.Component.extend(UploadMixin, {
             return 'private-1on1';
         }
     }.property('content.type'),
-
-    newMessageReceived: function() {
-        if (!this.get('visible') || this.get('content.scrollLock')) {
-            this.incrementProperty('content.newMessagesCount');
-        }
-
-        if (document.hidden) {
-            // Browser title notification
-            if (this.get('content.titleAlert')) {
-                titlenotifier.add();
-            }
-
-            // Sound notification
-            if (this.get('content.sounds')) {
-                play();
-            }
-        }
-    }.observes('content.messages.@each'),
 
     actions: {
         expand() {
@@ -162,13 +168,6 @@ export default Ember.Component.extend(UploadMixin, {
         let that = this;
 
         this.$messagePanel = this.$('.window-messages');
-
-        let observer = new MutationObserver(Ember.run.bind(this, function() {
-            that._goToBottom();
-            that._updateImages();
-            that._showImages();
-        }));
-        observer.observe(this.$messagePanel[0], { childList: true });
 
         this.$('.window-caption').tooltip();
         this.$messagePanel.tooltip({
