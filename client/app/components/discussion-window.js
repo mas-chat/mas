@@ -121,8 +121,6 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     mouseDown(event) {
-        console.log(event);
-
         if (!$(event.target).hasClass('fa-arrows')) {
             return; // Not moving the window
         }
