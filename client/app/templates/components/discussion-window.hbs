@@ -4,13 +4,15 @@
     </div>
 
     <div>
-        <i class="window-title-button fa fa-arrows"></i>
-        <i {{action "hide"}} class="window-title-button fa fa-minus"></i>
-        {{#if expanded}}
-            <i {{action "compress"}} class="window-title-button fa fa-compress"></i>
-        {{else}}
-            <i {{action "expand"}} class="window-title-button fa fa-expand"></i>
-        {{/if}}
+        {{#unless logModeEnabled}}
+            <i class="window-title-button fa fa-arrows"></i>
+            <i {{action "hide"}} class="window-title-button fa fa-minus"></i>
+            {{#if expanded}}
+                <i {{action "compress"}} class="window-title-button fa fa-compress"></i>
+            {{else}}
+                <i {{action "expand"}} class="window-title-button fa fa-expand"></i>
+            {{/if}}
+        {{/unless}}
     </div>
 </div>
 
