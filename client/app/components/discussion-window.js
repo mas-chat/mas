@@ -130,7 +130,7 @@ export default Ember.Component.extend(UploadMixin, {
         },
 
         close() {
-            this.sendAction('action', 'close', this.content)
+            this.sendAction('action', 'close', this.content);
         },
 
         menu(operation) {
