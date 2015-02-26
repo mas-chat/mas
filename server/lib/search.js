@@ -54,6 +54,12 @@ exports.getMessagesForDay = function(conversationId, start, end, callback) {
     elasticSearchClient.search({
         index: 'messages',
         body: {
+            size: 1000,
+            sort: {
+                ts: {
+                    order: 'asc'
+                }
+            },
             query: {
                 filtered: {
                     filter: {
