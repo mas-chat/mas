@@ -116,6 +116,8 @@ export default Ember.Component.extend(UploadMixin, {
 
         browse() {
             this.set('logModeEnabled', true);
+            this.set('expanded', true);
+            this.get('parentView').windowChanged(true);
         },
 
         toggleMemberListWidth() {
