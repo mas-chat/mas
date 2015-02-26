@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals $, _, FileAPI, emojify, titlenotifier */
+/* globals $, FileAPI, emojify, titlenotifier */
 
 import Ember from 'ember';
 import { play } from '../helpers/sound';
@@ -59,7 +59,9 @@ export default Ember.Component.extend(UploadMixin, {
                 this.set('initialAddition', false);
             }
 
-            this._updateImages();
+            // Update images array
+            this.$images = this.$('img[data-src]');
+
             this._goToBottom(!initialAddition);
         }, 200);
 
@@ -296,7 +298,7 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     _addScrollHandler() {
-        this.$messagePanel.on('scroll', _.throttle(Ember.run.bind(this, function() {
+        this.$messagePanel.on('scroll', Ember.run.throttle(this, function() {
             if (this.get('animating') || this.get('scrolling')) {
                 return;
             }
@@ -315,15 +317,7 @@ export default Ember.Component.extend(UploadMixin, {
 
             this.set('content.deletedLine', false); // Hack
             this._showImages();
-        }, 100)));
-    },
-
-    _updateImages() {
-        if (this.$images === null) {
-            this.$images = $([]);
-        }
-
-        this.$images = this.$images.add(this.$('img[data-src]'));
+        }, 100));
     },
 
     _showImages() {
