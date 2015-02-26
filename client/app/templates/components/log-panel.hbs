@@ -26,4 +26,9 @@
             <div>No recorded messages on {{view.friendlyDate}}.</div>
         </div>
     {{/each}}
+    <div>
+        {{#if tooManyMessages}}
+            Warning: Rest of the messages for this day have been skipped.
+        {{/if}}
+    </div>
 </div>

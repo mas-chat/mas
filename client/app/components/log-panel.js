@@ -33,6 +33,7 @@ export default Ember.Component.extend({
     $dateInput: null,
     currentDate: null,
     messages: null,
+    tooManyMessages: false, // Temporary solution, pagination is coming
 
     friendlyDate: function() {
         return moment(this.get('currentDate')).format('dddd, MMMM Do YYYY');
@@ -108,6 +109,9 @@ export default Ember.Component.extend({
             let messages = this.get('messages');
             let container = this.get('container');
             messages.clear();
+
+            // TBD: Temporary check, implement pagination
+            this.set('tooManyMessages', resp.results.length > 999);
 
             resp.results.forEach(function(message) {
                 let messageRecord = container.lookup('model:message').setProperties(message);
