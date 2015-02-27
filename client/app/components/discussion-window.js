@@ -27,6 +27,7 @@ export default Ember.Component.extend(UploadMixin, {
     attributeBindings: [ 'row:data-row', 'column:data-column' ],
 
     classNameBindings: [
+        'animating:velocity-animating:',
         'expanded:expanded:',
         'visible:visible:hidden',
         'ircServerWindow:irc-server-window:'
