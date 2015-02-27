@@ -29,11 +29,11 @@ export default Ember.Service.extend({
     initDone: false,
 
     init() {
+        this._super();
+
         this.set('users', Users.create());
         this.set('friends', Ember.A([]));
         this.set('windows', Ember.A([]));
         this.set('alerts', Ember.A([]));
-
-        return this._super();
     }
 });
