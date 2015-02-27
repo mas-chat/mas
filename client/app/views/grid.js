@@ -269,8 +269,11 @@ export default Ember.View.extend({
                         windowDim.height - cursorSpace : windowDim.height
                 };
 
+                const PADDING = 2 * 3;
+
                 if (newDim.left === oldDim.left && newDim.top === oldDim.top &&
-                    newDim.width === oldDim.width && newDim.height === oldDim.height) {
+                    newDim.width === oldDim.width + PADDING &&
+                    newDim.height === oldDim.height + PADDING) {
                     // Nothing to animate
                     return;
                 }
