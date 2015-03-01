@@ -322,6 +322,10 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     _showImages() {
+        if (!this.$images) {
+            return;
+        }
+
         let placeHolderHeight = 31;
         let panelHeight = this.$messagePanel.height();
         let that = this;
