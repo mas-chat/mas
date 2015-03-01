@@ -299,26 +299,28 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     _addScrollHandler() {
-        this.$messagePanel.on('scroll', Ember.run.throttle(this, function() {
-            if (this.get('animating') || this.get('scrolling')) {
-                return;
-            }
+        this.$messagePanel.on('scroll', function() {
+            Ember.run.throttle(this, function() {
+                if (this.get('animating') || this.get('scrolling')) {
+                    return;
+                }
 
-            let $panel = this.$messagePanel;
-            let scrollPos = $panel.scrollTop();
+                let $panel = this.$messagePanel;
+                let scrollPos = $panel.scrollTop();
 
-            if (scrollPos + $panel.innerHeight() >= $panel.prop('scrollHeight')) {
-                this.set('content.scrollLock', false);
-                this.set('content.newMessagesCount', 0);
-                Ember.Logger.info('scrollock off');
-            } else if (!this.get('content.deletedLine')) {
-                this.set('content.scrollLock', true);
-                Ember.Logger.info('scrollock on');
-            }
+                if (scrollPos + $panel.innerHeight() >= $panel.prop('scrollHeight')) {
+                    this.set('content.scrollLock', false);
+                    this.set('content.newMessagesCount', 0);
+                    Ember.Logger.info('scrollock off');
+                } else if (!this.get('content.deletedLine')) {
+                    this.set('content.scrollLock', true);
+                    Ember.Logger.info('scrollock on');
+                }
 
-            this.set('content.deletedLine', false); // Hack
-            this._showImages();
-        }, 100));
+                this.set('content.deletedLine', false); // Hack
+                this._showImages();
+            }, 100);
+        }.bind(this));
     },
 
     _showImages() {
