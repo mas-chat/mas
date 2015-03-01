@@ -17,7 +17,7 @@
     </div>
 </div>
 
-<div class="flex-1 flex-column logs-channel window-messages">
+<div class="flex-1 logs-channel window-messages">
     {{#each message in messages}}
         {{dayDivider messages _view.contentIndex}}
         <div class="line {{message.cat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>

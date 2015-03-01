@@ -65,7 +65,8 @@ export default Ember.Component.extend({
     didInsertElement() {
         this.$().velocity('slideDown', {
             duration: 700,
-            easing: 'easeInOutQuad'
+            easing: 'easeInOutQuad',
+            display: 'flex'
         });
 
         this.$dateInput = this.$('.logs-date');
