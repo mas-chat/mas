@@ -7,7 +7,11 @@
     "rules": {
         "strict": [2, "global"],
         "quotes": [2, "single", "avoid-escape"],
-        "no-use-before-define": 0
+        "no-use-before-define": 0,
+        "no-underscore-dangle": 0,
+        "no-mixed-requires": 0,
+        "space-unary-ops": 0,
+        "no-var": 2
     },
     "ecmaFeatures": {
         "blockBindings": true,
