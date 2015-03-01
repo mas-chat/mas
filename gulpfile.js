@@ -21,7 +21,6 @@ const paths = {
         'gulpfile.js',
         'server/**/*.js',
         '!server/public/dist/**/*.js',
-        'mas-private/**/*.js',
         'bin/masctl',
         'bin/create-alert'
     ],
