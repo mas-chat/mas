@@ -128,8 +128,12 @@ export default Ember.Component.extend(UploadMixin, {
         },
 
         sendMessage() {
-            this.sendAction('action', 'sendMessage', this.content, this.get('newMessage'));
-            this.set('newMessage', '');
+            let message = this.get('newMessage');
+
+            if (message) {
+                this.sendAction('action', 'sendMessage', this.content, message);
+                this.set('newMessage', '');
+            }
         },
 
         close() {
