@@ -57,6 +57,7 @@ export default Ember.Object.extend({
 
     titleAlert: false,
     sounds: false,
+    minimizedNamesList: false,
 
     password: null,
 
@@ -137,9 +138,10 @@ export default Ember.Object.extend({
             id: 'UPDATE',
             windowId: this.get('windowId'),
             sounds: this.get('sounds'),
-            titleAlert: this.get('titleAlert')
+            titleAlert: this.get('titleAlert'),
+            minimizedNamesList: this.get('minimizedNamesList')
         });
-    }.observes('titleAlert', 'sounds'),
+    }.observes('titleAlert', 'sounds', 'minimizedNamesList'),
 
     _mapUserIdsToNicks(role) {
         return this.get(role).map(function(userId) {

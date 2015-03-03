@@ -137,6 +137,7 @@ function *create(userId, conversationId) {
         conversationId: conversationId,
         sounds: false,
         titleAlert: false,
+        minimizedNamesList: false,
         visible: true,
         row: 0,
         column: 0
@@ -166,6 +167,7 @@ function *create(userId, conversationId) {
         row: newWindow.row,
         column: newWindow.column,
         sounds: newWindow.sounds,
+        minimizedNamesList: newWindow.minimizedNamesList,
         role: 'u' // Everybody starts as a normal user
     };
 

@@ -37,11 +37,11 @@
     </div>
 
     {{#if isGroup}}
-        <div {{bind-attr class=":window-members logModeEnabled:hidden wideMemberList:window-members-wide"}}>
+        <div {{bind-attr class=":window-members logModeEnabled:hidden content.minimizedNamesList::window-members-wide"}}>
             {{#each name in content.operatorNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=wavatar" />
-                    <div {{bind-attr class=":window-operator wideMemberList::hidden"}}>
+                    <div {{bind-attr class=":window-operator content.minimizedNamesList:hidden"}}>
                         {{name.nick}}
                     </div>
                 </div>
@@ -49,7 +49,7 @@
             {{#each name in content.voiceNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=wavatar" />
-                    <div {{bind-attr class=":window-voice wideMemberList::hidden"}}>
+                    <div {{bind-attr class=":window-voice content.minimizedNamesList:hidden"}}>
                         {{name.nick}}
                     </div>
                 </div>
@@ -57,7 +57,7 @@
             {{#each name in content.userNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=wavatar" />
-                    <div {{bind-attr class=":window-user wideMemberList::hidden"}}>
+                    <div {{bind-attr class=":window-user content.minimizedNamesList:hidden"}}>
                         {{name.nick}}
                     </div>
                 </div>

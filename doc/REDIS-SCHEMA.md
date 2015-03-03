@@ -52,6 +52,7 @@ MAS Redis structures
    sounds (bool)
    titleAlert (bool)
    visible (bool)
+   minimizedNamesList (bool)
    row (int)
    column (int)
    group (int)

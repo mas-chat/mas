@@ -41,7 +41,6 @@ export default Ember.Component.extend(UploadMixin, {
     $messagePanel: null,
     $images: null,
     logModeEnabled: false,
-    wideMemberList: true,
 
     row: Ember.computed.alias('content.row'),
     column: Ember.computed.alias('content.column'),
@@ -124,7 +123,7 @@ export default Ember.Component.extend(UploadMixin, {
         },
 
         toggleMemberListWidth() {
-            this.toggleProperty('wideMemberList');
+            this.toggleProperty('content.minimizedNamesList');
         },
 
         sendMessage() {
