@@ -40,7 +40,7 @@
         <div {{bind-attr class=":window-members logModeEnabled:hidden wideMemberList:window-members-wide"}}>
             {{#each name in content.operatorNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=wavatar" />
                     <div {{bind-attr class=":window-operator wideMemberList::hidden"}}>
                         {{name.nick}}
                     </div>
@@ -48,7 +48,7 @@
             {{/each}}
             {{#each name in content.voiceNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=wavatar" />
                     <div {{bind-attr class=":window-voice wideMemberList::hidden"}}>
                         {{name.nick}}
                     </div>
@@ -56,7 +56,7 @@
             {{/each}}
             {{#each name in content.userNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=wavatar" />
                     <div {{bind-attr class=":window-user wideMemberList::hidden"}}>
                         {{name.nick}}
                     </div>
