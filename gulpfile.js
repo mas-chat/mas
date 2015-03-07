@@ -14,7 +14,8 @@ const path = require('path'),
       less = require('gulp-less'),
       minifyCSS = require('gulp-minify-css'),
       rev = require('gulp-rev'),
-      rimraf = require('rimraf');
+      rimraf = require('rimraf'),
+      inlineCss = require('gulp-inline-css');
 
 const paths = {
     serverJavaScripts: [
@@ -97,11 +98,23 @@ gulp.task('fonts', [ 'bower' ], function() {
         .pipe(gulp.dest('./server/public/dist/fonts'));
 });
 
+
+gulp.task('emails', function() {
+    gulp.src('./server/emails/*.hbs')
+        .pipe(inlineCss({
+                applyStyleTags: true,
+                applyLinkTags: true,
+                removeStyleTags: true,
+                removeLinkTags: true
+        }))
+        .pipe(gulp.dest('./server/emails/build/'));
+});
+
 gulp.task('clean-assets', function(cb) {
     rimraf('./server/public/dist', cb);
 });
 
-gulp.task('build-assets', [ 'libs-pages', 'less-pages', 'fonts' ], function() {
+gulp.task('build-assets', [ 'libs-pages', 'less-pages', 'fonts', 'emails' ], function() {
     if (argv.prod) {
         gulp.src('./server/public/dist/**/*')
             .pipe(rev())

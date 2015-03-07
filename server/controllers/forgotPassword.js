@@ -20,15 +20,17 @@ const fs = require('fs'),
       path = require('path'),
       uuid = require('uid2'),
       nodemailer = require('nodemailer'),
+      htmlToText = require('nodemailer-html-to-text').htmlToText,
       handlebars = require('handlebars'),
       redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
       conf = require('../lib/conf');
 
 let transporter = nodemailer.createTransport();
+transporter.use('compile', htmlToText());
 
 let template = handlebars.compile(fs.readFileSync(path.join(
-    __dirname, '..', 'emails', 'resetPassword.hbs'), 'utf8'));
+    __dirname, '../emails/build/resetPassword.hbs'), 'utf8'));
 
 exports.create = function*() {
     let email = this.request.body.email;
@@ -47,7 +49,7 @@ exports.create = function*() {
             from: conf.get('site:admin_email'),
             to: user.email,
             subject: 'Password reset link',
-            text: body
+            html: body
         });
 
         yield redis.set(`passwordresettoken:${token}`, userId);

@@ -11,12 +11,13 @@
 /client/dist/
 /client/tmp/
 /client/bower_components/
-/client/node_modules
+/client/node_modules/
+/server/emails/build/
 /npm-debug.log
 /logs/
 /run/
 /data/
-/test/browser/reports
+/test/browser/reports/
 
 #Mac files
 .DS_Store
