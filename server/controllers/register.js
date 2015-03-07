@@ -307,7 +307,7 @@ exports.createReset = function*() {
 
         let user = new User();
         yield user.load(userId);
-        user.setFinalPasswordSha(form.data.password);
+        user.setPassword(form.data.password);
         yield user.save();
 
         this.response.redirect('/');
