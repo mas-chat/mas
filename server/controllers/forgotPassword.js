@@ -46,7 +46,7 @@ exports.create = function*() {
         });
 
         transporter.sendMail({
-            from: conf.get('site:admin_email'),
+            from: 'MAS admin <' + conf.get('site:admin_email') + '>',
             to: user.email,
             subject: 'Password reset link',
             html: body
