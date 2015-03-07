@@ -18,7 +18,7 @@
 
 import Ember from 'ember';
 
-export default Ember.Controller.extend({
+export default Ember.Component.extend({
     modalPassword: null,
     modalPasswordStatus: null,
     errorMsg: '',
@@ -47,9 +47,8 @@ export default Ember.Controller.extend({
             }.bind(this));
         },
 
-        cancel() {
-            this._updateModalPassword();
-            this.send('closeModal');
+        closeModal() {
+            this.sendAction();
         }
     },
 

@@ -35,16 +35,15 @@ export default Ember.Mixin.create({
             return;
         }
 
-        let model = this.get('model') || this.get('content');
         let options = {
             url: '/api/v1/upload',
             files: { userFiles: files },
             complete: function(err, xhr) {
                 if (!err) {
                     let url = JSON.parse(xhr.responseText).url[0];
-                    this._sendMessage(url, model);
+                    this._sendMessage(url);
                 } else {
-                    this._printLine('File upload failed.', 'error', model);
+                    this._printLine('File upload failed.', 'error');
                 }
             }.bind(this),
             data: { sessionId: this.get('socket').sessionId }
@@ -60,25 +59,25 @@ export default Ember.Mixin.create({
         FileAPI.upload(options);
     },
 
-    _sendMessage(text, model) {
+    _sendMessage(text) {
         this.get('socket').send({
             id: 'SEND',
             text: text,
-            windowId: model.get('windowId')
+            windowId: this.get('content.windowId')
         });
 
-        this._printLine(text, 'mymsg', model);
+        this._printLine(text, 'mymsg');
     },
 
-    _printLine(text, cat, model) {
+    _printLine(text, cat) {
         let messageRecord = this.get('container').lookup('model:message').setProperties({
             body: text,
             cat:  cat,
             userId: cat === 'mymsg' ?  this.get('store.userId') : null,
-            window: model,
+            window: this.get('content'),
             ts: moment().unix()
         });
 
-        model.get('messages').pushObject(messageRecord);
+        this.get('content.messages').pushObject(messageRecord);
     }
 });

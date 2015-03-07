@@ -19,8 +19,6 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
-    modalOpen: false,
-    modalQueue: Ember.A([]),
     fullScreenModalOpen: false,
 
     store: Ember.inject.service(),
@@ -31,15 +29,7 @@ export default Ember.Route.extend({
 
     actions: {
         openModal(modalName, model) {
-            if (this.get('modalOpen')) {
-                // New modal goes to a queue if there's already a modal open.
-                this.modalQueue.pushObject({
-                    name: modalName,
-                    model: model
-                });
-            } else {
-                this._open(modalName, model);
-            }
+            this.controllerFor("application").send('openModal', modalName, model)
         },
 
         toggleFullScreenModal(modalName, model) {
@@ -59,33 +49,6 @@ export default Ember.Route.extend({
 
                 this.set('fullScreenModalOpen', true);
             }
-        },
-
-        closeModal() {
-            this.disconnectOutlet({
-                outlet: 'modal',
-                parentView: 'application'
-            });
-
-            let nextModal = this.modalQueue.shiftObject();
-
-            if (nextModal) {
-                Ember.run.later(this, function() {
-                    this._open(nextModal.name, nextModal.model);
-                }, 300);
-            } else {
-                this.set('modalOpen', false);
-            }
         }
-    },
-
-    _open(modalName, model) {
-        this.render(modalName, {
-            into: 'application',
-            outlet: 'modal',
-            model: model
-        });
-
-        this.set('modalOpen', true);
     }
 });

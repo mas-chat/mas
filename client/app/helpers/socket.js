@@ -100,7 +100,7 @@ export default Ember.Object.extend({
                 sessionId: this.get('sessionId')
             });
 
-            this.get('container').lookup('route:application').send(
+            this.get('container').lookup('controller:application').send(
                 'closeModal');
         }));
     },

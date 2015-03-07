@@ -1,6 +1,9 @@
 <div class="blocker"></div>
 
-{{outlet 'modal'}}
+{{#if activeModal}}
+    {{component activeModal model=modalModel action="closeModal"}}
+{{/if}}
+
 {{outlet 'fullscreen-modal'}}
 
 {{alert-message alert=currentAlert hide="hideAlert" action="ackAlert"}}

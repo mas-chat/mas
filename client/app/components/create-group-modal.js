@@ -18,18 +18,15 @@
 
 import Ember from 'ember';
 
-export default Ember.Controller.extend({
-    channel: '',
+export default Ember.Component.extend({
+    group: '',
     password: '',
     errorMsg: '',
-
-    selectedNetwork: 'IRCNet',
-    networks: [ 'IRCNet', 'FreeNode', 'W3C' ],
 
     socket: Ember.inject.service(),
 
     actions: {
-        joinIRC() {
+        newGroup() {
             let password = this.get('password').trim();
 
             if (password === '') {
@@ -37,9 +34,8 @@ export default Ember.Controller.extend({
             }
 
             this.get('socket').send({
-                id: 'JOIN',
-                network: this.get('selectedNetwork'),
-                name: this.get('channel'),
+                id: 'CREATE',
+                name: this.get('group'),
                 password: password
             }, function(resp) {
                 if (resp.status === 'OK') {
@@ -48,6 +44,10 @@ export default Ember.Controller.extend({
                     this.set('errorMsg', resp.errorMsg);
                 }
             }.bind(this));
+        },
+
+        closeModal() {
+            this.sendAction();
         }
     }
 });

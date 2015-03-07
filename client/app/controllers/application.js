@@ -22,9 +22,36 @@ export default Ember.Controller.extend({
     currentAlert: null,
     alerts: null,
 
+    activeModal: 'empty-modal',
+    modalModel: null,
+    modalQueue: Ember.A([]),
+
     socket: Ember.inject.service(),
 
     actions: {
+        openModal(modalName, model) {
+            if (this.get('activeModal') !== 'empty-modal') {
+                // New modal goes to a queue if there's already a modal open.
+                this.modalQueue.pushObject({
+                    name: modalName,
+                    model: model
+                });
+            } else {
+                this._open(modalName, model)
+            }
+        },
+
+        closeModal() {
+            this.set('activeModal', 'empty-modal');
+            let nextModal = this.modalQueue.shiftObject();
+
+            if (nextModal) {
+                Ember.run.later(this, function() {
+                    this._open(nextModal.name, nextModal.model);
+                }, 300);
+            }
+        },
+
         ackAlert() {
             this.get('socket').send({
                 id: 'ACKALERT',
@@ -56,5 +83,10 @@ export default Ember.Controller.extend({
             // A trick to trigger window relayout, see resize handler in views/grid.js
             $(window).trigger('resize');
         });
+    },
+
+    _open(modalName, model) {
+        this.set('modalModel', model)
+        this.set('activeModal', modalName);
     }
 });

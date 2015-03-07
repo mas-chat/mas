@@ -17,21 +17,36 @@
 'use strict';
 
 import Ember from 'ember';
-import UploadMixin from '../mixins/upload';
 
-export default Ember.Controller.extend(UploadMixin, {
-    shot: null,
-    note: 'Allow webcam access in your browser.',
+export default Ember.Component.extend({
+    modalTopic: null,
+
+    socket: Ember.inject.service(),
 
     actions: {
-        cancel() {
+        changeTopic() {
+            // User has clicked 'OK', send the new topic to server
+            let newTopic = this.get('modalTopic');
+
+            this.get('socket').send({
+                id: 'UPDATE_TOPIC',
+                windowId: this.get('model.windowId'),
+                topic: newTopic
+            });
+
             this.send('closeModal');
         },
 
-        uploadPhoto() {
-            let file = this.get('shot').preview(800, 600);
-            this.handleUpload([ file ], 'jpeg');
-            this.send('closeModal');
+        closeModal() {
+            this.sendAction();
         }
-    }
+    },
+
+    topicTitle: function() {
+        return 'Edit topic for \'' + this.get('model.name') + '\'';
+    }.property('model.name'),
+
+    topicDidChange: function() {
+        this.set('modalTopic', this.get('model.topic'));
+    }.observes('model.topic').on('init')
 });

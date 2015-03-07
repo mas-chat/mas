@@ -18,7 +18,7 @@
 
 import Ember from 'ember';
 
-export default Ember.Controller.extend({
+export default Ember.Component.extend({
     modalSoundAlert: null,
     modalTitleAlert: null,
 
@@ -33,9 +33,8 @@ export default Ember.Controller.extend({
             this.send('closeModal');
         },
 
-        cancel() {
-            this._updateModalAlerts();
-            this.send('closeModal');
+        closeModal() {
+            this.sendAction();
         }
     },
 

@@ -19,13 +19,24 @@
 /* global FileAPI */
 
 import Ember from 'ember';
+import UploadMixin from '../mixins/upload';
 
-export default Ember.View.extend({
+export default Ember.Component.extend(UploadMixin, {
     // TBD: Ditch FileAPI, use native APIs directly. Allows e.g. to prefer 16:9 aspect ratio.
 
     webcam: null,
+    shot: null,
+
+    note: 'Allow webcam access in your browser.',
+    content: Ember.computed.alias('model'),
 
     actions: {
+        uploadPhoto() {
+            let file = this.get('shot').preview(800, 600);
+            this.handleUpload([ file ], 'jpeg');
+            this.send('closeModal');
+        },
+
         takePhoto() {
             if (!this.webcam.isActive()) {
                 alert('camera not active');
@@ -41,7 +52,11 @@ export default Ember.View.extend({
                 this.$('.shot').append(img);
             }.bind(this));
 
-            this.set('controller.shot', shot);
+            this.set('shot', shot);
+        },
+
+        closeModal() {
+            this.sendAction();
         }
     },
 
@@ -61,7 +76,7 @@ export default Ember.View.extend({
                 this.$('.btn-capture').removeClass('disabled');
             }
 
-            this.set('controller.note', newMessage);
+            this.set('note', newMessage);
         }.bind(this));
     },
 
@@ -70,4 +85,5 @@ export default Ember.View.extend({
             this.webcam.stop();
         }
     }
+
 });

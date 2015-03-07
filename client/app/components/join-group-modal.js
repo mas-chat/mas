@@ -18,7 +18,7 @@
 
 import Ember from 'ember';
 
-export default Ember.Controller.extend({
+export default Ember.Component.extend({
     group: '',
     password: '',
     errorMsg: '',
@@ -45,6 +45,10 @@ export default Ember.Controller.extend({
                     this.set('errorMsg', resp.errorMsg);
                 }
             }.bind(this));
+        },
+
+        closeModal() {
+            this.sendAction();
         }
     }
 });
