@@ -41,14 +41,14 @@ function User(details, settings, friends) {
 User.prototype.load = function*(userId) {
     this.data = yield redis.hgetall(`user:${userId}`);
     this.settings = yield redis.hgetall(`settings:${userId}`);
-    this.friends = yield redis.hgetall(`friends:${userId}`);
+    this.friends = yield redis.smembers(`friends:${userId}`);
 
     if (this.settings === null) {
         this.settings = {};
     }
 
     if (this.friends === null) {
-        this.friends = {};
+        this.friends = [];
     }
 };
 
