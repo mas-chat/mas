@@ -41,7 +41,7 @@ exports.register = function(app) {
     if (conf.get('googleauth:enabled') === true && conf.get('googleauth:openid_realm')) {
         app.get('/auth/google', passport.authenticate('google', {
             scope: 'email profile',
-            openIdRealm: conf.get('googleauth:openid_realm')
+            openIDRealm: conf.get('googleauth:openid_realm')
         }));
         app.get('/auth/google/oauth2callback', loginController.googleLogin);
     }
