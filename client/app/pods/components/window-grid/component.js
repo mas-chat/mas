@@ -49,6 +49,16 @@ export default Ember.Component.extend({
 
         windowAction(command, window, value) {
             this.sendAction('windowAction', command, window, value);
+        },
+
+        relayout(options) {
+            if (this.get('initDone')) {
+                Ember.run.next(this, function() { this._layoutWindows(options.animate); });
+            }
+        },
+
+        dragWindowStart(discussionWindow, event) {
+            this._dragWindowStart(discussionWindow, event);
         }
     },
 
@@ -58,27 +68,38 @@ export default Ember.Component.extend({
         }));
     },
 
-    windowChanged(animate) {
-        if (this.get('initDone')) {
-            Ember.run.next(this, function() { this._layoutWindows(animate); });
-        }
-    },
-
     initReady: function() {
         Ember.run.next(this, function() { this._layoutWindows(false); });
     }.observes('initDone'),
 
-    dragWindowStart(discussionWindow, event) {
+    _dragWindowStart(discussionWindow, event) {
+        let that = this;
         this.movingWindow = discussionWindow;
 
         this.movingWindow.$().addClass('moving').css('z-index', 200);
         $('#window-cursor').show();
         $('.blocker').show();
 
-        this.dragWindow(event);
+        this._dragWindow(event);
+
+        function handleDragMove(event) {
+            that._dragWindow(event);
+            event.preventDefault();
+        }
+
+        function handleDragEnd(event) {
+            that._dragWindowEnd();
+            event.preventDefault();
+
+            document.removeEventListener('mousemove', handleDragMove, false);
+            document.removeEventListener('mouseup', handleDragEnd, false);
+        }
+
+        document.addEventListener('mousemove', handleDragMove, false);
+        document.addEventListener('mouseup', handleDragEnd, false);
     },
 
-    dragWindow(event) {
+    _dragWindow(event) {
         let cursor = this._calculateCursorPosition(event);
 
         if (!cursor) {
@@ -101,7 +122,7 @@ export default Ember.Component.extend({
         }
     },
 
-    dragWindowEnd() {
+    _dragWindowEnd() {
         let cursor = this.cursor;
 
         this.movingWindow.$().removeClass('moving').css('z-index', '');

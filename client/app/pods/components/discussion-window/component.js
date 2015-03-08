@@ -47,7 +47,7 @@ export default Ember.Component.extend(UploadMixin, {
     visible: Ember.computed.alias('content.visible'),
 
     windowChanged: function() {
-        this.get('parentView').windowChanged(true);
+        this.sendAction('relayout', { animate: true });
     }.observes('visible', 'row', 'column'),
 
     lineAdded: function() {
@@ -103,12 +103,12 @@ export default Ember.Component.extend(UploadMixin, {
     actions: {
         expand() {
             this.set('expanded', true);
-            this.get('parentView').windowChanged(true);
+            this.sendAction('relayout', { animate: true });
         },
 
         compress() {
             this.set('expanded', false);
-            this.get('parentView').windowChanged(true);
+            this.sendAction('relayout', { animate: true });
         },
 
         hide() {
@@ -119,7 +119,7 @@ export default Ember.Component.extend(UploadMixin, {
         browse() {
             this.set('logModeEnabled', true);
             this.set('expanded', true);
-            this.get('parentView').windowChanged(true);
+            this.sendAction('relayout', { animate: true });
         },
 
         toggleMemberListWidth() {
@@ -149,25 +149,7 @@ export default Ember.Component.extend(UploadMixin, {
             return; // Not moving the window
         }
 
-        let gridView = this.get('parentView');
-
-        gridView.dragWindowStart(this, event);
-
-        function handleDragMove(event) {
-            gridView.dragWindow(event);
-            event.preventDefault();
-        }
-
-        function handleDragEnd(event) {
-            gridView.dragWindowEnd(event);
-            event.preventDefault();
-
-            document.removeEventListener('mousemove', handleDragMove, false);
-            document.removeEventListener('mouseup', handleDragEnd, false);
-        }
-
-        document.addEventListener('mousemove', handleDragMove, false);
-        document.addEventListener('mouseup', handleDragEnd, false);
+        this.sendAction('dragWindowStart', this, event);
     },
 
     layoutDone() {
@@ -267,14 +249,12 @@ export default Ember.Component.extend(UploadMixin, {
             this.send('upload', files, 'jpeg');
         }.bind(this));
 
-        this.get('parentView').windowChanged(false);
+        this.sendAction('relayout', { animate: false });
     },
 
     willDestroyElement() {
-        let gridView = this.get('parentView');
-
         Ember.run.next(this, function() {
-            gridView.windowChanged(true);
+            this.sendAction('relayout', { animate: true });
         });
     },
 
