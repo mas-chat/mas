@@ -19,8 +19,8 @@
 /* globals $, FileAPI, emojify, titlenotifier */
 
 import Ember from 'ember';
-import { play } from '../helpers/sound';
-import UploadMixin from '../mixins/upload';
+import { play } from '../../../helpers/sound';
+import UploadMixin from '../../../mixins/upload';
 
 export default Ember.Component.extend(UploadMixin, {
     classNames: [ 'window', 'flex-grow-column' ],

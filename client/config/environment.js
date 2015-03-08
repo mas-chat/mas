@@ -3,6 +3,7 @@
 module.exports = function(environment) {
     const ENV = {
         modulePrefix: 'mas',
+        podModulePrefix: 'mas/pods',
         environment: environment,
         baseURL: '/',
         locationType: 'auto',

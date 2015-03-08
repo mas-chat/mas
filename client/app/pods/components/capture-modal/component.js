@@ -19,7 +19,7 @@
 /* global FileAPI */
 
 import Ember from 'ember';
-import UploadMixin from '../mixins/upload';
+import UploadMixin from '../../../mixins/upload';
 
 export default Ember.Component.extend(UploadMixin, {
     // TBD: Ditch FileAPI, use native APIs directly. Allows e.g. to prefer 16:9 aspect ratio.
