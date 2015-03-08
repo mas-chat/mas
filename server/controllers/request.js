@@ -170,6 +170,7 @@ function *handleClose(params) {
         type: 'close',
         userId: params.userId,
         network: params.network,
+        name: params.conversation.name,
         conversationType: params.conversation.type
     });
 }
