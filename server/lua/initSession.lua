@@ -71,18 +71,11 @@ local windowIds = redis.call('SMEMBERS', 'windowlist:' .. userId)
 local allUsers = {}
 
 for i = 1, #windowIds do
+    local oneOnOneUserId = nil
     local windowId = windowIds[i]
     local window = hgetall('window:' .. userId .. ':' .. windowId)
     local conversationId = window.conversationId
     local conversation = hgetall('conversation:' .. conversationId)
-    local oneOnOneUserId = nil
-
-    if conversation.password == '' then
-        conversation.password = cjson.null
-    else
-        conversation.password = conversation.password
-    end
-
     local role = redis.call('HGET', 'conversationmembers:' .. conversationId, userId)
 
     if conversation.type == '1on1' then

@@ -146,7 +146,7 @@ function *handleJoin(params) {
         sessionId: params.sessionId,
         network: params.command.network,
         name: params.command.name,
-        password: params.command.password
+        password: params.command.password || '' // Normalize, no password is '', not null or false
     });
 }
 

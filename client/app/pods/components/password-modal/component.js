@@ -28,7 +28,7 @@ export default Ember.Component.extend({
     actions: {
         changePassword() {
             // User has clicked 'OK', send the new password to server
-            let newPassword = null;
+            let newPassword = '';
 
             if (this.get('modalPasswordStatus') === 'enabled') {
                 newPassword = this.get('modalPassword');
@@ -37,7 +37,7 @@ export default Ember.Component.extend({
             this.get('socket').send({
                 id: 'UPDATE_PASSWORD',
                 windowId: this.get('model.windowId'),
-                password: newPassword === null ? '' : newPassword
+                password: newPassword
             }, function(resp) {
                 if (resp.status === 'OK') {
                     this.send('closeModal');
@@ -68,6 +68,6 @@ export default Ember.Component.extend({
         let password = this.get('model.password');
 
         this.set('modalPassword', password);
-        this.set('modalPasswordStatus', password === null ? 'disabled' : 'enabled');
+        this.set('modalPasswordStatus', password === '' ? 'disabled' : 'enabled');
     }
 });

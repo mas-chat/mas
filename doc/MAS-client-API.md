@@ -253,7 +253,7 @@ Create new window. Window identifier is either ```userId``` or ```name```.
 
 ```network``` can be ```MAS```, ```IRCNet```, ```FreeNode``` etc.
 
-```password``` null if password protection is disabled, a string otherwise
+```password``` an empty string if password protection is disabled, a string containing the password otherwise
 
 ```role``` can be ```u``` (participant), ```v``` (voice), ```@``` (operator), ```*``` (owner)
 

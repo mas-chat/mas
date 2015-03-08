@@ -237,7 +237,7 @@ function *processUpdatePassword(params) {
     let state = yield redis.hget(`networks:${params.userId}:${conversation.network}`, 'state');
     let modeline = 'MODE ' + conversation.name + ' ';
 
-    if (params.password === null) {
+    if (params.password === '') {
         modeline += '-k foobar'; // IRC protocol is odd, -k requires dummy parameter
     } else {
         modeline += '+k ' + params.password;
