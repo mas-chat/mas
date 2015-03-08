@@ -37,7 +37,7 @@ export default Ember.Controller.extend({
                     model: model
                 });
             } else {
-                this._open(modalName, model)
+                this._open(modalName, model);
             }
         },
 
@@ -86,7 +86,7 @@ export default Ember.Controller.extend({
     },
 
     _open(modalName, model) {
-        this.set('modalModel', model)
+        this.set('modalModel', model);
         this.set('activeModal', modalName);
     }
 });

@@ -29,7 +29,7 @@ export default Ember.Route.extend({
 
     actions: {
         openModal(modalName, model) {
-            this.controllerFor("application").send('openModal', modalName, model)
+            this.controllerFor('application').send('openModal', modalName, model);
         },
 
         toggleFullScreenModal(modalName, model) {

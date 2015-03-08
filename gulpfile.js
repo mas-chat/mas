@@ -98,7 +98,6 @@ gulp.task('fonts', [ 'bower' ], function() {
         .pipe(gulp.dest('./server/public/dist/fonts'));
 });
 
-
 gulp.task('emails', function() {
     gulp.src('./server/emails/*.hbs')
         .pipe(inlineCss({
