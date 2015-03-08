@@ -50,7 +50,7 @@ export default Ember.Component.extend({
 
         exit() {
             this.set('enabled', false);
-            this.get('parentView').send('compress');
+            this.sendAction('compress');
         }
     },
 

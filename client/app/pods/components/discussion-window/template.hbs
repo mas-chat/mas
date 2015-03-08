@@ -18,7 +18,7 @@
 
 <div class="flex-row flex-1 window-content">
     {{#if logModeEnabled}}
-        {{log-panel enabled=logModeEnabled window=content}}
+        {{log-panel enabled=logModeEnabled window=content compress="compress"}}
     {{/if}}
 
     <div {{bind-attr class=":window-messages :flex-1 logModeEnabled:hidden"}}>
