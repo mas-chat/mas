@@ -1,8 +1,6 @@
 <div class="blocker"></div>
 
-{{#if activeModal}}
-    {{component activeModal model=modalModel action="closeModal"}}
-{{/if}}
+{{component activeModal model=modalModel action="closeModal"}}
 
 {{outlet 'fullscreen-modal'}}
 
