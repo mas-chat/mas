@@ -22,7 +22,7 @@ import Ember from 'ember';
 
 const CURSORWIDTH = 50;
 
-export default Ember.View.extend({
+export default Ember.Component.extend({
     classNames: [ 'grid', 'flex-1', 'flex-grow-column' ],
 
     dimensions: null,
@@ -41,6 +41,14 @@ export default Ember.View.extend({
                 network: 'MAS',
                 name: 'lobby'
             });
+        },
+
+        menuAction(command, window) {
+            this.sendAction('menuAction', command, window);
+        },
+
+        windowAction(command, window, value) {
+            this.sendAction('windowAction', command, window, value);
         }
     },
 
@@ -60,8 +68,8 @@ export default Ember.View.extend({
         Ember.run.next(this, function() { this._layoutWindows(false); });
     }.observes('initDone'),
 
-    dragWindowStart(view, event) {
-        this.movingWindow = view;
+    dragWindowStart(discussionWindow, event) {
+        this.movingWindow = discussionWindow;
 
         this.movingWindow.$().addClass('moving').css('z-index', 200);
         $('#window-cursor').show();
@@ -278,19 +286,19 @@ export default Ember.View.extend({
                     return;
                 }
 
-                let windowView = Ember.View.views[$el.attr('id')];
+                let discussionWindow = Ember.View.views[$el.attr('id')];
 
                 $el.velocity('stop').velocity(newDim, {
                     duration: duration,
                     visibility: 'visible',
                     begin() {
-                        windowView.set('animating', true);
+                        discussionWindow.set('animating', true);
                     },
                     complete() {
-                        windowView.set('animating', false);
+                        discussionWindow.set('animating', false);
 
                         // Make sure window shows the latest messages
-                        Ember.run.next(windowView, windowView.layoutDone);
+                        Ember.run.next(discussionWindow, discussionWindow.layoutDone);
                     }
                 });
             }.bind(this));

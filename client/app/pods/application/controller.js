@@ -80,7 +80,7 @@ export default Ember.Controller.extend({
         }
 
         Ember.run.next(this, function() {
-            // A trick to trigger window relayout, see resize handler in views/grid.js
+            // A trick to trigger window relayout, see resize handler in grid component
             $(window).trigger('resize');
         });
     },
