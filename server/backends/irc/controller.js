@@ -302,6 +302,22 @@ function processWhois(params) {
 
 // Restarted
 function *processRestarted() {
+    yield iterateUsersAndNetworks(function*(userId, network) {
+        let channels = yield redis.hgetall(`ircchannelsubscriptions:${userId}:${network}`);
+
+        if (channels) {
+            log.info(userId, 'Scheduling connect() to IRC network: ' + network);
+
+            yield addSystemMessage(userId, network, 'info',
+                'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
+                ' server enabled. Next connect will be slow.');
+
+            yield connect(userId, network);
+        }
+    });
+}
+
+function *iterateUsersAndNetworks(callback) {
     let allUsers = yield redis.smembers('userlist');
     let networks = yield redis.smembers('networklist');
 
@@ -312,17 +328,7 @@ function *processRestarted() {
     for (let userId of allUsers) {
         for (let network of networks) {
             if (network !== 'MAS') {
-                let channels = yield redis.hgetall(`ircchannelsubscriptions:${userId}:${network}`);
-
-                if (channels) {
-                    log.info(userId, 'Scheduling connect() to IRC network: ' + network);
-
-                    yield addSystemMessage(userId, network, 'info',
-                        'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
-                        ' server enabled. Next connect will be slow.');
-
-                    yield connect(userId, network);
-                }
+                yield callback(userId, network);
             }
         }
     }
