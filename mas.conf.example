@@ -85,14 +85,17 @@ identd=false
 [irc.networks.IRCNet]
 host=localhost
 port=6666
+ssl=false
 rate_limit=10
 
 [irc.networks.FreeNode]
 host=irc.freenode.net
 port=6667
+ssl=false
 rate_limit=10
 
 [irc.networks.W3C]
 host=irc.w3.org
 port=6665
+ssl=false
 rate_limit=10

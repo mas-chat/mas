@@ -23,6 +23,7 @@
 require('../../lib/init')('irc-connman');
 
 const net = require('net'),
+      tls = require('tls'),
       carrier = require('carrier'),
       isUtf8 = require('is-utf8'),
       iconv = require('iconv-lite'),
@@ -147,11 +148,19 @@ co(function*() {
 })();
 
 function connect(userId, nick, network) {
+    let socket;
+    let port = conf.get('irc:networks:' + network + ':port');
+    let host = conf.get('irc:networks:' + network + ':host');
     let options = {
-        host: conf.get('irc:networks:' + network + ':host'),
-        port: conf.get('irc:networks:' + network + ':port')
+        host: host,
+        port: port
     };
-    let socket = net.connect(options);
+
+    if (conf.get('irc:networks:' + network + ':ssl')) {
+        socket = tls.connect(port, host, {});
+    } else {
+        socket = net.connect(options);
+    }
 
     socket.nick = nick;
     socket.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
