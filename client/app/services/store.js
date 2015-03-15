@@ -24,6 +24,7 @@ export default Ember.Service.extend({
     users: null,
     windows: null,
     alerts: null,
+    networks: null,
 
     userId: null,
     initDone: false,
@@ -35,5 +36,6 @@ export default Ember.Service.extend({
         this.set('friends', Ember.A([]));
         this.set('windows', Ember.A([]));
         this.set('alerts', Ember.A([]));
+        this.set('networks', Ember.A([]));
     }
 });

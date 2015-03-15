@@ -26,6 +26,8 @@ const redis = require('../lib/redis').createClient(),
       alerts = require('../lib/alert'),
       outbox = require('../lib/outbox');
 
+let networks = null;
+
 exports.setup = function(server) {
     let io = socketIo(server);
 
@@ -101,6 +103,7 @@ exports.setup = function(server) {
                 yield friends.sendFriends(userId, sessionId);
                 yield friends.informStateChange(userId, 'login');
                 yield alerts.sendAlerts(userId, sessionId);
+                yield sendNetworkList(userId, sessionId);
 
                 startPushLoop();
             })();
@@ -159,3 +162,12 @@ exports.setup = function(server) {
         });
     });
 };
+
+function *sendNetworkList(userId, sessionId) {
+    networks = networks || (yield redis.smembers('networklist'));
+
+    yield outbox.queue(userId, sessionId, {
+        id: 'NETWORKS',
+        networks: networks
+    });
+}

@@ -23,10 +23,14 @@ export default Ember.Component.extend({
     password: '',
     errorMsg: '',
 
-    selectedNetwork: 'IRCNet',
-    networks: [ 'IRCNet', 'FreeNode', 'W3C' ],
-
     socket: Ember.inject.service(),
+    store: Ember.inject.service(),
+
+    selectedNetwork: null,
+
+    ircNetworks: function() {
+        return this.get('store.networks').removeObject('MAS');
+    }.property('store.networks'),
 
     actions: {
         joinIRC() {

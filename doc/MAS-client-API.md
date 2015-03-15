@@ -301,6 +301,25 @@ Server can send USERS command to update information that it sent in earlier USER
 
 The first USERS notification arrives immediately after 'initok' and contains an entry for the API user itself.
 
+### NETWORKS
+
+List of configured networks the user able to connect using JOIN request. The list always contains internal MAS network. Additionally it contains IRC networks that are configured in mas.conf file.
+
+```JSON
+{
+  "id": "NETWORKS",
+
+  "networks": [
+    "MAS"
+    "IRCNet",
+    "FreeNode",
+    "W3C"
+  ]
+}
+```
+
+NETWORKS notification arrives immediately after successful session initialization.
+
 ### FRIENDS
 
 Full list of user's contacts (friends).
@@ -543,10 +562,6 @@ Create new MAS group
 ### SEEN
 
 ### SEEN_RESP
-
-### GETLOG
-
-### GETLOG_RESP
 
 ### CHAT
 

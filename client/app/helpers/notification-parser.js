@@ -213,6 +213,10 @@ export default Ember.Object.extend({
         this.get('store.alerts').pushObject(data);
     },
 
+    _handleNetworks(data) {
+        this.get('store.networks').pushObjects(data.networks);
+    },
+
     _removeUser(userId, targetWindow) {
         targetWindow.operators.removeObject(userId);
         targetWindow.voices.removeObject(userId);
