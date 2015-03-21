@@ -61,7 +61,7 @@ MAS Redis structures
    <userId>:<conversationId> (int, windowId)
 
  networks:<userId>:<network> (hash)
-   state (string, 'connected', 'connecting', 'disconnected')
+   state (string) (e.g. 'connected', 'connecting', 'disconnected')
    currentnick (text)
    retryCount (int)
 
@@ -74,8 +74,8 @@ MAS Redis structures
  conversation:<conversationId> (hash)
    owner (string, userId) (mas group only)
    type (string, 'group', '1on1')
-   name (string) (e.g. '#foo', 'bar') ('' if not group)
-   network (string, 'MAS' or 'IRCNet', 'FreeNode', 'W3C')
+   name (string) (e.g. '#foo', 'bar'. '' if not group)
+   network (string) (e.g 'MAS' or 'IRCNet', 'FreeNode', 'W3C')
    topic (string)
    password (string)
    apikey (string)
