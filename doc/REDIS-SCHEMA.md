@@ -84,7 +84,7 @@ MAS Redis structures
    group:<network>:<name> (int, conversationId)
    1on1:<network>:<userId1>:<userId2> (int, conversationId)
 
- 1on1conversationlist:<userId> (list)
+ 1on1conversationhistory:<userId> (list)
    <conversationId1>, <conversationId2>
 
  conversationmembers:<conversationId> (hash)

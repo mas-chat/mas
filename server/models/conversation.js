@@ -141,13 +141,13 @@ Conversation.prototype.set1on1Members = function*(userId, peerUserId) {
     yield redis.hset('index:conversation',
         '1on1:' + this.network + ':' + userIds[0] + ':' + userIds[1], this.conversationId);
 
-    // Update 1on1conversationlist
+    // Update 1on1 conversation history
     if (userId.charAt(0) === 'm') {
-        yield redis.sadd(`1on1conversationlist:${userId}`, this.conversationId);
+        yield redis.sadd(`1on1conversationhistory:${userId}`, this.conversationId);
     }
 
     if (peerUserId.charAt(0) === 'm') {
-        yield redis.sadd(`1on1conversationlist:${peerUserId}`, this.conversationId);
+        yield redis.sadd(`1on1conversationhistory:${peerUserId}`, this.conversationId);
     }
 };
 
