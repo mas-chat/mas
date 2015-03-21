@@ -74,11 +74,10 @@ exports.get = function*(conversationId) {
 
 exports.getAllIncludingUser = function*(userId) {
     let conversations = [];
-    let conversationIds = yield redis.smembers(`conversationlist:${userId}`);
+    let conversationIds = (yield redis.smembers(`conversationlist:${userId}`)) || [];
 
     for (let conversationId of conversationIds) {
-        let conversation = yield get(conversationId);
-        conversations.push(conversation);
+        conversations.push(yield get(conversationId));
     }
 
     return conversations;
@@ -426,15 +425,14 @@ Conversation.prototype._remove = function*() {
 };
 
 Conversation.prototype._removeAllMembers = function*() {
-    let conversationId = this.conversationId;
     let members = Object.keys(this.members);
 
     for (let userId of members) {
-        yield redis.srem(`conversationlist:${userId}`, conversationId);
+        yield redis.srem(`conversationlist:${userId}`, this.conversationId);
     }
 
     this.members = {};
-    yield redis.del(`conversationmembers:${conversationId}`);
+    yield redis.del(`conversationmembers:${this.conversationId}`);
 };
 
 Conversation.prototype._setMember = function*(userId, role) {
@@ -442,7 +440,7 @@ Conversation.prototype._setMember = function*(userId, role) {
     let newField = yield redis.hset(`conversationmembers:${this.conversationId}`, userId, role);
 
     if (newField) {
-        yield redis.sadd(`conversationlist:${userId}`, userId);
+        yield redis.sadd(`conversationlist:${userId}`, this.conversationId);
     }
 
     return newField;

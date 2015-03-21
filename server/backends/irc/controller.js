@@ -907,7 +907,7 @@ function *handlePrivmsg(userId, msg, command) {
     if (msg.nick) {
         sourceUserId = yield ircUser.getUserId(msg.nick, msg.network);
     } else {
-        // Message is frm the server if the nick is missing
+        // Message is from the server if the nick is missing
         sourceUserId = 'iSERVER';
     }
 
@@ -968,11 +968,11 @@ function *updateNick(userId, network, oldNick, newNick) {
         log.info(userId, 'I\'m first and handle ' + oldNick + ' -> ' + newNick + ' nick change.');
 
         // We haven't heard about this change before
-        let conversations = conversationFactory.getAllIncludingUser(targetUserId);
+        let conversations = yield conversationFactory.getAllIncludingUser(targetUserId);
 
         for (let conversation of conversations) {
             if (conversation.network === network) {
-                yield conversation.addMessageUnlessDupicate(userId, {
+                yield conversation.addMessageUnlessDuplicate(userId, {
                     cat: 'info',
                     body: oldNick + ' is now known as ' + newNick
                 });
