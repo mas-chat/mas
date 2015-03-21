@@ -967,18 +967,18 @@ function *updateNick(userId, network, oldNick, newNick) {
     if (targetUserId) {
         log.info(userId, 'I\'m first and handle ' + oldNick + ' -> ' + newNick + ' nick change.');
 
-        // We havent heard about this change before
-        let conversationIds = yield window.getAllConversationIdsWithUserId(userId, targetUserId);
+        // We haven't heard about this change before
+        let conversations = conversationFactory.getAllIncludingUser(targetUserId);
 
-        for (let conversationId of conversationIds) {
-            let conversation = yield conversationFactory.get(conversationId);
+        for (let conversation of conversations) {
+            if (conversation.network === network) {
+                yield conversation.addMessageUnlessDupicate(userId, {
+                    cat: 'info',
+                    body: oldNick + ' is now known as ' + newNick
+                });
 
-            yield conversation.addMessageUnlessDuplicate(userId, {
-                cat: 'info',
-                body: oldNick + ' is now known as ' + newNick
-            });
-
-            yield conversation.sendUsers(targetUserId);
+                yield conversation.sendUsers(targetUserId);
+            }
         }
     }
 }

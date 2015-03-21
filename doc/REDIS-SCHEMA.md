@@ -91,6 +91,9 @@ MAS Redis structures
    <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user), 'd' (detached, only for MAS 1on1s))
    ...
 
+ conversationlist:<userId> (set)
+   <conversationId1>, <conversationId2>, ...
+
  conversationmsgs:<conversationId> (list) [oldest message on the right]
 
  passwordresettoken:<token> (string with expiry time)

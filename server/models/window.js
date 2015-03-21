@@ -65,30 +65,6 @@ exports.getAllConversationIds = function*(userId) {
     return yield getAllConversationIds(userId);
 };
 
-exports.getAllConversationIdsWithUserId = function*(userId, targetUserId) {
-    assert(userId !== targetUserId);
-
-    let conversationIds = yield getAllConversationIds(userId);
-    let res = [];
-
-    function compare(element) {
-        return element === targetUserId;
-    }
-
-    for (let conversationId of conversationIds) {
-        let conversation = yield conversationFactory.get(conversationId);
-        let members = Object.keys(conversation.members);
-
-        let exists = members.some(compare);
-
-        if (exists) {
-            res.push(conversationId);
-        }
-    }
-
-    return res;
-};
-
 exports.getWindowIdsForNetwork = function*(userId, network) {
     let windows = yield redis.smembers(`windowlist:${userId}`);
     let windowIds = [];

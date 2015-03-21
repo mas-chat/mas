@@ -64,12 +64,24 @@ exports.delete = function*(conversationId) {
             '1on1:' + conversation.network + ':' + userIds[0] + ':' + userIds[1]);
     }
 
-    yield redis.del(`conversationmembers:${conversationId}`);
+    yield conversation._removeAllMembers();
     yield redis.del(`conversationmsgs:${conversationId}`);
 };
 
 exports.get = function*(conversationId) {
     return yield get(conversationId);
+};
+
+exports.getAllIncludingUser = function*(userId) {
+    let conversations = [];
+    let conversationIds = yield redis.smembers(`conversationlist:${userId}`);
+
+    for (let conversationId of conversationIds) {
+        let conversation = yield get(conversationId);
+        conversations.push(conversation);
+    }
+
+    return conversations;
 };
 
 exports.findGroup = function*(name, network) {
@@ -116,9 +128,7 @@ Conversation.prototype.getMemberRole = function*(userId) {
 };
 
 Conversation.prototype.setMemberRole = function*(userId, role) {
-    this.members[userId] = role;
-
-    yield redis.hset(`conversationmembers:${this.conversationId}`, userId, role);
+    yield this._setMember(userId, role);
     yield this._streamAddMembers(userId, role);
 };
 
@@ -174,11 +184,9 @@ Conversation.prototype.setGroupMembers = function*(members) {
 Conversation.prototype.addGroupMember = function*(userId, role) {
     assert(role === 'u' || role === '+' || role === '@' || role === '*');
 
-    let newField = yield redis.hset(`conversationmembers:${this.conversationId}`, userId, role);
+    let newField = yield this._setMember(userId, role);
 
     if (newField) {
-        this.members[userId] = role;
-
         yield this.addMessage({
             userId: userId,
             cat: 'join',
@@ -193,6 +201,7 @@ Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKic
     assert(this.type === 'group');
 
     let removed = yield redis.hdel(`conversationmembers:${this.conversationId}`, userId);
+    yield redis.srem(`conversationlist:${userId}`, this.conversationId);
 
     if (removed === 1) {
         log.info('User: ' + userId + ' removed from conversation: ' +  this.conversationId);
@@ -229,9 +238,10 @@ Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKic
 };
 
 Conversation.prototype.remove1on1Member = function*(userId) {
+    assert(this.members[userId]);
+
     // First user that quits 1on1 is 'soft' removed, i.e. marked as having 'd'(etached) role
-    this.members[userId] = 'd';
-    yield redis.hset(`conversationmembers:${this.conversationId}`, userId, 'd');
+    yield this._setMember(userId, 'd');
 
     let peerUserId = yield this.getPeerUserId(this, userId);
 
@@ -389,17 +399,18 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
 Conversation.prototype._insertMembers = function*(members) {
     assert(members);
 
-    Object.keys(members).forEach(function(prop) {
-        this.members[prop] = members[prop];
-    }.bind(this));
+    for (let userId of Object.keys(members)) {
+        this.members[userId] = members[userId];
+        yield redis.sadd(`conversationlist:${userId}`, this.conversationId);
+    }
 
     yield redis.hmset(`conversationmembers:${this.conversationId}`, members);
 };
 
 Conversation.prototype._remove = function*() {
     yield redis.del(`conversation:${this.conversationId}`);
-    yield redis.del(`conversationmembers:${this.conversationId}`);
     yield redis.del(`conversationmsgs:${this.conversationId}`);
+    yield this._removeAllMembers();
 
     let key;
 
@@ -412,6 +423,29 @@ Conversation.prototype._remove = function*() {
     }
 
     yield redis.hdel('index:conversation', key);
+};
+
+Conversation.prototype._removeAllMembers = function*() {
+    let conversationId = this.conversationId;
+    let members = Object.keys(this.members);
+
+    for (let userId of members) {
+        yield redis.srem(`conversationlist:${userId}`, conversationId);
+    }
+
+    this.members = {};
+    yield redis.del(`conversationmembers:${conversationId}`);
+};
+
+Conversation.prototype._setMember = function*(userId, role) {
+    this.members[userId] = role;
+    let newField = yield redis.hset(`conversationmembers:${this.conversationId}`, userId, role);
+
+    if (newField) {
+        yield redis.sadd(`conversationlist:${userId}`, userId);
+    }
+
+    return newField;
 };
 
 function *get(conversationId) {
