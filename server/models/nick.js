@@ -27,7 +27,9 @@ exports.updateCurrentNick = function*(userId, network, nick) {
 
 exports.removeCurrentNick = function*(userId, network) {
     yield removeCurrentNickFromIndex(userId, network);
-    yield redis.hset(`networks:${userId}:${network}`, 'currentnick', '');
+
+    // Don't remove or modify currentnick of networks:<userId>:<network> here as the now stale
+    // nick is still needed for USERS command when old discussions are shown.
 };
 
 exports.getUserIdFromNick = function*(nick, network) {
