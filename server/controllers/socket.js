@@ -24,7 +24,8 @@ const redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
       friends = require('../models/friends'),
       alerts = require('../lib/alert'),
-      outbox = require('../lib/outbox');
+      outbox = require('../lib/outbox'),
+      courier = require('../lib/courier').createEndPoint('socket');
 
 let networks = null;
 
@@ -104,6 +105,7 @@ exports.setup = function(server) {
                 yield friends.informStateChange(userId, 'login');
                 yield alerts.sendAlerts(userId, sessionId);
                 yield sendNetworkList(userId, sessionId);
+                ircCheckIfInactive(userId);
 
                 startPushLoop();
             })();
@@ -169,5 +171,12 @@ function *sendNetworkList(userId, sessionId) {
     yield outbox.queue(userId, sessionId, {
         id: 'NETWORKS',
         networks: networks
+    });
+}
+
+function ircCheckIfInactive(userId) {
+    courier.send('ircparser', {
+        type: 'reconnectifinactive',
+        userId: userId,
     });
 }

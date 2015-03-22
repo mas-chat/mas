@@ -32,7 +32,8 @@ const assert = require('assert'),
       conversationFactory = require('../../models/conversation'),
       window = require('../../models/window'),
       nicks = require('../../models/nick'),
-      ircUser = require('./ircUser');
+      ircUser = require('./ircUser'),
+      ircScheduler = require('./scheduler');
 
 const OPER = '@';
 const VOICE = '+';
@@ -79,6 +80,7 @@ let handlers = {
 co(function*() {
     yield redisModule.loadScripts();
     yield redisModule.initDB();
+    ircScheduler.init();
 
     courier.on('send', processSend);
     courier.on('texCommand', processTextCommand);
@@ -93,6 +95,7 @@ co(function*() {
     courier.on('noconnection', processNoConnection);
     courier.on('connected', processConnected);
     courier.on('disconnected', processDisconnected);
+    courier.on('reconnectifinactive', processReconnectIfInactive);
     courier.start();
 })();
 
@@ -189,15 +192,15 @@ function *processJoin(params) {
     yield redis.hset(`ircchannelsubscriptions:${params.userId}:${params.network}`,
         channelName, params.password);
 
-    if (!state || state === 'disconnected' || state === 'closing') {
-        yield connect(params.userId, params.network);
-    } else if (state === 'connected') {
+    if (state === 'connected') {
         courier.send('connectionmanager', {
             type: 'write',
             userId: params.userId,
             network: params.network,
             line: 'JOIN ' + channelName + ' ' + params.password
         });
+    } else {
+        yield connect(params.userId, params.network);
     }
 
     yield outbox.queue(params.userId, params.sessionId, {
@@ -298,6 +301,25 @@ function processWhois(params) {
     });
 }
 
+function *processReconnectIfInactive(params) {
+    let userId = params.userId;
+    let networks = yield redis.smembers('networklist');
+
+    for (let network of networks) {
+        let state = yield redis.hget(`networks:${userId}:${network}`, 'state');
+
+        log.info('state on  ' + state);
+
+        if (state === 'idledisconnected') {
+            yield addSystemMessage(userId, network, 'info',
+                'You were disconnected from IRC because you haven\'t used MAS for a long time. ' +
+                'Welcome back! Reconnecting...');
+
+            yield connect(userId, network);
+        }
+    }
+}
+
 // Connection manager messages
 
 // Restarted
@@ -387,10 +409,12 @@ function *processDisconnected(params) {
     let network = params.network;
     let previousState = yield redis.hget(`networks:${userId}:${network}`, 'state');
 
-    yield redis.hset(`networks:${userId}:${network}`, 'state', 'disconnected');
+    yield redis.hset(`networks:${userId}:${network}`, 'state',
+        previousState === 'idleclosing' ? 'idledisconnected' : 'disconnected');
+
     yield nicks.removeCurrentNick(userId, network);
 
-    if (previousState === 'closing') {
+    if (previousState === 'closing' || previousState === 'idleclosing') {
         // We wanted to close the connection, don't reconnect
         return;
     }

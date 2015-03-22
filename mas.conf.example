@@ -77,10 +77,12 @@ initial_groups=lobby,test
 ; OPTIONS FOR THE IRC BACKEND
 
 ; rate_limit is in new connections per minute
+; inactivity_timeout is no logins to mas in days
 
 [irc]
 enabled=true
 identd=false
+inactivity_timeout=10
 
 [irc.networks.IRCNet]
 host=localhost
