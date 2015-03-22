@@ -95,9 +95,14 @@ export default Ember.Object.extend({
 
     simplifiedName: function() {
         let windowName = this.get('name');
+        let network = this.get('network');
         let type = this.get('type');
 
         if (type === 'group') {
+            if (network === 'Flowdock') {
+                windowName = windowName.replace(/.+\//, ''); // Remove organization prefix
+            }
+
             windowName = windowName.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
         } else {
             windowName = this.get('store.users').getNick(this.get('userId'), this.get('network'));

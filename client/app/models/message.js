@@ -46,6 +46,7 @@ export default Ember.Object.extend({
         let category = this.get('cat');
         let nick = this.get('nick');
         let body = this.get('body');
+        let network = this.get('window.network');
         let groupName = this.get('window.name');
 
         let output = '';
@@ -61,7 +62,7 @@ export default Ember.Object.extend({
         }
 
         if (output === '') {
-            output = this._decorate(this.get('body'));
+            output = this._decorate(this.get('body'), network);
         } else {
             output = '<span class="body">' + nick + ' ' + output + '</span>';
         }
@@ -73,11 +74,17 @@ export default Ember.Object.extend({
         return output;
     }.property('body', 'window.userNick'),
 
-    _decorate(text) {
+    _decorate(text, network) {
         let textParts = [];
         let imgUrls = [];
         let pos = 0;
         let imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
+
+        if (network === 'Flowdock') {
+            text = text.replace(/^\[(.*?)\] << (.*)/, function(match, p1, p2) {
+                return '⟦' + p1.substring(0, 6) + '…⟧ ' + p2;
+            });
+        }
 
         URI.withinString(text, function(url, start, end, source) {
             let urlObj = new URI(url);
