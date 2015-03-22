@@ -68,15 +68,15 @@ export default Ember.Object.extend({
     }.property('network'),
 
     operatorNames: function() {
-        return this._mapUserIdsToNicks('operators');
+        return this._mapUserIdsToNicks('operators').sortBy('nick');
     }.property('operators.@each', 'store.users.isDirty'),
 
     voiceNames: function() {
-        return this._mapUserIdsToNicks('voices');
+        return this._mapUserIdsToNicks('voices').sortBy('nick');
     }.property('voices.@each', 'store.users.isDirty'),
 
     userNames: function() {
-        return this._mapUserIdsToNicks('users');
+        return this._mapUserIdsToNicks('users').sortBy('nick');
     }.property('users.@each', 'store.users.isDirty'),
 
     decoratedTitle: function() { // (name, topic)
