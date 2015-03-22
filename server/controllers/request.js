@@ -90,7 +90,7 @@ function *handleSend(params) {
         });
         return;
     } else {
-        yield params.conversation.addMessage({
+        yield params.conversation.addMessageUnlessDuplicate(params.userId, {
             userId: params.userId,
             cat: 'msg',
             body: params.command.text

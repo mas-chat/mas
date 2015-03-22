@@ -267,8 +267,16 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
 };
 
 Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, excludeSession) {
-    // A special filter for IRC backend
-    let duplicate = yield redis.run('duplicateMsgFilter', sourceUserId, this.conversationId, msg);
+    // A special filter for IRC backend.
+
+    // To support Flowdock network where MAS user's message can come from the IRC server
+    // (before all incoming messages from MAS users were ignored as delivery had happened
+    // already locally) the overall logic is complicated. The code in the lua method now
+    // works because IRC server doesn't echo messages back to their senders. If that wasn't
+    // the case, lua reporter logic would fail. (If a reporter sees a new identical message
+    // it's not considered as duplicate. Somebody is just repeating their line.)
+    let duplicate = yield redis.run('duplicateMsgFilter', sourceUserId, this.conversationId,
+        msg.userId + ':' + msg.body);
 
     if (!duplicate) {
         yield this.addMessage(msg, excludeSession);

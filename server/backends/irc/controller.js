@@ -966,9 +966,6 @@ function *handlePrivmsg(userId, msg, command) {
         if (conversation === null) {
             log.warn(userId, 'Message arrived for an unknown channel');
             return;
-        } else if (sourceUserId.charAt(0) === 'm') {
-            // Message from internal user is processed already
-            return;
         }
     }
 
