@@ -16,7 +16,8 @@
 
 'use strict';
 
-const redis = require('../../lib/redis').createClient(),
+const crypto = require('crypto'),
+      redis = require('../../lib/redis').createClient(),
       nicks = require('../../models/nick');
 
 exports.getUserId = function*(nick, network) {
@@ -29,7 +30,9 @@ exports.getUserId = function*(nick, network) {
     // UserId for IRC user is created on the fly if the nick in the network hasn't an ID
     // already. This method therefore never returns null.
 
-    let ircUserId = yield redis.run('getOrCreateIrcUserId', nick, network);
+    // MD5 hash is used to get an unique fallback image from gravatar.com. We don't know
+    // the email address of IRC users so never get a real avatar.
+    let nickMD5 = crypto.createHash('md5').update(nick).digest('hex');
 
-    return ircUserId;
+    return yield redis.run('getOrCreateIrcUserId', nick, nickMD5, network);
 };

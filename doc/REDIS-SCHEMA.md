@@ -123,6 +123,7 @@ MAS Redis structures
 
  ircuser:<userId>
    nick (string)
+   nickMD5 (string)
    network (string)
 
  index:ircuser (hash)
