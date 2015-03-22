@@ -29,6 +29,8 @@ export default Ember.Object.extend({
         this.operators = Ember.A([]);
         this.voices = Ember.A([]);
         this.users = Ember.A([]);
+
+        this.desktop = Math.floor(Math.random() * 3); // TBD: Temporary hack for testing purposes.
     },
 
     socket: Ember.inject.service(),
@@ -42,6 +44,7 @@ export default Ember.Object.extend({
 
     row: 0,
     column: 0,
+    desktop: 0,
 
     visible: false,
     timeHidden: null,

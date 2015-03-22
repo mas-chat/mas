@@ -24,7 +24,7 @@ import UploadMixin from '../../../mixins/upload';
 
 export default Ember.Component.extend(UploadMixin, {
     classNames: [ 'window', 'flex-grow-column' ],
-    attributeBindings: [ 'row:data-row', 'column:data-column' ],
+    attributeBindings: [ 'row:data-row', 'column:data-column', 'desktop:data-desktop' ],
 
     classNameBindings: [
         'animating:velocity-animating:',
@@ -44,11 +44,22 @@ export default Ember.Component.extend(UploadMixin, {
 
     row: Ember.computed.alias('content.row'),
     column: Ember.computed.alias('content.column'),
-    visible: Ember.computed.alias('content.visible'),
+    desktop: Ember.computed.alias('content.desktop'),
+
+    selectedDesktop: 0,
+
+    visible: function() {
+        return this.get('content.visible') &&
+            this.get('selectedDesktop') === this.get('content.desktop');
+    }.property('selectedDesktop', 'desktop', 'content.visible'),
 
     windowChanged: function() {
         this.sendAction('relayout', { animate: true });
-    }.observes('visible', 'row', 'column'),
+    }.observes('content.visible', 'row', 'column', 'desktop'),
+
+    visibilityChanged: function() {
+        this.sendAction('relayout', { animate: false });
+    }.observes('visible'),
 
     lineAdded: function() {
         Ember.run.debounce(this, function() {

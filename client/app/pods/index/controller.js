@@ -22,6 +22,7 @@ import Ember from 'ember';
 
 export default Ember.ArrayController.extend({
     friends: null,
+    desktop: 0,
 
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
@@ -55,14 +56,20 @@ export default Ember.ArrayController.extend({
             };
 
             this.send('openModal', modals[command], window);
+        },
+
+        switchDesktop(desktop) {
+            this.set('desktop', desktop);
         }
     },
 
     sortedHiddenWindows: function() {
+        let desktop = this.get('desktop');
+
         return this.get('model').filter(function(val) {
-            return !val.get('visible');
+            return !val.get('visible') && val.get('desktop') === desktop;
         }).sortBy('timeHidden');
-    }.property('model.@each.visible'),
+    }.property('model.@each.visible', 'desktop'),
 
     friendsOnline: function() {
         return this.get('friends').filterBy('online', true).length;

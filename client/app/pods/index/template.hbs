@@ -1,7 +1,9 @@
-{{window-grid model=this menuAction="menuAction" windowAction="windowAction"}}
+{{window-grid model=this desktop=desktop menuAction="menuAction" windowAction="windowAction"}}
 
 <div class="sidebar flex-grow-column">
     <div class="upper-sidebar flex-1">
+        {{desktop-switcher action="switchDesktop"}}
+
         {{#each window in sortedHiddenWindows}}
             <div class="main-hidden-window-container" {{action "show" window}}>
                 <div class="main-badge">{{window.newMessagesCount}}</div>

@@ -28,6 +28,7 @@ export default Ember.Component.extend({
     dimensions: null,
     cursor: null,
     movingWindow: null,
+    desktop: 0,
 
     store: Ember.inject.service(),
     socket: Ember.inject.service(),
@@ -170,7 +171,9 @@ export default Ember.Component.extend({
             return;
         }
 
-        let windows = el.querySelectorAll('.window.visible');
+        let windows = el.querySelectorAll(
+            '.window.visible[data-desktop=\'' + this.get('desktop') + '\']');
+
         let rowNumbers = _.uniq(_.map(windows,
             function(element) { return parseInt(element.getAttribute('data-row')); })).sort();
         let rowHeight = Math.round(container.height / rowNumbers.length);
