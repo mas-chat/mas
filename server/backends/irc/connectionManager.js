@@ -109,36 +109,18 @@ courier.on('connect', function(params) {
 courier.on('disconnect', function(params) {
     let userId = params.userId;
     let network = params.network;
+    let socketName = userId + ':' + network;
 
-    sockets[userId + ':' + network].end();
-    delete sockets[userId + ':' + network];
+    write(userId, network, 'QUIT :' + params.reason);
+
+    if (sockets[socketName]) {
+        sockets[socketName].end();
+    }
 });
 
 // Write
 courier.on('write', function(params) {
-    let userId = params.userId;
-    let network = params.network;
-    let socket = sockets[userId + ':' + network];
-    let data = params.line;
-
-    if (!socket) {
-        courier.send('ircparser', {
-            type: 'noconnection',
-            userId: userId,
-            network: network
-        });
-        return;
-    }
-
-    if (typeof(data) === 'string') {
-        data = [ data ];
-    }
-
-    for (let line of data) {
-        socket.write(line + '\r\n');
-    }
-
-    socket.last = Date.now();
+    write(params.userId, params.network, params.line);
 });
 
 co(function*() {
@@ -223,6 +205,29 @@ function connect(userId, nick, network) {
     });
 
     sockets[userId + ':' + network] = socket;
+}
+
+function write(userId, network, data) {
+    let socket = sockets[userId + ':' + network];
+
+    if (!socket) {
+        courier.send('ircparser', {
+            type: 'noconnection',
+            userId: userId,
+            network: network
+        });
+        return;
+    }
+
+    if (typeof(data) === 'string') {
+        data = [ data ];
+    }
+
+    for (let line of data) {
+        socket.write(line + '\r\n');
+    }
+
+    socket.last = Date.now();
 }
 
 // Minimal parser to handle server sent PING command at this level

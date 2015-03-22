@@ -518,16 +518,10 @@ function *disconnect(userId, network) {
     yield redis.hset(`networks:${userId}:${network}`, 'state', 'closing');
 
     courier.send('connectionmanager', {
-        type: 'write',
-        userId: userId,
-        network: network,
-        line: 'QUIT :Session ended.'
-    });
-
-    courier.send('connectionmanager', {
         type: 'disconnect',
         userId: userId,
-        network: network
+        network: network,
+        reason: 'Session ended.'
     });
 }
 
