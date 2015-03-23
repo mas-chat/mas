@@ -24,7 +24,7 @@
     <div {{bind-attr class=":window-messages :flex-1 logModeEnabled:hidden"}}>
         {{#each message in content.messages}}
             {{dayDivider content.messages _view.contentIndex}}
-            <div class="line {{message.cat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
+            <div class="line {{message.decoratedCat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
         {{/each}}
         <div class="window-upload">
             <div class="js-upload">

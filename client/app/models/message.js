@@ -42,6 +42,11 @@ export default Ember.Object.extend({
         }
     }.observes('userId', 'window').on('init'),
 
+    decoratedCat: function() {
+        // TBD: Network === flowdock check is missing
+        return this.get('nick') === 'flowdock' ? 'flowdock' : this.get('cat');
+    }.property('cat', 'nick'),
+
     decoratedBody: function() {
         let category = this.get('cat');
         let nick = this.get('nick');
