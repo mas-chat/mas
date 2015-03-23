@@ -1031,15 +1031,6 @@ function *tryDifferentNick(userId, network) {
 // TBD: Add a timer (every 15min?) to send one NAMES to every irc channel to make sure memberslist
 // is in sync?
 
-function sendIRCPart(userId, network, channel) {
-    courier.send('connectionmanager', {
-        type: 'write',
-        userId: userId,
-        network: network,
-        line: 'PART ' + channel
-    });
-}
-
 function *disconnectIfIdle(userId, network) {
     let windowIds = yield window.getWindowIdsForNetwork(userId, network);
     let onlyServer1on1Left = false;
@@ -1143,6 +1134,15 @@ function sendJoin(userId, network, channel, password) {
         userId: userId,
         network: network,
         line: 'JOIN ' + channel + ' ' + password
+    });
+}
+
+function sendIRCPart(userId, network, channel) {
+    courier.send('connectionmanager', {
+        type: 'write',
+        userId: userId,
+        network: network,
+        line: 'PART ' + channel
     });
 }
 
