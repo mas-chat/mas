@@ -14,11 +14,11 @@
 --   governing permissions and limitations under the License.
 --
 
-local nick = string.lower(ARGV[1])
+local nick = ARGV[1]
 local nickMD5 = ARGV[2]
 local network = ARGV[3]
 
-local indexField = network .. ':' .. nick
+local indexField = network .. ':' .. string.lower(nick)
 
 local userId = redis.call('HGET', 'index:ircuser', indexField)
 

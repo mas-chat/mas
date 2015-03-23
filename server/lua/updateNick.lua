@@ -16,22 +16,22 @@
 
 local userId = ARGV[1]
 local network = ARGV[2]
-local oldNick = string.lower(ARGV[3])
-local newNick = string.lower(ARGV[4])
+local oldNick = ARGV[3]
+local newNick = ARGV[4]
 
-local userId = redis.call('HGET', 'index:currentnick', network .. ':' .. oldNick)
+local userId = redis.call('HGET', 'index:currentnick', network .. ':' .. string.lower(oldNick))
 
 if userId then
-    redis.call('HDEL', 'index:currentnick', network .. ':' .. oldNick)
+    redis.call('HDEL', 'index:currentnick', network .. ':' .. string.lower(oldNick))
     redis.call('HSET', 'networks:' .. userId .. ':' .. network, 'currentnick', newNick)
-    redis.call('HSET', 'index:currentnick', network .. ':' .. newNick, userId)
+    redis.call('HSET', 'index:currentnick', network .. ':' .. string.lower(newNick), userId)
 else
-    userId = redis.call('HGET', 'index:ircuser', network .. ':' .. oldNick)
+    userId = redis.call('HGET', 'index:ircuser', network .. ':' .. string.lower(oldNick))
 
     if userId then
-        redis.call('HDEL', 'index:ircuser', network .. ':' .. oldNick)
+        redis.call('HDEL', 'index:ircuser', network .. ':' .. string.lower(oldNick))
         redis.call('HSET', 'ircuser:' .. userId, 'nick', newNick)
-        redis.call('HSET', 'index:ircuser', network .. ':' .. newNick, userId)
+        redis.call('HSET', 'index:ircuser', network .. ':' .. string.lower(newNick), userId)
     end
 end
 

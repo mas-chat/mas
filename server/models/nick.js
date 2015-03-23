@@ -48,6 +48,6 @@ function *removeCurrentNickFromIndex(userId, network) {
     let oldNick = yield redis.hget(`networks:${userId}:${network}`, 'currentnick');
 
     if (oldNick) {
-        yield redis.hdel('index:currentnick', network + ':' + oldNick);
+        yield redis.hdel('index:currentnick', network + ':' + oldNick.toLowerCase());
     }
 }

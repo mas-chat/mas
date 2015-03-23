@@ -955,7 +955,7 @@ function *handlePrivmsg(userId, msg, command) {
         }
     }
 
-    if (target === currentNick) {
+    if (target.toLowerCase() === currentNick.toLowerCase()) {
         // Message is for the user only
         conversation = yield conversationFactory.find1on1(userId, sourceUserId, msg.network);
 
