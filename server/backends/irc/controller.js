@@ -118,12 +118,7 @@ function *processSend(params) {
     }
 
     if (target) {
-        courier.send('connectionmanager', {
-            type: 'write',
-            userId: params.userId,
-            network: conversation.network,
-            line: 'PRIVMSG ' + target + ' :' + params.text
-        });
+        sendPrivmsg(params.userId, conversation.network, target, params.text);
     }
 }
 
@@ -193,12 +188,7 @@ function *processJoin(params) {
         channelName, params.password);
 
     if (state === 'connected') {
-        courier.send('connectionmanager', {
-            type: 'write',
-            userId: params.userId,
-            network: params.network,
-            line: 'JOIN ' + channelName + ' ' + params.password
-        });
+        sendJoin(params.userId, params.network, channelName, params.password);
     } else {
         yield connect(params.userId, params.network);
     }
@@ -635,6 +625,15 @@ function *handle376(userId, msg) {
         yield addSystemMessage(userId, msg.network, 'info',
             'You can close this window at any time. It\'ll reappear when needed.');
 
+        // Tell the client nick we got
+        yield redis.run('introduceNewUserIds', userId, null, null, true, userId);
+
+        if (msg.network === 'Flowdock') {
+            // The odd case of Flowdock
+            sendPrivmsg(userId, 'Flowdock', 'NickServ', 'identify xxx yyy'); // TBD: temporary
+            return;
+        }
+
         let channelsToJoin = yield redis.hgetall(
             `ircchannelsubscriptions:${userId}:${msg.network}`);
 
@@ -644,18 +643,9 @@ function *handle376(userId, msg) {
             return;
         }
 
-        // TBD: Some duplication with processJoin()
         Object.keys(channelsToJoin).forEach(function(channel) {
-            courier.send('connectionmanager', {
-                type: 'write',
-                userId: userId,
-                network: msg.network,
-                line: 'JOIN ' + channel + ' ' + channelsToJoin[channel]
-            });
+            sendJoin(userId, msg.network, channel, channelsToJoin[channel]);
         });
-
-        // Tell the client nick we got
-        yield redis.run('introduceNewUserIds', userId, null, null, true, userId);
     }
 }
 
@@ -675,38 +665,50 @@ function *handle482(userId, msg) {
 function *handleJoin(userId, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
     let channel = msg.params[0];
-    let targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
-    let conversation = yield conversationFactory.findGroup(channel, msg.network);
-    let password = yield redis.hget(`ircchannelsubscriptions:${userId}:${msg.network}`, channel);
-
-    if (!conversation) {
-        conversation = yield conversationFactory.create({
-            owner: msg.userId,
-            type: 'group',
-            name: channel,
-            password: password,
-            network: msg.network
-        });
-
-        log.info(userId, 'First mas user joined channel: ' + msg.network + ':' + channel);
-    } else if (password) {
-        // Conversation exists and this user used non empty password successfully to join
-        // the channel. Update conversation password as it's possible that all other
-        // mas users were locked out during a server downtime and conversation.password is
-        // out of date.
-        yield conversation.setPassword(password);
-    }
+    let network = msg.network;
+    let targetUserId = yield ircUser.getUserId(msg.nick, network);
+    let conversation = yield conversationFactory.findGroup(channel, network);
 
     if (userId === targetUserId) {
+        let password = yield redis.hget(`ircchannelsubscriptions:${userId}:${network}`, channel);
+
+        if (!conversation) {
+            conversation = yield conversationFactory.create({
+                owner: msg.userId,
+                type: 'group',
+                name: channel,
+                password: password,
+                network: network
+            });
+
+            log.info(userId, 'First mas user joined channel: ' + network + ':' + channel);
+        }
+
         let windowId = yield window.findByConversationId(userId, conversation.conversationId);
 
         if (!windowId) {
             yield window.create(userId, conversation.conversationId);
             yield conversation.sendAddMembers(userId);
         }
+
+        if (password === null) {
+            // ircchannelsubscriptions entry is missing. This means IRC server has added the user
+            // to a channel without any action from the user. Flowdock at least does this.
+            // ircchannelsubscriptions must be updated as it's used to rejoin channels after a
+            // server restart.
+            yield redis.hset(`ircchannelsubscriptions:${userId}:${network}`, channel, '');
+        } else if (password) {
+            // Conversation exists and this user used non empty password successfully to join
+            // the channel. Update conversation password as it's possible that all other
+            // mas users were locked out during a server downtime and conversation.password is
+            // out of date.
+            yield conversation.setPassword(password);
+        }
     }
 
-    yield conversation.addGroupMember(targetUserId, 'u');
+    if (conversation) {
+        yield conversation.addGroupMember(targetUserId, 'u');
+    }
 }
 
 function *handleJoinReject(userId, msg) {
@@ -1123,6 +1125,24 @@ function *resetRetryCount(userId, network) {
 function isChannel(text) {
     return [ '&', '#', '+', '!' ].some(function(element) {
         return element === text.charAt(0);
+    });
+}
+
+function sendPrivmsg(userId, network, target, text) {
+    courier.send('connectionmanager', {
+        type: 'write',
+        userId: userId,
+        network: network,
+        line: 'PRIVMSG ' + target + ' :' + text
+    });
+}
+
+function sendJoin(userId, network, channel, password) {
+    courier.send('connectionmanager', {
+        type: 'write',
+        userId: userId,
+        network: network,
+        line: 'JOIN ' + channel + ' ' + password
     });
 }
 

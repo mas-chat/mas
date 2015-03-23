@@ -264,7 +264,15 @@ function *handleWhois(params) {
 function *handleChat(params) {
     let userId = params.userId;
     let targetUserId = params.command.userId;
-    let network = params.network;
+    let network = 'MAS';
+
+    // TDB: Refactor to a method
+    if (targetUserId.charAt(0) === 'm') {
+        // 1on1s between MAS users are forced through MAS
+        params.backend = 'loopbackparser';
+    } else {
+        network = yield redis.hget(`ircuser:${targetUserId}`, 'network');
+    }
 
     if (!targetUserId || typeof targetUserId !== 'string') {
         yield respondError('CHAT_RESP', userId, params.sessionId, 'Malformed request.');
@@ -274,13 +282,6 @@ function *handleChat(params) {
     if (userId === targetUserId) {
         yield respondError('CHAT_RESP', userId, params.sessionId, 'You can\'t chat with yourself.');
         return;
-    }
-
-    // TDB: Refactor to a method
-    if (targetUserId.charAt(0) === 'm') {
-        // 1on1s between MAS users are forced through MAS
-        network = 'MAS';
-        params.backend = 'loopbackparser';
     }
 
     let conversation = yield conversationFactory.find1on1(userId, targetUserId, network);
