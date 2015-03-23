@@ -44,7 +44,11 @@ export default Ember.Object.extend({
 
     decoratedCat: function() {
         // TBD: Network === flowdock check is missing
-        return this.get('nick') === 'flowdock' ? 'flowdock' : this.get('cat');
+        if (this.get('body').includes('Show in Flowdock:')) {
+            return 'flowdock-ignore';
+        }
+
+        return this.get('nick') === 'Flowdock' ? 'flowdock' : this.get('cat');
     }.property('cat', 'nick'),
 
     decoratedBody: function() {
