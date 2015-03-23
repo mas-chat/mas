@@ -85,12 +85,6 @@ export default Ember.Object.extend({
         let pos = 0;
         let imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
 
-        if (network === 'Flowdock') {
-            text = text.replace(/^\[(.*?)\] << (.*)/, function(match, p1, p2) {
-                return '⟦' + p1.substring(0, 6) + '…⟧ ' + p2;
-            });
-        }
-
         URI.withinString(text, function(url, start, end, source) {
             let urlObj = new URI(url);
             let visibleLink;
@@ -120,6 +114,12 @@ export default Ember.Object.extend({
         }
 
         let processedText = textParts.join('');
+
+        if (network === 'Flowdock') {
+            processedText = processedText.replace(/^\[(.*?)\] &lt;&lt; (.*)/, function(match, p1, p2) {
+                return '<span class="msg-prefix">' + p1.substring(0, 6) + '…</span> ' + p2;
+            });
+        }
 
         // Legacy thumb up emoji
         processedText = processedText.replace('*thumb up*', ':thumbsup: ');
