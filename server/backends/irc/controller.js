@@ -570,7 +570,7 @@ function *handle332(userId, msg) {
     let conversation = yield conversationFactory.findGroup(channel, msg.network);
 
     if (conversation) {
-        yield conversation.setTopic(topic);
+        yield conversation.setTopic(topic, msg.target);
     }
 }
 
