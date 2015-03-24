@@ -26,6 +26,7 @@
             {{dayDivider content.messages _view.contentIndex}}
             <div class="line {{message.decoratedCat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
         {{/each}}
+        <span class="window-messages-end"></span>
         <div class="window-upload">
             <div class="js-upload">
                 <div class="progress progress-success">

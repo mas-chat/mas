@@ -276,7 +276,7 @@ export default Ember.Component.extend(UploadMixin, {
 
         let duration = animate ? 3000 : 0;
 
-        this.$('.window-messages > div:last-child').velocity('stop').velocity('scroll', {
+        this.$('.window-messages-end').velocity('stop').velocity('scroll', {
             container: this.$messagePanel,
             duration: duration,
             easing: 'spring',
