@@ -37,6 +37,7 @@ exports.localLogin = function*(next) {
                 msg: 'Incorrect password or nick/email.'
             };
         } else {
+            yield updateIpAddress(that, userId);
             that.body = yield cookie.createSession(userId);
             that.body.success = true;
         }
@@ -66,9 +67,14 @@ function *auth(ctx, next, provider) {
         let inUse = yield redis.hget(`user:${userId}`, 'inuse');
 
         if (inUse === 'true') {
+            yield updateIpAddress(ctx, userId);
             ctx.redirect('/app/');
         } else {
             ctx.redirect('/register?ext=true');
         }
     }).call(ctx, next);
+}
+
+function *updateIpAddress(ctx, userId) {
+    yield redis.hset(`user:${userId}`, 'lastip', ctx.req.connection.remoteAddress);
 }
