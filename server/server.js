@@ -19,7 +19,8 @@
 
 require('./lib/init')('frontend');
 
-const path = require('path'),
+const fs = require('fs'),
+      path = require('path'),
       koa = require('koa'),
       hbs = require('koa-hbs'),
       error = require('koa-error'),
@@ -27,6 +28,7 @@ const path = require('path'),
       // logger = require('koa-logger'),
       co = require('co'),
       http = require('http'),
+      https = require('https'),
       handlebarsHelpers = require('./lib/handlebarsHelpers'),
       conf = require('./lib/conf'),
       log = require('./lib/log'),
@@ -61,21 +63,34 @@ app.use(userSession());
 handlebarsHelpers.registerHelpers(hbs);
 routes.register(app);
 
-// This must come after last app.use()
-let server = http.Server(app.callback());
-
-socketController.setup(server);
-
 co(function*() {
-    let port = conf.get('frontend:port');
-
     yield redisModule.loadScripts();
     yield redisModule.initDB();
 
     scheduler.init();
-    server.listen(port);
 
-    log.info(`MAS server started, http://localhost:${port}/`);
+    // Servers must be created after last app.use()
+
+    let httpPort = conf.get('frontend:http_port');
+    let httpServer = http.Server(app.callback());
+
+    socketController.setup(httpServer);
+    httpServer.listen(httpPort);
+
+    log.info(`MAS frontend http server listening, http://localhost:${httpPort}/`);
+
+    if (conf.get('frontend:https')) {
+        let httpsPort = conf.get('frontend:https_port');
+        let httpsServer = https.createServer({
+            key: fs.readFileSync(conf.get('frontend:https_key')),
+            cert: fs.readFileSync(conf.get('frontend:https_cert'))
+        }, app.callback());
+
+        socketController.setup(httpsServer);
+        httpsServer.listen(httpsPort);
+
+        log.info(`MAS frontend https server started, https://localhost:${httpsPort}/`);
+    }
 })();
 
 if (conf.get('frontend:demo_mode') === true) {

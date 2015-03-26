@@ -34,7 +34,10 @@ client_secret=XXXXXXXXXXXXXXXXXXXXXXX
 enabled=false
 
 [frontend]
-port=3200
+http_port=3200
+https=false
+https_key=ssl/server.key
+https_cert=ssl/server.crt
 demo_mode=false
 demo_user_email=whogets@fakemessages.com
 
