@@ -36,6 +36,7 @@ enabled=false
 [frontend]
 http_port=3200
 https=false
+https_port=443
 https_key=ssl/server.key
 https_cert=ssl/server.crt
 demo_mode=false
