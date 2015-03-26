@@ -176,7 +176,16 @@ function *handleClose(params) {
 }
 
 function *handleUpdate(params) {
-    let accepted = [ 'visible', 'row', 'column', 'sounds', 'titleAlert', 'minimizedNamesList' ];
+    let accepted = [
+        'visible',
+        'row',
+        'column',
+        'sounds',
+        'titleAlert',
+        'minimizedNamesList',
+        'desktop'
+    ];
+
     let oldValues = yield redis.hgetall(`window:${params.userId}:${params.windowId}`);
     let update = false;
 
@@ -199,7 +208,8 @@ function *handleUpdate(params) {
             column: params.command.column,
             sounds: params.command.sounds,
             titleAlert: params.command.titleAlert,
-            minimizedNamesList: params.command.minimizedNamesList
+            minimizedNamesList: params.command.minimizedNamesList,
+            desktop: params.command.desktop
         }, params.sessionId);
     }
 }

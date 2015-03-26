@@ -53,6 +53,7 @@ MAS Redis structures
    titleAlert (bool)
    visible (bool)
    minimizedNamesList (bool)
+   desktop (int)
    row (int)
    column (int)
    group (int)

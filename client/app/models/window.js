@@ -29,8 +29,6 @@ export default Ember.Object.extend({
         this.operators = Ember.A([]);
         this.voices = Ember.A([]);
         this.users = Ember.A([]);
-
-        this.desktop = Math.floor(Math.random() * 3); // TBD: Temporary hack for testing purposes.
     },
 
     socket: Ember.inject.service(),

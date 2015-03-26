@@ -103,7 +103,8 @@ for i = 1, #windowIds do
         ['row'] = tonumber(window.row),
         ['column'] = tonumber(window.column),
         ['password'] = conversation.password,
-        ['topic'] = conversation.topic
+        ['topic'] = conversation.topic,
+        ['desktop'] = window.desktop
     }))
 
     local members = {}
