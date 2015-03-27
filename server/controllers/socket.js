@@ -46,12 +46,13 @@ exports.setup = function(server) {
         function startPushLoop() {
             co(function*() {
                 while (1) {
-                    let commands = yield outbox.waitMsg(userId, sessionId, 25);
-                    commands.forEach(emit);
+                    let commands = yield outbox.waitMsg(userId, sessionId, 60);
 
                     if (state !== 'authenticated') {
                         break; // Prevents memory leaks
                     }
+
+                    commands.forEach(emit);
                 }
             })();
         }
