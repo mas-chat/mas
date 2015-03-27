@@ -298,8 +298,6 @@ function *processReconnectIfInactive(params) {
     for (let network of networks) {
         let state = yield redis.hget(`networks:${userId}:${network}`, 'state');
 
-        log.info('state on  ' + state);
-
         if (state === 'idledisconnected') {
             yield addSystemMessage(userId, network, 'info',
                 'You were disconnected from IRC because you haven\'t used MAS for a long time. ' +
