@@ -10,6 +10,8 @@
 ; Test_mode is not used for anything currently
 
 [common]
+user=false
+group=false
 env=default
 admin=m1
 dev_mode=false

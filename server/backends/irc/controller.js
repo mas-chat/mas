@@ -19,6 +19,10 @@
 
 /*jshint -W079 */
 
+const dropPriviledges = require('../../lib/dropPriviledges');
+
+dropPriviledges.drop();
+
 require('../../lib/init')('irc');
 
 const assert = require('assert'),

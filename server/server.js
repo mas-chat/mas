@@ -17,82 +17,54 @@
 
 'use strict';
 
-require('./lib/init')('frontend');
-
 const fs = require('fs'),
-      path = require('path'),
-      koa = require('koa'),
-      hbs = require('koa-hbs'),
-      error = require('koa-error'),
-      compress = require('koa-compress'),
-      // logger = require('koa-logger'),
-      co = require('co'),
       http = require('http'),
       https = require('https'),
-      handlebarsHelpers = require('./lib/handlebarsHelpers'),
-      conf = require('./lib/conf'),
-      log = require('./lib/log'),
-      redisModule = require('./lib/redis'),
-      passport = require('./lib/passport'),
-      userSession = require('./lib/userSession'),
-      routes = require('./routes/routes'),
-      scheduler = require('./lib/scheduler'),
-      demoContent = require('./lib/demoContent'),
-      socketController = require('./controllers/socket');
+      dropPriviledges = require('./lib/dropPriviledges'),
+      conf = require('./lib/conf');
 
-const app = koa();
+const httpPort = conf.get('frontend:http_port');
+const httpsPort = conf.get('frontend:https_port');
 
-// Development only
-if (app.env === 'development') {
-    app.use(error());
-    // app.use(logger());
+let httpHandler = initialHandler;
+
+let httpServer = http.Server(httpHandlerSelector);
+let httpsServer = null;
+
+httpServer.listen(httpPort, httpListenDone);
+
+if (conf.get('frontend:https')) {
+    httpsServer = https.createServer({
+        key: fs.readFileSync(conf.get('frontend:https_key')),
+        cert: fs.readFileSync(conf.get('frontend:https_cert'))
+    }, httpHandlerSelector);
+    httpsServer.listen(httpsPort, listensDone);
 }
 
-// Enable GZIP compression
-app.use(compress());
+function setHTTPHandler(handler) {
+    httpHandler = handler;
+}
 
-app.use(passport.initialize());
+function httpHandlerSelector(request, response) {
+    httpHandler(request, response);
+}
 
-app.use(hbs.middleware({
-    defaultLayout: 'layouts/main',
-    viewPath: path.join(__dirname, 'views')
-}));
+function initialHandler(request, response) {
+    response.writeHead(200, { 'Content-Type': 'text/plain' });
+    response.end('Server starting. Try again in few seconds...\n');
+}
 
-app.use(userSession());
-
-handlebarsHelpers.registerHelpers(hbs);
-routes.register(app);
-
-co(function*() {
-    yield redisModule.loadScripts();
-    yield redisModule.initDB();
-
-    scheduler.init();
-
-    // Servers must be created after last app.use()
-
-    let httpPort = conf.get('frontend:http_port');
-    let httpServer = http.Server(app.callback());
-
-    socketController.setup(httpServer);
-    httpServer.listen(httpPort);
-
-    log.info(`MAS frontend http server listening, http://localhost:${httpPort}/`);
-
-    if (conf.get('frontend:https')) {
-        let httpsPort = conf.get('frontend:https_port');
-        let httpsServer = https.createServer({
-            key: fs.readFileSync(conf.get('frontend:https_key')),
-            cert: fs.readFileSync(conf.get('frontend:https_cert'))
-        }, app.callback());
-
-        socketController.setup(httpsServer);
-        httpsServer.listen(httpsPort);
-
-        log.info(`MAS frontend https server started, https://localhost:${httpsPort}/`);
+function httpListenDone() {
+    if (!conf.get('frontend:https')) {
+        listensDone();
     }
-})();
+}
 
-if (conf.get('frontend:demo_mode') === true) {
-    demoContent.enable();
+function listensDone() {
+    dropPriviledges.drop();
+
+    require('./lib/init')('frontend');
+    const main = require('./main');
+
+    main.init(httpServer, httpsServer, setHTTPHandler);
 }
