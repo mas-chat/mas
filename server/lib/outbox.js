@@ -53,8 +53,10 @@ exports.waitMsg = function*(userId, sessionId, timeout) {
         commands.push(JSON.parse(command));
     }
 
-    log.info(userId, 'Flushed outbox. SessionId: ' + sessionId + '. Response: ' +
-        JSON.stringify(commands)); // .substring(0, 100));
+    if (commands.length > 0) {
+        log.info(userId, 'Flushed outbox. SessionId: ' + sessionId + '. Response: ' +
+            JSON.stringify(commands)); // .substring(0, 100));
+    }
 
     return commands;
 };
