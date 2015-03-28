@@ -14,16 +14,22 @@
 --   governing permissions and limitations under the License.
 --
 
-local userId = ARGV[1]
+local reporterUserId = ARGV[1]
 local conversationId = ARGV[2]
-local msg = ARGV[3]
-
+local msgUserId = ARGV[3]
+local msgBody = ARGV[3]
 local key = 'conversationbuffer:' .. conversationId
 
-local existingReporter = redis.call('HGET', key, msg)
+-- Remove trailing whitespace, IRC servers may not conserve it. In
+-- that case duplicates would pass the check.
+msgBody = string.gsub(msgBody, "^(.-)%s*$", "%1")
 
-if (not existingReporter) or existingReporter == userId then
-    redis.call('HSET', key, msg, userId)
+local msgFingerprint = msgUserId .. ':' .. msgBody
+
+local existingReporter = redis.call('HGET', key, msgFingerprint)
+
+if (not existingReporter) or existingReporter == reporterUserId then
+    redis.call('HSET', key, msgFingerprint, reporterUserId)
     redis.call('EXPIRE', key, 45)
     return false
 else

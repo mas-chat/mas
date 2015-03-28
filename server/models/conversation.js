@@ -276,7 +276,7 @@ Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, 
     // the case, lua reporter logic would fail. (If a reporter sees a new identical message
     // it's not considered as duplicate. Somebody is just repeating their line.)
     let duplicate = yield redis.run('duplicateMsgFilter', sourceUserId, this.conversationId,
-        msg.userId + ':' + msg.body);
+        msg.userId, msg.body);
 
     if (!duplicate) {
         yield this.addMessage(msg, excludeSession);
