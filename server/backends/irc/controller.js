@@ -969,7 +969,8 @@ function *handlePrivmsg(userId, msg, command) {
         conversation = yield conversationFactory.findGroup(target, msg.network);
 
         if (conversation === null) {
-            log.warn(userId, 'Message arrived for an unknown channel');
+            // :verne.freenode.net NOTICE * :*** Got Ident response
+            yield addSystemMessage(userId, msg.network, 'info', text);
             return;
         }
     }
