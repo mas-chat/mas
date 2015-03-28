@@ -30,7 +30,7 @@ let identHandler = function() {};
 
 // Start IDENT server
 if (conf.get('irc:identd')) {
-    net.createServer(identHandler).listen(IDENTD_PORT, identdDone);
+    net.createServer(identHandlerSelector).listen(IDENTD_PORT, identdDone);
 } else {
     identdDone();
 }
@@ -40,6 +40,10 @@ function identdDone() {
 
     let worker = require('./connectionManagerWorker');
     worker.init(setIdentdHandler);
+}
+
+function identHandlerSelector(conn) {
+    identHandler(conn);
 }
 
 function setIdentdHandler(handler) {
