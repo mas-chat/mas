@@ -59,9 +59,12 @@ function handleIdentConnection(conn) {
         if (!isNaN(localPort) && !isNaN(remotePort)) {
             for (let userId in sockets) {
                 if (sockets[userId].localPort === localPort &&
-                    sockets[userId].remotePort === remotePort &&
-                    sockets[userId].remoteAddress === conn.remoteAddress) {
+                    sockets[userId].remotePort === remotePort) {
+                    // sockets[userId].remoteAddress === conn.remoteAddress) {
                     found = true;
+
+                    log.info('Socket IP addr: ' + sockets[userId].remoteAddress); // TBD: Temporary
+
                     resp = prefix + ' : USERID : UNIX : ' + sockets[userId].nick + '\r\n';
                     break;
                 }
