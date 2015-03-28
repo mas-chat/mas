@@ -49,15 +49,19 @@ export default Ember.Component.extend({
 
     didInsertElement() {
         this.$pointer = this.$('.main-desktop-button-selected-rectangle');
+        this.movePointer(true);
     },
 
     movePointer(animate) {
         let pos = this.$('[data-desktop="' + this.selected + '"]').offset();
 
-        this.$pointer.velocity({
+        this.$pointer.velocity('stop').velocity({
             top: pos.top - 2,
             left: pos.left - 2
-        }, animate ? 400 : 0);
+        }, {
+            duration: animate ? 400 : 0,
+            visibility: 'visible'
+        });
     },
 
     _numberToLetter: function(number) {
