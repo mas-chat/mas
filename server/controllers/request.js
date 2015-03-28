@@ -151,6 +151,10 @@ function *handleJoin(params) {
 }
 
 function *handleClose(params) {
+    if (!params.conversation) {
+        return;
+    }
+
     // Ask all sessions to close this window
     yield outbox.queueAll(params.userId, {
         id: 'CLOSE',
