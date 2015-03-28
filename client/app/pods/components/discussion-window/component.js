@@ -73,7 +73,9 @@ export default Ember.Component.extend(UploadMixin, {
             // Update images array
             this.$images = this.$('img[data-src]');
 
-            this._goToBottom(!initialAddition);
+            Ember.run.scheduleOnce('afterRender', this, function() {
+                this._goToBottom(!initialAddition);
+            });
         }, 200);
 
         if (!this.get('visible') || this.get('content.scrollLock')) {
@@ -164,7 +166,9 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     layoutDone() {
-        this._goToBottom(false);
+        Ember.run.scheduleOnce('afterRender', this, function() {
+            this._goToBottom(false);
+        });
     },
 
     didInsertElement() {
