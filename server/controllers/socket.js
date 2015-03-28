@@ -32,29 +32,28 @@ let networks = null;
 exports.setup = function(server) {
     let io = socketIo(server);
 
-    // Socket.io
     io.on('connection', function(socket) {
         let userId = null;
         let sessionId = null;
-        let state = 'connected';
-        // connected, disconnected, authenticated
+        let state = 'connected'; // connected, disconnected, authenticated
 
         function emit(command) {
             socket.emit(command.id.endsWith('_RESP') ? 'resp' : 'ntf', command);
         }
 
-        function startPushLoop() {
-            co(function*() {
-                while (1) {
-                    let commands = yield outbox.waitMsg(userId, sessionId, 60);
+        function *eventLoop() {
+            while (1) {
+                let ts = Math.round(Date.now() / 1000);
+                yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
 
-                    if (state !== 'authenticated') {
-                        break; // Prevents memory leaks
-                    }
+                let commands = yield outbox.waitMsg(userId, sessionId, 60);
 
-                    commands.forEach(emit);
+                if (state !== 'authenticated') {
+                    break;
                 }
-            })();
+
+                commands.forEach(emit);
+            }
         }
 
         socket.on('init', function(data) {
@@ -70,8 +69,7 @@ exports.setup = function(server) {
                         code: 'INVALID_INIT',
                         reason: 'Invalid init message.'
                     });
-                    state = 'disconnected';
-                    socket.disconnect();
+                    end();
                     return;
                 }
 
@@ -86,8 +84,7 @@ exports.setup = function(server) {
                         code: 'INVALID_SECRET',
                         reason: 'Invalid or expired secret.'
                     });
-                    state = 'disconnected';
-                    socket.disconnect();
+                    end();
                     return;
                 }
 
@@ -97,7 +94,6 @@ exports.setup = function(server) {
                 socket.emit('initok', { sessionId: sessionId });
 
                 yield redis.zadd(`sessionlist:${userId}`, ts, sessionId);
-                yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
 
                 log.info(userId, 'Initializing new session: ' + sessionId);
                 yield redis.run('initSession', userId, sessionId);
@@ -108,7 +104,8 @@ exports.setup = function(server) {
                 yield sendNetworkList(userId, sessionId);
                 ircCheckIfInactive(userId);
 
-                startPushLoop();
+                yield eventLoop();
+                end();
             })();
         });
 
@@ -124,21 +121,21 @@ exports.setup = function(server) {
                         code: 'INVALID_SESSION',
                         reason: 'Invalid or expired session.'
                     });
-                    state = 'disconnected';
-                    socket.disconnect();
+                    end();
                     return;
                 }
 
                 state = 'authenticated';
-                startPushLoop();
+
+                yield eventLoop();
+                end();
             })();
         });
 
         socket.on('req', function(data) {
             co(function*() {
                 if (state !== 'authenticated') {
-                    state = 'disconnected';
-                    socket.disconnect();
+                    end();
                     return;
                 }
 
@@ -148,21 +145,14 @@ exports.setup = function(server) {
 
         socket.on('disconnect', function() {
             // Session is torn down in deleteIdleSessions() handler
+            end();
+        });
+
+        function end() {
+            log.info(userId, 'Socket.io disconnect. sessionId: ' + sessionId);
             state = 'disconnected';
-        });
-
-        socket.conn.on('heartbeat', function() {
-            co(function*() {
-                if (state !== 'authenticated') {
-                    state = 'disconnected';
-                    socket.disconnect();
-                    return;
-                }
-
-                let ts = Math.round(Date.now() / 1000);
-                yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
-            })();
-        });
+            socket.disconnect();
+        }
     });
 };
 
