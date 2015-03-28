@@ -20,5 +20,7 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
     sortProperties: [ 'online', 'last', 'name' ],
+    sortAscending: false,
+
     sortedFriends: Ember.computed.sort('friends', 'sortProperties')
 });
