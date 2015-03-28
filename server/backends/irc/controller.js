@@ -769,11 +769,11 @@ function *handleError(userId, msg) {
         userId, msg.network, 'error', 'Connection lost. Server reason: ' + reason);
 
     if (reason.includes('Too many host connections')) {
-        log.error(userId, 'Too many connections to: ' + msg.network);
+        log.warn(userId, 'Too many connections to: ' + msg.network);
 
         yield addSystemMessage(userId, msg.network, 'error',
             msg.network + ' IRC network doesn\'t allow more connections. ' +
-            'Close this window and rejoin to try again.');
+            'Close all windows related to this IRC network and rejoin another day to try again.');
 
         // Disable auto-reconnect
         yield redis.hset(`networks:${userId}:${msg.network}`, 'state', 'closing');
