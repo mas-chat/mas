@@ -55,6 +55,10 @@ export default Ember.Component.extend({
     movePointer(animate) {
         let pos = this.$('[data-desktop="' + this.selected + '"]').offset();
 
+        if (!pos) {
+            return;
+        }
+
         this.$pointer.velocity('stop').velocity({
             top: pos.top - 2,
             left: pos.left - 2
