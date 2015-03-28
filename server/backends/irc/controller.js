@@ -862,16 +862,17 @@ function *handleMode(userId, msg) {
 
         for (let mode of modes) {
             let newClass = null;
+            let targetUserId = null;
 
             if (mode.match(/[klbeIOov]/)) {
                 param = modeParams.shift();
 
                 if (!param) {
                     log.warn(userId, 'Received broken MODE command');
+                } else if (mode.match(/ov/)) {
+                    targetUserId = yield ircUser.getUserId(param, msg.network);
                 }
             }
-
-            let targetUserId = yield ircUser.getUserId(param, msg.network);
 
             if (mode === 'o' && oper === '+') {
                 // Got oper status
