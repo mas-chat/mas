@@ -853,7 +853,6 @@ function *handleMode(userId, msg) {
         let command = modeParams.shift();
         let oper = command.charAt(0);
         let modes = command.substring(1).split('');
-        let param;
 
         if (!(oper === '+' || oper === '-' )) {
             log.warn(userId, 'Received broken MODE command');
@@ -861,6 +860,7 @@ function *handleMode(userId, msg) {
         }
 
         for (let mode of modes) {
+            let param;
             let newClass = null;
             let targetUserId = null;
 
@@ -869,7 +869,8 @@ function *handleMode(userId, msg) {
 
                 if (!param) {
                     log.warn(userId, 'Received broken MODE command');
-                } else if (mode.match(/ov/)) {
+                    continue;
+                } else if (mode.match(/[ov]/)) {
                     targetUserId = yield ircUser.getUserId(param, msg.network);
                 }
             }
