@@ -124,6 +124,15 @@ function *handleCreate(params) {
 }
 
 function *handleJoin(params) {
+    if (!params.command.name || !params.command.network) {
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'JOIN_RESP',
+            status: 'PARAMETER_MISSING',
+            errorMsg: 'Name or network missing.'
+        });
+        return;
+    }
+
     let conversation = yield conversationFactory.findGroup(
         params.command.name, params.command.network);
 
