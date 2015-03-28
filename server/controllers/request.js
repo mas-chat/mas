@@ -313,7 +313,7 @@ function *handleChat(params) {
     courier.send(params.backend, {
         type: 'chat',
         userId: userId,
-        network: params.network,
+        network: network,
         targetUserId: targetUserId
     });
 }
