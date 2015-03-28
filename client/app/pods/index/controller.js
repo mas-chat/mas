@@ -75,6 +75,10 @@ export default Ember.ArrayController.extend({
         return this.get('friends').filterBy('online', true).length;
     }.property('friends.@each.online'),
 
+    desktops: function() {
+        return this.get('model').mapBy('desktop').uniq();
+    }.property('model.@each.desktop'),
+
     _handleSendMessage(window, text) {
         let messageRecord = this.get('container').lookup('model:message');
         let isCommand = text.charAt(0) === '/';

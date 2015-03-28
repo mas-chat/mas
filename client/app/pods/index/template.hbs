@@ -2,7 +2,7 @@
 
 <div class="sidebar flex-grow-column">
     <div class="upper-sidebar flex-1">
-        {{desktop-switcher action="switchDesktop"}}
+        {{desktop-switcher desktops=desktops action="switchDesktop"}}
 
         {{#each window in sortedHiddenWindows}}
             <div class="main-hidden-window-container" {{action "show" window}}>

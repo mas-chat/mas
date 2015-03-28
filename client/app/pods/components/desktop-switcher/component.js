@@ -21,9 +21,24 @@ import Ember from 'ember';
 export default Ember.Component.extend({
     classNames: [ 'main-desktop-switcher' ],
 
-    desktops: ['A', 'B', 'C'],
     selected: 0,
     $pointer: null,
+
+    alphabeticalDesktops: function() {
+        let desktops = Ember.A([]);
+
+        for (let i = 0; i < this.get('desktops').length; i++) {
+            desktops.push(this._numberToLetter(i));
+        }
+
+        return desktops;
+    }.property('desktops.@each'),
+
+    updatePointer: function() {
+        Ember.run.scheduleOnce('afterRender', this, function() {
+            this.movePointer(true);
+        });
+    }.observes('alphabeticalDesktops.@each', 'selected'),
 
     actions: {
         switch(desktop) {
@@ -32,21 +47,20 @@ export default Ember.Component.extend({
         }
     },
 
-    animate: function() {
-        this.movePointer(true);
-    }.observes('selected'),
-
     didInsertElement() {
         this.$pointer = this.$('.main-desktop-button-selected-rectangle');
-        this.movePointer(false);
     },
 
     movePointer(animate) {
-        let pos = this.$('[data-desktop="' + this.desktops[this.selected] + '"]').offset();
+        let pos = this.$('[data-desktop="' + this.selected + '"]').offset();
 
         this.$pointer.velocity({
             top: pos.top - 2,
             left: pos.left - 2
         }, animate ? 400 : 0);
+    },
+
+    _numberToLetter: function(number) {
+        return String.fromCharCode(65 + number); // 65 is ASCII 'A'
     }
 });

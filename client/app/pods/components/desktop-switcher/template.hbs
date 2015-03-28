@@ -1,5 +1,5 @@
-{{#each desktops as |desktop index|}}
-    <div {{action "switch" index}} data-desktop="{{desktop}}" class="main-desktop-button">{{desktop}}</div>
+{{#each alphabeticalDesktops as |desktop index|}}
+    <div {{action "switch" index}} data-desktop="{{index}}" class="main-desktop-button">{{desktop}}</div>
 {{/each}}
 
 <div class="main-desktop-button-selected-rectangle"></div>
