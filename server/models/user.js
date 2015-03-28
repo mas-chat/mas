@@ -18,6 +18,7 @@
 
 const bcrypt = require('bcrypt'),
       md5 = require('MD5'),
+      log = require('../lib/log'),
       redis = require('../lib/redis').createClient();
 
 const RESERVED_USERIDS = 9000;
@@ -67,32 +68,37 @@ User.prototype.generateUserId = function*() {
 
 User.prototype.save = function*() {
     let index = {};
-    let normalizedEmail = this.data.email.toLowerCase().trim();
-    let normalizedNick = this.data.nick.toLowerCase().trim();
+    let userId = this.data.userId;
 
     if (this.data.nick) {
-        index[normalizedNick] = this.data.userId;
+        let normalizedNick = this.data.nick.toLowerCase().trim();
+        index[normalizedNick] = userId;
+    } else {
+        log.warn(userId, 'No nick is defined while saving User model.');
     }
 
     if (this.data.email) {
-        index[normalizedEmail] = this.data.userId;
+        let normalizedEmail = this.data.email.toLowerCase().trim();
+
+        index[normalizedEmail] = userId;
+        this.data.emailMD5 = md5(normalizedEmail); // For gravatar support
+    } else {
+        log.warn(userId, 'No email is defined while saving User model.');
     }
 
     if (this.data.extAuthId) {
-        index[this.data.extAuthId] = this.data.userId;
+        index[this.data.extAuthId] = userId;
     }
 
-    this.data.emailMD5 = md5(normalizedEmail); // For gravatar support
-
-    yield redis.hmset(`user:${this.data.userId}`, this.data);
+    yield redis.hmset(`user:${userId}`, this.data);
     yield redis.hmset('index:user', index);
-    yield redis.sadd('userlist', this.data.userId);
+    yield redis.sadd('userlist', userId);
 
     if (Object.keys(this.settings).length > 0) {
-        yield redis.hmset(`settings:${this.data.userId}`, this.settings);
+        yield redis.hmset(`settings:${userId}`, this.settings);
     }
 
     if (this.friends.length > 0) {
-        yield redis.sadd(`friends:${this.data.userId}`, this.friends);
+        yield redis.sadd(`friends:${userId}`, this.friends);
     }
 };
