@@ -56,15 +56,14 @@ function handleIdentConnection(conn) {
         let found = false;
         let resp;
 
+        // Indexof() is needed because conn.remoteAddress can be in ::ffff:185.30.166.35 format
+        // while sockets[userId].remoteAddress is 185.30.166.
         if (!isNaN(localPort) && !isNaN(remotePort)) {
             for (let userId in sockets) {
                 if (sockets[userId].localPort === localPort &&
-                    sockets[userId].remotePort === remotePort) {
-                    // sockets[userId].remoteAddress === conn.remoteAddress) {
+                    sockets[userId].remotePort === remotePort &&
+                    conn.remoteAddress.indexOf(sockets[userId].remoteAddress) > - 1) {
                     found = true;
-
-                    log.info('Socket IP addr: ' + sockets[userId].remoteAddress); // TBD: Temporary
-
                     resp = prefix + ' : USERID : UNIX : ' + sockets[userId].nick + '\r\n';
                     break;
                 }
