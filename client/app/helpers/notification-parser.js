@@ -57,6 +57,9 @@ export default Ember.Object.extend({
     },
 
     _handleCreate(data) {
+        // TBD: Temporary server bug work-a-round
+        data.desktop = data.desktop ? parseInt(data.desktop) : 0;
+
         // This hack can be removed if there's a way to create and init the object in one go as
         // syncServer() observer doesn't have .on('init').
         window.disableUpdate = true;
