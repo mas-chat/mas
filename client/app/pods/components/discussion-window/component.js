@@ -274,18 +274,17 @@ export default Ember.Component.extend(UploadMixin, {
             return;
         }
 
-        let duration = animate ? 3000 : 0;
+        let duration = animate ? 1000 : 0;
 
         this.$('.window-messages-end').velocity('stop').velocity('scroll', {
             container: this.$messagePanel,
             duration: duration,
             easing: 'spring',
+            offset: 100, // Shouldn't be needed
             begin: function() {
-                this.$messagePanel.css('overflow-y', 'hidden');
                 this.set('scrolling', true);
             }.bind(this),
             complete: function() {
-                this.$messagePanel.css('overflow-y', 'auto');
                 this.set('scrolling', false);
                 this._showImages();
             }.bind(this)
