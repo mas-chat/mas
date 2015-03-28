@@ -120,7 +120,8 @@ export default Ember.Object.extend({
         let processedText = textParts.join('');
 
         if (network === 'Flowdock') {
-            processedText = processedText.replace(/^\[(.*?)\] &lt;&lt; (.*)/, function(match, p1, p2) {
+            processedText = processedText.replace(
+                /^\[(.*?)\] &lt;&lt; (.*)/, function(match, p1, p2) {
                 return '<span class="msg-prefix">' + p1.substring(0, 9) + '</span> ' + p2;
             });
         }

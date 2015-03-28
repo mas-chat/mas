@@ -137,7 +137,7 @@ function *processTextCommand(params) {
 
     switch (command) {
         case '':
-            systemMsg = 'Space after / character is not allowd.';
+            systemMsg = 'Space after / character is not allowed.';
             send = false;
             break;
         case 'part':
