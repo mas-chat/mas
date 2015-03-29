@@ -54,8 +54,12 @@ exports.yahooLogin = function*(next) {
 
 function *auth(ctx, next, provider) {
     yield passport.authenticate(provider, function*(err, userId) {
-        if (err || userId === false) {
-            log.warn('Invalid external login attempt.');
+        if (err) {
+            ctx.body = 'External login failed, reason: ' + err;
+            log.warn('Invalid external login attempt, reason: ' + err);
+            return;
+        } else if (userId === false) {
+            ctx.body = 'No account found. Login failed.';
             return;
         }
 
