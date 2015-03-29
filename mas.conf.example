@@ -31,6 +31,7 @@ cache_directory=data/cache/
 enabled=false
 client_id=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com
 client_secret=XXXXXXXXXXXXXXXXXXXXXXX
+callback_url=https://localhost:3200/auth/google/oauth2callback
 
 [yahooauth]
 enabled=false

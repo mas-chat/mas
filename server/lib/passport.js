@@ -122,7 +122,7 @@ if (conf.get('googleauth:enabled') === true) {
     let google = new GoogleStrategy({
         clientID: conf.get('googleauth:client_id'),
         clientSecret: conf.get('googleauth:client_secret'),
-        callbackURL: conf.get('site:url') + '/auth/google/oauth2callback'
+        callbackURL: conf.get('googleauth:callback_url')
     }, function(accessToken, refreshToken, params, profile, done) {
         // jshint camelcase: false
         // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
