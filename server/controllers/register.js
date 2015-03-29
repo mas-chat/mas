@@ -272,7 +272,7 @@ exports.createExt = function*() {
 
     let emailInUse = false;
 
-    if (form.fields.email && form.fields.email.toLowerCase() === user.data.email.toLowerCase()) {
+    if (form.data.email && form.data.email.toLowerCase() === user.data.email.toLowerCase()) {
         // Keep using the email address from external authenticator
         emailInUse = false;
     } else {
