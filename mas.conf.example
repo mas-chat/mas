@@ -36,12 +36,15 @@ callback_url=https://localhost:3200/auth/google/oauth2callback
 [yahooauth]
 enabled=false
 
+; https_ca can be false or comma separated list of CA cert files
+
 [frontend]
 http_port=3200
 https=false
 https_port=443
 https_key=ssl/server.key
 https_cert=ssl/server.crt
+https_ca=ssl/ca1.crt,ssl/ca2.crt
 demo_mode=false
 demo_user_email=whogets@fakemessages.com
 

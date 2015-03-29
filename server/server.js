@@ -34,9 +34,19 @@ let httpsServer = null;
 httpServer.listen(httpPort, httpListenDone);
 
 if (conf.get('frontend:https')) {
+    let caCerts = [];
+    let caCertFileList = conf.get('frontend:https_ca');
+
+    if (caCertFileList) {
+        for (let file of caCertFileList.split(',')) {
+            caCerts.push(fs.readFileSync(file));
+        }
+    }
+
     httpsServer = https.createServer({
         key: fs.readFileSync(conf.get('frontend:https_key')),
-        cert: fs.readFileSync(conf.get('frontend:https_cert'))
+        cert: fs.readFileSync(conf.get('frontend:https_cert')),
+        ca: caCerts
     }, httpHandlerSelector);
     httpsServer.listen(httpsPort, listensDone);
 }
