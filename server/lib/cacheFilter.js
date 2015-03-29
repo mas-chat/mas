@@ -25,11 +25,12 @@ module.exports = function*(next) {
     if (/^\/app\/*$/.test(this.path)) {
         // App index page
         cacheTime = 60 * 5; // 5 minutes
-    } else if (/^\/app\/*.+/.test(this.path)) {
-        // App assets that aren't fingerprinted
-        cacheTime = 60 * 60 * 24 * 2; // 2 days
     } else if (/\/app\/assets\/\S+-.{32}\.\w+$/.test(this.path)) {
+        // Fingerprinted app assets
         cacheTime = 60 * 60 * 24 * 365; // 1 year
+    } else if (/^\/app\/*.+/.test(this.path)) {
+        // All other app assets (not fingerprinted)
+        cacheTime = 60 * 60 * 24 * 2; // 2 days
     }
 
     if (cacheTime) {
