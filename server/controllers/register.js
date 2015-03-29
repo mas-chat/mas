@@ -275,12 +275,17 @@ exports.createExt = function*() {
             registrationForm: form.toHTML()
         });
     } else {
-        yield redis.hmset(`user:${this.mas.userId}`, {
-            name: form.data.name,
-            email: form.data.email,
-            nick: form.data.nick,
-            inuse: 'true'
-        });
+        let user = new User();
+        yield user.load(this.mas.userId);
+
+        // TBD: User object doesn't support changing email address yet, hence the hack
+        yield redis.hdel('index:user', user.data.email);
+
+        user.data.name = form.data.name;
+        user.data.email = form.data.email;
+        user.data.nick = form.data.nick;
+        user.data.inuse = 'true';
+        yield user.save();
 
         this.response.redirect('/app');
     }
