@@ -28,7 +28,7 @@ exports.localLogin = function*(next) {
         if (err === 'useExt') {
             that.body = {
                 success: false,
-                msg: 'This email address is bound to Google/Yahoo login.'
+                msg: 'This email address can login only through Google/Yahoo login.'
             };
         } else if (err || userId === false) {
             // Unknown user, wrong password, or disabled account

@@ -73,7 +73,7 @@ function authLocal(username, password, done) {
             }
         }
 
-        if (userId && user.openidurl) {
+        if (user && !user.password && user.openidurl) {
             done('useExt', false);
         } else if (!userId || !correctPassword || user.inuse !== 'true') {
             done('invalid', false);
