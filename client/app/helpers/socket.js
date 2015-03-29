@@ -28,6 +28,8 @@ export default Ember.Object.extend({
 
     _callbacks: {},
     _notificationParser: null,
+    _connectionLost: false,
+    _connectionLostWarningVisible: false,
 
     init() {
         this._super();
@@ -87,21 +89,32 @@ export default Ember.Object.extend({
         }));
 
         socket.on('disconnect', Ember.run.bind(this, function() {
-            this.get('container').lookup('route:application').send(
-                'openModal', 'non-interactive-modal', {
-                    title: 'Connection error',
-                    body: 'Connection to server lost. Trying to reconnect…'
-                });
+            this._connectionLost = true;
+
+            Ember.run.later(this, function() {
+                if (this._connectionLost) {
+                    this._connectionLostWarningVisible = true;
+
+                    this.get('container').lookup('route:application').send(
+                        'openModal', 'non-interactive-modal', {
+                            title: 'Connection error',
+                            body: 'Connection to server lost. Trying to reconnect…'
+                        });
+                }
+            }, 5000);
         }));
 
         socket.on('reconnect', Ember.run.bind(this, function() {
+            this._connectionLost = false;
+
             socket.emit('resume', {
                 userId: userId,
                 sessionId: this.get('sessionId')
             });
 
-            this.get('container').lookup('controller:application').send(
-                'closeModal');
+            if (this._connectionLostWarningVisible) {
+                this.get('container').lookup('controller:application').send('closeModal');
+            }
         }));
     },
 
