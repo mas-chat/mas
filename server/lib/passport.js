@@ -29,8 +29,6 @@ const crypto = require('crypto'),
       conf = require('./conf'),
       log = require('./log');
 
-// TBD: Rename Redis user.openidurl property to user.extAuthToken
-
 function authLocal(username, password, done) {
     co(function*() {
         let user = null;
@@ -73,7 +71,7 @@ function authLocal(username, password, done) {
             }
         }
 
-        if (user && !user.password && user.openidurl) {
+        if (user && !user.password && user.extAuthId) {
             done('useExt', false);
         } else if (!userId || !correctPassword || user.inuse !== 'true') {
             done('invalid', false);
@@ -94,7 +92,7 @@ function authExt(openidId, oauthId, profile, done) {
             if (userId) {
                 // User is identified by his OpenID 2.0 identifier even we know his OAuth 2.0 id.
                 // Start to solely use OAuth 2.0 id.
-                yield redis.hset(`user:${userId}`, 'openidurl', oauthId);
+                yield redis.hset(`user:${userId}`, 'extAuthId', oauthId);
                 yield redis.hdel('index:user', openidId);
                 yield redis.hset('index:user', oauthId, userId);
             } else {
