@@ -260,12 +260,23 @@ exports.create = function*() {
 
 exports.createExt = function*() {
     let form = yield decodeForm(this.req, registrationFormExt);
-    let emailInUse = yield nickOrEmailTaken(form.data.email, form.fields.email, 'email address');
     let nickInUse = yield nickOrEmailTaken(form.data.nick, form.fields.nick, 'nick');
 
     if (!this.mas.userId) {
         this.status = httpStatus('bad request');
         return;
+    }
+
+    let user = new User();
+    yield user.load(this.mas.userId);
+
+    let emailInUse = false;
+
+    if (form.fields.email && form.fields.email.toLowerCase() === user.data.email.toLowerCase()) {
+        // Keep using the email address from external authenticator
+        emailInUse = false;
+    } else {
+        emailInUse = yield nickOrEmailTaken(form.data.email, form.fields.email, 'email address');
     }
 
     if (!form.isValid() || (emailInUse && this.mas.email !== form.data.email) || nickInUse) {
@@ -275,9 +286,6 @@ exports.createExt = function*() {
             registrationForm: form.toHTML()
         });
     } else {
-        let user = new User();
-        yield user.load(this.mas.userId);
-
         // TBD: User object doesn't support changing email address yet, hence the hack
         yield redis.hdel('index:user', user.data.email);
 
