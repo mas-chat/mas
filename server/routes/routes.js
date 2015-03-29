@@ -66,8 +66,8 @@ exports.register = function(app) {
     app.post('/forgot-password', bodyParser(), forgotPasswordController.create);
     app.get('/reset-password/:token', registerController.indexReset);
 
-    // Special filter route for hashed assets
-    app.get(/\/dist\/\S+-........\.\w+$/, cacheFilter);
+    // Special filter route for fingerprinted assets. Will set cache-age to one year.
+    app.get(/\/app\/assets\/\S+-.{32}\.\w+$/, cacheFilter);
 
     // Web site page routes
     app.get('/', indexPageController);
