@@ -18,5 +18,21 @@
 
 module.exports = function*(next) {
     yield next;
-    this.set('Cache-Control', 'public, max-age=31536000'); // 1 year
+
+    // Set cache times for the client app
+    let cacheTime = false;
+
+    if (/^\/app\/*$/.test(this.path)) {
+        // App index page
+        cacheTime = 60 * 5; // 5 minutes
+    } else if (/^\/app\/*.+/.test(this.path)) {
+        // App assets that aren't fingerprinted
+        cacheTime = 60 * 60 * 24 * 2; // 2 days
+    } else if (/\/app\/assets\/\S+-.{32}\.\w+$/.test(this.path)) {
+        cacheTime = 60 * 60 * 24 * 365; // 1 year
+    }
+
+    if (cacheTime) {
+        this.set('Cache-Control', `public, max-age=${cacheTime}`);
+    }
 };

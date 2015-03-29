@@ -32,9 +32,9 @@ const path = require('path'),
       userFilesController = require('../controllers/userFiles'),
       forgotPasswordController = require('../controllers/forgotPassword');
 
-const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
-
 exports.register = function(app) {
+    app.use(cacheFilter);
+
     app.use(router(app));
 
     // Passport authentication routes
@@ -66,9 +66,6 @@ exports.register = function(app) {
     app.post('/forgot-password', bodyParser(), forgotPasswordController.create);
     app.get('/reset-password/:token', registerController.indexReset);
 
-    // Special filter route for fingerprinted assets. Will set cache-age to one year.
-    app.get(/\/app\/assets\/\S+-.{32}\.\w+$/, cacheFilter);
-
     // Web site page routes
     app.get('/', indexPageController);
     app.get(/.html$/, pagesController); // All other pages
@@ -76,12 +73,11 @@ exports.register = function(app) {
     // Public assets
     app.get('/files/:file', userFilesController);
 
+    // TBD: Improve caching strategy for the web site
     app.use(serve(path.join(__dirname, '..', 'public'), {
-        maxage: ONE_WEEK
+        maxage: 1000 * 60 * 10 // 10 minutes
     }));
 
     // Ember client assets
-    app.use(mount('/app', serve(path.join(__dirname, '../../client/dist'), {
-        maxage: ONE_WEEK
-    })));
+    app.use(mount('/app', serve(path.join(__dirname, '../../client/dist'))));
 };
