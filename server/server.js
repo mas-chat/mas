@@ -27,6 +27,7 @@ const httpPort = conf.get('frontend:http_port');
 const httpsPort = conf.get('frontend:https_port');
 
 let httpHandler = initialHandler;
+let httpsHandler = initialHandler;
 
 let httpServer = http.Server(httpHandlerSelector);
 let httpsServer = null;
@@ -47,16 +48,21 @@ if (conf.get('frontend:https')) {
         key: fs.readFileSync(conf.get('frontend:https_key')),
         cert: fs.readFileSync(conf.get('frontend:https_cert')),
         ca: caCerts
-    }, httpHandlerSelector);
+    }, httpsHandlerSelector);
     httpsServer.listen(httpsPort, listensDone);
 }
 
-function setHTTPHandler(handler) {
-    httpHandler = handler;
+function setHTTPHandlers(newHttpHandler, newHttpsHandler) {
+    httpHandler = newHttpHandler;
+    httpsHandler = newHttpsHandler;
 }
 
 function httpHandlerSelector(request, response) {
     httpHandler(request, response);
+}
+
+function httpsHandlerSelector(request, response) {
+    httpsHandler(request, response);
 }
 
 function initialHandler(request, response) {
@@ -74,7 +80,5 @@ function listensDone() {
     dropPriviledges.drop();
 
     require('./lib/init')('frontend');
-    const main = require('./main');
-
-    main.init(httpServer, httpsServer, setHTTPHandler);
+    require('./main').init(httpServer, httpsServer, setHTTPHandlers);
 }

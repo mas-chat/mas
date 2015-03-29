@@ -36,7 +36,7 @@ const path = require('path'),
 
 const app = koa();
 
-exports.init = function(httpServer, httpsServer, setHttpHandler) {
+exports.init = function(httpServer, httpsServer, setHttpHandlers) {
     const httpPort = conf.get('frontend:http_port');
     const httpsPort = conf.get('frontend:https_port');
 
@@ -77,9 +77,21 @@ exports.init = function(httpServer, httpsServer, setHttpHandler) {
             socketController.setup(httpsServer);
 
             log.info(`MAS frontend https server started, https://localhost:${httpsPort}/`);
-        }
 
-        setHttpHandler(app.callback());
+            const forceSSLApp = koa();
+
+            // To keep things simple, force SSL is always activated if https is enabled
+            forceSSLApp.use(function*() {
+                /* jshint noyield:true */
+                this.response.status = 301;
+                this.response.redirect(
+                    'https://' + this.hostname + ':' + httpsPort + this.request.url);
+            });
+
+            setHttpHandlers(forceSSLApp.callback(), app.callback());
+        } else {
+            setHttpHandlers(app.callback(), null);
+        }
     })();
 
     if (conf.get('frontend:demo_mode') === true) {
