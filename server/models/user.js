@@ -73,8 +73,6 @@ User.prototype.save = function*() {
     if (this.data.nick) {
         let normalizedNick = this.data.nick.toLowerCase().trim();
         index[normalizedNick] = userId;
-    } else {
-        log.warn(userId, 'No nick is defined while saving User model.');
     }
 
     if (this.data.email) {
