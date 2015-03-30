@@ -1,16 +1,17 @@
-<li class="dropdown-header">Friends:</li>
+<li class="dropdown-header">Contacts:</li>
 
 {{#each friend in sortedFriends}}
     <li class="main-friend-item">
         <div class="main-friend-chat"><i class="fa fa-comments"></i></div>
         <div class="main-friend-name">{{friend.name}}</div>
-        <div class="main-friend-ago">{{timeSince friend.online friend.last}}</div>
-        <div class="main-friend-status">
-            {{#if friend.online}}
+        {{#if friend.online}}
+            <div class="main-friend-status">
                 <i class="online fa fa-circle"></i>
-            {{else}}
-                <i class="offline fa fa-circle-o"></i>
-            {{/if}}
-        </div>
+            </div>
+        {{else}}
+            <div class="main-friend-ago">
+                {{timeSince friend.online friend.last}}
+            </div>
+        {{/if}}
     </li>
 {{/each}}
