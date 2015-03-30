@@ -297,7 +297,7 @@ export default Ember.Component.extend(UploadMixin, {
 
     _addScrollHandler() {
         this.$messagePanel.on('scroll', function() {
-            Ember.run.throttle(this, function() {
+            Ember.run.debounce(this, function() {
                 if (this.get('animating') || this.get('scrolling')) {
                     return;
                 }
@@ -316,7 +316,7 @@ export default Ember.Component.extend(UploadMixin, {
 
                 this.set('content.deletedLine', false); // Hack
                 this._showImages();
-            }, 100);
+            }, 150);
         }.bind(this));
     },
 
