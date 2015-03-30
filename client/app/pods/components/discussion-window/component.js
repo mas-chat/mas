@@ -278,7 +278,10 @@ export default Ember.Component.extend(UploadMixin, {
             return;
         }
 
-        let duration = animate ? 1000 : 0;
+        // TBD: Animation running and Ember updating {{each}} doesn't seem to mix well
+        // Enable animation again when we have Glimmer.
+        //let duration = animate ? 1000 : 0;
+        let duration = 0;
 
         this.$('.window-messages-end').velocity('stop').velocity('scroll', {
             container: this.$messagePanel,
