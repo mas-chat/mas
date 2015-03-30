@@ -51,21 +51,7 @@ exports.create = function*(options) {
 
 exports.delete = function*(conversationId) {
     let conversation = yield get(conversationId);
-
-    yield redis.del(`conversation:${conversationId}`);
-
-    if (conversation.type === 'group') {
-        yield redis.hdel('index:conversation',
-            'group:' + conversation.network + ':' + conversation.name);
-    } else {
-        let userIds = Object.keys(conversation.members).sort();
-
-        yield redis.hdel('index:conversation',
-            '1on1:' + conversation.network + ':' + userIds[0] + ':' + userIds[1]);
-    }
-
-    yield conversation._removeAllMembers();
-    yield redis.del(`conversationmsgs:${conversationId}`);
+    yield conversation._remove();
 };
 
 exports.get = function*(conversationId) {
@@ -73,6 +59,8 @@ exports.get = function*(conversationId) {
 };
 
 exports.getAllIncludingUser = function*(userId) {
+    // conversationlist structure must be maintained. Getting this information from windowlist would
+    // work only for MAS users, not for external (IRC) users
     let conversations = [];
     let conversationIds = (yield redis.smembers(`conversationlist:${userId}`)) || [];
 
@@ -242,7 +230,7 @@ Conversation.prototype.remove1on1Member = function*(userId) {
     // First user that quits 1on1 is 'soft' removed, i.e. marked as having 'd'(etached) role
     yield this._setMember(userId, 'd');
 
-    let peerUserId = yield this.getPeerUserId(this, userId);
+    let peerUserId = yield this.getPeerUserId(userId);
 
     if (this.members[peerUserId] === 'd') {
         yield this._remove();
