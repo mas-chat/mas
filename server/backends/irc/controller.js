@@ -746,6 +746,8 @@ function *handleQuit(userId, msg) {
         // TBD: Send a real quit message instead of part
         let conversation = yield conversationFactory.get(conversationId);
 
+        assert(conversation);
+
         if (conversation.network === msg.network && conversation.type === 'group') {
             // No need to check if the targetUser is on this channel,
             // removeGroupMember() is clever enough
