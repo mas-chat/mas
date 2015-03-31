@@ -346,9 +346,15 @@ export default Ember.Component.extend(UploadMixin, {
 
             if (pos + placeHolderHeight >= 0 && pos <= panelHeight) {
                 $img.attr('src', $img.data('src'));
-                $img.one('load error', function() {
+
+                $img.one('load', function() {
                     $img.removeClass('loader loader-small-dark');
                     $img.removeAttr('data-src');
+                    that._goToBottom(true);
+                });
+
+                $img.one('error', function() {
+                    $img.hide();
                     that._goToBottom(true);
                 });
 
