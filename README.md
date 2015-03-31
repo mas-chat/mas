@@ -31,7 +31,7 @@ MacOS/Linux/Windows.
 
 1. Install Redis and latest release of io.js
 
-   On Mac to get redis you can install [Homebrew](http://brew.sh/) and then do ```brew install redis```
+   On Mac to get redis and io.js you can install [Homebrew](http://brew.sh/) and then do ```brew install iojs redis```
 
 2. Create the configuration file. You don't need to edit it, default options should work.
 
