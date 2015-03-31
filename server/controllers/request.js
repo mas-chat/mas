@@ -200,6 +200,14 @@ function *handleUpdate(params) {
     ];
 
     let oldValues = yield redis.hgetall(`window:${params.userId}:${params.windowId}`);
+
+    if (!oldValues) {
+        log.warn(params.userId,
+            'handleUpdate(): Client tried to update non-existent window, id: ' + params.windowId +
+            ', command:' + params.command);
+        return;
+    }
+
     let update = false;
 
     for (let parameter of accepted) {
