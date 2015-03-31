@@ -220,7 +220,7 @@ Close window.
 {
   "id": "CLOSE",
 
-   "window": 1
+   "windowId": 1
 }
 ```
 
