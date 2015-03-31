@@ -62,6 +62,10 @@ export default Ember.Component.extend(UploadMixin, {
     }.observes('visible'),
 
     lineAdded: function() {
+        // Prevents _addScrollHandler to make faulty conclusion. We need to scroll and we we will
+        // after debounce kicks in.
+        this.set('scrolling', true);
+
         Ember.run.debounce(this, function() {
             let initialAddition = this.get('initialAddition');
 
