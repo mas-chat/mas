@@ -41,7 +41,7 @@
         <div {{bind-attr class=":window-members logModeEnabled:hidden content.minimizedNamesList::window-members-wide"}}>
             {{#each name in content.operatorNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=wavatar" />
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div {{bind-attr class=":member-name :window-operator content.minimizedNamesList:hidden"}}>
                         {{name.nick}}
                     </div>
@@ -49,7 +49,7 @@
             {{/each}}
             {{#each name in content.voiceNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=wavatar" />
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div {{bind-attr class=":member-name :window-voice content.minimizedNamesList:hidden"}}>
                         {{name.nick}}
                     </div>
@@ -57,7 +57,7 @@
             {{/each}}
             {{#each name in content.userNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=wavatar" />
+                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div {{bind-attr class=":member-name :window-user content.minimizedNamesList:hidden"}}>
                         {{name.nick}}
                     </div>
