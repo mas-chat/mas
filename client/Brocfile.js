@@ -8,6 +8,10 @@ var app = new EmberApp({
     lessOptions: {
         paths: [ 'bower_components' ]
     },
+    autoprefixer: {
+        browsers: ['last 2 versions'],
+        cascade: false
+    },
     vendorFiles: {
         'handlebars.js': null // Hopefully temporary hack, see ember 1.10 release blog post.
     }
