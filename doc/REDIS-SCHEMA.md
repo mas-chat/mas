@@ -89,7 +89,7 @@ MAS Redis structures
    <conversationId1>, <conversationId2>
 
  conversationmembers:<conversationId> (hash)
-   <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user), 'd' (detached, only for MAS 1on1s))
+   <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user)
    ...
 
  conversationlist:<userId> (set)
