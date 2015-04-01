@@ -73,7 +73,7 @@
             {{input placeholder="Write here…" class="form-control" valueBinding="newMessage"}}
             {{#if content.scrollLock}}
                 {{#if content.newMessagesCount}}
-                    <div class="window-new-messages">
+                    <div {{action "jumpToBottom"}} class="window-new-messages">
                         <span class="fa fa-chevron-down"></span> New messages
                     </div>
                 {{/if}}

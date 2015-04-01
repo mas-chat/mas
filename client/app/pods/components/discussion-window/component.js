@@ -62,9 +62,11 @@ export default Ember.Component.extend(UploadMixin, {
     }.observes('visible'),
 
     lineAdded: function() {
-        // Prevents _addScrollHandler to make faulty conclusion. We need to scroll and we we will
-        // after debounce kicks in.
-        this.set('scrolling', true);
+        if (!this.get('content.scrollLock')) {
+            // Prevents _addScrollHandler to make faulty conclusion.
+            // We need to scroll and we we will after debounce kicks in.
+            this.set('scrolling', true);
+        }
 
         Ember.run.debounce(this, function() {
             let initialAddition = this.get('initialAddition');
@@ -158,6 +160,11 @@ export default Ember.Component.extend(UploadMixin, {
 
         menu(operation) {
             this.sendAction('menuAction', operation, this.content);
+        },
+
+        jumpToBottom() {
+            this.set('content.scrollLock', false);
+            this._goToBottom(true);
         }
     },
 
@@ -284,8 +291,7 @@ export default Ember.Component.extend(UploadMixin, {
 
         // TBD: Animation running and Ember updating {{each}} doesn't seem to mix well
         // Enable animation again when we have Glimmer.
-        //let duration = animate ? 1000 : 0;
-        let duration = 0;
+        let duration = animate ? 200 : 0;
 
         this.$('.window-messages-end').velocity('stop').velocity('scroll', {
             container: this.$messagePanel,
