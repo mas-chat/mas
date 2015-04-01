@@ -130,7 +130,7 @@ Conversation.prototype.set1on1Members = function*(userId, peerUserId) {
     let userHash = {};
 
     userHash[userId] = 'u';
-    userHash[peerUserId] = 'd';
+    userHash[peerUserId] = 'u';
 
     yield this._insertMembers(userHash);
 
@@ -225,16 +225,14 @@ Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKic
 };
 
 Conversation.prototype.remove1on1Member = function*(userId) {
+    /* jshint noyield:true */
     assert(this.members[userId]);
 
-    // First user that quits 1on1 is 'soft' removed, i.e. marked as having 'd'(etached) role
-    yield this._setMember(userId, 'd');
-
-    let peerUserId = yield this.getPeerUserId(userId);
-
-    if (this.members[peerUserId] === 'd') {
-        yield this._remove();
-    }
+    // No clean-up is currently needed. 1on1 discussions are never deleted. Group discussions
+    // are deleted when the last member parts. This makes sense as groups are then totally reseted
+    // when they become empty (TBD: except elasticsearch contains orphan logs). Never deleting
+    // 1on1 conversations makes log searching from elasticsearch possible. TBD: On the other hand
+    // dead 1on1s start to pile eventually on Redis.
 };
 
 Conversation.prototype.isMember = function*(userId) {
@@ -379,18 +377,8 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
         let windowId = yield window.findByConversationId(userId, this.conversationId);
 
         if (!windowId && this.type === '1on1') {
-            // The case where one of the 1on1 members has closed his window and has 'd' role
-            let role = yield this.getMemberRole(userId);
-
-            if (role !== 'd') {
-                log.warn(userId, 'Strange role: ' + role + ' while delivering 1on1 message, ' +
-                    'conversationId: ' + this.conversationId);
-                continue;
-            }
-
-            //assert((yield this.getMemberRole(userId)) === 'd');
+            // The case where one of the 1on1 members has closed his window
             windowId = yield window.create(userId, this.conversationId);
-            yield this.setMemberRole(userId, 'u');
         }
 
         msg.windowId = parseInt(windowId);

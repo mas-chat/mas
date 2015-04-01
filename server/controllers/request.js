@@ -320,9 +320,11 @@ function *handleChat(params) {
     if (conversation) {
         assert(conversation.members[userId]);
 
-        if (conversation.members[userId] !== 'd') {
+        let existingWindow = yield window.findByConversationId(userId, conversation.conversationId);
+
+        if (existingWindow) {
             yield respondError('CHAT_RESP', userId, params.sessionId,
-                'You are already chatting with this person.');
+                '1on1 chat window with this person is already open.');
             return;
         } else {
             yield window.create(userId, conversation.conversationId);
