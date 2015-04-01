@@ -380,7 +380,15 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
 
         if (!windowId && this.type === '1on1') {
             // The case where one of the 1on1 members has closed his window and has 'd' role
-            assert((yield this.getMemberRole(userId)) === 'd');
+            let role = yield this.getMemberRole(userId);
+
+            if (role !== 'd') {
+                log.warn(userId, 'Strange role: ' + role + ' while delivering 1on1 message, ' +
+                    'conversationId: ' + this.conversationId);
+                continue;
+            }
+
+            //assert((yield this.getMemberRole(userId)) === 'd');
             windowId = yield window.create(userId, this.conversationId);
             yield this.setMemberRole(userId, 'u');
         }
