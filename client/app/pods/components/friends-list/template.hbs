@@ -2,7 +2,7 @@
 
 {{#each friend in sortedFriends}}
     <li class="main-friend-item">
-        <div class="main-friend-chat"><i class="fa fa-comments"></i></div>
+        <div class="main-friend-chat">{{! <i class="fa fa-comments"></i> }}</div>
         <div class="main-friend-name">{{friend.name}}</div>
         {{#if friend.online}}
             <div class="main-friend-status">
