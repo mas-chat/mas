@@ -89,7 +89,7 @@ The server will send all buffered 'ntf' events if the resume is successful. Clie
     "secret": "O1BgcLMBBEFC2etpjsRo",
     "clientName": "my_client_app",
     "clientOS": "android",
-    "version": 1,
+    "version": "1.0",
     "cachedUpto": 3763453
 }
 ```
