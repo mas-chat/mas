@@ -272,11 +272,6 @@
         & > * {
             cursor: default;
             padding: 1px 5px;
-
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
         }
 
@@ -358,7 +353,7 @@
             color: blue;
         }
 
-        input:focus::-moz-placeholder, input:focus::-webkit-input-placeholder, input:focus:-ms-input-placeholder {
+        input:focus::placeholder {
             color:transparent;
         }
 
