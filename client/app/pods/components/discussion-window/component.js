@@ -82,7 +82,7 @@ export default Ember.Component.extend(UploadMixin, {
             Ember.run.scheduleOnce('afterRender', this, function() {
                 this._goToBottom(!initialAddition);
             });
-        }, 200);
+        }, 300); // This should be more than duration of goToBottom() scrolling animation
 
         if (!this.get('visible') || this.get('content.scrollLock')) {
             this.incrementProperty('content.newMessagesCount');
@@ -289,8 +289,8 @@ export default Ember.Component.extend(UploadMixin, {
             return;
         }
 
-        // TBD: Animation running and Ember updating {{each}} doesn't seem to mix well
-        // Enable animation again when we have Glimmer.
+        // TBD: Animation running and Ember updating {{each}} doesn't always seem to mix well
+        // Maybe glimmer fixes that.
         let duration = animate ? 200 : 0;
 
         this.$('.window-messages-end').velocity('stop').velocity('scroll', {
@@ -318,7 +318,10 @@ export default Ember.Component.extend(UploadMixin, {
                 let $panel = this.$messagePanel;
                 let scrollPos = $panel.scrollTop();
 
-                if (scrollPos + $panel.innerHeight() >= $panel.prop('scrollHeight')) {
+                // User doesn't need to scroll exactly to the end.
+                let bottomTreshhold = $panel.prop('scrollHeight') - 5;
+
+                if (scrollPos + $panel.innerHeight() >= bottomTreshhold) {
                     this.set('content.scrollLock', false);
                     this.set('content.newMessagesCount', 0);
                     Ember.Logger.info('scrollock off');
