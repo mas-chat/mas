@@ -22,5 +22,11 @@ export default Ember.Component.extend({
     sortProperties: [ 'online:desc', 'last:desc', 'name' ],
     sortAscending: false,
 
-    sortedFriends: Ember.computed.sort('friends', 'sortProperties')
+    sortedFriends: Ember.computed.sort('friends', 'sortProperties'),
+
+    actions: {
+        startChat(userId) {
+            this.sendAction('windowAction', 'chat', null, userId);
+        }
+    }
 });
