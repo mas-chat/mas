@@ -5,7 +5,7 @@
 </div>
 
 {{#each window in model}}
-    {{discussion-window selectedDesktop=desktop content=window action="windowAction" menuAction="menuAction" relayout="relayout" dragWindowStart="dragWindowStart"}}
+    {{discussion-window selectedDesktop=activeDesktop content=window action="windowAction" menuAction="menuAction" relayout="relayout" dragWindowStart="dragWindowStart"}}
 {{else}}
     <div class="flex-grow-row flex-1 flex-align-center">
         {{#if initDone}}

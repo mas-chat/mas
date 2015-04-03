@@ -1,15 +1,8 @@
-{{window-grid model=this desktop=desktop menuAction="menuAction" windowAction="windowAction" dragActiveAction="dragActiveAction"}}
+{{window-grid model=this activeDesktop=activeDesktop menuAction="menuAction" windowAction="windowAction" dragActiveAction="dragActiveAction"}}
 
 <div class="sidebar flex-grow-column">
     <div class="upper-sidebar flex-1">
-        {{desktop-switcher desktops=desktops action="switchDesktop" activeDraggedWindow=activeDraggedWindow}}
-
-        {{#each window in sortedHiddenWindows}}
-            <div class="main-hidden-window-container" {{action "show" window}}>
-                <div class="main-badge">{{window.newMessagesCount}}</div>
-                <div class="main-short-name">{{window.simplifiedName}}</div>
-            </div>
-        {{/each}}
+        {{desktop-switcher desktops=desktops action="switchDesktop" activeDraggedWindow=activeDraggedWindow selected=activeDesktop newMessagesOnDesktops=newMessagesOnDesktops}}
     </div>
 
     <div class="lower-sidebar">

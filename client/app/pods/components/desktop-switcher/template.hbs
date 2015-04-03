@@ -1,7 +1,7 @@
-{{#each alphabeticalDesktops as |desktop index|}}
-    {{desktop-button action=switch index=index desktop=desktop activeDraggedWindow=activeDraggedWindow selected=selected}}
+{{#each desktops as |desktop|}}
+    {{desktop-button action="switch" id=desktop.id name=desktop.initials activeDraggedWindow=activeDraggedWindow selected=selected messages=desktop.messages}}
 {{/each}}
 
 {{#if activeDraggedWindow}}
-    <div data-index="new" class="main-desktop-droparea main-desktop-button"><i class="fa fa-plus"></i></div>
+    <div data-id="new" class="main-desktop-droparea main-desktop-button"><i class="fa fa-plus"></i></div>
 {{/if}}

@@ -44,8 +44,7 @@ export default Ember.Object.extend({
     column: 0,
     desktop: 0,
 
-    visible: false,
-    timeHidden: null,
+    visible: true,
     messages: null,
 
     newMessagesCount: 0,
@@ -134,10 +133,10 @@ export default Ember.Object.extend({
                 windowId: this.get('windowId'),
                 row: this.get('row'),
                 column: this.get('column'),
-                visible: this.get('visible')
+                desktop: this.get('desktop')
             });
         }
-    }.observes('visible', 'row', 'column'),
+    }.observes('desktop', 'row', 'column'),
 
     syncServerAlerts: function() {
         this.get('socket').send({

@@ -49,15 +49,24 @@ export default Ember.Component.extend(UploadMixin, {
     selectedDesktop: 0,
 
     visible: function() {
-        return this.get('content.visible') &&
-            this.get('selectedDesktop') === this.get('content.desktop');
-    }.property('selectedDesktop', 'desktop', 'content.visible'),
+        return this.get('selectedDesktop') === this.get('content.desktop');
+    }.property('selectedDesktop', 'content.desktop'),
 
     windowChanged: function() {
         this.sendAction('relayout', { animate: true });
-    }.observes('content.visible', 'row', 'column', 'desktop'),
+    }.observes('row', 'column', 'desktop'),
 
     visibilityChanged: function() {
+        if (this.get('visible')) {
+            this.set('content.newMessagesCount', 0);
+
+            // Hidden div can't be scrolled so the scrolling in the linedAdded() observer
+            // hasn't worked if new messages arrived to this window while it was hidden.
+            Ember.run.scheduleOnce('afterRender', this, function() {
+                this._goToBottom(false);
+            });
+        }
+
         this.sendAction('relayout', { animate: false });
     }.observes('visible'),
 
@@ -84,7 +93,8 @@ export default Ember.Component.extend(UploadMixin, {
             });
         }, 300); // This should be more than duration of goToBottom() scrolling animation
 
-        if (!this.get('visible') || this.get('content.scrollLock')) {
+        if ((!this.get('visible') || this.get('content.scrollLock')) &&
+            !this.get('initialAddition')) {
             this.incrementProperty('content.newMessagesCount');
         }
 
@@ -128,11 +138,6 @@ export default Ember.Component.extend(UploadMixin, {
         compress() {
             this.set('expanded', false);
             this.sendAction('relayout', { animate: true });
-        },
-
-        hide() {
-            this.set('content.visible', false);
-            this.set('content.timeHidden', Date.now());
         },
 
         browse() {
@@ -323,7 +328,6 @@ export default Ember.Component.extend(UploadMixin, {
 
                 if (scrollPos + $panel.innerHeight() >= bottomTreshhold) {
                     this.set('content.scrollLock', false);
-                    this.set('content.newMessagesCount', 0);
                     Ember.Logger.info('scrollock off');
                 } else if (!this.get('content.deletedLine')) {
                     this.set('content.scrollLock', true);

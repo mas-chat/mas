@@ -26,12 +26,12 @@ export default Ember.Component.extend({
     }.property('activeDraggedWindow'),
 
     selectedCSSClass: function() {
-        return (this.get('index') === this.get('selected')) ? 'main-desktop-button-selected' : '';
-    }.property('selected'),
+        return (this.get('id') === this.get('selected')) ? 'main-desktop-button-selected' : '';
+    }.property('selected', 'id'),
 
     actions: {
         switch() {
-            this.sendAction('action', this.get('index'));
+            this.sendAction('action', this.get('id'));
         }
     },
 });

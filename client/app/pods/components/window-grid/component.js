@@ -28,7 +28,7 @@ export default Ember.Component.extend({
     dimensions: null,
     cursor: {},
     movingWindow: null,
-    desktop: 0,
+    activeDesktop: 0,
 
     store: Ember.inject.service(),
     socket: Ember.inject.service(),
@@ -188,7 +188,7 @@ export default Ember.Component.extend({
         }
 
         let windows = el.querySelectorAll(
-            '.window.visible[data-desktop=\'' + this.get('desktop') + '\']');
+            '.window.visible[data-desktop=\'' + this.get('activeDesktop') + '\']');
 
         let rowNumbers = _.uniq(_.map(windows,
             function(element) { return parseInt(element.getAttribute('data-row')); })).sort();

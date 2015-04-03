@@ -22,21 +22,14 @@ import Ember from 'ember';
 
 export default Ember.ArrayController.extend({
     friends: null,
-    desktop: 0,
+    activeDesktop: null,
+    desktopHasBeenSwitched: false,
     activeDraggedWindow: false,
 
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
     actions: {
-        show(window) {
-            window.set('visible', true);
-
-            if (!window.get('scrollLock')) {
-                window.set('newMessagesCount', 0);
-            }
-        },
-
         logout() {
             this.get('socket').send({ id: 'LOGOUT' }, function() {
                 $.removeCookie('auth', { path: '/' });
@@ -60,7 +53,8 @@ export default Ember.ArrayController.extend({
         },
 
         switchDesktop(desktop) {
-            this.set('desktop', desktop);
+            this.set('desktopHasBeenSwitched', true);
+            this.set('activeDesktop', desktop);
         },
 
         dragActiveAction(value) {
@@ -68,21 +62,54 @@ export default Ember.ArrayController.extend({
         }
     },
 
-    sortedHiddenWindows: function() {
-        let desktop = this.get('desktop');
-
-        return this.get('model').filter(function(val) {
-            return !val.get('visible') && val.get('desktop') === desktop;
-        }).sortBy('timeHidden');
-    }.property('model.@each.visible', 'desktop'),
-
     friendsOnline: function() {
         return this.get('friends').filterBy('online', true).length;
     }.property('friends.@each.online'),
 
     desktops: function() {
-        return this.get('model').mapBy('desktop').uniq();
-    }.property('model.@each.desktop'),
+        let desktops = {};
+        let desktopsArray = Ember.A([]);
+
+        this.get('model').forEach(function(masWindow) {
+            let newMessages = masWindow.get('newMessagesCount');
+            let desktop = masWindow.get('desktop');
+            let initials = masWindow.get('simplifiedName').substr(0, 2).toUpperCase();
+
+            if (desktops[desktop]) {
+                desktops[desktop].messages += newMessages;
+            } else {
+                desktops[desktop] = { messages: newMessages, initials: initials };
+            }
+        });
+
+        Object.keys(desktops).forEach(function(desktop) {
+            desktopsArray.push({
+                id: parseInt(desktop),
+                initials: desktops[desktop].initials,
+                messages: desktops[desktop].messages
+            });
+        });
+
+        return desktopsArray;
+    }.property('model.@each.desktop', 'model.@each.newMessagesCount'),
+
+    deletedDesktopCheck: function() {
+        let desktopIds = this.get('desktops').map(d => d.id);
+
+        if (desktopIds.indexOf(this.get('activeDesktop')) === -1) {
+            this.set('activeDesktop', this._oldestDesktop());
+        }
+    }.observes('desktops.@each'),
+
+    setIntialActiveDesktop: function() {
+        if (!this.get('desktopHasBeenSwitched')) {
+            this.set('activeDesktop', this._oldestDesktop());
+        }
+    }.observes('desktops.@each'),
+
+    _oldestDesktop() {
+        return this.get('desktops').map(d => d.id).sort()[0];
+    },
 
     _handleSendMessage(window, text) {
         let messageRecord = this.get('container').lookup('model:message');

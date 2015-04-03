@@ -24,16 +24,6 @@ export default Ember.Component.extend({
     activeDraggedWindow: true,
     selected: 0,
 
-    alphabeticalDesktops: function() {
-        let desktops = Ember.A([]);
-
-        for (let i = 0; i < this.get('desktops').length; i++) {
-            desktops.push(this._numberToLetter(i));
-        }
-
-        return desktops;
-    }.property('desktops.@each'),
-
     actions: {
         switch(desktop) {
             this.sendAction('action', desktop);
@@ -50,17 +40,9 @@ export default Ember.Component.extend({
             return;
         }
 
-        let index = $(event.target).closest('div').data('index');
-        index = index === 'new' ? 'new' : parseInt(index);
+        let id = $(event.target).closest('div').data('id');
 
-        if (index === 'new') {
-            draggedWindow.set('desktop', this.get('desktops').length);
-        } else if (!isNaN(index)) {
-            draggedWindow.set('desktop', index);
-        }
-    },
-
-    _numberToLetter: function(number) {
-        return String.fromCharCode(65 + number); // 65 is ASCII 'A'
+        draggedWindow.set('desktop',
+            id === 'new' ? Math.floor(new Date() / 1000) : parseInt(id));
     }
 });
