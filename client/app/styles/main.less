@@ -149,7 +149,7 @@
 
 .upper-sidebar {
     overflow-y: auto;
-    overflow-x: hidden;
+    width: 100%;
 }
 
 .lower-sidebar {
@@ -272,6 +272,7 @@
 }
 
 .main-desktop-button {
+    position: relative;
     height: 27px;
     width: 27px;
     background-color: #1AA8B7;
@@ -283,6 +284,25 @@
     margin-right: auto;
     cursor: pointer;
     z-index: 1;
+    user-select: none;
+}
+
+.main-desktop-button[data-badge]:after {
+    content: attr(data-badge);
+    position: absolute;
+    bottom: -4px;
+    right: -5px;
+    font-size: .7em;
+    background: #d45b53;
+    color: white;
+    width: 16px;
+    height: 12px;
+    text-align: center;
+    line-height: 12px;
+}
+
+.main-desktop-button[data-badge="0"]:after {
+   display: none;
 }
 
 .main-desktop-button-selected {
