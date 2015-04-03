@@ -6,7 +6,6 @@
     <div>
         {{#unless logModeEnabled}}
             <i class="window-title-button fa fa-arrows"></i>
-            <i {{action "hide"}} class="window-title-button fa fa-minus"></i>
             {{#if expanded}}
                 <i {{action "compress"}} class="window-title-button fa fa-compress"></i>
             {{else}}
