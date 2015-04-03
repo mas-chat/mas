@@ -26,7 +26,7 @@ export default Ember.Component.extend({
     classNames: [ 'grid', 'flex-1', 'flex-grow-column' ],
 
     dimensions: null,
-    cursor: null,
+    cursor: {},
     movingWindow: null,
     desktop: 0,
 
@@ -77,6 +77,8 @@ export default Ember.Component.extend({
         let that = this;
         this.movingWindow = discussionWindow;
 
+        this.sendAction('dragActiveAction', discussionWindow);
+
         this.movingWindow.$().addClass('moving').css('z-index', 200);
         $('#window-cursor').show();
 
@@ -96,9 +98,8 @@ export default Ember.Component.extend({
             event.preventDefault();
         }
 
-        function handleDragEnd(event) {
+        function handleDragEnd() {
             that._dragWindowEnd();
-            event.preventDefault();
 
             document.removeEventListener('mousemove', handleDragMove, false);
             document.removeEventListener('mouseup', handleDragEnd, false);
@@ -111,11 +112,12 @@ export default Ember.Component.extend({
     _dragWindow(event) {
         let cursor = this._calculateCursorPosition(event);
 
-        if (!cursor) {
+        if (cursor.x === null && this.cursor.x === null) {
+            // Still outside of grid
             return;
         }
 
-        if (!this.cursor || this.cursor.x !== cursor.x || this.cursor.y !== cursor.y ||
+        if (this.cursor.x !== cursor.x || this.cursor.y !== cursor.y ||
             (cursor.section !== 'middle' && cursor.section !== this.cursor.section)) {
             this.cursor = cursor;
 
@@ -134,9 +136,15 @@ export default Ember.Component.extend({
     _dragWindowEnd() {
         let cursor = this.cursor;
 
+        this.sendAction('dragActiveAction', false);
+
         this.movingWindow.$().removeClass('moving').css('z-index', '');
         $('#window-cursor').hide();
         $('.blocker').hide();
+
+        if (this.cursor.x === null) {
+            return;
+        }
 
         this.dimensions.forEach(function(row, rowIndex) {
             row.forEach(function(masWindow, columnIndex) {
@@ -239,6 +247,13 @@ export default Ember.Component.extend({
     },
 
     _drawCursor(cursor) {
+        if (cursor.x === null) {
+           $('#window-cursor').hide();
+           return;
+        } else {
+            $('#window-cursor').show();
+        }
+
         let container = this._containerDimensions();
         let cursorPos = {};
         let cursorWindow = this.dimensions[cursor.y][cursor.x];
@@ -358,12 +373,18 @@ export default Ember.Component.extend({
     },
 
     _calculateCursorPosition(event) {
+        const outOfBoundsCursor = { x: null, y: null, section: null };
+
         let x = event.clientX;
         let y = event.clientY;
 
         let windowX = 0;
         let windowY = 0;
         let masWindow;
+
+        if (this._containerDimensions().width < x) {
+            return outOfBoundsCursor;
+        }
 
         this.dimensions.forEach(function(row, index) {
             if (row[0].top < y) {
@@ -379,7 +400,7 @@ export default Ember.Component.extend({
         });
 
         if (!masWindow) {
-            return null;
+            return outOfBoundsCursor;
         } else {
             return {
                 x: windowX,

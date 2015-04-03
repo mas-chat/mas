@@ -21,8 +21,8 @@ import Ember from 'ember';
 export default Ember.Component.extend({
     classNames: [ 'main-desktop-switcher' ],
 
+    activeDraggedWindow: true,
     selected: 0,
-    $pointer: null,
 
     alphabeticalDesktops: function() {
         let desktops = Ember.A([]);
@@ -34,38 +34,30 @@ export default Ember.Component.extend({
         return desktops;
     }.property('desktops.@each'),
 
-    updatePointer: function() {
-        Ember.run.scheduleOnce('afterRender', this, function() {
-            this.movePointer(true);
-        });
-    }.observes('alphabeticalDesktops.@each', 'selected'),
-
     actions: {
         switch(desktop) {
-            this.set('selected', desktop);
             this.sendAction('action', desktop);
         }
     },
 
-    didInsertElement() {
-        this.$pointer = this.$('.main-desktop-button-selected-rectangle');
-        this.movePointer(true);
-    },
+    mouseUp(event) {
+        // There's a second mouseup handler in window-grid component. That handler manages
+        // activeDraggedWindow property. This setup should still be safe because mouseup event
+        // bubble first here and then in window-grid. Thus no race condition.
+        let draggedWindow = this.get('activeDraggedWindow');
 
-    movePointer(animate) {
-        let pos = this.$('[data-desktop="' + this.selected + '"]').offset();
-
-        if (!pos) {
+        if (!draggedWindow) {
             return;
         }
 
-        this.$pointer.velocity('stop').velocity({
-            top: pos.top - 2,
-            left: pos.left - 2
-        }, {
-            duration: animate ? 400 : 0,
-            visibility: 'visible'
-        });
+        let index = $(event.target).closest('div').data('index');
+        index = index === 'new' ? 'new' : parseInt(index);
+
+        if (index === 'new') {
+            draggedWindow.set('desktop', this.get('desktops').length);
+        } else if (!isNaN(index)) {
+            draggedWindow.set('desktop', index);
+        }
     },
 
     _numberToLetter: function(number) {

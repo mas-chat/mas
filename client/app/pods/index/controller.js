@@ -23,6 +23,7 @@ import Ember from 'ember';
 export default Ember.ArrayController.extend({
     friends: null,
     desktop: 0,
+    activeDraggedWindow: false,
 
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
@@ -60,6 +61,10 @@ export default Ember.ArrayController.extend({
 
         switchDesktop(desktop) {
             this.set('desktop', desktop);
+        },
+
+        dragActiveAction(value) {
+            this.set('activeDraggedWindow', value);
         }
     },
 
