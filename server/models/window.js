@@ -43,6 +43,23 @@ exports.remove = function*(userId, windowId) {
     yield remove(userId, windowId);
 };
 
+exports.isValidDesktop = function *(userId, desktop) {
+    let windows = yield redis.smembers(`windowlist:${userId}`);
+    let found = false;
+
+    for (let windowId of windows) {
+        // TBD: Too many redis calls, re-factor to lua later.
+        let existingDesktop = yield redis.hget(`window:${userId}:${windowId}`, 'desktop');
+
+        if (parseInt(existingDesktop) === desktop) {
+            found = true;
+            break;
+        }
+    }
+
+    return found;
+};
+
 exports.removeByConversationId = function*(userId, conversationId) {
     let windows = yield redis.smembers(`windowlist:${userId}`);
 

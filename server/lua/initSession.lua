@@ -59,13 +59,6 @@ redis.call('LPUSH', outbox, cjson.encode({
     ['sessionId'] = sessionId
 }))
 
-local settings = hgetall('settings:' .. userId)
-
-redis.call('LPUSH', outbox, cjson.encode({
-    ['id'] = 'SET',
-    ['settings'] = settings
-}))
-
 -- Iterate through windows
 local windowIds = redis.call('SMEMBERS', 'windowlist:' .. userId)
 local allUsers = {}
@@ -143,6 +136,16 @@ for i = 1, #windowIds do
         seenUser(command.userId)
     end
 end
+
+-- Send settings
+local settings = hgetall('settings:' .. userId)
+
+redis.call('LPUSH', outbox, cjson.encode({
+    ['id'] = 'SET',
+    ['settings'] = {
+        ['activeDesktop'] = tonumber(settings.activeDesktop)
+    }
+}))
 
 -- Prepend the USERS command so client gets it first
 local userIdList = {}

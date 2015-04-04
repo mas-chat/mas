@@ -449,20 +449,20 @@ Remove one or more users from window participant list.
 
 ### SET
 
-Update settings.
+Update settings and application wide parameters
 
 ```JSON
 {
   "id": "SET",
 
   "settings": {
-    "largeFonts": "0",
-    "showFriendBar": "1",
-    "firstTime": "0",
-    "loggingEnabled": "0"
+    "activeDesktop": 1428135577
   }
 }
 ```
+
+Currently only valid setting is ```activeDesktop```. Client must switch to this desktop when it
+receives the notification.
 
 ### UPDATE
 
@@ -633,7 +633,23 @@ End session immediately
 
 ### SET
 
+```
+{
+  "id": "SET",
+  "settings": {
+    "activeDesktop": 48829213
+  }
+}
+```
+
 ### SET_RESP
+
+```
+{
+  "id": "SET_RESP"
+  "status": "OK"
+}
+```
 
 ### ADDF
 

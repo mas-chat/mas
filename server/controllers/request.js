@@ -298,9 +298,15 @@ function *handleSet(params) {
             break;
         }
 
-        // TBD: Add switch case here when there are multiple settings
+        // TBD: Re-factor when there are multiple settings
         if (!isNaN(value)) {
-            yield redis.hset(`settings:${params.userId}`, 'activeDesktop', properties[prop]);
+            if (yield window.isValidDesktop(params.userId, value)) {
+                yield redis.hset(`settings:${params.userId}`, 'activeDesktop', properties[prop]);
+            } else {
+                yield respondError('SET_RESP', params.userId, params.sessionId,
+                    `Desktop '${value}' doesn't exist`);
+                error = true;
+            }
         }
     }
 

@@ -217,6 +217,16 @@ export default Ember.Object.extend({
         this.get('store.networks').pushObjects(data.networks);
     },
 
+    _handleSet(data) {
+        if (!data.settings) {
+            return;
+        }
+
+        if (typeof(data.settings.activeDesktop) !== 'undefined') {
+            this.set('store.activeDesktop', data.settings.activeDesktop);
+        }
+    },
+
     _removeUser(userId, targetWindow) {
         targetWindow.operators.removeObject(userId);
         targetWindow.voices.removeObject(userId);

@@ -22,7 +22,10 @@ import Users from '../helpers/users';
 export default Ember.Service.extend({
     friends: null,
     users: null,
+
     windows: null,
+    activeDesktop: null,
+
     alerts: null,
     networks: null,
 

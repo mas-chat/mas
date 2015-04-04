@@ -22,12 +22,12 @@ import Ember from 'ember';
 
 export default Ember.ArrayController.extend({
     friends: null,
-    activeDesktop: null,
-    desktopHasBeenSwitched: false,
     activeDraggedWindow: false,
 
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
+
+    activeDesktop: Ember.computed.alias('store.activeDesktop'),
 
     actions: {
         logout() {
@@ -53,7 +53,6 @@ export default Ember.ArrayController.extend({
         },
 
         switchDesktop(desktop) {
-            this.set('desktopHasBeenSwitched', true);
             this.set('activeDesktop', desktop);
         },
 
@@ -94,18 +93,16 @@ export default Ember.ArrayController.extend({
     }.property('model.@each.desktop', 'model.@each.newMessagesCount'),
 
     deletedDesktopCheck: function() {
+        if (!this.get('store.initDone')) {
+            return;
+        }
+
         let desktopIds = this.get('desktops').map(d => d.id);
 
         if (desktopIds.indexOf(this.get('activeDesktop')) === -1) {
             this.set('activeDesktop', this._oldestDesktop());
         }
-    }.observes('desktops.@each'),
-
-    setIntialActiveDesktop: function() {
-        if (!this.get('desktopHasBeenSwitched')) {
-            this.set('activeDesktop', this._oldestDesktop());
-        }
-    }.observes('desktops.@each'),
+    }.observes('desktops.@each', 'store.initDone'),
 
     updateActiveDesktop: function() {
         this.get('socket').send({
