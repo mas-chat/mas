@@ -870,11 +870,11 @@ function *handleMode(userId, msg) {
             let newClass = null;
             let targetUserId = null;
 
-            if (mode.match(/[klbeIOov]/)) {
+            if (mode.match(/[klbeIOovq]/)) {
                 param = modeParams.shift();
 
                 if (!param) {
-                    log.warn(userId, 'Received broken MODE command');
+                    log.warn(userId, 'Received broken MODE command, parameter missing');
                     continue;
                 } else if (mode.match(/[ov]/)) {
                     targetUserId = yield ircUser.getUserId(param, msg.network);
