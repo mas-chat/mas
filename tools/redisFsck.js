@@ -23,6 +23,8 @@ const assert = require('assert'),
       redis = redisModule.createClient();
 
 const tests = [
+    desktopTest,
+    activeDesktopTest,
     conversationIndexTest,
     conversationIndexAccessTest,
     conversationMembersTest,
@@ -30,7 +32,8 @@ const tests = [
     oneOnOneHistoryTest,
     windowIndexTest,
     windowTest,
-    windowlistTest
+    windowlistTest,
+    friendsExistTest
 ];
 
 console.log(' *************************************************************************');
@@ -235,6 +238,68 @@ function *windowlistTest() {
     }
 
     printVerdict('windowlist', true);
+}
+
+function *friendsExistTest() {
+    let friendsKeys = yield redis.keys('friends:*');
+
+    for (let friendsKey of friendsKeys) {
+        let friends = yield redis.smembers(friendsKey);
+
+        for (let userId of friends) {
+            let exists = yield redis.exists(`user:${userId}`);
+
+            if (!exists) {
+                console.log(`${friendsKeys} has non-existing friend ${userId}`);
+            }
+        }
+    }
+
+    printVerdict('friends', true);
+}
+
+function *desktopTest() {
+    let windowKeys = yield redis.keys('window:*');
+
+    for (let windowKey of windowKeys) {
+        let masWindow = yield redis.hgetall(windowKey);
+
+        if (masWindow.desktop !== null && isNaN(masWindow.desktop)) {
+            console.log(`Fixing invalid window.desktop for ${windowKey}`);
+            yield redis.hset(windowKey, 'desktop', 0);
+        }
+    }
+
+    printVerdict('window.desktop', true);
+}
+
+function *activeDesktopTest() {
+    let settingsKeys = yield redis.keys('settings:*');
+
+    for (let settingsKey of settingsKeys) {
+        let activeDesktop = yield redis.hget(settingsKey, 'activeDesktop');
+
+        if (activeDesktop !== null) {
+            let userId = settingsKey.split(':')[1];
+            let windowKeys = yield redis.keys(`window:${userId}:*`);
+            let found = false;
+
+            for (let windowKey of windowKeys) {
+                let desktop = yield redis.hget(windowKey, 'desktop');
+
+                if (desktop === activeDesktop) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                console.log('ERROR: found invalid activeDesktop setting');
+            }
+        }
+    }
+
+    printVerdict('settings.activeDesktop', true);
 }
 
 function printVerdict(desc, passed) {
