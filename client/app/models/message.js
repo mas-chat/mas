@@ -107,7 +107,7 @@ export default Ember.Object.extend({
                 visibleLink = this._escHtml(urlObj.readable(), false);
             }
 
-            textParts.push('<a href="' + url + '" target="_newtab">' + visibleLink + '</a>');
+            textParts.push('<a href="' + url + '" target="_blank">' + visibleLink + '</a>');
             pos = end;
 
             return url;

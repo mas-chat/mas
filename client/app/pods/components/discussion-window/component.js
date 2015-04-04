@@ -268,7 +268,7 @@ export default Ember.Component.extend(UploadMixin, {
                     let href = item.el.attr('href');
 
                     return '<small>Link to the original image:</small><a href="' + href +
-                        '" target="_newtab">' + href + '</a>';
+                        '" target="_blank">' + href + '</a>';
                 }
             }
         });
