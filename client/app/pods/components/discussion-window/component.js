@@ -242,7 +242,8 @@ export default Ember.Component.extend(UploadMixin, {
             at: ':',
             displayTpl: emojiListTemplate,
             insertTpl: ':${name}:',
-            data: emojisList
+            data: emojisList,
+            highlightFirst: false
         });
 
         function getNick(item) {
