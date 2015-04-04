@@ -17,7 +17,8 @@
 
 'use strict';
 
-const assert = require('assert'),
+const readlineSync = require('readline-sync'),
+      assert = require('assert'),
       co = require('co'),
       redisModule = require('../server/lib/redis'),
       redis = redisModule.createClient();
@@ -36,12 +37,15 @@ const tests = [
     friendsExistTest
 ];
 
-console.log(' *************************************************************************');
-console.log(' *** This is a higly experimental Redis database consistency check tool');
-console.log(' *** Remove the assert from the source code if you really want to use it.');
-console.log(' *************************************************************************');
+console.log(' ************************************************************************');
+console.log(' *** This is a experimental MAS Redis database consistency checking tool');
+console.log(' ************************************************************************');
 
-assert(0);
+let response = readlineSync.question('Are you sure you want to continue? [yes/no]: ');
+
+if (response !== 'yes') {
+    process.exit(1);
+}
 
 co(function*() {
     for (let test of tests) {
