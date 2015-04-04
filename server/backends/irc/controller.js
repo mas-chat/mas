@@ -670,9 +670,19 @@ function *handleJoin(userId, msg) {
     let network = msg.network;
     let targetUserId = yield ircUser.getUserId(msg.nick, network);
     let conversation = yield conversationFactory.findGroup(channel, network);
+    let subscriptionsKey = `ircchannelsubscriptions:${userId}:${network}`;
 
     if (userId === targetUserId) {
-        let password = yield redis.hget(`ircchannelsubscriptions:${userId}:${network}`, channel);
+        let password = yield redis.hget(subscriptionsKey, channel);
+
+        if (password === null) {
+            // ircchannelsubscriptions entry is missing. This means IRC server has added the user
+            // to a channel without any action from the user. Flowdock at least does this.
+            // ircchannelsubscriptions must be updated as it's used to rejoin channels after a
+            // server restart.
+            password = '';
+            yield redis.hset(subscriptionsKey, channel, password);
+        }
 
         if (!conversation) {
             conversation = yield conversationFactory.create({
@@ -693,13 +703,7 @@ function *handleJoin(userId, msg) {
             yield conversation.sendAddMembers(userId);
         }
 
-        if (password === null) {
-            // ircchannelsubscriptions entry is missing. This means IRC server has added the user
-            // to a channel without any action from the user. Flowdock at least does this.
-            // ircchannelsubscriptions must be updated as it's used to rejoin channels after a
-            // server restart.
-            yield redis.hset(`ircchannelsubscriptions:${userId}:${network}`, channel, '');
-        } else if (password) {
+        if (password) {
             // Conversation exists and this user used non empty password successfully to join
             // the channel. Update conversation password as it's possible that all other
             // mas users were locked out during a server downtime and conversation.password is

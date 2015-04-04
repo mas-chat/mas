@@ -99,7 +99,6 @@ function *processJoin(params) {
     let groupName = params.name;
     let userId = params.userId;
     let conversation = yield conversationFactory.findGroup(groupName, 'MAS');
-    let role = 'u';
 
     if (!conversation) {
         yield outbox.queue(userId, params.sessionId, {
@@ -124,10 +123,8 @@ function *processJoin(params) {
         status: 'OK'
     });
 
-    if (conversation.owner === userId) {
-        // Owner returned
-        role = '*';
-    }
+    // Owner might have returned
+    let role = conversation.owner === userId ? '*' : 'u';
 
     yield joinGroup(conversation, userId, role);
 }
