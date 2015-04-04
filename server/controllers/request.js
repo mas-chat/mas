@@ -283,7 +283,7 @@ function *handleUpdateTopic(params) {
 }
 
 function *handleSet(params) {
-    let properties = params.command.properties || {};
+    let properties = params.command.settings || {};
     let error = false;
 
     const allowed = [ 'activeDesktop' ];

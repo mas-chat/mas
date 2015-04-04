@@ -110,7 +110,7 @@ export default Ember.ArrayController.extend({
     updateActiveDesktop: function() {
         this.get('socket').send({
             id: 'SET',
-            properties: {
+            settings: {
                 activeDesktop: this.get('activeDesktop')
             }
         });
