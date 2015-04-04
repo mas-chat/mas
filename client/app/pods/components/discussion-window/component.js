@@ -285,7 +285,7 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     willDestroyElement() {
-        Ember.run.next(this, function() {
+        Ember.run.scheduleOnce('afterRender', this, function() {
             this.sendAction('relayout', { animate: true });
         });
     },
