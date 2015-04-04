@@ -46,6 +46,12 @@ exports.init = function(httpServer, httpsServer, setHttpHandlers) {
         // app.use(logger());
     }
 
+    app.use(function*(next) {
+        /* jshint noyield:true */
+        this.set('X-Frame-Options', 'DENY');
+        yield next;
+    });
+
     // Enable GZIP compression
     app.use(compress());
 
