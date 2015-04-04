@@ -109,12 +109,14 @@ function *create(userId, conversationId) {
 
     assert(conversation);
 
+    let currentDesktop = parseInt(yield redis.hget(`settings:${userId}`, 'activeDesktop'));
+
     let newWindow = {
         conversationId: conversationId,
         sounds: false,
         titleAlert: false,
         minimizedNamesList: false,
-        desktop: 0,
+        desktop: currentDesktop || 0,
         visible: true,
         row: 0,
         column: 0

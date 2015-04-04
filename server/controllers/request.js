@@ -37,6 +37,7 @@ const handlers = {
     UPDATE: handleUpdate,
     UPDATE_PASSWORD: handleUpdatePassword,
     UPDATE_TOPIC: handleUpdateTopic,
+    SET: handleSet,
     WHOIS: handleWhois,
     CHAT: handleChat,
     ACKALERT: handleAckAlert,
@@ -279,6 +280,36 @@ function *handleUpdateTopic(params) {
         conversationId: params.conversation.conversationId,
         topic: params.command.topic
     });
+}
+
+function *handleSet(params) {
+    let properties = params.command.properties || {};
+    let error = false;
+
+    const allowed = [ 'activeDesktop' ];
+
+    for (let prop of Object.keys(properties)) {
+        let value = properties[prop];
+
+        if (allowed.indexOf(prop) === -1) {
+            yield respondError('SET_RESP', params.userId, params.sessionId,
+                `'${prop}' is not a valid property`);
+            error = true;
+            break;
+        }
+
+        // TBD: Add switch case here when there are multiple settings
+        if (!isNaN(value)) {
+            yield redis.hset(`settings:${params.userId}`, 'activeDesktop', properties[prop]);
+        }
+    }
+
+    if (!error) {
+        yield outbox.queue(params.userId, params.sessionId, {
+            id: 'SET_RESP',
+            status: 'OK'
+        });
+    }
 }
 
 function *handleWhois(params) {

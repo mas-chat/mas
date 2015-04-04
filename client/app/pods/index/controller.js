@@ -107,6 +107,15 @@ export default Ember.ArrayController.extend({
         }
     }.observes('desktops.@each'),
 
+    updateActiveDesktop: function() {
+        this.get('socket').send({
+            id: 'SET',
+            properties: {
+                activeDesktop: this.get('activeDesktop')
+            }
+        });
+    }.observes('activeDesktop'),
+
     _oldestDesktop() {
         return this.get('desktops').map(d => d.id).sort()[0];
     },
