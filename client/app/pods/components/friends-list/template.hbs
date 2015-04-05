@@ -13,7 +13,7 @@
                 {{timeSince friend.online friend.last}}
             </div>
         {{/if}}
-        <div {{action "removeFriend" friend.userId}} class="main-friend-remove">
+        <div {{action "removeFriend" friend.userId}} data-toggle="tooltip" data-placement="top" title="Remove this person from the list" class="main-friend-remove">
             <i class="fa fa-times"></i>
         </div>
     </li>
