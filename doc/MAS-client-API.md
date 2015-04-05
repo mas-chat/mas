@@ -323,7 +323,7 @@ NETWORKS notification arrives immediately after successful session initializatio
 
 ### FRIENDS
 
-Full list of user's contacts (friends).
+Full list of user's contacts (friends). Send by the server during the session startup and when a user is added or removed from a contact list.
 
 ```JSON
 {
@@ -662,6 +662,26 @@ End session immediately
 ### NOKF
 
 ### NOKF_RESP
+
+### REMOVE_FRIEND
+
+```JSON
+{
+  "id": "REMOVE_FRIEND",
+
+  "userId": "m4242"
+}
+```
+
+### REMOVE_FRIEND_RESP
+
+```JSON
+{
+  "id": "REMOVE_FRIEND_RESP",
+
+  "status": "OK"
+}
+```
 
 ### UPDATE_PASSWORD
 

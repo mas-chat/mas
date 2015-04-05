@@ -13,5 +13,8 @@
                 {{timeSince friend.online friend.last}}
             </div>
         {{/if}}
+        <div {{action "removeFriend" friend.userId}} class="main-friend-remove">
+            <i class="fa fa-times"></i>
+        </div>
     </li>
 {{/each}}

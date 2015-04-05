@@ -52,7 +52,11 @@ exports.sendFriends = function*(userId, sessionId) {
         command.friends.push(friendData);
     }
 
-    yield outbox.queue(userId, sessionId, command);
+    if (sessionId) {
+        yield outbox.queue(userId, sessionId, command);
+    } else {
+        yield outbox.queueAll(userId, command);
+    }
 };
 
 exports.informStateChange = function*(userId, eventType) {

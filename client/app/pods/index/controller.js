@@ -58,6 +58,10 @@ export default Ember.ArrayController.extend({
 
         dragActiveAction(value) {
             this.set('activeDraggedWindow', value);
+        },
+
+        removeFriend(userId) {
+            this.send('openModal', 'remove-friend-modal', userId);
         }
     },
 

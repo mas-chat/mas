@@ -27,6 +27,10 @@ export default Ember.Component.extend({
     actions: {
         startChat(userId) {
             this.sendAction('windowAction', 'chat', null, userId);
+        },
+
+        removeFriend(userId) {
+            this.sendAction('removeFriend', userId);
         }
     }
 });

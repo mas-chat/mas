@@ -42,7 +42,8 @@ const handlers = {
     CHAT: handleChat,
     ACKALERT: handleAckAlert,
     LOGOUT: handleLogout,
-    GET_CONVERSATION_LOG: handleGetConversationLog
+    GET_CONVERSATION_LOG: handleGetConversationLog,
+    REMOVE_FRIEND: handleRemoveFriend
 };
 
 module.exports = function*(userId, sessionId, command) {
@@ -73,6 +74,8 @@ module.exports = function*(userId, sessionId, command) {
             network: network,
             command: command
         });
+    } else {
+        log.warn(userId, `Reveiced unknown request: ${command.id}`);
     }
 };
 
@@ -430,6 +433,20 @@ function *handleGetConversationLog(params) {
             });
         })();
     });
+}
+
+function *handleRemoveFriend(params) {
+    if (!params.command.userId) {
+        return;
+    }
+
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'REMOVE_FRIEND_RESP',
+        status: 'OK'
+    });
+
+    yield redis.srem(`friends:${params.userId}`, params.command.userId);
+    yield friends.sendFriends(params.userId);
 }
 
 function *respondError(resp, userId, sessionId, msg, errorStatus) {
