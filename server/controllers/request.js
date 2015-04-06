@@ -95,25 +95,27 @@ function *handleSend(params) {
             text: params.command.text.substring(1)
         });
         return;
-    } else {
-        yield params.conversation.addMessageUnlessDuplicate(params.userId, {
-            userId: params.userId,
-            cat: 'msg',
-            body: params.command.text
-        }, params.sessionId);
-
-        courier.send(params.backend, {
-            type: 'send',
-            userId: params.userId,
-            sessionId: params.sessionId,
-            conversationId: params.conversation.conversationId,
-            text: params.command.text
-        });
     }
+
+    let gid = yield params.conversation.addMessageUnlessDuplicate(params.userId, {
+        userId: params.userId,
+        cat: 'msg',
+        body: params.command.text
+    }, params.sessionId);
+
+    courier.send(params.backend, {
+        type: 'send',
+        userId: params.userId,
+        sessionId: params.sessionId,
+        conversationId: params.conversation.conversationId,
+        text: params.command.text
+    });
 
     yield outbox.queue(params.userId, params.sessionId, {
         id: 'SEND_RESP',
-        status: 'OK'
+        status: 'OK',
+        body: params.command.text,
+        gid: gid
     });
 }
 

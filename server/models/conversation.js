@@ -250,6 +250,8 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
     yield this._streamAddText(msg, excludeSession);
 
     search.storeMessage(this.conversationId, msg);
+
+    return msg.gid;
 };
 
 Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, excludeSession) {
@@ -265,8 +267,10 @@ Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, 
         msg.userId, msg.body);
 
     if (!duplicate) {
-        yield this.addMessage(msg, excludeSession);
+        return yield this.addMessage(msg, excludeSession);
     }
+
+    return null;
 };
 
 Conversation.prototype.sendAddMembers = function*(userId) {
