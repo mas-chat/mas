@@ -115,6 +115,7 @@ function *handleSend(params) {
         id: 'SEND_RESP',
         status: 'OK',
         body: params.command.text,
+        windowId: params.windowId,
         gid: gid
     });
 }

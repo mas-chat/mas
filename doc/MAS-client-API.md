@@ -497,13 +497,13 @@ Following requests are supported. Under every request is corresponding response.
 
 Send a message to a group or 1on1 discussion.
 
-Note that the session that sends SEND request doesn't receive corresponding ADDTEXT notification. Therefore SEND_RESP messages contain ```gid``` and ```body``` properties that the other sessions and users get in ```ADDTEXT``` notifications (other ADDTEXT properties the client can easily compute locally). Server will echo the new message in the response exactly as it was sent in the request ```text``` property.
+Note that the session that sends SEND request doesn't receive corresponding ADDTEXT notification. Therefore SEND_RESP messages contain ```gid```, ```body```, and ```windowId``` properties that the other sessions and users get in ```ADDTEXT``` notifications (other ADDTEXT properties the client can easily compute locally). Server will echo the new message in the response exactly as it was sent in the request ```text``` property.
 
 ```JSON
 {
   "id": "SEND",
 
-  "windowId": 2,
+  "windowId": 23,
   "text": "Hello world"
 }
 ```
@@ -515,6 +515,7 @@ Note that the session that sends SEND request doesn't receive corresponding ADDT
   "id": "SEND_RESP",
 
   "status": "OK",
+  "windowId": 23,
   "body": "Hello world",
   "gid": 34243322
 }
