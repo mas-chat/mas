@@ -38,6 +38,9 @@ MAS Redis structures
    <nick> (int, userId)
    <openidurl> (int, userId)
 
+ friendsrequests:<userId> (set)
+   <userId1>, <userId2> ...
+
  friends:<userId> (set)
    <userId1>, <userId2> ...
 
