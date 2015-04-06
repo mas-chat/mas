@@ -381,9 +381,9 @@ Show a generic alert info message.
 {
   "id": "ALERT",
 
-  "alertId": 32433
+  "alertId": 32433,
   "message": "There will be service break on Monday",
-  "dismissible": true
+  "dismissible": true,
   "report": false
 }
 ```
@@ -481,6 +481,24 @@ Updates a value initially received in ```CREATE``` command.
 
 Attributes in ```CREATE``` command that can be update are: ```password```, ```topic```, ```visible```, ```row```, ```column```, ```sounds```, ```role```, ```minimizedNamesList``, ```desktop```, and ```titleAlert```.
 
+### FRIENDSCONFIRM
+
+Another user(s) wants to add the user to his/her contacts list
+
+```JSON
+{
+  "id": "FRIENDSUPDATE",
+
+  "friends": [{
+    "userId": "m4242"
+  }, {
+    "userId": "m99"
+  }]
+}
+```
+
+Client must send one ```FRIEND_VERDICT``` request per received userId after the user has made the decision.
+
 # Requests and responses
 
 In addition of listening notifications from the server, the client can send commands to the server at any time.
@@ -556,17 +574,9 @@ Create new MAS group
 
 ### CLOSE_RESP
 
-### REST
-
-### REST_RESP
-
-### SEEN
-
-### SEEN_RESP
-
 ### CHAT
 
-```
+```JSON
 {
   "id": 'CHAT',
 
@@ -577,21 +587,11 @@ Create new MAS group
 
 ### CHAT_RESP
 
-```
+```JSON
 {
   "id": 'CHAT_RESP',
 
   "status": "OK"
-}
-```
-
-or
-
-```
-{
-  "id": 'CHAT_RESP',
-
-  "status": "OK",
 }
 ```
 
@@ -601,7 +601,7 @@ Contains ```errorMsg``` property if the status is not ```OK```
 
 End session immediately
 
-```
+```JSON
 {
   "id": "LOGOUT"
 }
@@ -609,7 +609,7 @@ End session immediately
 
 ### LOGOUT_RESP
 
-```
+```JSON
 {
   "id": "LOGOUT_RESP"
 }
@@ -617,14 +617,16 @@ End session immediately
 
 ### ACKALERT
 
+```JSON
 {
   "id": "ACKALERT"
   "alertId": 34253
 }
+```
 
 ### ACKALERT_RESP
 
-```
+```JSON
 {
   "id": "ACKALERT_RESP"
   "status": "OK"
@@ -633,7 +635,7 @@ End session immediately
 
 ### SET
 
-```
+```JSON
 {
   "id": "SET",
   "settings": {
@@ -644,24 +646,59 @@ End session immediately
 
 ### SET_RESP
 
-```
+```JSON
 {
   "id": "SET_RESP"
   "status": "OK"
 }
 ```
 
-### ADDF
+### REQUEST_FRIEND
 
-### ADDF_RESP
+User wants to add another user to his/her contacts list.
 
-### OKF
+```JSON
+{
+  "id": "REQUEST_FRIEND"
+  "userId": "m97"
+}
+```
 
-### OKF_RESP
+### REQUEST_FRIEND_RESP
 
-### NOKF
+```JSON
+{
+  "id": "REQUEST_FRIEND_RESP"
+  "status": "OK"
+}
+```
 
-### NOKF_RESP
+Contains ```errorMsg``` property if the status is not ```OK```
+
+### FRIEND_VERDICT
+
+This is a request that the client can send after receiving FRIENDSCONFIRM notification and user's decision.
+
+```JSON
+{
+  "id": "FRIEMD_VERDICT"
+  "userId": "m97"
+  "allow": false
+}
+```
+
+```allow``` is set to true if the user accepts to be added to another user's contacts list.
+
+### FRIEND_VERDICT_RESP
+
+```JSON
+{
+  "id": "FRIEND_VERDICT_RESP"
+  "status": "OK"
+}
+```
+
+Contains ```errorMsg``` property if the status is not ```OK```
 
 ### REMOVE_FRIEND
 
