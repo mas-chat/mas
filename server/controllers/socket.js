@@ -99,6 +99,7 @@ exports.setup = function(server) {
                 yield redis.run('initSession', userId, sessionId);
 
                 yield friends.sendFriends(userId, sessionId);
+                yield friends.sendFriendConfirm(userId, sessionId);
                 yield friends.informStateChange(userId, 'login');
                 yield alerts.sendAlerts(userId, sessionId);
                 yield sendNetworkList(userId, sessionId);

@@ -21,6 +21,7 @@
 import Ember from 'ember';
 
 export default Ember.Object.extend({
+    socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
     initReceived: false,
@@ -210,6 +211,19 @@ export default Ember.Object.extend({
     },
 
     _handleAlert(data) {
+        // Default labels for server generated alerts
+        data.postponeLabel = 'Show again later';
+        data.ackLabel = 'Dismiss';
+
+        data.resultCallback = function(result) {
+            if (result === 'ack') {
+                this.get('socket').send({
+                    id: 'ACKALERT',
+                    alertId: data.alertId
+                });
+            }
+        }.bind(this);
+
         this.get('store.alerts').pushObject(data);
     },
 
@@ -224,6 +238,38 @@ export default Ember.Object.extend({
 
         if (typeof(data.settings.activeDesktop) !== 'undefined') {
             this.set('store.activeDesktop', data.settings.activeDesktop);
+        }
+    },
+
+    _handleFriendsconfirm(data) {
+        let socket = this.get('socket');
+        let users = this.get('store.users');
+
+        function resultHandler(userId) {
+            return function(result) {
+                if (result === 'ack' || result === 'nack') {
+                    socket.send({
+                        id: 'FRIEND_VERDICT',
+                        userId: userId,
+                        allow: result === 'ack'
+                    });
+                }
+            };
+        }
+
+        for (let friendCandidate of data.friends) {
+            let realName = users.getName(friendCandidate.userId);
+            let nick = users.getNick(friendCandidate.userId, 'MAS');
+
+            this.get('store.alerts').pushObject({
+                message: `Allow ${realName} (${nick}) to add you to his/her contacts list?`,
+                dismissible: true,
+                report: false,
+                postponeLabel: 'Decide later',
+                nackLabel: 'Ignore',
+                ackLabel: 'Allow',
+                resultCallback: resultHandler(friendCandidate.userId)
+            });
         }
     },
 

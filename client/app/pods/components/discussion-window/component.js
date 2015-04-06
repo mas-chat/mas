@@ -218,6 +218,10 @@ export default Ember.Component.extend(UploadMixin, {
 
                 this.getMenu().find('li').eq(0).html(
                     '<img class="menu-avatar" src="' + avatar + '">' +  selectedNick);
+
+                // Only MAS users can be added to a contacts list.
+                $('.window-contexMenu-request-friend').toggle(selectedUserId.charAt(0) === 'm');
+
                 return true;
             },
             onItem(context, e) {

@@ -4,11 +4,24 @@
     </div>
 
     {{#if alert.dismissible}}
+        {{#if alert.postponeLabel}}
+            <div>
+                <button {{action "close" "postpone"}} type="button" class="btn btn-default">
+                    {{alert.postponeLabel}}
+                </button>
+            </div>
+        {{/if}}
+        {{#if alert.nackLabel}}
+            <div>
+                <button {{action "close" "nack"}} type="button" class="btn btn-default">
+                    {{alert.nackLabel}}
+                </button>
+            </div>
+        {{/if}}
         <div>
-            <button {{action "hide"}} type="button" class="btn btn-default">Show again later</button>
-        </div>
-        <div>
-            <button {{action "ack"}} type="button" class="btn btn-primary">Dismiss</button>
+            <button {{action "close" "ack"}} type="button" class="btn btn-primary">
+                {{alert.ackLabel}}
+            </button>
         </div>
     {{/if}}
 {{/if}}

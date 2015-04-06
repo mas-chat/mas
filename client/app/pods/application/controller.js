@@ -52,17 +52,7 @@ export default Ember.Controller.extend({
             }
         },
 
-        ackAlert() {
-            this.get('socket').send({
-                id: 'ACKALERT',
-                alertId: this.get('currentAlert.alertId')
-            });
-
-            this.set('currentAlert', null);
-            this._setCurrentAlert();
-        },
-
-        hideAlert() {
+        alertClosed() {
             this.set('currentAlert', null);
             this._setCurrentAlert();
         }
@@ -80,7 +70,7 @@ export default Ember.Controller.extend({
         }
 
         Ember.run.next(this, function() {
-            // A trick to trigger window relayout, see resize handler in grid component
+            // A trick to trigger window re-layout, see resize handler in grid component
             $(window).trigger('resize');
         });
     },

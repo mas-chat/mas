@@ -43,6 +43,8 @@ const handlers = {
     ACKALERT: handleAckAlert,
     LOGOUT: handleLogout,
     GET_CONVERSATION_LOG: handleGetConversationLog,
+    REQUEST_FRIEND: handleRequestFriend,
+    FRIEND_VERDICT: handleFriendVerdict,
     REMOVE_FRIEND: handleRemoveFriend
 };
 
@@ -432,6 +434,60 @@ function *handleGetConversationLog(params) {
                 results: results
             });
         })();
+    });
+}
+
+function *handleRequestFriend(params) {
+    let userId = params.userId;
+    let requestorUserId = params.command.userId;
+    let exists = yield redis.exists(`user:${requestorUserId}`);
+
+    if (!exists) {
+        yield respondError('REQUEST_FRIEND_RESP', userId, params.sessionId,
+           'Unknown MAS userId.');
+        return;
+    }
+
+    let existingFriend = yield redis.sismember(`friends:${userId}`, requestorUserId);
+
+    if (existingFriend) {
+        yield respondError('REQUEST_FRIEND_RESP', userId, params.sessionId,
+           'This person is already on your contacts list.');
+        return;
+    }
+
+    yield redis.sadd(`friendsrequests:${requestorUserId}`, userId);
+
+    yield outbox.queue(userId, params.sessionId, {
+        id: 'REQUEST_FRIEND_RESP',
+        status: 'OK'
+    });
+}
+
+function *handleFriendVerdict(params) {
+    let userId = params.userId;
+    let requestorUserId = params.command.userId;
+
+    let removed = yield redis.srem(`friendsrequests:${userId}`, requestorUserId);
+
+    if (removed === 0) {
+        yield respondError('FRIEND_VERDICT_RESP', userId, params.sessionId,
+           'Invalid userId.');
+        return;
+    }
+
+    if (params.command.allow) {
+        yield redis.sadd(`friends:${userId}`, requestorUserId);
+        yield redis.sadd(`friends:${requestorUserId}`, userId);
+
+        // Inform both parties
+        yield friends.sendFriends(requestorUserId);
+        yield friends.sendFriends(userId);
+    }
+
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'FRIEND_VERDICT_RESP',
+        status: 'OK'
     });
 }
 

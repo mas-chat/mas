@@ -165,36 +165,23 @@ export default Ember.ArrayController.extend({
         }.bind(this));
     },
 
-    _handleWhois(window, userId) {
+    _handleRequestFriend(window, userId) {
         this.get('socket').send({
-            id: 'WHOIS',
-            windowId: window.get('windowId'),
+            id: 'REQUEST_FRIEND',
             userId: userId
-        });
-    },
+        }, function(resp) {
+            let message = resp.status === 'OK' ?
+                'Request sent. Contact will added to your list when he or she approves.' :
+                resp.errorMsg;
 
-    _handleOp(window, userId) {
-        this.get('socket').send({
-            id: 'OP',
-            windowId: window.get('windowId'),
-            userId: userId
-        });
-    },
-
-    _handleKick(window, userId) {
-        this.get('socket').send({
-            id: 'KICK',
-            windowId: this.get('content.windowId'),
-            userId: userId
-        });
-    },
-
-    _handleKickban(window, userId) {
-        this.get('socket').send({
-            id: 'KICKBAN',
-            windowId: window.get('windowId'),
-            userId: userId
-        });
+            this.get('store.alerts').pushObject({
+                message: message,
+                dismissible: true,
+                report: false,
+                postponeLabel: false,
+                ackLabel: 'Okay'
+            });
+        }.bind(this));
     },
 
     _handleClose(window) {

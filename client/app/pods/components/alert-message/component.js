@@ -22,14 +22,14 @@ export default Ember.Component.extend({
     classNames: [ 'flex-row', 'announcement' ],
 
     actions: {
-        ack() {
-            this.set('message', '');
-            this.sendAction();
-        },
+        close(result) {
+            let callback = this.get('alert.resultCallback');
 
-        hide() {
-            this.set('message', '');
-            this.sendAction('hide');
+            if (callback) {
+                callback(result);
+            }
+
+            this.sendAction('alertClosed');
         }
     }
 });
