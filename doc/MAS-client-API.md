@@ -599,9 +599,9 @@ Ask server to start a 1on1 conversation with another user. The server will follo
 
 ```JSON
 {
-  "id": 'CHAT',
+  "id": "CHAT",
 
-  "windowId":: 8,
+  "windowId": 8,
   "userId": "m43432"
 }
 ```
@@ -610,7 +610,7 @@ Ask server to start a 1on1 conversation with another user. The server will follo
 
 ```JSON
 {
-  "id": 'CHAT_RESP',
+  "id": "CHAT_RESP",
 
   "status": "OK"
 }
@@ -642,7 +642,7 @@ Indicate that the user has dismissed an alert.
 
 ```JSON
 {
-  "id": "ACKALERT"
+  "id": "ACKALERT",
   "alertId": 34253
 }
 ```
@@ -651,7 +651,7 @@ Indicate that the user has dismissed an alert.
 
 ```JSON
 {
-  "id": "ACKALERT_RESP"
+  "id": "ACKALERT_RESP",
   "status": "OK"
 }
 ```
@@ -675,7 +675,7 @@ Currently the possible setting is ```activeDesktop```.
 
 ```JSON
 {
-  "id": "SET_RESP"
+  "id": "SET_RESP",
   "status": "OK"
 }
 ```
@@ -686,7 +686,7 @@ User wants to add another user to his/her contacts list.
 
 ```JSON
 {
-  "id": "REQUEST_FRIEND"
+  "id": "REQUEST_FRIEND",
   "userId": "m97"
 }
 ```
@@ -695,7 +695,7 @@ User wants to add another user to his/her contacts list.
 
 ```JSON
 {
-  "id": "REQUEST_FRIEND_RESP"
+  "id": "REQUEST_FRIEND_RESP",
   "status": "OK"
 }
 ```
@@ -708,8 +708,8 @@ This is a request that the client can send after receiving FRIENDSCONFIRM notifi
 
 ```JSON
 {
-  "id": "FRIEMD_VERDICT"
-  "userId": "m97"
+  "id": "FRIEND_VERDICT",
+  "userId": "m97",
   "allow": false
 }
 ```
@@ -720,7 +720,7 @@ This is a request that the client can send after receiving FRIENDSCONFIRM notifi
 
 ```JSON
 {
-  "id": "FRIEND_VERDICT_RESP"
+  "id": "FRIEND_VERDICT_RESP",
   "status": "OK"
 }
 ```
