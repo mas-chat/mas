@@ -750,7 +750,11 @@ function *handleQuit(userId, msg) {
         // TBD: Send a real quit message instead of part
         let conversation = yield conversationFactory.get(conversationId);
 
-        assert(conversation);
+        if (!conversation) {
+            // TBD: Temporary, should be assert
+            log.warn(userId, 'Conversation doesn\'t exist even it should.');
+            continue;
+        }
 
         if (conversation.network === msg.network && conversation.type === 'group') {
             // No need to check if the targetUser is on this channel,
