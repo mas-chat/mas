@@ -192,6 +192,11 @@ function *handleClose(params) {
         name: params.conversation.name,
         conversationType: params.conversation.type
     });
+
+    yield outbox.queue(params.userId, params.sessionId, {
+        id: 'CLOSE_RESP',
+        status: 'OK'
+    });
 }
 
 function *handleUpdate(params) {
@@ -457,6 +462,7 @@ function *handleRequestFriend(params) {
     }
 
     yield redis.sadd(`friendsrequests:${requestorUserId}`, userId);
+    yield friends.sendFriendConfirm(requestorUserId, params.sessionId);
 
     yield outbox.queue(userId, params.sessionId, {
         id: 'REQUEST_FRIEND_RESP',

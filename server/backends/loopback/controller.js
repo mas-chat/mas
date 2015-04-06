@@ -58,7 +58,7 @@ function *processCreate(params) {
     if (!groupName) {
         yield outbox.queue(params.userId, params.sessionId, {
             id: 'CREATE_RESP',
-            status: 'error',
+            status: 'ERROR_NAME_MISSING',
             errorMsg: 'Name can\'t be empty.'
         });
         return;
@@ -69,7 +69,7 @@ function *processCreate(params) {
     if (conversation) {
         yield outbox.queue(params.userId, params.sessionId, {
             id: 'CREATE_RESP',
-            status: 'error',
+            status: 'ERROR_EXISTS',
             errorMsg: 'A group by this name already exists. If you\'d like, you can try to join it.'
         });
         return;

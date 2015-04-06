@@ -12,7 +12,7 @@ MAS protocol is message based, server driven and built on top of
 
 # Login
 
-Login endpoint expects username and password in URL encoded form (like normal form submission).
+Login endpoint expects user name and password in URL encoded form (like normal form submission).
 
 ```
 POST /login
@@ -156,7 +156,7 @@ The server will send all buffered 'ntf' events if the resume is successful. Clie
 |------------|-----------|----------------------------------------------------|
 | id         | mandatory | Type of the notification, request, or response     |
 
-Other paramters are specific to notification, request, or response type. See below.
+Other parameters are specific to notification, request, or response type. See below.
 
 # Example scenario
 
@@ -164,7 +164,7 @@ John has two active clients (A and B). Both of the clients have established acti
 
 John decides to join to 'copenhagen' chat group. He clicks the join group button in client A. As a result, through the session A1, the server receives a 'req' event which contains a 'JOIN' message. Server validates the request and sends 'CREATE' notification to all John's active sessions (A1 and B1). 'CREATE' notification instructs the clients to create new UI window or tab for the 'copenhagen' group. After that the server sends 'JOIN' response to session A1. Purpose of a response message is mainly to communicate failure reasons when requests can't be fulfilled.
 
-All updates that trigger change in the UI are signalled similarly as notifications. With this approach all active clients stay synced in real time.
+All updates that trigger change in the UI are signaled similarly as notifications. With this approach all active clients stay synced in real time.
 
 Another advantage is that client startup phase is not a special case. The server simply sends one 'CREATE' notification per every group the user is participating.
 
@@ -291,14 +291,14 @@ Information about the userIds. Server sends USERS command containing a userId be
     "i300": {
       "name": "T. Rinity",
       "nick": {
-        IRCNet: "trinity"
+        "IRCNet": "trinity"
       }
     }
   }
 }
 ```
 
-Server can send USERS command to update information that it sent in earlier USERS command. This happends for example when any user changes his nick. Note that the ```nick``` attribute is a hash, user can have different nicks in different networks.
+Server can send USERS command to update information that it sent in earlier USERS command. This happens for example when any user changes his nick. Note that the ```nick``` attribute is a hash, user can have different nicks in different networks.
 
 The first USERS notification arrives immediately after 'initok' and contains an entry for the API user itself.
 
@@ -361,18 +361,6 @@ An update to the initial list received with ```FRIENDS``` commands. Contains new
 
 Fields are same as in ```FRIENDS``` command.
 
-### INFO
-
-Show a generic info message.
-
-```JSON
-{
-  "id": "INFO",
-
-  "text": "You can't join group Secret. Wrong password."
-}
-```
-
 ### ALERT
 
 Show a generic alert info message.
@@ -392,7 +380,7 @@ If ```report``` is true then the client must send ```ACKALERT``` request when th
 
 ### INITDONE
 
-Initialization is complete. Hint that client can now render the UI as all initial messages (backlog) have arrived. Allows client to not update UI based on every received ADDTEXT command at session startup. Can lead to more responsive UI.
+Initialization is complete. A hint that client can now render the UI as all initial messages (backlog) have arrived. Allows client to not update UI based on every received ADDTEXT command at session startup. Can lead to more responsive UI.
 
 ```JSON
 {
@@ -507,7 +495,9 @@ Following requests are supported. Under every request is corresponding response.
 
 ### SEND
 
-```
+Send a message to a group or 1on1 discussion.
+
+```JSON
 {
   "id": "SEND",
 
@@ -518,11 +508,10 @@ Following requests are supported. Under every request is corresponding response.
 
 ### SEND_RESP
 
-```
+```JSON
 {
   "id": "SEND_RESP",
 
-  "windowId": 2,
   "status": "OK"
 }
 ```
@@ -531,7 +520,7 @@ Following requests are supported. Under every request is corresponding response.
 
 Join to new MAS group or IRC channel
 
-```
+```JSON
 {
   "id": "JOIN",
 
@@ -543,7 +532,7 @@ Join to new MAS group or IRC channel
 
 ### JOIN_RESP
 
-```
+```JSON
 {
   "id": "JOIN_RESP",
 
@@ -559,7 +548,7 @@ Status can be ```OK```, ```NOT_FOUND```, ```INCORRECT_PASSWORD```, ```ALREADY_JO
 
 Create new MAS group
 
-```
+```JSON
 {
   "id": "CREATE",
 
@@ -570,18 +559,50 @@ Create new MAS group
 
 ### CREATE_RESP
 
+```JSON
+{
+  "id": "CREATE_RESP",
+
+  "status": "OK",
+}
+```
+
+Contains ```errorMsg``` property if the status is not ```OK```
+
+Status can be ```OK```, ```ERROR_NAME_MISSING```, or ```ERROR_EXISTS```
+
 ### CLOSE
+
+Close a window. In case the window is not 1on1, part from the MAS group or IRC channel.
+
+```JSON
+{
+  "id": "CLOSE",
+
+  "windoId": 3
+}
+```
 
 ### CLOSE_RESP
 
+```JSON
+{
+  "id": "CLOSE_RESP",
+
+  "status": "OK"
+}
+```
+
 ### CHAT
+
+Ask server to start a 1on1 conversation with another user. The server will follow up with a CREATE notification if the 1on1 can be started successfully.
 
 ```JSON
 {
   "id": 'CHAT',
 
   "windowId":: 8,
-  "userId": "mr43432"
+  "userId": "m43432"
 }
 ```
 
@@ -617,6 +638,8 @@ End session immediately
 
 ### ACKALERT
 
+Indicate that the user has dismissed an alert.
+
 ```JSON
 {
   "id": "ACKALERT"
@@ -635,6 +658,8 @@ End session immediately
 
 ### SET
 
+Update an application parameter or setting.
+
 ```JSON
 {
   "id": "SET",
@@ -643,6 +668,8 @@ End session immediately
   }
 }
 ```
+
+Currently the possible setting is ```activeDesktop```.
 
 ### SET_RESP
 
