@@ -25,7 +25,6 @@ let readlineSync = require('readline-sync'),
 
 let message = readlineSync.question('Message: ');
 let expiresInHours = readlineSync.question('Expires in (hours): ');
-let report = yesOrNo('Require report?');
 let dismissible = yesOrNo('Can be dismissed?');
 
 let now = Math.round(Date.now() / 1000);
@@ -40,7 +39,7 @@ co(function*() {
         message: message,
         expires: ts,
         dismissible: dismissible,
-        report: report
+        report: true
     };
 
     yield redis.hmset(`alert:${alertId}`, alert);
