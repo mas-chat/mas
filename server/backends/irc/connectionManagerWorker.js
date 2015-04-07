@@ -111,7 +111,7 @@ courier.on('disconnect', function(params) {
     let network = params.network;
     let socketName = userId + ':' + network;
 
-    write(userId, network, 'QUIT :' + params.reason);
+    write({ userId: userId, network: network, reportError: false }, 'QUIT :' + params.reason);
 
     if (sockets[socketName]) {
         sockets[socketName].end();
@@ -120,7 +120,7 @@ courier.on('disconnect', function(params) {
 
 // Write
 courier.on('write', function(params) {
-    write(params.userId, params.network, params.line);
+    write({ userId: params.userId, network: params.network, reportError: true }, params.line);
 });
 
 co(function*() {
@@ -207,15 +207,17 @@ function connect(userId, nick, network) {
     sockets[userId + ':' + network] = socket;
 }
 
-function write(userId, network, data) {
-    let socket = sockets[userId + ':' + network];
+function write(options, data) {
+    let socket = sockets[options.userId + ':' + options.network];
 
     if (!socket) {
-        courier.send('ircparser', {
-            type: 'noconnection',
-            userId: userId,
-            network: network
-        });
+        if (options.reportError) {
+            courier.send('ircparser', {
+                type: 'noconnection',
+                userId: options.userId,
+                network: options.network
+            });
+        }
         return;
     }
 

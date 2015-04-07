@@ -1065,9 +1065,12 @@ function *disconnectIfIdle(userId, network) {
         }
     }
 
-    if (windowIds.length === 0 || onlyServer1on1Left) {
+    if (onlyServer1on1Left) {
         yield addSystemMessage(userId, network,
             'info', 'No open windows left for this network, disconnecting...');
+    }
+
+    if (windowIds.length === 0 || onlyServer1on1Left) {
         yield disconnect(userId, network);
     }
 }
