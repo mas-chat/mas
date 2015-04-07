@@ -185,8 +185,6 @@ function *handleClose(params) {
         yield params.conversation.remove1on1Member(params.userId);
     }
 
-    yield window.remove(params.userId, params.windowId);
-
     // Backend specific cleanup
     courier.send(params.backend, {
         type: 'close',

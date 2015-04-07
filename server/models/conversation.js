@@ -203,12 +203,10 @@ Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKic
 
         yield this._streamRemoveMembers(userId);
 
-        let removeConversation = true;
+        // Never let window to exist alone without linked conversation
+        yield this._removeConversationWindow(userId);
 
-        if (userId.charAt(0) === 'm') {
-            // Never let window to exist alone without linked conversation
-            yield window.removeByConversationId(userId, this.conversationId);
-        }
+        let removeConversation = true;
 
         Object.keys(this.members).forEach(function(member) {
             if (member.charAt(0) === 'm') {
@@ -227,6 +225,9 @@ Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKic
 Conversation.prototype.remove1on1Member = function*(userId) {
     /* jshint noyield:true */
     assert(this.members[userId]);
+
+    // Never let window to exist alone without linked conversation
+    yield this._removeConversationWindow(userId);
 
     // No clean-up is currently needed. 1on1 discussions are never deleted. Group discussions
     // are deleted when the last member parts. This makes sense as groups are then totally reseted
@@ -429,6 +430,12 @@ Conversation.prototype._removeAllMembers = function*() {
 
     this.members = {};
     yield redis.del(`conversationmembers:${this.conversationId}`);
+};
+
+Conversation.prototype._removeConversationWindow = function*(userId) {
+    if (userId.charAt(0) === 'm') {
+        yield window.removeByConversationId(userId, this.conversationId);
+    }
 };
 
 Conversation.prototype._setMember = function*(userId, role) {
