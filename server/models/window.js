@@ -19,6 +19,7 @@
 const assert = require('assert'),
       redis = require('../lib/redis').createClient(),
       outbox = require('../lib/outbox'),
+      log = require('../lib/log'),
       conversationFactory = require('./conversation');
 
 exports.create = function*(userId, conversationId) {
@@ -191,9 +192,20 @@ function *getConversationId(userId, windowId) {
 function *remove(userId, windowId) {
     let conversationId = yield getConversationId(userId, windowId);
 
-    yield redis.srem(`windowlist:${userId}`, windowId);
-    yield redis.del(`window:${userId}:${windowId}`);
-    yield redis.hdel('index:windowIds', userId + ':' + conversationId);
+    log.info(userId, `Removing window, id: ${windowId}`);
+
+    let deletedList = yield redis.srem(`windowlist:${userId}`, windowId);
+    let deletedIndex = yield redis.hdel('index:windowIds', userId + ':' + conversationId);
+    let deletedWindow = yield redis.del(`window:${userId}:${windowId}`);
+
+    // TBD: Convert to assert when the situation are fully stable
+    if (deletedList === 0) {
+        log.warn(userId, 'windowlist entry missing.');
+    } else if (deletedIndex === 0) {
+        log.warn(userId, 'index:windowIds entry missing.');
+    } else if (deletedWindow === 0) {
+        log.warn(userId, 'window entry missing.');
+    }
 
     yield outbox.queueAll(userId, {
         id: 'CLOSE',
