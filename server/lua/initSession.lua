@@ -54,11 +54,6 @@ local function seenUser(userId)
     end
 end
 
-redis.call('LPUSH', outbox, cjson.encode({
-    ['id'] = 'SESSIONID',
-    ['sessionId'] = sessionId
-}))
-
 -- Iterate through windows
 local windowIds = redis.call('SMEMBERS', 'windowlist:' .. userId)
 local allUsers = {}
