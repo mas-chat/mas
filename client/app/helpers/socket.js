@@ -30,9 +30,12 @@ export default Ember.Object.extend({
     _notificationParser: null,
     _connectionLost: false,
     _connectionLostWarningVisible: false,
+    _disconnectedQueue: null,
 
     init() {
         this._super();
+
+        this._disconnectedQueue = Ember.A([]);
 
         let authCookie = $.cookie('auth');
 
@@ -67,6 +70,22 @@ export default Ember.Object.extend({
             this.set('sessionId', data.sessionId);
         }));
 
+        socket.on('resumeok', Ember.run.bind(this, function() {
+            Ember.Logger.info(
+                `MAS session resumed. Sending ${this._disconnectedQueue.length} commands`);
+
+            for (let command of this._disconnectedQueue) {
+                this._send(command.command, command.callback);
+            }
+
+            this._disconnectedQueue.clear();
+            this._connectionLost = false;
+
+            if (this._connectionLostWarningVisible) {
+                this.get('container').lookup('controller:application').send('closeModal');
+            }
+        }));
+
         this.socket.on('terminate', Ember.run.bind(this, function(data) {
             if (data.code === 'INVALID_SESSION') {
                 window.location.reload();
@@ -89,6 +108,8 @@ export default Ember.Object.extend({
         }));
 
         socket.on('disconnect', Ember.run.bind(this, function() {
+            Ember.Logger.info('Socket.io connection lost.');
+
             this._connectionLost = true;
 
             Ember.run.later(this, function() {
@@ -105,26 +126,34 @@ export default Ember.Object.extend({
         }));
 
         socket.on('reconnect', Ember.run.bind(this, function() {
-            this._connectionLost = false;
+            Ember.Logger.info('Socket.io connection resumed.');
 
             socket.emit('resume', {
                 userId: userId,
                 sessionId: this.get('sessionId')
             });
-
-            if (this._connectionLostWarningVisible) {
-                this.get('container').lookup('controller:application').send('closeModal');
-            }
         }));
     },
 
     send(command, callback) {
+        if (this._connectionLost) {
+            Ember.Logger.info('Connection is lost. Buffering ' + command.id);
+
+            this._disconnectedQueue.push({
+                command: command,
+                callback: callback
+            });
+        } else {
+            this._send(command, callback);
+        }
+    },
+
+    _send(command, callback) {
         if (callback) {
             this._callbacks[command.id + '_RESP'] = callback;
         }
 
         this.socket.emit('req', command);
-
         Ember.Logger.info('→ REQ: ' + command.id);
     },
 

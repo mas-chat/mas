@@ -72,14 +72,15 @@ List of used custom events.
 | req                  | client     |
 | resp                 | server     |
 | resume               | client     |
+| resumeok             | server     |
 
 ## Socket.io client disconnect event
 
 If the client receives 'disconnect' event (network hiccup or server problem) from socket.io and then 'reconnect' event, it can opt to send the 'resume' event to the server instead of sending 'init' event (full restart).
 
-Note that if the time between 'disconnect' and 'reconnect' is long, the server might have deleted the session. In that case the server sends the 'terminate' event as response to 'resume'. Client needs then to create a new session with new socket.io connection and 'init' event.
+Note that if the time between 'disconnect' and 'reconnect' is long, the server might have deleted the session. In that case the server sends the 'terminate' event as response to 'resume'. Client needs then to create a new session with new socket.io connection and 'init' event. If the session still exists, server sends 'resumeok'. Client is allowed to send 'req' events only after it has received 'resumeok' event.
 
-The server will send all buffered 'ntf' events if the resume is successful. Client can assume that no new chat message is lost.
+The server will send all buffered 'ntf' events if the resume is successful. Currently it can't be guaranteed that no chat messages are lost in this situation.
 
 ## Init event payload
 
@@ -142,6 +143,10 @@ The server will send all buffered 'ntf' events if the resume is successful. Clie
 |------------|-----------|----------------------------------------------------|
 | userId     | mandatory | User Id                                            |
 | sessionId  | mandatory | Session Id                                         |
+
+## Resumeok event payload
+
+Contains no payload.
 
 ## Ntf, req, and resp event payload
 

@@ -122,12 +122,11 @@ export default Ember.ArrayController.extend({
     },
 
     _handleSendMessage(window, text) {
-        let messageRecord = this.get('container').lookup('model:message');
         let isCommand = text.charAt(0) === '/';
         let ircServer1on1 = window.get('type') === '1on1' && window.get('userId') === 'iSERVER';
 
         if (ircServer1on1 && !isCommand) {
-            messageRecord.setProperties({
+            let messageRecord = this.container.lookup('model:message').setProperties({
                 body: 'Only commands allowed, e.g. /whois john',
                 cat: 'error',
                 ts: moment().unix(),
@@ -141,8 +140,8 @@ export default Ember.ArrayController.extend({
                 text: text,
                 windowId: window.get('windowId')
             }, function(resp) {
-                messageRecord.setProperties({
-                    body: text,
+                let messageRecord = this.container.lookup('model:message').setProperties({
+                    body: resp.body,
                     cat: 'mymsg',
                     userId: this.get('store.userId'),
                     ts: moment().unix(),

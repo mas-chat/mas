@@ -91,9 +91,8 @@ exports.setup = function(server) {
                 state = 'authenticated';
                 sessionId = uuid(15);
 
-                socket.emit('initok', { sessionId: sessionId });
-
                 yield redis.zadd(`sessionlist:${userId}`, ts, sessionId);
+                socket.emit('initok', { sessionId: sessionId });
 
                 log.info(userId, 'Initializing new session: ' + sessionId);
                 yield redis.run('initSession', userId, sessionId);
@@ -126,6 +125,7 @@ exports.setup = function(server) {
                     return;
                 }
 
+                socket.emit('resumeok');
                 state = 'authenticated';
 
                 yield eventLoop();
