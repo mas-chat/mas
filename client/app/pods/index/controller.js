@@ -133,24 +133,24 @@ export default Ember.ArrayController.extend({
                 ts: moment().unix(),
                 window: window
             });
+
+            window.get('messages').pushObject(messageRecord);
         } else {
             this.get('socket').send({
                 id: 'SEND',
                 text: text,
                 windowId: window.get('windowId')
-            });
+            }, function(resp) {
+                messageRecord.setProperties({
+                    body: text,
+                    cat: 'mymsg',
+                    userId: this.get('store.userId'),
+                    ts: moment().unix(),
+                    window: window
+                });
 
-            messageRecord.setProperties({
-                body: text,
-                cat: 'mymsg',
-                userId: this.get('store.userId'),
-                ts: moment().unix(),
-                window: window
-            });
-        }
-
-        if (!isCommand) {
-            window.get('messages').pushObject(messageRecord);
+                window.get('messages').pushObject(messageRecord);
+            }.bind(this));
         }
     },
 
