@@ -318,8 +318,9 @@ function *processReconnectIfInactive(params) {
 function *processRestarted() {
     yield iterateUsersAndNetworks(function*(userId, network) {
         let channels = yield redis.hgetall(`ircchannelsubscriptions:${userId}:${network}`);
+        let state = yield redis.hget(`networks:${userId}:${network}`, 'state');
 
-        if (channels) {
+        if (channels && state !== 'idledisconnected') {
             log.info(userId, 'Scheduling connect() to IRC network: ' + network);
 
             yield addSystemMessage(userId, network, 'info',
