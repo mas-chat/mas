@@ -34,9 +34,9 @@ export default Ember.Component.extend(UploadMixin, {
     ],
 
     expanded: false,
-    initialAddition: true,
     animating: false,
     scrolling: false,
+    linesAmount: null,
 
     $messagePanel: null,
     $images: null,
@@ -71,6 +71,15 @@ export default Ember.Component.extend(UploadMixin, {
     }.observes('visible'),
 
     lineAdded: function() {
+        let messages = this.get('content.messages');
+        let previousLines = this.get('linesAmount');
+        this.set('linesAmount', messages.length);
+
+        if (previousLines && previousLines >= messages.length) {
+            // Line was removed.
+            return;
+        }
+
         if (!this.get('content.scrollLock')) {
             // Prevents _addScrollHandler to make faulty conclusion.
             // We need to scroll and we we will after debounce kicks in.
@@ -78,27 +87,22 @@ export default Ember.Component.extend(UploadMixin, {
         }
 
         Ember.run.debounce(this, function() {
-            let initialAddition = this.get('initialAddition');
-
-            if (initialAddition) {
-                this._addScrollHandler();
-                this.set('initialAddition', false);
-            }
-
             // Update images array
             this.$images = this.$('img[data-src]');
 
             Ember.run.scheduleOnce('afterRender', this, function() {
-                this._goToBottom(!initialAddition);
+                this._goToBottom(true);
             });
         }, 300); // This should be more than duration of goToBottom() scrolling animation
 
-        if ((!this.get('visible') || this.get('content.scrollLock')) &&
-            !this.get('initialAddition')) {
+        let cat = messages[messages.length - 1].cat; // Message that was just added.
+        let importantMessage = cat === 'msg' || cat === 'error' || cat === 'action';
+
+        if ((!this.get('visible') || this.get('content.scrollLock')) && importantMessage) {
             this.incrementProperty('content.newMessagesCount');
         }
 
-        if (document.hidden) {
+        if (document.hidden && importantMessage) {
             // Browser title notification
             if (this.get('content.titleAlert')) {
                 titlenotifier.add();
@@ -109,7 +113,7 @@ export default Ember.Component.extend(UploadMixin, {
                 play();
             }
         }
-    }.observes('content.messages.@each').on('init'),
+    }.observes('content.messages.@each'),
 
     ircServerWindow: function() {
         return this.get('content.userId') === 'iSERVER' ? 'irc-server-window' : '';
@@ -191,6 +195,7 @@ export default Ember.Component.extend(UploadMixin, {
         let that = this;
 
         this.$messagePanel = this.$('.window-messages');
+        this._addScrollHandler();
 
         this.$('.window-caption').tooltip();
         this.$messagePanel.tooltip({
