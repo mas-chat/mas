@@ -33,5 +33,5 @@ export default Ember.Component.extend({
         switch() {
             this.sendAction('action', this.get('id'));
         }
-    },
+    }
 });

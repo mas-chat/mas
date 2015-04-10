@@ -44,7 +44,7 @@ exports.remove = function*(userId, windowId) {
     yield remove(userId, windowId);
 };
 
-exports.isValidDesktop = function *(userId, desktop) {
+exports.isValidDesktop = function*(userId, desktop) {
     let windows = yield redis.smembers(`windowlist:${userId}`);
     let found = false;
 

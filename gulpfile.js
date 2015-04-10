@@ -69,7 +69,7 @@ gulp.task('eslint', function() {
         .concat(paths.testJavaScripts))
         .pipe(eslint())
         .pipe(eslint.format());
- //       .pipe(eslint.failOnError());
+    //  .pipe(eslint.failOnError());
 });
 
 gulp.task('bower', function() {
@@ -101,10 +101,10 @@ gulp.task('fonts', [ 'bower' ], function() {
 gulp.task('emails', function() {
     gulp.src('./server/emails/*.hbs')
         .pipe(inlineCss({
-                applyStyleTags: true,
-                applyLinkTags: true,
-                removeStyleTags: true,
-                removeLinkTags: true
+            applyStyleTags: true,
+            applyLinkTags: true,
+            removeStyleTags: true,
+            removeLinkTags: true
         }))
         .pipe(gulp.dest('./server/emails/build/'));
 });

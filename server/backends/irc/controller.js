@@ -252,7 +252,7 @@ function *processUpdateTopic(params) {
             line: 'TOPIC ' + conversation.name + ' :' + params.topic
         });
 
-        return { status: 'OK'};
+        return { status: 'OK' };
     }
 }
 
@@ -990,9 +990,9 @@ function *tryDifferentNick(userId, network) {
     yield nicks.updateCurrentNick(userId, network, currentNick);
 
     courier.callNoWait('connectionmanager', 'write', {
-       userId: userId,
-       network: network,
-       line: 'NICK ' + currentNick
+        userId: userId,
+        network: network,
+        line: 'NICK ' + currentNick
     });
 }
 

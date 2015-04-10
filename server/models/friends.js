@@ -59,7 +59,7 @@ exports.sendFriends = function*(userId, sessionId) {
     }
 };
 
-exports.sendFriendConfirm = function *(userId, sessionId) {
+exports.sendFriendConfirm = function*(userId, sessionId) {
     let friendRequests = yield redis.smembers(`friendsrequests:${userId}`);
 
     // Use userId property so that related USERS notification is send automatically

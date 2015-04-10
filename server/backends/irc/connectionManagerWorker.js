@@ -62,7 +62,7 @@ function handleIdentConnection(conn) {
             for (let userId in sockets) {
                 if (sockets[userId].localPort === localPort &&
                     sockets[userId].remotePort === remotePort &&
-                    conn.remoteAddress.indexOf(sockets[userId].remoteAddress) > - 1) {
+                    conn.remoteAddress.indexOf(sockets[userId].remoteAddress) > -1) {
                     found = true;
                     resp = prefix + ' : USERID : UNIX : ' + sockets[userId].nick + '\r\n';
                     break;

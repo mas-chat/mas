@@ -57,7 +57,7 @@ function disconnectInactiveIRCUsers() {
                         log.info(userId, 'Disconnected inactive user. UserId: ' + userId +
                             ', network: ' + network);
                     }
-               }
+                }
             }
         }
     })();

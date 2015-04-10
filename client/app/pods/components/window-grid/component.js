@@ -248,8 +248,8 @@ export default Ember.Component.extend({
 
     _drawCursor(cursor) {
         if (cursor.x === null) {
-           $('#window-cursor').hide();
-           return;
+            $('#window-cursor').hide();
+            return;
         } else {
             $('#window-cursor').show();
         }
