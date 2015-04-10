@@ -53,11 +53,12 @@ Courier.prototype.start = function() {
 
             processing = true;
 
-            let msg = JSON.parse(result[1]);
-            let handler = this.handlers[msg.type];
             log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}] DATA: ${result[1]}`);
 
-            assert(handler, this.name + ': Missing message handler for: ' + msg.type);
+            let msg = JSON.parse(result[1]);
+            let handler = this.handlers[msg.__type];
+
+            assert(handler, this.name + ': Missing message handler for: ' + msg.__type);
 
             if (isGeneratorFunction(handler)) {
                 /*jshint -W083 */
@@ -77,9 +78,9 @@ Courier.prototype.start = function() {
     }).call(this);
 };
 
-Courier.prototype.call = function*(dest, msg) {
+Courier.prototype.call = function*(dest, type, params) {
     let uid = Date.now() + uid2(10);
-    let data = this._convertToString(msg, uid);
+    let data = this._convertToString(type, params, uid);
     let reqRedis = redisModule.createClient();
 
     yield reqRedis.lpush(`inbox:${dest}`, data);
@@ -92,11 +93,12 @@ Courier.prototype.call = function*(dest, msg) {
 
     resp = resp ? JSON.parse(resp[1]) : {};
     delete resp.__sender;
+
     return resp;
 };
 
-Courier.prototype.callNoWait = function(dest, msg) {
-    let data = this._convertToString(msg);
+Courier.prototype.callNoWait = function(dest, type, params) {
+    let data = this._convertToString(type, params);
 
     co(function*() {
         yield sendRedis.lpush(`inbox:${dest}`, data);
@@ -123,11 +125,17 @@ Courier.prototype._reply = function(msg, resp) {
 
     assert(resp);
 
-    this.send(`${msg.__sender}:${msg.__uid}`, resp);
+    this.callNoWait(`${msg.__sender}:${msg.__uid}`, null, resp);
 };
 
-Courier.prototype._convertToString = function(msg, uid) {
+Courier.prototype._convertToString = function(type, params, uid) {
+    let msg = params || {};
+
     msg.__sender = this.name;
+
+    if (type) {
+        msg.__type = type;
+    }
 
     if (uid) {
         msg.__uid = uid;

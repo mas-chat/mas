@@ -130,6 +130,7 @@ function *processTextCommand(params) {
     let command = params.text.match(/.*?(?=\W+|$)/)[0].toLowerCase();
     let payload = params.text.substring(command.length);
     let data = params.text;
+    let network = conversation.network;
     let systemMsg = null;
     let send = true;
     let res;
@@ -144,7 +145,7 @@ function *processTextCommand(params) {
             send = false;
             break;
         case 'msg':
-            res = yield handleMsgTextCommand(payload, conversation.network);
+            res = yield handleMsgTextCommand(payload, network);
             send = res[0];
             systemMsg = res[1];
             data = res[2] || data;
@@ -155,16 +156,12 @@ function *processTextCommand(params) {
     }
 
     if (systemMsg) {
-        yield addSystemMessage(params.userId, conversation.network, 'info', systemMsg);
+        yield addSystemMessage(params.userId, network, 'info', systemMsg);
     }
 
     if (send) {
-        courier.callNoWait('connectionmanager', {
-            type: 'write',
-            userId: params.userId,
-            network: conversation.network,
-            line: data
-        });
+        courier.callNoWait(
+            'connectionmanager', 'write', { userId: params.userId, network: network, line: data });
     }
 }
 
@@ -217,7 +214,8 @@ function *processClose(params) {
 
 function *processUpdatePassword(params) {
     let conversation = yield conversationFactory.get(params.conversationId);
-    let state = yield redis.hget(`networks:${params.userId}:${conversation.network}`, 'state');
+    let network = conversation.network;
+    let state = yield redis.hget(`networks:${params.userId}:${network}`, 'state');
     let modeline = 'MODE ' + conversation.name + ' ';
 
     if (params.password === '') {
@@ -233,12 +231,8 @@ function *processUpdatePassword(params) {
         };
     }
 
-    courier.callNoWait('connectionmanager', {
-        type: 'write',
-        userId: params.userId,
-        network: conversation.network,
-        line: modeline
-    });
+    courier.callNoWait(
+        'connectionmanager', 'write', { userId: params.userId, network: network, line: modeline });
 
     return { status: 'OK' };
 }
@@ -253,8 +247,7 @@ function *processUpdateTopic(params) {
             errorMsg: 'Can\'t change the topic. You are not connected to the IRC network'
         };
     } else {
-        courier.callNoWait('connectionmanager', {
-            type: 'write',
+        courier.callNoWait('connectionmanager', 'write', {
             userId: params.userId,
             network: conversation.network,
             line: 'TOPIC ' + conversation.name + ' :' + params.topic
@@ -350,6 +343,8 @@ function *processNoConnection(params) {
 // Connected
 function *processConnected(params) {
     let user = yield redis.hgetall(`user:${params.userId}`);
+    let network = params.network;
+
     log.info(params.userId, 'Connected to IRC server');
 
     let commands = [
@@ -357,12 +352,8 @@ function *processConnected(params) {
         'USER ' + user.nick + ' 8 * :Real Name (Ralph v1.0)'
     ];
 
-    courier.callNoWait('connectionmanager', {
-        type: 'write',
-        userId: params.userId,
-        network: params.network,
-        line: commands
-    });
+    courier.callNoWait(
+        'connectionmanager', 'write', { userId: params.userId, network: network, line: commands });
 }
 
 // Disconnected
@@ -492,19 +483,14 @@ function *connect(userId, network, skipRetryCountReset) {
     yield addSystemMessage(userId, network, 'info', 'Connecting to IRC server...');
     ircMessageBuffer[userId + network] = [];
 
-    courier.callNoWait('connectionmanager', {
-        type: 'connect',
-        userId: userId,
-        nick: nick,
-        network: network
-    });
+    courier.callNoWait(
+        'connectionmanager', 'connect', { userId: userId, nick: nick, network: network });
 }
 
 function *disconnect(userId, network) {
     yield redis.hset(`networks:${userId}:${network}`, 'state', 'closing');
 
-    courier.callNoWait('connectionmanager', {
-        type: 'disconnect',
+    courier.callNoWait('connectionmanager', 'disconnect', {
         userId: userId,
         network: network,
         reason: 'Session ended.'
@@ -929,8 +915,7 @@ function *handlePrivmsg(userId, msg, command) {
         }
 
         if (reply) {
-            courier.callNoWait('connectionmanager', {
-                type: 'write',
+            courier.callNoWait('connectionmanager', 'write', {
                 userId: userId,
                 network: msg.network,
                 line: 'NOTICE ' + msg.nick + ' :' + reply
@@ -1005,11 +990,10 @@ function *tryDifferentNick(userId, network) {
 
     yield nicks.updateCurrentNick(userId, network, currentNick);
 
-    courier.callNoWait('connectionmanager', {
-        type: 'write',
-        userId: userId,
-        network: network,
-        line: 'NICK ' + currentNick
+    courier.callNoWait('connectionmanager', 'write', {
+       userId: userId,
+       network: network,
+       line: 'NICK ' + currentNick
     });
 }
 
@@ -1108,8 +1092,7 @@ function isChannel(text) {
 }
 
 function sendPrivmsg(userId, network, target, text) {
-    courier.callNoWait('connectionmanager', {
-        type: 'write',
+    courier.callNoWait('connectionmanager', 'write', {
         userId: userId,
         network: network,
         line: 'PRIVMSG ' + target + ' :' + text
@@ -1117,8 +1100,7 @@ function sendPrivmsg(userId, network, target, text) {
 }
 
 function sendJoin(userId, network, channel, password) {
-    courier.callNoWait('connectionmanager', {
-        type: 'write',
+    courier.callNoWait('connectionmanager', 'write', {
         userId: userId,
         network: network,
         line: 'JOIN ' + channel + ' ' + password
@@ -1126,8 +1108,7 @@ function sendJoin(userId, network, channel, password) {
 }
 
 function sendIRCPart(userId, network, channel) {
-    courier.callNoWait('connectionmanager', {
-        type: 'write',
+    courier.callNoWait('connectionmanager', 'write', {
         userId: userId,
         network: network,
         line: 'PART ' + channel

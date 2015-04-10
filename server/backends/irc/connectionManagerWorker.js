@@ -155,11 +155,7 @@ function connect(userId, nick, network) {
     }
 
     socket.on('connect', function() {
-        courier.callNoWait('ircparser', {
-            type: 'connected',
-            userId: userId,
-            network: network
-        });
+        courier.callNoWait('ircparser', 'connected', { userId: userId, network: network });
 
         socket.pingTimer = setInterval(sendPing, LAG_POLL_INTERVAL);
     });
@@ -182,12 +178,8 @@ function connect(userId, nick, network) {
             let proceed = handlePing(socket, line);
 
             if (proceed) {
-                courier.callNoWait('ircparser', {
-                    type: 'data',
-                    userId: userId,
-                    network: network,
-                    line: line
-                });
+                courier.callNoWait(
+                    'ircparser', 'data', { userId: userId, network: network, line: line });
             }
         });
     });
@@ -212,11 +204,8 @@ function write(options, data) {
 
     if (!socket) {
         if (options.reportError) {
-            courier.callNoWait('ircparser', {
-                type: 'noconnection',
-                userId: options.userId,
-                network: options.network
-            });
+            courier.callNoWait(
+                'ircparser', 'noconnection', { userId: options.userId, network: options.network });
         }
         return;
     }
@@ -265,10 +254,6 @@ function handleEnd(userId, network, error) {
 
     log.info(userId, 'IRC connection closed by the server or network.');
 
-    courier.callNoWait('ircparser', {
-        type: 'disconnected',
-        userId: userId,
-        network: network,
-        reason: reason
-    });
+    courier.callNoWait(
+        'ircparser', 'disconnected', { userId: userId, network: network, reason: reason });
 }

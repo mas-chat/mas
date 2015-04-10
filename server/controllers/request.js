@@ -86,10 +86,8 @@ function *handleSend(params) {
     }
 
     if (params.command.text.charAt(0) === '/') {
-        courier.callNoWait(params.backend, {
-            type: 'texCommand',
+        courier.callNoWait(params.backend, 'texCommand', {
             userId: params.userId,
-            sessionId: params.sessionId,
             conversationId: params.conversation.conversationId,
             text: params.command.text.substring(1)
         });
@@ -100,10 +98,8 @@ function *handleSend(params) {
             body: params.command.text
         }, params.sessionId);
 
-        courier.callNoWait(params.backend, {
-            type: 'send',
+        courier.callNoWait(params.backend, 'send', {
             userId: params.userId,
-            sessionId: params.sessionId,
             conversationId: params.conversation.conversationId,
             text: params.command.text
         });
@@ -115,8 +111,7 @@ function *handleSend(params) {
 function *handleCreate(params) {
     /* jshint noyield:true */
 
-    return yield courier.call('loopbackparser', {
-        type: 'create',
+    return yield courier.call('loopbackparser', 'create', {
         userId: params.userId,
         name: params.command.name,
         password: params.command.password
@@ -139,8 +134,7 @@ function *handleJoin(params) {
         }
     }
 
-    return yield courier.call(params.backend, {
-        type: 'join',
+    return yield courier.call(params.backend, 'join', {
         userId: params.userId,
         network: params.command.network,
         name: params.command.name,
@@ -166,8 +160,7 @@ function *handleClose(params) {
     }
 
     // Backend specific cleanup
-    courier.callNoWait(params.backend, {
-        type: 'close',
+    courier.callNoWait(params.backend, 'close', {
         userId: params.userId,
         network: params.network,
         name: params.conversation.name,
@@ -239,8 +232,7 @@ function *handleUpdatePassword(params) {
         return { status: 'ERROR', errorMsg: 'Can\'t set password for 1on1.' };
     }
 
-    return yield courier.call(params.backend, {
-        type: 'updatePassword',
+    return yield courier.call(params.backend, 'updatePassword', {
         userId: params.userId,
         conversationId: params.conversation.conversationId,
         password: password
@@ -254,8 +246,7 @@ function *handleUpdateTopic(params) {
         return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
     }
 
-    return yield courier.call(params.backend, {
-        type: 'updateTopic',
+    return yield courier.call(params.backend, 'updateTopic', {
         userId: params.userId,
         conversationId: params.conversation.conversationId,
         topic: params.command.topic
@@ -327,8 +318,7 @@ function *handleChat(params) {
         yield window.setup1on1(userId, targetUserId, network);
     }
 
-    courier.callNoWait(params.backend, {
-        type: 'chat',
+    courier.callNoWait(params.backend, 'chat', {
         userId: userId,
         network: network,
         targetUserId: targetUserId

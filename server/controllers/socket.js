@@ -100,7 +100,9 @@ exports.setup = function(server) {
                 yield friends.informStateChange(userId, 'login');
                 yield alerts.sendAlerts(userId, sessionId);
                 yield sendNetworkList(userId, sessionId);
-                ircCheckIfInactive(userId);
+
+                // Check if the user was away too long
+                courier.callNoWait('ircparser', 'reconnectifinactive', { userId: userId });
 
                 yield eventLoop();
                 end();
@@ -162,12 +164,5 @@ function *sendNetworkList(userId, sessionId) {
     yield outbox.queue(userId, sessionId, {
         id: 'NETWORKS',
         networks: networks
-    });
-}
-
-function ircCheckIfInactive(userId) {
-    courier.callNoWait('ircparser', {
-        type: 'reconnectifinactive',
-        userId: userId,
     });
 }
