@@ -38,7 +38,6 @@ const handlers = {
     UPDATE_PASSWORD: handleUpdatePassword,
     UPDATE_TOPIC: handleUpdateTopic,
     SET: handleSet,
-    WHOIS: handleWhois,
     CHAT: handleChat,
     ACKALERT: handleAckAlert,
     LOGOUT: handleLogout,
@@ -284,20 +283,6 @@ function *handleSet(params) {
             }
         }
     }
-
-    return { status: 'OK' };
-}
-
-// TBD: Remove WHOIS request
-function *handleWhois(params) {
-    /* jshint noyield:true */
-
-    courier.send(params.backend, {
-        type: 'whois',
-        userId: params.userId,
-        network: params.network,
-        nick: params.command.nick
-    });
 
     return { status: 'OK' };
 }

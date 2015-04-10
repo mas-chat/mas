@@ -92,7 +92,6 @@ co(function*() {
     courier.on('close', processClose);
     courier.on('updatePassword', processUpdatePassword);
     courier.on('updateTopic', processUpdateTopic);
-    courier.on('whois', processWhois);
     courier.on('chat', processChat);
     courier.on('restarted', processRestarted);
     courier.on('data', processData);
@@ -263,15 +262,6 @@ function *processUpdateTopic(params) {
 
         return { status: 'OK'};
     }
-}
-
-function processWhois(params) {
-    courier.send('connectionmanager', {
-        type: 'write',
-        userId: params.userId,
-        network: params.network,
-        line: 'WHOIS ' + params.nick
-    });
 }
 
 function *processReconnectIfInactive(params) {
