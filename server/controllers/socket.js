@@ -141,7 +141,10 @@ exports.setup = function(server) {
                 }
 
                 let resp = yield requestController(userId, sessionId, data);
-                cb(resp || {}); // Send the response as Socket.io acknowledgment.
+
+                if (cb) {
+                    cb(resp || {}); // Send the response as Socket.io acknowledgment.
+                }
             })();
         });
 
