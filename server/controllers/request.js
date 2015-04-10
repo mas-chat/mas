@@ -86,7 +86,7 @@ function *handleSend(params) {
     }
 
     if (params.command.text.charAt(0) === '/') {
-        courier.send(params.backend, {
+        courier.callNoWait(params.backend, {
             type: 'texCommand',
             userId: params.userId,
             sessionId: params.sessionId,
@@ -100,7 +100,7 @@ function *handleSend(params) {
             body: params.command.text
         }, params.sessionId);
 
-        courier.send(params.backend, {
+        courier.callNoWait(params.backend, {
             type: 'send',
             userId: params.userId,
             sessionId: params.sessionId,
@@ -115,7 +115,7 @@ function *handleSend(params) {
 function *handleCreate(params) {
     /* jshint noyield:true */
 
-    return yield courier.sendReq('loopbackparser', {
+    return yield courier.call('loopbackparser', {
         type: 'create',
         userId: params.userId,
         name: params.command.name,
@@ -139,7 +139,7 @@ function *handleJoin(params) {
         }
     }
 
-    return yield courier.sendReq(params.backend, {
+    return yield courier.call(params.backend, {
         type: 'join',
         userId: params.userId,
         network: params.command.network,
@@ -166,7 +166,7 @@ function *handleClose(params) {
     }
 
     // Backend specific cleanup
-    courier.send(params.backend, {
+    courier.callNoWait(params.backend, {
         type: 'close',
         userId: params.userId,
         network: params.network,
@@ -239,7 +239,7 @@ function *handleUpdatePassword(params) {
         return { status: 'ERROR', errorMsg: 'Can\'t set password for 1on1.' };
     }
 
-    return yield courier.sendReq(params.backend, {
+    return yield courier.call(params.backend, {
         type: 'updatePassword',
         userId: params.userId,
         conversationId: params.conversation.conversationId,
@@ -254,7 +254,7 @@ function *handleUpdateTopic(params) {
         return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
     }
 
-    return yield courier.sendReq(params.backend, {
+    return yield courier.call(params.backend, {
         type: 'updateTopic',
         userId: params.userId,
         conversationId: params.conversation.conversationId,
@@ -327,7 +327,7 @@ function *handleChat(params) {
         yield window.setup1on1(userId, targetUserId, network);
     }
 
-    courier.send(params.backend, {
+    courier.callNoWait(params.backend, {
         type: 'chat',
         userId: userId,
         network: network,

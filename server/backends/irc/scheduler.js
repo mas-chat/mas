@@ -48,7 +48,7 @@ function disconnectInactiveIRCUsers() {
                     if (state === 'connected') {
                         yield redis.hset(`networks:${userId}:${network}`, 'state', 'idleclosing');
 
-                        courier.send('connectionmanager', {
+                        courier.callNoWait('connectionmanager', {
                             type: 'disconnect',
                             userId: userId,
                             network: network,

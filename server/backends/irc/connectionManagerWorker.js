@@ -125,7 +125,7 @@ courier.on('write', function(params) {
 
 co(function*() {
     yield courier.clearInbox('ircparser');
-    courier.send('ircparser', 'restarted');
+    courier.callNoWait('ircparser', 'restarted');
     courier.start();
 })();
 
@@ -155,7 +155,7 @@ function connect(userId, nick, network) {
     }
 
     socket.on('connect', function() {
-        courier.send('ircparser', {
+        courier.callNoWait('ircparser', {
             type: 'connected',
             userId: userId,
             network: network
@@ -182,7 +182,7 @@ function connect(userId, nick, network) {
             let proceed = handlePing(socket, line);
 
             if (proceed) {
-                courier.send('ircparser', {
+                courier.callNoWait('ircparser', {
                     type: 'data',
                     userId: userId,
                     network: network,
@@ -212,7 +212,7 @@ function write(options, data) {
 
     if (!socket) {
         if (options.reportError) {
-            courier.send('ircparser', {
+            courier.callNoWait('ircparser', {
                 type: 'noconnection',
                 userId: options.userId,
                 network: options.network
@@ -265,7 +265,7 @@ function handleEnd(userId, network, error) {
 
     log.info(userId, 'IRC connection closed by the server or network.');
 
-    courier.send('ircparser', {
+    courier.callNoWait('ircparser', {
         type: 'disconnected',
         userId: userId,
         network: network,

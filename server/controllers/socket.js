@@ -166,7 +166,7 @@ function *sendNetworkList(userId, sessionId) {
 }
 
 function ircCheckIfInactive(userId) {
-    courier.send('ircparser', {
+    courier.callNoWait('ircparser', {
         type: 'reconnectifinactive',
         userId: userId,
     });

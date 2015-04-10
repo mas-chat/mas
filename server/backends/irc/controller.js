@@ -159,7 +159,7 @@ function *processTextCommand(params) {
     }
 
     if (send) {
-        courier.send('connectionmanager', {
+        courier.callNoWait('connectionmanager', {
             type: 'write',
             userId: params.userId,
             network: conversation.network,
@@ -233,7 +233,7 @@ function *processUpdatePassword(params) {
         };
     }
 
-    courier.send('connectionmanager', {
+    courier.callNoWait('connectionmanager', {
         type: 'write',
         userId: params.userId,
         network: conversation.network,
@@ -253,7 +253,7 @@ function *processUpdateTopic(params) {
             errorMsg: 'Can\'t change the topic. You are not connected to the IRC network'
         };
     } else {
-        courier.send('connectionmanager', {
+        courier.callNoWait('connectionmanager', {
             type: 'write',
             userId: params.userId,
             network: conversation.network,
@@ -357,7 +357,7 @@ function *processConnected(params) {
         'USER ' + user.nick + ' 8 * :Real Name (Ralph v1.0)'
     ];
 
-    courier.send('connectionmanager', {
+    courier.callNoWait('connectionmanager', {
         type: 'write',
         userId: params.userId,
         network: params.network,
@@ -492,7 +492,7 @@ function *connect(userId, network, skipRetryCountReset) {
     yield addSystemMessage(userId, network, 'info', 'Connecting to IRC server...');
     ircMessageBuffer[userId + network] = [];
 
-    courier.send('connectionmanager', {
+    courier.callNoWait('connectionmanager', {
         type: 'connect',
         userId: userId,
         nick: nick,
@@ -503,7 +503,7 @@ function *connect(userId, network, skipRetryCountReset) {
 function *disconnect(userId, network) {
     yield redis.hset(`networks:${userId}:${network}`, 'state', 'closing');
 
-    courier.send('connectionmanager', {
+    courier.callNoWait('connectionmanager', {
         type: 'disconnect',
         userId: userId,
         network: network,
@@ -929,7 +929,7 @@ function *handlePrivmsg(userId, msg, command) {
         }
 
         if (reply) {
-            courier.send('connectionmanager', {
+            courier.callNoWait('connectionmanager', {
                 type: 'write',
                 userId: userId,
                 network: msg.network,
@@ -1005,7 +1005,7 @@ function *tryDifferentNick(userId, network) {
 
     yield nicks.updateCurrentNick(userId, network, currentNick);
 
-    courier.send('connectionmanager', {
+    courier.callNoWait('connectionmanager', {
         type: 'write',
         userId: userId,
         network: network,
@@ -1108,7 +1108,7 @@ function isChannel(text) {
 }
 
 function sendPrivmsg(userId, network, target, text) {
-    courier.send('connectionmanager', {
+    courier.callNoWait('connectionmanager', {
         type: 'write',
         userId: userId,
         network: network,
@@ -1117,7 +1117,7 @@ function sendPrivmsg(userId, network, target, text) {
 }
 
 function sendJoin(userId, network, channel, password) {
-    courier.send('connectionmanager', {
+    courier.callNoWait('connectionmanager', {
         type: 'write',
         userId: userId,
         network: network,
@@ -1126,7 +1126,7 @@ function sendJoin(userId, network, channel, password) {
 }
 
 function sendIRCPart(userId, network, channel) {
-    courier.send('connectionmanager', {
+    courier.callNoWait('connectionmanager', {
         type: 'write',
         userId: userId,
         network: network,

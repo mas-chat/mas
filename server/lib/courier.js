@@ -77,28 +77,9 @@ Courier.prototype.start = function() {
     }).call(this);
 };
 
-Courier.prototype._reply = function(msg, resp) {
-    if (!msg.__uid) {
-        // Not a request.
-        return;
-    }
-
-    assert(resp);
-
-    this.send(`${msg.__sender}:${msg.__uid}`, resp);
-};
-
-Courier.prototype.send = function(dest, msg) {
-    let data = convert(msg, this.name);
-
-    co(function*() {
-        yield sendRedis.lpush(`inbox:${dest}`, data);
-    })();
-};
-
-Courier.prototype.sendReq = function*(dest, msg) {
+Courier.prototype.call = function*(dest, msg) {
     let uid = Date.now() + uid2(10);
-    let data = convert(msg, this.name, uid);
+    let data = this._convertToString(msg, uid);
     let reqRedis = redisModule.createClient();
 
     yield reqRedis.lpush(`inbox:${dest}`, data);
@@ -114,6 +95,14 @@ Courier.prototype.sendReq = function*(dest, msg) {
     return resp;
 };
 
+Courier.prototype.callNoWait = function(dest, msg) {
+    let data = this._convertToString(msg);
+
+    co(function*() {
+        yield sendRedis.lpush(`inbox:${dest}`, data);
+    })();
+};
+
 Courier.prototype.clearInbox = function*(name) {
     yield sendRedis.del(`inbox:${name}`);
 };
@@ -126,20 +115,26 @@ Courier.prototype.noop = function() {
     return null;
 };
 
-function convert(msg, sender, uid) {
-    if (typeof msg === 'string') {
-        msg = { type: msg };
+Courier.prototype._reply = function(msg, resp) {
+    if (!msg.__uid) {
+        // Not a request.
+        return;
     }
-    msg.__sender = sender;
+
+    assert(resp);
+
+    this.send(`${msg.__sender}:${msg.__uid}`, resp);
+};
+
+Courier.prototype._convertToString = function(msg, uid) {
+    msg.__sender = this.name;
 
     if (uid) {
         msg.__uid = uid;
     }
 
-    msg = JSON.stringify(msg);
-
-    return msg;
-}
+    return JSON.stringify(msg);
+};
 
 function isGeneratorFunction(obj) {
     return obj && obj.constructor && obj.constructor.name === 'GeneratorFunction';
