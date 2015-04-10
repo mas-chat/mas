@@ -140,15 +140,17 @@ export default Ember.ArrayController.extend({
                 text: text,
                 windowId: window.get('windowId')
             }, function() {
-                let messageRecord = this.container.lookup('model:message').setProperties({
-                    body: text,
-                    cat: 'mymsg',
-                    userId: this.get('store.userId'),
-                    ts: moment().unix(),
-                    window: window
-                });
+                if (!isCommand) {
+                    let messageRecord = this.container.lookup('model:message').setProperties({
+                        body: text,
+                        cat: 'mymsg',
+                        userId: this.get('store.userId'),
+                        ts: moment().unix(),
+                        window: window
+                    });
 
-                window.get('messages').pushObject(messageRecord);
+                    window.get('messages').pushObject(messageRecord);
+                }
             }.bind(this));
         }
     },
