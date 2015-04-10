@@ -49,7 +49,7 @@ The overall approach is:
 
 5. When the client initiates an action it emits an 'req' (request) event. Event payload contains a JSON message which describes the request type and other parameters.
 
-6. After processing the request, the server sends a 'resp' event. Event payload contains a JSON message which describes the response type and other parameters.
+6. After processing the request, the server sends a Socket.io acknowledgment. Acknowledgment payload contains a JSON message which describes the response type and other parameters.
 
 7. The server sends 'ntf' events when something changes.
 
@@ -70,7 +70,6 @@ List of used custom events.
 | terminate            | server     |
 | ntf                  | server     |
 | req                  | client     |
-| resp                 | server     |
 | resume               | client     |
 | resumeok             | server     |
 
@@ -148,7 +147,7 @@ The server will send all buffered 'ntf' events if the resume is successful. Curr
 
 Contains no payload.
 
-## Ntf, req, and resp event payload
+## Ntf and req event payload
 
 ```JSON
 {
@@ -159,15 +158,15 @@ Contains no payload.
 
 | Parameter  | Type      | Description                                        |
 |------------|-----------|----------------------------------------------------|
-| id         | mandatory | Type of the notification, request, or response     |
+| id         | mandatory | Type of the notification, request                  |
 
-Other parameters are specific to notification, request, or response type. See below.
+Other parameters are specific to notification or request type. See below.
 
 # Example scenario
 
 John has two active clients (A and B). Both of the clients have established active sessions (A1 and B1).
 
-John decides to join to 'copenhagen' chat group. He clicks the join group button in client A. As a result, through the session A1, the server receives a 'req' event which contains a 'JOIN' message. Server validates the request and sends 'CREATE' notification to all John's active sessions (A1 and B1). 'CREATE' notification instructs the clients to create new UI window or tab for the 'copenhagen' group. After that the server sends 'JOIN' response to session A1. Purpose of a response message is mainly to communicate failure reasons when requests can't be fulfilled.
+John decides to join to 'copenhagen' chat group. He clicks the join group button in client A. As a result, through the session A1, the server receives a 'req' event which contains a 'JOIN' message. Server validates the request and sends 'CREATE' notification to all John's active sessions (A1 and B1). 'CREATE' notification instructs the clients to create new UI window or tab for the 'copenhagen' group. After that the server sends 'JOIN' acknowledgment to session A1. Purpose of a response message is mainly to communicate failure reasons when requests can't be fulfilled.
 
 All updates that trigger change in the UI are signaled similarly as notifications. With this approach all active clients stay synced in real time.
 
@@ -492,17 +491,17 @@ Another user(s) wants to add the user to his/her contacts list
 
 Client must send one ```FRIEND_VERDICT``` request per received userId after the user has made the decision.
 
-# Requests and responses
+# Requests and acknowledgments
 
 In addition of listening notifications from the server, the client can send commands to the server at any time.
 
-Following requests are supported. Under every request is corresponding response.
+Following requests are supported. Under every request is corresponding acknowledgment.
 
 ### SEND
 
 Send a message to a group or 1on1 discussion.
 
-Note that the session that sends SEND request doesn't receive corresponding ADDTEXT notification. Therefore SEND_RESP messages contain ```gid```, ```body```, and ```windowId``` properties that the other sessions and users get in ```ADDTEXT``` notifications (other ADDTEXT properties the client can easily compute locally). Server will echo the new message in the response exactly as it was sent in the request ```text``` property.
+Note that the session that sends SEND request doesn't receive the corresponding ADDTEXT notification. Therefore the acknowledgment contains ```gid``` property that the other sessions and users learn from ```ADDTEXT``` notifications (other ADDTEXT properties the client can easily compute locally).
 
 ```JSON
 {
@@ -513,16 +512,11 @@ Note that the session that sends SEND request doesn't receive corresponding ADDT
 }
 ```
 
-### SEND_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "SEND_RESP",
-
   "status": "OK",
-  "windowId": 23,
-  "body": "Hello world",
-  "gid": 34243322
 }
 ```
 
@@ -540,12 +534,10 @@ Join to new MAS group or IRC channel
 }
 ```
 
-### JOIN_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "JOIN_RESP",
-
   "status": "OK",
 }
 ```
@@ -567,12 +559,10 @@ Create new MAS group
 }
 ```
 
-### CREATE_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "CREATE_RESP",
-
   "status": "OK",
 }
 ```
@@ -593,12 +583,10 @@ Close a window. In case the window is not 1on1, part from the MAS group or IRC c
 }
 ```
 
-### CLOSE_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "CLOSE_RESP",
-
   "status": "OK"
 }
 ```
@@ -616,12 +604,10 @@ Ask server to start a 1on1 conversation with another user. The server will follo
 }
 ```
 
-### CHAT_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "CHAT_RESP",
-
   "status": "OK"
 }
 ```
@@ -638,11 +624,11 @@ End session immediately
 }
 ```
 
-### LOGOUT_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "LOGOUT_RESP"
+  "status": "OK"
 }
 ```
 
@@ -657,11 +643,10 @@ Indicate that the user has dismissed an alert.
 }
 ```
 
-### ACKALERT_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "ACKALERT_RESP",
   "status": "OK"
 }
 ```
@@ -681,11 +666,10 @@ Update an application parameter or setting.
 
 Currently the possible setting is ```activeDesktop```.
 
-### SET_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "SET_RESP",
   "status": "OK"
 }
 ```
@@ -701,11 +685,10 @@ User wants to add another user to his/her contacts list.
 }
 ```
 
-### REQUEST_FRIEND_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "REQUEST_FRIEND_RESP",
   "status": "OK"
 }
 ```
@@ -726,11 +709,10 @@ This is a request that the client can send after receiving FRIENDSCONFIRM notifi
 
 ```allow``` is set to true if the user accepts to be added to another user's contacts list.
 
-### FRIEND_VERDICT_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "FRIEND_VERDICT_RESP",
   "status": "OK"
 }
 ```
@@ -747,12 +729,10 @@ Contains ```errorMsg``` property if the status is not ```OK```
 }
 ```
 
-### REMOVE_FRIEND_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "REMOVE_FRIEND_RESP",
-
   "status": "OK"
 }
 ```
@@ -770,12 +750,10 @@ Contains ```errorMsg``` property if the status is not ```OK```
 
 Password protection will be disabled if ```password``` is an empty string.
 
-### UPDATE_PASSWORD_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "UPDATE_PASSWORD_RESP",
-
   "status": "OK"
 }
 ```
@@ -793,12 +771,10 @@ Contains ```errorMsg``` property if the status is not ```OK```
 }
 ```
 
-### UPDATE_PASSWORD_RESP
+#### Acknowledgment
 
 ```JSON
 {
-  "id": "UPDATE_PASSWORD_RESP",
-
   "status": "OK"
 }
 ```

@@ -17,6 +17,7 @@
 'use strict';
 
 const assert = require('assert'),
+      uid2 = require('uid2'),
       redisModule = require('./redis'),
       sendRedis = redisModule.createClient(),
       rcvRedis = redisModule.createClient(),
@@ -42,7 +43,7 @@ function Courier(name) {
     this.name = name;
     this.handlers = {};
 
-    log.info('New Courier instance created.');
+    log.info('Courier: New instance created.');
 }
 
 Courier.prototype.start = function() {
@@ -54,18 +55,17 @@ Courier.prototype.start = function() {
 
             let msg = JSON.parse(result[1]);
             let handler = this.handlers[msg.type];
-            log.info('MSG RCVD [' + msg.__sender + ' → ' + this.name + '] DATA: ' + result[1]);
+            log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}] DATA: ${result[1]}`);
 
             assert(handler, this.name + ': Missing message handler for: ' + msg.type);
 
             if (isGeneratorFunction(handler)) {
                 /*jshint -W083 */
                 co(function*() {
-                    yield handler(msg);
-                })();
+                    this._reply(msg, (yield handler(msg)));
+                }).call(this);
             } else {
-                // Normal function
-                handler(msg);
+                this._reply(msg, handler(msg));
             }
 
             processing = false;
@@ -77,12 +77,41 @@ Courier.prototype.start = function() {
     }).call(this);
 };
 
+Courier.prototype._reply = function(msg, resp) {
+    if (!msg.__uid) {
+        // Not a request.
+        return;
+    }
+
+    assert(resp);
+
+    this.send(`${msg.__sender}:${msg.__uid}`, resp);
+};
+
 Courier.prototype.send = function(dest, msg) {
     let data = convert(msg, this.name);
 
     co(function*() {
         yield sendRedis.lpush(`inbox:${dest}`, data);
     })();
+};
+
+Courier.prototype.sendReq = function*(dest, msg) {
+    let uid = Date.now() + uid2(10);
+    let data = convert(msg, this.name, uid);
+    let reqRedis = redisModule.createClient();
+
+    yield reqRedis.lpush(`inbox:${dest}`, data);
+    let resp = yield reqRedis.brpop(`inbox:${this.name}:${uid}`, 60);
+    yield reqRedis.quit();
+
+    if (resp === null) {
+        log.warn('Courier: No reply received from ' + dest);
+    }
+
+    resp = resp ? JSON.parse(resp[1]) : {};
+    delete resp.__sender;
+    return resp;
 };
 
 Courier.prototype.clearInbox = function*(name) {
@@ -97,14 +126,18 @@ Courier.prototype.noop = function() {
     return null;
 };
 
-function convert(msg, sender) {
+function convert(msg, sender, uid) {
     if (typeof msg === 'string') {
         msg = { type: msg };
     }
     msg.__sender = sender;
+
+    if (uid) {
+        msg.__uid = uid;
+    }
+
     msg = JSON.stringify(msg);
 
-    // log.info('MSG SENT [' + sender + ' -> ' + dest + '] DATA:' + msg);
     return msg;
 }
 
@@ -113,6 +146,6 @@ function isGeneratorFunction(obj) {
 }
 
 function exit() {
-    log.info('Courier ready. Exiting.');
+    log.info('Courier: Courier ready. Exiting.');
     process.exit(0);
 }

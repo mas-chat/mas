@@ -67,7 +67,7 @@ module.exports = function*(userId, sessionId, command) {
     // TBD: Check that windowId, network, and name are valid
 
     if (handlers[command.id]) {
-        yield handlers[command.id]({
+        return yield handlers[command.id]({
             userId: userId,
             sessionId: sessionId,
             windowId: windowId,
@@ -94,39 +94,31 @@ function *handleSend(params) {
             conversationId: params.conversation.conversationId,
             text: params.command.text.substring(1)
         });
-        return;
+    } else {
+        yield params.conversation.addMessageUnlessDuplicate(params.userId, {
+            userId: params.userId,
+            cat: 'msg',
+            body: params.command.text
+        }, params.sessionId);
+
+        courier.send(params.backend, {
+            type: 'send',
+            userId: params.userId,
+            sessionId: params.sessionId,
+            conversationId: params.conversation.conversationId,
+            text: params.command.text
+        });
     }
 
-    let gid = yield params.conversation.addMessageUnlessDuplicate(params.userId, {
-        userId: params.userId,
-        cat: 'msg',
-        body: params.command.text
-    }, params.sessionId);
-
-    courier.send(params.backend, {
-        type: 'send',
-        userId: params.userId,
-        sessionId: params.sessionId,
-        conversationId: params.conversation.conversationId,
-        text: params.command.text
-    });
-
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'SEND_RESP',
-        status: 'OK',
-        body: params.command.text,
-        windowId: params.windowId,
-        gid: gid
-    });
+    return { status: 'OK' };
 }
 
 function *handleCreate(params) {
     /* jshint noyield:true */
 
-    courier.send('loopbackparser', {
+    return yield courier.sendReq('loopbackparser', {
         type: 'create',
         userId: params.userId,
-        sessionId: params.sessionId,
         name: params.command.name,
         password: params.command.password
     });
@@ -134,12 +126,7 @@ function *handleCreate(params) {
 
 function *handleJoin(params) {
     if (!params.command.name || !params.command.network) {
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'JOIN_RESP',
-            status: 'PARAMETER_MISSING',
-            errorMsg: 'Name or network missing.'
-        });
-        return;
+        return { status: 'PARAMETER_MISSING', errorMsg: 'Name or network missing.' };
     }
 
     let conversation = yield conversationFactory.findGroup(
@@ -149,19 +136,13 @@ function *handleJoin(params) {
         let isMember = yield conversation.isMember(params.userId);
 
         if (isMember) {
-            yield outbox.queue(params.userId, params.sessionId, {
-                id: 'JOIN_RESP',
-                status: 'ALREADY_JOINED',
-                errorMsg: 'You have already joined the group.'
-            });
-            return;
+            return { status: 'ALREADY_JOINED', errorMsg: 'You have already joined the group.' };
         }
     }
 
-    courier.send(params.backend, {
+    return yield courier.sendReq(params.backend, {
         type: 'join',
         userId: params.userId,
-        sessionId: params.sessionId,
         network: params.command.network,
         name: params.command.name,
         password: params.command.password || '' // Normalize, no password is '', not null or false
@@ -170,7 +151,7 @@ function *handleJoin(params) {
 
 function *handleClose(params) {
     if (!params.conversation) {
-        return;
+        return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
     }
 
     // Ask all sessions to close this window
@@ -194,10 +175,7 @@ function *handleClose(params) {
         conversationType: params.conversation.type
     });
 
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'CLOSE_RESP',
-        status: 'OK'
-    });
+    return { status: 'OK' };
 }
 
 function *handleUpdate(params) {
@@ -217,7 +195,7 @@ function *handleUpdate(params) {
         log.warn(params.userId,
             'handleUpdate(): Client tried to update non-existent window, id: ' + params.windowId +
             ', command:' + params.command);
-        return;
+        return { status: 'ERROR' };
     }
 
     let update = false;
@@ -245,36 +223,28 @@ function *handleUpdate(params) {
             desktop: params.command.desktop
         }, params.sessionId);
     }
+
+    return { status: 'OK' };
 }
 
 function *handleUpdatePassword(params) {
-    if (!params.conversation) {
-        return;
-    }
-
     let password = params.command.password;
 
     // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
-    if (typeof password !== 'string') {
-        yield respondError('UPDATE_PASSWORD_RESP', params.userId, params.sessionId,
-            'New password is invalid.');
-        return;
+
+    if (!params.conversation) {
+        return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
+    } else if (typeof password !== 'string') {
+        return { status: 'ERROR', errorMsg: 'New password is invalid.' };
     } else if (params.conversation.type === '1on1') {
-        yield respondError('UPDATE_PASSWORD_RESP', params.userId, params.sessionId,
-            'Can\'t set password for 1on1.');
-        return;
+        return { status: 'ERROR', errorMsg: 'Can\'t set password for 1on1.' };
     }
 
-    courier.send(params.backend, {
+    return yield courier.sendReq(params.backend, {
         type: 'updatePassword',
         userId: params.userId,
         conversationId: params.conversation.conversationId,
         password: password
-    });
-
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'UPDATE_PASSWORD_RESP',
-        status: 'OK'
     });
 }
 
@@ -282,10 +252,10 @@ function *handleUpdateTopic(params) {
     /* jshint noyield:true */
 
     if (!params.conversation) {
-        return;
+        return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
     }
 
-    courier.send(params.backend, {
+    return yield courier.sendReq(params.backend, {
         type: 'updateTopic',
         userId: params.userId,
         conversationId: params.conversation.conversationId,
@@ -295,7 +265,6 @@ function *handleUpdateTopic(params) {
 
 function *handleSet(params) {
     let properties = params.command.settings || {};
-    let error = false;
 
     const allowed = [ 'activeDesktop' ];
 
@@ -303,10 +272,7 @@ function *handleSet(params) {
         let value = properties[prop];
 
         if (allowed.indexOf(prop) === -1) {
-            yield respondError('SET_RESP', params.userId, params.sessionId,
-                `'${prop}' is not a valid property`);
-            error = true;
-            break;
+            return { status: 'ERROR', errorMsg: `'${prop}' is not a valid property` };
         }
 
         // TBD: Re-factor when there are multiple settings
@@ -314,21 +280,15 @@ function *handleSet(params) {
             if (yield window.isValidDesktop(params.userId, value)) {
                 yield redis.hset(`settings:${params.userId}`, 'activeDesktop', properties[prop]);
             } else {
-                yield respondError('SET_RESP', params.userId, params.sessionId,
-                    `Desktop '${value}' doesn't exist`);
-                error = true;
+                return { status: 'ERROR', errorMsg: `Desktop '${value}' doesn't exist` };
             }
         }
     }
 
-    if (!error) {
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'SET_RESP',
-            status: 'OK'
-        });
-    }
+    return { status: 'OK' };
 }
 
+// TBD: Remove WHOIS request
 function *handleWhois(params) {
     /* jshint noyield:true */
 
@@ -338,6 +298,8 @@ function *handleWhois(params) {
         network: params.network,
         nick: params.command.nick
     });
+
+    return { status: 'OK' };
 }
 
 function *handleChat(params) {
@@ -354,13 +316,11 @@ function *handleChat(params) {
     }
 
     if (!targetUserId || typeof targetUserId !== 'string') {
-        yield respondError('CHAT_RESP', userId, params.sessionId, 'Malformed request.');
-        return;
+        return { status: 'ERROR', errorMsg: 'Malformed request.' };
     }
 
     if (userId === targetUserId) {
-        yield respondError('CHAT_RESP', userId, params.sessionId, 'You can\'t chat with yourself.');
-        return;
+        return { status: 'ERROR', errorMsg: 'You can\'t chat with yourself.' };
     }
 
     let conversation = yield conversationFactory.find1on1(userId, targetUserId, network);
@@ -371,9 +331,10 @@ function *handleChat(params) {
         let existingWindow = yield window.findByConversationId(userId, conversation.conversationId);
 
         if (existingWindow) {
-            yield respondError('CHAT_RESP', userId, params.sessionId,
-                '1on1 chat window with this person is already open.');
-            return;
+            return {
+                status: 'ERROR',
+                errorMsg: '1on1 chat window with this person is already open.'
+            };
         } else {
             yield window.create(userId, conversation.conversationId);
         }
@@ -387,28 +348,24 @@ function *handleChat(params) {
         network: network,
         targetUserId: targetUserId
     });
+
+    return { status: 'OK' };
 }
 
 function *handleAckAlert(params) {
     let alertId = params.command.alertId;
-
     yield redis.srem(`activealerts:${params.userId}`, alertId);
 
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'ACKALERT_RESP',
-        status: 'OK'
-    });
+    return { status: 'OK' };
 }
 
 function *handleLogout(params) {
+    /* jshint noyield:true */
+
     log.info(params.userId, 'User ended session. SessionId: ' + params.sessionId);
 
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'LOGOUT_RESP'
-    });
-
     setTimeout(function() {
-        // Give the system some time to deliver LOGOUT_RESP before cleanup
+        // Give the system some time to deliver the acknowledgment before cleanup
         co(function*() {
             let last = yield redis.run('deleteSession', params.userId, params.sessionId);
 
@@ -417,30 +374,21 @@ function *handleLogout(params) {
             }
         })();
     }, 5000);
+
+    return { status: 'OK' };
 }
 
 function *handleGetConversationLog(params) {
     let command = params.command;
 
     if (!params.conversation) {
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'GET_CONVERSATION_LOG_RESP',
-            status: 'ERROR'
-        });
-        return;
+        return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
     }
 
     let conversationId = params.conversation.conversationId;
+    let results = yield search.getMessagesForDay(conversationId, command.start, command.end);
 
-    search.getMessagesForDay(conversationId, command.start, command.end, function(results) {
-        co(function*() {
-            yield outbox.queue(params.userId, params.sessionId, {
-                id: 'GET_CONVERSATION_LOG_RESP',
-                status: results === null ? 'ERROR' : 'OK',
-                results: results
-            });
-        })();
-    });
+    return { status: results === null ? 'ERROR' : 'OK', results: results };
 }
 
 function *handleRequestFriend(params) {
@@ -449,26 +397,19 @@ function *handleRequestFriend(params) {
     let exists = yield redis.exists(`user:${requestorUserId}`);
 
     if (!exists) {
-        yield respondError('REQUEST_FRIEND_RESP', userId, params.sessionId,
-           'Unknown MAS userId.');
-        return;
+        return { status: 'ERROR', errorMsg: 'Unknown userId.' };
     }
 
     let existingFriend = yield redis.sismember(`friends:${userId}`, requestorUserId);
 
     if (existingFriend) {
-        yield respondError('REQUEST_FRIEND_RESP', userId, params.sessionId,
-           'This person is already on your contacts list.');
-        return;
+        return { status: 'ERROR', errorMsg: 'This person is already on your contacts list.' };
     }
 
     yield redis.sadd(`friendsrequests:${requestorUserId}`, userId);
     yield friends.sendFriendConfirm(requestorUserId, params.sessionId);
 
-    yield outbox.queue(userId, params.sessionId, {
-        id: 'REQUEST_FRIEND_RESP',
-        status: 'OK'
-    });
+    return { status: 'OK' };
 }
 
 function *handleFriendVerdict(params) {
@@ -478,9 +419,7 @@ function *handleFriendVerdict(params) {
     let removed = yield redis.srem(`friendsrequests:${userId}`, requestorUserId);
 
     if (removed === 0) {
-        yield respondError('FRIEND_VERDICT_RESP', userId, params.sessionId,
-           'Invalid userId.');
-        return;
+        return { status: 'ERROR', errorMsg: 'Invalid userId.' };
     }
 
     if (params.command.allow) {
@@ -492,30 +431,16 @@ function *handleFriendVerdict(params) {
         yield friends.sendFriends(userId);
     }
 
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'FRIEND_VERDICT_RESP',
-        status: 'OK'
-    });
+    return { status: 'OK' };
 }
 
 function *handleRemoveFriend(params) {
     if (!params.command.userId) {
-        return;
+        return { status: 'ERROR', errorMsg: 'Invalid userId.' };
     }
-
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'REMOVE_FRIEND_RESP',
-        status: 'OK'
-    });
 
     yield redis.srem(`friends:${params.userId}`, params.command.userId);
     yield friends.sendFriends(params.userId);
-}
 
-function *respondError(resp, userId, sessionId, msg, errorStatus) {
-    yield outbox.queue(userId, sessionId, {
-        id: resp,
-        status: errorStatus || 'ERROR',
-        errorMsg: msg
-    });
+    return { status: 'OK' };
 }

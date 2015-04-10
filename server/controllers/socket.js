@@ -37,10 +37,6 @@ exports.setup = function(server) {
         let sessionId = null;
         let state = 'connected'; // connected, disconnected, authenticated
 
-        function emit(command) {
-            socket.emit(command.id.endsWith('_RESP') ? 'resp' : 'ntf', command);
-        }
-
         function *eventLoop() {
             while (1) {
                 let ts = Math.round(Date.now() / 1000);
@@ -52,7 +48,9 @@ exports.setup = function(server) {
                     break;
                 }
 
-                commands.forEach(emit);
+                for (let command of commands) {
+                    socket.emit('ntf', command);
+                }
             }
         }
 
@@ -133,14 +131,15 @@ exports.setup = function(server) {
             })();
         });
 
-        socket.on('req', function(data) {
+        socket.on('req', function(data, cb) {
             co(function*() {
                 if (state !== 'authenticated') {
                     end();
                     return;
                 }
 
-                yield requestController(userId, sessionId, data);
+                let resp = yield requestController(userId, sessionId, data);
+                cb(resp || {}); // Send the response as Socket.io acknowledgment.
             })();
         });
 

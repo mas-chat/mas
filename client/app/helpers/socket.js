@@ -26,7 +26,6 @@ export default Ember.Object.extend({
 
     sessionId: 0,
 
-    _callbacks: {},
     _notificationParser: null,
     _connectionLost: false,
     _connectionLostWarningVisible: false,
@@ -98,15 +97,6 @@ export default Ember.Object.extend({
             this._notificationParser.process(data);
         }));
 
-        socket.on('resp', Ember.run.bind(this, function(command) {
-            Ember.Logger.info('← RESP: ' + command.id);
-
-            // Command is a response to command we sent earlier
-            if (this._callbacks[command.id]) {
-                this._callbacks[command.id](command);
-            }
-        }));
-
         socket.on('disconnect', Ember.run.bind(this, function() {
             Ember.Logger.info('Socket.io connection lost.');
 
@@ -149,11 +139,13 @@ export default Ember.Object.extend({
     },
 
     _send(command, callback) {
-        if (callback) {
-            this._callbacks[command.id + '_RESP'] = callback;
-        }
+        this.socket.emit('req', command, function(data) {
+            if (callback) {
+                Ember.Logger.info('← Response to REQ');
+                callback(data);
+            }
+        });
 
-        this.socket.emit('req', command);
         Ember.Logger.info('→ REQ: ' + command.id);
     },
 

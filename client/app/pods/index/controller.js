@@ -139,9 +139,9 @@ export default Ember.ArrayController.extend({
                 id: 'SEND',
                 text: text,
                 windowId: window.get('windowId')
-            }, function(resp) {
+            }, function() {
                 let messageRecord = this.container.lookup('model:message').setProperties({
-                    body: resp.body,
+                    body: text,
                     cat: 'mymsg',
                     userId: this.get('store.userId'),
                     ts: moment().unix(),

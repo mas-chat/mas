@@ -56,31 +56,19 @@ function *processCreate(params) {
     let password = params.password;
 
     if (!groupName) {
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'CREATE_RESP',
-            status: 'ERROR_NAME_MISSING',
-            errorMsg: 'Name can\'t be empty.'
-        });
-        return;
+        return { status: 'ERROR_NAME_MISSING', errorMsg: 'Name can\'t be empty.' };
     }
 
     let conversation = yield conversationFactory.findGroup(groupName, 'MAS');
 
     if (conversation) {
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'CREATE_RESP',
+        return {
             status: 'ERROR_EXISTS',
             errorMsg: 'A group by this name already exists. If you\'d like, you can try to join it.'
-        });
-        return;
+        };
     }
 
     // TBD Add other checks
-
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'CREATE_RESP',
-        status: 'OK'
-    });
 
     conversation = yield conversationFactory.create({
         owner: userId,
@@ -93,6 +81,8 @@ function *processCreate(params) {
     });
 
     yield joinGroup(conversation, userId, '*');
+
+    return { status: 'OK' };
 }
 
 function *processJoin(params) {
@@ -101,38 +91,24 @@ function *processJoin(params) {
     let conversation = yield conversationFactory.findGroup(groupName, 'MAS');
 
     if (!conversation) {
-        yield outbox.queue(userId, params.sessionId, {
-            id: 'JOIN_RESP',
-            status: 'NOT_FOUND',
-            errorMsg: 'Group doesn\'t exist.'
-        });
-        return;
-    } else if (conversation.password !== '' &&
-        conversation.password !== params.password) {
-
-        yield outbox.queue(userId, params.sessionId, {
-            id: 'JOIN_RESP',
-            status: 'INCORRECT_PASSWORD',
-            errorMsg: 'Incorrect password.'
-        });
-        return;
+        return { status: 'NOT_FOUND', errorMsg: 'Group doesn\'t exist.' };
+    } else if (conversation.password !== '' && conversation.password !== params.password) {
+        return { status: 'INCORRECT_PASSWORD', errorMsg: 'Incorrect password.' };
     }
-
-    yield outbox.queue(userId, params.sessionId, {
-        id: 'JOIN_RESP',
-        status: 'OK'
-    });
 
     // Owner might have returned
     let role = conversation.owner === userId ? '*' : 'u';
 
     yield joinGroup(conversation, userId, role);
+
+    return { status: 'OK' };
 }
 
 function *processUpdatePassword(params) {
     let conversation = yield conversationFactory.get(params.conversationId);
-
     yield conversation.setPassword(params.password);
+
+    return { status: 'OK' };
 }
 
 function *processUpdateTopic(params) {
@@ -141,10 +117,7 @@ function *processUpdateTopic(params) {
 
     yield conversation.setTopic(params.topic, nick);
 
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'UPDATE_TOPIC_RESP',
-        status: 'OK'
-    });
+    return { status: 'OK' };
 }
 
 function *joinGroup(conversation, userId, role) {

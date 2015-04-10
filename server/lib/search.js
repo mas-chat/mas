@@ -16,7 +16,8 @@
 
 'use strict';
 
-const elasticSearchClient = require('./elasticSearch').getClient(),
+const Q = require('q'),
+      elasticSearchClient = require('./elasticSearch').getClient(),
       log = require('./log');
 
 exports.storeMessage = function(conversationId, msg) {
@@ -45,9 +46,12 @@ exports.storeMessage = function(conversationId, msg) {
     return true;
 };
 
-exports.getMessagesForDay = function(conversationId, start, end, callback) {
+exports.getMessagesForDay = function(conversationId, start, end) {
+    let deferred = Q.defer();
+
     if (!elasticSearchClient) {
         warn();
+        deferred.resolve(null);
         return;
     }
 
@@ -95,10 +99,10 @@ exports.getMessagesForDay = function(conversationId, start, end, callback) {
             });
         }
 
-        callback(results);
+        deferred.resolve(results);
     });
 
-    return true;
+    return deferred.promise;
 };
 
 function warn() {

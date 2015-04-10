@@ -176,12 +176,7 @@ function *processJoin(params) {
     let illegalNameRegEx = /\s|\cG|,/; // See RFC2812, section 1.3
 
     if (!channelName || channelName === '' || illegalNameRegEx.test(channelName)) {
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'JOIN_RESP',
-            status: 'ERROR',
-            errorMsg: 'Illegal or missing channel name.'
-        });
-        return;
+        return { status: 'ERROR', errorMsg: 'Illegal or missing channel name.' };
     }
 
     if (!hasChannelPrefixRegex.test(channelName)) {
@@ -197,10 +192,7 @@ function *processJoin(params) {
         yield connect(params.userId, params.network);
     }
 
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'JOIN_RESP',
-        status: 'OK'
-    });
+    return { status: 'OK' };
 }
 
 function *processChat(params) {
@@ -210,11 +202,6 @@ function *processChat(params) {
     if (!conversation) {
         yield window.setup1on1(params.userId, params.targetUserId, params.network);
     }
-
-    yield outbox.queue(params.userId, params.sessionId, {
-        id: 'CHAT_RESP',
-        status: 'OK'
-    });
 }
 
 function *processClose(params) {
@@ -241,24 +228,20 @@ function *processUpdatePassword(params) {
     }
 
     if (state !== 'connected') {
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'UPDATE_PASSWORD_RESP',
+        return {
             status: 'ERROR',
             errorMsg: 'Can\'t change the password. You are not connected to the IRC network'
-        });
-    } else {
-        courier.send('connectionmanager', {
-            type: 'write',
-            userId: params.userId,
-            network: conversation.network,
-            line: modeline
-        });
-
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'UPDATE_PASSWORD_RESP',
-            status: 'OK'
-        });
+        };
     }
+
+    courier.send('connectionmanager', {
+        type: 'write',
+        userId: params.userId,
+        network: conversation.network,
+        line: modeline
+    });
+
+    return { status: 'OK' };
 }
 
 function *processUpdateTopic(params) {
@@ -266,11 +249,10 @@ function *processUpdateTopic(params) {
     let state = yield redis.hget(`networks:${params.userId}:${conversation.network}`, 'state');
 
     if (state !== 'connected') {
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'UPDATE_TOPIC_RESP',
+        return {
             status: 'ERROR',
             errorMsg: 'Can\'t change the topic. You are not connected to the IRC network'
-        });
+        };
     } else {
         courier.send('connectionmanager', {
             type: 'write',
@@ -279,10 +261,7 @@ function *processUpdateTopic(params) {
             line: 'TOPIC ' + conversation.name + ' :' + params.topic
         });
 
-        yield outbox.queue(params.userId, params.sessionId, {
-            id: 'UPDATE_TOPIC_RESP',
-            status: 'OK'
-        });
+        return { status: 'OK'};
     }
 }
 
