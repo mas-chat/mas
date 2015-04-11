@@ -27,16 +27,6 @@
         opacity: 0.3;
     }
 
-    &.irc-server-window {
-        .window-content {
-            background-color: rgb(241, 242, 244);
-        }
-
-        .window-title {
-            background-color: rgb(32, 147, 185);
-        }
-    }
-
     .window-title {
         padding: 4px 8px;
         background-color: @window-title-bg-color;
@@ -44,12 +34,34 @@
         color: whitesmoke;
     }
 
-    .window-content {
-        background-color: @window-bg-color;
+    &.irc-server-window {
+        .window-title {
+            background-color: rgb(32, 147, 185);
+        }
+
+        .window-content {
+            background-color: rgb(241, 242, 244);
+        }
     }
 
-    .window-title.private-1on1 {
-        background-color: green;
+    &.private-1on1 {
+        .window-title {
+            background-color: green;
+        }
+
+        .window-content {
+            background-color: #FFF2D4;
+        }
+
+        .date-divider {
+            background-color: rgb(255, 242, 212);
+        }
+    }
+
+    &.group {
+        .window-content {
+            background-color: white;
+        }
     }
 
     .window-title-buttons {
@@ -257,7 +269,8 @@
 
     iframe.youtube-preview {
         height: 178px;
-        padding-top: 9px;
+        padding: 9px 20px 0px 0px;
+        vertical-align: middle;
     }
 
     .date-divider {

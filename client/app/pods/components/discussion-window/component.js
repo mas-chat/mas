@@ -30,7 +30,8 @@ export default Ember.Component.extend(UploadMixin, {
         'animating:velocity-animating:',
         'expanded:expanded:',
         'visible:visible:hidden',
-        'ircServerWindow:irc-server-window:'
+        'ircServerWindow:irc-server-window:',
+        'type'
     ],
 
     expanded: false,
@@ -130,7 +131,7 @@ export default Ember.Component.extend(UploadMixin, {
         return this.get('content.type') === 'group';
     }.property('content.type'),
 
-    cssType: function() {
+    type: function() {
         if (this.get('content.type') === 'group') {
             return 'group';
         } else if (this.get('content.userId') === 'iSERVER') {
