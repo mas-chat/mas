@@ -198,6 +198,7 @@ export default Ember.Component.extend(UploadMixin, {
     didInsertElement() {
         let that = this;
 
+        this.$images = this.$('img[data-src]');
         this.$messagePanel = this.$('.window-messages');
         this._addScrollHandler();
 
