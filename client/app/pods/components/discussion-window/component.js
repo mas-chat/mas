@@ -90,14 +90,8 @@ export default Ember.Component.extend(UploadMixin, {
             this.set('scrolling', true);
         }
 
-        Ember.run.debounce(this, function() {
-            // Update images array
-            this.$images = this.$('img[data-src]');
-
-            Ember.run.scheduleOnce('afterRender', this, function() {
-                this._goToBottom(true);
-            });
-        }, 300); // This should be more than duration of goToBottom() scrolling animation
+        // Threshold should be more than duration of goToBottom() scrolling animation
+        Ember.run.debounce(this, this._checkNewImages, 300);
 
         let cat = messages[messages.length - 1].cat; // Message that was just added.
         let importantMessage = cat === 'msg' || cat === 'error' || cat === 'action';
@@ -118,6 +112,15 @@ export default Ember.Component.extend(UploadMixin, {
             }
         }
     }.observes('content.messages.@each'),
+
+    _checkNewImages() {
+        // Update images array
+        this.$images = this.$('img[data-src]');
+
+        Ember.run.scheduleOnce('afterRender', this, function() {
+            this._goToBottom(true);
+        });
+    },
 
     ircServerWindow: function() {
         return this.get('content.userId') === 'iSERVER' ? 'irc-server-window' : '';
@@ -312,15 +315,13 @@ export default Ember.Component.extend(UploadMixin, {
             return;
         }
 
-        // TBD: Animation running and Ember updating {{each}} doesn't always seem to mix well
-        // Maybe glimmer fixes that.
         let duration = animate ? 200 : 0;
 
         this.$('.window-messages-end').velocity('stop').velocity('scroll', {
             container: this.$messagePanel,
             duration: duration,
             easing: 'spring',
-            offset: 100, // Shouldn't be needed
+            offset: -1 * this.$messagePanel.innerHeight(),
             begin: function() {
                 this.set('scrolling', true);
             }.bind(this),
@@ -332,30 +333,32 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     _addScrollHandler() {
-        this.$messagePanel.on('scroll', function() {
-            Ember.run.debounce(this, function() {
-                if (this.get('animating') || this.get('scrolling')) {
-                    return;
-                }
+        let handler = function() {
+            if (this.get('animating') || this.get('scrolling')) {
+                return;
+            }
 
-                let $panel = this.$messagePanel;
-                let scrollPos = $panel.scrollTop();
+            let $panel = this.$messagePanel;
+            let scrollPos = $panel.scrollTop();
 
-                // User doesn't need to scroll exactly to the end.
-                let bottomTreshhold = $panel.prop('scrollHeight') - 5;
+            // User doesn't need to scroll exactly to the end.
+            let bottomTreshhold = $panel.prop('scrollHeight') - 5;
 
-                if (scrollPos + $panel.innerHeight() >= bottomTreshhold) {
-                    this.set('scrollLock', false);
-                    Ember.Logger.info('scrollock off');
-                } else if (!this.get('deletedLine')) {
-                    this.set('scrollLock', true);
-                    Ember.Logger.info('scrollock on');
-                }
+            if (scrollPos + $panel.innerHeight() >= bottomTreshhold) {
+                this.set('scrollLock', false);
+                Ember.Logger.info('scrollock off');
+            } else if (!this.get('deletedLine')) {
+                this.set('scrollLock', true);
+                Ember.Logger.info('scrollock on');
+            }
 
-                this.set('deletedLine', false); // Hack
-                this._showImages();
-            }, 150);
-        }.bind(this));
+            this.set('deletedLine', false); // Hack
+            this._showImages();
+        };
+
+        this.$messagePanel.on('scroll', () => {
+            Ember.run.throttle(this, handler, 150);
+        });
     },
 
     _showImages() {
