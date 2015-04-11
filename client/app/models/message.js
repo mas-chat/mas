@@ -160,7 +160,7 @@ export default Ember.Object.extend({
         }
 
         // Emoji separation
-        let parts = text.split(/(:[a-z0-9_-]+:)/);
+        let parts = text.split(/(:\S+:)/);
 
         for (let part of parts) {
             let match = /^:(.+):$/.exec(part);
