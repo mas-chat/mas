@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals URI, emojify */
+/* globals URI */
 
 import Ember from 'ember';
 
@@ -46,114 +46,130 @@ export default Ember.Object.extend({
     }.observes('userId', 'window').on('init'),
 
     decoratedCat: function() {
+        let mentionedRegEx = this.get('mentionedRegEx');
+        let body = this.get('body');
+
         // TBD: Network === flowdock check is missing
         if (this.get('body').indexOf('Show in Flowdock:') > -1) {
             return 'flowdock-ignore';
         }
 
-        return this.get('nick') === 'Flowdock' ? 'flowdock' : this.get('cat');
-    }.property('cat', 'nick'),
+        if (mentionedRegEx && mentionedRegEx.test(body)) {
+            return 'mention';
+        }
 
-    decoratedBody: function() {
+        return this.get('nick') === 'Flowdock' ? 'flowdock' : this.get('cat');
+    }.property('cat', 'nick', 'body', 'ownNick', 'mentionedRegEx'),
+
+    channelAction: function() {
         let category = this.get('cat');
         let nick = this.get('nick');
-        let mentionedRegEx = this.get('mentionedRegEx');
-        let body = this.get('body');
-        let network = this.get('window.network');
         let groupName = this.get('window.name');
+        let body = this.get('body');
 
-        let output = '';
-
-        if (category === 'join') {
-            output = 'has joined ' + groupName + '.';
-        } else if (category === 'part') {
-            output = 'has left ' + groupName + '.' + body;
-        } else if (category === 'quit') {
-            output = 'has quit irc. Reason: ' + body;
-        } else if (category === 'kick') {
-            output = 'was kicked from ' + groupName + '. Reason: ' + body;
+        switch (category) {
+            case 'join':
+                return `${nick} has joined ${groupName}.`;
+            case 'part':
+                return `${nick} has left ${groupName}. ${body}`;
+            case 'quit':
+                return `${nick} has quit irc. Reason: ${body}`;
+            case 'kick':
+                return `${nick} was kicked from ${groupName}. Reason: ${body}`;
         }
+    }.property('cat'),
 
-        if (output === '') {
-            output = this._decorate(this.get('body'), network);
-        } else {
-            output = '<span class="body">' + nick + ' ' + output + '</span>';
-        }
-
-        if (mentionedRegEx && mentionedRegEx.test(body)) {
-            this.set('cat', 'mention');
-        }
-
-        return output;
-    }.property('body', 'ownNick', 'mentionedRegEx'),
-
-    _decorate(text, network) {
-        let textParts = [];
-        let imgUrls = [];
+    bodyParts: function() {
+        let result = Ember.A([]);
         let pos = 0;
         let imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
+        let body = this.get('body');
+        let network = this.get('network');
 
-        URI.withinString(text, function(url, start, end, source) {
+        URI.withinString(body, function(url, start, end, source) {
             let urlObj = new URI(url);
             let visibleLink;
+            let media = false;
+            let type = '';
 
             if (start !== pos) {
-                textParts.push(this._escHtml(source.substring(pos, start), false));
+                this._addTextPart(result, source.substring(pos, start), network);
             }
 
             if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
-                url = this._escHtml(url, true);
-
-                imgUrls.push('<li><a href="' + url + '" class="user-img"><img ' +
-                    'class="loader loader-small-dark" src="" data-src="' + url + '"></a></li>');
-                visibleLink = this._escHtml(urlObj.filename(), false);
+                visibleLink = urlObj.filename();
+                media = true;
+                type = 'image';
             } else if (urlObj.domain() === 'youtube.com' && urlObj.search(true).v) {
-                // Youtube
-                let videoId = urlObj.search(true).v;
-
-                imgUrls.push(
-                    `<li><iframe class="youtube-preview" ` +
-                    `src="https://www.youtube.com/embed/${videoId}?showinfo=0&autohide=1" ` +
-                    `allowfullscreen frameborder="0"></iframe>`);
-                visibleLink = this._escHtml(urlObj.toString(), false);
+                visibleLink = urlObj.toString();
+                media = true;
+                type = 'youtubelink';
             } else {
-                visibleLink = this._escHtml(urlObj.readable(), false);
+                visibleLink = urlObj.readable();
             }
 
-            textParts.push('<a href="' + url + '" target="_blank">' + visibleLink + '</a>');
+            result.push({
+                link: true,
+                text: visibleLink,
+                url: url,
+                media: media,
+                type: type
+            });
+
             pos = end;
 
             return url;
         }.bind(this));
 
-        if (text && text.length !== pos) {
-            textParts.push(this._escHtml(text.substring(pos), false));
+        if (body && body.length !== pos) {
+            this._addTextPart(result, body.substring(pos), network);
         }
 
-        let processedText = textParts.join('');
+        return result;
+    }.property('body'),
 
+    hasMedia: function() {
+        return this.get('bodyParts').isAny('media', true);
+    }.property('bodyParts'),
+
+    hasYoutubeVideo: function() {
+        return this.get('bodyParts').isAny('type', 'youtubelink');
+    }.property('bodyParts'),
+
+    videoId: function() {
+        let video = this.get('bodyParts').findBy('type', 'youtubelink');
+
+        if (video) {
+            let urlObj = new URI(video.url);
+            return urlObj.search(true).v;
+        } else {
+            return null;
+        }
+    }.property('bodyParts'),
+
+    images: function() {
+        return this.get('bodyParts').filterBy('type', 'image');
+    }.property('bodyparts'),
+
+    _addTextPart(array, text, network) {
         if (network === 'Flowdock') {
-            processedText = processedText.replace(
+            text = text.replace(
                 /^\[(.*?)\] &lt;&lt; (.*)/, function(match, p1, p2) {
                 return '<span class="msg-prefix">' + p1.substring(0, 9) + '</span> ' + p2;
             });
         }
 
-        // Legacy thumb up emoji
-        processedText = processedText.replace('*thumb up*', ':thumbsup: ');
+        // Emoji separation
+        let parts = text.split(/(:[a-z0-9_-]+:)/);
 
-        // Other emojis
-        processedText = emojify.replace(processedText);
+        for (let part of parts) {
+            let match = /^:(.+):$/.exec(part);
 
-        let imgSection = imgUrls.length ? '<ul class="user-image">' + imgUrls.join(' ') +
-            '</ul>' : '';
-        let textSection = '<span class="body">' + processedText + '</span>';
-
-        return textSection + imgSection;
-    },
-
-    _escHtml(string, full) {
-        let res = string.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-        return full ? res.replace(/>/g, '&gt;').replace(/"/g, '&quot;') : res;
+            array.push({
+                link: false,
+                text: part,
+                emoji: match && emojify.emojiNames.indexOf(match[1]) > -1 ? match[1] : false
+            });
+        }
     }
 });
