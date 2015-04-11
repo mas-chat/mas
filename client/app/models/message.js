@@ -107,6 +107,15 @@ export default Ember.Object.extend({
                 imgUrls.push('<li><a href="' + url + '" class="user-img"><img ' +
                     'class="loader loader-small-dark" src="" data-src="' + url + '"></a></li>');
                 visibleLink = this._escHtml(urlObj.filename(), false);
+            } else if (urlObj.domain() === 'youtube.com' && urlObj.search(true).v) {
+                // Youtube
+                let videoId = urlObj.search(true).v;
+
+                imgUrls.push(
+                    `<li><iframe class="youtube-preview" ` +
+                    `src="https://www.youtube.com/embed/${videoId}?showinfo=0&autohide=1" ` +
+                    `allowfullscreen frameborder="0"></iframe>`);
+                visibleLink = this._escHtml(urlObj.toString(), false);
             } else {
                 visibleLink = this._escHtml(urlObj.readable(), false);
             }
