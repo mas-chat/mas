@@ -48,6 +48,10 @@ let ircMessageBuffer = {};
 
 let handlers = {
     '043': handle043,
+    311: handle311,
+    312: handle312,
+    317: handle317,
+    319: handle319,
     332: handle332,
     333: handleNoop, // RPL_TOPICWHOTIME: No good place to show
     353: handle353,
@@ -518,6 +522,43 @@ function *handle043(userId, msg) {
 
     yield updateNick(userId, msg.network, oldNick, newNick);
     yield tryDifferentNick(userId, msg.network);
+}
+
+function *handle311(userId, msg) {
+    // :irc.localhost 311 ilkka_ Mika7 ~Mika7 127.0.0.1 * :Real Name (Ralph v1.0)
+    let nick = msg.params[0];
+    let user = msg.params[1];
+    let host = msg.params[2];
+    let realName = msg.params[4];
+
+    yield addSystemMessage(userId, msg.network, 'server',
+        `--- ${nick} is [${user}@${host}] (${realName})`);
+}
+
+function *handle312(userId, msg) {
+    // :irc.localhost 312 ilkka_ Mika7 irc.localhost :Darwin ircd default configuration
+    let server = msg.params[1];
+    let serverInfo = msg.params[2];
+
+    yield addSystemMessage(userId, msg.network, 'server',
+        `--- using server ${server} [${serverInfo}]`);
+}
+
+function *handle317(userId, msg) {
+    // irc.localhost 317 ilkka_ Mika7 44082 1428703143 :seconds idle, signon time
+    let idleTime = msg.params[1];
+    let signonTime = new Date(parseInt(msg.params[2]) * 1000).toUTCString();
+
+    yield addSystemMessage(userId, msg.network, 'server',
+        `--- has been idle ${idleTime} seconds. Signed on ${signonTime}`);
+}
+
+
+function *handle319(userId, msg) {
+    // :irc.localhost 319 ilkka_ Mika7 :#portaali @#hemmot @#ilves #ceeassa
+    let channels = msg.params[1];
+
+    yield addSystemMessage(userId, msg.network, 'server', `--- on channels ${channels}`);
 }
 
 function *handle332(userId, msg) {
