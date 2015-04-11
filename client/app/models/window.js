@@ -67,6 +67,10 @@ export default Ember.Object.extend({
         return this.get('store.users').getNick(userId, this.get('network'));
     }.property('network'),
 
+    userNickHighlightRegex: function() {
+        return new RegExp(`(^|[@ ])${this.get('userNick')}[ :]`);
+    }.property('userNick'),
+
     operatorNames: function() {
         return this._mapUserIdsToNicks('operators').sortBy('nick');
     }.property('operators.@each', 'store.users.isDirty'),

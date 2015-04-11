@@ -31,6 +31,9 @@ export default Ember.Object.extend({
     window: null,
     nick: '',
 
+    ownNick: Ember.computed.alias('window.userNick'),
+    mentionedRegEx: Ember.computed.alias('window.userNickHighlightRegex'),
+
     ircMotd: false,
 
     userIdDidChange: function() {
@@ -54,6 +57,7 @@ export default Ember.Object.extend({
     decoratedBody: function() {
         let category = this.get('cat');
         let nick = this.get('nick');
+        let mentionedRegEx = this.get('mentionedRegEx');
         let body = this.get('body');
         let network = this.get('window.network');
         let groupName = this.get('window.name');
@@ -76,12 +80,12 @@ export default Ember.Object.extend({
             output = '<span class="body">' + nick + ' ' + output + '</span>';
         }
 
-        if (body.indexOf('@' + this.get('window.userNick')) !== -1) {
+        if (mentionedRegEx && mentionedRegEx.test(body)) {
             this.set('cat', 'mention');
         }
 
         return output;
-    }.property('body', 'window.userNick'),
+    }.property('body', 'ownNick', 'mentionedRegEx'),
 
     _decorate(text, network) {
         let textParts = [];
