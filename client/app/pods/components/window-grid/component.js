@@ -84,13 +84,6 @@ export default Ember.Component.extend({
 
         let gridDim = this._containerDimensions();
 
-        $('.blocker').css({
-            width: gridDim.width,
-            height: gridDim.height
-        });
-
-        $('.blocker').show();
-
         this._dragWindow(event);
 
         function handleDragMove(event) {
@@ -140,7 +133,6 @@ export default Ember.Component.extend({
 
         this.movingWindow.$().removeClass('moving').css('z-index', '');
         $('#window-cursor').hide();
-        $('.blocker').hide();
 
         if (this.cursor.x === null) {
             return;
