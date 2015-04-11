@@ -317,11 +317,15 @@ export default Ember.Component.extend(UploadMixin, {
 
         let duration = animate ? 200 : 0;
 
+        // There's an odd bug(?) in Chrome. Offset below can't be just some large enough number
+        // to make sure we reach the bottom every time. If it is, Chrome scrolls beyond end of the
+        // content. Spent several days figuring out what was going on. Problem is not related to
+        // velocity.js. It happens with jQuery.scrollTop() as well.
         this.$('.window-messages-end').velocity('stop').velocity('scroll', {
             container: this.$messagePanel,
             duration: duration,
             easing: 'spring',
-            offset: -1 * this.$messagePanel.innerHeight(),
+            offset: -1 * this.$messagePanel.innerHeight() + 5, // 5px is padding
             begin: function() {
                 this.set('scrolling', true);
             }.bind(this),
