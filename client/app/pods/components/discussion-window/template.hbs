@@ -70,7 +70,7 @@
     <div class="window-add-text-container flex-1">
         <form {{action "sendMessage" on="submit"}}>
             {{input placeholder="Write here…" class="form-control" value=newMessage}}
-            {{#if content.scrollLock}}
+            {{#if scrollLock}}
                 {{#if content.newMessagesCount}}
                     <div {{action "jumpToBottom"}} class="window-new-messages">
                         <span class="fa fa-chevron-down"></span> New messages

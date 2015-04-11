@@ -36,6 +36,8 @@ export default Ember.Component.extend(UploadMixin, {
     expanded: false,
     animating: false,
     scrolling: false,
+    scrollLock: false,
+
     linesAmount: null,
     deletedLine: false,
 
@@ -82,7 +84,7 @@ export default Ember.Component.extend(UploadMixin, {
             return;
         }
 
-        if (!this.get('content.scrollLock')) {
+        if (!this.get('scrollLock')) {
             // Prevents _addScrollHandler to make faulty conclusion.
             // We need to scroll and we we will after debounce kicks in.
             this.set('scrolling', true);
@@ -100,7 +102,7 @@ export default Ember.Component.extend(UploadMixin, {
         let cat = messages[messages.length - 1].cat; // Message that was just added.
         let importantMessage = cat === 'msg' || cat === 'error' || cat === 'action';
 
-        if ((!this.get('visible') || this.get('content.scrollLock')) && importantMessage) {
+        if ((!this.get('visible') || this.get('scrollLock')) && importantMessage) {
             this.incrementProperty('content.newMessagesCount');
         }
 
@@ -174,7 +176,7 @@ export default Ember.Component.extend(UploadMixin, {
         },
 
         jumpToBottom() {
-            this.set('content.scrollLock', false);
+            this.set('scrollLock', false);
             this._goToBottom(true);
         }
     },
@@ -302,7 +304,7 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     _goToBottom(animate) {
-        if (this.get('content.scrollLock')) {
+        if (this.get('scrollLock')) {
             return;
         }
 
@@ -339,10 +341,10 @@ export default Ember.Component.extend(UploadMixin, {
                 let bottomTreshhold = $panel.prop('scrollHeight') - 5;
 
                 if (scrollPos + $panel.innerHeight() >= bottomTreshhold) {
-                    this.set('content.scrollLock', false);
+                    this.set('scrollLock', false);
                     Ember.Logger.info('scrollock off');
                 } else if (!this.get('deletedLine')) {
-                    this.set('content.scrollLock', true);
+                    this.set('scrollLock', true);
                     Ember.Logger.info('scrollock on');
                 }
 
