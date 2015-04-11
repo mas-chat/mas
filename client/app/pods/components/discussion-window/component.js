@@ -256,7 +256,8 @@ export default Ember.Component.extend(UploadMixin, {
             displayTpl: emojiListTemplate,
             insertTpl: ':${name}:',
             data: emojisList,
-            highlightFirst: false
+            highlightFirst: false,
+            limit: 20
         });
 
         function getNick(item) {
@@ -269,7 +270,8 @@ export default Ember.Component.extend(UploadMixin, {
 
         this.$('.form-control').atwho({
             at: '@',
-            data: nickList
+            data: nickList,
+            limit: 10
         });
 
         this.$messagePanel.magnificPopup({
