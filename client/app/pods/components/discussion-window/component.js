@@ -186,6 +186,7 @@ export default Ember.Component.extend(UploadMixin, {
             return; // Not moving the window
         }
 
+        event.preventDefault();
         this.sendAction('dragWindowStart', this, event);
     },
 
