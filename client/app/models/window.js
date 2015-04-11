@@ -49,7 +49,6 @@ export default Ember.Object.extend({
 
     newMessagesCount: 0,
     scrollLock: false,
-    deletedLine: false,
 
     operators: null,
     voices: null,

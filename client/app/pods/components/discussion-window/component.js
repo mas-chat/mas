@@ -37,6 +37,7 @@ export default Ember.Component.extend(UploadMixin, {
     animating: false,
     scrolling: false,
     linesAmount: null,
+    deletedLine: false,
 
     $messagePanel: null,
     $images: null,
@@ -77,6 +78,7 @@ export default Ember.Component.extend(UploadMixin, {
 
         if (previousLines && previousLines >= messages.length) {
             // Line was removed.
+            this.set('deletedLine', true);
             return;
         }
 
@@ -339,12 +341,12 @@ export default Ember.Component.extend(UploadMixin, {
                 if (scrollPos + $panel.innerHeight() >= bottomTreshhold) {
                     this.set('content.scrollLock', false);
                     Ember.Logger.info('scrollock off');
-                } else if (!this.get('content.deletedLine')) {
+                } else if (!this.get('deletedLine')) {
                     this.set('content.scrollLock', true);
                     Ember.Logger.info('scrollock on');
                 }
 
-                this.set('content.deletedLine', false); // Hack
+                this.set('deletedLine', false); // Hack
                 this._showImages();
             }, 150);
         }.bind(this));

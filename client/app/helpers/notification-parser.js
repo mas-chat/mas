@@ -85,7 +85,6 @@ export default Ember.Object.extend({
 
         if (messages.length > 200) {
             messages.shiftObject();
-            targetWindow.deletedLine = true;
         }
 
         messages.pushObject(messageRecord);
