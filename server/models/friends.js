@@ -24,6 +24,7 @@ const redis = require('../lib/redis').createClient(),
 exports.sendFriends = function*(userId, sessionId) {
     let command = {
         id: 'FRIENDS',
+        reset: true,
         friends: []
     };
 
@@ -78,19 +79,20 @@ exports.sendFriendConfirm = function*(userId, sessionId) {
 
 exports.informStateChange = function*(userId, eventType) {
     let command = {
-        id: 'FRIENDSUPDATE',
-        userId: userId
+        id: 'FRIENDS',
+        reset: false,
+        friends: [{
+            userId: userId,
+            online: eventType === 'login',
+        }]
     };
-    let ts;
 
     // Zero means the user is currently online
-    if (eventType === 'login') {
-        ts = 0;
-        command.online = true;
-    } else {
+    let ts = 0;
+
+    if (eventType !== 'login') {
         ts = Math.round(Date.now() / 1000);
-        command.last = ts;
-        command.online = false;
+        command.friends[0].last = ts;
     }
 
     yield redis.hset(`user:${userId}`, 'lastlogout', ts);

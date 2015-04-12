@@ -192,21 +192,25 @@ export default Ember.Object.extend({
     },
 
     _handleFriends(data) {
-        this.get('store.friends').clear();
-
-        data.friends.forEach(function(newFriend) {
-            let friendRecord = this.get('container').lookup('model:friend')
-              .setProperties(newFriend);
-            this.get('store.friends').pushObject(friendRecord);
-        }.bind(this));
-    },
-
-    _handleFriendsupdate(data) {
-        let friend = this.get('store.friends').findBy('userId', data.userId);
-        friend.set('online', data.online);
-        if (data.last) {
-            friend.set('last', data.last);
+        if (data.reset) {
+            this.get('store.friends').clear();
         }
+
+        data.friends.forEach(function(details) {
+            let friend = this.get('store.friends').findBy('userId', details.userId);
+
+            if (!friend) {
+                let friendRecord =
+                    this.get('container').lookup('model:friend').setProperties(details);
+                this.get('store.friends').pushObject(friendRecord);
+            } else {
+                friend.set('online', details.online);
+
+                if (details.last) {
+                    friend.set('last', details.last);
+                }
+            }
+        }.bind(this));
     },
 
     _handleAlert(data) {

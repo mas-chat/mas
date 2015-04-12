@@ -333,6 +333,7 @@ Full list of user's contacts (friends). Send by the server during the session st
 {
   "id": "FRIENDS",
 
+  "reset": true,
   "friends": [{
       "userId": "m42321",
       "online": true
@@ -345,25 +346,11 @@ Full list of user's contacts (friends). Send by the server during the session st
 }
 ```
 
+```reset``` if true, then the existing list needs to be cleared. Otherwise the command adds new users or updates existing users' information on the list.
+
 ```online``` can be ```true```, ```false```. Indicates the current situation.
 
 ```last``` is included if ```online``` is ```false```. It's a unix timestamp indicating when this user was logged in last time. Also possible is a special value ```-1``` which means this user hasn't ever logged in.
-
-### FRIENDSUPDATE
-
-An update to the initial list received with ```FRIENDS``` commands. Contains new information regarding one specific user.
-
-```JSON
-{
-  "id": "FRIENDSUPDATE",
-
-  "userId": "m13323",
-  "online": false,
-  "last": 1411259620
-}
-```
-
-Fields are same as in ```FRIENDS``` command.
 
 ### ALERT
 
