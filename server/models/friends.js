@@ -81,10 +81,10 @@ exports.informStateChange = function*(userId, eventType) {
     let command = {
         id: 'FRIENDS',
         reset: false,
-        friends: [{
+        friends: [ {
             userId: userId,
-            online: eventType === 'login',
-        }]
+            online: eventType === 'login'
+        } ]
     };
 
     // Zero means the user is currently online

@@ -553,7 +553,6 @@ function *handle317(userId, msg) {
         `--- has been idle ${idleTime} seconds. Signed on ${signonTime}`);
 }
 
-
 function *handle319(userId, msg) {
     // :irc.localhost 319 ilkka_ Mika7 :#portaali @#hemmot @#ilves #ceeassa
     let channels = msg.params[1];
