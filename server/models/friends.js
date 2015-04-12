@@ -62,13 +62,13 @@ exports.sendFriends = function*(userId, sessionId) {
 exports.sendFriendConfirm = function*(userId, sessionId) {
     let friendRequests = yield redis.smembers(`friendsrequests:${userId}`);
 
-    // Use userId property so that related USERS notification is send automatically
-    // See lib/outbox.js for details.
-    friendRequests = friendRequests.map(function(userId) {
-        return { userId: userId };
-    });
+    if (friendRequests && friendRequests.length > 0) {
+        // Uses userId property so that related USERS notification is send automatically
+        // See lib/outbox.js for details.
+        friendRequests = friendRequests.map(function(userId) {
+            return { userId: userId };
+        });
 
-    if (friendRequests) {
         yield outbox.queue(userId, sessionId, {
             id: 'FRIENDSCONFIRM',
             friends: friendRequests
