@@ -1,0 +1,31 @@
+<div class="line {{message.decoratedCat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick~}}</div><span class="body">
+        {{~#if message.channelAction}}
+            {{message.channelAction}}
+        {{~else}}
+            {{~#each bodyPart in message.bodyParts}}
+                {{~#if bodyPart.link}}
+                    <a href="{{bodyPart.url}}" target="_blank">{{bodyPart.text}}</a>
+                {{~else}}
+                    {{#if bodyPart.emoji}}
+                        <img align="absmiddle" alt=":{{bodyPart.emoji}}:" class="emoji" src="/app/assets/images/emoji/{{bodyPart.emoji}}.png" title=":{{bodyPart.emoji}}:" />
+                    {{~else}}
+                        {{~bodyPart.text~}}
+                    {{~/if}}
+                {{~/if}}
+            {{~/each}}
+            {{~#if message.hasMedia}}
+                <ul class="user-image">
+                    {{#if message.hasYoutubeVideo}}
+                        <li>
+                            <iframe class="youtube-preview" src="https://www.youtube.com/embed/{{message.videoId}}?showinfo=0&autohide=1" allowfullscreen frameborder="0"></iframe>
+                        </li>
+                    {{/if}}
+                    {{#each image in message.images}}
+                        <li>
+                            <a href="{{image.url}}" class="user-img"><img class="loader loader-small-dark" src="" data-src="{{image.url}}"></a>
+                        </li>
+                    {{/each}}
+                </ul>
+            {{~/if}}
+        {{~/if}}
+</span></div>

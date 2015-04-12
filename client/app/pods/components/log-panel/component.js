@@ -27,6 +27,7 @@ export default Ember.Component.extend({
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
+    loading: true,
     enabled: true,
     window: null,
 
@@ -100,6 +101,8 @@ export default Ember.Component.extend({
         let epochTsStart = moment(date).startOf('day').unix();
         let epochTsEnd = moment(date).endOf('day').unix();
 
+        this.set('loading', true);
+
         this.get('socket').send({
             id: 'GET_CONVERSATION_LOG',
             windowId: this.get('window.windowId'),
@@ -110,6 +113,8 @@ export default Ember.Component.extend({
             let messages = this.get('messages');
             let container = this.get('container');
             messages.clear();
+
+            this.set('loading', false);
 
             // TBD: Temporary check, implement pagination
             this.set('tooManyMessages', resp.results.length > 999);

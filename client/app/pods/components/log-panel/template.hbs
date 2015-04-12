@@ -20,10 +20,16 @@
 <div class="flex-1 logs-channel window-messages">
     {{#each message in messages}}
         {{dayDivider messages _view.contentIndex}}
-        <div class="line {{message.cat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick}}</div>{{{message.decoratedBody}}}</div>
+        {{partial "message"}}
     {{else}}
         <div class='logs-no-messages flex-1'>
-            <div>No recorded messages on {{friendlyDate}}.</div>
+            <div>
+                {{#if loading}}
+                    Loading…
+                {{else}}
+                    No recorded messages on {{friendlyDate}}.
+                {{/if}}
+            </div>
         </div>
     {{/each}}
     <div>
