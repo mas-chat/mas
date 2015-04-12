@@ -91,6 +91,7 @@ export default Ember.Object.extend({
         let imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
         let body = this.get('body');
         let network = this.get('network');
+        let cat = this.get('cat');
 
         URI.withinString(body, function(url, start, end, source) {
             let urlObj = new URI(url);
@@ -99,7 +100,7 @@ export default Ember.Object.extend({
             let type = '';
 
             if (start !== pos) {
-                this._addTextPart(result, source.substring(pos, start), network);
+                this._addTextPart(result, source.substring(pos, start), network, cat);
             }
 
             if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
@@ -128,7 +129,7 @@ export default Ember.Object.extend({
         }.bind(this));
 
         if (body && body.length !== pos) {
-            this._addTextPart(result, body.substring(pos), network);
+            this._addTextPart(result, body.substring(pos), network, cat);
         }
 
         return result;
@@ -157,11 +158,15 @@ export default Ember.Object.extend({
         return this.get('bodyParts').filterBy('type', 'image');
     }.property('bodyparts'),
 
-    _addTextPart(array, text, network) {
+    _addTextPart(array, text, network, cat) {
         if (network === 'Flowdock') {
             text = text.replace(/^\[(.*?)\] &lt;&lt; (.*)/, function(match, p1, p2) {
                 return '[' + p1.substring(0, 9) + '] ' + p2;
             });
+        }
+
+        if (cat === 'banner') {
+            text = text.replace(/ /g, 'ˑ'); // Preserve whitespace trick.
         }
 
         // Emoji separation
