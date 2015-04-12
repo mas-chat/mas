@@ -397,7 +397,9 @@ export default Ember.Component.extend(UploadMixin, {
                 });
 
                 $img.one('error', function() {
-                    $img.hide();
+                    // Let's hide the whole media area. Would be too complicated to check if
+                    // there are other image thumbnails that we loaded successfully.
+                    $img.closest('.user-media').hide();
                     that._goToBottom(true);
                 });
 
