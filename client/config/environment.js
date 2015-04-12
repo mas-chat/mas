@@ -26,9 +26,6 @@ module.exports = function(environment) {
             'img-src': "'self'",
             'style-src': "'self' 'unsafe-inline' http://fonts.googleapis.com",
             'media-src': "'self'"
-        },
-        lessOptions: {
-            paths: [ 'bower_components' ]
         }
     };
 
