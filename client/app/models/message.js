@@ -162,7 +162,7 @@ export default Ember.Object.extend({
         // Emoji separation
         let parts = text.split(/(:\S+:)/);
 
-        for (let part of parts) {
+        parts.forEach(function(part) {
             let match = /^:(.+):$/.exec(part);
 
             array.push({
@@ -170,6 +170,6 @@ export default Ember.Object.extend({
                 text: part,
                 emoji: match && emojify.emojiNames.indexOf(match[1]) > -1 ? match[1] : false
             });
-        }
+        });
     }
 });

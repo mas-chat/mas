@@ -256,7 +256,7 @@ export default Ember.Object.extend({
             };
         }
 
-        for (let friendCandidate of data.friends) {
+        data.friends.forEach(function(friendCandidate) {
             let realName = users.getName(friendCandidate.userId);
             let nick = users.getNick(friendCandidate.userId, 'MAS');
 
@@ -269,7 +269,7 @@ export default Ember.Object.extend({
                 ackLabel: 'Allow',
                 resultCallback: resultHandler(friendCandidate.userId)
             });
-        }
+        }.bind(this));
     },
 
     _removeUser(userId, targetWindow) {
