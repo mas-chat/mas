@@ -265,6 +265,31 @@
             width: auto;
             margin: 8px 8px 8px 0px;
         }
+
+        .user-img-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-img-container:hover .user-img-close {
+            display: block;
+        }
+
+        .user-img-container .user-img-close:hover {
+            color: #df691a;
+            opacity: 1;
+        }
+
+        .user-img-close {
+            position: absolute;
+            top: 11px;
+            right: 11px;
+            cursor: pointer;
+            opacity: 0.5;
+            color: #aaaaaa;
+            display: none;
+            z-index: 10;
+        }
     }
 
     iframe.youtube-preview {

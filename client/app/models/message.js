@@ -30,6 +30,7 @@ export default Ember.Object.extend({
     type: null,
     window: null,
     nick: '',
+    hideImages: false,
 
     ownNick: Ember.computed.alias('window.userNick'),
     mentionedRegEx: Ember.computed.alias('window.userNickHighlightRegex'),

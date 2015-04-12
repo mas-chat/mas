@@ -20,11 +20,21 @@
                             <iframe class="youtube-preview" src="https://www.youtube.com/embed/{{message.videoId}}?showinfo=0&autohide=1" allowfullscreen frameborder="0"></iframe>
                         </li>
                     {{/if}}
-                    {{#each image in message.images}}
-                        <li>
-                            <a href="{{image.url}}" class="user-img"><img class="loader loader-small-dark" src="" data-src="{{image.url}}"></a>
-                        </li>
-                    {{/each}}
+                    {{#unless message.hideImages}}
+                        {{#each message.images as |image|}}
+                            <li>
+                                <a href="{{image.url}}" class="user-img">
+                                <div class="user-img-container">
+                                    <img class="loader loader-small-dark" src="" data-src="{{image.url}}">
+                                    <span {{action "hideImages" message on="mouseDown" bubbles=false}} class="user-img-close fa-stack">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-times fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </div>
+                                </a>
+                            </li>
+                        {{/each}}
+                    {{/unless}}
                 </ul>
             {{~/if}}
         {{~/if}}

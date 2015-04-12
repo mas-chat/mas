@@ -182,6 +182,10 @@ export default Ember.Component.extend(UploadMixin, {
         jumpToBottom() {
             this.set('scrollLock', false);
             this._goToBottom(true);
+        },
+
+        hideImages(message) {
+            message.set('hideImages', true);
         }
     },
 
@@ -282,7 +286,7 @@ export default Ember.Component.extend(UploadMixin, {
 
         this.$messagePanel.magnificPopup({
             type: 'image',
-            delegate: '.user-img',
+            delegate: '.user-img:not(.user-img-close)',
             closeOnContentClick: true,
             image: {
                 verticalFit: false,
