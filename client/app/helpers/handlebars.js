@@ -22,13 +22,6 @@ import Ember from 'ember';
 
 let SafeString = Ember.Handlebars.SafeString;
 
-Ember.Handlebars.helper('decoratedTimestamp', function(timestamp) {
-    let ts = moment.unix(timestamp);
-
-    return new SafeString('<div class="timestamp" data-toggle="tooltip" title="' +
-        ts.format('ddd, MMM D') + '">' + ts.format('HH:mm') + '</div>');
-});
-
 Ember.Handlebars.helper('dayDivider', function(list, index) {
     let dateForCurrent = moment.unix(list[index].get('ts'));
     let dateForPrevious = index === 0 ? null : moment.unix(list[index - 1].get('ts'));

@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals URI */
+/* globals URI, moment */
 
 import Ember from 'ember';
 
@@ -62,6 +62,10 @@ export default Ember.Object.extend({
 
         return this.get('nick') === 'Flowdock' ? 'flowdock' : cat;
     }.property('cat', 'nick', 'body', 'ownNick', 'mentionedRegEx'),
+
+    decoratedTs: function() {
+        return moment.unix(this.get('ts')).format('HH:mm');
+    }.property('ts'),
 
     channelAction: function() {
         let category = this.get('cat');

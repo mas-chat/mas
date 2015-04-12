@@ -111,17 +111,18 @@
     }
 
     .line {
-        clear: both;
+        display: flex;
+        flex-direction: row;
     }
 
     .timestamp {
-        float: left;
-        color: @body-bg;
+        color: #8F99A2;
         width: 42px;
     }
 
     .body {
         display: inline;
+        flex: 1;
     }
 
     .msg-prefix {
@@ -133,25 +134,20 @@
     }
 
     .nick {
-        float: left;
-        display: inline-block;
         font-weight: bold;
         color: #A13F5A;
-        padding-right: 3px;
+        padding-right: 4px;
         &:after {
             content: ":";
         }
     }
 
     .line.banner {
-        white-space: pre;
-
         .nick {
             display: none;
         }
 
         .body {
-            display: block;
             font-family: Courier New, monospace;
             text-overflow: ellipsis;
             font-size: 11px;

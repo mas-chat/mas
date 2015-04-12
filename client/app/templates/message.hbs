@@ -1,4 +1,11 @@
-<div class="line {{message.decoratedCat}}">{{decoratedTimestamp message.ts}}<div class="nick">{{message.nick~}}</div><span class="body">
+<div class="line {{message.decoratedCat}}">
+    <div class="timestamp">
+        {{message.decoratedTs}}
+    </div>
+    <div class="body">
+        <span class="nick">
+            {{message.nick~}}
+        </span>
         {{~#if message.channelAction}}
             {{message.channelAction}}
         {{~else}}
@@ -38,4 +45,5 @@
                 </ul>
             {{~/if}}
         {{~/if}}
-</span></div>
+    </div>
+</div>
