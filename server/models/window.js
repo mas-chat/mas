@@ -52,7 +52,7 @@ exports.isValidDesktop = function*(userId, desktop) {
         // TBD: Too many redis calls, re-factor to lua later.
         let existingDesktop = yield redis.hget(`window:${userId}:${windowId}`, 'desktop');
 
-        if (parseInt(existingDesktop) === desktop) {
+        if (existingDesktop && parseInt(existingDesktop) === desktop) {
             found = true;
             break;
         }
