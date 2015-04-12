@@ -266,12 +266,10 @@ function *handleSet(params) {
         }
 
         // TBD: Re-factor when there are multiple settings
-        if (!isNaN(value)) {
-            if (yield window.isValidDesktop(params.userId, value)) {
-                yield redis.hset(`settings:${params.userId}`, 'activeDesktop', properties[prop]);
-            } else {
-                return { status: 'ERROR', errorMsg: `Desktop '${value}' doesn't exist` };
-            }
+        if (yield window.isValidDesktop(params.userId, value)) {
+            yield redis.hset(`settings:${params.userId}`, 'activeDesktop', properties[prop]);
+        } else {
+            return { status: 'ERROR', errorMsg: `Desktop '${value}' doesn't exist` };
         }
     }
 
