@@ -71,7 +71,7 @@ export default Ember.Object.extend({
         this.get('store.windows').removeObject(targetWindow);
     },
 
-    _handleAddtext(data, targetWindow) {
+    _handleMsg(data, targetWindow) {
         if (!targetWindow) {
             return;
         }
@@ -91,9 +91,9 @@ export default Ember.Object.extend({
     },
 
     _handleInitdone() {
-        // An optimization to handle ADDTEXT notifications separately in batches
+        // An optimization to handle MSG notifications separately in batches
         let addTexts = _.remove(this.initBuffer, function(notification) {
-            return notification.id === 'ADDTEXT';
+            return notification.id === 'MSG';
         });
 
         this.initBuffer.forEach(function(notification) {

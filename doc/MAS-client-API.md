@@ -101,7 +101,7 @@ The server will send all buffered 'ntf' events if the resume is successful. Curr
 | clientName | optional  | Client name                                        |
 | clientOS   | optional  | Client operating system                            |
 | version    | mandatory | Must be string "1.0"                               |
-| cachedUpto | optional  | Every ADDTEXT notification has a gid field which is ever increasing global id. This parameter communicates the highest the client has already seen and stored. The server will omit of sending messages with lower gid in the beginning of session. Without this option, the server sends up to 200 ADDTEXT notification for every window to fill the window backlog. |
+| cachedUpto | optional  | Every MSG notification has a gid field which is ever increasing global id. This parameter communicates the highest the client has already seen and stored. The server will omit of sending messages with lower gid in the beginning of session. Without this option, the server sends up to 200 MSG notification for every window to fill the window backlog. |
 
 ## Initok event payload
 
@@ -151,7 +151,7 @@ Contains no payload.
 
 ```JSON
 {
-    "id": "ADDTEXT"
+    "id": "MSG"
     ...
 }
 ```
@@ -177,13 +177,13 @@ Another advantage is that client startup phase is not a special case. The server
 Below is the list of notifications that MAS server can send to a client.
 A notification is always a request for the client to take some action.
 
-### ADDTEXT
+### MSG
 
 Add a messge line to window.
 
 ```JSON
 {
-  "id": "ADDTEXT",
+  "id": "MSG",
 
   "windowId": 1,
   "body": "Hello worlds!",
@@ -371,7 +371,7 @@ If ```report``` is true then the client must send ```ACKALERT``` request when th
 
 ### INITDONE
 
-Initialization is complete. A hint that client can now render the UI as all initial messages (backlog) have arrived. Allows client to not update UI based on every received ADDTEXT command at session startup. Can lead to more responsive UI.
+Initialization is complete. A hint that client can now render the UI as all initial messages (backlog) have arrived. Allows client to not update UI based on every received MSG command at session startup. Can lead to more responsive UI.
 
 ```JSON
 {
@@ -488,7 +488,7 @@ Following requests are supported. Under every request is corresponding acknowled
 
 Send a message to a group or 1on1 discussion.
 
-Note that the session that sends SEND request doesn't receive the corresponding ADDTEXT notification. Therefore the acknowledgment contains ```gid``` property that the other sessions and users learn from ```ADDTEXT``` notifications (other ADDTEXT properties the client can easily compute locally).
+Note that the session that sends SEND request doesn't receive the corresponding MSG notification. Therefore the acknowledgment contains ```gid``` property that the other sessions and users learn from ```MSG``` notifications (other MSG notification properties the client can easily compute locally).
 
 ```JSON
 {

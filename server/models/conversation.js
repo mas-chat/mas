@@ -347,7 +347,7 @@ Conversation.prototype.setPassword = function*(password) {
 };
 
 Conversation.prototype._streamAddText = function*(msg, excludeSession) {
-    msg.id = 'ADDTEXT';
+    msg.id = 'MSG';
     yield this._stream(msg, excludeSession);
 };
 

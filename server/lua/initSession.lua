@@ -119,7 +119,7 @@ for i = 1, #windowIds do
     for ii = #lines, 1, -1 do
         local command = cjson.decode(lines[ii])
 
-        command.id = 'ADDTEXT'
+        command.id = 'MSG'
         command.windowId = tonumber(windowId)
 
         if command.userId == userId and command.cat ~= 'join' and command.cat ~= 'part' and
