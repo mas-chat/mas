@@ -46,19 +46,20 @@ export default Ember.Object.extend({
     }.observes('userId', 'window').on('init'),
 
     decoratedCat: function() {
-        let mentionedRegEx = this.get('mentionedRegEx');
+        let cat = this.get('cat');
         let body = this.get('body');
+        let mentionedRegEx = this.get('mentionedRegEx');
 
         // TBD: Network === flowdock check is missing
         if (this.get('body').indexOf('Show in Flowdock:') > -1) {
             return 'flowdock-ignore';
         }
 
-        if (mentionedRegEx && mentionedRegEx.test(body)) {
+        if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {
             return 'mention';
         }
 
-        return this.get('nick') === 'Flowdock' ? 'flowdock' : this.get('cat');
+        return this.get('nick') === 'Flowdock' ? 'flowdock' : cat;
     }.property('cat', 'nick', 'body', 'ownNick', 'mentionedRegEx'),
 
     channelAction: function() {
