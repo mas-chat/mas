@@ -16,7 +16,11 @@
                     {{#if bodyPart.emoji}}
                         <img align="absmiddle" alt=":{{bodyPart.emoji}}:" class="emoji" src="/app/assets/images/emoji/{{bodyPart.emoji}}.png" title=":{{bodyPart.emoji}}:" />
                     {{~else}}
-                        {{~bodyPart.text~}}
+                        {{~#if bodyPart.mention}}
+                            <span class="nick-mention">{{bodyPart.text}}</span>
+                        {{~else}}
+                            {{bodyPart.text}}
+                        {{~/if}}
                     {{~/if}}
                 {{~/if}}
             {{~/each}}

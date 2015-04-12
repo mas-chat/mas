@@ -100,7 +100,7 @@ export default Ember.Object.extend({
             let type = '';
 
             if (start !== pos) {
-                this._addTextPart(result, source.substring(pos, start), network, cat);
+                this._parseText(result, source.substring(pos, start), network, cat);
             }
 
             if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
@@ -129,7 +129,7 @@ export default Ember.Object.extend({
         }.bind(this));
 
         if (body && body.length !== pos) {
-            this._addTextPart(result, body.substring(pos), network, cat);
+            this._parseText(result, body.substring(pos), network, cat);
         }
 
         return result;
@@ -158,7 +158,7 @@ export default Ember.Object.extend({
         return this.get('bodyParts').filterBy('type', 'image');
     }.property('bodyparts'),
 
-    _addTextPart(array, text, network, cat) {
+    _parseText(array, text, network, cat) {
         if (network === 'Flowdock') {
             text = text.replace(/^\[(.*?)\] &lt;&lt; (.*)/, function(match, p1, p2) {
                 return '[' + p1.substring(0, 9) + '] ' + p2;
@@ -169,17 +169,27 @@ export default Ember.Object.extend({
             text = text.replace(/ /g, 'ˑ'); // Preserve whitespace trick.
         }
 
-        // Emoji separation
-        let parts = text.split(/(:\S+:)/);
+        // Emoji and @mention separation
+        let parts = text.split(/(:\S+:|(?:^| )@\S+ )/);
 
         parts.forEach(function(part) {
-            let match = /^:(.+):$/.exec(part);
+            let emojiMatch = /^:(.+):$/.exec(part);
+            let isEmoji = emojiMatch && emojify.emojiNames.indexOf(emojiMatch[1]) > -1;
 
-            array.push({
-                link: false,
-                text: part,
-                emoji: match && emojify.emojiNames.indexOf(match[1]) > -1 ? match[1] : false
-            });
+            if (isEmoji) {
+                array.push({ link: false, text: part, emoji: emojiMatch[1] });
+                return;
+            }
+
+            let mentionMatch = /^\s?(@\S+) $/.exec(part);
+
+            if (mentionMatch) {
+                array.push({ link: false, mention: true, text: mentionMatch[1] });
+                return;
+            }
+
+            // Plain text
+            array.push({ link: false, text: part });
         });
     }
 });
