@@ -262,7 +262,7 @@ function *handleSet(params) {
         let value = properties[prop];
 
         if (allowed.indexOf(prop) === -1) {
-            return { status: 'ERROR', errorMsg: `'${prop}' is not a valid property` };
+            return { status: 'ERROR', errorMsg: `'${prop}' is not a valid settings property` };
         }
 
         // TBD: Re-factor when there are multiple settings
