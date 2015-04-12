@@ -31,11 +31,11 @@ export default Ember.Object.extend({
         if (!this.initReceived && notification.id !== 'INITDONE') {
             this.initBuffer.push(notification);
         } else {
-            this.handleNotification(notification);
+            this._handleNotification(notification);
         }
     },
 
-    handleNotification(notification) {
+    _handleNotification(notification) {
         let name = notification.id;
         let targetWindow = null;
         let windowId = notification.windowId;
@@ -97,7 +97,7 @@ export default Ember.Object.extend({
         });
 
         this.initBuffer.forEach(function(notification) {
-            this.handleNotification(notification);
+            this._handleNotification(notification);
         }.bind(this));
 
         let grouped = _.groupBy(addTexts, function(notification) {
