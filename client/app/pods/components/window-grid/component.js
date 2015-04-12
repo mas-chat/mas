@@ -82,8 +82,6 @@ export default Ember.Component.extend({
         this.movingWindow.$().addClass('moving').css('z-index', 200);
         $('#window-cursor').show();
 
-        let gridDim = this._containerDimensions();
-
         this._dragWindow(event);
 
         function handleDragMove(event) {
