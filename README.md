@@ -8,7 +8,7 @@ NOTE: Redis database schema will freeze only after 1.0 release. This is also whe
 For more info, see
 
 - [Architecture page](https://github.com/ilkkao/mas/wiki)
-- [MAS client API](http://ilkkao.github.io/mas/api.html)
+- [MAS client API](https://github.com/ilkkao/mas/blob/master/doc/MAS-client-API.md)
 
 ## Status:
 
