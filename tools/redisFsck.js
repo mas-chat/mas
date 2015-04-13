@@ -34,7 +34,8 @@ const tests = [
     windowIndexTest,
     windowTest,
     windowlistTest,
-    friendsExistTest
+    friendsExistTest,
+    conversationIndexCaseTest
 ];
 
 console.log(' ************************************************************************');
@@ -304,6 +305,48 @@ function *activeDesktopTest() {
     }
 
     printVerdict('settings.activeDesktop', true);
+}
+
+function *conversationIndexCaseTest() {
+    let index = yield redis.hgetall('index:conversation');
+
+    assert(index);
+
+    let keyArray = Object.keys(index);
+
+    for (let entry of keyArray) {
+        if (!(/^group:/.test(entry))) {
+            continue;
+        }
+
+        let parts = /^group:([a-zA-Z0-9]+):(.+)$/.exec(entry);
+
+        assert(parts.length === 3);
+
+        let channel = parts[2];
+        let channelLowerCase = parts[2].toLowerCase();
+
+        if (channel !== channelLowerCase) {
+            let value = yield redis.hget('index:conversation', `group:${parts[1]}:${channel}`);
+            assert(value);
+
+            let existingValue =  yield redis.hget(
+                'index:conversation', `group:${parts[1]}:${channelLowerCase}`);
+
+            if (existingValue && value !== existingValue) {
+                console.log('BAD CONVERSATION, can\'t fix:' + parts[1] + ':' + channel);
+                process.exit(1);
+            }
+
+            yield redis.hdel('index:conversation', `group:${parts[1]}:${channel}`);
+            yield redis.hset('index:conversation', `group:${parts[1]}:${channelLowerCase}`, value);
+
+            console.log(
+                `Fixing group:${parts[1]}:${channel} to group:${parts[1]}:${channelLowerCase}`);
+        }
+    }
+
+    console.log(keyArray.length);
 }
 
 function printVerdict(desc, passed) {
