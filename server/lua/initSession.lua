@@ -14,8 +14,8 @@
 --   governing permissions and limitations under the License.
 --
 
--- Initialization of outbox needs to be atomic operation (=Lua script)
--- for streaming to be realiable.
+-- Initialization of notification queue needs to be atomic operation (=Lua script)
+-- for streaming to be reliable.
 
 #include 'lib/introduceNewUserIds'
 

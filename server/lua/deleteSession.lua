@@ -17,7 +17,7 @@
 local userId = ARGV[1]
 local sessionId = ARGV[2]
 
--- Remove outbox
+-- Remove notification queue
 redis.call('DEL', 'outbox:' .. userId .. ':' .. sessionId)
 
 -- Remove sessionknownuserids
