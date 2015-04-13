@@ -18,7 +18,7 @@
 
 const assert = require('assert'),
       redis = require('../lib/redis').createClient(),
-      outbox = require('../lib/outbox'),
+      notification = require('../lib/notification'),
       log = require('../lib/log'),
       conversationFactory = require('./conversation');
 
@@ -169,7 +169,7 @@ function *create(userId, conversationId) {
         role: 'u' // Everybody starts as a normal user
     };
 
-    yield outbox.queueAll(userId, createMsg);
+    yield notification.queueAll(userId, createMsg);
     return windowId;
 }
 
@@ -207,7 +207,7 @@ function *remove(userId, windowId) {
         log.warn(userId, 'window entry missing.');
     }
 
-    yield outbox.queueAll(userId, {
+    yield notification.queueAll(userId, {
         id: 'CLOSE',
         windowId: parseInt(windowId)
     });

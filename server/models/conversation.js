@@ -22,7 +22,7 @@ const assert = require('assert'),
       redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
       search = require('../lib/search'),
-      outbox = require('../lib/outbox'),
+      notification = require('../lib/notification'),
       window = require('./window');
 
 let MSG_BUFFER_SIZE = 200;
@@ -285,7 +285,7 @@ Conversation.prototype.sendAddMembers = function*(userId) {
         });
     }.bind(this));
 
-    yield outbox.queueAll(userId, {
+    yield notification.queueAll(userId, {
         id: 'ADDMEMBERS',
         windowId: parseInt(windowId),
         reset: true,
@@ -388,7 +388,7 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
 
         msg.windowId = parseInt(windowId);
 
-        yield outbox.queueAll(userId, msg, excludeSession);
+        yield notification.queueAll(userId, msg, excludeSession);
     }
 };
 

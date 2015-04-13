@@ -24,7 +24,7 @@ const redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
       friends = require('../models/friends'),
       alerts = require('../lib/alert'),
-      outbox = require('../lib/outbox'),
+      notification = require('../lib/notification'),
       courier = require('../lib/courier').createEndPoint('socket');
 
 let networks = null;
@@ -42,7 +42,7 @@ exports.setup = function(server) {
                 let ts = Math.round(Date.now() / 1000);
                 yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
 
-                let commands = yield outbox.waitMsg(userId, sessionId, 60);
+                let commands = yield notification.waitMsg(userId, sessionId, 60);
 
                 if (state !== 'authenticated') {
                     break;
@@ -164,7 +164,7 @@ exports.setup = function(server) {
 function *sendNetworkList(userId, sessionId) {
     networks = networks || (yield redis.smembers('networklist'));
 
-    yield outbox.queue(userId, sessionId, {
+    yield notification.queue(userId, sessionId, {
         id: 'NETWORKS',
         networks: networks
     });

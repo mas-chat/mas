@@ -16,7 +16,7 @@
 
 'use strict';
 
-const outbox = require('../lib/outbox'),
+const notification = require('../lib/notification'),
       redis = require('../lib/redis').createClient();
 
 exports.sendAlerts = function*(userId, sessionId) {
@@ -30,7 +30,7 @@ exports.sendAlerts = function*(userId, sessionId) {
             alert.id = 'ALERT';
             alert.alertId = alertId;
 
-            yield outbox.queue(userId, sessionId, alert);
+            yield notification.queue(userId, sessionId, alert);
         } else {
             // Alert has expired
             yield redis.srem(`activealerts:${userId}`, alertId);

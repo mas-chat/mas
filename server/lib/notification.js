@@ -61,11 +61,6 @@ exports.waitMsg = function*(userId, sessionId, timeout) {
     return commands;
 };
 
-exports.length = function*(userId, sessionId) {
-    // TBD Add helper concat('outbox', userId, sessionId)
-    return parseInt(yield redis.llen(`outbox:${userId}:${sessionId}`));
-};
-
 function *queueCommands(userId, sessionId, excludeSessionId, commands) {
     if (!util.isArray(commands)) {
         commands = [ commands ];

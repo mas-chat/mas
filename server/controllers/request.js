@@ -22,7 +22,7 @@ const assert = require('assert'),
       co = require('co'),
       log = require('../lib/log'),
       redis = require('../lib/redis').createClient(),
-      outbox = require('../lib/outbox'),
+      notification = require('../lib/notification'),
       search = require('../lib/search'),
       courier = require('../lib/courier').createEndPoint('command'),
       conversationFactory = require('../models/conversation'),
@@ -148,7 +148,7 @@ function *handleClose(params) {
     }
 
     // Ask all sessions to close this window
-    yield outbox.queueAll(params.userId, {
+    yield notification.queueAll(params.userId, {
         id: 'CLOSE',
         windowId: params.windowId
     });
@@ -203,7 +203,7 @@ function *handleUpdate(params) {
 
     if (update) {
         // Notify all sessions. Undefined body properties won't appear in the JSON message
-        yield outbox.queueAll(params.userId, {
+        yield notification.queueAll(params.userId, {
             id: 'UPDATE',
             windowId: params.windowId,
             visible: params.command.visible,

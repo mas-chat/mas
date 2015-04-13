@@ -17,7 +17,7 @@
 'use strict';
 
 const redis = require('../lib/redis').createClient(),
-      outbox = require('../lib/outbox');
+      notification = require('../lib/notification');
 
 // TBD: Instead of FRIENDS and FRIENDSUPDATE, use ADDFRIENDS
 
@@ -54,9 +54,9 @@ exports.sendFriends = function*(userId, sessionId) {
     }
 
     if (sessionId) {
-        yield outbox.queue(userId, sessionId, command);
+        yield notification.queue(userId, sessionId, command);
     } else {
-        yield outbox.queueAll(userId, command);
+        yield notification.queueAll(userId, command);
     }
 };
 
@@ -65,12 +65,12 @@ exports.sendFriendConfirm = function*(userId, sessionId) {
 
     if (friendRequests && friendRequests.length > 0) {
         // Uses userId property so that related USERS notification is send automatically
-        // See lib/outbox.js for details.
+        // See lib/notification.js for details.
         friendRequests = friendRequests.map(function(userId) {
             return { userId: userId };
         });
 
-        yield outbox.queue(userId, sessionId, {
+        yield notification.queue(userId, sessionId, {
             id: 'FRIENDSCONFIRM',
             friends: friendRequests
         });
@@ -100,6 +100,6 @@ exports.informStateChange = function*(userId, eventType) {
     let friendIds = yield redis.smembers(`friends:${userId}`);
 
     for (let friendUserId of friendIds) {
-        yield outbox.queueAll(friendUserId, command);
+        yield notification.queueAll(friendUserId, command);
     }
 };

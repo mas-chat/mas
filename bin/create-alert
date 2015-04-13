@@ -21,7 +21,7 @@ let readlineSync = require('readline-sync'),
     co = require('co'),
     redisModule = require('../server/lib/redis'),
     redis = redisModule.createClient(),
-    outbox = require('../server/lib/outbox');
+    notification = require('../server/lib/notification');
 
 let message = readlineSync.question('Message: ');
 let expiresInHours = readlineSync.question('Expires in (hours): ');
@@ -69,7 +69,7 @@ co(function*() {
 
     for (let userId of allUsers) {
         yield redis.sadd(`activealerts:${userId}`, alertId);
-        yield outbox.queueAll(userId, alert);
+        yield notification.queueAll(userId, alert);
     }
 
     console.log('Done. Use CONTROL-C to quit.');
