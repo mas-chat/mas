@@ -148,7 +148,7 @@ function *handleClose(params) {
     }
 
     // Ask all sessions to close this window
-    yield notification.queueAll(params.userId, {
+    yield notification.broadcast(params.userId, {
         id: 'CLOSE',
         windowId: params.windowId
     });
@@ -203,7 +203,7 @@ function *handleUpdate(params) {
 
     if (update) {
         // Notify all sessions. Undefined body properties won't appear in the JSON message
-        yield notification.queueAll(params.userId, {
+        yield notification.broadcast(params.userId, {
             id: 'UPDATE',
             windowId: params.windowId,
             visible: params.command.visible,

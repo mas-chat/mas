@@ -30,7 +30,7 @@ exports.sendAlerts = function*(userId, sessionId) {
             alert.id = 'ALERT';
             alert.alertId = alertId;
 
-            yield notification.queue(userId, sessionId, alert);
+            yield notification.send(userId, sessionId, alert);
         } else {
             // Alert has expired
             yield redis.srem(`activealerts:${userId}`, alertId);

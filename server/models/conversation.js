@@ -285,7 +285,7 @@ Conversation.prototype.sendAddMembers = function*(userId) {
         });
     }.bind(this));
 
-    yield notification.queueAll(userId, {
+    yield notification.broadcast(userId, {
         id: 'ADDMEMBERS',
         windowId: parseInt(windowId),
         reset: true,
@@ -388,7 +388,7 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
 
         msg.windowId = parseInt(windowId);
 
-        yield notification.queueAll(userId, msg, excludeSession);
+        yield notification.broadcast(userId, msg, excludeSession);
     }
 };
 

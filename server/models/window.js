@@ -150,7 +150,7 @@ function *create(userId, conversationId) {
 
     yield redis.hset('index:windowIds', userId + ':' + conversationId, windowId);
 
-    let createMsg = {
+    yield notification.broadcast(userId, {
         id: 'CREATE',
         windowId: windowId,
         name: conversation.name,
@@ -167,9 +167,8 @@ function *create(userId, conversationId) {
         minimizedNamesList: newWindow.minimizedNamesList,
         desktop: newWindow.desktop,
         role: 'u' // Everybody starts as a normal user
-    };
+    });
 
-    yield notification.queueAll(userId, createMsg);
     return windowId;
 }
 
@@ -207,7 +206,7 @@ function *remove(userId, windowId) {
         log.warn(userId, 'window entry missing.');
     }
 
-    yield notification.queueAll(userId, {
+    yield notification.broadcast(userId, {
         id: 'CLOSE',
         windowId: parseInt(windowId)
     });

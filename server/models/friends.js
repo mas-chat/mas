@@ -54,9 +54,9 @@ exports.sendFriends = function*(userId, sessionId) {
     }
 
     if (sessionId) {
-        yield notification.queue(userId, sessionId, command);
+        yield notification.send(userId, sessionId, command);
     } else {
-        yield notification.queueAll(userId, command);
+        yield notification.broadcast(userId, command);
     }
 };
 
@@ -70,7 +70,7 @@ exports.sendFriendConfirm = function*(userId, sessionId) {
             return { userId: userId };
         });
 
-        yield notification.queue(userId, sessionId, {
+        yield notification.send(userId, sessionId, {
             id: 'FRIENDSCONFIRM',
             friends: friendRequests
         });
@@ -100,6 +100,6 @@ exports.informStateChange = function*(userId, eventType) {
     let friendIds = yield redis.smembers(`friends:${userId}`);
 
     for (let friendUserId of friendIds) {
-        yield notification.queueAll(friendUserId, command);
+        yield notification.broadcast(friendUserId, command);
     }
 };

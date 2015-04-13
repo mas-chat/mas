@@ -22,17 +22,17 @@ const util = require('util'),
       redisModule = require('./redis'),
       redis = redisModule.createClient();
 
-exports.queue = function*(userId, sessionId, commands) {
-    yield queueCommands(userId, sessionId, null, commands);
+exports.send = function*(userId, sessionId, ntfs) {
+    yield queueNotifications(userId, sessionId, null, ntfs);
 };
 
-exports.queueAll = function*(userId, commands, excludeSessionId) {
-    yield queueCommands(userId, null, excludeSessionId, commands);
+exports.broadcast = function*(userId, ntfs, excludeSessionId) {
+    yield queueNotifications(userId, null, excludeSessionId, ntfs);
 };
 
-exports.waitMsg = function*(userId, sessionId, timeout) {
+exports.receive = function*(userId, sessionId, timeout) {
     let command;
-    let commands = [];
+    let ntfs = [];
 
     if (timeout) {
         // Wait for first req/ntf to appear if timeout is given
@@ -44,42 +44,42 @@ exports.waitMsg = function*(userId, sessionId, timeout) {
 
         if (result) {
             command = result[1];
-            commands.push(JSON.parse(command));
+            ntfs.push(JSON.parse(command));
         }
     }
 
-    // Retrieve other commands if there are any
+    // Retrieve other ntfs if there are any
     while ((command = yield redis.rpop(`outbox:${userId}:${sessionId}`)) !== null) {
-        commands.push(JSON.parse(command));
+        ntfs.push(JSON.parse(command));
     }
 
-    if (commands.length > 0) {
+    if (ntfs.length > 0) {
         log.info(userId, 'Flushed outbox. SessionId: ' + sessionId + '. Response: ' +
-            JSON.stringify(commands)); // .substring(0, 100));
+            JSON.stringify(ntfs)); // .substring(0, 100));
     }
 
-    return commands;
+    return ntfs;
 };
 
-function *queueCommands(userId, sessionId, excludeSessionId, commands) {
-    if (!util.isArray(commands)) {
-        commands = [ commands ];
+function *queueNotifications(userId, sessionId, excludeSessionId, ntfs) {
+    if (!util.isArray(ntfs)) {
+        ntfs = [ ntfs ];
     }
 
-    yield handleNewUserIds(userId, sessionId, excludeSessionId, commands);
+    yield handleNewUserIds(userId, sessionId, excludeSessionId, ntfs);
 
-    commands = commands.map(function(value) {
+    ntfs = ntfs.map(function(value) {
         return typeof(value) === 'string' ? value : JSON.stringify(value);
     });
 
     yield redis.run.apply(null,
-        [ 'queueOutbox', userId, sessionId, excludeSessionId ].concat(commands));
+        [ 'queueOutbox', userId, sessionId, excludeSessionId ].concat(ntfs));
 }
 
-function *handleNewUserIds(userId, sessionId, excludeSessionId, commands) {
+function *handleNewUserIds(userId, sessionId, excludeSessionId, ntfs) {
     let allUserIds = [];
 
-    commands.forEach(function(command) {
+    ntfs.forEach(function(command) {
         allUserIds = allUserIds.concat(scanUserIds(command));
     });
 

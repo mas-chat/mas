@@ -42,7 +42,7 @@ exports.setup = function(server) {
                 let ts = Math.round(Date.now() / 1000);
                 yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
 
-                let commands = yield notification.waitMsg(userId, sessionId, 60);
+                let commands = yield notification.receive(userId, sessionId, 60);
 
                 if (state !== 'authenticated') {
                     break;
@@ -164,7 +164,7 @@ exports.setup = function(server) {
 function *sendNetworkList(userId, sessionId) {
     networks = networks || (yield redis.smembers('networklist'));
 
-    yield notification.queue(userId, sessionId, {
+    yield notification.send(userId, sessionId, {
         id: 'NETWORKS',
         networks: networks
     });

@@ -69,7 +69,7 @@ co(function*() {
 
     for (let userId of allUsers) {
         yield redis.sadd(`activealerts:${userId}`, alertId);
-        yield notification.queueAll(userId, alert);
+        yield notification.broadcast(userId, alert);
     }
 
     console.log('Done. Use CONTROL-C to quit.');
