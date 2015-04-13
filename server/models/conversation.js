@@ -40,7 +40,7 @@ exports.create = function*(options) {
     if (options.type === 'group') {
         // Update group index
         yield redis.hset('index:conversation',
-            'group:' + options.network + ':' + options.name, conversationId);
+            'group:' + options.network + ':' + options.name.toLowerCase(), conversationId);
     }
 
     log.info('Created ' + options.type + ' conversation: ' + conversationId +
@@ -74,7 +74,8 @@ exports.getAllIncludingUser = function*(userId) {
 exports.findGroup = function*(name, network) {
     assert(network && name);
 
-    let conversationId = yield redis.hget('index:conversation', 'group:' + network + ':' + name);
+    let conversationId = yield redis.hget(
+        'index:conversation', 'group:' + network + ':' + name.toLowerCase());
 
     if (!conversationId) {
         log.info('Searched non-existing group: ' + network + ':' + name);
