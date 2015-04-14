@@ -30,6 +30,6 @@ end
 
 for i = 1, #sessions do
     if sessions[i] ~= excludeSessionId then
-        redis.call('LPUSHX', 'outbox:' .. userId .. ':' .. sessions[i], unpack(commands))
+        redis.call('LPUSH', 'outbox:' .. userId .. ':' .. sessions[i], unpack(commands))
     end
 end
