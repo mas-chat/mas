@@ -24,6 +24,7 @@ const redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
       friends = require('../models/friends'),
       alerts = require('../lib/alert'),
+      conf = require('../lib/conf'),
       notification = require('../lib/notification'),
       courier = require('../lib/courier').createEndPoint('socket');
 
@@ -90,10 +91,19 @@ exports.setup = function(server) {
                 sessionId = uuid(15);
 
                 yield redis.zadd(`sessionlist:${userId}`, ts, sessionId);
-                socket.emit('initok', { sessionId: sessionId });
+
+                let maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
+                let cachedUpto = isInteger(data.cachedUpto) ? cachedUpto : 0;
+
+                socket.emit('initok', {
+                    sessionId: sessionId,
+                    maxBacklogMsgs: maxBacklogMsgs
+                });
 
                 log.info(userId, 'Initializing new session: ' + sessionId);
-                yield redis.run('initSession', userId, sessionId);
+                log.info(userId, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
+
+                yield redis.run('initSession', userId, sessionId, maxBacklogMsgs, cachedUpto);
 
                 yield friends.sendFriends(userId, sessionId);
                 yield friends.sendFriendConfirm(userId, sessionId);
@@ -168,4 +178,24 @@ function *sendNetworkList(userId, sessionId) {
         id: 'NETWORKS',
         networks: networks
     });
+}
+
+
+function checkBacklogParameterBounds(value) {
+    let minAllowedBacklog = conf.get('session:min_backlog');
+    let maxAllowedBacklog = conf.get('session:max_backlog');
+
+    if (!isInteger(value)) {
+        value = maxAllowedBacklog;
+    } else if (value < minAllowedBacklog) {
+        value = minAllowedBacklog;
+    } else if (value > maxAllowedBacklog) {
+        value = maxAllowedBacklog;
+    }
+
+    return value;
+}
+
+function isInteger(x) {
+    return (typeof x === 'number') && (x % 1 === 0);
 }

@@ -21,6 +21,8 @@
 
 local userId = ARGV[1]
 local sessionId = ARGV[2]
+local maxBacklogLines = tonumber(ARGV[3])
+local cachedUpto = tonumber(ARGV[4])
 local outbox = 'outbox:' .. userId .. ':' .. sessionId
 
 local function split(s, delimiter)
@@ -114,21 +116,24 @@ for i = 1, #windowIds do
         ['members'] = members
     }))
 
-    local lines = redis.call('LRANGE', 'conversationmsgs:' .. conversationId, 0, -1);
+    local lines = redis.call('LRANGE',
+       'conversationmsgs:' .. conversationId, -1 * maxBacklogLines, -1)
 
     for ii = #lines, 1, -1 do
-        local command = cjson.decode(lines[ii])
+        local message = cjson.decode(lines[ii])
 
-        command.id = 'MSG'
-        command.windowId = tonumber(windowId)
+        if message.gid > cachedUpto then
+            message.id = 'MSG'
+            message.windowId = tonumber(windowId)
 
-        if command.userId == userId and command.cat ~= 'join' and command.cat ~= 'part' and
-           command.cat ~= 'quit' then
-            command.cat = 'mymsg'
+            if message.userId == userId and message.cat ~= 'join' and message.cat ~= 'part' and
+                message.cat ~= 'quit' then
+                message.cat = 'mymsg'
+            end
+
+            redis.call('LPUSH', outbox, cjson.encode(message))
+            seenUser(message.userId)
         end
-
-        redis.call('LPUSH', outbox, cjson.encode(command))
-        seenUser(command.userId)
     end
 end
 
@@ -142,7 +147,7 @@ redis.call('LPUSH', outbox, cjson.encode({
     }
 }))
 
--- Prepend the USERS command so client gets it first
+-- Prepend the USERS notification so client gets it first
 local userIdList = {}
 
 -- Always include info about the user itself

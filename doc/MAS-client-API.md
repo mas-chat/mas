@@ -94,14 +94,15 @@ The server will send all buffered 'ntf' events if the resume is successful. Curr
 }
 ```
 
-| Parameter  | Type      | Description                                        |
-|------------|-----------|----------------------------------------------------|
-| userId     | mandatory | User Id                                            |
-| secret     | mandatory | Secret authentication token                        |
-| clientName | optional  | Client name                                        |
-| clientOS   | optional  | Client operating system                            |
-| version    | mandatory | Must be string "1.0"                               |
-| cachedUpto | optional  | Every MSG notification has a gid field which is ever increasing global id. This parameter communicates the highest the client has already seen and stored. The server will omit of sending messages with lower gid in the beginning of session. Without this option, the server sends up to 200 MSG notification for every window to fill the window backlog. |
+| Parameter      | Type      | Description                                        |
+|----------------|-----------|----------------------------------------------------|
+| userId         | mandatory | User Id                                            |
+| secret         | mandatory | Secret authentication token                        |
+| clientName     | optional  | Client name                                        |
+| clientOS       | optional  | Client operating system                            |
+| version        | mandatory | Must be string "1.0"                               |
+| cachedUpto     | optional  | Every MSG notification has a gid field which is ever increasing global id. This parameter communicates the highest the client has already seen and stored. The server will omit of sending messages with lower gid in the beginning of session. Without this option, the server sends up to 200 MSG notification for every window to fill the window backlog. |
+| maxBacklogMsgs | optional  | Maximum amount of messages per window the client wants the server to send when a new session starts. Server might not respect this value, see 'initok' event.
 
 ## Initok event payload
 
@@ -114,6 +115,7 @@ The server will send all buffered 'ntf' events if the resume is successful. Curr
 | Parameter  | Type      | Description                                        |
 |------------|-----------|----------------------------------------------------|
 | sessionId  | mandatory | Session identifier. Needed for image uploads and for resuming the connection after socket.io client 'disconnect' event |
+| maxBacklogMsgs | mandatory | Maximum amount of messages per window the server sends to the client before 'INITDONE' notification. This is either the value the client sent in 'init' message if the server approved it or a default value if the client didn't send maxBacklogMsgs parameter or the value it send was rejected.
 
 ## Terminate event payload
 
