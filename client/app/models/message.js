@@ -99,6 +99,10 @@ export default Ember.Object.extend({
             let media = false;
             let type = '';
 
+            if (urlObj.protocol() === '') {
+                urlObj.protocol('http');
+            }
+
             if (start !== pos) {
                 this._parseText(result, source.substring(pos, start), network, cat);
             }
@@ -118,7 +122,7 @@ export default Ember.Object.extend({
             result.push({
                 link: true,
                 text: visibleLink,
-                url: url,
+                url: urlObj.toString(),
                 media: media,
                 type: type
             });
