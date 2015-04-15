@@ -99,10 +99,6 @@ export default Ember.Object.extend({
             let media = false;
             let type = '';
 
-            if (urlObj.protocol() === '') {
-                urlObj.protocol('http');
-            }
-
             if (start !== pos) {
                 this._parseText(result, source.substring(pos, start), network, cat);
             }
@@ -117,6 +113,10 @@ export default Ember.Object.extend({
                 type = 'youtubelink';
             } else {
                 visibleLink = urlObj.readable();
+            }
+
+            if (urlObj.protocol() === '') {
+                urlObj.protocol('http');
             }
 
             result.push({
