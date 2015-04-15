@@ -62,7 +62,8 @@ export default Ember.Object.extend({
             clientOS: navigator.platform,
             userId: userId,
             secret: secret,
-            version: '1.0'
+            version: '1.0',
+            maxBacklogMsgs: isMobile.any ? 80 : 160
         });
 
         socket.on('initok', Ember.run.bind(this, function(data) {

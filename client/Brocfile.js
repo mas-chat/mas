@@ -34,6 +34,7 @@ app.import('bower_components/momentjs/moment.js');
 app.import('bower_components/howler/howler.js');
 app.import('bower_components/lodash/lodash.js');
 app.import('bower_components/bootstrap/dist/js/bootstrap.js');
+app.import('bower_components/isMobile/isMobile.js');
 
 app.import('bower_components/bootstrap-datepicker/js/bootstrap-datepicker.js');
 
