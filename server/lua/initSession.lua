@@ -117,7 +117,7 @@ for i = 1, #windowIds do
     }))
 
     local lines = redis.call('LRANGE',
-       'conversationmsgs:' .. conversationId, -1 * maxBacklogLines, -1)
+        'conversationmsgs:' .. conversationId, 0, maxBacklogLines - 1)
 
     for ii = #lines, 1, -1 do
         local message = cjson.decode(lines[ii])
