@@ -25,7 +25,7 @@ const assert = require('assert'),
       notification = require('../lib/notification'),
       window = require('./window');
 
-let MSG_BUFFER_SIZE = 200;
+let MSG_BUFFER_SIZE = 200; // TBD: This should come from session:max_backlog setting
 
 exports.create = function*(options) {
     let conversationId = yield redis.incr('nextGlobalConversationId');
@@ -249,7 +249,7 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
     yield redis.lpush(`conversationmsgs:${this.conversationId}`, JSON.stringify(msg));
     yield redis.ltrim(`conversationmsgs:${this.conversationId}`, 0, MSG_BUFFER_SIZE - 1);
 
-    yield this._streamAddText(msg, excludeSession);
+    yield this._streamMsg(msg, excludeSession);
 
     search.storeMessage(this.conversationId, msg);
 
@@ -347,7 +347,7 @@ Conversation.prototype.setPassword = function*(password) {
     });
 };
 
-Conversation.prototype._streamAddText = function*(msg, excludeSession) {
+Conversation.prototype._streamMsg = function*(msg, excludeSession) {
     msg.id = 'MSG';
     yield this._stream(msg, excludeSession);
 };
