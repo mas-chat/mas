@@ -99,7 +99,7 @@ exports.setup = function(server) {
                 yield redis.zadd(`sessionlist:${userId}`, ts, sessionId);
 
                 let maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
-                let cachedUpto = isInteger(data.cachedUpto) ? cachedUpto : 0;
+                let cachedUpto = isInteger(data.cachedUpto) ? data.cachedUpto : 0;
 
                 socket.emit('initok', {
                     sessionId: sessionId,
