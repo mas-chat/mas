@@ -82,7 +82,7 @@ module.exports = function*(userId, sessionId, command) {
 
 function *handleSend(params) {
     if (!params.conversation) {
-        return;
+        return { status: 'ERROR', errorMsg: 'Invalid windowId.'};
     }
 
     if (params.command.text.charAt(0) === '/') {
@@ -91,6 +91,8 @@ function *handleSend(params) {
             conversationId: params.conversation.conversationId,
             text: params.command.text.substring(1)
         });
+
+        return { status: 'OK' };
     } else {
         let gid = yield params.conversation.addMessageUnlessDuplicate(params.userId, {
             userId: params.userId,
@@ -103,9 +105,9 @@ function *handleSend(params) {
             conversationId: params.conversation.conversationId,
             text: params.command.text
         });
-    }
 
-    return { status: 'OK', gid: gid };
+        return { status: 'OK', gid: gid };
+    }
 }
 
 function *handleCreate(params) {
