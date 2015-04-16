@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals $, io */
+/* globals $, io, isMobile */
 
 import Ember from 'ember';
 import NotificationParser from './notification-parser';
