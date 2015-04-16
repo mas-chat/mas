@@ -52,6 +52,7 @@ demo_user_email=whogets@fakemessages.com
 enabled=true
 directory=logs
 clear_at_startup=false
+rotate_daily=false
 
 [pid]
 enabled=true

@@ -84,11 +84,15 @@ function configTransports() {
             fs.unlinkSync(fileName);
         }
 
-        let fileTransport = new (winston.transports.File)({
+        let fileTransportOptions = {
             filename: fileName,
             colorize: false,
             handleExceptions: true
-        });
+        };
+
+        let fileTransport = conf.get('log:rotate_daily') ?
+            new (winston.transports.DailyRotateFile)(fileTransportOptions) :
+            new (winston.transports.File)(fileTransportOptions);
 
         transports.push(fileTransport);
     }
