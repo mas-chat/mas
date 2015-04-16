@@ -92,7 +92,7 @@ function *handleSend(params) {
             text: params.command.text.substring(1)
         });
     } else {
-        yield params.conversation.addMessageUnlessDuplicate(params.userId, {
+        let gid = yield params.conversation.addMessageUnlessDuplicate(params.userId, {
             userId: params.userId,
             cat: 'msg',
             body: params.command.text
@@ -105,7 +105,7 @@ function *handleSend(params) {
         });
     }
 
-    return { status: 'OK' };
+    return { status: 'OK', gid: gid };
 }
 
 function *handleCreate(params) {
