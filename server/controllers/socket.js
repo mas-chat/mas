@@ -43,14 +43,20 @@ exports.setup = function(server) {
                 let ts = Math.round(Date.now() / 1000);
                 yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
 
-                let commands = yield notification.receive(userId, sessionId, 60);
+                let ntfs = yield notification.receive(userId, sessionId, 60);
 
                 if (state !== 'authenticated') {
                     break;
                 }
 
-                for (let command of commands) {
-                    socket.emit('ntf', command);
+                for (let ntf of ntfs) {
+                    if (ntf.id !== 'MSG') {
+                        let ntfAsString = JSON.stringify(ntf);
+                        log.info(userId,
+                            `Emitted ${ntf.id}. SessionId: ${sessionId}, data: ${ntfAsString}`);
+                    }
+
+                    socket.emit('ntf', ntf);
                 }
             }
         }
@@ -66,7 +72,7 @@ exports.setup = function(server) {
                     log.info('Invalid init socket.io message.');
                     socket.emit('terminate', {
                         code: 'INVALID_INIT',
-                        reason: 'Invalid init message.'
+                        reason: 'Invalid init event.'
                     });
                     end();
                     return;

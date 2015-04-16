@@ -18,7 +18,6 @@
 
 const util = require('util'),
       _ = require('lodash'),
-      log = require('./log'),
       redisModule = require('./redis'),
       redis = redisModule.createClient();
 
@@ -51,11 +50,6 @@ exports.receive = function*(userId, sessionId, timeout) {
     // Retrieve other ntfs if there are any
     while ((command = yield redis.rpop(`outbox:${userId}:${sessionId}`)) !== null) {
         ntfs.push(JSON.parse(command));
-    }
-
-    if (ntfs.length > 0) {
-        log.info(userId, 'Flushed outbox. SessionId: ' + sessionId + '. Response: ' +
-            JSON.stringify(ntfs)); // .substring(0, 100));
     }
 
     return ntfs;
