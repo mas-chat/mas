@@ -29,6 +29,7 @@ const tests = [
     conversationIndexTest,
     conversationIndexAccessTest,
     conversationMembersTest,
+    orphanGroupConversationTest,
     conversationListTest,
     oneOnOneHistoryTest,
     windowIndexTest,
@@ -76,6 +77,8 @@ function *conversationIndexTest() {
 
             let members = yield redis.hgetall(`conversationmembers:${conversationId}`);
 
+            conversation.name = conversation.name.toLowerCase();
+
             if (conversation.type === 'group') {
                 key = `group:${conversation.network}:${conversation.name}`;
             } else {
@@ -110,7 +113,10 @@ function *conversationIndexAccessTest() {
 
         let conversation = yield redis.hgetall(`conversation:${index[key]}`);
 
-        assert(conversation);
+        if (!conversation) {
+            console.log(`Removing index entry without conversation: ${key} -> ${index[key]}`);
+            yield redis.hdel('index:conversation', key);
+        }
     }
 
     printVerdict('conversation:index', true);
@@ -211,6 +217,29 @@ function *windowIndexTest() {
     }
 
     printVerdict('index:windowIds', passed);
+}
+
+function *orphanGroupConversationTest() {
+    let windowKeys = yield redis.keys('window:*');
+    let conversationKeys = yield redis.keys('conversation:*');
+
+    let activeConversations = {};
+
+    for (let entry of windowKeys) {
+        let conversationId = yield redis.hget(entry, 'conversationId');
+        activeConversations[conversationId] = true;
+    }
+
+    for (let entry of conversationKeys) {
+        let conversation = yield redis.hgetall(entry);
+        let conversationId = entry.split(':')[1];
+
+        if (conversation.type === 'group' && !activeConversations[conversationId]) {
+            console.log('Orphan group conversation found: ' + entry);
+        }
+    }
+
+    printVerdict('orphan group conversations', true);
 }
 
 function *windowTest() {
