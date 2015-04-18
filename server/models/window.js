@@ -26,20 +26,6 @@ exports.create = function*(userId, conversationId) {
     return yield create(userId, conversationId);
 };
 
-exports.setup1on1 = function*(userId, peerUserId, network) {
-    let conversation = yield conversationFactory.create({
-        owner: userId,
-        type: '1on1',
-        name: '',
-        network: network
-    });
-
-    yield conversation.set1on1Members(userId, peerUserId);
-    yield create(userId, conversation.conversationId);
-
-    return conversation;
-};
-
 exports.remove = function*(userId, windowId) {
     yield remove(userId, windowId);
 };

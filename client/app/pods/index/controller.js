@@ -134,25 +134,45 @@ export default Ember.ArrayController.extend({
             });
 
             window.get('messages').pushObject(messageRecord);
-        } else {
-            this.get('socket').send({
-                id: 'SEND',
-                text: text,
-                windowId: window.get('windowId')
-            }, function() {
-                if (!isCommand) {
-                    let messageRecord = this.container.lookup('model:message').setProperties({
-                        body: text,
-                        cat: 'mymsg',
-                        userId: this.get('store.userId'),
-                        ts: moment().unix(),
-                        window: window
-                    });
+            return;
+        }
 
-                    window.get('messages').pushObject(messageRecord);
+        if (isCommand && text.trim() === '/help') {
+            this.send('openModal', 'help-modal');
+            return;
+        }
+
+        // TBD: send command and parameters separately to server. Helps parsing also here.
+        // TBD: If the command is /me, echo it.
+
+        if (isCommand) {
+            this.get('socket').send({
+                id: 'COMMAND',
+                command: text.substring(1),
+                windowId: window.get('windowId')
+            }, function(resp) {
+                if (resp.status !== 'OK') {
+                    this.send('openModal', 'info-modal', { title: 'Error', body: resp.errorMsg });
                 }
             }.bind(this));
+            return;
         }
+
+        this.get('socket').send({
+            id: 'SEND',
+            text: text,
+            windowId: window.get('windowId')
+        }, function() {
+            let messageRecord = this.container.lookup('model:message').setProperties({
+                body: text,
+                cat: 'mymsg',
+                userId: this.get('store.userId'),
+                ts: moment().unix(),
+                window: window
+            });
+
+            window.get('messages').pushObject(messageRecord);
+        }.bind(this));
     },
 
     _handleChat(window, userId) {

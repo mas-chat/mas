@@ -1,0 +1,31 @@
+{{#modal-dialog title="Available commands" proceedButton="OK" submit="closeModal" noCancel="true"}}
+<table class="help-commands">
+    <thead>
+        <tr>
+            <th>Command</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><b>/1on1</b> &lt;nick&gt;</td>
+            <td>Start 1on1 discussion with a MAS user</td>
+        </tr>
+        <tr>
+            <td><b>/ircquery</b> &lt;nick&gt;</td>
+            <td>Start 1on1 discussion with an IRC user. Only available in an IRC window.</td>
+        </tr>
+        <tr>
+            <td><b>/me</b> drinks coffee</td>
+            <td>Send an action. Only available in an IRC window.</td>
+        </tr>
+        <tr>
+            <td><b>/topic</b> Meeting at 10 o'clock</td>
+            <td>Set the channel topic. Only available in an IRC window.</td>
+        </tr>
+        <tr class="irc-explanation">
+            <td colspan="2">Other IRC commands like <b>/mode</b> and <b>/kick</b> are also available for IRC channels. These commands are sent directly to IRC server unmodified. Meaning you need to follow IRC protocol and for example have to include channel name in the mode command, <b>/mode</b> #copenhagen +ob ilkka *!*@*.se</td>
+        </tr>
+    </tbody>
+</table>
+{{/modal-dialog}}

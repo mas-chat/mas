@@ -33,7 +33,11 @@ exports.removeCurrentNick = function*(userId, network) {
 };
 
 exports.getUserIdFromNick = function*(nick, network) {
-    return yield redis.hget('index:currentnick', network + ':' + nick.toLowerCase());
+    if (network === 'MAS') {
+        return yield redis.hget('index:user', nick);
+    } else {
+        return yield redis.hget('index:currentnick', network + ':' + nick.toLowerCase());
+    }
 };
 
 exports.getCurrentNick = function*(userId, network) {

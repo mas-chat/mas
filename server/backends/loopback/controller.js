@@ -39,8 +39,7 @@ co(function*() {
     yield createInitialGroups();
 
     courier.on('send', courier.noop);
-    courier.on('texCommand', courier.noop);
-    courier.on('chat', courier.noop);
+    courier.on('textCommand', processTextCommand);
     courier.on('updateTopic', processUpdateTopic);
     courier.on('updatePassword', processUpdatePassword);
     courier.on('create', processCreate);
@@ -48,6 +47,10 @@ co(function*() {
     courier.on('close', courier.noop); // TBD: Should we do something?
     courier.start();
 })();
+
+function processTextCommand() {
+    return { status: 'ERROR', errorMsg: 'Unknown command in this context.'};
+}
 
 function *processCreate(params) {
     let userId = params.userId;

@@ -28,25 +28,7 @@ const assert = require('assert'),
 let MSG_BUFFER_SIZE = 200; // TBD: This should come from session:max_backlog setting
 
 exports.create = function*(options) {
-    let conversationId = yield redis.incr('nextGlobalConversationId');
-
-    Object.keys(options).forEach(function(prop) {
-        // Can't store null to redis
-        options[prop] = options[prop] === null ? '' : options[prop];
-    });
-
-    yield redis.hmset(`conversation:${conversationId}`, options);
-
-    if (options.type === 'group') {
-        // Update group index
-        yield redis.hset('index:conversation',
-            'group:' + options.network + ':' + options.name.toLowerCase(), conversationId);
-    }
-
-    log.info('Created ' + options.type + ' conversation: ' + conversationId +
-        (options.name ? ', name: ' + options.name : '') + ' (' + options.network + ')');
-
-    return new Conversation(conversationId, options, {});
+    return yield create(options);
 };
 
 exports.delete = function*(conversationId) {
@@ -84,18 +66,31 @@ exports.findGroup = function*(name, network) {
     return yield get(conversationId);
 };
 
-exports.find1on1 = function*(userId1, userId2, network) {
-    assert (userId1 && userId2 && network);
+exports.findOrCreate1on1 = function*(userId, peerUserId, network) {
+    assert (userId && peerUserId && network);
 
-    let userIds = [ userId1, userId2 ].sort();
+    let conversation;
+    let userIds = [ userId, peerUserId ].sort();
     let conversationId = yield redis.hget('index:conversation',
         '1on1:' + network + ':' + userIds[0] + ':' + userIds[1]);
 
+    // TBD: Make sure peerUserId is either valid MAS user or that user doesn't have too many
+    // 1on1 conversations.
+
     if (!conversationId) {
-        log.info('Searched non-existing 1on1: ' + userId1 + ':' + userId2 + ':' + network);
+        conversation = yield create({
+            owner: userId,
+            type: '1on1',
+            name: '',
+            network: network
+        });
+
+        yield conversation.set1on1Members(userId, peerUserId);
+    } else {
+        conversation = yield get(conversationId);
     }
 
-    return yield get(conversationId);
+    return conversation;
 };
 
 function Conversation(conversationId, record, members) {
@@ -382,9 +377,14 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
 
         let windowId = yield window.findByConversationId(userId, this.conversationId);
 
-        if (!windowId && this.type === '1on1') {
+        if (!windowId && msg.id === 'MSG' && this.type === '1on1') {
             // The case where one of the 1on1 members has closed his window
             windowId = yield window.create(userId, this.conversationId);
+        }
+
+        if (!windowId) {
+            log.warn(userId, 'Window doesn\t exist, can\'t stream notification');
+            return;
         }
 
         msg.windowId = parseInt(windowId);
@@ -449,6 +449,28 @@ Conversation.prototype._setMember = function*(userId, role) {
 
     return newField;
 };
+
+function *create(options) {
+    let conversationId = yield redis.incr('nextGlobalConversationId');
+
+    Object.keys(options).forEach(function(prop) {
+        // Can't store null to redis
+        options[prop] = options[prop] === null ? '' : options[prop];
+    });
+
+    yield redis.hmset(`conversation:${conversationId}`, options);
+
+    if (options.type === 'group') {
+        // Update group index
+        yield redis.hset('index:conversation',
+            'group:' + options.network + ':' + options.name.toLowerCase(), conversationId);
+    }
+
+    log.info('Created ' + options.type + ' conversation: ' + conversationId +
+        (options.name ? ', name: ' + options.name : '') + ' (' + options.network + ')');
+
+    return new Conversation(conversationId, options, {});
+}
 
 function *get(conversationId) {
     let record =  yield redis.hgetall(`conversation:${conversationId}`);

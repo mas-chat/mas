@@ -91,12 +91,11 @@ co(function*() {
     ircScheduler.init();
 
     courier.on('send', processSend);
-    courier.on('texCommand', processTextCommand);
+    courier.on('textCommand', processTextCommand);
     courier.on('join', processJoin);
     courier.on('close', processClose);
     courier.on('updatePassword', processUpdatePassword);
     courier.on('updateTopic', processUpdateTopic);
-    courier.on('chat', processChat);
     courier.on('restarted', processRestarted);
     courier.on('data', processData);
     courier.on('noconnection', processNoConnection);
@@ -131,42 +130,32 @@ function *processSend(params) {
 
 function *processTextCommand(params) {
     let conversation = yield conversationFactory.get(params.conversationId);
-    let command = params.text.match(/.*?(?=\W+|$)/)[0].toLowerCase();
-    let payload = params.text.substring(command.length);
-    let data = params.text;
+    let command = params.command;
+    let commandParams = params.commandParams;
     let network = conversation.network;
-    let systemMsg = null;
-    let send = true;
-    let res;
+    let data = false;
 
     switch (command) {
-        case '':
-            systemMsg = 'Space after / character is not allowed.';
-            send = false;
-            break;
         case 'part':
-            systemMsg = 'Use the window menu instead to leave.';
-            send = false;
-            break;
+            return { status: 'ERROR', errorMsg: 'Use the window menu instead to leave.' };
         case 'msg':
-            res = yield handleMsgTextCommand(payload, network);
-            send = res[0];
-            systemMsg = res[1];
-            data = res[2] || data;
-            break;
+            return { status: 'ERROR', errorMsg: 'Use /ircquery <nick> to start 1on1 via IRC' };
         case 'me':
-            data = 'PRIVMSG ' + conversation.name + ' :\u0001ACTION ' + payload + '\u0001';
+            data = `PRIVMSG ${conversation.name} :\u0001ACTION ${commandParams}\u0001`;
+            break;
+        case 'topic':
+            data = `TOPIC ${conversation.name} :${commandParams}`;
             break;
     }
 
-    if (systemMsg) {
-        yield addSystemMessage(params.userId, network, 'info', systemMsg);
+    if (!data) {
+        data = `${command} ${commandParams}`;
     }
 
-    if (send) {
-        courier.callNoWait(
-            'connectionmanager', 'write', { userId: params.userId, network: network, line: data });
-    }
+    courier.callNoWait(
+        'connectionmanager', 'write', { userId: params.userId, network: network, line: data });
+
+    return { status: 'OK' };
 }
 
 function *processJoin(params) {
@@ -193,15 +182,6 @@ function *processJoin(params) {
     }
 
     return { status: 'OK' };
-}
-
-function *processChat(params) {
-    let conversation = yield conversationFactory.find1on1(
-        params.userId, params.targetUserId, params.network);
-
-    if (!conversation) {
-        yield window.setup1on1(params.userId, params.targetUserId, params.network);
-    }
 }
 
 function *processClose(params) {
@@ -461,11 +441,7 @@ function *parseIrcMessage(params) {
 }
 
 function *addSystemMessage(userId, network, cat, body) {
-    let conversation = yield conversationFactory.find1on1(userId, 'iSERVER', network);
-
-    if (!conversation) {
-        conversation = yield window.setup1on1(userId, 'iSERVER', network);
-    }
+    let conversation = yield conversationFactory.findOrCreate1on1(userId, 'iSERVER', network);
 
     yield conversation.addMessage({
         userId: 'iSERVER',
@@ -979,11 +955,8 @@ function *handlePrivmsg(userId, msg, command) {
 
     if (target.toLowerCase() === currentNick.toLowerCase()) {
         // Message is for the user only
-        conversation = yield conversationFactory.find1on1(userId, sourceUserId, msg.network);
-
-        if (conversation === null) {
-            conversation = yield window.setup1on1(userId, sourceUserId, msg.network);
-        }
+        conversation = yield conversationFactory.findOrCreate1on1(
+            userId, sourceUserId, msg.network);
     } else {
         conversation = yield conversationFactory.findGroup(target, msg.network);
 

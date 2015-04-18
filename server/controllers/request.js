@@ -27,10 +27,13 @@ const assert = require('assert'),
       courier = require('../lib/courier').createEndPoint('command'),
       conversationFactory = require('../models/conversation'),
       window = require('../models/window'),
-      friends = require('../models/friends');
+      nick = require('../models/nick'),
+      friends = require('../models/friends'),
+      ircUser = require('../backends/irc/ircUser');
 
 const handlers = {
     SEND: handleSend,
+    COMMAND: handleCommand,
     CREATE: handleCreate,
     JOIN: handleJoin,
     CLOSE: handleClose,
@@ -85,29 +88,51 @@ function *handleSend(params) {
         return { status: 'ERROR', errorMsg: 'Invalid windowId.'};
     }
 
-    if (params.command.text.charAt(0) === '/') {
-        courier.callNoWait(params.backend, 'texCommand', {
-            userId: params.userId,
-            conversationId: params.conversation.conversationId,
-            text: params.command.text.substring(1)
-        });
+    let gid = yield params.conversation.addMessageUnlessDuplicate(params.userId, {
+        userId: params.userId,
+        cat: 'msg',
+        body: params.command.text
+    }, params.sessionId);
 
-        return { status: 'OK' };
-    } else {
-        let gid = yield params.conversation.addMessageUnlessDuplicate(params.userId, {
-            userId: params.userId,
-            cat: 'msg',
-            body: params.command.text
-        }, params.sessionId);
+    courier.callNoWait(params.backend, 'send', {
+        userId: params.userId,
+        conversationId: params.conversation.conversationId,
+        text: params.command.text
+    });
 
-        courier.callNoWait(params.backend, 'send', {
-            userId: params.userId,
-            conversationId: params.conversation.conversationId,
-            text: params.command.text
-        });
+    return { status: 'OK', gid: gid };
+}
 
-        return { status: 'OK', gid: gid };
+function *handleCommand(params) {
+    let data = /^(\S*)(.*)/.exec(params.command.command.trim());
+    let command = data[1] ? data[1].toLowerCase() : '';
+    let commandParams = data[2] ? data[2] : '';
+    let targetUserId;
+
+    switch (command) {
+        case '1on1':
+            targetUserId = yield nick.getUserIdFromNick(commandParams.trim(), 'MAS');
+
+            if (!targetUserId) {
+                return { status: 'ERROR', errorMsg: 'Unknown MAS nick.' };
+            }
+
+            return yield start1on1(params.userId, targetUserId, 'MAS');
+        case 'ircquery':
+            if (params.network === 'MAS') {
+                return { status: 'ERROR', errorMsg: 'You can only use /ircquery on IRC window' };
+            }
+
+            targetUserId = yield ircUser.getUserId(commandParams.trim(), params.network);
+            return yield start1on1(params.userId, targetUserId, params.network);
     }
+
+    return yield courier.call(params.backend, 'textCommand', {
+        userId: params.userId,
+        conversationId: params.conversation.conversationId,
+        command: command,
+        commandParams: commandParams
+    });
 }
 
 function *handleCreate(params) {
@@ -283,14 +308,14 @@ function *handleChat(params) {
     let targetUserId = params.command.userId;
     let network = 'MAS';
 
-    // TDB: Refactor to a method
-    if (targetUserId.charAt(0) === 'm') {
-        // 1on1s between MAS users are forced through MAS
-        params.backend = 'loopbackparser';
-    } else {
+    if (targetUserId.charAt(0) !== 'm') {
         network = yield redis.hget(`ircuser:${targetUserId}`, 'network');
     }
 
+    return yield start1on1(userId, targetUserId, network);
+}
+
+function *start1on1(userId, targetUserId, network) {
     if (!targetUserId || typeof targetUserId !== 'string') {
         return { status: 'ERROR', errorMsg: 'Malformed request.' };
     }
@@ -299,30 +324,17 @@ function *handleChat(params) {
         return { status: 'ERROR', errorMsg: 'You can\'t chat with yourself.' };
     }
 
-    let conversation = yield conversationFactory.find1on1(userId, targetUserId, network);
+    let conversation = yield conversationFactory.findOrCreate1on1(userId, targetUserId, network);
+    let existingWindow = yield window.findByConversationId(userId, conversation.conversationId);
 
-    if (conversation) {
-        assert(conversation.members[userId]);
-
-        let existingWindow = yield window.findByConversationId(userId, conversation.conversationId);
-
-        if (existingWindow) {
-            return {
-                status: 'ERROR',
-                errorMsg: '1on1 chat window with this person is already open.'
-            };
-        } else {
-            yield window.create(userId, conversation.conversationId);
-        }
+    if (existingWindow) {
+        return {
+            status: 'ERROR',
+            errorMsg: '1on1 chat window with this person is already open.'
+        };
     } else {
-        yield window.setup1on1(userId, targetUserId, network);
+        yield window.create(userId, conversation.conversationId);
     }
-
-    courier.callNoWait(params.backend, 'chat', {
-        userId: userId,
-        network: network,
-        targetUserId: targetUserId
-    });
 
     return { status: 'OK' };
 }
