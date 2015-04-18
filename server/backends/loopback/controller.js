@@ -49,7 +49,7 @@ co(function*() {
 })();
 
 function processTextCommand() {
-    return { status: 'ERROR', errorMsg: 'Unknown command in this context.'};
+    return { status: 'ERROR', errorMsg: 'Unknown command in this context.' };
 }
 
 function *processCreate(params) {

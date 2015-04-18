@@ -186,7 +186,6 @@ function *sendNetworkList(userId, sessionId) {
     });
 }
 
-
 function checkBacklogParameterBounds(value) {
     let minAllowedBacklog = conf.get('session:min_backlog');
     let maxAllowedBacklog = conf.get('session:max_backlog');

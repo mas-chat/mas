@@ -18,8 +18,7 @@
 
 /*jshint -W079 */
 
-const assert = require('assert'),
-      co = require('co'),
+const co = require('co'),
       log = require('../lib/log'),
       redis = require('../lib/redis').createClient(),
       notification = require('../lib/notification'),
@@ -85,7 +84,7 @@ module.exports = function*(userId, sessionId, command) {
 
 function *handleSend(params) {
     if (!params.conversation) {
-        return { status: 'ERROR', errorMsg: 'Invalid windowId.'};
+        return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
     }
 
     let gid = yield params.conversation.addMessageUnlessDuplicate(params.userId, {
@@ -104,6 +103,7 @@ function *handleSend(params) {
 }
 
 function *handleCommand(params) {
+    let userId = params.userId;
     let data = /^(\S*)(.*)/.exec(params.command.command.trim());
     let command = data[1] ? data[1].toLowerCase() : '';
     let commandParams = data[2] ? data[2] : '';
@@ -117,18 +117,22 @@ function *handleCommand(params) {
                 return { status: 'ERROR', errorMsg: 'Unknown MAS nick.' };
             }
 
-            return yield start1on1(params.userId, targetUserId, 'MAS');
+            return yield start1on1(userId, targetUserId, 'MAS');
         case 'ircquery':
             if (params.network === 'MAS') {
                 return { status: 'ERROR', errorMsg: 'You can only use /ircquery on IRC window' };
             }
 
             targetUserId = yield ircUser.getUserId(commandParams.trim(), params.network);
-            return yield start1on1(params.userId, targetUserId, params.network);
+
+            // 1on1s between MAS users are forced through loopback backend as multiple 1on1s between
+            // same people via different networks isn't useful feature, just confusing.
+            return yield start1on1(
+                userId, targetUserId, targetUserId.charAt(0) === 'm' ? 'MAS' : params.network);
     }
 
     return yield courier.call(params.backend, 'textCommand', {
-        userId: params.userId,
+        userId: userId,
         conversationId: params.conversation.conversationId,
         command: command,
         commandParams: commandParams
