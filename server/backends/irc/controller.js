@@ -57,6 +57,7 @@ let handlers = {
     353: handle353,
     366: handle366,
     376: handle376,
+    401: handle401,
     433: handle433,
     482: handle482,
 
@@ -513,6 +514,19 @@ function *handleServerText(userId, msg, code) {
     if (text) {
         yield addSystemMessage(userId, msg.network, cat, text);
     }
+}
+
+function *handle401(userId, msg) {
+    // :irc.localhost 401 ilkka dadaa :No such nick/channel
+    let targetUserId = yield ircUser.getUserId(msg.params[0], msg.network);
+    let conversation = yield conversationFactory.findOrCreate1on1(
+        userId, targetUserId, msg.network);
+
+    yield conversation.addMessage({
+        userId: 'iSERVER',
+        cat: 'error',
+        body: `${msg.params[0]} is not in IRC.`
+    });
 }
 
 function *handle043(userId, msg) {
