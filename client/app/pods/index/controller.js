@@ -122,10 +122,18 @@ export default Ember.ArrayController.extend({
     },
 
     _handleSendMessage(window, text) {
-        let isCommand = text.charAt(0) === '/';
+        let command = false;
+        let commandParams;
+
+        if (text.charAt(0) === '/') {
+            let data = /^(\S*)(.*)/.exec(text.substring(1));
+            command = data[1] ? data[1].toLowerCase() : '';
+            commandParams = data[2] ? data[2] : '';
+        }
+
         let ircServer1on1 = window.get('type') === '1on1' && window.get('userId') === 'iSERVER';
 
-        if (ircServer1on1 && !isCommand) {
+        if (ircServer1on1 && !command) {
             let messageRecord = this.container.lookup('model:message').setProperties({
                 body: 'Only commands allowed, e.g. /whois john',
                 cat: 'error',
@@ -137,18 +145,18 @@ export default Ember.ArrayController.extend({
             return;
         }
 
-        if (isCommand && text.trim() === '/help') {
+        if (command === 'help') {
             this.send('openModal', 'help-modal');
             return;
         }
 
-        // TBD: send command and parameters separately to server. Helps parsing also here.
-        // TBD: If the command is /me, echo it.
+        // TBD: /me on an empty IRC channel is not shown to the sender.
 
-        if (isCommand) {
+        if (command) {
             this.get('socket').send({
                 id: 'COMMAND',
-                command: text.substring(1),
+                command: command,
+                params: commandParams.trim(),
                 windowId: window.get('windowId')
             }, function(resp) {
                 if (resp.status !== 'OK') {

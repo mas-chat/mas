@@ -104,9 +104,8 @@ function *handleSend(params) {
 
 function *handleCommand(params) {
     let userId = params.userId;
-    let data = /^(\S*)(.*)/.exec(params.command.command.trim());
-    let command = data[1] ? data[1].toLowerCase() : '';
-    let commandParams = data[2] ? data[2] : '';
+    let command = params.command.command;
+    let commandParams = params.command.params;
     let targetUserId;
 
     switch (command) {
