@@ -458,12 +458,7 @@ function *connect(userId, network, skipRetryCountReset, delay) {
         yield resetRetryCount(userId, network);
     }
 
-    let delayText = '';
-
-    if (delay) {
-        delayText = ` in ${delay} seconds`;
-    }
-
+    let delayText = delay ? ` in ${Math.round(delay / 1000 / 60)} minutes` : '';
     yield addSystemMessage(userId, network, 'info', `Connecting to IRC server${delayText}...`);
 
     ircMessageBuffer[userId + network] = [];
