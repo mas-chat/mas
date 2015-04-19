@@ -88,19 +88,19 @@ function handleIdentConnection(conn) {
 // Connect
 courier.on('connect', function(params) {
     let network = params.network;
-    let delay = 0;
+    let rateLimitDelay = 0;
     let rateLimit = conf.get('irc:networks:' + network + ':rate_limit'); // connections per minute
 
     if (!nextNetworkConnectionSlot[network] || nextNetworkConnectionSlot[network] < Date.now()) {
         // Rate limiting not active
         nextNetworkConnectionSlot[network] = Date.now();
     } else {
-        delay = nextNetworkConnectionSlot[network] - Date.now();
+        rateLimitDelay = nextNetworkConnectionSlot[network] - Date.now();
     }
 
     setTimeout(function() {
         connect(params.userId, params.nick, network);
-    }, delay);
+    }, rateLimitDelay + params.delay);
 
     nextNetworkConnectionSlot[network] += Math.round(60 / rateLimit * 1000);
 });

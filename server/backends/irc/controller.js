@@ -27,7 +27,6 @@ require('../../lib/init')('irc');
 
 const assert = require('assert'),
       co = require('co'),
-      wait = require('co-wait'),
       log = require('../../lib/log'),
       redisModule = require('../../lib/redis'),
       redis = redisModule.createClient(),
@@ -374,8 +373,7 @@ function *processDisconnected(params) {
     }
 
     yield addSystemMessage(userId, network, 'error', msg);
-    yield wait(delay);
-    yield connect(params.userId, params.network, true);
+    yield connect(params.userId, params.network, true, delay);
 }
 
 function *parseIrcMessage(params) {
@@ -450,7 +448,7 @@ function *addSystemMessage(userId, network, cat, body) {
     });
 }
 
-function *connect(userId, network, skipRetryCountReset) {
+function *connect(userId, network, skipRetryCountReset, delay) {
     let nick = yield redis.hget(`user:${userId}`, 'nick');
     yield nicks.updateCurrentNick(userId, network, nick);
 
@@ -460,11 +458,23 @@ function *connect(userId, network, skipRetryCountReset) {
         yield resetRetryCount(userId, network);
     }
 
-    yield addSystemMessage(userId, network, 'info', 'Connecting to IRC server...');
+    let delayText = '';
+
+    if (delay) {
+        delayText = ` in ${delay} seconds`;
+    }
+
+    yield addSystemMessage(userId, network, 'info', `Connecting to IRC server${delayText}...`);
+
     ircMessageBuffer[userId + network] = [];
 
     courier.callNoWait(
-        'connectionmanager', 'connect', { userId: userId, nick: nick, network: network });
+        'connectionmanager', 'connect', {
+            userId: userId,
+            nick: nick,
+            network: network,
+            delay: delay ? delay : 0
+        });
 }
 
 function *disconnect(userId, network) {
