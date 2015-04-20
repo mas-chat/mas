@@ -27,6 +27,7 @@ const net = require('net'),
       carrier = require('carrier'),
       isUtf8 = require('is-utf8'),
       iconv = require('iconv-lite'),
+      ip = require('ip'),
       co = require('co'),
       conf = require('../../lib/conf'),
       log = require('../../lib/log'),
@@ -56,32 +57,30 @@ function handleIdentConnection(conn) {
         let found = false;
         let resp;
 
-        // Indexof() is needed because conn.remoteAddress can be in ::ffff:185.30.166.35 format
-        // while sockets[userId].remoteAddress is 185.30.166.
         if (!isNaN(localPort) && !isNaN(remotePort)) {
             for (let userId in sockets) {
                 if (sockets[userId].localPort === localPort &&
                     sockets[userId].remotePort === remotePort &&
-                    conn.remoteAddress.indexOf(sockets[userId].remoteAddress) > -1) {
+                    ip.isEqual(sockets[userId].remoteAddress, conn.remoteAddress)) {
                     found = true;
-                    resp = prefix + ' : USERID : UNIX : ' + sockets[userId].nick + '\r\n';
+                    resp = `USERID : UNIX : ${sockets[userId].nick}`;
                     break;
                 }
             }
 
             if (!found) {
-                resp = prefix + ' : ERROR : NO-USER\r\n';
+                resp = 'ERROR : NO-USER';
             }
         }
 
         clearTimeout(timer);
 
         if (resp) {
-            conn.write(resp);
+            conn.write(`${prefix} : ${resp}\r\n`);
         }
         conn.end();
 
-        log.info('Ident request from ' + conn.remoteAddress + ', req: ' + line + ', resp: ' + resp);
+        log.info(`Ident request from ${conn.remoteAddress}, req: ${line}, resp: ${resp}`);
     });
 }
 
