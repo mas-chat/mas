@@ -248,7 +248,7 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
 
     search.storeMessage(this.conversationId, msg);
 
-    return msg.gid;
+    return msg;
 };
 
 Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, excludeSession) {
@@ -267,7 +267,7 @@ Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, 
         return yield this.addMessage(msg, excludeSession);
     }
 
-    return null;
+    return {};
 };
 
 Conversation.prototype.sendAddMembers = function*(userId) {

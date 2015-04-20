@@ -87,7 +87,7 @@ function *handleSend(params) {
         return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
     }
 
-    let gid = yield params.conversation.addMessageUnlessDuplicate(params.userId, {
+    let msg = yield params.conversation.addMessageUnlessDuplicate(params.userId, {
         userId: params.userId,
         cat: 'msg',
         body: params.command.text
@@ -99,7 +99,7 @@ function *handleSend(params) {
         text: params.command.text
     });
 
-    return { status: 'OK', gid: gid };
+    return { status: 'OK', gid: msg.gid, ts: msg.ts };
 }
 
 function *handleCommand(params) {

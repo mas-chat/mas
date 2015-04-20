@@ -483,7 +483,8 @@ Note that the session that sends SEND request doesn't receive the corresponding 
 ```JSON
 {
   "status": "OK",
-  "gid": 382742993
+  "gid": 382742993,
+  "ts": 1429140481
 }
 ```
 
