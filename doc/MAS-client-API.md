@@ -70,16 +70,11 @@ List of used custom events.
 | terminate            | server     |
 | ntf                  | server     |
 | req                  | client     |
-| resume               | client     |
-| resumeok             | server     |
 
 ## Socket.io client disconnect event
 
-If the client receives 'disconnect' event (network hiccup or server problem) from socket.io and then 'reconnect' event, it can opt to send the 'resume' event to the server instead of sending 'init' event (full restart).
-
-Note that if the time between 'disconnect' and 'reconnect' is long, the server might have deleted the session. In that case the server sends the 'terminate' event as response to 'resume'. Client needs then to create a new session with new socket.io connection and 'init' event. If the session still exists, server sends 'resumeok'. Client is allowed to send 'req' events only after it has received 'resumeok' event.
-
-The server will send all buffered 'ntf' events if the resume is successful. Currently it can't be guaranteed that no chat messages are lost in this situation.
+If the client receives 'disconnect' event (network hiccup or server problem) from socket.io and then 'reconnect' event, it must send 'init' event again. To make this procedure as lightweight as possible,
+the client should use the cachedUpto parameter.
 
 ## Init event payload
 
@@ -130,24 +125,6 @@ The server will send all buffered 'ntf' events if the resume is successful. Curr
 |------------|-----------|----------------------------------------------------|
 | code       | mandatory | Can be "INVALID_SECRET", "INVALID_SESSION", "UNSUPPORTED_PROTOCOL_VERSION" |
 | reason     | mandatory | Textual description of the failure reason.         |
-
-## Resume event payload
-
-```JSON
-{
-    "userId": "m32432",
-    "sessionId": "n433smdkDdRW32fsdxc4fds4Tw"
-}
-```
-
-| Parameter  | Type      | Description                                        |
-|------------|-----------|----------------------------------------------------|
-| userId     | mandatory | User Id                                            |
-| sessionId  | mandatory | Session Id                                         |
-
-## Resumeok event payload
-
-Contains no payload.
 
 ## Ntf and req event payload
 
