@@ -383,7 +383,7 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
         }
 
         if (!windowId) {
-            log.warn(userId, 'Window doesn\t exist, can\'t stream notification');
+            log.warn(userId, 'Window doesn\'t exist, can\'t stream ntf:' + JSON.stringify(msg));
             return;
         }
 
