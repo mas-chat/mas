@@ -56,6 +56,10 @@ exports.receive = function*(userId, sessionId, timeout) {
 };
 
 exports.requeue = function*(userId, sessionId, ntfs) {
+    ntfs = ntfs.map(function(ntf) {
+        return JSON.stringify(ntf);
+    });
+
     yield redis.rpush.apply(redis, [ `outbox:${userId}:${sessionId}` ].concat(ntfs.reverse()));
 };
 
