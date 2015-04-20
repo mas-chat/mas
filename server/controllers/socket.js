@@ -46,7 +46,7 @@ exports.setup = function(server) {
                 let ntfs = yield notification.receive(userId, sessionId, 60);
 
                 if (state !== 'authenticated') {
-                    if (ntfs) {
+                    if (ntfs.length > 0) {
                         yield notification.requeue(userId, sessionId, ntfs);
                     }
                     break;
