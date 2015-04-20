@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+/* globals isMobile */
+
 'use strict';
 
 import Ember from 'ember';
@@ -129,7 +131,7 @@ export default Ember.Object.extend({
     }.property('type'),
 
     syncServerPosition: function() {
-        if (!window.disableUpdate) {
+        if (!window.disableUpdate && !isMobile.any) {
             this.get('socket').send({
                 id: 'UPDATE',
                 windowId: this.get('windowId'),

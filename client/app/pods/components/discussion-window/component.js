@@ -56,6 +56,10 @@ export default Ember.Component.extend(UploadMixin, {
         return this.get('selectedDesktop') === this.get('content.desktop');
     }.property('selectedDesktop', 'content.desktop'),
 
+    logOrMobileModeEnabled: function() {
+        return this.get('logModeEnabled') || isMobile.any;
+    }.property('logModeEnabled'),
+
     windowChanged: function() {
         this.sendAction('relayout', { animate: true });
     }.observes('row', 'column', 'desktop'),

@@ -4,7 +4,7 @@
     </div>
 
     <div class="window-title-buttons">
-        {{#unless logModeEnabled}}
+        {{#unless logOrMobileModeEnabled}}
             <i class="window-title-button fa fa-arrows"></i>
             {{#if expanded}}
                 <i {{action "compress"}} class="window-title-button fa fa-compress"></i>

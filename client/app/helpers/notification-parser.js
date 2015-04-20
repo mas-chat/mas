@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals _ */
+/* globals _, isMobile */
 
 import Ember from 'ember';
 
@@ -26,6 +26,7 @@ export default Ember.Object.extend({
 
     initReceived: false,
     initBuffer: [],
+    mobileDesktop: 0,
 
     process(notification) {
         if (!this.initReceived && notification.id !== 'INITDONE') {
@@ -58,6 +59,12 @@ export default Ember.Object.extend({
     },
 
     _handleCreate(data) {
+        if (isMobile.any) {
+            // Couldn't find a nice way to do this in a model. In mobile mode we show only one
+            // window per desktop.
+            data.desktop = this.incrementProperty('mobileDesktop');
+        }
+
         // This hack can be removed if there's a way to create and init the object in one go as
         // syncServer() observer doesn't have .on('init').
         window.disableUpdate = true;
