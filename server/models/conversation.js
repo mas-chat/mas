@@ -419,7 +419,11 @@ Conversation.prototype._remove = function*() {
         key = '1on1:' + this.network + ':' + userIds[0] + ':' + userIds[1];
     }
 
-    yield redis.hdel('index:conversation', key);
+    let removed = yield redis.hdel('index:conversation', key);
+
+    if (removed !== 1) {
+        log.warn(`Tried to remove index:conversation entry that doesn\'t exist, key: ${key}`);
+    }
 };
 
 Conversation.prototype._removeAllMembers = function*() {
