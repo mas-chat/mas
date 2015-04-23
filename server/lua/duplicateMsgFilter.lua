@@ -17,7 +17,7 @@
 local reporterUserId = ARGV[1]
 local conversationId = ARGV[2]
 local msgUserId = ARGV[3]
-local msgBody = ARGV[3]
+local msgBody = ARGV[4]
 local key = 'conversationbuffer:' .. conversationId
 
 -- Remove trailing whitespace, IRC servers may not conserve it. In
