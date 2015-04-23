@@ -83,8 +83,14 @@ module.exports = function*(userId, sessionId, command) {
 };
 
 function *handleSend(params) {
+    let text = params.command.text;
+
     if (!params.conversation) {
-        return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
+        return { status: 'ERROR', errorMsg: 'Protocol error: Invalid windowId.' };
+    } else if (typeof text !== 'string') {
+        return { status: 'ERROR', errorMsg: 'Protocol error: text property missing or not string.'};
+    } else if (text.length > 500) {
+        return { status: 'ERROR', errorMsg: 'Message too long. Maximum length is 500 characters.' };
     }
 
     let msg = yield params.conversation.addMessageUnlessDuplicate(params.userId, {

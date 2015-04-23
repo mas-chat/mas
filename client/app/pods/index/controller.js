@@ -171,6 +171,11 @@ export default Ember.ArrayController.extend({
             text: text,
             windowId: window.get('windowId')
         }, function(resp) {
+            if (resp.status !== 'OK') {
+                this.send('openModal', 'info-modal', { title: 'Error', body: resp.errorMsg });
+                return;
+            }
+
             let messageRecord = this.container.lookup('model:message').setProperties({
                 body: text,
                 cat: 'mymsg',
