@@ -129,6 +129,11 @@ co(function*() {
 })();
 
 function connect(userId, nick, network) {
+    if (sockets[`${userId}:${network}`]) {
+        log.warn(userId, `Impossible happened. Already connected to IRC network: ${network}`);
+        return;
+    }
+
     let socket;
     let port = conf.get('irc:networks:' + network + ':port');
     let host = conf.get('irc:networks:' + network + ':host');
