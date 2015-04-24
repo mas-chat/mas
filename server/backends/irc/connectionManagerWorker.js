@@ -58,12 +58,12 @@ function handleIdentConnection(conn) {
         let resp;
 
         if (!isNaN(localPort) && !isNaN(remotePort)) {
-            for (let userId in sockets) {
-                if (sockets[userId].localPort === localPort &&
-                    sockets[userId].remotePort === remotePort &&
-                    ip.isEqual(sockets[userId].remoteAddress, conn.remoteAddress)) {
+            for (let key in sockets) {
+                if (sockets[key].localPort === localPort &&
+                    sockets[key].remotePort === remotePort &&
+                    ip.isEqual(sockets[key].remoteAddress, conn.remoteAddress)) {
                     found = true;
-                    resp = `USERID : UNIX : ${sockets[userId].nick}`;
+                    resp = `USERID : UNIX : ${sockets[key].nick}`;
                     break;
                 }
             }
