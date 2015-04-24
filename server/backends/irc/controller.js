@@ -176,7 +176,7 @@ function *processJoin(params) {
 
     if (state === 'connected') {
         sendJoin(params.userId, params.network, channelName, params.password);
-    } else {
+    } else if (state !== 'connecting') {
         yield connect(params.userId, params.network);
     }
 
