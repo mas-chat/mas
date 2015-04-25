@@ -34,7 +34,13 @@ exports.removeCurrentNick = function*(userId, network) {
 
 exports.getUserIdFromNick = function*(nick, network) {
     if (network === 'MAS') {
-        return yield redis.hget('index:user', nick);
+        let userId = yield redis.hget('index:user', nick);
+
+        if (userId) {
+            return (yield redis.hget(`user:${userId}`, 'deleted')) === 'true' ? null : userId;
+        } else {
+            return null;
+        }
     } else {
         return yield redis.hget('index:currentnick', network + ':' + nick.toLowerCase());
     }

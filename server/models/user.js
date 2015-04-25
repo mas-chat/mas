@@ -41,6 +41,7 @@ function User(details, settings, friends) {
 
 User.prototype.load = function*(userId) {
     this.data = yield redis.hgetall(`user:${userId}`);
+
     this.settings = yield redis.hgetall(`settings:${userId}`);
     this.friends = yield redis.smembers(`friends:${userId}`);
 
@@ -99,4 +100,22 @@ User.prototype.save = function*() {
     if (this.friends.length > 0) {
         yield redis.sadd(`friends:${userId}`, this.friends);
     }
+};
+
+User.prototype.delete = function*() {
+    let userId = this.data.userId;
+
+    yield redis.hmset(`user:${userId}`, {
+        deleted: 'true',
+        deletionTime: Math.round(Date.now() / 1000)
+    });
+
+    // Free email address and extAuthId but not nick. Nicks are kept forever to not to
+    // break conversation logs.
+    yield redis.hdel('index:user', this.data.email.toLowerCase().trim());
+    yield redis.hdel('index:user', this.data.extAuthId);
+
+    yield redis.del(`settings:${userId}`);
+
+    yield redis.del(`activealerts:${userId}`);
 };

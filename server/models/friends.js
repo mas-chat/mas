@@ -103,3 +103,14 @@ exports.informStateChange = function*(userId, eventType) {
         yield notification.broadcast(friendUserId, command);
     }
 };
+
+exports.removeUser = function*(userId) {
+    let friendIds = yield redis.smembers(`friends:${userId}`);
+
+    for (let friendUserId of friendIds) {
+        yield redis.srem(`friends:${friendUserId}`, userId);
+    }
+
+    yield redis.del(`friends:${userId}`);
+    yield redis.del(`friendsrequests:${userId}`);
+};

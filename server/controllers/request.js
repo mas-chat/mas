@@ -26,6 +26,7 @@ const co = require('co'),
       courier = require('../lib/courier').createEndPoint('command'),
       conversationFactory = require('../models/conversation'),
       window = require('../models/window'),
+      User = require('../models/user'),
       nick = require('../models/nick'),
       friends = require('../models/friends'),
       ircUser = require('../backends/irc/ircUser');
@@ -44,14 +45,24 @@ const handlers = {
     ACKALERT: handleAckAlert,
     LOGOUT: handleLogout,
     GET_CONVERSATION_LOG: handleGetConversationLog,
+    GET_PROFILE: handleGetProfile,
+    UPDATE_PROFILE: handleUpdateProfile,
     REQUEST_FRIEND: handleRequestFriend,
     FRIEND_VERDICT: handleFriendVerdict,
-    REMOVE_FRIEND: handleRemoveFriend
+    REMOVE_FRIEND: handleRemoveFriend,
+    DESTROY_ACCOUNT: handleDestroyAccount
 };
 
 module.exports = function*(userId, sessionId, command) {
     let windowId = command.windowId;
     let network = command.network;
+
+    let userExists = yield userExistsCheck(userId);
+
+    if (!userExists) {
+        // Account has been deleted very recently
+        return;
+    }
 
     let conversation = null;
 
@@ -88,9 +99,19 @@ function *handleSend(params) {
     if (!params.conversation) {
         return { status: 'ERROR', errorMsg: 'Protocol error: Invalid windowId.' };
     } else if (typeof text !== 'string') {
-        return { status: 'ERROR', errorMsg: 'Protocol error: text property missing or not string.'};
+        return { status: 'ERROR', errorMsg: 'Protocol error: text prop missing or not a string.' };
     } else if (text.length > 500) {
         return { status: 'ERROR', errorMsg: 'Message too long. Maximum length is 500 characters.' };
+    }
+
+    if (params.conversation.type === '1on1' && params.conversation.network === 'MAS') {
+        let targetUserId = yield params.conversation.getPeerUserId(params.userId);
+        let userExists = yield userExistsCheck(targetUserId);
+
+        if (!userExists) {
+            return { status: 'ERROR',
+                errorMsg: 'This MAS user\'s account is deleted. Please close this conversation.' };
+        }
     }
 
     let msg = yield params.conversation.addMessageUnlessDuplicate(params.userId, {
@@ -183,26 +204,7 @@ function *handleClose(params) {
         return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
     }
 
-    // Ask all sessions to close this window
-    yield notification.broadcast(params.userId, {
-        id: 'CLOSE',
-        windowId: params.windowId
-    });
-
-    if (params.conversation.type === 'group') {
-        yield params.conversation.removeGroupMember(params.userId);
-    } else {
-        yield params.conversation.remove1on1Member(params.userId);
-    }
-
-    // Backend specific cleanup
-    courier.callNoWait(params.backend, 'close', {
-        userId: params.userId,
-        network: params.network,
-        name: params.conversation.name,
-        conversationType: params.conversation.type
-    });
-
+    yield removeFromConversation(params.userId, params.conversation);
     return { status: 'OK' };
 }
 
@@ -333,6 +335,14 @@ function *start1on1(userId, targetUserId, network) {
         return { status: 'ERROR', errorMsg: 'You can\'t chat with yourself.' };
     }
 
+    if (targetUserId.charAt(0) === 'm') {
+        let userExists = yield userExistsCheck(targetUserId);
+
+        if (!userExists) {
+            return { status: 'ERROR', errorMsg: 'Unknown MAS userId.' };
+        }
+    }
+
     let conversation = yield conversationFactory.findOrCreate1on1(userId, targetUserId, network);
     let existingWindow = yield window.findByConversationId(userId, conversation.conversationId);
 
@@ -439,4 +449,78 @@ function *handleRemoveFriend(params) {
     yield friends.sendFriends(params.userId);
 
     return { status: 'OK' };
+}
+
+function *handleGetProfile(params) {
+    let user = yield redis.hgetall(`user:${params.userId}`);
+    return { name: user.name, email: user.email, nick: user.nick };
+}
+
+function *handleUpdateProfile(params) {
+    let newName = params.command.name;
+    let newEmail = params.command.email;
+
+    // Keep in sync with register controller.
+    if (newName.length < 6) {
+        return { status: 'ERROR', errorMsg: 'Name is too short.' };
+    } else if (!(/\S+@\S+\.\S+/.test(newEmail))) {
+        return { status: 'ERROR', errorMsg: 'Invalid email address' };
+    }
+
+    yield redis.hmset(`user:${params.userId}`, {
+        name: params.command.name,
+        email: params.command.email
+    });
+
+    return { status: 'OK' };
+}
+
+function *handleDestroyAccount(params) {
+    let userId = params.userId;
+
+    let user = new User();
+    yield user.load(userId);
+    yield user.delete();
+
+    let conversationIds = yield window.getAllConversationIds(userId);
+
+    for (let conversationId of conversationIds) {
+        let conversation = yield conversationFactory.get(conversationId);
+        yield removeFromConversation(userId, conversation);
+    }
+
+    let networks = yield redis.smembers('networklist');
+
+    for (let network of networks) {
+        // Don't remove 'networks::${userId}:${network}' entries as they are needed to
+        // keep discussion logs parseable. Those logs contain userIds, not nicks.
+
+        yield redis.del(`ircchannelsubscriptions:${userId}:${network}`);
+    }
+
+    yield friends.removeUser(userId);
+
+    return { status: 'OK' };
+}
+
+function *userExistsCheck(userId) {
+    let user = yield redis.hgetall(`user:${userId}`);
+
+    return user && user.deleted !== 'true';
+}
+
+function *removeFromConversation(userId, conversation) {
+    if (conversation.type === 'group') {
+        yield conversation.removeGroupMember(userId);
+    } else {
+        yield conversation.remove1on1Member(userId);
+    }
+
+    // Backend specific cleanup
+    courier.callNoWait(conversation.network === 'MAS' ? 'loopbackparser' : 'ircparser', 'close', {
+        userId: userId,
+        network: conversation.network,
+        name: conversation.name,
+        conversationType: conversation.type
+    });
 }
