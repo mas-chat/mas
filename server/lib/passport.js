@@ -43,7 +43,7 @@ function authLocal(username, password, done) {
             user = yield redis.hgetall(`user:${userId}`);
         }
 
-        if (user.deleted === 'true') {
+        if (!user || user.deleted === 'true') {
             done('invalid', false);
             return;
         }
@@ -76,7 +76,7 @@ function authLocal(username, password, done) {
             }
         }
 
-        if (user && !user.password && user.extAuthId) {
+        if (!user.password && user.extAuthId) {
             done('useExt', false);
         } else if (!userId || !correctPassword || user.inuse !== 'true') {
             done('invalid', false);
