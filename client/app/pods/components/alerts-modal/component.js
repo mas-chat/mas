@@ -30,11 +30,11 @@ export default Ember.Component.extend({
             this.set('model.sounds', newSoundAlert === 'enabled');
             this.set('model.titleAlert', newTitleAlert === 'enabled');
 
-            this.send('closeModal');
+            this.sendAction('closeModal');
         },
 
         closeModal() {
-            this.sendAction();
+            this.sendAction('closeModal');
         }
     },
 

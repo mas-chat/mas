@@ -39,11 +39,11 @@ export default Ember.Component.extend({
                 userId: this.get('userId')
             });
 
-            this.send('closeModal');
+            this.sendAction('closeModal');
         },
 
         closeModal() {
-            this.sendAction();
+            this.sendAction('closeModal');
         }
     }
 });

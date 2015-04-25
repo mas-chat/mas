@@ -34,7 +34,7 @@ export default Ember.Component.extend(UploadMixin, {
         uploadPhoto() {
             let file = this.get('shot').preview(800, 600);
             this.handleUpload([ file ], 'jpeg');
-            this.send('closeModal');
+            this.sendAction('closeModal');
         },
 
         takePhoto() {
@@ -56,7 +56,7 @@ export default Ember.Component.extend(UploadMixin, {
         },
 
         closeModal() {
-            this.sendAction();
+            this.sendAction('closeModal');
         }
     },
 

@@ -21,7 +21,7 @@ import Ember from 'ember';
 export default Ember.Component.extend({
     actions: {
         closeModal() {
-            this.sendAction();
+            this.sendAction('closeModal');
         }
     }
 });

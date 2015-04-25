@@ -34,11 +34,11 @@ export default Ember.Component.extend({
                 topic: newTopic
             });
 
-            this.send('closeModal');
+            this.sendAction('closeModal');
         },
 
         closeModal() {
-            this.sendAction();
+            this.sendAction('closeModal');
         }
     },
 

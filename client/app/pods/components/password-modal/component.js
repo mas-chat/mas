@@ -40,7 +40,7 @@ export default Ember.Component.extend({
                 password: newPassword
             }, function(resp) {
                 if (resp.status === 'OK') {
-                    this.send('closeModal');
+                    this.sendAction('closeModal');
                 } else {
                     this.set('errorMsg', resp.errorMsg);
                 }
@@ -48,7 +48,7 @@ export default Ember.Component.extend({
         },
 
         closeModal() {
-            this.sendAction();
+            this.sendAction('closeModal');
         }
     },
 
