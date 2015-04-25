@@ -22,6 +22,10 @@ export default Ember.Component.extend({
     classNames: [ 'modal', 'fade' ],
 
     actions: {
+        terminate() {
+            this.sendAction('terminate');
+        },
+
         cancel() {
             this.sendAction('cancel');
         },

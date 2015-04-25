@@ -1,8 +1,10 @@
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
-            {{#unless noControls}}
-                <button {{action "cancel"}} type="button" class="close">&times;</button>
+            {{#unless noCancel}}
+                {{#unless noControls}}
+                    <button {{action "cancel"}} type="button" class="close">&times;</button>
+                {{/unless}}
             {{/unless}}
             <h4 class="modal-title">{{title}}</h4>
         </div>
@@ -11,14 +13,23 @@
         </div>
         {{#unless noControls}}
             <div class="modal-footer">
-                {{#unless noCancel}}
-                    <button {{action "cancel"}} type="button" data-modal="cancel "class="btn btn-default">
-                        Cancel
-                    </button>
-                {{/unless}}
-                    <button {{action "submit"}} type="button" data-modal="submit" class="btn btn-primary">
+                {{#if terminateButton}}
+                    <div class="pull-left">
+                        <button {{action "terminate"}} type="button" class="btn btn-danger">
+                            {{terminateButton}}
+                        </button>
+                    </div>
+                {{/if}}
+                <div class="pull-right">
+                    {{#unless noCancel}}
+                        <button {{action "cancel"}} type="button" class="btn btn-default">
+                            Cancel
+                        </button>
+                    {{/unless}}
+                    <button {{action "submit"}} type="button" class="btn btn-primary">
                         {{proceedButton}}
                     </button>
+                </div>
             </div>
         {{/unless}}
     </div>
