@@ -43,6 +43,11 @@ function authLocal(username, password, done) {
             user = yield redis.hgetall(`user:${userId}`);
         }
 
+        if (user.deleted === 'true') {
+            done('invalid', false);
+            return;
+        }
+
         if (userId && user.password) {
             let passwordParts = user.password.split(':');
             let encryptionMethod = passwordParts[0];
