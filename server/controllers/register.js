@@ -245,7 +245,8 @@ exports.create = function*() {
             name: form.data.name,
             email: form.data.email,
             nick: form.data.nick,
-            inuse: 'true'
+            inuse: 'true',
+            registrationtime: Math.round(Date.now() / 1000)
         }, {}, {});
 
         user.setPassword(form.data.password);
@@ -293,6 +294,7 @@ exports.createExt = function*() {
         user.data.email = form.data.email;
         user.data.nick = form.data.nick;
         user.data.inuse = 'true';
+        user.data.registrationtime = Math.round(Date.now() / 1000);
         yield user.save();
 
         this.response.redirect('/app');
