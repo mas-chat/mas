@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals $, FileAPI, emojify, titlenotifier */
+/* globals $, FileAPI, emojify, titlenotifier, isMobile */
 
 import Ember from 'ember';
 import { play } from '../../../helpers/sound';
