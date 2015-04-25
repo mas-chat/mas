@@ -457,6 +457,7 @@ function *handleGetProfile(params) {
 }
 
 function *handleUpdateProfile(params) {
+    let userId = params.userId;
     let newName = params.command.name;
     let newEmail = params.command.email;
 
@@ -467,10 +468,13 @@ function *handleUpdateProfile(params) {
         return { status: 'ERROR', errorMsg: 'Invalid email address' };
     }
 
-    yield redis.hmset(`user:${params.userId}`, {
-        name: params.command.name,
-        email: params.command.email
-    });
+    let user = new User();
+
+    yield user.load(userId);
+    user.data.name = params.command.name;
+    user.data.email = params.command.email;
+    yield user.save();
+
 
     return { status: 'OK' };
 }

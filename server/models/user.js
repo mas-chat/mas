@@ -42,6 +42,11 @@ function User(details, settings, friends) {
 User.prototype.load = function*(userId) {
     this.data = yield redis.hgetall(`user:${userId}`);
 
+    // See save()
+    this._oldNick = this.data.nick;
+    this._oldEmail = this.data.email;
+    this._oldExtAuthId = this.data.extAuthId;
+
     this.settings = yield redis.hgetall(`settings:${userId}`);
     this.friends = yield redis.smembers(`friends:${userId}`);
 
@@ -90,8 +95,22 @@ User.prototype.save = function*() {
     }
 
     yield redis.hmset(`user:${userId}`, this.data);
-    yield redis.hmset('index:user', index);
     yield redis.sadd('userlist', userId);
+
+    // Update index
+    if (this._oldNick) {
+        yield redis.hdel('index:user', this._oldNick);
+    }
+
+    if (this._oldEmail) {
+        yield redis.hdel('index:user', this._oldEmail);
+    }
+
+    if (this._oldExtAuthId) {
+        yield redis.hdel('index:user', this._oldExtAuthId);
+    }
+
+    yield redis.hmset('index:user', index);
 
     if (Object.keys(this.settings).length > 0) {
         yield redis.hmset(`settings:${userId}`, this.settings);
