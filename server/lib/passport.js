@@ -43,42 +43,38 @@ function authLocal(username, password, done) {
             user = yield redis.hgetall(`user:${userId}`);
         }
 
-        if (!user || user.deleted === 'true') {
+        if (!user || user.deleted === 'true' || !user.password) {
             done('invalid', false);
+            return;
+        } else if (!user.password && user.extAuthId) {
+            done('useExt', false);
             return;
         }
 
-        if (userId && user.password) {
-            let passwordParts = user.password.split(':');
-            let encryptionMethod = passwordParts[0];
-            let encryptedHash = passwordParts[1];
+        let passwordParts = user.password.split(':');
+        let encryptionMethod = passwordParts[0];
+        let encryptedHash = passwordParts[1];
 
-            if (encryptionMethod === 'sha256') {
-                let expectedSha = crypto.createHash(
-                    'sha256').update(password, 'utf8').digest('hex');
+        if (encryptionMethod === 'sha256') {
+            let expectedSha = crypto.createHash(
+                'sha256').update(password, 'utf8').digest('hex');
 
-                if (encryptedHash === expectedSha) {
-                    correctPassword = true;
-                    // Migrate to bcrypt
-                    let salt = bcrypt.genSaltSync(10);
-                    let hash = bcrypt.hashSync(password, salt);
-                    yield redis.hset(`user:${userId}`, 'password', 'bcrypt:' + hash);
-                }
-            } else if (encryptionMethod === 'bcrypt') {
-                correctPassword = bcrypt.compareSync(password, encryptedHash);
-            } else if (encryptionMethod === 'plain') {
-                // Only used in testing
-                correctPassword = password === encryptedHash;
-                log.info('Login attempt with unencrypted password, result:' + correctPassword);
-            } else {
-                done('invalid', false);
-                return;
+            if (encryptedHash === expectedSha) {
+                correctPassword = true;
+                // Migrate to bcrypt
+                let salt = bcrypt.genSaltSync(10);
+                let hash = bcrypt.hashSync(password, salt);
+                yield redis.hset(`user:${userId}`, 'password', 'bcrypt:' + hash);
             }
+        } else if (encryptionMethod === 'bcrypt') {
+            correctPassword = bcrypt.compareSync(password, encryptedHash);
+        } else if (encryptionMethod === 'plain') {
+            // Only used in testing
+            correctPassword = password === encryptedHash;
+            log.info('Login attempt with unencrypted password, result:' + correctPassword);
         }
 
-        if (!user.password && user.extAuthId) {
-            done('useExt', false);
-        } else if (!userId || !correctPassword || user.inuse !== 'true') {
+        if (!correctPassword || user.inuse !== 'true') {
             done('invalid', false);
         } else {
             done(null, userId);
