@@ -89,7 +89,7 @@ let formFields = {
         cssClasses: {
             label: [ 'control-label' ]
         },
-        validators: [ validators.rangelength(3, 14, 'Nick has to 3-14 characters long.'),
+        validators: [ validators.rangelength(3, 14, 'Nick has to be 3-14 characters long.'),
             validateNick ]
     }),
     tos: fields.boolean({
