@@ -748,3 +748,62 @@ Contains ```errorMsg``` property if the status is not ```OK```
 ```
 
 Contains ```errorMsg``` property if the status is not ```OK```
+
+### GET_PROFILE
+
+```JSON
+{
+  "id": "GET_PROFILE",
+}
+```
+
+#### Acknowledgment
+
+```JSON
+{
+  "name": "Ilkka Oksanen",
+  "email": "ilkkao@iki.fi",
+  "nick": "ilkka"
+}
+```
+
+### UPDATE_PROFILE
+
+```JSON
+{
+  "id": "UPDATE_PROFILE",
+
+  "name": "Ilkka Oksanen",
+  "email": "ilkka@meetandspeak.com"
+}
+```
+
+#### Acknowledgment
+
+```JSON
+{
+  "status": "OK"
+}
+```
+
+Contains ```errorMsg``` property if the status is not ```OK```
+
+### DESTROY_ACCOUNT
+
+Deletes the account and log outs the user immediately.
+
+WARNING: Can't be undone.
+
+```JSON
+{
+  "id": "DESTROY_ACCOUNT"
+}
+```
+
+#### Acknowledgment
+
+```JSON
+{
+  "status": "OK"
+}
+```

@@ -7,6 +7,7 @@ MAS Redis structures
    name (string)
    email (string)
    inuse (string, 'true', 'false')
+   deleted (string, 'true', 'false')
    lastlogout (int, unix time) (0 = online)
    password (string)
    nick (string)
