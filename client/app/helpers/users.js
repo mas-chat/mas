@@ -33,6 +33,6 @@ export default Ember.Object.extend({
     },
 
     getAvatarHash(userId) {
-        return this.get('users.' + userId + '.gravatar') || 'na';
+        return this.get('users.' + userId + '.gravatar') || '';
     }
 });

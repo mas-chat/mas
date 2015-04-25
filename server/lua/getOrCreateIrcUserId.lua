@@ -15,8 +15,7 @@
 --
 
 local nick = ARGV[1]
-local nickMD5 = ARGV[2]
-local network = ARGV[3]
+local network = ARGV[2]
 
 local indexField = network .. ':' .. string.lower(nick)
 
@@ -25,7 +24,7 @@ local userId = redis.call('HGET', 'index:ircuser', indexField)
 if not userId then
     userId = 'i' .. redis.call('INCR', 'nextGlobalIrcUserId')
 
-    redis.call('HMSET', 'ircuser:' .. userId, 'nick', nick, 'nickMD5', nickMD5, 'network', network)
+    redis.call('HMSET', 'ircuser:' .. userId, 'nick', nick, 'network', network)
     redis.call('HSET', 'index:ircuser', indexField, userId)
 end
 

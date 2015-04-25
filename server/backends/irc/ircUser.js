@@ -30,9 +30,5 @@ exports.getUserId = function*(nick, network) {
     // UserId for IRC user is created on the fly if the nick in the network hasn't an ID
     // already. This method therefore never returns null.
 
-    // MD5 hash is used to get an unique fallback image from gravatar.com. We don't know
-    // the email address of IRC users so never get a real avatar.
-    let nickMD5 = crypto.createHash('md5').update(nick).digest('hex');
-
-    return yield redis.run('getOrCreateIrcUserId', nick, nickMD5, network);
+    return yield redis.run('getOrCreateIrcUserId', nick, network);
 };

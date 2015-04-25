@@ -74,6 +74,6 @@ local function getAvatarHash(userId)
     if class == 'm' then
         return redis.call('HGET', 'user:' .. userId, 'emailMD5')
     else
-        return redis.call('HGET', 'ircuser:' .. userId, 'nickMD5')
+        return ''
     end
 end
