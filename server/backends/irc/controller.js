@@ -356,15 +356,13 @@ function *processDisconnected(params) {
     }
 
     let delay = 30 * 1000; // 30s
-    let msg = 'Lost connection to IRC server (' + params.reason + '). Will try to reconnect in ';
+    let msg = `Lost connection to IRC server (${params.reason}). Scheduling a reconnect attempt...`;
     let count = yield redis.hincrby(`networks:${userId}:${network}`, 'retryCount', 1);
 
     // Set the backoff timer
     if (count < 4) {
-        msg = msg + '30 seconds.';
     } else if (count < 8) {
         delay = 3 * 60 * 1000; // 3 mins
-        msg = msg + '3 minutes.';
     } else if (count >= 8) {
         delay = 60 * 60 * 1000; // 1 hour
         msg = 'Error in connection to IRC server after multiple attempts. Waiting one hour ' +
@@ -1050,13 +1048,13 @@ function *disconnectIfIdle(userId, network) {
         }
     }
 
-    if (onlyServer1on1Left) {
-        yield addSystemMessage(userId, network,
-            'info', 'No open windows left for this network, disconnecting...');
-    }
-
     if (windowIds.length === 0 || onlyServer1on1Left) {
         yield disconnect(userId, network);
+    }
+
+    if (onlyServer1on1Left) {
+        yield addSystemMessage(userId, network,
+           'info', 'No open windows left for this network. Disconnected.');
     }
 }
 
