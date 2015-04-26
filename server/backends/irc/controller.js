@@ -172,7 +172,7 @@ function *processJoin(params) {
     }
 
     yield redis.hset(`ircchannelsubscriptions:${params.userId}:${params.network}`,
-        channelName, params.password);
+        channelName.toLowerCase(), params.password);
 
     if (state === 'connected') {
         sendJoin(params.userId, params.network, channelName, params.password);
@@ -186,7 +186,8 @@ function *processJoin(params) {
 function *processClose(params) {
     let state = yield redis.hget(`networks:${params.userId}:${params.network}`, 'state');
 
-    yield redis.hdel(`ircchannelsubscriptions:${params.userId}:${params.network}`, params.name);
+    yield redis.hdel(`ircchannelsubscriptions:${params.userId}:${params.network}`,
+       params.name.toLowerCase());
 
     if (state === 'connected' && params.conversationType === 'group') {
         sendIRCPart(params.userId, params.network, params.name);
@@ -619,8 +620,8 @@ function *handle376(userId, msg) {
         yield redis.run('introduceNewUserIds', userId, null, null, true, userId);
 
         if (msg.network === 'Flowdock') {
-            // The odd case of Flowdock
-            sendPrivmsg(userId, 'Flowdock', 'NickServ', 'identify xxx yyy'); // TBD: temporary
+            // TBD: The odd case of Flowdock, temporary
+            sendPrivmsg(userId, 'Flowdock', 'NickServ', 'identify xx@example.com password');
             return;
         }
 
@@ -713,7 +714,7 @@ function *handleJoinReject(userId, msg) {
     yield addSystemMessage(userId, msg.network,
         'error', 'Failed to join ' + channel + '. Reason: ' + reason);
 
-    yield redis.hdel(`ircchannelsubscriptions:${userId}:${msg.network}`, channel);
+    yield redis.hdel(`ircchannelsubscriptions:${userId}:${msg.network}`, channel.toLowerCase());
 
     if (conversation) {
         yield conversation.removeGroupMember(userId, false, false);
@@ -895,8 +896,8 @@ function *handleMode(userId, msg) {
                 let newPassword = oper === '+' ? param : '';
 
                 yield conversation.setPassword(newPassword);
-                yield redis.hset(
-                    `ircchannelsubscriptions:${userId}:${msg.network}`, target, newPassword);
+                yield redis.hset(`ircchannelsubscriptions:${userId}:${msg.network}`,
+                    target.toLowerCase(), newPassword);
             }
 
             if (newClass) {
