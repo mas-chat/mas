@@ -480,5 +480,10 @@ function *get(conversationId) {
     let record =  yield redis.hgetall(`conversation:${conversationId}`);
     let members = yield redis.hgetall(`conversationmembers:${conversationId}`);
 
-    return record ? new Conversation(conversationId, record, members || {}) : null;
+    if (record) {
+        return new Conversation(conversationId, record, members || {});
+    } else {
+        log.warn(`Searched non-existing conversation, id: ${conversationId}`);
+        return null;
+    }
 }
