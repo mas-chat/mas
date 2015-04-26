@@ -35,6 +35,7 @@ const tests = [
     windowIndexTest,
     windowTest,
     windowlistTest,
+    ircChannelSubscriptionsTest,
     friendsExistTest,
     conversationIndexCaseTest
 ];
@@ -63,6 +64,9 @@ function *conversationIndexTest() {
     let conversationIndexFieldsLength = yield redis.hlen('index:conversation');
 
     let passed = conversationKeys.length === conversationIndexFieldsLength;
+
+    console.log(`Conversations: ${conversationKeys.length}`);
+    console.log(`Conversation index entries: ${conversationIndexFieldsLength}`);
 
     printVerdict('index:conversation', passed);
 
@@ -376,6 +380,37 @@ function *conversationIndexCaseTest() {
     }
 
     console.log(keyArray.length);
+}
+
+function *ircChannelSubscriptionsTest() {
+    let keys = yield redis.keys('ircchannelsubscriptions:*');
+
+    for (let key of keys) {
+        let channels = yield redis.hgetall(key);
+        let network = key.split(':')[2];
+
+        for(let channel of Object.keys(channels)) {
+            let indexKey = `group:${network}:${channel}`;
+            let conversationId = yield redis.hget('index:conversation', indexKey);
+
+            if (!conversationId) {
+                let loweCaseIndexKey = `group:${network}:${channel.toLowerCase()}`;
+                let lowerCaseconversationId = yield redis.hget(
+                    'index:conversation', loweCaseIndexKey);
+
+                if (!lowerCaseconversationId) {
+                    console.log(`Removing ircchannelsubscriptions ${indexKey}`);
+                    yield redis.hdel(key, channel);
+                } else {
+                    console.log(`Renaming ircchannelsubscriptions ${indexKey} to lower case`);
+                    yield redis.hdel(key, channel);
+                    yield redis.hset(key, channel.toLowerCase(), channels[channel]);
+                }
+            }
+        }
+    }
+
+    printVerdict('ircchannelsubscriptions', true);
 }
 
 function printVerdict(desc, passed) {
