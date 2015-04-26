@@ -662,7 +662,7 @@ function *handleJoin(userId, msg) {
     let subscriptionsKey = `ircchannelsubscriptions:${userId}:${network}`;
 
     if (userId === targetUserId) {
-        let password = yield redis.hget(subscriptionsKey, channel);
+        let password = yield redis.hget(subscriptionsKey, channel.toLowerCase());
 
         if (password === null) {
             // ircchannelsubscriptions entry is missing. This means IRC server has added the user
@@ -670,7 +670,7 @@ function *handleJoin(userId, msg) {
             // ircchannelsubscriptions must be updated as it's used to rejoin channels after a
             // server restart.
             password = '';
-            yield redis.hset(subscriptionsKey, channel, password);
+            yield redis.hset(subscriptionsKey, channel.toLowerCase(), password);
         }
 
         if (!conversation) {
