@@ -32,8 +32,8 @@ if (dataDirectory.charAt(0) !== path.sep) {
 }
 
 module.exports = function*() {
-    // The body isn't multipart, so busboy can't parse it
     if (!this.request.is('multipart/*')) {
+        // The body isn't multipart, so busboy can't parse it
         return;
     }
 
