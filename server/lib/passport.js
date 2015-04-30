@@ -43,11 +43,11 @@ function authLocal(username, password, done) {
             user = yield redis.hgetall(`user:${userId}`);
         }
 
-        if (!user || user.deleted === 'true' || !user.password) {
-            done('invalid', false);
-            return;
-        } else if (!user.password && user.extAuthId) {
+        if (!user.password && user.extAuthId) {
             done('useExt', false);
+            return;
+        } else if (!user || user.deleted === 'true' || !user.password) {
+            done('invalid', false);
             return;
         }
 
@@ -56,8 +56,7 @@ function authLocal(username, password, done) {
         let encryptedHash = passwordParts[1];
 
         if (encryptionMethod === 'sha256') {
-            let expectedSha = crypto.createHash(
-                'sha256').update(password, 'utf8').digest('hex');
+            let expectedSha = crypto.createHash('sha256').update(password, 'utf8').digest('hex');
 
             if (encryptedHash === expectedSha) {
                 correctPassword = true;
@@ -74,10 +73,10 @@ function authLocal(username, password, done) {
             log.info('Login attempt with unencrypted password, result:' + correctPassword);
         }
 
-        if (!correctPassword || user.inuse !== 'true') {
-            done('invalid', false);
-        } else {
+        if (correctPassword && user.inuse === 'true') {
             done(null, userId);
+        } else {
+            done('invalid', false);
         }
     })();
 }
