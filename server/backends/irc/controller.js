@@ -1109,6 +1109,8 @@ function parseCTCPMessage(text) {
         return { type: dataType ? dataType : 'UNKNOWN', data: payload };
     }
     /*jshint +W084 */
+
+    return { type: 'UNKNOWN' };
 }
 
 function *resetRetryCount(userId, network) {
