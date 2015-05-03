@@ -50,7 +50,7 @@ module.exports = function configureProcess(serverName) {
                     process.kill(pid, 0);
                 } catch (e) {
                     // Process mentioned in the pid file is not running anymore
-                    log.info ('Removing stale pid file: ' + pidFile);
+                    log.info('Removing stale pid file: ' + pidFile);
                     fs.unlinkSync(pidFile);
                     pid = 0;
                 }

@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals moment */
+/* globals moment, $ */
 
 import Ember from 'ember';
 

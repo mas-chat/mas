@@ -72,8 +72,8 @@ export default Ember.Mixin.create({
     _printLine(text, cat) {
         let messageRecord = this.get('container').lookup('model:message').setProperties({
             body: text,
-            cat:  cat,
-            userId: cat === 'mymsg' ?  this.get('store.userId') : null,
+            cat: cat,
+            userId: cat === 'mymsg' ? this.get('store.userId') : null,
             window: this.get('content'),
             ts: moment().unix()
         });

@@ -5,7 +5,7 @@
         "node": true
     },
     "rules": {
-        "strict": [2, "global"],
+        "strict": 0,
         "quotes": [2, "single", "avoid-escape"],
         "no-use-before-define": 0,
         "no-underscore-dangle": 0,
@@ -17,6 +17,17 @@
         "blockBindings": true,
         "forOf": true,
         "templateStrings": true,
-        "generators": true
+        "generators": true,
+        "arrowFunctions": true,
+        "classes": true,
+        "defaultParams": true,
+        "destructuring": true,
+        "modules": true,
+        "spread": true,
+        "templateStrings": true,
+        "objectLiteralComputedProperties": true,
+        "objectLiteralDuplicateProperties": true,
+        "objectLiteralShorthandMethods": true,
+        "objectLiteralShorthandProperties": true
     },
 }
