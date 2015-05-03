@@ -61,7 +61,7 @@ module.exports = function*(userId, sessionId, command) {
 
     if (!userExists) {
         // Account has been deleted very recently
-        return;
+        return {};
     }
 
     let conversation = null;
@@ -88,9 +88,10 @@ module.exports = function*(userId, sessionId, command) {
             network: network,
             command: command
         });
-    } else {
-        log.warn(userId, `Reveiced unknown request: ${command.id}`);
     }
+
+    log.warn(userId, `Reveiced unknown request: ${command.id}`);
+    return {};
 };
 
 function *handleSend(params) {
