@@ -547,7 +547,7 @@ Close a window. In case the window is not 1on1, part from the MAS group or IRC c
 {
   "id": "CLOSE",
 
-  "windoId": 3
+  "windowId": 3
 }
 ```
 
