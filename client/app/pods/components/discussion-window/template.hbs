@@ -69,7 +69,7 @@
 <div {{bind-attr class=":window-toolbar :flex-row logModeEnabled:hidden"}}>
     <div class="window-add-text-container flex-1">
         <form {{action "sendMessage" on="submit"}}>
-            {{input placeholder="Write here…" class="form-control" value=newMessage}}
+            {{input placeholder="Write here…" maxlength="500" class="form-control" value=newMessage}}
             {{#if scrollLock}}
                 {{#if content.newMessagesCount}}
                     <div {{action "jumpToBottom"}} class="window-new-messages">
