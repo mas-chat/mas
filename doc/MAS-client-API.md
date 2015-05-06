@@ -123,7 +123,7 @@ the client should use the cachedUpto parameter.
 
 | Parameter  | Type      | Description                                        |
 |------------|-----------|----------------------------------------------------|
-| code       | mandatory | Can be "INVALID_SECRET", "INVALID_SESSION", "UNSUPPORTED_PROTOCOL_VERSION" |
+| code       | mandatory | Can be "INVALID_SECRET", "UNSUPPORTED_PROTOCOL_VERSION" |
 | reason     | mandatory | Textual description of the failure reason.         |
 
 ## Ntf and req event payload
