@@ -19,9 +19,6 @@
 /* globals _, isMobile */
 
 import Ember from 'ember';
-import Window from '../models/window';
-import Message from '../models/message';
-import Friend from '../models/friend';
 
 export default Ember.Object.extend({
     store: null,
@@ -68,16 +65,7 @@ export default Ember.Object.extend({
             data.desktop = this.incrementProperty('mobileDesktop');
         }
 
-        // This hack can be removed if there's a way to create and init the object in one go as
-        // syncServer() observer doesn't have .on('init').
-        window.disableUpdate = true;
-
-        let windowRecord = Window.create(data);
-        windowRecord.set('socket', this.get('socket'));
-        windowRecord.set('store', this.get('store'));
-
-        window.disableUpdate = false;
-
+        let windowRecord = this.get('store').createObject('window', data);
         this.get('store.windows').pushObject(windowRecord);
     },
 
@@ -93,9 +81,7 @@ export default Ember.Object.extend({
         data.window = targetWindow;
         delete data.windowId;
 
-        let messageRecord = Message.create(data);
-        messageRecord.set('store', this.get('store'));
-
+        let messageRecord = this.get('store').createObject('message', data);
         let messages = targetWindow.messages;
 
         if (messages.length > 200) {
@@ -127,9 +113,7 @@ export default Ember.Object.extend({
                 delete notification.windowId;
                 notification.window = windowObject;
 
-                let messageRecord = Message.create(notification);
-                messageRecord.set('store', this.get('store'));
-                return messageRecord;
+                return this.get('store').createObject('message', notification);
             }.bind(this));
 
             let targetWindow = this.get('store.windows').findBy('windowId', windowId);
@@ -217,9 +201,7 @@ export default Ember.Object.extend({
             let friend = this.get('store.friends').findBy('userId', details.userId);
 
             if (!friend) {
-                let friendRecord = Friend.create(details);
-                friendRecord.set('store', this.get('store'));
-
+                let friendRecord = this.get('store').createObject('friend', details);
                 this.get('store.friends').pushObject(friendRecord);
             } else {
                 friend.set('online', details.online);

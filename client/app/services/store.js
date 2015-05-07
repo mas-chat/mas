@@ -18,8 +18,13 @@
 
 import Ember from 'ember';
 import Users from '../helpers/users';
+import Window from '../models/window';
+import Message from '../models/message';
+import Friend from '../models/friend';
 
 export default Ember.Service.extend({
+    socket: Ember.inject.service(),
+
     friends: null,
     users: null,
 
@@ -40,5 +45,22 @@ export default Ember.Service.extend({
         this.set('windows', Ember.A([]));
         this.set('alerts', Ember.A([]));
         this.set('networks', Ember.A([]));
+    },
+
+    createObject(type, data) {
+        const mapping = {
+            window: Window,
+            message: Message,
+            friend: Friend
+        };
+
+        let object = mapping[type].create(data);
+        object.set('store', this);
+
+        if (type === 'window') {
+            object.set('socket', this.get('socket'));
+        }
+
+        return object;
     }
 });

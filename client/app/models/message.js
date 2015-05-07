@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals URI, moment */
+/* globals URI, moment, emojify */
 
 import Ember from 'ember';
 

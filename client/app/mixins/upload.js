@@ -19,7 +19,6 @@
 /* globals FileAPI, moment */
 
 import Ember from 'ember';
-import Message from '../models/message';
 
 export default Ember.Mixin.create({
     socket: Ember.inject.service(),
@@ -71,13 +70,12 @@ export default Ember.Mixin.create({
     },
 
     _printLine(text, cat) {
-        let messageRecord = Message.create({
+        let messageRecord = this.get('store').createObject('message', {
             body: text,
             cat: cat,
             userId: cat === 'mymsg' ? this.get('store.userId') : null,
             window: this.get('content'),
-            ts: moment().unix(),
-            store: this.get('store')
+            ts: moment().unix()
         });
 
         this.get('content.messages').pushObject(messageRecord);
