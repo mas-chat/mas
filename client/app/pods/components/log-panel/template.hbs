@@ -18,8 +18,8 @@
 </div>
 
 <div class="flex-1 logs-channel window-messages">
-    {{#each message in messages}}
-        {{dayDivider messages _view.contentIndex}}
+    {{#each messages as |message index|}}
+        {{dayDivider messages index}}
         {{partial "message"}}
     {{else}}
         <div class='logs-no-messages flex-1'>

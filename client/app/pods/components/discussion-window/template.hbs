@@ -21,8 +21,8 @@
     {{/if}}
 
     <div {{bind-attr class=":window-messages :flex-1 logModeEnabled:hidden"}}>
-        {{#each message in content.messages}}
-            {{dayDivider content.messages _view.contentIndex}}
+        {{#each content.messages as |message index|}}
+            {{dayDivider content.messages index}}
             {{partial "message"}}
         {{/each}}
         <div class="window-upload">
