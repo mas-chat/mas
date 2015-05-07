@@ -33,8 +33,8 @@ export default Ember.Object.extend({
         this.users = Ember.A([]);
     },
 
-    socket: Ember.inject.service(),
-    store: Ember.inject.service(),
+    socket: null,
+    store: null,
 
     windowId: 0,
     name: null,

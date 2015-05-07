@@ -170,17 +170,17 @@ export default Ember.Component.extend(UploadMixin, {
             let message = this.get('newMessage');
 
             if (message) {
-                this.sendAction('action', 'sendMessage', this.content, message);
+                this.sendAction('action', 'sendMessage', this.get('content'), message);
                 this.set('newMessage', '');
             }
         },
 
         close() {
-            this.sendAction('action', 'close', this.content);
+            this.sendAction('action', 'close', this.get('content'));
         },
 
         menu(operation) {
-            this.sendAction('menuAction', operation, this.content);
+            this.sendAction('menuAction', operation, this.get('content'));
         },
 
         jumpToBottom() {

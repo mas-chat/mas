@@ -21,7 +21,7 @@
 import Ember from 'ember';
 
 export default Ember.Object.extend({
-    store: Ember.inject.service(),
+    store: null,
 
     body: null,
     cat: null,
@@ -29,7 +29,6 @@ export default Ember.Object.extend({
     userId: null,
     type: null,
     window: null,
-    nick: '',
     hideImages: false,
 
     ownNick: Ember.computed.alias('window.userNick'),
@@ -37,14 +36,9 @@ export default Ember.Object.extend({
 
     ircMotd: false,
 
-    userIdDidChange: function() {
-        let userId = this.get('userId');
-        let network = this.get('window.network');
-
-        if (userId && network) {
-            this.set('nick', this.get('store.users').getNick(userId, network));
-        }
-    }.observes('userId', 'window').on('init'),
+    nick: function() {
+        return this.get('store.users').getNick(this.get('userId'), this.get('window.network'));
+    }.property('userId', 'window'),
 
     decoratedCat: function() {
         let cat = this.get('cat');

@@ -1,5 +1,5 @@
 //
-//   Copyright 2015 Ilkka Oksanen <iao@iki.fi>
+//   Copyright 2009-2015 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,15 +16,147 @@
 
 'use strict';
 
+/* globals $, io, isMobile */
+
 import Ember from 'ember';
-import Socket from '../helpers/socket';
+import NotificationParser from '../helpers/notification-parser';
 
-let socket = Socket.create({
-    container: window.container
-});
+export default Ember.Object.extend({
+    store: Ember.inject.service(),
 
-export default Ember.Service.extend({
+    sessionId: 0,
+
+    _notificationParser: null,
+    _connectionLost: false,
+    _disconnectedQueue: null,
+
+    _networkErrorStartCallback: null,
+    _networkErrorEndCallback: null,
+    _networkErrorCallbackCtx: null,
+
+    init() {
+        this._super();
+
+        this._disconnectedQueue = Ember.A([]);
+
+        let authCookie = $.cookie('auth');
+
+        if (!authCookie) {
+            this._logout();
+        }
+
+        let [ userId, secret ] = authCookie.split('-');
+
+        if (!userId || !secret) {
+            this._logout();
+        }
+
+        this.set('store.userId', userId);
+
+        this._notificationParser = NotificationParser.create({
+            socket: this,
+            store: this.get('store')
+        });
+
+        let socket = this.socket = io.connect();
+
+        socket.emit('init', {
+            clientName: 'web',
+            clientOS: navigator.platform,
+            userId: userId,
+            secret: secret,
+            version: '1.0',
+            maxBacklogMsgs: isMobile.any ? 80 : 160
+        });
+
+        socket.on('initok', Ember.run.bind(this, function(data) {
+            this.set('sessionId', data.sessionId);
+        }));
+
+        socket.on('resumeok', Ember.run.bind(this, function() {
+            Ember.Logger.info(
+                `MAS session resumed. Sending ${this._disconnectedQueue.length} commands`);
+
+            for (let command of this._disconnectedQueue) {
+                this._send(command.command, command.callback);
+            }
+
+            this._disconnectedQueue.clear();
+            this._connectionLost = false;
+
+            let endCallback = this.get('_networkErrorEndCallback');
+
+            if (endCallback) {
+                endCallback.call(this.get('_networkErrorCallbackCtx'));
+            }
+        }));
+
+        this.socket.on('terminate', Ember.run.bind(this, function(data) {
+            if (data.code === 'INVALID_SESSION') {
+                window.location.reload();
+            } else {
+                this._logout();
+            }
+        }));
+
+        socket.on('ntf', Ember.run.bind(this, function(data) {
+            this._notificationParser.process(data);
+        }));
+
+        socket.on('disconnect', Ember.run.bind(this, function() {
+            Ember.Logger.info('Socket.io connection lost.');
+
+            this._connectionLost = true;
+
+            let startCallback = this.get('_networkErrorStartCallback');
+
+            if (startCallback) {
+                startCallback.call(this.get('_networkErrorCallbackCtx'));
+            }
+        }));
+
+        socket.on('reconnect', Ember.run.bind(this, function() {
+            Ember.Logger.info('Socket.io connection resumed.');
+
+            socket.emit('resume', {
+                userId: userId,
+                sessionId: this.get('sessionId')
+            });
+        }));
+    },
+
     send(command, callback) {
-        socket.send(command, callback);
+        if (this._connectionLost) {
+            Ember.Logger.info('Connection is lost. Buffering ' + command.id);
+
+            this._disconnectedQueue.push({
+                command: command,
+                callback: callback
+            });
+        } else {
+            this._send(command, callback);
+        }
+    },
+
+    registerNetworkErrorHandlers(ctx, startCallback, endCallback) {
+        this.set('_networkErrorStartCallback', startCallback);
+        this.set('_networkErrorEndCallback', endCallback);
+        this.set('_networkErrorCallbackCtx', ctx);
+    },
+
+    _send(command, callback) {
+        this.socket.emit('req', command, function(data) {
+            if (callback) {
+                Ember.Logger.info('← Response to REQ');
+                callback(data);
+            }
+        });
+
+        Ember.Logger.info('→ REQ: ' + command.id);
+    },
+
+    _logout() {
+        $.removeCookie('auth', { path: '/' });
+        window.location = '/';
     }
 });

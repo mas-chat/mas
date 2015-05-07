@@ -44,12 +44,12 @@ export default Ember.Component.extend({
             });
         },
 
-        menuAction(command, window) {
-            this.sendAction('menuAction', command, window);
+        menuAction(command, discussionWindow) {
+            this.sendAction('menuAction', command, discussionWindow);
         },
 
-        windowAction(command, window, value) {
-            this.sendAction('windowAction', command, window, value);
+        windowAction(command, discussionWindow, value) {
+            this.sendAction('windowAction', command, discussionWindow, value);
         },
 
         relayout(options) {

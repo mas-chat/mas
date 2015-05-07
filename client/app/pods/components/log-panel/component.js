@@ -19,6 +19,7 @@
 /* globals moment, $ */
 
 import Ember from 'ember';
+import Message from '../../models/message';
 
 export default Ember.Component.extend({
     classNames: [ 'flex-column', 'flex-1' ],
@@ -111,7 +112,6 @@ export default Ember.Component.extend({
         }, function(resp) {
             let windowObject = this.get('window');
             let messages = this.get('messages');
-            let container = this.get('container');
             messages.clear();
 
             this.set('loading', false);
@@ -120,8 +120,9 @@ export default Ember.Component.extend({
             this.set('tooManyMessages', resp.results.length > 999);
 
             resp.results.forEach(function(message) {
-                let messageRecord = container.lookup('model:message').setProperties(message);
+                let messageRecord = Message.create(message);
                 messageRecord.set('window', windowObject);
+                messageRecord.set('store', this.get('store'));
                 messages.pushObject(messageRecord);
                 this._loadImages();
             }.bind(this));

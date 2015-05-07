@@ -30,28 +30,23 @@ export default Ember.Controller.extend({
 
     socket: Ember.inject.service(),
 
+    _connectionLost: false,
+    _connectionLostWarningVisible: false,
+    _timer: null,
+
+    init() {
+        this._super();
+
+        this.get('socket').registerNetworkErrorHandlers(this, this._nwErrorStart, this._nwErrorEnd);
+    },
+
     actions: {
         openModal(modalName, model) {
-            if (this.get('activeModal') !== 'empty-modal') {
-                // New modal goes to a queue if there's already a modal open.
-                this.modalQueue.pushObject({
-                    name: modalName,
-                    model: model
-                });
-            } else {
-                this._open(modalName, model);
-            }
+            this._openModal(modalName, model);
         },
 
         closeModal() {
-            this.set('activeModal', 'empty-modal');
-            let nextModal = this.modalQueue.shiftObject();
-
-            if (nextModal) {
-                Ember.run.later(this, function() {
-                    this._open(nextModal.name, nextModal.model);
-                }, 300);
-            }
+            this._closeModal();
         },
 
         alertClosed() {
@@ -77,8 +72,54 @@ export default Ember.Controller.extend({
         });
     },
 
+    _openModal(modalName, model) {
+        if (this.get('activeModal') !== 'empty-modal') {
+            // New modal goes to a queue if there's already a modal open.
+            this.modalQueue.pushObject({
+                name: modalName,
+                model: model
+            });
+        } else {
+            this._open(modalName, model);
+        }
+    },
+
     _open(modalName, model) {
         this.set('modalModel', model);
         this.set('activeModal', modalName);
+    },
+
+    _closeModal() {
+        this.set('activeModal', 'empty-modal');
+        let nextModal = this.modalQueue.shiftObject();
+
+        if (nextModal) {
+            Ember.run.later(this, function() {
+                this._open(nextModal.name, nextModal.model);
+            }, 300);
+        }
+    },
+
+    _nwErrorStart() {
+        // TBD: Connection error modal should skip the queue
+        let timer = Ember.run.later(this, function() {
+            this._openModal('non-interactive-modal', {
+                title: 'Connection error',
+                body: 'Connection to server lost. Trying to reconnect…'
+            });
+            this.set('_timer', null);
+        }, 5000);
+
+        this.set('_timer', timer);
+    },
+
+    _nwErrorEnd() {
+        let timer = this.get('_timer');
+
+        if (timer) {
+            Ember.run.cancel(timer);
+        } else {
+            this._closeModal('closeModal');
+        }
     }
 });

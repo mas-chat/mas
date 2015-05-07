@@ -19,6 +19,7 @@
 /* global $, _, moment */
 
 import Ember from 'ember';
+import Message from '../../models/message';
 
 export default Ember.ArrayController.extend({
     friends: null,
@@ -134,13 +135,13 @@ export default Ember.ArrayController.extend({
         let ircServer1on1 = window.get('type') === '1on1' && window.get('userId') === 'iSERVER';
 
         if (ircServer1on1 && !command) {
-            let messageRecord = this.container.lookup('model:message').setProperties({
+            let messageRecord = Message.create({
                 body: 'Only commands allowed, e.g. /whois john',
                 cat: 'error',
                 ts: moment().unix(),
-                window: window
+                window: window,
+                store: this.get('store')
             });
-
             window.get('messages').pushObject(messageRecord);
             return;
         }
@@ -176,13 +177,14 @@ export default Ember.ArrayController.extend({
                 return;
             }
 
-            let messageRecord = this.container.lookup('model:message').setProperties({
+            let messageRecord = Message.create({
                 body: text,
                 cat: 'mymsg',
                 userId: this.get('store.userId'),
                 ts: resp.ts,
                 gid: resp.gid,
-                window: window
+                window: window,
+                store: this.get('store')
             });
 
             window.get('messages').pushObject(messageRecord);

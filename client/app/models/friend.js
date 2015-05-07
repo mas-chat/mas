@@ -19,7 +19,7 @@
 import Ember from 'ember';
 
 export default Ember.Object.extend({
-    store: Ember.inject.service(),
+    store: null,
 
     userId: null,
 
