@@ -20,7 +20,7 @@
         {{log-panel enabled=logModeEnabled window=content compress="compress"}}
     {{/if}}
 
-    <div {{bind-attr class=":window-messages :flex-1 logModeEnabled:hidden"}}>
+    <div class="window-messages flex-1 {{hiddenIfLogMode}}">
         {{#each content.messages as |message index|}}
             {{dayDivider content.messages index}}
             {{partial "message"}}
@@ -37,11 +37,11 @@
     </div>
 
     {{#if isGroup}}
-        <div {{bind-attr class=":window-members logModeEnabled:hidden content.minimizedNamesList::window-members-wide"}}>
+        <div class="window-members {{hiddenIfLogMode}} {{wideUnlessminimizedNamesList}}">
             {{#each name in content.operatorNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div {{bind-attr class=":member-name :window-operator content.minimizedNamesList:hidden"}}>
+                    <div class="member-name window-operator {{hiddenIfMinimizedUserNames}}">
                         {{name.nick}}
                     </div>
                 </div>
@@ -49,7 +49,7 @@
             {{#each name in content.voiceNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div {{bind-attr class=":member-name :window-voice content.minimizedNamesList:hidden"}}>
+                    <div class="member-name window-voice {{hiddenIfMinimizedUserNames}}">
                         {{name.nick}}
                     </div>
                 </div>
@@ -57,7 +57,7 @@
             {{#each name in content.userNames}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div {{bind-attr class=":member-name :window-user content.minimizedNamesList:hidden"}}>
+                    <div class="member-name window-user {{hiddenIfMinimizedUserNames}}">
                         {{name.nick}}
                     </div>
                 </div>
@@ -66,7 +66,7 @@
     {{/if}}
 </div>
 
-<div {{bind-attr class=":window-toolbar :flex-row logModeEnabled:hidden"}}>
+<div class="window-toolbar flex-row {{hiddenIfLogMode}}">
     <div class="window-add-text-container flex-1">
         <form {{action "sendMessage" on="submit"}}>
             {{input placeholder="Write here…" maxlength="500" class="form-control" value=newMessage}}

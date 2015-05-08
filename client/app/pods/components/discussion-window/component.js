@@ -145,6 +145,18 @@ export default Ember.Component.extend(UploadMixin, {
         }
     }.property('content.type'),
 
+    hiddenIfLogMode: function() {
+        return this.get('logOrMobileModeEnabled') ? 'hidden' : '';
+    }.property('logModeEnabled'),
+
+    hiddenIfMinimizedUserNames: function() {
+        return this.get('content.minimizedNamesList') ? 'hidden' : '';
+    }.property('content.minimizedNamesList'),
+
+    wideUnlessminimizedNamesList: function() {
+        return this.get('content.minimizedNamesList') ? '' : 'window-members-wide';
+    }.property('content.minimizedNamesList'),
+
     actions: {
         expand() {
             this.set('expanded', true);
