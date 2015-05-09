@@ -25,11 +25,17 @@ export default Ember.Object.extend({
     socket: null,
 
     initReceived: false,
-    initBuffer: [],
+    initBuffer: null,
     mobileDesktop: 0,
 
+    reset() {
+        this.set('initBuffer', Ember.A([]));
+        this.set('initReceived', false);
+        this.set('mobileDesktop', 0);
+    },
+
     process(notification) {
-        if (!this.initReceived && notification.id !== 'INITDONE') {
+        if (!this.get('initReceived') && notification.id !== 'INITDONE') {
             this.initBuffer.push(notification);
         } else {
             this._handleNotification(notification);
@@ -65,8 +71,8 @@ export default Ember.Object.extend({
             data.desktop = this.incrementProperty('mobileDesktop');
         }
 
-        let windowRecord = this.get('store').createObject('window', data);
-        this.get('store.windows').pushObject(windowRecord);
+        data.generation = this.get('socket.sessionId');
+        this.get('store').upsertObject('window', data);
     },
 
     _handleClose(data, targetWindow) {
@@ -81,14 +87,15 @@ export default Ember.Object.extend({
         data.window = targetWindow;
         delete data.windowId;
 
-        let messageRecord = this.get('store').createObject('message', data);
-        let messages = targetWindow.messages;
+        this.get('store').upsertObject('message', data, targetWindow);
 
-        if (messages.length > 200) {
-            messages.shiftObject();
+        let sortedMessages = targetWindow.get('messages').sortBy('ts');
+
+        if (sortedMessages.length > 200) {
+            for (let i = 0; i < sortedMessages.length - 200; i++) {
+                targetWindow.get('messages').removeObject(sortedMessages[i]);
+            }
         }
-
-        messages.pushObject(messageRecord);
     },
 
     _handleInitdone() {
@@ -109,18 +116,20 @@ export default Ember.Object.extend({
             windowId = parseInt(windowId);
             let windowObject = this.get('store.windows').findBy('windowId', windowId);
 
-            let messages = _.map(grouped[windowId], function(notification) {
+            for (let notification of grouped[windowId]) {
                 delete notification.windowId;
                 notification.window = windowObject;
 
-                return this.get('store').createObject('message', notification);
-            }.bind(this));
-
-            let targetWindow = this.get('store.windows').findBy('windowId', windowId);
-
-            // Now we are able to update the whole window backlog in one go.
-            targetWindow.messages.pushObjects(messages);
+                this.get('store').upsertObject('message', notification, windowObject);
+            }
         }.bind(this));
+
+        // Remove possible deleted windows
+        for (let windowObject of this.get('store.windows')) {
+            if (windowObject.get('generation') !== this.get('socket.sessionId')) {
+                this.get('store.windows').removeObject(windowObject);
+            }
+        }
 
         Ember.run.next(this, function() {
             // INITDONE notification usually arrives together with another notifications. These
@@ -197,20 +206,9 @@ export default Ember.Object.extend({
             this.get('store.friends').clear();
         }
 
-        data.friends.forEach(function(details) {
-            let friend = this.get('store.friends').findBy('userId', details.userId);
-
-            if (!friend) {
-                let friendRecord = this.get('store').createObject('friend', details);
-                this.get('store.friends').pushObject(friendRecord);
-            } else {
-                friend.set('online', details.online);
-
-                if (details.last) {
-                    friend.set('last', details.last);
-                }
-            }
-        }.bind(this));
+        for (let friend of data.friends) {
+            this.get('store').upsertObject('friend', friend);
+        }
     },
 
     _handleAlert(data) {
@@ -227,11 +225,11 @@ export default Ember.Object.extend({
             }
         }.bind(this);
 
-        this.get('store.alerts').pushObject(data);
+        this.get('store').upsertObject('alert', data);
     },
 
     _handleNetworks(data) {
-        this.get('store.networks').pushObjects(data.networks);
+        this.get('store.networks').setObjects(data.networks);
     },
 
     _handleSet(data) {
@@ -264,8 +262,9 @@ export default Ember.Object.extend({
             let realName = users.getName(friendCandidate.userId);
             let nick = users.getNick(friendCandidate.userId, 'MAS');
 
-            this.get('store.alerts').pushObject({
+            this.get('store').upsertObject('alert', {
                 message: `Allow ${realName} (${nick}) to add you to his/her contacts list?`,
+                alertId: friendCandidate.userId,
                 dismissible: true,
                 report: false,
                 postponeLabel: 'Decide later',

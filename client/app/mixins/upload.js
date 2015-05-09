@@ -19,8 +19,9 @@
 /* globals FileAPI, moment */
 
 import Ember from 'ember';
+import SendMsgMixin from './sendMsg';
 
-export default Ember.Mixin.create({
+export default Ember.Mixin.create(SendMsgMixin, {
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
@@ -41,7 +42,8 @@ export default Ember.Mixin.create({
             complete: function(err, xhr) {
                 if (!err) {
                     let url = JSON.parse(xhr.responseText).url[0];
-                    this._sendMessage(url);
+                    this._sendText(url, this.get('content'));
+                    this._printLine('File upload failed.', 'error');
                 } else {
                     this._printLine('File upload failed.', 'error');
                 }
@@ -59,25 +61,16 @@ export default Ember.Mixin.create({
         FileAPI.upload(options);
     },
 
-    _sendMessage(text) {
-        this.get('socket').send({
-            id: 'SEND',
-            text: text,
-            windowId: this.get('content.windowId')
-        });
-
-        this._printLine(text, 'mymsg');
-    },
-
     _printLine(text, cat) {
-        let messageRecord = this.get('store').createObject('message', {
+        // Note that these errors share a special fixed gid. Gid is the primary key for messages so
+        // only one is shown per window as new error replaces the existing one. This is intentional.
+        this.get('store').upsertObject('message', {
             body: text,
             cat: cat,
             userId: cat === 'mymsg' ? this.get('store.userId') : null,
             window: this.get('content'),
-            ts: moment().unix()
-        });
-
-        this.get('content.messages').pushObject(messageRecord);
+            ts: moment().unix(),
+            gid: 'error'
+        }, this.get('content'));
     }
 });

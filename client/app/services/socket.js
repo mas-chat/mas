@@ -60,35 +60,17 @@ export default Ember.Object.extend({
 
         let socket = this.socket = io.connect();
 
-        socket.emit('init', {
-            clientName: 'web',
-            clientOS: navigator.platform,
-            userId: userId,
-            secret: secret,
-            version: '1.0',
-            maxBacklogMsgs: isMobile.any ? 80 : 160
-        });
+        this._notificationParser.reset();
+        this._emitInit(userId, secret);
 
         socket.on('initok', Ember.run.bind(this, function(data) {
             this.set('sessionId', data.sessionId);
-        }));
-
-        socket.on('resumeok', Ember.run.bind(this, function() {
-            Ember.Logger.info(
-                `MAS session resumed. Sending ${this._disconnectedQueue.length} commands`);
 
             for (let command of this._disconnectedQueue) {
-                this._send(command.command, command.callback);
+                this._emitReq(command.command, command.callback);
             }
 
             this._disconnectedQueue.clear();
-            this._connectionLost = false;
-
-            let endCallback = this.get('_networkErrorEndCallback');
-
-            if (endCallback) {
-                endCallback.call(this.get('_networkErrorCallbackCtx'));
-            }
         }));
 
         this.socket.on('terminate', Ember.run.bind(this, function(data) {
@@ -116,12 +98,16 @@ export default Ember.Object.extend({
         }));
 
         socket.on('reconnect', Ember.run.bind(this, function() {
-            Ember.Logger.info('Socket.io connection resumed.');
+            this._connectionLost = false;
 
-            socket.emit('resume', {
-                userId: userId,
-                sessionId: this.get('sessionId')
-            });
+            let endCallback = this.get('_networkErrorEndCallback');
+
+            if (endCallback) {
+                endCallback.call(this.get('_networkErrorCallbackCtx'));
+            }
+
+            this._notificationParser.reset();
+            this._emitInit(userId, secret);
         }));
     },
 
@@ -134,7 +120,7 @@ export default Ember.Object.extend({
                 callback: callback
             });
         } else {
-            this._send(command, callback);
+            this._emitReq(command, callback);
         }
     },
 
@@ -144,7 +130,18 @@ export default Ember.Object.extend({
         this.set('_networkErrorCallbackCtx', ctx);
     },
 
-    _send(command, callback) {
+    _emitInit(userId, secret) {
+        this.socket.emit('init', {
+            clientName: 'web',
+            clientOS: navigator.platform,
+            userId: userId,
+            secret: secret,
+            version: '1.0',
+            maxBacklogMsgs: isMobile.any ? 80 : 160
+        });
+    },
+
+    _emitReq(command, callback) {
         this.socket.emit('req', command, function(data) {
             if (callback) {
                 Ember.Logger.info('← Response to REQ');

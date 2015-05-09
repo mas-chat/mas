@@ -119,9 +119,8 @@ export default Ember.Component.extend({
             this.set('tooManyMessages', resp.results.length > 999);
 
             resp.results.forEach(function(message) {
-                let messageRecord = this.get('store').createObject('message', message);
-                messageRecord.set('window', windowObject);
-                messages.pushObject(messageRecord);
+                message.window = windowObject;
+                this.get('store').upsertObject('message', message, this);
                 this._loadImages();
             }.bind(this));
         }.bind(this));

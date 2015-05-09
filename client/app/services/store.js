@@ -21,19 +21,18 @@ import Users from '../helpers/users';
 import Window from '../models/window';
 import Message from '../models/message';
 import Friend from '../models/friend';
+import Alert from '../models/alert';
 
 export default Ember.Service.extend({
     socket: Ember.inject.service(),
 
-    friends: null,
     users: null,
-
+    friends: null,
     windows: null,
-    activeDesktop: null,
-
     alerts: null,
     networks: null,
 
+    activeDesktop: null,
     userId: null,
     initDone: false,
 
@@ -47,20 +46,45 @@ export default Ember.Service.extend({
         this.set('networks', Ember.A([]));
     },
 
-    createObject(type, data) {
+    upsertObject(type, data, parent) {
+        let primaryKeys = {
+            window: 'windowId',
+            message: 'gid',
+            friend: 'userId',
+            alert: 'alertId'
+        };
+
+        this._upsert(data, primaryKeys[type], type, parent || this);
+    },
+
+    _upsert(data, primaryKey, type, parent) {
+        let object = parent.get(type + 's').findBy(primaryKey, data[primaryKey]);
+
+        if (object) {
+            object.setProperties(data);
+        } else {
+            this._insertObject(type, data, parent);
+        }
+    },
+
+    _insertObject(type, data, parent) {
         const mapping = {
             window: Window,
             message: Message,
-            friend: Friend
+            friend: Friend,
+            alert: Alert
         };
 
         let object = mapping[type].create(data);
-        object.set('store', this);
+
+        if (type === 'window' || type === 'message' || type === 'friend') {
+            object.set('store', this);
+        }
 
         if (type === 'window') {
             object.set('socket', this.get('socket'));
         }
 
-        return object;
+        parent.get(type + 's').pushObject(object);
     }
 });

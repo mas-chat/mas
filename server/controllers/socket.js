@@ -38,32 +38,6 @@ exports.setup = function(server) {
         let sessionId = null;
         let state = 'connected'; // connected, disconnected, authenticated
 
-        function *eventLoop() {
-            while (1) {
-                let ts = Math.round(Date.now() / 1000);
-                yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
-
-                let ntfs = yield notification.receive(userId, sessionId, 60);
-
-                if (state !== 'authenticated') {
-                    if (ntfs.length > 0) {
-                        yield notification.requeue(userId, sessionId, ntfs);
-                    }
-                    break;
-                }
-
-                for (let ntf of ntfs) {
-                    if (ntf.id !== 'MSG') {
-                        let ntfAsString = JSON.stringify(ntf);
-                        log.info(userId,
-                            `Emitted ${ntf.id}. SessionId: ${sessionId}, data: ${ntfAsString}`);
-                    }
-
-                    socket.emit('ntf', ntf);
-                }
-            }
-        }
-
         socket.on('init', function(data) {
             co(function*() {
                 let ts = Math.round(Date.now() / 1000);
@@ -123,32 +97,27 @@ exports.setup = function(server) {
                 // Check if the user was away too long
                 courier.callNoWait('ircparser', 'reconnectifinactive', { userId: userId });
 
-                yield eventLoop();
-                end();
-            })();
-        });
+                // Event loop
+                while (1) {
+                    let ts = Math.round(Date.now() / 1000);
+                    yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
 
-        socket.on('resume', function(data) {
-            co(function*() {
-                userId = data.userId;
-                sessionId = data.sessionId;
+                    let ntfs = yield notification.receive(userId, sessionId, 60);
 
-                let exists = yield redis.zscore(`sessionlist:${userId}`, sessionId);
+                    if (state !== 'authenticated') {
+                        end();
+                        break;
+                    }
 
-                if (!exists) {
-                    socket.emit('terminate', {
-                        code: 'INVALID_SESSION',
-                        reason: 'Invalid or expired session.'
-                    });
-                    end();
-                    return;
+                    for (let ntf of ntfs) {
+                        if (ntf.id !== 'MSG') {
+                            log.info(userId,
+                                `Emitted ${ntf.id}. SesId: ${sessionId}, [${JSON.stringify(ntf)}]`);
+                        }
+
+                        socket.emit('ntf', ntf);
+                    }
                 }
-
-                socket.emit('resumeok');
-                state = 'authenticated';
-
-                yield eventLoop();
-                end();
             })();
         });
 

@@ -61,6 +61,10 @@ export default Ember.Object.extend({
 
     password: null,
 
+    sortedMessages: function() {
+        return this.get('messages').sortBy('ts');
+    }.property('messages.@each'),
+
     userNick: function() {
         // Here so that not every message object needs to fetch user's nick separately
         let userId = this.get('store.userId');

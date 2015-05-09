@@ -19,8 +19,9 @@
 /* global $, _, moment */
 
 import Ember from 'ember';
+import SendMsgMixin from '../../mixins/sendMsg';
 
-export default Ember.ArrayController.extend({
+export default Ember.ArrayController.extend(SendMsgMixin, {
     friends: null,
     activeDraggedWindow: false,
 
@@ -134,13 +135,14 @@ export default Ember.ArrayController.extend({
         let ircServer1on1 = window.get('type') === '1on1' && window.get('userId') === 'iSERVER';
 
         if (ircServer1on1 && !command) {
-            let messageRecord = this.get('store').createObject('message', {
+            // Note that only one error is shown because of the shared fixed gid (=primary key).
+            this.get('store').upsertObject('message', {
                 body: 'Only commands allowed, e.g. /whois john',
                 cat: 'error',
                 ts: moment().unix(),
-                window: window
+                window: window,
+                gid: 'error'
             });
-            window.get('messages').pushObject(messageRecord);
             return;
         }
 
@@ -165,27 +167,7 @@ export default Ember.ArrayController.extend({
             return;
         }
 
-        this.get('socket').send({
-            id: 'SEND',
-            text: text,
-            windowId: window.get('windowId')
-        }, function(resp) {
-            if (resp.status !== 'OK') {
-                this.send('openModal', 'info-modal', { title: 'Error', body: resp.errorMsg });
-                return;
-            }
-
-            let messageRecord = this.get('store').createObject('message', {
-                body: text,
-                cat: 'mymsg',
-                userId: this.get('store.userId'),
-                ts: resp.ts,
-                gid: resp.gid,
-                window: window
-            });
-
-            window.get('messages').pushObject(messageRecord);
-        }.bind(this));
+        this._sendText(text, window);
     },
 
     _handleChat(window, userId) {

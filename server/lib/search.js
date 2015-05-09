@@ -91,6 +91,7 @@ exports.getMessagesForDay = function(conversationId, start, end) {
         if (!error) {
             results = response.hits.hits.map(function(hit) {
                 return {
+                    gid: hit._id,
                     ts: Math.floor(hit._source.ts / 1000),
                     body: hit._source.body,
                     cat: hit._source.cat,
