@@ -65,6 +65,7 @@ export default Ember.Object.extend({
 
         socket.on('initok', Ember.run.bind(this, function(data) {
             this.set('sessionId', data.sessionId);
+            this.set('store.maxBacklogMsgs', data.maxBacklogMsgs);
 
             for (let command of this._disconnectedQueue) {
                 this._emitReq(command.command, command.callback);

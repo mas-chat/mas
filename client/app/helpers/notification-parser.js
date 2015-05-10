@@ -90,9 +90,10 @@ export default Ember.Object.extend({
         this.get('store').upsertObject('message', data, targetWindow);
 
         let sortedMessages = targetWindow.get('messages').sortBy('ts');
+        let maxBacklogMsgs = this.get('store.maxBacklogMsgs');
 
-        if (sortedMessages.length > 200) {
-            for (let i = 0; i < sortedMessages.length - 200; i++) {
+        if (sortedMessages.length > maxBacklogMsgs) {
+            for (let i = 0; i < sortedMessages.length - maxBacklogMsgs; i++) {
                 targetWindow.get('messages').removeObject(sortedMessages[i]);
             }
         }

@@ -35,6 +35,7 @@ export default Ember.Service.extend({
     activeDesktop: null,
     userId: null,
     initDone: false,
+    maxBacklogMsgs: 0,
 
     init() {
         this._super();
