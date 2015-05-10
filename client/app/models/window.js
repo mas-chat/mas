@@ -27,10 +27,10 @@ export default Ember.Object.extend({
     init() {
         this._super();
 
-        this.messages = Ember.A([]);
-        this.operators = Ember.A([]);
-        this.voices = Ember.A([]);
-        this.users = Ember.A([]);
+        this.set('messages', Ember.A([]));
+        this.set('operators', Ember.A([]));
+        this.set('voices', Ember.A([]));
+        this.set('users', Ember.A([]));
     },
 
     socket: null,
@@ -133,6 +133,15 @@ export default Ember.Object.extend({
             return '1on1';
         }
     }.property('type'),
+
+    messageLimiter: function() {
+        let sortedMessages = this.get('messages').sortBy('ts');
+        let maxBacklogMsgs = this.get('store.maxBacklogMsgs');
+
+        for (let i = 0; i < sortedMessages.length - maxBacklogMsgs; i++) {
+            this.get('messages').removeObject(sortedMessages[i]);
+        }
+    }.observes('messages.@each'),
 
     syncServerPosition: function() {
         if (!window.disableUpdate && !isMobile.any) {

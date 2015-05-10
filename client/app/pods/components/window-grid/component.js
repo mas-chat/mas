@@ -33,8 +33,6 @@ export default Ember.Component.extend({
     store: Ember.inject.service(),
     socket: Ember.inject.service(),
 
-    initDone: Ember.computed.alias('store.initDone'),
-
     actions: {
         joinLobby() {
             this.get('socket').send({
@@ -53,7 +51,7 @@ export default Ember.Component.extend({
         },
 
         relayout(options) {
-            if (this.get('initDone')) {
+            if (this.get('store.windowListComplete')) {
                 Ember.run.next(this, function() { this._layoutWindows(options.animate); });
             }
         },
@@ -71,7 +69,7 @@ export default Ember.Component.extend({
 
     initReady: function() {
         Ember.run.next(this, function() { this._layoutWindows(false); });
-    }.observes('initDone'),
+    }.observes('store.windowListComplete'),
 
     _dragWindowStart(discussionWindow, event) {
         let that = this;

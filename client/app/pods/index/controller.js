@@ -98,7 +98,7 @@ export default Ember.ArrayController.extend(SendMsgMixin, {
     }.property('model.@each.desktop', 'model.@each.newMessagesCount'),
 
     deletedDesktopCheck: function() {
-        if (!this.get('store.initDone')) {
+        if (!this.get('store.windowListComplete')) {
             return;
         }
 
@@ -107,7 +107,7 @@ export default Ember.ArrayController.extend(SendMsgMixin, {
         if (desktopIds.indexOf(this.get('activeDesktop')) === -1) {
             this.set('activeDesktop', this._oldestDesktop());
         }
-    }.observes('desktops.@each', 'store.initDone'),
+    }.observes('desktops.@each', 'store.windowListComplete'),
 
     updateActiveDesktop: function() {
         this.get('socket').send({

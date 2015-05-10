@@ -24,18 +24,18 @@ export default Ember.Object.extend({
     store: null,
     socket: null,
 
-    initReceived: false,
+    initDoneReceived: false,
     initBuffer: null,
     mobileDesktop: 0,
 
     reset() {
         this.set('initBuffer', Ember.A([]));
-        this.set('initReceived', false);
+        this.set('initDoneReceived', false);
         this.set('mobileDesktop', 0);
     },
 
     process(notification) {
-        if (!this.get('initReceived') && notification.id !== 'INITDONE') {
+        if (!this.get('initDoneReceived') && notification.id !== 'INITDONE') {
             this.initBuffer.push(notification);
         } else {
             this._handleNotification(notification);
@@ -88,15 +88,6 @@ export default Ember.Object.extend({
         delete data.windowId;
 
         this.get('store').upsertObject('message', data, targetWindow);
-
-        let sortedMessages = targetWindow.get('messages').sortBy('ts');
-        let maxBacklogMsgs = this.get('store.maxBacklogMsgs');
-
-        if (sortedMessages.length > maxBacklogMsgs) {
-            for (let i = 0; i < sortedMessages.length - maxBacklogMsgs; i++) {
-                targetWindow.get('messages').removeObject(sortedMessages[i]);
-            }
-        }
     },
 
     _handleInitdone() {
@@ -132,15 +123,8 @@ export default Ember.Object.extend({
             }
         }
 
-        Ember.run.next(this, function() {
-            // INITDONE notification usually arrives together with another notifications. These
-            // other notifications update property bindings. INITDONE triggers code that
-            // assumes these updates have been processed. Therefore initDone must be
-            // triggered one run loop round later than everything else.
-            this.set('store.initDone', true);
-        });
-
-        this.set('initReceived', true);
+        this.set('store.windowListComplete', true);
+        this.set('initDoneReceived', true);
     },
 
     _handleUsers(data) {

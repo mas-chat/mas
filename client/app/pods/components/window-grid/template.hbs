@@ -6,7 +6,7 @@
     {{discussion-window selectedDesktop=activeDesktop content=window action="windowAction" menuAction="menuAction" relayout="relayout" dragWindowStart="dragWindowStart"}}
 {{else}}
     <div class="flex-grow-row flex-1 flex-align-center">
-        {{#if initDone}}
+        {{#if store.windowListComplete}}
             <div class="main-welcome-msg">
                 <h2>Welcome!</h2><p>You haven't joined any groups yet.</p>
                 <p>Press the <span class="glyphicon glyphicon-plus"></span> button on the right if
