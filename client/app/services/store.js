@@ -42,7 +42,7 @@ export default Ember.Service.extend({
     activeDesktop: null,
     userId: null,
     windowListComplete: false,
-    maxBacklogMsgs: 0,
+    maxBacklogMsgs: 100000,
 
     init() {
         this._super();
@@ -52,6 +52,21 @@ export default Ember.Service.extend({
         this.set('windows', Ember.A([]));
         this.set('alerts', Ember.A([]));
         this.set('networks', Ember.A([]));
+
+        // We are service and fully initialized only after this run loop.
+        Ember.run.next(this, function() {
+            if (typeof Storage !== 'undefined') {
+                this._loadSnapshot();
+
+                setInterval(function() {
+                    Ember.run.next(this, this._saveSnapshot);
+                }.bind(this), 60 * 1000); // Once in a minute
+            }
+
+            // If there's a snapshot it has been pushed to store now. It's safe to start
+            // socket.io connection. Data from server can't race anymore with snapshot data.
+            this.get('socket').start();
+        });
     },
 
     upsertObject(type, data, parent) {
@@ -62,7 +77,7 @@ export default Ember.Service.extend({
             alert: 'alertId'
         };
 
-        this._upsert(data, primaryKeys[type], type, parent || this);
+        return this._upsert(data, primaryKeys[type], type, parent || this);
     },
 
     _upsert(data, primaryKey, type, parent) {
@@ -71,8 +86,10 @@ export default Ember.Service.extend({
         if (object) {
             object.setProperties(data);
         } else {
-            this._insertObject(type, data, parent);
+            object = this._insertObject(type, data, parent);
         }
+
+        return object;
     },
 
     _insertObject(type, data, parent) {
@@ -90,6 +107,89 @@ export default Ember.Service.extend({
             object.set('window', parent);
         }
 
-        parent.get(type + 's').pushObject(object);
+        return parent.get(type + 's').pushObject(object);
+    },
+
+    _saveSnapshot() {
+        if (!this.get('windowListComplete')) {
+            return;
+        }
+
+        let data = { windows: [], users: {} };
+
+        for (let masWindow of this.get('windows')) {
+            let messages = [];
+
+            for (let message of masWindow.get('messages')) {
+                let messageData = message.getProperties([
+                    'gid',
+                    'body',
+                    'cat',
+                    'ts',
+                    'userId',
+                    'type',
+                    'hideImages'
+                ]);
+
+                messages.push(messageData);
+                data.users[messageData.userId] = true;
+            }
+
+            let windowProperties = masWindow.getProperties([
+                'windowId',
+                'generation',
+                'name',
+                'userId',
+                'network',
+                'type',
+                'row',
+                'column',
+                'desktop',
+                'visible'
+            ]);
+
+            windowProperties.messages = messages;
+            data.windows.push(windowProperties);
+        }
+
+        for (let userId of Object.keys(data.users)) {
+            data.users[userId] = this.get('users.users.' + userId);
+        }
+        data.activeDesktop = this.get('activeDesktop');
+
+        window.localStorage.setItem('data', JSON.stringify(data));
+        Ember.Logger.info('Snapshot saved.');
+    },
+
+    _loadSnapshot() {
+        try {
+            let data = JSON.parse(window.localStorage.getItem('data'));
+
+            if (!data || !data.activeDesktop) {
+                Ember.Logger.info('Snapshot not found.');
+                return;
+            }
+
+            this.set('activeDesktop', data.activeDesktop);
+
+            for (var userId of Object.keys(data.users)) { /* jshint -W089 */
+                this.set('users.users.' + userId, data.users[userId]);
+            }
+
+            this.get('users').incrementProperty('isDirty');
+
+            for (let windowData of data.windows) {
+                let windowObject = this.upsertObject('window', windowData);
+
+                for (let messageData of windowData.messages) {
+                    this.upsertObject('message', messageData, windowObject);
+                }
+            }
+
+            this.set('windowListComplete', true);
+            Ember.Logger.info('Snapshot loaded successfully.');
+        } catch (e) {
+            Ember.Logger.info(`Failed to load snapshot: ${e}`);
+        }
     }
 });
