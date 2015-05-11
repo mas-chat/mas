@@ -125,8 +125,7 @@ export default Ember.Object.extend({
 
     _handleUsers(data) {
         for (var userId in data.mapping) { /* jshint -W089 */
-            let user = data.mapping[userId];
-            this.get('store.users').set('users.' + userId, user);
+            this.set('store.users.users.' + userId, data.mapping[userId]);
         }
 
         this.get('store.users').incrementProperty('isDirty');
