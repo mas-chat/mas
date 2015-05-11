@@ -85,11 +85,7 @@ export default Ember.Object.extend({
         }));
 
         this.socket.on('terminate', Ember.run.bind(this, function(data) {
-            if (data.code === 'INVALID_SESSION') {
-                window.location.reload();
-            } else {
-                this._logout();
-            }
+            this._logout();
         }));
 
         socket.on('ntf', Ember.run.bind(this, function(data) {
