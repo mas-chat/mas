@@ -36,7 +36,6 @@ export default Ember.Mixin.create({
                 userId: this.get('store.userId'),
                 ts: resp.ts,
                 gid: resp.gid,
-                window: window
             }, window);
         }.bind(this));
     }

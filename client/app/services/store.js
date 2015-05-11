@@ -23,6 +23,13 @@ import Message from '../models/message';
 import Friend from '../models/friend';
 import Alert from '../models/alert';
 
+const modelNameMapping = {
+    window: Window,
+    message: Message,
+    friend: Friend,
+    alert: Alert
+};
+
 export default Ember.Service.extend({
     socket: Ember.inject.service(),
 
@@ -69,14 +76,7 @@ export default Ember.Service.extend({
     },
 
     _insertObject(type, data, parent) {
-        const mapping = {
-            window: Window,
-            message: Message,
-            friend: Friend,
-            alert: Alert
-        };
-
-        let object = mapping[type].create(data);
+        let object = modelNameMapping[type].create(data);
 
         if (type === 'window' || type === 'message' || type === 'friend') {
             object.set('store', this);
@@ -84,6 +84,10 @@ export default Ember.Service.extend({
 
         if (type === 'window') {
             object.set('socket', this.get('socket'));
+        }
+
+        if (type === 'message') {
+            object.set('window', parent);
         }
 
         parent.get(type + 's').pushObject(object);

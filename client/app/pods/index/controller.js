@@ -140,9 +140,8 @@ export default Ember.ArrayController.extend(SendMsgMixin, {
                 body: 'Only commands allowed, e.g. /whois john',
                 cat: 'error',
                 ts: moment().unix(),
-                window: window,
                 gid: 'error'
-            });
+            }, window);
             return;
         }
 

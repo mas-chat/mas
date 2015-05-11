@@ -84,9 +84,7 @@ export default Ember.Object.extend({
             return;
         }
 
-        data.window = targetWindow;
         delete data.windowId;
-
         this.get('store').upsertObject('message', data, targetWindow);
     },
 
@@ -110,8 +108,6 @@ export default Ember.Object.extend({
 
             for (let notification of grouped[windowId]) {
                 delete notification.windowId;
-                notification.window = windowObject;
-
                 this.get('store').upsertObject('message', notification, windowObject);
             }
         }.bind(this));
