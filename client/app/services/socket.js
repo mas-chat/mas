@@ -25,9 +25,10 @@ export default Ember.Object.extend({
     store: Ember.inject.service(),
 
     sessionId: 0,
+    secret: '',
 
     _notificationParser: null,
-    _connectionLost: false,
+    _connected: false,
     _disconnectedQueue: null,
 
     _networkErrorStartCallback: null,
@@ -52,18 +53,27 @@ export default Ember.Object.extend({
         }
 
         this.set('store.userId', userId);
+        this.set('secret', secret);
 
         this._notificationParser = NotificationParser.create({
             socket: this,
             store: this.get('store')
         });
 
-        let socket = this.socket = io.connect();
-
         this._notificationParser.reset();
+    },
+
+    start() {
+        let userId = this.get('store.userId');
+        let secret = this.get('secret');
+        let socket = io.connect();
+
+        this.set('socket', socket);
         this._emitInit(userId, secret);
 
         socket.on('initok', Ember.run.bind(this, function(data) {
+            this.set('_connected', true);
+
             this.set('sessionId', data.sessionId);
             this.set('store.maxBacklogMsgs', data.maxBacklogMsgs);
 
@@ -89,7 +99,7 @@ export default Ember.Object.extend({
         socket.on('disconnect', Ember.run.bind(this, function() {
             Ember.Logger.info('Socket.io connection lost.');
 
-            this._connectionLost = true;
+            this.set('_connected', false);
 
             let startCallback = this.get('_networkErrorStartCallback');
 
@@ -99,8 +109,6 @@ export default Ember.Object.extend({
         }));
 
         socket.on('reconnect', Ember.run.bind(this, function() {
-            this._connectionLost = false;
-
             let endCallback = this.get('_networkErrorEndCallback');
 
             if (endCallback) {
@@ -113,15 +121,15 @@ export default Ember.Object.extend({
     },
 
     send(command, callback) {
-        if (this._connectionLost) {
-            Ember.Logger.info('Connection is lost. Buffering ' + command.id);
+        if (this.get('_connected')) {
+            this._emitReq(command, callback);
+        } else {
+            Ember.Logger.info('Connection lost. Buffering ' + command.id);
 
             this._disconnectedQueue.push({
                 command: command,
                 callback: callback
             });
-        } else {
-            this._emitReq(command, callback);
         }
     },
 
