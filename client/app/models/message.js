@@ -23,11 +23,11 @@ import Ember from 'ember';
 export default Ember.Object.extend({
     store: null,
 
+    gid: 0,
     body: null,
     cat: null,
     ts: null,
     userId: null,
-    type: null,
     window: null,
     hideImages: false,
 
