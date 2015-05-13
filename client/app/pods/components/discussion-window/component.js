@@ -81,6 +81,11 @@ export default Ember.Component.extend(UploadMixin, {
 
     lineAdded: function() {
         let messages = this.get('content.messages');
+
+        if (messages.length === 0) {
+            return;
+        }
+
         let previousLines = this.get('linesAmount');
         this.set('linesAmount', messages.length);
 
