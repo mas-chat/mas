@@ -34,6 +34,11 @@ export default Ember.ArrayController.extend(SendMsgMixin, {
         logout() {
             this.get('socket').send({ id: 'LOGOUT' }, function() {
                 $.removeCookie('auth', { path: '/' });
+
+                if (typeof Storage !== 'undefined') {
+                    window.localStorage.removeItem('data');
+                }
+
                 window.location = '/';
             });
         },
