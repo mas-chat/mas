@@ -16,11 +16,11 @@
 
 'use strict';
 
-const forms = require('forms'),
+const Promise = require('bluebird'),
+      forms = require('forms'),
       fields = forms.fields,
       widgets = forms.widgets,
       validators = forms.validators,
-      Q = require('q'),
       httpStatus = require('statuses'),
       redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
@@ -149,19 +149,19 @@ let registrationFormReset = forms.create({
 });
 
 function decodeForm(req, inputForm) {
-    let deferred = Q.defer();
+    let deferred = Promise.pending();
 
     inputForm.handle(req, {
         success: function(form) {
-            deferred.resolve(form);
+            deferred.fulfill(form);
         },
         error: function(form) {
             log.info('Registration form data is invalid');
-            deferred.resolve(form);
+            deferred.fulfill(form);
         },
         empty: function(form) {
             log.info('There is no form');
-            deferred.resolve(form);
+            deferred.fulfill(form);
         }
     });
 
