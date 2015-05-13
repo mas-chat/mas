@@ -18,7 +18,7 @@
 'use strict';
 
 let co = require('co'),
-    Q = require('q'),
+    Promise = require('bluebird'),
     elasticsearch = require('elasticsearch'),
     argv = require('yargs').argv;
 
@@ -27,30 +27,32 @@ let client = new elasticsearch.Client({
 //    log: 'trace'
 });
 
+client.indices = Promise.promisifyAll(client.indices);
+
 co(function *() {
     if (argv.deleteIndices) {
         console.log('Deleting all indices...');
-        yield Q.ninvoke(client.indices, 'delete', {
+        yield client.indices.delete({
             index: '_all'
         });
     }
 
     console.log('Creating index "messages1"...');
 
-    yield Q.ninvoke(client.indices, 'create', {
+    yield client.indices.create({
         index: 'messages1'
     });
 
     console.log('Creating alias "messages", points to "messages1"...');
 
-    yield Q.ninvoke(client.indices, 'putAlias', {
+    yield client.indices.putAlias({
         name: 'messages',
         index: 'messages1'
     });
 
-    console.log('Setting mapping for "messages1"...')
+    console.log('Setting mapping for "messages1"...');
 
-    yield Q.ninvoke(client.indices, 'putMapping', {
+    yield client.indices.putMapping({
         index: 'messages1',
         type: 'message',
         body: {
