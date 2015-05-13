@@ -37,6 +37,7 @@ export default Ember.Object.extend({
     store: null,
 
     windowId: 0,
+    generation: '',
     name: null,
     userId: null,
     network: null,
