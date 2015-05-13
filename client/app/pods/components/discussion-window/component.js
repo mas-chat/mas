@@ -43,6 +43,7 @@ export default Ember.Component.extend(UploadMixin, {
     deletedLine: false,
 
     $messagePanel: null,
+    $messagesEndAnchor: null,
     $images: null,
     logModeEnabled: false,
 
@@ -225,6 +226,7 @@ export default Ember.Component.extend(UploadMixin, {
 
         this.$images = this.$('img[data-src]');
         this.$messagePanel = this.$('.window-messages');
+        this.$messagesEndAnchor = this.$('.window-messages-end');
         this._addScrollHandler();
 
         this.$('.window-caption').tooltip();
@@ -332,7 +334,7 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     _goToBottom(animate) {
-        if (this.get('scrollLock')) {
+        if (this.get('scrollLock') || !this.$messagesEndAnchor) {
             return;
         }
 
@@ -342,7 +344,7 @@ export default Ember.Component.extend(UploadMixin, {
         // to make sure we reach the bottom every time. If it is, Chrome scrolls beyond end of the
         // content. Spent several days figuring out what was going on. Problem is not related to
         // velocity.js. It happens with jQuery.scrollTop() as well.
-        this.$('.window-messages-end').velocity('stop').velocity('scroll', {
+        this.$messagesEndAnchor.velocity('stop').velocity('scroll', {
             container: this.$messagePanel,
             duration: duration,
             easing: 'spring',
