@@ -145,7 +145,8 @@ export default Ember.Service.extend({
                 'row',
                 'column',
                 'desktop',
-                'visible'
+                'visible',
+                'newMessagesCount'
             ]);
 
             windowProperties.messages = messages;
