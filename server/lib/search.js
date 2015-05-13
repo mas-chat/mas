@@ -16,8 +16,8 @@
 
 'use strict';
 
-const Q = require('q'),
-      elasticSearchClient = require('./elasticSearch').getClient(),
+const Promise = require('bluebird'),
+      elasticSearchClient = Promise.promisifyAll(require('./elasticSearch').getClient()),
       log = require('./log');
 
 exports.storeMessage = function(conversationId, msg) {
@@ -46,16 +46,13 @@ exports.storeMessage = function(conversationId, msg) {
     return true;
 };
 
-exports.getMessagesForDay = function(conversationId, start, end) {
-    let deferred = Q.defer();
-
+exports.getMessagesForDay = function*(conversationId, start, end) {
     if (!elasticSearchClient) {
         warn();
-        deferred.resolve(null);
         return;
     }
 
-    elasticSearchClient.search({
+    let response = yield elasticSearchClient.search({
         index: 'messages',
         body: {
             size: 1000,
@@ -85,25 +82,17 @@ exports.getMessagesForDay = function(conversationId, start, end) {
                 }
             }
         }
-    }, function(error, response) {
-        let results = null;
-
-        if (!error) {
-            results = response.hits.hits.map(function(hit) {
-                return {
-                    gid: hit._id,
-                    ts: Math.floor(hit._source.ts / 1000),
-                    body: hit._source.body,
-                    cat: hit._source.cat,
-                    userId: hit._source.userId
-                };
-            });
-        }
-
-        deferred.resolve(results);
     });
 
-    return deferred.promise;
+    return response.hits.hits.map(function(hit) {
+        return {
+            gid: hit._id,
+            ts: Math.floor(hit._source.ts / 1000),
+            body: hit._source.body,
+            cat: hit._source.cat,
+            userId: hit._source.userId
+        };
+    });
 };
 
 function warn() {
