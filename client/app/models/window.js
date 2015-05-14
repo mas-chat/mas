@@ -69,15 +69,12 @@ export default Ember.Object.extend({
         return this.get('messages').sortBy('ts');
     }.property('messages.@each'),
 
-    userNick: function() {
-        // Here so that not every message object needs to fetch user's nick separately
-        let userId = this.get('store.userId');
-        return this.get('store.users').getNick(userId, this.get('network'));
-    }.property('network'),
-
     userNickHighlightRegex: function() {
-        return new RegExp(`(^|[@ ])${this.get('userNick')}[ :]`);
-    }.property('userNick'),
+        let userId = this.get('store.userId');
+        let nick = this.get('store.users').getNick(userId, this.get('network'));
+
+        return new RegExp(`(^|[@ ])${nick}[ :]`);
+    }.property('store.userId', 'store.users.isDirty'),
 
     operatorNames: function() {
         return this._mapUserIdsToNicks('operators').sortBy('nick');
