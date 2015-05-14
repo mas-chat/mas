@@ -26,6 +26,7 @@ import Alert from '../models/alert';
 const modelNameMapping = {
     window: Window,
     message: Message,
+    logMessage: Message,
     friend: Friend,
     alert: Alert
 };
@@ -95,7 +96,9 @@ export default Ember.Service.extend({
     _insertObject(type, data, parent) {
         let object = modelNameMapping[type].create(data);
 
-        if (type === 'window' || type === 'message' || type === 'friend') {
+        // TBD: Add 'arrayName' parameter so that logMessage type can be removed.
+
+        if (type === 'window' || type === 'message' || type === 'logMessage' || type === 'friend') {
             object.set('store', this);
         }
 
@@ -103,7 +106,7 @@ export default Ember.Service.extend({
             object.set('socket', this.get('socket'));
         }
 
-        if (type === 'message') {
+        if (type === 'message' || type === 'logMessage') {
             object.set('window', parent);
         }
 

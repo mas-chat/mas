@@ -28,6 +28,8 @@ export default Ember.Object.extend({
         this._super();
 
         this.set('messages', Ember.A([]));
+        this.set('logMessages', Ember.A([]));
+
         this.set('operators', Ember.A([]));
         this.set('voices', Ember.A([]));
         this.set('users', Ember.A([]));
@@ -49,6 +51,7 @@ export default Ember.Object.extend({
 
     visible: true,
     messages: null,
+    logMessages: null,
 
     newMessagesCount: 0,
 

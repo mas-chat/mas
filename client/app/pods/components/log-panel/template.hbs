@@ -18,8 +18,8 @@
 </div>
 
 <div class="flex-1 logs-channel window-messages">
-    {{#each messages as |message index|}}
-        {{dayDivider messages index}}
+    {{#each window.logMessages as |message index|}}
+        {{dayDivider window.logMessages index}}
         {{partial "message"}}
     {{else}}
         <div class='logs-no-messages flex-1'>
@@ -27,7 +27,7 @@
                 {{#if loading}}
                     Loading…
                 {{else}}
-                    No recorded messages on {{friendlyDate}}.
+                    No conversation took place on {{friendlyDate}}.
                 {{/if}}
             </div>
         </div>
