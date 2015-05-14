@@ -31,7 +31,6 @@ export default Ember.Object.extend({
     window: null,
     hideImages: false,
 
-    ownNick: Ember.computed.alias('window.userNick'),
     mentionedRegEx: Ember.computed.alias('window.userNickHighlightRegex'),
 
     ircMotd: false,
@@ -55,7 +54,7 @@ export default Ember.Object.extend({
         }
 
         return this.get('nick') === 'Flowdock' ? 'flowdock' : cat;
-    }.property('cat', 'nick', 'body', 'ownNick', 'mentionedRegEx'),
+    }.property('cat', 'nick', 'body', 'mentionedRegEx'),
 
     decoratedTs: function() {
         return moment.unix(this.get('ts')).format('HH:mm');
