@@ -35,7 +35,7 @@ export default Ember.Mixin.create({
                 cat: 'mymsg',
                 userId: this.get('store.userId'),
                 ts: resp.ts,
-                gid: resp.gid,
+                gid: resp.gid
             }, window);
         }.bind(this));
     }
