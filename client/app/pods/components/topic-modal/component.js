@@ -23,6 +23,14 @@ export default Ember.Component.extend({
 
     socket: Ember.inject.service(),
 
+    topicTitle: Ember.computed('model.name', function() {
+        return 'Edit topic for \'' + this.get('model.name') + '\'';
+    }),
+
+    topicDidChange: function() {
+        this.set('modalTopic', this.get('model.topic'));
+    }.observes('model.topic').on('init'),
+
     actions: {
         changeTopic() {
             // User has clicked 'OK', send the new topic to server
@@ -40,13 +48,5 @@ export default Ember.Component.extend({
         closeModal() {
             this.sendAction('closeModal');
         }
-    },
-
-    topicTitle: function() {
-        return 'Edit topic for \'' + this.get('model.name') + '\'';
-    }.property('model.name'),
-
-    topicDidChange: function() {
-        this.set('modalTopic', this.get('model.topic'));
-    }.observes('model.topic').on('init')
+    }
 });

@@ -23,8 +23,8 @@ export default Ember.Object.extend({
 
     userId: null,
 
-    name: function() {
+    name: Ember.computed('store.users.isDirty', function() {
         let userId = this.get('userId');
         return this.get('store.users').getName(userId);
-    }.property('store.users.isDirty')
+    })
 });

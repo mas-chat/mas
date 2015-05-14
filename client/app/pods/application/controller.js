@@ -34,6 +34,10 @@ export default Ember.Controller.extend({
     _connectionLostWarningVisible: false,
     _timer: null,
 
+    observeAlerts: Ember.observer('alerts.@each', function() {
+        this._setCurrentAlert();
+    }),
+
     init() {
         this._super();
 
@@ -54,10 +58,6 @@ export default Ember.Controller.extend({
             this._setCurrentAlert();
         }
     },
-
-    observeAlerts: function() {
-        this._setCurrentAlert();
-    }.observes('alerts.@each'),
 
     _setCurrentAlert() {
         let alerts = this.get('alerts');

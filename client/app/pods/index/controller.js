@@ -30,6 +30,58 @@ export default Ember.ArrayController.extend(SendMsgMixin, {
 
     activeDesktop: Ember.computed.alias('store.activeDesktop'),
 
+    friendsOnline: Ember.computed('friends.@each.online', function() {
+        return this.get('friends').filterBy('online', true).length;
+    }),
+
+    desktops: Ember.computed('model.@each.desktop', 'model.@each.newMessagesCount', function() {
+        let desktops = {};
+        let desktopsArray = Ember.A([]);
+
+        this.get('model').forEach(function(masWindow) {
+            let newMessages = masWindow.get('newMessagesCount');
+            let desktop = masWindow.get('desktop');
+            let initials = masWindow.get('simplifiedName').substr(0, 2).toUpperCase();
+
+            if (desktops[desktop]) {
+                desktops[desktop].messages += newMessages;
+            } else {
+                desktops[desktop] = { messages: newMessages, initials: initials };
+            }
+        });
+
+        Object.keys(desktops).forEach(function(desktop) {
+            desktopsArray.push({
+                id: parseInt(desktop),
+                initials: desktops[desktop].initials,
+                messages: desktops[desktop].messages
+            });
+        });
+
+        return desktopsArray;
+    }),
+
+    deletedDesktopCheck: Ember.observer('desktops.@each', 'store.windowListComplete', function() {
+        if (!this.get('store.windowListComplete')) {
+            return;
+        }
+
+        let desktopIds = this.get('desktops').map(d => d.id);
+
+        if (desktopIds.indexOf(this.get('activeDesktop')) === -1) {
+            this.set('activeDesktop', this._oldestDesktop());
+        }
+    }),
+
+    updateActiveDesktop: Ember.observer('activeDesktop', function() {
+        this.get('socket').send({
+            id: 'SET',
+            settings: {
+                activeDesktop: this.get('activeDesktop')
+            }
+        });
+    }),
+
     actions: {
         logout() {
             this.get('socket').send({ id: 'LOGOUT' }, function() {
@@ -70,58 +122,6 @@ export default Ember.ArrayController.extend(SendMsgMixin, {
             this.send('openModal', 'remove-friend-modal', userId);
         }
     },
-
-    friendsOnline: function() {
-        return this.get('friends').filterBy('online', true).length;
-    }.property('friends.@each.online'),
-
-    desktops: function() {
-        let desktops = {};
-        let desktopsArray = Ember.A([]);
-
-        this.get('model').forEach(function(masWindow) {
-            let newMessages = masWindow.get('newMessagesCount');
-            let desktop = masWindow.get('desktop');
-            let initials = masWindow.get('simplifiedName').substr(0, 2).toUpperCase();
-
-            if (desktops[desktop]) {
-                desktops[desktop].messages += newMessages;
-            } else {
-                desktops[desktop] = { messages: newMessages, initials: initials };
-            }
-        });
-
-        Object.keys(desktops).forEach(function(desktop) {
-            desktopsArray.push({
-                id: parseInt(desktop),
-                initials: desktops[desktop].initials,
-                messages: desktops[desktop].messages
-            });
-        });
-
-        return desktopsArray;
-    }.property('model.@each.desktop', 'model.@each.newMessagesCount'),
-
-    deletedDesktopCheck: function() {
-        if (!this.get('store.windowListComplete')) {
-            return;
-        }
-
-        let desktopIds = this.get('desktops').map(d => d.id);
-
-        if (desktopIds.indexOf(this.get('activeDesktop')) === -1) {
-            this.set('activeDesktop', this._oldestDesktop());
-        }
-    }.observes('desktops.@each', 'store.windowListComplete'),
-
-    updateActiveDesktop: function() {
-        this.get('socket').send({
-            id: 'SET',
-            settings: {
-                activeDesktop: this.get('activeDesktop')
-            }
-        });
-    }.observes('activeDesktop'),
 
     _oldestDesktop() {
         return this.get('desktops').map(d => d.id).sort()[0];

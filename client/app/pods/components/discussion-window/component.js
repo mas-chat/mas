@@ -47,25 +47,55 @@ export default Ember.Component.extend(UploadMixin, {
     $images: null,
     logModeEnabled: false,
 
+    selectedDesktop: 0,
+
     row: Ember.computed.alias('content.row'),
     column: Ember.computed.alias('content.column'),
     desktop: Ember.computed.alias('content.desktop'),
 
-    selectedDesktop: 0,
-
-    visible: function() {
+    visible: Ember.computed('selectedDesktop', 'content.desktop', function() {
         return this.get('selectedDesktop') === this.get('content.desktop');
-    }.property('selectedDesktop', 'content.desktop'),
+    }),
 
-    logOrMobileModeEnabled: function() {
+    logOrMobileModeEnabled: Ember.computed('logModeEnabled', function() {
         return this.get('logModeEnabled') || isMobile.any;
-    }.property('logModeEnabled'),
+    }),
 
-    windowChanged: function() {
+    ircServerWindow: Ember.computed('content.userId', function() {
+        return this.get('content.userId') === 'iSERVER' ? 'irc-server-window' : '';
+    }),
+
+    isGroup: Ember.computed('content.type', function() {
+        return this.get('content.type') === 'group';
+    }),
+
+    type: Ember.computed('content.type', function() {
+        if (this.get('content.type') === 'group') {
+            return 'group';
+        } else if (this.get('content.userId') === 'iSERVER') {
+            return 'server-1on1';
+        } else {
+            return 'private-1on1';
+        }
+    }),
+
+    hiddenIfLogMode: Ember.computed('logModeEnabled', function() {
+        return this.get('logOrMobileModeEnabled') ? 'hidden' : '';
+    }),
+
+    hiddenIfMinimizedUserNames: Ember.computed('content.minimizedNamesList', function() {
+        return this.get('content.minimizedNamesList') ? 'hidden' : '';
+    }),
+
+    wideUnlessminimizedNamesList: Ember.computed('content.minimizedNamesList', function() {
+        return this.get('content.minimizedNamesList') ? '' : 'window-members-wide';
+    }),
+
+    windowChanged: Ember.observer('row', 'column', 'desktop', function() {
         this.sendAction('relayout', { animate: true });
-    }.observes('row', 'column', 'desktop'),
+    }),
 
-    visibilityChanged: function() {
+    visibilityChanged: Ember.observer('visible', function() {
         if (this.get('visible')) {
             this.set('content.newMessagesCount', 0);
 
@@ -77,9 +107,9 @@ export default Ember.Component.extend(UploadMixin, {
         }
 
         this.sendAction('relayout', { animate: false });
-    }.observes('visible'),
+    }),
 
-    lineAdded: function() {
+    lineAdded: Ember.observer('content.messages.@each', function() {
         let messages = this.get('content.messages');
 
         if (messages.length === 0) {
@@ -122,46 +152,7 @@ export default Ember.Component.extend(UploadMixin, {
                 play();
             }
         }
-    }.observes('content.messages.@each'),
-
-    _checkNewImages() {
-        // Update images array
-        this.$images = this.$('img[data-src]');
-
-        Ember.run.scheduleOnce('afterRender', this, function() {
-            this._goToBottom(true);
-        });
-    },
-
-    ircServerWindow: function() {
-        return this.get('content.userId') === 'iSERVER' ? 'irc-server-window' : '';
-    }.property('content.userId'),
-
-    isGroup: function() {
-        return this.get('content.type') === 'group';
-    }.property('content.type'),
-
-    type: function() {
-        if (this.get('content.type') === 'group') {
-            return 'group';
-        } else if (this.get('content.userId') === 'iSERVER') {
-            return 'server-1on1';
-        } else {
-            return 'private-1on1';
-        }
-    }.property('content.type'),
-
-    hiddenIfLogMode: function() {
-        return this.get('logOrMobileModeEnabled') ? 'hidden' : '';
-    }.property('logModeEnabled'),
-
-    hiddenIfMinimizedUserNames: function() {
-        return this.get('content.minimizedNamesList') ? 'hidden' : '';
-    }.property('content.minimizedNamesList'),
-
-    wideUnlessminimizedNamesList: function() {
-        return this.get('content.minimizedNamesList') ? '' : 'window-members-wide';
-    }.property('content.minimizedNamesList'),
+    }),
 
     actions: {
         expand() {
@@ -335,6 +326,15 @@ export default Ember.Component.extend(UploadMixin, {
     willDestroyElement() {
         Ember.run.scheduleOnce('afterRender', this, function() {
             this.sendAction('relayout', { animate: true });
+        });
+    },
+
+    _checkNewImages() {
+        // Update images array
+        this.$images = this.$('img[data-src]');
+
+        Ember.run.scheduleOnce('afterRender', this, function() {
+            this._goToBottom(true);
         });
     },
 

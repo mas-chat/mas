@@ -35,11 +35,11 @@ export default Ember.Object.extend({
 
     ircMotd: false,
 
-    nick: function() {
+    nick: Ember.computed('userId', 'window', function() {
         return this.get('store.users').getNick(this.get('userId'), this.get('window.network'));
-    }.property('userId', 'window'),
+    }),
 
-    decoratedCat: function() {
+    decoratedCat: Ember.computed('cat', 'nick', 'body', 'mentionedRegEx', function() {
         let cat = this.get('cat');
         let body = this.get('body');
         let mentionedRegEx = this.get('mentionedRegEx');
@@ -54,13 +54,13 @@ export default Ember.Object.extend({
         }
 
         return this.get('nick') === 'Flowdock' ? 'flowdock' : cat;
-    }.property('cat', 'nick', 'body', 'mentionedRegEx'),
+    }),
 
-    decoratedTs: function() {
+    decoratedTs: Ember.computed('ts', function() {
         return moment.unix(this.get('ts')).format('HH:mm');
-    }.property('ts'),
+    }),
 
-    channelAction: function() {
+    channelAction: Ember.computed('cat', function() {
         let category = this.get('cat');
         let nick = this.get('nick');
         let groupName = this.get('window.name');
@@ -76,9 +76,9 @@ export default Ember.Object.extend({
             case 'kick':
                 return `${nick} was kicked from ${groupName}. Reason: ${body}`;
         }
-    }.property('cat'),
+    }),
 
-    bodyParts: function() {
+    bodyParts: Ember.computed('body', function() {
         let result = Ember.A([]);
         let pos = 0;
         let imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
@@ -130,17 +130,17 @@ export default Ember.Object.extend({
         }
 
         return result;
-    }.property('body'),
+    }),
 
-    hasMedia: function() {
+    hasMedia: Ember.computed('bodyParts', function() {
         return this.get('bodyParts').isAny('media', true);
-    }.property('bodyParts'),
+    }),
 
-    hasYoutubeVideo: function() {
+    hasYoutubeVideo: Ember.computed('bodyParts', function() {
         return this.get('bodyParts').isAny('type', 'youtubelink');
-    }.property('bodyParts'),
+    }),
 
-    videoId: function() {
+    videoId: Ember.computed('bodyParts', function() {
         let video = this.get('bodyParts').findBy('type', 'youtubelink');
 
         if (video) {
@@ -149,11 +149,11 @@ export default Ember.Object.extend({
         } else {
             return null;
         }
-    }.property('bodyParts'),
+    }),
 
-    images: function() {
+    images: Ember.computed('bodyParts', function() {
         return this.get('bodyParts').filterBy('type', 'image');
-    }.property('bodyparts'),
+    }),
 
     _parseText(array, text, network, cat) {
         if (network === 'Flowdock') {

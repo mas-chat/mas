@@ -24,13 +24,13 @@ export default Ember.Component.extend({
 
     userId: Ember.computed.alias('model'),
 
-    name: function() {
+    name: Ember.computed('userId', function() {
         return this.get('store.users').getName(this.get('userId'), 'MAS');
-    }.property('userId'),
+    }),
 
-    nick: function() {
+    nick: Ember.computed('userId', function() {
         return this.get('store.users').getNick(this.get('userId'), 'MAS');
-    }.property('userId'),
+    }),
 
     actions: {
         remove() {

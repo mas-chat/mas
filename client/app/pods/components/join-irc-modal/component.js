@@ -28,9 +28,9 @@ export default Ember.Component.extend({
 
     selectedNetwork: null,
 
-    ircNetworks: function() {
+    ircNetworks: Ember.computed('store.networks', function() {
         return this.get('store.networks').removeObject('MAS');
-    }.property('store.networks'),
+    }),
 
     actions: {
         joinIRC() {

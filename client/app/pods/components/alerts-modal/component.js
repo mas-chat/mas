@@ -42,9 +42,9 @@ export default Ember.Component.extend({
         this._updateModalAlerts();
     }.observes('model.sounds', 'model.titleAlert').on('init'),
 
-    alertsTitle: function() {
+    alertsTitle: Ember.computed('model.name', function() {
         return 'Configure alerts for \'' + this.get('model.name') + '\'';
-    }.property('model.name'),
+    }),
 
     _updateModalAlerts() {
         this.set('modalSoundAlert', this.get('model.sounds') ? 'enabled' : 'disabled');

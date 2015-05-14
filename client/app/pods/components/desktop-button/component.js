@@ -21,13 +21,13 @@ import Ember from 'ember';
 export default Ember.Component.extend({
     activeDraggedWindow: false,
 
-    dropAreaCSSClass: function() {
+    dropAreaCSSClass: Ember.computed('activeDraggedWindow', function() {
         return this.get('activeDraggedWindow') ? 'main-desktop-droparea' : '';
-    }.property('activeDraggedWindow'),
+    }),
 
-    selectedCSSClass: function() {
+    selectedCSSClass: Ember.computed('selected', 'id', function() {
         return (this.get('id') === this.get('selected')) ? 'main-desktop-button-selected' : '';
-    }.property('selected', 'id'),
+    }),
 
     actions: {
         switch() {

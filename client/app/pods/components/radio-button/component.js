@@ -25,18 +25,18 @@ export default Ember.Component.extend({
 
     selection: null,
 
-    click() {
-        this.set('selection', this.$().val());
-    },
-
-    checked: function() {
+    checked: Ember.computed('value', 'selection', function() {
         return this.get('value') === this.get('selection');
-    }.property(),
+    }),
 
-    updateValue: function() {
+    updateValue: Ember.observer('selection', function() {
         if (this.get('selection') === this.$().val()) {
             return this.set('checked', true);
         }
         return this.set('checked', false);
-    }.observes('selection')
+    }),
+
+    click() {
+        this.set('selection', this.$().val());
+    }
 });

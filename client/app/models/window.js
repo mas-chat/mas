@@ -65,30 +65,30 @@ export default Ember.Object.extend({
 
     password: null,
 
-    sortedMessages: function() {
+    sortedMessages: Ember.computed('messages.@each', function() {
         return this.get('messages').sortBy('ts');
-    }.property('messages.@each'),
+    }),
 
-    userNickHighlightRegex: function() {
+    userNickHighlightRegex: Ember.computed('store.userId', 'store.users.isDirty', function() {
         let userId = this.get('store.userId');
         let nick = this.get('store.users').getNick(userId, this.get('network'));
 
         return new RegExp(`(^|[@ ])${nick}[ :]`);
-    }.property('store.userId', 'store.users.isDirty'),
+    }),
 
-    operatorNames: function() {
+    operatorNames: Ember.computed('operators.@each', 'store.users.isDirty', function() {
         return this._mapUserIdsToNicks('operators').sortBy('nick');
-    }.property('operators.@each', 'store.users.isDirty'),
+    }),
 
-    voiceNames: function() {
+    voiceNames: Ember.computed('voices.@each', 'store.users.isDirty', function() {
         return this._mapUserIdsToNicks('voices').sortBy('nick');
-    }.property('voices.@each', 'store.users.isDirty'),
+    }),
 
-    userNames: function() {
+    userNames: Ember.computed('users.@each', 'store.users.isDirty', function() {
         return this._mapUserIdsToNicks('users').sortBy('nick');
-    }.property('users.@each', 'store.users.isDirty'),
+    }),
 
-    decoratedTitle: function() { // (name, topic)
+    decoratedTitle: Ember.computed('name', 'network', 'type', 'store.users.isDirty', function() {
         return titleBuilder.build({
             name: this.get('name'),
             network: this.get('network'),
@@ -96,13 +96,13 @@ export default Ember.Object.extend({
             userId: this.get('userId'),
             store: this.get('store')
         });
-    }.property('name', 'network', 'type', 'store.users.isDirty'),
+    }),
 
-    decoratedTopic: function() {
+    decoratedTopic: Ember.computed('topic', function() {
         return this.get('topic') ? '- ' + this.get('topic') : '';
-    }.property('topic'),
+    }),
 
-    simplifiedName: function() {
+    simplifiedName: Ember.computed('name', function() {
         let windowName = this.get('name');
         let network = this.get('network');
         let type = this.get('type');
@@ -117,14 +117,14 @@ export default Ember.Object.extend({
             windowName = this.get('store.users').getNick(this.get('userId'), this.get('network'));
         }
         return windowName;
-    }.property('name'),
+    }),
 
-    tooltipTopic: function() {
+    tooltipTopic: Ember.computed('topic', function() {
         let topic = this.get('topic');
         return topic ? 'Topic: ' + topic : 'Topic not set.';
-    }.property('topic'),
+    }),
 
-    explainedType: function() {
+    explainedType: Ember.computed('type', function() {
         let type = this.get('type');
         let network = this.get('network');
 
@@ -133,18 +133,18 @@ export default Ember.Object.extend({
         } else {
             return '1on1';
         }
-    }.property('type'),
+    }),
 
-    messageLimiter: function() {
+    messageLimiter: Ember.observer('messages.@each', function() {
         let sortedMessages = this.get('messages').sortBy('ts');
         let maxBacklogMsgs = this.get('store.maxBacklogMsgs');
 
         for (let i = 0; i < sortedMessages.length - maxBacklogMsgs; i++) {
             this.get('messages').removeObject(sortedMessages[i]);
         }
-    }.observes('messages.@each'),
+    }),
 
-    syncServerPosition: function() {
+    syncServerPosition: Ember.observer('desktop', 'row', 'column', function() {
         if (!window.disableUpdate && !isMobile.any) {
             this.get('socket').send({
                 id: 'UPDATE',
@@ -154,9 +154,9 @@ export default Ember.Object.extend({
                 desktop: this.get('desktop')
             });
         }
-    }.observes('desktop', 'row', 'column'),
+    }),
 
-    syncServerAlerts: function() {
+    syncServerAlerts: Ember.observer('titleAlert', 'sounds', 'minimizedNamesList', function() {
         this.get('socket').send({
             id: 'UPDATE',
             windowId: this.get('windowId'),
@@ -164,7 +164,7 @@ export default Ember.Object.extend({
             titleAlert: this.get('titleAlert'),
             minimizedNamesList: this.get('minimizedNamesList')
         });
-    }.observes('titleAlert', 'sounds', 'minimizedNamesList'),
+    }),
 
     _mapUserIdsToNicks(role) {
         return this.get(role).map(function(userId) {
