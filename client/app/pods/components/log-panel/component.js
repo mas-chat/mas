@@ -33,8 +33,13 @@ export default Ember.Component.extend({
 
     $dateInput: null,
     currentDate: null,
-    messages: null,
     tooManyMessages: false, // Temporary solution, pagination is coming
+
+    init() {
+        this._super();
+
+        this.set('currentDate', new Date());
+    },
 
     friendlyDate: function() {
         return moment(this.get('currentDate')).format('dddd, MMMM Do YYYY');
@@ -53,14 +58,6 @@ export default Ember.Component.extend({
             this.set('enabled', false);
             this.sendAction('compress');
         }
-    },
-
-    init() {
-        this._super();
-
-        this.set('currentDate', new Date());
-
-        this.messages = Ember.A([]);
     },
 
     didInsertElement() {
