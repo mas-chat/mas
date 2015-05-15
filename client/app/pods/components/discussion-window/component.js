@@ -332,10 +332,7 @@ export default Ember.Component.extend(UploadMixin, {
     _checkNewImages() {
         // Update images array
         this.$images = this.$('img[data-src]');
-
-        Ember.run.scheduleOnce('afterRender', this, function() {
-            this._goToBottom(true);
-        });
+        this._goToBottom(true);
     },
 
     _goToBottom(animate) {
