@@ -407,7 +407,7 @@ export default Ember.Component.extend(UploadMixin, {
             // jQuery offsetParent() documentation for details.
             let pos = $img.position().top;
 
-            if (pos + placeHolderHeight >= 0 && pos <= panelHeight) {
+            if (pos + placeHolderHeight >= 0 && pos <= panelHeight && !$img.attr('src')) {
                 $img.attr('src', $img.data('src'));
 
                 $img.one('load', function() {
