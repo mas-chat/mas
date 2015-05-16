@@ -202,17 +202,15 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     move(dim, duration) {
+        this.set('animating', true);
+
         this.$().velocity('stop').velocity(dim, {
             duration: duration,
             visibility: 'visible',
-            begin: function() {
-                this.set('animating', true);
-            }.bind(this),
-            complete: function() {
+            complete: Ember.run.bind(this, function() {
                 this.set('animating', false);
-                // Make sure window shows the latest messages
-                Ember.run.next(this, this.layoutDone);
-            }.bind(this)
+                this._goToBottom(false); // Make sure window shows the latest messages
+            })
         });
     },
 
@@ -223,12 +221,6 @@ export default Ember.Component.extend(UploadMixin, {
 
         event.preventDefault();
         this.sendAction('dragWindowStart', this, event);
-    },
-
-    layoutDone() {
-        Ember.run.scheduleOnce('afterRender', this, function() {
-            this._goToBottom(false);
-        });
     },
 
     didInsertElement() {
