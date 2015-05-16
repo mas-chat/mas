@@ -74,6 +74,7 @@ export default Ember.Service.extend({
         let primaryKeys = {
             window: 'windowId',
             message: 'gid',
+            logMessage: 'gid',
             friend: 'userId',
             alert: 'alertId'
         };
@@ -96,7 +97,7 @@ export default Ember.Service.extend({
     _insertObject(type, data, parent) {
         let object = modelNameMapping[type].create(data);
 
-        // TBD: Add 'arrayName' parameter so that logMessage type can be removed.
+        // TBD: Add 'arrayName' parameter so that logMessage type and primary key can be removed.
 
         if (type === 'window' || type === 'message' || type === 'logMessage' || type === 'friend') {
             object.set('store', this);
