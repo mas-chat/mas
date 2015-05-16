@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals _, $ */
+/* globals $ */
 
 import Ember from 'ember';
 
@@ -29,6 +29,7 @@ export default Ember.Component.extend({
     cursor: {},
     movingWindow: null,
     activeDesktop: 0,
+    windowComponents: null,
 
     store: Ember.inject.service(),
     socket: Ember.inject.service(),
@@ -36,6 +37,12 @@ export default Ember.Component.extend({
     initReady: Ember.observer('store.windowListComplete', function() {
         Ember.run.next(this, function() { this._layoutWindows(false); });
     }),
+
+    init() {
+        this._super();
+
+        this.set('windowComponents', Ember.A([]));
+    },
 
     actions: {
         joinLobby() {
@@ -62,6 +69,14 @@ export default Ember.Component.extend({
 
         dragWindowStart(discussionWindow, event) {
             this._dragWindowStart(discussionWindow, event);
+        },
+
+        registerWindow(discussionWindow) {
+            this.get('windowComponents').addObject(discussionWindow);
+        },
+
+        unregisterWindow(discussionWindow) {
+            this.get('windowComponents').removeObject(discussionWindow);
         }
     },
 
@@ -149,9 +164,9 @@ export default Ember.Component.extend({
                         (columnIndex === cursor.x && cursor.section === 'left')) ? 1 : 0;
                 }
 
-                let view = Ember.View.views[masWindow.el.getAttribute('id')];
-                view.set('row', rowIndex + deltaY);
-                view.set('column', columnIndex + deltaX);
+                let component = masWindow.component;
+                component.set('row', rowIndex + deltaY);
+                component.set('column', columnIndex + deltaX);
             });
         });
 
@@ -161,12 +176,12 @@ export default Ember.Component.extend({
 
     _layoutWindows(animate) {
         let duration = animate ? 600 : 0;
-        let el = this.get('element');
+        let windowComponents = this.get('windowComponents');
         let container = this._containerDimensions();
-        let expandedWindow = el.querySelector('.window.expanded');
+        let expandedWindow = windowComponents.findBy('expanded', true);
 
         if (expandedWindow) {
-            $(expandedWindow).velocity({
+            expandedWindow.move({
                 left: 0,
                 top: 0,
                 width: container.width,
@@ -175,40 +190,30 @@ export default Ember.Component.extend({
             return;
         }
 
-        let windows = el.querySelectorAll(
-            '.window.visible[data-desktop=\'' + this.get('activeDesktop') + '\']');
-
-        let rowNumbers = _.uniq(_.map(windows,
-            function(element) { return parseInt(element.getAttribute('data-row')); })).sort();
+        let visibleWindows = windowComponents.filterBy('visible');
+        let rowNumbers = visibleWindows.mapBy('row').uniq().sort();
         let rowHeight = Math.round(container.height / rowNumbers.length);
 
         let dimensions = [];
 
-        _.forEach(rowNumbers, function(row, rowIndex) {
-            let windowsInRow = el.querySelectorAll('.window.visible[data-row="' + row + '"]');
+        rowNumbers.forEach(function(row, rowIndex) {
+            let windowsInRow = visibleWindows.filterBy('row', row).sortBy('column');
             let windowWidth = Math.round(container.width / windowsInRow.length);
 
             dimensions.push([]);
 
-            windowsInRow = _.sortBy(windowsInRow, function(element) {
-                return parseInt(element.getAttribute('data-column'));
-            });
-
-            _.forEach(windowsInRow, function(element, columnIndex) {
-                let dim = {
+            windowsInRow.forEach(function(windowComponent, columnIndex) {
+                dimensions[rowIndex].push({
                     left: columnIndex * windowWidth,
                     top: rowIndex * rowHeight,
                     width: windowWidth,
                     height: rowHeight,
-                    el: element
-                };
-
-                dimensions[rowIndex].push(dim);
+                    component: windowComponent
+                });
             });
         });
 
         this.dimensions = dimensions;
-
         this._animate(duration);
     },
 
@@ -287,17 +292,6 @@ export default Ember.Component.extend({
     _animate(duration) {
         this.dimensions.forEach(function(row, rowIndex) {
             row.forEach(function(windowDim, columnIndex) {
-                let $el = $(windowDim.el);
-                let position = $el.position();
-
-                // Keep all values in hash to make rounding easy in the next step
-                let oldDim = {
-                    left: position.left,
-                    top: position.top,
-                    width: $el.width(),
-                    height: $el.height()
-                };
-
                 let cursorSpace = this._calculateSpaceForCursor(
                     columnIndex, rowIndex, windowDim.cursor);
 
@@ -312,30 +306,8 @@ export default Ember.Component.extend({
                         windowDim.height - cursorSpace : windowDim.height
                 };
 
-                const PADDING = 2 * 3;
-
-                if (newDim.left === oldDim.left && newDim.top === oldDim.top &&
-                    newDim.width === oldDim.width + PADDING &&
-                    newDim.height === oldDim.height + PADDING) {
-                    // Nothing to animate
-                    return;
-                }
-
-                let discussionWindow = Ember.View.views[$el.attr('id')];
-
-                $el.velocity('stop').velocity(newDim, {
-                    duration: duration,
-                    visibility: 'visible',
-                    begin() {
-                        discussionWindow.set('animating', true);
-                    },
-                    complete() {
-                        discussionWindow.set('animating', false);
-
-                        // Make sure window shows the latest messages
-                        Ember.run.next(discussionWindow, discussionWindow.layoutDone);
-                    }
-                });
+                let windowComponent = windowDim.component;
+                windowComponent.move(newDim, duration);
             }.bind(this));
         }.bind(this));
     },

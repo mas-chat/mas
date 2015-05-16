@@ -24,7 +24,6 @@ import UploadMixin from '../../../mixins/upload';
 
 export default Ember.Component.extend(UploadMixin, {
     classNames: [ 'window', 'flex-grow-column' ],
-    attributeBindings: [ 'row:data-row', 'column:data-column', 'desktop:data-desktop' ],
 
     classNameBindings: [
         'animating:velocity-animating:',
@@ -202,6 +201,21 @@ export default Ember.Component.extend(UploadMixin, {
         }
     },
 
+    move(dim, duration) {
+        this.$().velocity('stop').velocity(dim, {
+            duration: duration,
+            visibility: 'visible',
+            begin: function() {
+                this.set('animating', true);
+            }.bind(this),
+            complete: function() {
+                this.set('animating', false);
+                // Make sure window shows the latest messages
+                Ember.run.next(this, this.layoutDone);
+            }.bind(this)
+        });
+    },
+
     mouseDown(event) {
         if (!$(event.target).hasClass('fa-arrows')) {
             return; // Not moving the window
@@ -219,6 +233,8 @@ export default Ember.Component.extend(UploadMixin, {
 
     didInsertElement() {
         let that = this;
+
+        this.sendAction('register', this);
 
         this.$images = this.$('img[data-src]');
         this.$messagePanel = this.$('.window-messages');
@@ -324,6 +340,9 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     willDestroyElement() {
+        this.$().velocity('stop');
+        this.sendAction('unregister', this);
+
         Ember.run.scheduleOnce('afterRender', this, function() {
             this.sendAction('relayout', { animate: true });
         });
