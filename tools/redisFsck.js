@@ -341,9 +341,11 @@ function *activeDesktopTest() {
             let userId = settingsKey.split(':')[1];
             let windowKeys = yield redis.keys(`window:${userId}:*`);
             let found = false;
+            let lastValidDestopId;
 
             for (let windowKey of windowKeys) {
                 let desktop = yield redis.hget(windowKey, 'desktop');
+                lastValidDestopId = desktop;
 
                 if (desktop === activeDesktop) {
                     found = true;
@@ -351,8 +353,9 @@ function *activeDesktopTest() {
                 }
             }
 
-            if (!found) {
-                console.log('ERROR: found invalid activeDesktop setting');
+            if (!found && windowKeys.length > 0) {
+                console.log(`ERROR: Fixing invalid activeDesktop value: '${activeDesktop}'.`);
+                yield redis.hset(settingsKey, 'activeDesktop', lastValidDestopId);
             }
         }
     }
