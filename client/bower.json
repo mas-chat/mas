@@ -37,7 +37,8 @@
     "FileAPI": "~2.0.6",
     "socket.io-client": "~1.3.2",
     "bootstrap-datepicker": "~1.4.0",
-    "isMobile": "~0.3.6"
+    "isMobile": "~0.3.6",
+    "babel-polyfill": "~0.0.1"
   },
   "resolutions": {
     "ember": "canary"

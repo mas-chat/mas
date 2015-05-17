@@ -30,6 +30,9 @@ var app = new EmberApp({
 // please specify an object with the list of modules as keys
 // along with the exports of each module as its value.
 
+// Temporary fix, see ember-cli-babel issue #40
+app.import('bower_components/babel-polyfill/browser-polyfill.js', { prepend: true });
+
 app.import('bower_components/momentjs/moment.js');
 app.import('bower_components/howler/howler.js');
 app.import('bower_components/lodash/lodash.js');
