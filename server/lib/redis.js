@@ -50,6 +50,8 @@ exports.loadScripts = function*() {
             log.error('Lua script loading failed: ' + scriptName + ', ' + e);
         }
     }
+
+    redisClient.quit();
 };
 
 exports.initDB = function*() {
