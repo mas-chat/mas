@@ -23,6 +23,8 @@ local userId = ARGV[1]
 local sessionId = ARGV[2]
 local maxBacklogLines = tonumber(ARGV[3])
 local cachedUpto = tonumber(ARGV[4])
+local ts = ARGV[5]
+
 local outbox = 'outbox:' .. userId .. ':' .. sessionId
 
 local function split(s, delimiter)
@@ -55,6 +57,8 @@ local function seenUser(userId)
         seenUserIds[userId] = true
     end
 end
+
+redis.call('ZADD', 'sessionlist:' .. userId, ts, sessionId)
 
 -- Iterate through windows
 local windowIds = redis.call('SMEMBERS', 'windowlist:' .. userId)

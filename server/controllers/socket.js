@@ -73,8 +73,6 @@ exports.setup = function(server) {
                 state = 'authenticated';
                 sessionId = uuid(15);
 
-                yield redis.zadd(`sessionlist:${userId}`, ts, sessionId);
-
                 let maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
                 let cachedUpto = isInteger(data.cachedUpto) ? data.cachedUpto : 0;
 
@@ -86,7 +84,7 @@ exports.setup = function(server) {
                 log.info(userId, 'Initializing new session: ' + sessionId);
                 log.info(userId, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
 
-                yield redis.run('initSession', userId, sessionId, maxBacklogMsgs, cachedUpto);
+                yield redis.run('initSession', userId, sessionId, maxBacklogMsgs, cachedUpto, ts);
 
                 yield friends.sendFriends(userId, sessionId);
                 yield friends.sendFriendConfirm(userId, sessionId);
