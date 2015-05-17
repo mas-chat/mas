@@ -80,7 +80,7 @@ function *outboxTest() {
 }
 
 function *conversationIndexTest() {
-    let conversationKeys = (yield redis.keys('conversation:*'));
+    let conversationKeys = yield redis.keys('conversation:*');
     let conversationIndexFieldsLength = yield redis.hlen('index:conversation');
 
     let passed = conversationKeys.length === conversationIndexFieldsLength;
