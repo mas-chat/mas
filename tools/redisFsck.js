@@ -24,6 +24,7 @@ const readlineSync = require('readline-sync'),
       redis = redisModule.createClient();
 
 const tests = [
+    outboxTest,
     desktopTest,
     activeDesktopTest,
     conversationIndexTest,
@@ -51,6 +52,8 @@ if (response !== 'yes') {
 }
 
 co(function*() {
+    yield redisModule.loadScripts();
+
     for (let test of tests) {
         yield test();
     }
@@ -58,6 +61,23 @@ co(function*() {
     yield redis.quit();
     console.log('DONE');
 })();
+
+function *outboxTest() {
+    let outboxKeys = yield redis.keys('outbox:*');
+
+    for (let key of outboxKeys) {
+        let keyParts = key.split(':');
+        let userId = keyParts[1];
+        let sessionId = keyParts[2];
+
+        let score = yield redis.zscore('sessionlastheartbeat', `${userId}:${sessionId}`);
+
+        if (!score) {
+            console.log('Removing stale session');
+            yield redis.run('deleteSession', userId, sessionId);
+        }
+    }
+}
 
 function *conversationIndexTest() {
     let conversationKeys = (yield redis.keys('conversation:*'));
