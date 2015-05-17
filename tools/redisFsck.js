@@ -20,9 +20,10 @@
 const readlineSync = require('readline-sync'),
       assert = require('assert'),
       co = require('co'),
-      colors = require('colors'),
       redisModule = require('../server/lib/redis'),
       redis = redisModule.createClient();
+
+require('colors');
 
 const tests = [
     outboxTest,
@@ -46,7 +47,7 @@ const tests = [
 let autoRepair = false;
 
 console.log(' ************************************************************************');
-console.log(' *** This is a experimental MAS Redis database consistency checking tool');
+console.log(' *** This is an experimental MAS Redis database consistency checking tool');
 console.log(' ************************************************************************');
 
 let response = readlineSync.question('Do you want to continue (yes/no)? [no] ');
@@ -290,6 +291,10 @@ function *windowIndexTest() {
     let windowIndexEntries = yield redis.hgetall('index:windowIds');
 
     let passed = windowKeys.length === Object.keys(windowIndexEntries).length;
+
+    if (!passed) {
+        console.log('ERROR: amount of window and window index keys doesn\'t match.');
+    }
 
     for (let entry of Object.keys(windowIndexEntries)) {
         let windowId = windowIndexEntries[entry];
