@@ -125,7 +125,7 @@ export default Ember.Component.extend(UploadMixin, {
         }
 
         if (!this.get('scrollLock')) {
-            // Prevents _addScrollHandler to make faulty conclusion.
+            // Prevents scroll handler to make faulty conclusion.
             // We need to scroll and we we will after debounce kicks in.
             this.set('scrolling', true);
         }
