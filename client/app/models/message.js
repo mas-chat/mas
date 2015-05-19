@@ -86,6 +86,7 @@ export default Ember.Object.extend({
         let network = this.get('network');
         let cat = this.get('cat');
 
+        // TBD: Do parsing in two stages, first images and rest. Then rest in detail.
         URI.withinString(body, function(url, start, end, source) {
             let urlObj = new URI(url);
             let visibleLink;
@@ -112,12 +113,14 @@ export default Ember.Object.extend({
                 urlObj.protocol('http');
             }
 
-            result.push({
+            this._pushPart(result, {
                 link: true,
                 text: visibleLink,
                 url: urlObj.toString(),
                 media: media,
-                type: type
+                type: type,
+                source: '',
+                loaded: false
             });
 
             pos = end;
@@ -134,6 +137,10 @@ export default Ember.Object.extend({
 
     hasMedia: Ember.computed('bodyParts', function() {
         return this.get('bodyParts').isAny('media', true);
+    }),
+
+    hasImages: Ember.computed('bodyParts', function() {
+        return this.get('bodyParts').isAny('type', 'image');
     }),
 
     hasYoutubeVideo: Ember.computed('bodyParts', function() {
@@ -155,7 +162,11 @@ export default Ember.Object.extend({
         return this.get('bodyParts').filterBy('type', 'image');
     }),
 
-    _parseText(array, text, network, cat) {
+    _pushPart(array, params) {
+        array.pushObject(Ember.Object.create(params));
+    },
+
+    _parseText(result, text, network, cat) {
         if (network === 'Flowdock') {
             text = text.replace(/^\[(.*?)\] &lt;&lt; (.*)/, function(match, p1, p2) {
                 return '[' + p1.substring(0, 9) + '] ' + p2;
@@ -174,19 +185,30 @@ export default Ember.Object.extend({
             let isEmoji = emojiMatch && emojify.emojiNames.indexOf(emojiMatch[1]) > -1;
 
             if (isEmoji) {
-                array.push({ link: false, text: part, emoji: emojiMatch[1] });
+                this._pushPart(result, {
+                    link: false,
+                    text: part,
+                    emoji: emojiMatch[1]
+                });
                 return;
             }
 
             let mentionMatch = /^\s?(@\S+) $/.exec(part);
 
             if (mentionMatch) {
-                array.push({ link: false, mention: true, text: mentionMatch[1] });
+                this._pushPart(result, {
+                    link: false,
+                    mention: true,
+                    text: mentionMatch[1]
+                });
                 return;
             }
 
             // Plain text
-            array.push({ link: false, text: part });
-        });
+            this._pushPart(result, {
+                link: false,
+                text: part
+            });
+        }.bind(this));
     }
 });
