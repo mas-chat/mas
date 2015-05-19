@@ -43,7 +43,6 @@ export default Ember.Component.extend(UploadMixin, {
 
     $messagePanel: null,
     $messagesEndAnchor: null,
-    $images: null,
     logModeEnabled: false,
 
     selectedDesktop: 0,
@@ -97,41 +96,19 @@ export default Ember.Component.extend(UploadMixin, {
     visibilityChanged: Ember.observer('visible', function() {
         if (this.get('visible')) {
             this.set('content.newMessagesCount', 0);
-
-            // Hidden div can't be scrolled so the scrolling in the linedAdded() observer
-            // hasn't worked if new messages arrived to this window while it was hidden.
-            Ember.run.scheduleOnce('afterRender', this, function() {
-                this._goToBottom(false);
-            });
         }
 
         this.sendAction('relayout', { animate: false });
     }),
 
-    lineAdded: Ember.observer('content.messages.@each', function() {
+    _lineAdded() {
         let messages = this.get('content.messages');
-
-        if (messages.length === 0) {
-            return;
-        }
-
-        let previousLines = this.get('linesAmount');
-        this.set('linesAmount', messages.length);
-
-        if (previousLines && previousLines >= messages.length) {
-            // Line was removed.
-            this.set('deletedLine', true);
-            return;
-        }
 
         if (!this.get('scrollLock')) {
             // Prevents scroll handler to make faulty conclusion.
             // We need to scroll and we we will after debounce kicks in.
             this.set('scrolling', true);
         }
-
-        // Threshold should be more than duration of goToBottom() scrolling animation
-        Ember.run.debounce(this, this._checkNewImages, 300);
 
         let cat = messages[messages.length - 1].cat; // Message that was just added.
         let importantMessage = cat === 'msg' || cat === 'error' || cat === 'action';
@@ -151,7 +128,11 @@ export default Ember.Component.extend(UploadMixin, {
                 play();
             }
         }
-    }),
+
+        Ember.run.debounce(this, function() {
+            this._goToBottom(true);
+        }, 300);
+    },
 
     actions: {
         expand() {
@@ -210,6 +191,7 @@ export default Ember.Component.extend(UploadMixin, {
             complete: Ember.run.bind(this, function() {
                 this.set('animating', false);
                 this._goToBottom(false); // Make sure window shows the latest messages
+                this._showImages();
             })
         });
     },
@@ -228,10 +210,8 @@ export default Ember.Component.extend(UploadMixin, {
 
         this.sendAction('register', this);
 
-        this.$images = this.$('img[data-src]');
         this.$messagePanel = this.$('.window-messages');
         this.$messagesEndAnchor = this.$('.window-messages-end');
-        this._addScrollHandler();
 
         this.$('.window-caption').tooltip();
         this.$messagePanel.tooltip({
@@ -329,6 +309,27 @@ export default Ember.Component.extend(UploadMixin, {
         }.bind(this));
 
         this.sendAction('relayout', { animate: false });
+
+        this._addScrollHandler();
+
+        Ember.run.later(this, function() {
+            this._showImages();
+            this._addLazyImageScrollHandler();
+        }, 4000);
+
+        this.get('content.messages').addArrayObserver(this);
+    },
+
+    arrayWillChange: function(array, offset, removeCount) {
+        if (removeCount > 0) {
+           this.set('deletedLine', true);
+        }
+    },
+
+    arrayDidChange: function(array, offset, removeCount, addCount){
+        if (addCount > 0) {
+           this._lineAdded();
+        }
     },
 
     willDestroyElement() {
@@ -338,12 +339,6 @@ export default Ember.Component.extend(UploadMixin, {
         Ember.run.scheduleOnce('afterRender', this, function() {
             this.sendAction('relayout', { animate: true });
         });
-    },
-
-    _checkNewImages() {
-        // Update images array
-        this.$images = this.$('img[data-src]');
-        this._goToBottom(true);
     },
 
     _goToBottom(animate) {
@@ -367,7 +362,6 @@ export default Ember.Component.extend(UploadMixin, {
             }.bind(this),
             complete: function() {
                 this.set('scrolling', false);
-                this._showImages();
             }.bind(this)
         });
     },
@@ -393,51 +387,72 @@ export default Ember.Component.extend(UploadMixin, {
             }
 
             this.set('deletedLine', false); // Hack
-            this._showImages();
         };
 
         this.$messagePanel.on('scroll', () => {
-            Ember.run.throttle(this, handler, 150);
+            // Delay nust be longer than goToBottom animation
+            Ember.run.throttle(this, handler, 250, false);
+        });
+    },
+
+    _addLazyImageScrollHandler() {
+        this.$messagePanel.on('scroll', () => {
+            Ember.run.throttle(this, this._showImages, 250, true);
         });
     },
 
     _showImages() {
-        if (!this.$images) {
+        let $imgContainers = this.$('ul[data-has-images="true"]');
+
+        if (!$imgContainers) {
             return;
         }
 
-        let placeHolderHeight = 31;
+        const placeHolderHeight = 31;
         let panelHeight = this.$messagePanel.height();
         let that = this;
 
-        this.$images = this.$images.filter(function() {
-            let $img = $(this);
-
+        $imgContainers.each(function() {
+            let $imgContainer = $(this);
             // We want to know image's position in .window-messages container div. For position()
             // to work correctly, .window-messages has to have position set to 'relative'. See
             // jQuery offsetParent() documentation for details.
-            let pos = $img.position().top;
+            let pos = $imgContainer.position().top;
 
-            if (pos + placeHolderHeight >= 0 && pos <= panelHeight && !$img.attr('src')) {
-                $img.attr('src', $img.data('src'));
+            if (pos + placeHolderHeight >= 0 && pos <= panelHeight) {
+                // Images of this message are in view port. Start to lazy load images.
+                let message = that.get('content.messages').findBy('gid', $imgContainer.data('gid'));
+                let images = message.get('images') || [];
 
-                $img.one('load', function() {
-                    $img.removeClass('loader loader-small-dark');
-                    $img.removeAttr('data-src');
-                    that._goToBottom(true);
-                });
+                for (let i = 0; i < images.length; i++) {
+                    let image = images[i];
 
-                $img.one('error', function() {
-                    // Let's hide the whole media area. Would be too complicated to check if
-                    // there are other image thumbnails that we loaded successfully.
-                    $img.closest('.user-media').hide();
-                    that._goToBottom(true);
-                });
+                    if (image.get('source')) {
+                        // Image has been already loaded
+                        continue;
+                    }
 
-                return false;
+                    image.set('source', image.get('url'));
+
+                    let $image = $imgContainer.find('img').eq(i);
+
+                    $image.one('load error', function(e) {
+                        if (e.type === 'error') {
+                            $image.hide();
+                        }
+
+                        Ember.run(function() {
+                            Ember.Logger.info('Lazy loaded image');
+
+                            image.set('loaded', true);
+
+                            Ember.run.scheduleOnce('afterRender', this, function() {
+                                that._goToBottom(true);
+                            });
+                        });
+                    });
+                }
             }
-
-            return true;
         });
     }
 });

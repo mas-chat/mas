@@ -25,7 +25,7 @@
                 {{~/if}}
             {{~/each}}
             {{~#if message.hasMedia}}
-                <ul class="user-media">
+                <ul class="user-media" data-gid="{{message.gid}}" data-has-images="{{message.hasImages}}">
                     {{#if message.hasYoutubeVideo}}
                         <li>
                             <iframe class="youtube-preview" src="https://www.youtube.com/embed/{{message.videoId}}?showinfo=0&autohide=1" allowfullscreen frameborder="0"></iframe>
@@ -36,7 +36,7 @@
                             <li>
                                 <a href="{{image.url}}" class="user-img">
                                     <div class="user-img-container">
-                                        <img class="loader loader-small-dark" src="" data-src="{{image.url}}">
+                                        <img class="{{if image.loaded '' 'loader loader-small-dark'}}" src="{{image.source}}">
                                         <span {{action "hideImages" message on="mouseDown" bubbles=false}} class="user-img-close fa-stack">
                                             <i class="fa fa-circle fa-stack-2x"></i>
                                             <i class="fa fa-times fa-stack-1x fa-inverse"></i>
