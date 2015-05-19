@@ -35,7 +35,6 @@ export default Ember.Component.extend(UploadMixin, {
 
     expanded: false,
     animating: false,
-    scrolling: false,
     scrollLock: false,
 
     linesAmount: null,
@@ -103,13 +102,6 @@ export default Ember.Component.extend(UploadMixin, {
 
     _lineAdded() {
         let messages = this.get('content.messages');
-
-        if (!this.get('scrollLock')) {
-            // Prevents scroll handler to make faulty conclusion.
-            // We need to scroll and we we will after debounce kicks in.
-            this.set('scrolling', true);
-        }
-
         let cat = messages[messages.length - 1].cat; // Message that was just added.
         let importantMessage = cat === 'msg' || cat === 'error' || cat === 'action';
 
@@ -129,9 +121,9 @@ export default Ember.Component.extend(UploadMixin, {
             }
         }
 
-        Ember.run.debounce(this, function() {
+        Ember.run.scheduleOnce('afterRender', this, function() {
             this._goToBottom(true);
-        }, 300);
+        });
     },
 
     actions: {
@@ -357,18 +349,12 @@ export default Ember.Component.extend(UploadMixin, {
             duration: duration,
             easing: 'spring',
             offset: -1 * this.$messagePanel.innerHeight() + 5, // 5px is padding
-            begin: function() {
-                this.set('scrolling', true);
-            }.bind(this),
-            complete: function() {
-                this.set('scrolling', false);
-            }.bind(this)
         });
     },
 
     _addScrollHandler() {
         let handler = function() {
-            if (this.get('animating') || this.get('scrolling')) {
+            if (this.get('animating')) {
                 return;
             }
 

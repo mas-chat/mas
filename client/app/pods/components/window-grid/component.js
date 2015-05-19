@@ -63,7 +63,7 @@ export default Ember.Component.extend({
 
         relayout(options) {
             if (this.get('store.windowListComplete')) {
-                Ember.run.debounce(this, function() { this._layoutWindows(options.animate); }, 100);
+                Ember.run.debounce(this, function() { this._layoutWindows(options.animate); }, 10);
             }
         },
 
