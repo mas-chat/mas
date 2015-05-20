@@ -162,8 +162,12 @@ export default Ember.Service.extend({
         }
         data.activeDesktop = this.get('activeDesktop');
 
-        window.localStorage.setItem('data', JSON.stringify(data));
-        Ember.Logger.info('Snapshot saved.');
+        try {
+            window.localStorage.setItem('data', JSON.stringify(data));
+            Ember.Logger.info('Snapshot saved.');
+        } catch (e) {
+            Ember.Logger.info(`Failed to save snapshot: ${e}`);
+        }
     },
 
     _loadSnapshot() {
