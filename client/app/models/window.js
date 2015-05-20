@@ -66,7 +66,7 @@ export default Ember.Object.extend({
 
     password: null,
 
-    sortedMessages: Ember.computed('messages.@each', function() {
+    sortedMessages: Ember.computed('messages.@each', 'store.dayCounter', function() {
         // Third parameter minimizes moment() calls
         let addDayDividerIfNewDay = function(array, firstDayTs, firstDay, secondDay) {
             if (firstDay !== secondDay) {

@@ -44,6 +44,7 @@ export default Ember.Service.extend({
     userId: null,
     windowListComplete: false,
     maxBacklogMsgs: 100000,
+    dayCounter: 0,
 
     init() {
         this._super();
@@ -68,6 +69,16 @@ export default Ember.Service.extend({
             // socket.io connection. Data from server can't race anymore with snapshot data.
             this.get('socket').start();
         });
+
+        // Day has changed service
+        let timeToTomorrow = moment().endOf('day').diff(moment()) + 1;
+
+        let changeDay = function() {
+            this.incrementProperty('dayCounter');
+            Ember.run.later(this, changeDay, 1000 * 60 * 60 * 24);
+        };
+
+        Ember.run.later(this, changeDay, timeToTomorrow);
     },
 
     upsertObject(type, data, parent) {
