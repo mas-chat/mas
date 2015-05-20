@@ -412,7 +412,7 @@ Conversation.prototype._remove = function*() {
     let key;
 
     if (this.type === 'group') {
-        key = 'group:' + this.network + ':' + this.name;
+        key = 'group:' + this.network + ':' + this.name.toLowerCase();
     } else {
         let userIds = Object.keys(this.members);
         userIds = userIds.sort();
