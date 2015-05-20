@@ -43,7 +43,6 @@ export default Ember.Mixin.create(SendMsgMixin, {
                 if (!err) {
                     let url = JSON.parse(xhr.responseText).url[0];
                     this._sendText(url, this.get('content'));
-                    this._printLine('File upload failed.', 'error');
                 } else {
                     this._printLine('File upload failed.', 'error');
                 }
