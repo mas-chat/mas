@@ -304,6 +304,7 @@ export default Ember.Component.extend(UploadMixin, {
 
         this._addScrollHandler();
 
+        // TBD: Can timer removed? Do this after first visible true and gotobottom call?
         Ember.run.later(this, function() {
             this._showImages();
             this._addLazyImageScrollHandler();

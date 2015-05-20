@@ -29,6 +29,10 @@ export default Ember.Component.extend({
     cursor: {},
     movingWindow: null,
     activeDesktop: 0,
+
+    relayoutScheduled: false,
+    relayoutAnimate: null,
+
     windowComponents: null,
 
     store: Ember.inject.service(),
@@ -62,9 +66,26 @@ export default Ember.Component.extend({
         },
 
         relayout(options) {
-            if (this.get('store.windowListComplete')) {
-                Ember.run.debounce(this, function() { this._layoutWindows(options.animate); }, 10);
+            if (!this.get('store.windowListComplete')) {
+                return;
             }
+
+            // If there's at least one relayout call without animation, it takes precedence.
+            if (this.relayoutAnimate === null || this.relayoutAnimate === true) {
+                this.relayoutAnimate = options.animate;
+            }
+
+            if (this.relayoutScheduled) {
+                return;
+            }
+
+            this.relayoutScheduled = true;
+
+            Ember.run.next(this, function() {
+                this.relayoutScheduled = false;
+                this._layoutWindows(this.relayoutAnimate);
+                this.relayoutAnimate = null;
+            });
         },
 
         dragWindowStart(discussionWindow, event) {
