@@ -77,7 +77,7 @@ export default Ember.Component.extend(UploadMixin, {
     }),
 
     hiddenIfLogMode: Ember.computed('logModeEnabled', function() {
-        return this.get('logOrMobileModeEnabled') ? 'hidden' : '';
+        return this.get('logModeEnabled') ? 'hidden' : '';
     }),
 
     hiddenIfMinimizedUserNames: Ember.computed('content.minimizedNamesList', function() {
