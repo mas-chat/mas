@@ -20,6 +20,7 @@
 
 import Ember from 'ember';
 import TitleBuilder from '../helpers/title-builder';
+import Message from './message';
 
 let titleBuilder = TitleBuilder.create();
 
@@ -66,7 +67,37 @@ export default Ember.Object.extend({
     password: null,
 
     sortedMessages: Ember.computed('messages.@each', function() {
-        return this.get('messages').sortBy('ts');
+        // Third parameter minimizes moment() calls
+        let addDayDividerIfNewDay = function(array, firstDayTs, firstDay, secondDay) {
+            if (firstDay !== secondDay) {
+                array.push(Message.create({
+                    body: firstDayTs.format('dddd, MMMM D, YYYY'),
+                    cat: 'day-divider',
+                    window: this,
+                    store: this.get('store')
+                }));
+            }
+        }.bind(this);
+
+        let dayOfPreviousMsg = null;
+        let result = Ember.A([]);
+
+        this.get('messages').sortBy('ts').forEach(function(item) {
+            let currentMsgTs = moment.unix(item.get('ts'));
+            let dayOfCurrentMsg = currentMsgTs.format('l');
+
+            addDayDividerIfNewDay(result, currentMsgTs, dayOfCurrentMsg, dayOfPreviousMsg);
+            dayOfPreviousMsg = dayOfCurrentMsg;
+
+            result.push(item);
+        }.bind(this));
+
+        // Add day divider as last item if the last message is from yesterday or earlier.
+        let currentMsgTs = moment();
+        let dayOfCurrentMsg = currentMsgTs.format('l');
+        addDayDividerIfNewDay(result, currentMsgTs, dayOfCurrentMsg, dayOfPreviousMsg);
+
+        return result;
     }),
 
     userNickHighlightRegex: Ember.computed('store.userId', 'store.users.isDirty', function() {

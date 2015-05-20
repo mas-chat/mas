@@ -21,8 +21,7 @@
     {{/if}}
 
     <div class="window-messages flex-1 {{hiddenIfLogMode}}">
-        {{#each content.sortedMessages as |message index|}}
-            {{dayDivider content.sortedMessages index}}
+        {{#each content.sortedMessages as |message|}}
             {{partial "message"}}
         {{/each}}
         <div class="window-upload">

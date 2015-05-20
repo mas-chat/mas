@@ -52,10 +52,6 @@
         .window-content {
             background-color: #DFE6F0;
         }
-
-        .date-divider {
-            background-color: #DFE6F0;
-        }
     }
 
     &.group {
@@ -160,6 +156,22 @@
             font-family: Courier New, monospace;
             text-overflow: ellipsis;
             font-size: 11px;
+        }
+    }
+
+    .line.day-divider {
+        .nick, .timestamp {
+            display: none;
+        }
+
+        .body {
+            color: #686060;
+            text-decoration: underline;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+            margin: 5px 0px;
         }
     }
 
@@ -303,17 +315,6 @@
         height: 178px;
         padding: 9px 20px 9px 0px;
         vertical-align: middle;
-    }
-
-    .date-divider {
-        width: 100%;
-        font-size: 10px;
-        font-weight: bold;
-        background-color: whitesmoke;
-        border: 1px solid #ccc;
-        text-align: center;
-        white-space: nowrap;
-        margin: 5px 0px;
     }
 
     .window-members {

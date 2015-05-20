@@ -22,16 +22,6 @@ import Ember from 'ember';
 
 let SafeString = Ember.Handlebars.SafeString;
 
-Ember.Handlebars.helper('dayDivider', function(list, index) {
-    let dateForCurrent = moment.unix(list[index].get('ts'));
-    let dateForPrevious = index === 0 ? null : moment.unix(list[index - 1].get('ts'));
-
-    if (index === 0 || dateForCurrent.format('l') !== dateForPrevious.format('l')) {
-        return new SafeString(
-            '<div class="date-divider">' + dateForCurrent.format('dddd, MMMM D, YYYY') + '</div>');
-    }
-});
-
 Ember.Handlebars.helper('timeSince', function(online, timeStamp) {
     let res;
 
