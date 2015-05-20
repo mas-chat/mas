@@ -100,6 +100,28 @@ export default Ember.Component.extend(UploadMixin, {
         this.sendAction('relayout', { animate: false });
     }),
 
+    nickCompletion: Ember.observer('content.userNames.@each', 'content.voiceNames.@each',
+        'content.operatorNames.@each', function() {
+        this._updateNickCompletionList();
+    }),
+
+    _updateNickCompletionList() {
+        let target = this.$('.form-control');
+
+        if (!target) {
+            return;
+        }
+
+        let nickList = this.get('content.operatorNames').concat(this.get('content.voiceNames'),
+            this.get('content.userNames')).map(item => item.nick);
+
+        target.atwho({
+            at: '@',
+            data: nickList,
+            limit: 15
+        });
+    },
+
     _lineAdded() {
         let messages = this.get('content.messages');
         let cat = messages[messages.length - 1].cat; // Message that was just added.
@@ -264,19 +286,7 @@ export default Ember.Component.extend(UploadMixin, {
             limit: 20
         });
 
-        function getNick(item) {
-            return item.nick;
-        }
-
-        let nickList = this.get('content.operatorNames').map(getNick)
-            .concat(this.get('content.voiceNames').map(getNick))
-            .concat(this.get('content.userNames').map(getNick));
-
-        this.$('.form-control').atwho({
-            at: '@',
-            data: nickList,
-            limit: 10
-        });
+        this._updateNickCompletionList();
 
         this.$messagePanel.magnificPopup({
             type: 'image',
