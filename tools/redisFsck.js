@@ -627,7 +627,7 @@ function printVerdict(desc, passed) {
 
 function *removeConversation(conversationId) {
     let conversation = yield redis.hgetall(`conversation:${conversationId}`);
-    let members = yield redis.hgetall(`conversationmembers:${conversationId}`);
+    let members = (yield redis.hgetall(`conversationmembers:${conversationId}`)) || [];
 
     yield redis.del(`conversation:${conversationId}`);
     yield redis.del(`conversationmsgs:${conversationId}`);
