@@ -271,17 +271,6 @@ function *conversationMembersHaveWindowTest() {
 
                     yield redis.hdel(`conversationmembers:${conversationId}`, userId);
                     yield redis.srem(`conversationlist:${userId}`, conversationId);
-                    let removeConversation = true;
-
-                    Object.keys(members).forEach(function(member) {
-                        if (member.charAt(0) === 'm') {
-                            removeConversation = false;
-                        }
-                    });
-
-                    if (removeConversation) {
-                        yield removeConversation(conversationId);
-                    }
                 }
             }
         }
@@ -531,9 +520,10 @@ function *activeDesktopTest() {
 
             if (!found && windowKeys.length > 0) {
                 passed = false;
+                console.log(`ERROR: Invalid activeDesktop value: '${activeDesktop}'`);
 
                 if (autoRepair) {
-                    console.log(`FIXING: Invalid activeDesktop value: '${activeDesktop}'.`);
+                    console.log(`FIXING: Invalid activeDesktop value: '${activeDesktop}'`);
                     yield redis.hset(settingsKey, 'activeDesktop', lastValidDestopId);
                 }
             }
