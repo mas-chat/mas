@@ -36,7 +36,7 @@ export default Ember.Component.extend({
         joinIRC() {
             this.get('socket').send({
                 id: 'JOIN',
-                network: this.get('selectedNetwork'),
+                network: this.get('selectedNetwork') || this.get('ircNetworks')[0],
                 name: this.get('channel'),
                 password: this.get('password').trim()
             }, function(resp) {
