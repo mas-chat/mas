@@ -36,7 +36,7 @@ exports.setup = function(server) {
     io.on('connection', function(socket) {
         let userId = null;
         let sessionId = null;
-        let state = 'connected'; // connected, disconnected, authenticated
+        let state = 'connected'; // connected, authenticated, disconnected
 
         socket.on('init', function(data) {
             co(function*() {
@@ -51,7 +51,7 @@ exports.setup = function(server) {
                         code: 'INVALID_INIT',
                         reason: 'Invalid init event.'
                     });
-                    end();
+                    yield end('Invalid init.');
                     return;
                 }
 
@@ -66,7 +66,7 @@ exports.setup = function(server) {
                         code: 'INVALID_SECRET',
                         reason: 'Invalid or expired secret.'
                     });
-                    end();
+                    yield end('Invalid secret.');
                     return;
                 }
 
@@ -103,7 +103,6 @@ exports.setup = function(server) {
                     let ntfs = yield notification.receive(userId, sessionId, 60);
 
                     if (state !== 'authenticated') {
-                        end();
                         break;
                     }
 
@@ -122,7 +121,7 @@ exports.setup = function(server) {
         socket.on('req', function(data, cb) {
             co(function*() {
                 if (state !== 'authenticated') {
-                    end();
+                    yield end('Request arrived before init.');
                     return;
                 }
 
@@ -135,14 +134,24 @@ exports.setup = function(server) {
         });
 
         socket.on('disconnect', function() {
-            // Session is torn down in deleteIdleSessions() handler
-            end();
+            co(function*() {
+                yield end('Socket.io disconnect.');
+            })();
         });
 
-        function end() {
-            log.info(userId, 'Socket.io disconnect. sessionId: ' + sessionId);
-            state = 'disconnected';
-            socket.disconnect();
+        function *end(reason) {
+            if (state !== 'disconnected') {
+                log.info(userId, `Session ${sessionId} ended. Reason: ${reason}`);
+
+                state = 'disconnected';
+                socket.disconnect();
+
+                let last = yield redis.run('deleteSession', userId, sessionId);
+
+                if (last) {
+                    yield friends.informStateChange(userId, 'logout');
+                }
+            }
         }
     });
 };

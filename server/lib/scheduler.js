@@ -24,12 +24,14 @@ const co = require('co'),
       friends = require('../models/friends');
 
 exports.init = function() {
-    // Once in a minute
-    new CronJob('0 */1 * * * *', deleteIdleSessions, null, true);
+    // Once in an hour
+    new CronJob('0 0 */1 * * *', deleteStaleSessions, null, true);
 };
 
-function deleteIdleSessions() {
-    log.info('Running deleteIdleSessions job');
+function deleteStaleSessions() {
+    // Cleans stale sessions that might exist because of server crash
+
+    log.info('Running deleteStaleSessions job');
 
     co(function*() {
         let ts = Math.round(Date.now() / 1000) - conf.get('session:idle_timeout');
@@ -41,7 +43,7 @@ function deleteIdleSessions() {
             let sessionId = fields[1];
 
             let last = yield redis.run('deleteSession', userId, sessionId);
-            log.info(userId, 'Removed idle session. SessionId: ' + sessionId);
+            log.info(userId, 'Removed stale session. SessionId: ' + sessionId);
 
             if (last) {
                 yield friends.informStateChange(userId, 'logout');
