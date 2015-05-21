@@ -136,6 +136,10 @@ function *handleCommand(params) {
     let commandParams = params.command.params;
     let targetUserId;
 
+    if (!params.conversation) {
+        return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
+    }
+
     switch (command) {
         case '1on1':
             targetUserId = yield nick.getUserIdFromNick(commandParams.trim(), 'MAS');
