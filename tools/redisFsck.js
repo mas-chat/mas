@@ -88,7 +88,7 @@ function *outboxTest() {
 
         if (!score) {
             passed = false;
-            console.log('ERROR: Stale session found.');
+            console.log(`ERROR: Stale session ${userId}:${sessionId} found.`);
 
             if (autoRepair) {
                 console.log('FIXING: Removing stale session');
