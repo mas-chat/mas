@@ -141,15 +141,18 @@ exports.setup = function(server) {
 
         function *end(reason) {
             if (state !== 'disconnected') {
-                log.info(userId, `Session ${sessionId} ended. Reason: ${reason}`);
-
-                state = 'disconnected';
                 socket.disconnect();
+                state = 'disconnected';
 
-                let last = yield redis.run('deleteSession', userId, sessionId);
+                let sessionIdExplained = `${sessionId} ` || '';
+                log.info(userId, `Session ${sessionIdExplained}ended. Reason: ${reason}`);
 
-                if (last) {
-                    yield friends.informStateChange(userId, 'logout');
+                if (sessionId) {
+                    let last = yield redis.run('deleteSession', userId, sessionId);
+
+                    if (last) {
+                        yield friends.informStateChange(userId, 'logout');
+                    }
                 }
             }
         }
