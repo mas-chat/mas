@@ -16,8 +16,7 @@
 
 'use strict';
 
-const crypto = require('crypto'),
-      redis = require('../../lib/redis').createClient(),
+const redis = require('../../lib/redis').createClient(),
       nicks = require('../../models/nick');
 
 exports.getUserId = function*(nick, network) {
