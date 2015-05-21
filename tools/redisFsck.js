@@ -26,6 +26,7 @@ const readlineSync = require('readline-sync'),
 require('colors');
 
 const tests = [
+    conversationMembersHaveWindowTest,
     outboxTest,
     desktopTest,
     activeDesktopTest,
@@ -232,6 +233,56 @@ function *conversationMembersTest() {
                 console.log(
                     'FIXING: Removing invalid 1on1, conversationId: ' + conversationId + '...');
                 yield removeConversation(conversationId);
+            }
+        }
+    }
+
+    return passed;
+}
+
+function *conversationMembersHaveWindowTest() {
+    let passed = true;
+
+    let conversationMembersKeys = yield redis.keys('conversationmembers:*');
+
+    for (let conversationMemberKey of conversationMembersKeys) {
+        let members = yield redis.hgetall(conversationMemberKey);
+        let conversationId = conversationMemberKey.split(':')[1];
+        let conversationType = yield redis.hget(`conversation:${conversationId}`, 'type');
+
+        if (conversationType !== 'group') {
+            continue;
+        }
+
+        for (let userId of Object.keys(members)) {
+            if (userId.charAt(0) !== 'm') {
+                continue;
+            }
+
+            let windowId = yield redis.hget('index:windowIds', `${userId}:${conversationId}`);
+
+            if (!windowId) {
+                passed = false;
+                console.log(`ERROR: Conversation ${conversationId}, ` +
+                    `member ${userId} doesn\'t have matching window entry.`);
+
+                if (autoRepair) {
+                    console.log('FIXING: Removing user from conversation.');
+
+                    yield redis.hdel(`conversationmembers:${conversationId}`, userId);
+                    yield redis.srem(`conversationlist:${userId}`, conversationId);
+                    let removeConversation = true;
+
+                    Object.keys(members).forEach(function(member) {
+                        if (member.charAt(0) === 'm') {
+                            removeConversation = false;
+                        }
+                    });
+
+                    if (removeConversation) {
+                        yield removeConversation(conversationId);
+                    }
+                }
             }
         }
     }
