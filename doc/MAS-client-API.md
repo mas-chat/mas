@@ -109,7 +109,7 @@ the client should use the cachedUpto parameter.
 
 | Parameter  | Type      | Description                                        |
 |------------|-----------|----------------------------------------------------|
-| sessionId  | mandatory | Session identifier. Needed for image uploads and for resuming the connection after socket.io client 'disconnect' event |
+| sessionId  | mandatory | Session identifier. Client needs it currently only when uploading images. |
 | maxBacklogMsgs | mandatory | Maximum amount of messages per window the server sends to the client before 'INITDONE' notification. This is either the value the client sent in 'init' message if the server approved it or a default value if the client didn't send maxBacklogMsgs parameter or the value it send was rejected.
 
 ## Terminate event payload
