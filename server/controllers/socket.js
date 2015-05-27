@@ -81,7 +81,7 @@ exports.setup = function(server) {
                     maxBacklogMsgs: maxBacklogMsgs
                 });
 
-                log.info(userId, 'Initializing new session: ' + sessionId);
+                log.info(userId, `New session init: ${sessionId}, client: ${data.clientName}`);
                 log.info(userId, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
 
                 yield redis.run('initSession', userId, sessionId, maxBacklogMsgs, cachedUpto, ts);
