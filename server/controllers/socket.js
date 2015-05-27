@@ -40,6 +40,15 @@ exports.setup = function(server) {
 
         socket.on('init', function(data) {
             co(function*() {
+                if (sessionId) {
+                    socket.emit('terminate', {
+                        code: 'MULTIPLE_INITS',
+                        reason: 'INIT event can be send only once per socket.io connection.'
+                    });
+                    yield end('Multiple inits.');
+                    return;
+                }
+
                 let ts = Math.round(Date.now() / 1000);
                 let secret = data.secret;
 
