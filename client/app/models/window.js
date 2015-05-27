@@ -14,9 +14,9 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals isMobile */
-
 'use strict';
+
+/* globals isMobile, moment */
 
 import Ember from 'ember';
 import TitleBuilder from '../helpers/title-builder';

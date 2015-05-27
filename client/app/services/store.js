@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* globals moment */
+
 import Ember from 'ember';
 import Users from '../helpers/users';
 import Window from '../models/window';
