@@ -424,32 +424,35 @@ export default Ember.Component.extend(UploadMixin, {
                 for (let i = 0; i < images.length; i++) {
                     let image = images[i];
 
-                    if (image.get('source')) {
-                        // Image has been already loaded
-                        continue;
+                    if (!image.get('source')) {
+                        // Image hasn't been already loaded
+                        that._loadImage(image, $imgContainer, i);
                     }
-
-                    image.set('source', image.get('url'));
-
-                    let $image = $imgContainer.find('img').eq(i);
-
-                    $image.one('load error', function(e) {
-                        if (e.type === 'error') {
-                            $image.hide();
-                        }
-
-                        Ember.run(function() {
-                            Ember.Logger.info('Lazy loaded image');
-
-                            image.set('loaded', true);
-
-                            Ember.run.scheduleOnce('afterRender', this, function() {
-                                that._goToBottom(true);
-                            });
-                        });
-                    });
                 }
             }
+        });
+    },
+
+    _loadImage(image, $container, index) {
+        image.set('source', image.get('url'));
+
+        let $image = $container.find('img').eq(index);
+        let that = this;
+
+        $image.one('load error', function(e) {
+            if (e.type === 'error') {
+                $image.hide();
+            }
+
+            Ember.run(function() {
+                Ember.Logger.info('Lazy loaded image');
+
+                image.set('loaded', true);
+
+                Ember.run.scheduleOnce('afterRender', this, function() {
+                    that._goToBottom(true);
+                });
+            });
         });
     }
 });
