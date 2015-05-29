@@ -37,7 +37,7 @@
 
     {{#if isGroup}}
         <div class="window-members {{hiddenIfLogMode}} {{wideUnlessminimizedNamesList}}">
-            {{#each name in content.operatorNames}}
+            {{#each content.operatorNames as |name|}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div class="member-name window-operator {{hiddenIfMinimizedUserNames}}">
@@ -45,7 +45,7 @@
                     </div>
                 </div>
             {{/each}}
-            {{#each name in content.voiceNames}}
+            {{#each content.voiceNames as |name|}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div class="member-name window-voice {{hiddenIfMinimizedUserNames}}">
@@ -53,7 +53,7 @@
                     </div>
                 </div>
             {{/each}}
-            {{#each name in content.userNames}}
+            {{#each content.userNames as |name|}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                     <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div class="member-name window-user {{hiddenIfMinimizedUserNames}}">

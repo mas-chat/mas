@@ -2,7 +2,7 @@
     <div id="window-cursor-inner"><i class="fa fa-plus"></i></div>
 </div>
 
-{{#each window in model}}
+{{#each model as |window|}}
     {{discussion-window register="registerWindow" unregister="unregisterWindow" selectedDesktop=activeDesktop content=window action="windowAction" menuAction="menuAction" relayout="relayout" dragWindowStart="dragWindowStart"}}
 {{else}}
     <div class="flex-grow-row flex-1 flex-align-center">

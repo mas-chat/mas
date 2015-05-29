@@ -9,7 +9,7 @@
         {{~#if message.channelAction}}
             {{message.channelAction}}
         {{~else}}
-            {{~#each bodyPart in message.bodyParts}}
+            {{~#each message.bodyParts as |bodyPart|}}
                 {{~#if bodyPart.link}}
                     <a href="{{bodyPart.url}}" target="_blank">{{bodyPart.text}}</a>
                 {{~else}}
