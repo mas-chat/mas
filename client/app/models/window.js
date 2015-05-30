@@ -67,35 +67,31 @@ export default Ember.Object.extend({
     password: null,
 
     sortedMessages: Ember.computed('messages.@each', 'store.dayCounter', function() {
-        // Third parameter minimizes moment() calls
-        let addDayDividerIfNewDay = function(array, firstDayTs, firstDay, secondDay) {
-            if (firstDay !== secondDay) {
-                array.push(Message.create({
-                    body: firstDayTs.format('dddd, MMMM D, YYYY'),
-                    cat: 'day-divider',
-                    window: this,
-                    store: this.get('store')
-                }));
+        let result = this.get('messages').sortBy('ts');
+
+        let addDayDivider = (array, dateString, index) => {
+            array.splice(index, 0, Message.create({
+                body: dateString,
+                cat: 'day-divider',
+                gid: dateString, // String, non-changing and unique, good enough as primary key
+                window: this,
+                store: this.get('store')
+            }));
+        };
+
+        let dayOfNextMsg = moment().format('dddd, MMMM D');
+
+        for (let i = result.length - 1; i >= 0; i--) {
+            let ts = moment.unix(result[i].get('ts'));
+            let day = ts.format('dddd, MMMM D');
+
+            if (day !== dayOfNextMsg) {
+                addDayDivider(result, dayOfNextMsg, i + 1);
+                dayOfNextMsg = day;
             }
-        }.bind(this);
+        }
 
-        let dayOfPreviousMsg = null;
-        let result = Ember.A([]);
-
-        this.get('messages').sortBy('ts').forEach(function(item) {
-            let currentMsgTs = moment.unix(item.get('ts'));
-            let dayOfCurrentMsg = currentMsgTs.format('l');
-
-            addDayDividerIfNewDay(result, currentMsgTs, dayOfCurrentMsg, dayOfPreviousMsg);
-            dayOfPreviousMsg = dayOfCurrentMsg;
-
-            result.push(item);
-        }.bind(this));
-
-        // Add day divider as last item if the last message is from yesterday or earlier.
-        let currentMsgTs = moment();
-        let dayOfCurrentMsg = currentMsgTs.format('l');
-        addDayDividerIfNewDay(result, currentMsgTs, dayOfCurrentMsg, dayOfPreviousMsg);
+        addDayDivider(result, dayOfNextMsg, 0); // Always start the backlog with a day divider
 
         return result;
     }),
