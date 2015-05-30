@@ -39,6 +39,10 @@ export default Ember.Object.extend({
         return this.get('store.users').getNick(this.get('userId'), this.get('window.network'));
     }),
 
+    gidString: Ember.computed('gid', function() {
+        return this.get('gid').toString();
+    }),
+
     decoratedCat: Ember.computed('cat', 'nick', 'body', 'mentionedRegEx', function() {
         let cat = this.get('cat');
         let body = this.get('body');
