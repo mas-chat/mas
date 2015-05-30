@@ -21,7 +21,7 @@
 import Ember from 'ember';
 import NotificationParser from '../helpers/notification-parser';
 
-export default Ember.Object.extend({
+export default Ember.Service.extend({
     store: Ember.inject.service(),
 
     sessionId: 0,
