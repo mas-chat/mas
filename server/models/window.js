@@ -118,6 +118,7 @@ function *create(userId, conversationId) {
     let newWindow = {
         conversationId: conversationId,
         sounds: false,
+        emailAlert: false,
         titleAlert: false,
         minimizedNamesList: false,
         desktop: currentDesktop || 0,
@@ -145,6 +146,7 @@ function *create(userId, conversationId) {
         network: conversation.network,
         password: conversation.password || null,
         topic: conversation.topic,
+        emailAlert: newWindow.emailAlert,
         titleAlert: newWindow.titleAlert,
         visible: newWindow.visible,
         row: newWindow.row,

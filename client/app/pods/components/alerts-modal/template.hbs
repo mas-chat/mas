@@ -1,23 +1,21 @@
 {{#modal-dialog title=alertsTitle proceedButton="Change" cancel="closeModal" submit="changeAlerts"}}
     <form role="form">
-        <label class="setting-title">Sound alert:</label>
-        <div class="modal-radio new-row">
-            {{radio-button selection=modalSoundAlert value="enabled"}}
-            Enabled. Play sound when new message arrives.
-        </div>
-        <div class="modal-radio">
-            {{radio-button selection=modalSoundAlert value="disabled"}}
-            Disabled
+        <div class="new-row">
+            <label>
+                {{input type="checkbox" checked=modalSoundAlert}} Play sound when new message arrives.
+            </label>
         </div>
 
-        <label class="setting-title setting-title-next">Title alert:</label>
-        <div class="modal-radio new-row">
-            {{radio-button selection=modalTitleAlert value="enabled"}}
-            Enabled. Show the amount of unread messages in browser title bar.
+        <div class="new-row">
+            <label>
+                {{input type="checkbox" checked=modalTitleAlert}} Increase the amount of unread messages in browser title bar when new message arrives.
+            </label>
         </div>
-        <div class="modal-radio">
-            {{radio-button selection=modalTitleAlert value="disabled"}}
-            Disabled
+
+        <div class="new-row">
+            <label>
+                {{input type="checkbox" checked=modalEmailAlert}} Send an email when I'm not logged in and somebody mentions (@mynick) me.
+            </label>
         </div>
     </form>
 {{/modal-dialog}}

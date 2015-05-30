@@ -90,6 +90,7 @@ for i = 1, #windowIds do
         ['userId'] = oneOnOneUserId, -- added if the window is 1on1
         ['type'] = conversation.type,
         ['sounds'] = window.sounds == 'true',
+        ['emailAlert'] = window.emailAlert == 'true',
         ['titleAlert'] = window.titleAlert == 'true',
         ['minimizedNamesList'] = window.minimizedNamesList == 'true',
         ['role'] = role,

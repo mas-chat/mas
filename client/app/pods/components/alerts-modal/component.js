@@ -19,16 +19,18 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    modalSoundAlert: null,
-    modalTitleAlert: null,
+    model: null,
+    modalSoundAlert: false,
+    modalTitleAlert: false,
+    modalEmailAlert: false,
+
+    // TBD: Simplify when one-way bindings are available
 
     actions: {
         changeAlerts() {
-            let newSoundAlert = this.get('modalSoundAlert');
-            let newTitleAlert = this.get('modalTitleAlert');
-
-            this.set('model.sounds', newSoundAlert === 'enabled');
-            this.set('model.titleAlert', newTitleAlert === 'enabled');
+            this.set('model.sounds', this.get('modalSoundAlert'));
+            this.set('model.titleAlert', this.get('modalTitleAlert'));
+            this.set('model.emailAlert', this.get('modalEmailAlert'));
 
             this.sendAction('closeModal');
         },
@@ -38,16 +40,25 @@ export default Ember.Component.extend({
         }
     },
 
-    alertsDidChange: function() {
-        this._updateModalAlerts();
-    }.observes('model.sounds', 'model.titleAlert').on('init'),
+    didInitAttrs() {
+        this.set('modalSoundAlert', this.get('model.sounds'));
+        this.set('modalTitleAlert', this.get('model.titleAlert'));
+        this.set('modalEmailAlert', this.get('model.emailAlert'));
+    },
 
-    alertsTitle: Ember.computed('model.name', function() {
-        return 'Configure alerts for \'' + this.get('model.name') + '\'';
+    soundAlertDidChange: Ember.observer('model.sounds', function() {
+        this.set('modalSoundAlert', this.get('model.sounds'));
     }),
 
-    _updateModalAlerts() {
-        this.set('modalSoundAlert', this.get('model.sounds') ? 'enabled' : 'disabled');
-        this.set('modalTitleAlert', this.get('model.titleAlert') ? 'enabled' : 'disabled');
-    }
+    titleAlertDidChange: Ember.observer('model.titleAlert', function() {
+        this.set('modalTitleAlert', this.get('model.titleAlert'));
+    }),
+
+    emailAlertDidChange: Ember.observer('model.emailAlert', function() {
+        this.set('modalEmailAlert', this.get('model.emailAlert'));
+    }),
+
+    alertsTitle: Ember.computed('model.name', function() {
+        return 'Configure alerts for \'' + this.get('model.simplifiedName') + '\'';
+    })
 });

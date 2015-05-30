@@ -219,6 +219,7 @@ function *handleUpdate(params) {
         'row',
         'column',
         'sounds',
+        'emailAlert',
         'titleAlert',
         'minimizedNamesList',
         'desktop'
@@ -253,6 +254,7 @@ function *handleUpdate(params) {
             row: params.command.row,
             column: params.command.column,
             sounds: params.command.sounds,
+            emailAlert: params.command.emailAlert,
             titleAlert: params.command.titleAlert,
             minimizedNamesList: params.command.minimizedNamesList,
             desktop: params.command.desktop
