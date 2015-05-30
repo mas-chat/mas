@@ -16,21 +16,11 @@
 
 'use strict';
 
-const fs = require('fs'),
-      path = require('path'),
-      uuid = require('uid2'),
-      nodemailer = require('nodemailer'),
-      htmlToText = require('nodemailer-html-to-text').htmlToText,
-      handlebars = require('handlebars'),
+const uuid = require('uid2'),
       redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
+      mailer = require('../lib/mailer'),
       conf = require('../lib/conf');
-
-let transporter = nodemailer.createTransport();
-transporter.use('compile', htmlToText());
-
-let template = handlebars.compile(fs.readFileSync(path.join(
-    __dirname, '../emails/build/resetPassword.hbs'), 'utf8'));
 
 exports.create = function*() {
     let email = this.request.body.email;
@@ -40,17 +30,10 @@ exports.create = function*() {
         let token = uuid(30);
         let user = yield redis.hgetall(`user:${userId}`);
 
-        let body = template({
+        mailer.send('emails/build/resetPassword.hbs', {
             name: user.name,
             url: conf.get('site:url') + '/reset-password/' + token
-        });
-
-        transporter.sendMail({
-            from: 'MAS admin <' + conf.get('site:admin_email') + '>',
-            to: user.email,
-            subject: 'Password reset link',
-            html: body
-        });
+        }, user.email, 'Password reset link');
 
         yield redis.set(`passwordresettoken:${token}`, userId);
         yield redis.expire(`passwordresettoken:${token}`, 60 * 60 * 24); // 24 hours
