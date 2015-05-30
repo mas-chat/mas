@@ -117,7 +117,7 @@ function *create(userId, conversationId) {
 
     let newWindow = {
         conversationId: conversationId,
-        sounds: false,
+        soundAlert: false,
         emailAlert: false,
         titleAlert: false,
         minimizedNamesList: false,
@@ -151,7 +151,7 @@ function *create(userId, conversationId) {
         visible: newWindow.visible,
         row: newWindow.row,
         column: newWindow.column,
-        sounds: newWindow.sounds,
+        soundAlert: newWindow.soundAlert,
         minimizedNamesList: newWindow.minimizedNamesList,
         desktop: newWindow.desktop,
         role: 'u' // Everybody starts as a normal user

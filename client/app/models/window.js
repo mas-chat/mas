@@ -62,7 +62,7 @@ export default Ember.Object.extend({
 
     titleAlert: false,
     emailAlert: false,
-    sounds: false,
+    soundAlert: false,
 
     minimizedNamesList: false,
 
@@ -186,14 +186,14 @@ export default Ember.Object.extend({
     }),
 
     syncServerAlerts: Ember.observer(
-        'emailAlert', 'titleAlert', 'sounds', 'minimizedNamesList', function() {
+        'emailAlert', 'titleAlert', 'soundAlert', 'minimizedNamesList', function() {
         this.get('socket').send({
             id: 'UPDATE',
             windowId: this.get('windowId'),
-            sounds: this.get('sounds'),
+            minimizedNamesList: this.get('minimizedNamesList'),
+            soundAlert: this.get('soundAlert'),
             emailAlert: this.get('emailAlert'),
-            titleAlert: this.get('titleAlert'),
-            minimizedNamesList: this.get('minimizedNamesList')
+            titleAlert: this.get('titleAlert')
         });
     }),
 

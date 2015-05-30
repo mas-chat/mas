@@ -28,7 +28,7 @@ export default Ember.Component.extend({
 
     actions: {
         changeAlerts() {
-            this.set('model.sounds', this.get('modalSoundAlert'));
+            this.set('model.soundAlert', this.get('modalSoundAlert'));
             this.set('model.titleAlert', this.get('modalTitleAlert'));
             this.set('model.emailAlert', this.get('modalEmailAlert'));
 
@@ -41,13 +41,13 @@ export default Ember.Component.extend({
     },
 
     didInitAttrs() {
-        this.set('modalSoundAlert', this.get('model.sounds'));
+        this.set('modalSoundAlert', this.get('model.soundAlert'));
         this.set('modalTitleAlert', this.get('model.titleAlert'));
         this.set('modalEmailAlert', this.get('model.emailAlert'));
     },
 
-    soundAlertDidChange: Ember.observer('model.sounds', function() {
-        this.set('modalSoundAlert', this.get('model.sounds'));
+    soundAlertDidChange: Ember.observer('model.soundAlert', function() {
+        this.set('modalSoundAlert', this.get('model.soundAlert'));
     }),
 
     titleAlertDidChange: Ember.observer('model.titleAlert', function() {

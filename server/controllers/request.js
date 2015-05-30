@@ -218,8 +218,8 @@ function *handleUpdate(params) {
         'visible',
         'row',
         'column',
-        'sounds',
         'emailAlert',
+        'soundAlert',
         'titleAlert',
         'minimizedNamesList',
         'desktop'
@@ -253,7 +253,7 @@ function *handleUpdate(params) {
             visible: params.command.visible,
             row: params.command.row,
             column: params.command.column,
-            sounds: params.command.sounds,
+            soundAlert: params.command.soundAlert,
             emailAlert: params.command.emailAlert,
             titleAlert: params.command.titleAlert,
             minimizedNamesList: params.command.minimizedNamesList,

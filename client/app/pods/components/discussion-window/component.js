@@ -138,7 +138,7 @@ export default Ember.Component.extend(UploadMixin, {
             }
 
             // Sound notification
-            if (this.get('content.sounds')) {
+            if (this.get('content.soundAlert')) {
                 play();
             }
         }
