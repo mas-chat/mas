@@ -1,0 +1,55 @@
+{{#each messages key="gidString" as |message|}}
+    <div class="line {{message.decoratedCat}}">
+        <div class="timestamp">
+            {{message.decoratedTs}}
+        </div>
+        <div class="body">
+            <span class="nick">
+                {{message.nick~}}
+            </span>
+            {{~#if message.channelAction}}
+                {{message.channelAction}}
+            {{~else}}
+                {{~#each message.bodyParts as |bodyPart|}}
+                    {{~#if bodyPart.link}}
+                        <a href="{{bodyPart.url}}" target="_blank">{{bodyPart.text}}</a>
+                    {{~else}}
+                        {{#if bodyPart.emoji}}
+                            <img align="absmiddle" alt=":{{bodyPart.emoji}}:" class="emoji" src="/app/assets/images/emoji/{{bodyPart.emoji}}.png" title=":{{bodyPart.emoji}}:" />
+                        {{~else}}
+                            {{~#if bodyPart.mention}}
+                                <span class="nick-mention">{{bodyPart.text}}</span>
+                            {{~else}}
+                                {{bodyPart.text}}
+                            {{~/if}}
+                        {{~/if}}
+                    {{~/if}}
+                {{~/each}}
+                {{~#if message.hasMedia}}
+                    <ul class="user-media" data-gid="{{message.gid}}" data-has-images="{{message.hasImages}}">
+                        {{#if message.hasYoutubeVideo}}
+                            <li>
+                                <iframe class="youtube-preview" src="https://www.youtube.com/embed/{{message.videoId}}?showinfo=0&autohide=1" allowfullscreen frameborder="0"></iframe>
+                            </li>
+                        {{/if}}
+                        {{#unless message.hideImages}}
+                            {{#each message.images as |image|}}
+                                <li>
+                                    <a href="{{image.url}}" class="user-img">
+                                        <div class="user-img-container">
+                                            <img class="{{if image.loaded '' 'loader loader-small-dark'}}" src="{{image.source}}">
+                                            <span {{action "hideImages" message on="mouseDown" bubbles=false}} class="user-img-close fa-stack">
+                                                <i class="fa fa-circle fa-stack-2x"></i>
+                                                <i class="fa fa-times fa-stack-1x fa-inverse"></i>
+                                            </span>
+                                        </div>
+                                    </a>
+                                </li>
+                            {{/each}}
+                        {{/unless}}
+                    </ul>
+                {{~/if}}
+            {{~/if}}
+        </div>
+    </div>
+{{/each}}

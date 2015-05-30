@@ -18,9 +18,9 @@
 </div>
 
 <div class="flex-1 logs-channel window-messages">
-    {{#each window.logMessages as |message|}}
-        {{partial "message"}}
-    {{else}}
+    {{message-list messages=window.logMessages}}
+
+    {{#unless window.logMessages}}
         <div class='logs-no-messages flex-1'>
             <div>
                 {{#if loading}}
@@ -30,7 +30,7 @@
                 {{/if}}
             </div>
         </div>
-    {{/each}}
+    {{/unless}}
     <div>
         {{#if tooManyMessages}}
             Warning: Rest of the messages for this day have been skipped.

@@ -21,9 +21,7 @@
     {{/if}}
 
     <div class="window-messages flex-1 {{hiddenIfLogMode}}">
-        {{#each content.sortedMessages as |message|}}
-            {{partial "message"}}
-        {{/each}}
+        {{message-list messages=content.sortedMessages}}
         <div class="window-upload">
             <div class="js-upload">
                 <div class="progress progress-success">
