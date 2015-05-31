@@ -487,12 +487,14 @@ Conversation.prototype._notifyByEmailIfMentioned = function*(message) {
         let emailAlertSetting = yield redis.hget(`window:${userId}:${windowId}`, 'emailAlert');
 
         if (emailAlertSetting === 'true') {
+            let nickName = yield nick.getCurrentNick(message.userId, this.network);
+
             mailer.send('emails/build/mentioned.hbs', {
                 name: user.name,
                 message: message.body,
                 window: this.name,
-                nick: message.nick
-            }, user.email, `${message.nick} mentiond you on MeetAndSpeak`);
+                nick: nickName
+            }, user.email, `${nickName} mentiond you on MeetAndSpeak`);
         }
     }
 };
