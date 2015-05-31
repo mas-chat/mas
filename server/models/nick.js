@@ -18,6 +18,11 @@
 
 const redis = require('../lib/redis').createClient();
 
+// User's nick in MAS network is stored 'nick' property in user:<userId> hash. User's nicks in
+// other networks are stored in 'currentnick' property in networks:<userId>:<network> hash.
+// These two locations have their own indices. In the future, nick in MAS network could be
+// be stored also in networks:<userId>:MAS?
+
 exports.updateCurrentNick = function*(userId, network, nick) {
     yield removeCurrentNickFromIndex(userId, network);
 
@@ -47,12 +52,12 @@ exports.getUserIdFromNick = function*(nick, network) {
 };
 
 exports.getCurrentNick = function*(userId, network) {
-    return yield getCurrentNick(userId, network);
+    if (network === 'MAS') {
+        return yield redis.hget(`user:${userId}`, 'nick');
+    } else {
+        return yield redis.hget(`networks:${userId}:${network}`, 'currentnick');
+    }
 };
-
-function *getCurrentNick(userId, network) {
-    return yield redis.hget(`networks:${userId}:${network}`, 'currentnick');
-}
 
 function *removeCurrentNickFromIndex(userId, network) {
     let oldNick = yield redis.hget(`networks:${userId}:${network}`, 'currentnick');
