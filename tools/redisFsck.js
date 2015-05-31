@@ -43,7 +43,8 @@ const tests = [
     ircChannelSubscriptionsTest,
     friendsExistTest,
     conversationIndexCaseTest,
-    migrateSoundAdlertSetting
+//  migrateSoundAdlertSetting,
+//  migrateForceEmaillertSetting
 ];
 
 let autoRepair = false;
@@ -651,6 +652,8 @@ function *removeConversation(conversationId) {
     yield redis.hdel('index:conversation', key);
 }
 
+// Database migrations
+
 function *migrateSoundAdlertSetting() {
     let passed = true;
     let windowKeys = yield redis.keys('window:*');
@@ -661,6 +664,22 @@ function *migrateSoundAdlertSetting() {
         if (soundAlertSetting) {
             yield redis.hset(entry, 'soundAlert', soundAlertSetting);
             yield redis.hdel(entry, 'sounds');
+        }
+    }
+
+    return passed;
+}
+
+function *migrateForceEmaillertSetting() {
+    let passed = true;
+    let windowKeys = yield redis.keys('window:*');
+
+    for (let entry of windowKeys) {
+        let conversationId = yield redis.hget(entry, 'conversationId');
+        let type = yield redis.hget(`conversation:${conversationId}`, 'type');
+
+        if (type === 'group') {
+            yield redis.hset(entry, 'emailAlert', true);
         }
     }
 
