@@ -118,7 +118,7 @@ function *create(userId, conversationId) {
     let newWindow = {
         conversationId: conversationId,
         soundAlert: false,
-        emailAlert: false,
+        emailAlert: true,
         titleAlert: false,
         minimizedNamesList: false,
         desktop: currentDesktop || 0,

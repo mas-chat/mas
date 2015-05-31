@@ -22,7 +22,8 @@ const fs = require('fs'),
       mailgun = require('nodemailer-mailgun-transport'),
       htmlToText = require('nodemailer-html-to-text').htmlToText,
       handlebars = require('handlebars'),
-      conf = require('../lib/conf');
+      conf = require('../lib/conf'),
+      log = require('../lib/log');
 
 let templateCache = {};
 let transporter;
@@ -37,6 +38,8 @@ exports.send = function(templateName, data, address, subject) {
         template = handlebars.compile(fs.readFileSync(templatePath, 'utf8'));
         templateCache[templatePath] = template;
     }
+
+    log.info(`Sending email to: ${address}`);
 
     transporter.sendMail({
         from: 'MAS admin <' + conf.get('site:admin_email') + '>',

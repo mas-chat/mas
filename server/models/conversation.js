@@ -21,9 +21,11 @@
 const assert = require('assert'),
       redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
+      mailer = require('../lib/mailer'),
       search = require('../lib/search'),
       notification = require('../lib/notification'),
-      window = require('./window');
+      window = require('./window'),
+      nick = require('./nick');
 
 let MSG_BUFFER_SIZE = 200; // TBD: This should come from session:max_backlog setting
 
@@ -241,6 +243,8 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
     msg.gid = yield redis.incr('nextGlobalMsgId');
     msg.ts = Math.round(Date.now() / 1000);
 
+    yield this._notifyByEmailIfMentioned(msg);
+
     yield redis.lpush(`conversationmsgs:${this.conversationId}`, JSON.stringify(msg));
     yield redis.ltrim(`conversationmsgs:${this.conversationId}`, 0, MSG_BUFFER_SIZE - 1);
 
@@ -452,6 +456,45 @@ Conversation.prototype._setMember = function*(userId, role) {
     }
 
     return newField;
+};
+
+Conversation.prototype._notifyByEmailIfMentioned = function*(message) {
+    let mentions = message.body.match(/(?:^| )@\S+(?=$| )/g);
+
+    if (this.type !== 'group' || !mentions) {
+        return;
+    }
+
+    for (let mention of mentions) {
+        let userId = yield nick.getUserIdFromNick(mention.substring(1), this.network);
+
+        if (!userId) {
+            continue;
+        }
+
+        let user = yield redis.hgetall(`user:${userId}`);
+
+        if (parseInt(user.lastlogout) === 0) {
+            continue; // Mentioned user is online
+        }
+
+        let windowId = yield window.findByConversationId(userId, this.conversationId);
+
+        if (!windowId) {
+            continue; // Mentioned user is not on this group
+        }
+
+        let emailAlertSetting = yield redis.hget(`window:${userId}:${windowId}`, 'emailAlert');
+
+        if (emailAlertSetting === 'true') {
+            mailer.send('emails/build/mentioned.hbs', {
+                name: user.name,
+                message: message.body,
+                window: this.name,
+                nick: message.nick
+            }, user.email, `${message.nick} mentiond you on MeetAndSpeak`);
+        }
+    }
 };
 
 function *create(options) {
