@@ -262,8 +262,13 @@ a {
   }
 }
 
+/* MAS customizations */
+
 .mentioned {
     background-color: #CCE4F8;
 }
 
-/*# sourceMappingURL=styles.css.map */
+.content-block.small {
+    font-size: 10px;
+    color: #aaa;
+}
