@@ -52,6 +52,8 @@ demo_user_email=whogets@fakemessages.com
 enabled=false
 api_key=key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 domain=mg.example.com
+from=support@example.com
+sender=support@mg.example.com
 
 [log]
 enabled=true

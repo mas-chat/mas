@@ -27,6 +27,8 @@ const fs = require('fs'),
 
 let templateCache = {};
 let transporter;
+let fromAddress;
+let senderAddress;
 
 setupTransporter();
 
@@ -42,7 +44,8 @@ exports.send = function(templateName, data, address, subject) {
     log.info(`Sending email to: ${address}`);
 
     transporter.sendMail({
-        from: 'MAS admin <' + conf.get('site:admin_email') + '>',
+        from: 'MAS admin <' + fromAddress + '>',
+        sender: senderAddress,
         to: address,
         subject: subject,
         html: template(data)
@@ -59,8 +62,12 @@ function setupTransporter() {
         };
 
         transporter = nodemailer.createTransport(mailgun(mailgunAuth));
+        fromAddress = conf.get('mailgun:from');
+        senderAddress = conf.get('mailgun:sender');
     } else {
         transporter = nodemailer.createTransport();
+        fromAddress = conf.get('site:admin_email');
+        senderAddress = fromAddress;
     }
 
     transporter.use('compile', htmlToText());
