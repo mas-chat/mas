@@ -1,14 +1,11 @@
 {{#modal-dialog title=passwordTitle proceedButton="Change" cancel="closeModal" submit="changePassword"}}
     <span class="error-text">{{errorMsg}}</span>
     <form role="form">
-        <label class="modal-radio">
-            {{radio-button selection=modalPasswordStatus value="enabled"}}
-            Enabled
-        </label>
-        <label class="modal-radio">
-            {{radio-button selection=modalPasswordStatus value="disabled"}}
-            Disabled
-        </label>
+        <div class="new-row">
+            <label>
+                {{input type="checkbox" checked=modalPasswordEnabled}} Password enabled.
+            </label>
+        </div>
         <div class="form-group">
             <label for="password">Password</label>
             {{input class="form-control" elementId="password" value=modalPassword disabled=modalPasswordDisabled}}

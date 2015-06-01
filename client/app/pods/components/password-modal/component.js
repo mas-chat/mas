@@ -21,29 +21,33 @@ import Ember from 'ember';
 export default Ember.Component.extend({
     model: null,
     modalPassword: null,
-    modalPasswordStatus: null,
+    modalPasswordEnabled: false,
     errorMsg: '',
 
     socket: Ember.inject.service(),
 
-    modalPasswordDisabled: Ember.computed('modalPasswordStatus', function() {
-        return this.get('modalPasswordStatus') !== 'enabled';
+    modalPasswordDisabled: Ember.computed('modalPasswordEnabled', function() {
+        return !this.get('modalPasswordEnabled');
     }),
 
     passwordTitle: Ember.computed('model.name', function() {
         return 'Change Password for \'' + this.get('model.name') + '\'';
     }),
 
+    didInitAttrs() {
+        this._updateModalPassword();
+    },
+
     passwordDidChange: function() {
         this._updateModalPassword();
-    }.observes('model.password').on('init'),
+    }.observes('model.password'),
 
     actions: {
         changePassword() {
             // User has clicked 'OK', send the new password to server
             let newPassword = '';
 
-            if (this.get('modalPasswordStatus') === 'enabled') {
+            if (this.get('modalPasswordEnabled')) {
                 newPassword = this.get('modalPassword');
             }
 
@@ -69,6 +73,6 @@ export default Ember.Component.extend({
         let password = this.get('model.password');
 
         this.set('modalPassword', password);
-        this.set('modalPasswordStatus', password === '' ? 'disabled' : 'enabled');
+        this.set('modalPasswordEnabled', password !== '');
     }
 });
