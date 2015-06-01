@@ -1,5 +1,4 @@
 {
-  "name": "mas",
   "homepage": "https://github.com/ilkkao/mas",
   "authors": [
     "Ilkka Oksanen <iao@iki.fi>"
@@ -8,15 +7,16 @@
     "chat"
   ],
   "license": "Apache",
+  "name": "mas",
   "dependencies": {
     "ember": "canary",
-    "ember-resolver": "~0.1.15",
-    "loader.js": "ember-cli/loader.js#3.2.0",
     "ember-cli-shims": "ember-cli/ember-cli-shims#0.0.3",
     "ember-cli-test-loader": "ember-cli-test-loader#0.1.3",
     "ember-load-initializers": "ember-cli/ember-load-initializers#0.1.4",
-    "ember-qunit": "0.3.2",
+    "ember-qunit": "0.3.3",
     "ember-qunit-notifications": "0.0.7",
+    "ember-resolver": "~0.1.15",
+    "loader.js": "ember-cli/loader.js#3.2.0",
     "qunit": "~1.17.1",
     "jquery": "~2.1.4",
     "momentjs": "~2.10.0",
