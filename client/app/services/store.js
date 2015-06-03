@@ -99,6 +99,7 @@ export default Ember.Service.extend({
         let object = parent.get(type + 's').findBy(primaryKey, data[primaryKey]);
 
         if (object) {
+            delete data[primaryKey];
             object.setProperties(data);
         } else {
             object = this._insertObject(type, data, parent);
