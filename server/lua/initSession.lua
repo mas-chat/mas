@@ -94,7 +94,6 @@ for i = 1, #windowIds do
         ['titleAlert'] = window.titleAlert == 'true',
         ['minimizedNamesList'] = window.minimizedNamesList == 'true',
         ['role'] = role,
-        ['visible'] = window.visible == 'true',
         ['row'] = tonumber(window.row),
         ['column'] = tonumber(window.column),
         ['password'] = conversation.password,

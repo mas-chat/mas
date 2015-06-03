@@ -122,7 +122,6 @@ function *create(userId, conversationId) {
         titleAlert: false,
         minimizedNamesList: false,
         desktop: currentDesktop || 0,
-        visible: true,
         row: 0,
         column: 0
     };
@@ -148,7 +147,6 @@ function *create(userId, conversationId) {
         topic: conversation.topic,
         emailAlert: newWindow.emailAlert,
         titleAlert: newWindow.titleAlert,
-        visible: newWindow.visible,
         row: newWindow.row,
         column: newWindow.column,
         soundAlert: newWindow.soundAlert,

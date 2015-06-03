@@ -56,7 +56,6 @@ MAS Redis structures
    emailAlert (bool)
    soundAlert (bool)
    titleAlert (bool)
-   visible (bool)
    minimizedNamesList (bool)
    desktop (int)
    row (int)

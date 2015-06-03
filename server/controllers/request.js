@@ -215,7 +215,6 @@ function *handleClose(params) {
 
 function *handleUpdate(params) {
     let accepted = [
-        'visible',
         'row',
         'column',
         'emailAlert',
@@ -250,7 +249,6 @@ function *handleUpdate(params) {
         yield notification.broadcast(params.userId, {
             id: 'UPDATE',
             windowId: params.windowId,
-            visible: params.command.visible,
             row: params.command.row,
             column: params.command.column,
             soundAlert: params.command.soundAlert,

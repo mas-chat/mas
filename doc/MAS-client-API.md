@@ -225,7 +225,6 @@ Create new window. Window identifier is either ```userId``` or ```name```.
   "soundAlert": true,
   "titleAlert": false,
   "topic": "We meet tomorrow at 3PM",
-  "visible": true,
   "role": "@",
   "minimizedNamesList": false,
   "desktop": 1,
@@ -438,7 +437,7 @@ Update existing parameter for existing window.
 
 Updates a value initially received in ```CREATE``` command.
 
-Attributes in ```CREATE``` command that can be update are: ```password```, ```topic```, ```visible```, ```row```, ```column```, ```soundAlert```, ```role```, ```minimizedNamesList``, ```desktop```, ```emailAlert```, and ```titleAlert```.
+Attributes in ```CREATE``` command that can be update are: ```password```, ```topic```, ```row```, ```column```, ```soundAlert```, ```role```, ```minimizedNamesList``, ```desktop```, ```emailAlert```, and ```titleAlert```.
 
 ### FRIENDSCONFIRM
 

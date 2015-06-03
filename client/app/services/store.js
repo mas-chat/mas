@@ -163,7 +163,6 @@ export default Ember.Service.extend({
                 'row',
                 'column',
                 'desktop',
-                'visible',
                 'newMessagesCount'
             ]);
 

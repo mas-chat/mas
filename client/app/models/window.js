@@ -50,7 +50,6 @@ export default Ember.Object.extend({
     column: 0,
     desktop: 0,
 
-    visible: true,
     messages: null,
     logMessages: null,
 
