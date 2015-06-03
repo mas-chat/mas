@@ -43,6 +43,10 @@ export default Ember.Component.extend(UploadMixin, {
     $messagePanel: null,
     $messagesEndAnchor: null,
     logModeEnabled: false,
+    scrollHandlersAdded: false,
+
+    scrollTimer: null,
+    lazyImageTimer: null,
 
     selectedDesktop: 0,
 
@@ -204,8 +208,9 @@ export default Ember.Component.extend(UploadMixin, {
             visibility: 'visible',
             complete: Ember.run.bind(this, function() {
                 this.set('animating', false);
-                this._goToBottom(false); // Make sure window shows the latest messages
-                this._showImages();
+                this._goToBottom(false, () => {
+                    this._showImages(); // Make sure window shows the images after scrolling
+                });
             })
         });
     },
@@ -312,14 +317,6 @@ export default Ember.Component.extend(UploadMixin, {
 
         this.sendAction('relayout', { animate: false });
 
-        this._addScrollHandler();
-
-        // TBD: Can timer removed? Do this after first visible true and gotobottom call?
-        Ember.run.later(this, function() {
-            this._showImages();
-            this._addLazyImageScrollHandler();
-        }, 4000);
-
         this.get('content.messages').addArrayObserver(this);
     },
 
@@ -336,15 +333,20 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     willDestroyElement() {
+        this.$messagesEndAnchor.velocity('stop');
         this.$().velocity('stop');
+
         this.sendAction('unregister', this);
+
+        Ember.run.cancel(this.scrollTimer);
+        Ember.run.cancel(this.lazyImageTimer);
 
         Ember.run.scheduleOnce('afterRender', this, function() {
             this.sendAction('relayout', { animate: true });
         });
     },
 
-    _goToBottom(animate) {
+    _goToBottom(animate, callback) {
         if (this.get('scrollLock') || !this.$messagesEndAnchor) {
             return;
         }
@@ -360,6 +362,17 @@ export default Ember.Component.extend(UploadMixin, {
             duration: duration,
             easing: 'spring',
             offset: -1 * this.$messagePanel.innerHeight() + 5, // 5px is padding
+            complete: Ember.run.bind(this, function() {
+                if (callback) {
+                    callback();
+                }
+
+                if (!this.scrollHandlersAdded) {
+                    this._addScrollHandler();
+                    this._addLazyImageScrollHandler();
+                    this.scrollHandlersAdded = true;
+                }
+            })
         });
     },
 
@@ -388,13 +401,13 @@ export default Ember.Component.extend(UploadMixin, {
 
         this.$messagePanel.on('scroll', () => {
             // Delay nust be longer than goToBottom animation
-            Ember.run.throttle(this, handler, 250, false);
+            this.scrollTimer = Ember.run.throttle(this, handler, 250, false);
         });
     },
 
     _addLazyImageScrollHandler() {
         this.$messagePanel.on('scroll', () => {
-            Ember.run.throttle(this, this._showImages, 250, true);
+            this.lazyImageTimer = Ember.run.throttle(this, this._showImages, 250, true);
         });
     },
 
