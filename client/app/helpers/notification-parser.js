@@ -112,12 +112,16 @@ export default Ember.Object.extend({
             }
         }.bind(this));
 
-        // Remove possible deleted windows
+        let deletedWindows = [];
+
+        // Remove possible deleted windows.
         for (let windowObject of this.get('store.windows')) {
             if (windowObject.get('generation') !== this.get('socket.sessionId')) {
-                this.get('store.windows').removeObject(windowObject);
+                deletedWindows.push(windowObject);
             }
         }
+
+        this.get('store.windows').removeObjects(deletedWindows);
 
         this.set('store.windowListComplete', true);
         this.set('initDoneReceived', true);
