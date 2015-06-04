@@ -67,10 +67,6 @@ export default Ember.Object.extend({
 
     password: null,
 
-    windowIdString: Ember.computed('windowId', function() {
-        return this.get('windowId').toString();
-    }),
-
     sortedMessages: Ember.computed('messages.@each', 'store.dayCounter', function() {
         let result = this.get('messages').sortBy('ts');
 
