@@ -44,6 +44,7 @@ export default Ember.Component.extend(UploadMixin, {
     $messagesEndAnchor: null,
     logModeEnabled: false,
     scrollHandlersAdded: false,
+    elementInserted: false,
 
     scrollTimer: null,
     lazyImageTimer: null,
@@ -93,7 +94,9 @@ export default Ember.Component.extend(UploadMixin, {
     }),
 
     windowChanged: Ember.observer('row', 'column', 'desktop', function() {
-        this.sendAction('relayout', { animate: true });
+        if (this.get('elementInserted')) {
+            this.sendAction('relayout', { animate: true });
+        }
     }),
 
     visibilityChanged: Ember.observer('visible', function() {
@@ -101,7 +104,9 @@ export default Ember.Component.extend(UploadMixin, {
             this.set('content.newMessagesCount', 0);
         }
 
-        this.sendAction('relayout', { animate: false });
+        if (this.get('elementInserted')) {
+            this.sendAction('relayout', { animate: false });
+        }
     }),
 
     nickCompletion: Ember.observer('content.userNames.@each', 'content.voiceNames.@each',
@@ -228,6 +233,7 @@ export default Ember.Component.extend(UploadMixin, {
         let that = this;
 
         this.sendAction('register', this);
+        this.set('elementInserted', true);
 
         this.$messagePanel = this.$('.window-messages');
         this.$messagesEndAnchor = this.$('.window-messages-end');
