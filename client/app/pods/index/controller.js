@@ -21,12 +21,15 @@
 import Ember from 'ember';
 import SendMsgMixin from '../../mixins/sendMsg';
 
-export default Ember.ArrayController.extend(SendMsgMixin, {
-    friends: null,
-    activeDraggedWindow: false,
-
+export default Ember.Controller.extend(SendMsgMixin, {
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
+
+    model: Ember.computed.alias('store.windows'),
+    friends: Ember.computed.alias('store.friends'),
+    userId: Ember.computed.alias('store.userId'),
+
+    activeDraggedWindow: false,
 
     activeDesktop: Ember.computed.alias('store.activeDesktop'),
 
