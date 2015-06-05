@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* global $, _, moment */
+/* global $, moment */
 
 import Ember from 'ember';
 import SendMsgMixin from '../../mixins/sendMsg';
@@ -96,7 +96,7 @@ export default Ember.ArrayController.extend(SendMsgMixin, {
         },
 
         windowAction(command, window, value) {
-            this['_handle' + _.capitalize(command)](window, value);
+            this[`_handle${command.capitalize()}`](window, value);
         },
 
         menuAction(command, window) {
