@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals _, isMobile */
+/* globals isMobile */
 
 import Ember from 'ember';
 
@@ -24,41 +24,27 @@ export default Ember.Object.extend({
     store: null,
     socket: null,
 
-    initDoneReceived: false,
-    initBuffer: null,
     mobileDesktop: 0,
 
-    reset() {
-        this.set('initBuffer', Ember.A([]));
-        this.set('initDoneReceived', false);
-        this.set('mobileDesktop', 0);
-    },
-
     process(notification) {
-        if (!this.get('initDoneReceived') && notification.id !== 'INITDONE') {
-            this.initBuffer.push(notification);
-        } else {
-            this._handleNotification(notification);
-        }
-    },
+        let type = notification.id;
+        delete notification.id;
 
-    _handleNotification(notification) {
-        let name = notification.id;
         let targetWindow = null;
         let windowId = notification.windowId;
 
-        delete notification.id;
-
-        Ember.Logger.info('← NTF: ' + name);
+        if (type !== 'MSG') {
+            Ember.Logger.info(`← NTF: ${type}`);
+        }
 
         if (typeof windowId === 'number') {
             targetWindow = this.get('store.windows').findBy('windowId', windowId);
         }
 
-        let funcName = '_handle' + name.charAt(0) + name.substring(1).toLowerCase();
+        let funcName = '_handle' + type.charAt(0) + type.substring(1).toLowerCase();
 
         if (!this[funcName]) {
-            Ember.Logger.warn('Unknown notification received: ' + name);
+            Ember.Logger.warn('Unknown notification received: ' + type);
         } else {
             this[funcName](notification, targetWindow);
         }
@@ -89,32 +75,9 @@ export default Ember.Object.extend({
     },
 
     _handleInitdone() {
-        // An optimization to handle MSG notifications separately in batches
-        let addTexts = _.remove(this.initBuffer, function(notification) {
-            return notification.id === 'MSG';
-        });
-
-        this.initBuffer.forEach(function(notification) {
-            this._handleNotification(notification);
-        }.bind(this));
-
-        let grouped = _.groupBy(addTexts, function(notification) {
-            return notification.windowId;
-        });
-
-        Object.keys(grouped).forEach(function(windowId) {
-            windowId = parseInt(windowId);
-            let windowObject = this.get('store.windows').findBy('windowId', windowId);
-
-            for (let notification of grouped[windowId]) {
-                delete notification.windowId;
-                this.get('store').upsertObject('message', notification, windowObject);
-            }
-        }.bind(this));
-
+        // Remove possible deleted windows.
         let deletedWindows = [];
 
-        // Remove possible deleted windows.
         for (let windowObject of this.get('store.windows')) {
             if (windowObject.get('generation') !== this.get('socket.sessionId')) {
                 deletedWindows.push(windowObject);
@@ -124,7 +87,6 @@ export default Ember.Object.extend({
         this.get('store.windows').removeObjects(deletedWindows);
 
         this.set('store.windowListComplete', true);
-        this.set('initDoneReceived', true);
     },
 
     _handleUsers(data) {

@@ -59,8 +59,6 @@ export default Ember.Service.extend({
             socket: this,
             store: this.get('store')
         });
-
-        this._notificationParser.reset();
     },
 
     start(cachedUpTo) {
@@ -84,7 +82,7 @@ export default Ember.Service.extend({
             this._disconnectedQueue.clear();
         }));
 
-        this.socket.on('terminate', Ember.run.bind(this, function(data) {
+        this.socket.on('terminate', Ember.run.bind(this, function() {
             this._logout();
         }));
 
@@ -111,7 +109,6 @@ export default Ember.Service.extend({
                 endCallback.call(this.get('_networkErrorCallbackCtx'));
             }
 
-            this._notificationParser.reset();
             this._emitInit(userId, secret);
         }));
     },
