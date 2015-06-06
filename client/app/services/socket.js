@@ -63,13 +63,13 @@ export default Ember.Service.extend({
         this._notificationParser.reset();
     },
 
-    start() {
+    start(cachedUpTo) {
         let userId = this.get('store.userId');
         let secret = this.get('secret');
         let socket = io.connect();
 
         this.set('socket', socket);
-        this._emitInit(userId, secret);
+        this._emitInit(userId, secret, cachedUpTo);
 
         socket.on('initok', Ember.run.bind(this, function(data) {
             this.set('_connected', true);
@@ -135,14 +135,15 @@ export default Ember.Service.extend({
         this.set('_networkErrorCallbackCtx', ctx);
     },
 
-    _emitInit(userId, secret) {
+    _emitInit(userId, secret, cachedUpTo) {
         this.socket.emit('init', {
             clientName: 'web',
             clientOS: navigator.platform,
             userId: userId,
             secret: secret,
             version: '1.0',
-            maxBacklogMsgs: isMobile.any ? 80 : 160
+            maxBacklogMsgs: isMobile.any ? 80 : 160,
+            cachedUpTo: cachedUpTo || 0
         });
     },
 
