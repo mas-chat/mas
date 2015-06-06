@@ -362,10 +362,11 @@ export default Ember.Component.extend(UploadMixin, {
 
         let duration = animate ? 200 : 0;
 
-        // There's an odd bug(?) in Chrome. Offset below can't be just some large enough number
-        // to make sure we reach the bottom every time. If it is, Chrome scrolls beyond end of the
-        // content. Spent several days figuring out what was going on. Problem is not related to
-        // velocity.js. It happens with jQuery.scrollTop() as well.
+        // There's an odd bug(?) in Chrome where extra empty space is added to the end of message
+        // backlog. User can scroll beyond end of backlog. I currently suspect it happens CSS
+        // rotation (load image spinner) and scrolling happen at the same time. Problem is not
+        // related to velocity.js. It happens with jQuery.scrollTop() as well.
+
         this.$messagesEndAnchor.velocity('stop').velocity('scroll', {
             container: this.$messagePanel,
             duration: duration,
