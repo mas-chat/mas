@@ -20,18 +20,16 @@
 
 import Ember from 'ember';
 
-let SafeString = Ember.Handlebars.SafeString;
-
 Ember.Handlebars.helper('timeSince', function(online, timeStamp) {
-    let res;
+    let dateString;
 
     if (online) {
-        res = '';
+        dateString = '';
     } else if (timeStamp === -1) {
-        res = 'never';
+        dateString = 'never';
     } else {
-        res = moment.unix(timeStamp).fromNow(true);
+        dateString = moment.unix(timeStamp).fromNow(true);
     }
 
-    return new SafeString(res);
+    return dateString;
 });
