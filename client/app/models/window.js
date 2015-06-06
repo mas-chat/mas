@@ -186,14 +186,16 @@ export default Ember.Object.extend({
 
     syncServerAlerts: Ember.observer(
         'emailAlert', 'titleAlert', 'soundAlert', 'minimizedNamesList', function() {
-        this.get('socket').send({
-            id: 'UPDATE',
-            windowId: this.get('windowId'),
-            minimizedNamesList: this.get('minimizedNamesList'),
-            soundAlert: this.get('soundAlert'),
-            emailAlert: this.get('emailAlert'),
-            titleAlert: this.get('titleAlert')
-        });
+        if (!window.disableUpdate) {
+            this.get('socket').send({
+                id: 'UPDATE',
+                windowId: this.get('windowId'),
+                minimizedNamesList: this.get('minimizedNamesList'),
+                soundAlert: this.get('soundAlert'),
+                emailAlert: this.get('emailAlert'),
+                titleAlert: this.get('titleAlert')
+            });
+        }
     }),
 
     _mapUserIdsToNicks(role) {
