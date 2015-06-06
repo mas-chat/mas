@@ -28,10 +28,9 @@ export default Ember.Controller.extend(SendMsgMixin, {
     model: Ember.computed.alias('store.windows'),
     friends: Ember.computed.alias('store.friends'),
     userId: Ember.computed.alias('store.userId'),
+    activeDesktop: Ember.computed.alias('store.activeDesktop'),
 
     activeDraggedWindow: false,
-
-    activeDesktop: Ember.computed.alias('store.activeDesktop'),
 
     friendsOnline: Ember.computed('friends.@each.online', function() {
         return this.get('friends').filterBy('online', true).length;
