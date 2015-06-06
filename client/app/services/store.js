@@ -163,7 +163,8 @@ export default Ember.Service.extend({
                 'row',
                 'column',
                 'desktop',
-                'newMessagesCount'
+                'newMessagesCount',
+                'minimizedNamesList'
             ]);
 
             windowProperties.messages = messages;
