@@ -357,6 +357,9 @@ export default Ember.Component.extend(UploadMixin, {
             return;
         }
 
+        // TBD: Temporary trace to help to debug a rare bug. Remove when not needed.
+        Ember.Logger.info(`${this.get('content.simplifiedName')} scrolling, animate: ${animate}`);
+
         let duration = animate ? 200 : 0;
 
         // There's an odd bug(?) in Chrome. Offset below can't be just some large enough number
