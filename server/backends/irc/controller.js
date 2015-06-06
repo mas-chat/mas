@@ -17,8 +17,6 @@
 
 'use strict';
 
-/*jshint -W079 */
-
 const dropPriviledges = require('../../lib/dropPriviledges');
 
 dropPriviledges.drop();
@@ -482,7 +480,6 @@ function *disconnect(userId, network) {
 }
 
 function *handleNoop() {
-    /* jshint noyield:true */
 }
 
 function *handleServerText(userId, msg, code) {
@@ -1092,7 +1089,6 @@ function parseCTCPMessage(text) {
     let regex = /\u0001(.*?)\u0001/g;
     let matches;
 
-    /*jshint -W084 */
     while (matches = regex.exec(text)) {
         let msg = matches[1];
         let dataType;
@@ -1108,7 +1104,6 @@ function parseCTCPMessage(text) {
         // Only one CTCP extended message per PRIVMSG is supported for now
         return { type: dataType ? dataType : 'UNKNOWN', data: payload };
     }
-    /*jshint +W084 */
 
     return { type: 'UNKNOWN' };
 }

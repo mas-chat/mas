@@ -16,8 +16,6 @@
 
 'use strict';
 
-/*jshint -W079 */
-
 const co = require('co'),
       log = require('../lib/log'),
       redis = require('../lib/redis').createClient(),
@@ -171,8 +169,6 @@ function *handleCommand(params) {
 }
 
 function *handleCreate(params) {
-    /* jshint noyield:true */
-
     return yield courier.call('loopbackparser', 'create', {
         userId: params.userId,
         name: params.command.name,
@@ -283,8 +279,6 @@ function *handleUpdatePassword(params) {
 }
 
 function *handleUpdateTopic(params) {
-    /* jshint noyield:true */
-
     if (!params.conversation) {
         return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
     }
@@ -371,8 +365,6 @@ function *handleAckAlert(params) {
 }
 
 function *handleLogout(params) {
-    /* jshint noyield:true */
-
     log.info(params.userId, 'User ended session. SessionId: ' + params.sessionId);
 
     setTimeout(function() {

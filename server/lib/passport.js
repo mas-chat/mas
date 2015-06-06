@@ -124,7 +124,6 @@ if (conf.get('googleauth:enabled') === true) {
         clientSecret: conf.get('googleauth:client_secret'),
         callbackURL: conf.get('googleauth:callback_url')
     }, function(accessToken, refreshToken, params, profile, done) {
-        // jshint camelcase: false
         // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
         let openIdId = jwt.decode(params.id_token, null, true).openid_id;
         authExt(openIdId, 'google:' + profile.id, profile, done);

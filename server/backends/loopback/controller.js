@@ -17,8 +17,6 @@
 
 'use strict';
 
-/*jshint -W079 */
-
 const dropPriviledges = require('../../lib/dropPriviledges');
 
 dropPriviledges.drop();

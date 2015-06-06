@@ -16,8 +16,6 @@
 
 'use strict';
 
-/* jshint -W079 */
-
 const assert = require('assert'),
       redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
@@ -108,7 +106,6 @@ function Conversation(conversationId, record, members) {
 }
 
 Conversation.prototype.getMemberRole = function*(userId) {
-    /* jshint noyield:true */
     return this.members[userId];
 };
 
@@ -118,7 +115,6 @@ Conversation.prototype.setMemberRole = function*(userId, role) {
 };
 
 Conversation.prototype.getPeerUserId = function*(userId) {
-    /* jshint noyield:true */
     let members = Object.keys(this.members);
     return members[0] === userId ? members[1] : members[0];
 };
@@ -221,7 +217,6 @@ Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKic
 };
 
 Conversation.prototype.remove1on1Member = function*(userId) {
-    /* jshint noyield:true */
     assert(this.members[userId]);
 
     // Never let window to exist alone without linked conversation
@@ -235,7 +230,6 @@ Conversation.prototype.remove1on1Member = function*(userId) {
 };
 
 Conversation.prototype.isMember = function*(userId) {
-    /* jshint noyield:true */
     return !!this.members[userId];
 };
 

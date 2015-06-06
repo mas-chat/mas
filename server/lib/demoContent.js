@@ -16,8 +16,6 @@
 
 'use strict';
 
-/*jshint -W079 */
-
 const co = require('co'),
       wait = require('co-wait'),
       faker = require('faker'),

@@ -92,7 +92,7 @@ if (action === 'status') {
 }
 
 function stopProcesses() {
-    for (let component in processes) { /*jshint forin: false */
+    for (let component in processes) {
         let pid = getComponentPid(component);
 
         if (pid !== 0) {
@@ -104,10 +104,10 @@ function stopProcesses() {
     }
 }
 
-function startProcesses() { /*jshint -W083 */
+function startProcesses() {
     let shutdownStarted = false;
 
-    for (let component in processes) { /*jshint forin: false */
+    for (let component in processes) {
         let spawnOptions = {
             detached: argv.background,
             stdio: argv.background ? 'ignore' : null
@@ -142,7 +142,7 @@ function startProcesses() { /*jshint -W083 */
 
                 console.log(msg);
 
-                for (let shutdownComponent in processes) { /*jshint forin: false */
+                for (let shutdownComponent in processes) {
                     console.log('Stopped:'.yellow + ' ' + shutdownComponent);
                     handles[shutdownComponent].kill();
                 }
@@ -158,7 +158,7 @@ function startProcesses() { /*jshint -W083 */
 function monitorProcesses() {
     let allRunning = true;
 
-    for (let component in processes) { /*jshint forin: false */
+    for (let component in processes) {
         let pid = getComponentPid(component);
 
         if (pid !== 0) {

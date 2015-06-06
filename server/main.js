@@ -47,7 +47,6 @@ exports.init = function(httpServer, httpsServer, setHttpHandlers) {
     }
 
     app.use(function*(next) {
-        /* jshint noyield:true */
         this.set('X-Frame-Options', 'DENY');
         yield next;
     });
@@ -88,7 +87,6 @@ exports.init = function(httpServer, httpsServer, setHttpHandlers) {
 
             // To keep things simple, force SSL is always activated if https is enabled
             forceSSLApp.use(function*() {
-                /* jshint noyield:true */
                 this.response.status = 301;
                 this.response.redirect(
                     'https://' + this.hostname + ':' + httpsPort + this.request.url);
