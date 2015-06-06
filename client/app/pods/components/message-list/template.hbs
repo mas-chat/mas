@@ -37,7 +37,7 @@
                                 <li>
                                     <a href="{{image.url}}" class="user-img">
                                         <div class="user-img-container">
-                                            <img class="{{if image.loaded '' 'loader loader-small-dark'}}" src="{{image.source}}">
+                                            <img src="{{image.source}}">
                                             <span {{action "hideImages" message on="mouseDown" bubbles=false}} class="user-img-close fa-stack">
                                                 <i class="fa fa-circle fa-stack-2x"></i>
                                                 <i class="fa fa-times fa-stack-1x fa-inverse"></i>

@@ -469,12 +469,7 @@ export default Ember.Component.extend(UploadMixin, {
 
             Ember.run(function() {
                 Ember.Logger.info('Lazy loaded image');
-
-                image.set('loaded', true);
-
-                Ember.run.scheduleOnce('afterRender', this, function() {
-                    that._goToBottom(true);
-                });
+                that._goToBottom(true);
             });
         });
     }

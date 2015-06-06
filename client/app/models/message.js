@@ -119,8 +119,7 @@ export default Ember.Object.extend({
                 url: urlObj.toString(),
                 media: media,
                 type: type,
-                source: '',
-                loaded: false
+                source: ''
             });
 
             pos = end;
