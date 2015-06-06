@@ -7,7 +7,6 @@ const path = require('path'),
       util = require('gulp-util'),
       concat = require('gulp-concat'),
       uglify = require('gulp-uglify'),
-      jshint = require('gulp-jshint'),
       eslint = require('gulp-eslint'),
       jscs = require('gulp-jscs'),
       bower = require('gulp-bower'),
@@ -46,15 +45,6 @@ function appendPath(libs) {
 }
 
 paths.pagesLibs = appendPath(paths.pagesLibs);
-
-gulp.task('jshint', function() {
-    return gulp.src(paths.serverJavaScripts
-        .concat(paths.clientJavaScripts)
-        .concat(paths.testJavaScripts))
-        .pipe(jshint())
-        .pipe(jshint.reporter('jshint-stylish'))
-        .pipe(jshint.reporter('fail'));
-});
 
 gulp.task('jscs', function() {
     return gulp.src(paths.serverJavaScripts
@@ -128,4 +118,4 @@ gulp.task('watch', function() {
 });
 
 // The default task
-gulp.task('default', [ 'jshint', 'jscs', 'eslint' ]);
+gulp.task('default', [ 'jscs', 'eslint' ]);
