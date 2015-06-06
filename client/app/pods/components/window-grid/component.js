@@ -118,8 +118,8 @@ export default Ember.Component.extend({
 
         this._dragWindow(event);
 
-        function handleDragMove(event) {
-            that._dragWindow(event);
+        function handleDragMove(dragMoveEvent) {
+            that._dragWindow(dragMoveEvent);
             event.preventDefault();
         }
 
@@ -320,7 +320,7 @@ export default Ember.Component.extend({
                     left: windowDim.cursor === 'left' ?
                         windowDim.left + cursorSpace : windowDim.left,
                     top: windowDim.cursor === 'top' ?
-                        windowDim.top + cursorSpace :  windowDim.top,
+                        windowDim.top + cursorSpace : windowDim.top,
                     width: windowDim.cursor === 'left' || windowDim.cursor === 'right' ?
                         windowDim.width - cursorSpace : windowDim.width,
                     height: windowDim.cursor === 'top' || windowDim.cursor === 'bottom' ?

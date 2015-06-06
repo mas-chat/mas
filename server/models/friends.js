@@ -66,8 +66,8 @@ exports.sendFriendConfirm = function*(userId, sessionId) {
     if (friendRequests && friendRequests.length > 0) {
         // Uses userId property so that related USERS notification is send automatically
         // See lib/notification.js for details.
-        friendRequests = friendRequests.map(function(userId) {
-            return { userId: userId };
+        friendRequests = friendRequests.map(function(friendUserId) {
+            return { userId: friendUserId };
         });
 
         yield notification.send(userId, sessionId, {

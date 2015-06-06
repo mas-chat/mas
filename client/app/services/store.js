@@ -195,7 +195,7 @@ export default Ember.Service.extend({
 
             this.set('activeDesktop', data.activeDesktop);
 
-            for (var userId of Object.keys(data.users)) { /* jshint -W089 */
+            for (let userId of Object.keys(data.users)) {
                 this.set('users.users.' + userId, data.users[userId]);
             }
 

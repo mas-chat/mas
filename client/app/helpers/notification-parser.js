@@ -94,7 +94,7 @@ export default Ember.Object.extend({
     },
 
     _handleUsers(data) {
-        for (var userId in data.mapping) { /* jshint -W089 */
+        for (let userId in data.mapping) {
             this.set('store.users.users.' + userId, data.mapping[userId]);
         }
 

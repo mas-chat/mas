@@ -106,8 +106,8 @@ exports.setup = function(server) {
 
                 // Event loop
                 while (1) {
-                    let ts = Math.round(Date.now() / 1000);
-                    yield redis.zadd('sessionlastheartbeat', ts, userId + ':' + sessionId);
+                    let loopTs = Math.round(Date.now() / 1000);
+                    yield redis.zadd('sessionlastheartbeat', loopTs, userId + ':' + sessionId);
 
                     let ntfs = yield notification.receive(userId, sessionId, 60);
 
