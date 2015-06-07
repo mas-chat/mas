@@ -116,6 +116,18 @@ MAS Redis structures
  activealerts:<userId> (set)
    <id3>, <id4> ...
 
+ emailnotifacations (set)
+   <userId1>, <userId2> ...
+
+ emailnotificationslist:<userId>
+   <ntfId1>, <ntfId2>, ...
+
+ emailnotifcation:<ntfId> (hash)
+   group
+   nick
+   body
+   ts
+
 ```
 
  IRC backend
