@@ -62,7 +62,7 @@ co(function*() {
 
     let allUsers = yield redis.smembers('userlist');
 
-    // Conver object to MAS notification
+    // Convert object to MAS notification
     alert.id = 'ALERT';
     alert.alertId = alertId;
     delete alert.expires;
@@ -73,6 +73,8 @@ co(function*() {
     }
 
     yield redis.quit();
+    yield notification.shutdown();
+
     console.log('Done. All OK.');
 })();
 

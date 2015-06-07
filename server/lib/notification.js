@@ -63,6 +63,10 @@ exports.requeue = function*(userId, sessionId, ntfs) {
     yield redis.rpush.apply(redis, [ `outbox:${userId}:${sessionId}` ].concat(ntfs.reverse()));
 };
 
+exports.shutdown = function*() {
+    yield redis.quit();
+}
+
 function *queueNotifications(userId, sessionId, excludeSessionId, ntfs) {
     if (!util.isArray(ntfs)) {
         ntfs = [ ntfs ];
