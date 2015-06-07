@@ -472,7 +472,6 @@ function *handleUpdateProfile(params) {
     user.data.email = params.command.email;
     yield user.save();
 
-
     return { status: 'OK' };
 }
 

@@ -328,13 +328,13 @@ export default Ember.Component.extend(UploadMixin, {
 
     arrayWillChange: function(array, offset, removeCount) {
         if (removeCount > 0) {
-           this.set('deletedLine', true);
+            this.set('deletedLine', true);
         }
     },
 
-    arrayDidChange: function(array, offset, removeCount, addCount){
+    arrayDidChange: function(array, offset, removeCount, addCount) {
         if (addCount > 0) {
-           this._lineAdded();
+            this._lineAdded();
         }
     },
 

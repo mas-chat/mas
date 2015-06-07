@@ -49,7 +49,7 @@ exports.storeMessage = function(conversationId, msg) {
 exports.getMessagesForDay = function*(conversationId, start, end) {
     if (!elasticSearchClient) {
         warn();
-        return;
+        return false;
     }
 
     let response = yield elasticSearchClient.search({

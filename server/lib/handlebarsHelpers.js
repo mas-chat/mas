@@ -19,13 +19,15 @@
 const fs = require('fs'),
       path = require('path');
 
-let manifest = null;
+let manifest;
 const PREFIX = '/dist/';
 
 try {
     manifest = JSON.parse(fs.readFileSync(path.resolve(__dirname,
         '..', 'public', 'dist', 'rev-manifest.json')));
-} catch (e) {}
+} catch (e) {
+    manifest = false;
+}
 
 exports.registerHelpers = function(hbs) {
     hbs.registerHelper('getPageJSFile', function() {

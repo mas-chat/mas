@@ -53,10 +53,10 @@ exports.send = function(templateName, data, address, subject) {
 };
 
 function setupTransporter() {
-    if (conf.get('mailgun:enabled') === true)  {
+    if (conf.get('mailgun:enabled') === true) {
         let mailgunAuth = {
             auth: {
-                api_key: conf.get('mailgun:api_key'),
+                api_key: conf.get('mailgun:api_key'), // eslint-disable-line camelcase
                 domain: conf.get('mailgun:domain')
             }
         };

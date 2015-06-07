@@ -25,7 +25,9 @@ const co = require('co'),
 
 exports.init = function() {
     // Once in an hour
-    new CronJob('0 0 */1 * * *', deleteStaleSessions, null, true);
+    new CronJob('0 0 */1 * * *', deleteStaleSessions, null, true); // eslint-disable-line no-new
+    // Once in 15 minutes
+    new CronJob('0 */15 * * * *', deliverEmails, null, true); // eslint-disable-line no-new
 };
 
 function deleteStaleSessions() {

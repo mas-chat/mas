@@ -39,7 +39,7 @@ export default Ember.Component.extend(UploadMixin, {
 
         takePhoto() {
             if (!this.webcam.isActive()) {
-                alert('camera not active');
+                alert('camera not active'); // eslint-disable-line no-alert
             }
 
             this.$('[data-modal="submit"]').removeClass('disabled');
@@ -48,8 +48,10 @@ export default Ember.Component.extend(UploadMixin, {
             let shot = this.webcam.shot();
 
             shot.clone().preview(160, 120).get(function(err, img) {
-                this.$('.shot').empty();
-                this.$('.shot').append(img);
+                if (!err) {
+                    this.$('.shot').empty();
+                    this.$('.shot').append(img);
+                }
             }.bind(this));
 
             this.set('shot', shot);

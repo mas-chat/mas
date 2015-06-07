@@ -67,7 +67,7 @@ exports.findGroup = function*(name, network) {
 };
 
 exports.findOrCreate1on1 = function*(userId, peerUserId, network) {
-    assert (userId && peerUserId && network);
+    assert(userId && peerUserId && network);
 
     let conversation;
     let userIds = [ userId, peerUserId ].sort();
@@ -185,7 +185,7 @@ Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKic
     yield redis.srem(`conversationlist:${userId}`, this.conversationId);
 
     if (removed === 1) {
-        log.info('User: ' + userId + ' removed from conversation: ' +  this.conversationId);
+        log.info(`User: ${userId} removed from conversation: ${this.conversationId}`);
 
         delete this.members[userId];
 
@@ -295,7 +295,7 @@ Conversation.prototype.sendUsers = function*(userId) {
     }
 };
 
-Conversation.prototype.setTopic = function*(topic, nick) {
+Conversation.prototype.setTopic = function*(topic, nickName) {
     let changed = yield redis.run('setConversationField', this.conversationId, 'topic', topic);
 
     if (!changed) {
@@ -311,7 +311,7 @@ Conversation.prototype.setTopic = function*(topic, nick) {
 
     yield this.addMessage({
         cat: 'info',
-        body: nick + ' has changed the topic to: "' + topic + '".'
+        body: nickName + ' has changed the topic to: "' + topic + '".'
     });
 };
 
@@ -516,7 +516,7 @@ function *create(options) {
 }
 
 function *get(conversationId) {
-    let record =  yield redis.hgetall(`conversation:${conversationId}`);
+    let record = yield redis.hgetall(`conversation:${conversationId}`);
     let members = yield redis.hgetall(`conversationmembers:${conversationId}`);
 
     if (record) {

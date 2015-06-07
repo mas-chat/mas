@@ -129,7 +129,7 @@ function startProcesses() {
             node.stderr.on('data', printChildOutput);
         }
 
-        node.on('close', function handleClose(code) {
+        node.on('close', function handleClose(code) { // eslint-disable-line no-loop-func
             if (!shutdownStarted) {
                 shutdownStarted = true;
 

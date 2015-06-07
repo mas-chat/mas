@@ -61,7 +61,7 @@ Courier.prototype.start = function() {
             assert(handler, this.name + ': Missing message handler for: ' + msg.__type);
 
             if (isGeneratorFunction(handler)) {
-                co(function*() {
+                co(function*() { // eslint-disable-line no-loop-func
                     this._reply(msg, (yield handler(msg)));
                 }).call(this);
             } else {

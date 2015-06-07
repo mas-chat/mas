@@ -359,8 +359,7 @@ function *processDisconnected(params) {
     let count = yield redis.hincrby(`networks:${userId}:${network}`, 'retryCount', 1);
 
     // Set the backoff timer
-    if (count < 4) {
-    } else if (count < 8) {
+    if (count > 3 && count < 8) {
         delay = 3 * 60 * 1000; // 3 mins
     } else if (count >= 8) {
         delay = 60 * 60 * 1000; // 1 hour
@@ -1089,7 +1088,7 @@ function parseCTCPMessage(text) {
     let regex = /\u0001(.*?)\u0001/g;
     let matches;
 
-    while (matches = regex.exec(text)) {
+    while ((matches = regex.exec(text))) {
         let msg = matches[1];
         let dataType;
         let payload = '';

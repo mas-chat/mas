@@ -44,11 +44,11 @@ module.exports = function configureProcess(serverName) {
             pid.removeOnExit();
         } catch (e) {
             if (e.code === 'EEXIST') {
-                let pid = parseInt(fs.readFileSync(pidFile));
+                pid = parseInt(fs.readFileSync(pidFile));
 
                 try {
                     process.kill(pid, 0);
-                } catch (e) {
+                } catch (killE) {
                     // Process mentioned in the pid file is not running anymore
                     log.info('Removing stale pid file: ' + pidFile);
                     fs.unlinkSync(pidFile);

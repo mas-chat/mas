@@ -25,7 +25,8 @@ const co = require('co'),
 
 exports.init = function() {
     // Twice in a day
-    new CronJob('0 0 7,19 * * *', disconnectInactiveIRCUsers, null, true);
+    new CronJob( // eslint-disable-line no-new
+        '0 0 7,19 * * *', disconnectInactiveIRCUsers, null, true);
 };
 
 function disconnectInactiveIRCUsers() {
