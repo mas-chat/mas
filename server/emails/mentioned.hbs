@@ -22,14 +22,23 @@
                                     <td class="content-block">
                                         <p><b>Hi {{name}},</b></p>
 
-                                        <p>{{nick}} just mentioned you on MeetAndSpeak group {{window}}.</p>
+                                        <p>You were just contacted on MeetAndSpeak.</p>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td class="content-block">
-                                        <p class="mentioned"><b>&lt;{{nick}}&gt;</b> {{message}}</p>
-                                    </td>
-                                </tr>
+                                {{#each notifications}}
+                                    <tr>
+                                        <td class="content-block">
+                                            <p><b>{{@key}}:</b></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="content-block">
+                                            {{#each this}}
+                                                <p class="mentioned"><b>{{senderNick}}:</b> {{message}}</p>
+                                            {{/each}}
+                                        </td>
+                                    </tr>
+                                {{/each}}
                                 <tr>
                                     <td class="content-block">
                                     <a href="https://meetandspeak.com">Go to MeetAndSpeak</a>
@@ -37,7 +46,7 @@
                                 </tr>
                                 <tr>
                                     <td class="content-block small">
-                                        <p>Check '{{window}} window settings &#8594; Configure alerts' if you wish not to receive these emails.</p>
+                                        <p>Check 'Window settings &#8594; Configure alerts' if you wish not to receive these emails.</p>
                                     </td>
                                 </tr>
                             </table>

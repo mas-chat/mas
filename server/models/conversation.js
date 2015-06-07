@@ -17,9 +17,9 @@
 'use strict';
 
 const assert = require('assert'),
+      uuid = require('uid2'),
       redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
-      mailer = require('../lib/mailer'),
       search = require('../lib/search'),
       notification = require('../lib/notification'),
       window = require('./window'),
@@ -237,7 +237,7 @@ Conversation.prototype.addMessage = function*(msg, excludeSession) {
     msg.gid = yield redis.incr('nextGlobalMsgId');
     msg.ts = Math.round(Date.now() / 1000);
 
-    yield this._notifyByEmailIfMentioned(msg);
+    yield this._scanForEmailNotifications(msg);
 
     yield redis.lpush(`conversationmsgs:${this.conversationId}`, JSON.stringify(msg));
     yield redis.ltrim(`conversationmsgs:${this.conversationId}`, 0, MSG_BUFFER_SIZE - 1);
@@ -452,24 +452,40 @@ Conversation.prototype._setMember = function*(userId, role) {
     return newField;
 };
 
-Conversation.prototype._notifyByEmailIfMentioned = function*(message) {
-    let mentions = message.body.match(/(?:^| )@\S+(?=$| )/g);
-
-    if (this.type !== 'group' || !mentions) {
+Conversation.prototype._scanForEmailNotifications = function*(message) {
+    if (message.userId === 'iSERVER') {
         return;
     }
 
-    for (let mention of mentions) {
-        let userId = yield nick.getUserIdFromNick(mention.substring(1), this.network);
+    let userIds = [];
 
-        if (!userId) {
-            continue;
+    if (this.type === 'group') {
+        let mentions = message.body.match(/(?:^| )@\S+(?=$| )/g);
+
+        if (!mentions) {
+            return;
         }
 
+        for (let mention of mentions) {
+            let userId = yield nick.getUserIdFromNick(mention.substring(1), this.network);
+
+            if (userId) {
+                userIds.push(userId);
+            }
+        }
+
+        if (userIds.length === 0) {
+            return;
+        }
+    } else {
+        userIds = [ yield this.getPeerUserId(message.userId) ];
+    }
+
+    for (let userId of userIds) {
         let user = yield redis.hgetall(`user:${userId}`);
 
-        if (parseInt(user.lastlogout) === 0) {
-            continue; // Mentioned user is online
+        if (!user || parseInt(user.lastlogout) === 0) {
+            continue; // Mentioned user is IRC user or online
         }
 
         let windowId = yield window.findByConversationId(userId, this.conversationId);
@@ -482,13 +498,20 @@ Conversation.prototype._notifyByEmailIfMentioned = function*(message) {
 
         if (emailAlertSetting === 'true') {
             let nickName = yield nick.getCurrentNick(message.userId, this.network);
+            let name = (yield redis.hget(`user:${message.userId}`, 'name')) || nickName;
+            let notificationId = uuid(20);
 
-            mailer.send('emails/build/mentioned.hbs', {
-                name: user.name,
-                message: message.body,
-                window: this.name,
-                nick: nickName
-            }, user.email, `${nickName} mentiond you on MeetAndSpeak`);
+            // TBD: Needs to be transaction, add lua script
+            yield redis.sadd('emailnotifications', userId);
+            yield redis.sadd(`emailnotificationslist:${userId}`, notificationId);
+
+            yield redis.hmset(`emailnotification:${notificationId}`, {
+                type: this.type,
+                senderName: name,
+                senderNick: nickName,
+                groupName: this.name,
+                message: message.body
+            });
         }
     }
 };
