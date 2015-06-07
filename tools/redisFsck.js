@@ -678,7 +678,7 @@ function *migrateForceEmaillertSetting() {
         let conversationId = yield redis.hget(entry, 'conversationId');
         let type = yield redis.hget(`conversation:${conversationId}`, 'type');
 
-        if (type === 'group') {
+        if (type === '1on1') {
             yield redis.hset(entry, 'emailAlert', true);
         }
     }
