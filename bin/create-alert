@@ -72,7 +72,8 @@ co(function*() {
         yield notification.broadcast(userId, alert);
     }
 
-    console.log('Done. Use CONTROL-C to quit.');
+    yield redis.quit();
+    console.log('Done. All OK.');
 })();
 
 function yesOrNo(label) {
