@@ -20,6 +20,7 @@ const assert = require('assert'),
       redis = require('../lib/redis').createClient(),
       notification = require('../lib/notification'),
       log = require('../lib/log'),
+      conf = require('../lib/conf'),
       conversationFactory = require('./conversation');
 
 exports.create = function*(userId, conversationId) {
@@ -155,6 +156,8 @@ function *create(userId, conversationId) {
         role: 'u' // Everybody starts as a normal user
     });
 
+    yield sendBacklog(userId, conversationId, windowId);
+
     return windowId;
 }
 
@@ -196,4 +199,28 @@ function *remove(userId, windowId) {
         id: 'CLOSE',
         windowId: parseInt(windowId)
     });
+}
+
+function *sendBacklog(userId, conversationId, windowId) {
+    // TBD: This is same code as in initSession.lua
+    let maxBacklogLines = conf.get('session:max_backlog');
+    let lines = yield redis.lrange(`conversationmsgs:${conversationId}`, 0, maxBacklogLines - 1);
+
+    if (!lines) {
+        return;
+    }
+
+    for (let line of lines) {
+        let message = JSON.parse(line);
+
+        message.id = 'MSG';
+        message.windowId = windowId;
+
+        if (message.userId === userId && message.cat !== 'join' && message.cat !== 'part' &&
+            message.cat !== 'quit') {
+            message.cat = 'mymsg';
+        }
+
+        yield notification.broadcast(userId, message);
+    }
 }
