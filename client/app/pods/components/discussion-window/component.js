@@ -333,7 +333,7 @@ export default Ember.Component.extend(UploadMixin, {
     },
 
     arrayDidChange: function(array, offset, removeCount, addCount) {
-        if (addCount > 0) {
+        if (addCount > 0 && this.get('store.windowListComplete')) {
             this._lineAdded();
         }
     },
