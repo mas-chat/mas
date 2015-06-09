@@ -37,7 +37,7 @@
         <div class="window-members {{hiddenIfLogMode}} {{wideUnlessminimizedNamesList}}">
             {{#each content.operatorNames key="userId" as |name|}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div class="member-name window-operator {{hiddenIfMinimizedUserNames}}">
                         {{name.nick}}
                     </div>
@@ -45,7 +45,7 @@
             {{/each}}
             {{#each content.voiceNames key="userId" as |name|}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div class="member-name window-voice {{hiddenIfMinimizedUserNames}}">
                         {{name.nick}}
                     </div>
@@ -53,7 +53,7 @@
             {{/each}}
             {{#each content.userNames key="userId" as |name|}}
                 <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                    <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                     <div class="member-name window-user {{hiddenIfMinimizedUserNames}}">
                         {{name.nick}}
                     </div>
