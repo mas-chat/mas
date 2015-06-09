@@ -30,7 +30,7 @@ export default Ember.Mixin.create({
                 return;
             }
 
-            this.get('store').upsertObject('message', {
+            this.get('store').upsertModel('message', {
                 body: text,
                 cat: 'mymsg',
                 userId: this.get('store.userId'),

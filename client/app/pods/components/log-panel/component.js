@@ -106,13 +106,13 @@ export default Ember.Component.extend({
             start: epochTsStart,
             end: epochTsEnd
         }, function(resp) {
-            this.get('window.logMessages').clear();
+            this.get('store').clearModels('logMessage', this.get('window'));
             this.set('loading', false);
             // TBD: Temporary check, implement pagination
             this.set('tooManyMessages', resp.results.length > 999);
 
             resp.results.forEach(function(message) {
-                this.get('store').upsertObject('logMessage', message, this.get('window'));
+                this.get('store').upsertModel('logMessage', message, this.get('window'));
             }.bind(this));
 
             this._loadImages();

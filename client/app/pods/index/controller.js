@@ -143,7 +143,7 @@ export default Ember.Controller.extend(SendMsgMixin, {
 
         if (ircServer1on1 && !command) {
             // Note that only one error is shown because of the shared fixed gid (=primary key).
-            this.get('store').upsertObject('message', {
+            this.get('store').upsertModel('message', {
                 body: 'Only commands allowed, e.g. /whois john',
                 cat: 'error',
                 ts: moment().unix(),
@@ -196,7 +196,8 @@ export default Ember.Controller.extend(SendMsgMixin, {
                 'Request sent. Contact will added to your list when he or she approves.' :
                 resp.errorMsg;
 
-            this.get('store.alerts').pushObject({
+            this.get('store').upsertModel('alert', {
+                alertId: `internal:${Date.now()}`,
                 message: message,
                 dismissible: true,
                 report: false,

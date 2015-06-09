@@ -63,7 +63,7 @@ export default Ember.Mixin.create(SendMsgMixin, {
     _printLine(text, cat) {
         // Note that these errors share a special fixed gid. Gid is the primary key for messages so
         // only one is shown per window as new error replaces the existing one. This is intentional.
-        this.get('store').upsertObject('message', {
+        this.get('store').upsertModel('message', {
             body: text,
             cat: cat,
             userId: cat === 'mymsg' ? this.get('store.userId') : null,

@@ -23,8 +23,13 @@ import Ember from 'ember';
 export default Ember.Object.extend({
     store: null,
     socket: null,
+    msgBuffer: null,
 
     mobileDesktop: 0,
+
+    init() {
+        this.msgBuffer = [];
+    },
 
     process(notification) {
         let type = notification.id;
@@ -61,12 +66,12 @@ export default Ember.Object.extend({
 
         // A hack to prevent the client to echo new values immediately back to the server.
         window.disableUpdate = true;
-        this.get('store').upsertObject('window', data);
+        this.get('store').upsertModel('window', data);
         window.disableUpdate = false;
     },
 
     _handleClose(data, targetWindow) {
-        this.get('store.windows').removeObject(targetWindow);
+        this.get('store').removeModel('window', targetWindow);
     },
 
     _handleMsg(data, targetWindow) {
@@ -75,7 +80,13 @@ export default Ember.Object.extend({
         }
 
         delete data.windowId;
-        this.get('store').upsertObject('message', data, targetWindow);
+
+        if (!this.get('store.windowListComplete')) {
+            // Optimization: Avoid re-renders after every message
+            this.msgBuffer.push({ data: data, parent: targetWindow });
+        } else {
+            this.get('store').upsertModel('message', data, targetWindow);
+        }
     },
 
     _handleInitdone() {
@@ -88,8 +99,19 @@ export default Ember.Object.extend({
             }
         }
 
-        this.get('store.windows').removeObjects(deletedWindows);
+        this.get('store').removeModels('window', deletedWindows);
 
+        // Insert buffered message in one go.
+        Ember.Logger.info(`MsgBuffer processing started.`);
+
+        for (let i = 0; i < this.msgBuffer.length; i++) {
+            let item = this.msgBuffer[i];
+            this.get('store').upsertModel('message', item.data, item.parent);
+        }
+
+        Ember.Logger.info(`MsgBuffer processing ended.`);
+
+        this.msgBuffer = [];
         this.set('store.windowListComplete', true);
     },
 
@@ -114,7 +136,10 @@ export default Ember.Object.extend({
 
         data.members.forEach(function(member) {
             let userId = member.userId;
-            this._removeUser(userId, targetWindow);
+
+            if (!data.reset) {
+                this._removeUser(userId, targetWindow);
+            }
 
             switch (member.role) {
                 case '@':
@@ -153,11 +178,11 @@ export default Ember.Object.extend({
 
     _handleFriends(data) {
         if (data.reset) {
-            this.get('store.friends').clear();
+            this.get('store').clearModels('friend');
         }
 
         for (let friend of data.friends) {
-            this.get('store').upsertObject('friend', friend);
+            this.get('store').upsertModel('friend', friend);
         }
     },
 
@@ -175,7 +200,7 @@ export default Ember.Object.extend({
             }
         }.bind(this);
 
-        this.get('store').upsertObject('alert', data);
+        this.get('store').upsertModel('alert', data);
     },
 
     _handleNetworks(data) {
@@ -212,7 +237,7 @@ export default Ember.Object.extend({
             let realName = users.getName(friendCandidate.userId);
             let nick = users.getNick(friendCandidate.userId, 'MAS');
 
-            this.get('store').upsertObject('alert', {
+            this.get('store').upsertModel('alert', {
                 message: `Allow ${realName} (${nick}) to add you to his/her contacts list?`,
                 alertId: friendCandidate.userId,
                 dismissible: true,

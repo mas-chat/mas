@@ -66,6 +66,8 @@ export default Ember.Service.extend({
         let secret = this.get('secret');
         let socket = io.connect();
 
+        Ember.Logger.info('Opened Socket.io connection.');
+
         this.set('socket', socket);
         this._emitInit(userId, secret, cachedUpTo);
 
@@ -117,7 +119,7 @@ export default Ember.Service.extend({
         if (this.get('_connected')) {
             this._emitReq(command, callback);
         } else {
-            Ember.Logger.info('Connection lost. Buffering ' + command.id);
+            Ember.Logger.info(`No Socket.io Connection, buffering: ${command.id}`);
 
             this._disconnectedQueue.push({
                 command: command,
@@ -144,6 +146,8 @@ export default Ember.Service.extend({
             maxBacklogMsgs: isMobile.any ? 80 : 160,
             cachedUpTo: cachedUpTo || 0
         });
+
+        Ember.Logger.info(`Sent INIT event.`);
     },
 
     _emitReq(command, callback) {

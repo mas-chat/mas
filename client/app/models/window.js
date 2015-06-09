@@ -168,7 +168,7 @@ export default Ember.Object.extend({
         let maxBacklogMsgs = this.get('store.maxBacklogMsgs');
 
         for (let i = 0; i < sortedMessages.length - maxBacklogMsgs; i++) {
-            this.get('messages').removeObject(sortedMessages[i]);
+            this.get('store').removeModel('message', sortedMessages[i], this);
         }
     }),
 

@@ -33,6 +33,14 @@ const modelNameMapping = {
     alert: Alert
 };
 
+const primaryKeys = {
+    window: 'windowId',
+    message: 'gid',
+    logMessage: 'gid',
+    friend: 'userId',
+    alert: 'alertId'
+};
+
 export default Ember.Service.extend({
     socket: Ember.inject.service(),
 
@@ -72,6 +80,38 @@ export default Ember.Service.extend({
             this.get('socket').start();
         });
 
+        this._startDayChangedService();
+    },
+
+    upsertModel(type, data, parent) {
+        return this._upsert(data, primaryKeys[type], type, parent || this);
+    },
+
+    removeModel(type, object, parent) {
+        this.removeModels(type, [ object ], parent);
+    },
+
+    removeModels(type, objects, parent) {
+        parent = parent || this;
+
+        for (let object of objects) {
+            let primaryKeyName = primaryKeys[type];
+            let primaryKeyValue = object[primaryKeyName];
+
+            delete parent.lookupTable[type][primaryKeyValue];
+        }
+
+        parent.get(type + 's').removeObjects(objects);
+    },
+
+    clearModels(type, parent) {
+        parent = parent || this;
+
+        delete parent.lookupTable[type];
+        this.get(type + 's').clear();
+    },
+
+    _startDayChangedService() {
         // Day has changed service
         let timeToTomorrow = moment().endOf('day').diff(moment()) + 1;
 
@@ -83,26 +123,23 @@ export default Ember.Service.extend({
         Ember.run.later(this, changeDay, timeToTomorrow);
     },
 
-    upsertObject(type, data, parent) {
-        let primaryKeys = {
-            window: 'windowId',
-            message: 'gid',
-            logMessage: 'gid',
-            friend: 'userId',
-            alert: 'alertId'
-        };
-
-        return this._upsert(data, primaryKeys[type], type, parent || this);
-    },
-
     _upsert(data, primaryKey, type, parent) {
-        let object = parent.get(type + 's').findBy(primaryKey, data[primaryKey]);
+        if (!parent.lookupTable) {
+            parent.lookupTable = {};
+        }
+
+        if (!parent.lookupTable[type]) {
+            parent.lookupTable[type] = {};
+        }
+
+        let object = parent.lookupTable[type][data[primaryKey]];
 
         if (object) {
             delete data[primaryKey];
             object.setProperties(data);
         } else {
             object = this._insertObject(type, data, parent);
+            parent.lookupTable[type][data[primaryKey]] = object;
         }
 
         return object;
@@ -186,12 +223,16 @@ export default Ember.Service.extend({
 
     _loadSnapshot() {
         try {
+            Ember.Logger.info('Starting to load saved snapshot.');
+
             let data = JSON.parse(window.localStorage.getItem('data'));
 
             if (!data || !data.activeDesktop) {
                 Ember.Logger.info('Snapshot not found.');
                 return;
             }
+
+            Ember.Logger.info('Snapshot loaded.');
 
             this.set('activeDesktop', data.activeDesktop);
 
@@ -202,17 +243,18 @@ export default Ember.Service.extend({
             this.get('users').incrementProperty('isDirty');
 
             for (let windowData of data.windows) {
-                let windowObject = this.upsertObject('window', windowData);
+                let windowObject = this.upsertModel('window', windowData);
 
                 for (let messageData of windowData.messages) {
-                    this.upsertObject('message', messageData, windowObject);
+                    this.upsertModel('message', messageData, windowObject);
                 }
             }
 
             this.set('windowListComplete', true);
-            Ember.Logger.info('Snapshot loaded successfully.');
+
+            Ember.Logger.info('Snapshot processed.');
         } catch (e) {
-            Ember.Logger.info(`Failed to load snapshot: ${e}`);
+            Ember.Logger.info(`Failed to load or process snapshot: ${e}`);
         }
     }
 });
