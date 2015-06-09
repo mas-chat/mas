@@ -83,6 +83,25 @@ export default Ember.Service.extend({
         this._startDayChangedService();
     },
 
+    insertModels(type, models, parent) {
+        parent = parent || this;
+
+        let objects = [];
+        let primaryKeyName = primaryKeys[type];
+
+        this._ensureLookupTableExists(type, parent);
+
+        for (let data of models) {
+            let object = this._createModel(type, data, parent);
+            let primaryKey = data[primaryKeyName];
+
+            objects.push(object);
+            parent.lookupTable[type][primaryKey] = object;
+        }
+
+        parent.get(type + 's').pushObjects(objects);
+    },
+
     upsertModel(type, data, parent) {
         return this._upsert(data, primaryKeys[type], type, parent || this);
     },
@@ -123,29 +142,31 @@ export default Ember.Service.extend({
         Ember.run.later(this, changeDay, timeToTomorrow);
     },
 
-    _upsert(data, primaryKey, type, parent) {
-        if (!parent.lookupTable) {
-            parent.lookupTable = {};
-        }
-
-        if (!parent.lookupTable[type]) {
-            parent.lookupTable[type] = {};
-        }
-
-        let object = parent.lookupTable[type][data[primaryKey]];
+    _upsert(data, primaryKeyName, type, parent) {
+        this._ensureLookupTableExists(type, parent);
+        let object = parent.lookupTable[type][data[primaryKeyName]];
 
         if (object) {
-            delete data[primaryKey];
+            if (type === 'message') {
+                return object; // TBD: Must be removed when messages are editable.
+            }
+
+            delete data[primaryKeyName];
             object.setProperties(data);
         } else {
             object = this._insertObject(type, data, parent);
-            parent.lookupTable[type][data[primaryKey]] = object;
+            parent.lookupTable[type][data[primaryKeyName]] = object;
         }
 
         return object;
     },
 
     _insertObject(type, data, parent) {
+        let object = this._createModel(type, data, parent);
+        return parent.get(type + 's').pushObject(object);
+    },
+
+    _createModel(type, data, parent) {
         let object = modelNameMapping[type].create(data);
 
         // TBD: Add 'arrayName' parameter so that logMessage type and primary key can be removed.
@@ -162,7 +183,17 @@ export default Ember.Service.extend({
             object.set('window', parent);
         }
 
-        return parent.get(type + 's').pushObject(object);
+        return object;
+    },
+
+    _ensureLookupTableExists(type, parent) {
+        if (!parent.lookupTable) {
+            parent.lookupTable = {};
+        }
+
+        if (!parent.lookupTable[type]) {
+            parent.lookupTable[type] = {};
+        }
     },
 
     _saveSnapshot() {
@@ -244,10 +275,7 @@ export default Ember.Service.extend({
 
             for (let windowData of data.windows) {
                 let windowObject = this.upsertModel('window', windowData);
-
-                for (let messageData of windowData.messages) {
-                    this.upsertModel('message', messageData, windowObject);
-                }
+                this.insertModels('message', windowData.messages, windowObject);
             }
 
             this.set('windowListComplete', true);
