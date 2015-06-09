@@ -67,17 +67,27 @@ export default Ember.Service.extend({
 
         // We are service and fully initialized only after this run loop.
         Ember.run.next(this, function() {
-            if (typeof Storage !== 'undefined') {
-                this._loadSnapshot();
+            let data;
+            let localStorageSupported = typeof Storage !== 'undefined';
 
+            if (localStorageSupported) {
+                data = this._loadSnapshot();
+            }
+
+            // It's now first possible time to start socket.io connection. Data from server
+            // can't race with snapshot data as first socket.io event will be processed at
+            // earliest in the next runloop.
+            this.get('socket').start(data ? data.cachedUpTo : 0);
+
+            if (data) {
+                this._processSnapshot(data);
+            }
+
+            if (localStorageSupported) {
                 setInterval(function() {
                     Ember.run.next(this, this._saveSnapshot);
                 }.bind(this), 60 * 1000); // Once in a minute
             }
-
-            // If there's a snapshot it has been pushed to store now. It's safe to start
-            // socket.io connection. Data from server can't race anymore with snapshot data.
-            this.get('socket').start();
         });
 
         this._startDayChangedService();
@@ -201,7 +211,13 @@ export default Ember.Service.extend({
             return;
         }
 
-        let data = { windows: [], users: {} };
+        let data = {
+            windows: [],
+            users: {},
+            activeDesktop: this.get('activeDesktop'),
+            userId: this.get('userId'),
+            version: 1
+        };
 
         for (let masWindow of this.get('windows')) {
             let messages = [];
@@ -242,7 +258,6 @@ export default Ember.Service.extend({
         for (let userId of Object.keys(data.users)) {
             data.users[userId] = this.get('users.users.' + userId);
         }
-        data.activeDesktop = this.get('activeDesktop');
 
         try {
             window.localStorage.setItem('data', JSON.stringify(data));
@@ -253,36 +268,50 @@ export default Ember.Service.extend({
     },
 
     _loadSnapshot() {
+        let data;
+
+        Ember.Logger.info('Starting to load saved snapshot.');
+
         try {
-            Ember.Logger.info('Starting to load saved snapshot.');
+            data = JSON.parse(window.localStorage.getItem('data'));
 
-            let data = JSON.parse(window.localStorage.getItem('data'));
-
-            if (!data || !data.activeDesktop) {
+            if (!data) {
                 Ember.Logger.info('Snapshot not found.');
-                return;
+                return false;
+            }
+
+            if (!data.activeDesktop || data.userId !== this.get('userId') || data.version !== 1) {
+                Ember.Logger.info('Snapshot corrupted.');
+                window.localStorage.removeItem('data');
+                return false;
             }
 
             Ember.Logger.info('Snapshot loaded.');
-
-            this.set('activeDesktop', data.activeDesktop);
-
-            for (let userId of Object.keys(data.users)) {
-                this.set('users.users.' + userId, data.users[userId]);
-            }
-
-            this.get('users').incrementProperty('isDirty');
-
-            for (let windowData of data.windows) {
-                let windowObject = this.upsertModel('window', windowData);
-                this.insertModels('message', windowData.messages, windowObject);
-            }
-
-            this.set('windowListComplete', true);
-
-            Ember.Logger.info('Snapshot processed.');
         } catch (e) {
-            Ember.Logger.info(`Failed to load or process snapshot: ${e}`);
+            Ember.Logger.info(`Failed to load or validate snapshot: ${e}`);
         }
+
+        return data;
+    },
+
+    _processSnapshot(data) {
+        for (let userId of Object.keys(data.users)) {
+            this.set('users.users.' + userId, data.users[userId]);
+        }
+
+        this.get('users').incrementProperty('isDirty');
+
+        for (let windowData of data.windows) {
+            let messages = windowData.messages;
+            delete windowData.messages;
+
+            let windowObject = this.upsertModel('window', windowData);
+            this.insertModels('message', messages, windowObject);
+        }
+
+        this.set('activeDesktop', data.activeDesktop);
+        this.set('windowListComplete', true);
+
+        Ember.Logger.info('Snapshot processed.');
     }
 });
