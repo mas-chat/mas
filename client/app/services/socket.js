@@ -61,7 +61,7 @@ export default Ember.Service.extend({
         });
     },
 
-    start(cachedUpTo) {
+    start(cachedUpto) {
         let userId = this.get('store.userId');
         let secret = this.get('secret');
         let socket = io.connect();
@@ -69,7 +69,7 @@ export default Ember.Service.extend({
         Ember.Logger.info('Opened Socket.io connection.');
 
         this.set('socket', socket);
-        this._emitInit(userId, secret, cachedUpTo);
+        this._emitInit(userId, secret, cachedUpto);
 
         socket.on('initok', Ember.run.bind(this, function(data) {
             this.set('_connected', true);
@@ -134,7 +134,7 @@ export default Ember.Service.extend({
         this.set('_networkErrorCallbackCtx', ctx);
     },
 
-    _emitInit(userId, secret, cachedUpTo) {
+    _emitInit(userId, secret, cachedUpto) {
         this.set('store.windowListComplete', false);
 
         this.socket.emit('init', {
@@ -144,10 +144,10 @@ export default Ember.Service.extend({
             secret: secret,
             version: '1.0',
             maxBacklogMsgs: isMobile.any ? 80 : 160,
-            cachedUpTo: cachedUpTo || 0
+            cachedUpto: cachedUpto || 0
         });
 
-        Ember.Logger.info(`Sent INIT event.`);
+        Ember.Logger.info(`Sent INIT event, cachedUpto: ${cachedUpto}`);
     },
 
     _emitReq(command, callback) {

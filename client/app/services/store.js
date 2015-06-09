@@ -77,7 +77,7 @@ export default Ember.Service.extend({
             // It's now first possible time to start socket.io connection. Data from server
             // can't race with snapshot data as first socket.io event will be processed at
             // earliest in the next runloop.
-            this.get('socket').start(data ? data.cachedUpTo : 0);
+            this.get('socket').start(data && data.cachedUpto ? data.cachedUpto : 0);
 
             if (data) {
                 this._processSnapshot(data);
@@ -207,6 +207,8 @@ export default Ember.Service.extend({
     },
 
     _saveSnapshot() {
+        let cachedUpto = 0;
+
         if (!this.get('windowListComplete')) {
             return;
         }
@@ -233,6 +235,10 @@ export default Ember.Service.extend({
                     'hideImages'
                 ]);
 
+                if (messageData.gid > cachedUpto) {
+                    cachedUpto = messageData.gid;
+                }
+
                 messages.push(messageData);
                 data.users[messageData.userId] = true;
             }
@@ -254,6 +260,8 @@ export default Ember.Service.extend({
             windowProperties.messages = messages;
             data.windows.push(windowProperties);
         }
+
+        data.cachedUpto = cachedUpto;
 
         for (let userId of Object.keys(data.users)) {
             data.users[userId] = this.get('users.users.' + userId);
