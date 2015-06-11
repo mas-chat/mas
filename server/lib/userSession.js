@@ -19,7 +19,7 @@
 const redis = require('../lib/redis').createClient();
 
 module.exports = function authenticate() {
-    return function *authenticate(next) {
+    return function *auth(next) {
         let valid = true;
         let userId, secret, data;
         let cookie = this.cookies.get('auth');

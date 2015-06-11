@@ -65,7 +65,7 @@ exports.requeue = function*(userId, sessionId, ntfs) {
 
 exports.shutdown = function*() {
     yield redis.quit();
-}
+};
 
 function *queueNotifications(userId, sessionId, excludeSessionId, ntfs) {
     if (!util.isArray(ntfs)) {
