@@ -22,8 +22,18 @@ const path = require('path'),
       redis = require('redis'),
       thunkify = require('thunkify'),
       redisLuaHelper = require('redis-lua-helper'),
+      init = require('./init'),
       log = require('./log'),
       conf = require('./conf');
+
+let clients = [];
+
+init.on('shutdown', function() {
+    for (let client of clients) {
+        console.log('Closing Redis connections...');
+        client.quitNoRemove();
+    }
+});
 
 let rlh = redisLuaHelper({
     root: path.join(__dirname, '..', 'lua'),
@@ -75,6 +85,7 @@ function createClient() {
 
     coRedisClient.plainRedis = redis;
     coRedisClient.plainRedisClient = plainRedisClient;
+    clients.push(coRedisClient);
 
     coRedisClient.run = function*() {
         let params = [].slice.call(arguments);
@@ -93,6 +104,15 @@ function createClient() {
         }
 
         return res;
+    };
+
+    coRedisClient.quit = function*() {
+        clients.splice(clients.indexOf(this), 1);
+        plainRedisClient.quit();
+    };
+
+    coRedisClient.quitNoRemove = function() {
+        plainRedisClient.quit();
     };
 
     return coRedisClient;

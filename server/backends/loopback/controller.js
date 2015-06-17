@@ -21,7 +21,9 @@ const dropPriviledges = require('../../lib/dropPriviledges');
 
 dropPriviledges.drop();
 
-require('../../lib/init')('loopback');
+const init = require('../../lib/init')
+
+init.configureProcess('loopback');
 
 const co = require('co'),
       redisModule = require('../../lib/redis'),

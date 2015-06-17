@@ -21,7 +21,9 @@ const dropPriviledges = require('../../lib/dropPriviledges');
 
 dropPriviledges.drop();
 
-require('../../lib/init')('irc');
+const init = require('../../lib/init');
+
+init.configureProcess('irc');
 
 const assert = require('assert'),
       co = require('co'),

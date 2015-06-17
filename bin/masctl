@@ -98,6 +98,9 @@ function stopProcesses() {
         if (pid !== 0) {
             process.kill(pid);
             console.log('Stopped:'.yellow + ' ' + component);
+            // laheta SIGKILL jos ei kuollut 10s paasta??
+
+            // timeri sekuunin valein seuraamaan tilannetta handler kuten status komento
         } else {
             console.log('Was not running:'.red + ' ' + component);
         }

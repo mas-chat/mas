@@ -16,14 +16,16 @@
 
 'use strict';
 
-const path = require('path'),
+const assert = require('assert'),
+      path = require('path'),
       fs = require('fs'),
       npid = require('npid'),
       conf = require('./conf'),
-      log = require('./log'),
-      courier = require('./courier');
+      log = require('./log');
 
-module.exports = function configureProcess(serverName) {
+let shutdownCallbacks = [];
+
+exports.configureProcess = function(serverName) {
     let processName = 'mas-' + serverName + '-' + conf.get('common:env');
     let pid;
 
@@ -63,12 +65,46 @@ module.exports = function configureProcess(serverName) {
             }
         }
 
-        let deletePidAndExit = function() {
-            pid.remove();
-            courier.shutdown();
-        };
-
-        process.on('SIGINT', deletePidAndExit);
-        process.on('SIGTERM', deletePidAndExit);
+        process.on('SIGINT', shutdown);
+        process.on('SIGTERM', shutdown);
     }
+};
+
+// pitaa palauttaa ne erikoiscasen process.exitit muuten race startupin ja shutdown valilla redisin kanssa ainakin
+
+// NOTE: This will not close existing connections, which will wait for timeout before they are closed. To close them immediately , first make a list of connected sockets
+
+// kakkos stepissa
+
+// var socketlist = [];
+// io.sockets.on('connection', function(socket) {
+//     socketlist.push(socket);
+//     socket.emit('socket_is_connected','You are connected!');
+//     socket.on('close', function () {
+//       console.log('socket closed');
+//       socketlist.splice(socketlist.indexOf(socket), 1);
+//     });
+// });
+// Then close all existing connections
+
+// socketlist.forEach(function(socket) {
+//   socket.destroy();
+// });
+
+masctl pitaa lahettaa SIGTERM vaan
+
+exports.on = function(event, callback) {
+    assert(event === 'shutdown');
+
+    shutdownCallbacks.push(callback);
+};
+
+exports.shutdown = function() {
+    shutdown();
+};
+
+function shutdown() {
+    shutdownCallbacks.forEach(function(callback) {
+        callback();
+    });
 };

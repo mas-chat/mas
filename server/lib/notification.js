@@ -39,7 +39,7 @@ exports.receive = function*(userId, sessionId, timeout) {
         // socket.io connections block each other.
         let newClient = redisModule.createClient();
         let result = yield newClient.brpop(`outbox:${userId}:${sessionId}`, timeout);
-        newClient.quit();
+        yield newClient.quit();
 
         if (result) {
             command = result[1];

@@ -24,6 +24,7 @@ const redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
       friends = require('../models/friends'),
       alerts = require('../lib/alert'),
+      init = require('../lib/init'),
       conf = require('../lib/conf'),
       notification = require('../lib/notification'),
       courier = require('../lib/courier').createEndPoint('socket');
@@ -32,6 +33,11 @@ let networks = null;
 
 exports.setup = function(server) {
     let io = socketIo(server);
+
+    init.on('shutdown', function() {
+        console.log('Closing socket.io connections');
+        io.httpServer.close();
+    });
 
     io.on('connection', function(socket) {
         let userId = null;

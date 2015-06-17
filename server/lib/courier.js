@@ -24,19 +24,8 @@ const assert = require('assert'),
       co = require('co'),
       log = require('./log');
 
-let shutdownInitiated = false;
-let processing = false;
-
 exports.createEndPoint = function(name) {
     return new Courier(name);
-};
-
-exports.shutdown = function() {
-    if (!processing) {
-        exit();
-    } else {
-        shutdownInitiated = true;
-    }
 };
 
 function Courier(name) {
@@ -50,9 +39,6 @@ Courier.prototype.start = function() {
     co(function*() {
         while (1) {
             let result = (yield rcvRedis.brpop(`inbox:${this.name}`, 0))[1];
-
-            processing = true;
-
             let msg = JSON.parse(result);
             let handler = this.handlers[msg.__type];
 
@@ -66,12 +52,6 @@ Courier.prototype.start = function() {
                 }).call(this);
             } else {
                 this._reply(msg, handler(msg));
-            }
-
-            processing = false;
-
-            if (shutdownInitiated) {
-                exit();
             }
         }
     }).call(this);
@@ -145,9 +125,4 @@ Courier.prototype._convertToString = function(type, params, uid) {
 
 function isGeneratorFunction(obj) {
     return obj && obj.constructor && obj.constructor.name === 'GeneratorFunction';
-}
-
-function exit() {
-    log.info('Courier: Courier ready. Exiting.');
-    process.exit(0);
 }
