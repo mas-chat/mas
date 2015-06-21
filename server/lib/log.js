@@ -18,6 +18,7 @@
 
 const path = require('path'),
       fs = require('fs'),
+      mkdirp =require('mkdirp'),
       winston = require('winston'),
       MasTransport = require('./winstonMasTransport'),
       conf = require('./conf');
@@ -76,8 +77,7 @@ function configTransports() {
         let fileName = path.join(logDirectory, process.title + '.log');
 
         if (!fs.existsSync(logDirectory)) {
-            console.error('ERROR: '.red + 'Log directory ' + logDirectory + ' doesn\'t exist.');
-            process.exit(5);
+            mkdirp.sync(logDirectory); // Make sure log directory exists
         }
 
         if (conf.get('log:clear_at_startup') && fs.existsSync(fileName)) {

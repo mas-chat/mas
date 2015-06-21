@@ -19,11 +19,15 @@
 const path = require('path'),
       fs = require('fs'),
       npid = require('npid'),
+      semver = require('semver'),
+      mkdirp = require('mkdirp'),
       conf = require('./conf'),
       log = require('./log'),
       courier = require('./courier');
 
 module.exports = function configureProcess(serverName) {
+    checkNodeVersion();
+
     let processName = 'mas-' + serverName + '-' + conf.get('common:env');
     let pid;
 
@@ -36,6 +40,8 @@ module.exports = function configureProcess(serverName) {
         if (pidDirectory.charAt(0) !== path.sep) {
             pidDirectory = path.join(__dirname, '..', '..', pidDirectory);
         }
+
+        mkdirp.sync(pidDirectory); // Make sure pid directory exists
 
         let pidFile = path.join(pidDirectory, processName + '.pid');
 
@@ -72,3 +78,10 @@ module.exports = function configureProcess(serverName) {
         process.on('SIGTERM', deletePidAndExit);
     }
 };
+
+function checkNodeVersion() {
+    if (semver.lt(process.version, 'v0.11.11')) {
+        console.log('ERROR: Installed Node.js version must be at least v0.11.11');
+        process.exit(1);
+    }
+}

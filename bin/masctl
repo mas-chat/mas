@@ -20,10 +20,8 @@
 const child = require('child_process'),
       fs = require('fs'),
       path = require('path'),
-      semver = require('semver'),
       yargs = require('yargs'),
-      nconf = require('nconf'),
-      mkdirp = require('mkdirp');
+      nconf = require('nconf');
 
 require('colors');
 
@@ -51,16 +49,11 @@ let argv = yargs
     .alias('v', 'version')
     .argv;
 
-checkNodeVersion();
 setupNconf();
 
 let action = argv._[0];
 let env = getConfigOption('common:env');
 let pidDir = getConfigOption('pid:directory');
-let logDir = getConfigOption('log:directory');
-
-mkdirp.sync(getAbsolutePath(logDir)); // Make sure logs directory exists
-mkdirp.sync(getAbsolutePath(pidDir)); // Make sure pids directory exists
 
 let handles = {};
 
@@ -197,13 +190,6 @@ function waitAndUnref(node, component) {
         node.unref();
         console.log('Launched:'.green + ' ' + component);
     }, 5000);
-}
-
-function checkNodeVersion() {
-    if (semver.lt(process.version, 'v0.11.11')) {
-        console.log('ERROR: Installed Node.js version must be at least v0.11.11');
-        process.exit(1);
-    }
 }
 
 function setupNconf() {
