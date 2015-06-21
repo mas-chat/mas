@@ -503,7 +503,7 @@ Conversation.prototype._scanForEmailNotifications = function*(message) {
 
             // TBD: Needs to be transaction, add lua script
             yield redis.sadd('emailnotifications', userId);
-            yield redis.sadd(`emailnotificationslist:${userId}`, notificationId);
+            yield redis.lpush(`emailnotificationslist:${userId}`, notificationId);
 
             yield redis.hmset(`emailnotification:${notificationId}`, {
                 type: this.type,

@@ -119,7 +119,7 @@ MAS Redis structures
  emailnotifications (set)
    <userId1>, <userId2> ...
 
- emailnotificationslist:<userId>
+ emailnotificationslist:<userId> (list)
    <ntfId1>, <ntfId2>, ...
 
  emailnotification:<ntfId> (hash)

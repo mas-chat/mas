@@ -67,7 +67,7 @@ function deliverEmails() {
         let userIds = yield redis.smembers('emailnotifications');
 
         for (let userId of userIds) {
-            let notificationIds = yield redis.smembers(`emailnotificationslist:${userId}`);
+            let notificationIds = yield redis.lrange(`emailnotificationslist:${userId}`, 0, -1);
             let notifications = [];
 
             for (let notificationId of notificationIds) {
