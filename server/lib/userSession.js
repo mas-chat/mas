@@ -18,47 +18,45 @@
 
 const redis = require('../lib/redis').createClient();
 
-module.exports = function authenticate() {
-    return function *auth(next) {
-        let valid = true;
-        let userId, secret, data;
-        let cookie = this.cookies.get('auth');
-        let ts = Math.round(Date.now() / 1000);
+module.exports = function *auth(next) {
+    let valid = true;
+    let userId, secret, data;
+    let cookie = this.cookies.get('auth');
+    let ts = Math.round(Date.now() / 1000);
 
-        if (!cookie) {
+    if (!cookie) {
+        valid = false;
+    }
+
+    if (valid) {
+        data = cookie.split('-');
+
+        if (data.length !== 3) {
+            valid = false;
+        } else {
+            userId = data[0];
+            secret = data[1];
+
+            if (!userId || !secret) {
+                valid = false;
+            }
+        }
+    }
+
+    let user;
+
+    if (valid) {
+        user = yield redis.hgetall(`user:${userId}`);
+
+        if (!(user && user.secretExpires > ts && user.secret === secret)) {
             valid = false;
         }
+    }
 
-        if (valid) {
-            data = cookie.split('-');
+    this.mas = this.mas || {};
+    this.mas.userId = valid ? userId : null;
+    this.mas.email = valid ? user.email : null;
+    this.mas.inUse = valid ? user.inuse === 'true' : null;
 
-            if (data.length !== 3) {
-                valid = false;
-            } else {
-                userId = data[0];
-                secret = data[1];
-
-                if (!userId || !secret) {
-                    valid = false;
-                }
-            }
-        }
-
-        let user;
-
-        if (valid) {
-            user = yield redis.hgetall(`user:${userId}`);
-
-            if (!(user && user.secretExpires > ts && user.secret === secret)) {
-                valid = false;
-            }
-        }
-
-        this.mas = this.mas || {};
-        this.mas.userId = valid ? userId : null;
-        this.mas.email = valid ? user.email : null;
-        this.mas.inUse = valid ? user.inuse === 'true' : null;
-
-        yield next;
-    };
+    yield next;
 };

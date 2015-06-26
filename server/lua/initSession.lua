@@ -141,16 +141,6 @@ for i = 1, #windowIds do
     end
 end
 
--- Send settings
-local settings = hgetall('settings:' .. userId)
-
-redis.call('LPUSH', outbox, cjson.encode({
-    ['id'] = 'SET',
-    ['settings'] = {
-        ['activeDesktop'] = tonumber(settings.activeDesktop)
-    }
-}))
-
 -- Prepend the USERS notification so client gets it first
 local userIdList = {}
 

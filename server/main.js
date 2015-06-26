@@ -61,7 +61,7 @@ exports.init = function(httpServer, httpsServer, setHttpHandlers) {
         viewPath: path.join(__dirname, 'views')
     }));
 
-    app.use(userSession());
+    app.use(userSession);
 
     handlebarsHelpers.registerHelpers(hbs);
     routes.register(app);

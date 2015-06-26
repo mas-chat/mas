@@ -18,10 +18,13 @@
 
 const co = require('co'),
       log = require('../lib/log'),
+      uid2 = require('uid2'),
       redis = require('../lib/redis').createClient(),
       notification = require('../lib/notification'),
       search = require('../lib/search'),
+      conf = require('../lib/conf'),
       courier = require('../lib/courier').createEndPoint('command'),
+      mailer = require('../lib/mailer'),
       conversationFactory = require('../models/conversation'),
       window = require('../models/window'),
       User = require('../models/user'),
@@ -48,7 +51,8 @@ const handlers = {
     REQUEST_FRIEND: handleRequestFriend,
     FRIEND_VERDICT: handleFriendVerdict,
     REMOVE_FRIEND: handleRemoveFriend,
-    DESTROY_ACCOUNT: handleDestroyAccount
+    DESTROY_ACCOUNT: handleDestroyAccount,
+    SEND_CONFIRM_EMAIL: handleSendConfirmEmail,
 };
 
 module.exports = function*(userId, sessionId, command) {
@@ -469,7 +473,14 @@ function *handleUpdateProfile(params) {
 
     yield user.load(userId);
     user.data.name = params.command.name;
-    user.data.email = params.command.email;
+
+    if (user.data.email !== params.command.email) {
+        user.data.email = params.command.email;
+        user.data.emailConfirmed = 'false';
+
+        yield sendEmailConfirmationEmail(userId, user.data.email);
+    }
+
     yield user.save();
 
     return { status: 'OK' };
@@ -501,6 +512,25 @@ function *handleDestroyAccount(params) {
     yield friends.removeUser(userId);
 
     return { status: 'OK' };
+}
+
+function *handleSendConfirmEmail(params) {
+    let userId = params.userId;
+
+    yield sendEmailConfirmationEmail(userId);
+    return { status: 'OK' };
+}
+
+function *sendEmailConfirmationEmail(userId, email) {
+    let user = yield redis.hgetall(`user:${userId}`);
+    let emailConfirmationToken = uid2(25);
+
+    yield redis.setex(`emailconfirmationtoken:${emailConfirmationToken}`, 60 * 60 * 24, userId);
+
+    mailer.send('emails/build/confirmEmail.hbs', {
+        name: user.name,
+        url: conf.get('site:url') + '/confirm-email/' + emailConfirmationToken
+    }, email || user.email, `Please confirm your email address`);
 }
 
 function *userExistsCheck(userId) {

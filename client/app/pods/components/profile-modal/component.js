@@ -22,6 +22,7 @@ export default Ember.Component.extend({
     errorMsg: '',
 
     socket: Ember.inject.service(),
+    store: Ember.inject.service(),
 
     actions: {
         edit() {
@@ -32,6 +33,8 @@ export default Ember.Component.extend({
             }, function(resp) {
                 if (resp.status === 'OK') {
                     this.sendAction('closeModal');
+                    // Don't nag about unconfirmed email address anymore in this session
+                    this.set('store.emailConfirmed', true);
                 } else {
                     this.set('errorMsg', resp.errorMsg);
                 }

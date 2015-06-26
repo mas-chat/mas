@@ -30,7 +30,8 @@ const path = require('path'),
       pagesController = require('../controllers/pages/pages'),
       uploadController = require('../controllers/upload'),
       userFilesController = require('../controllers/userFiles'),
-      forgotPasswordController = require('../controllers/forgotPassword');
+      forgotPasswordController = require('../controllers/forgotPassword'),
+      confirmEmailController = require('../controllers/confirmEmail');
 
 exports.register = function(app) {
     app.use(cacheFilter);
@@ -65,6 +66,9 @@ exports.register = function(app) {
     // Forgot password
     app.post('/forgot-password', bodyParser(), forgotPasswordController.create);
     app.get('/reset-password/:token', registerController.indexReset);
+
+    // Confirm email
+    app.get('/confirm-email/:token', confirmEmailController.show);
 
     // Web site page routes
     app.get('/', indexPageController);

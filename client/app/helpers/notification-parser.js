@@ -215,6 +215,9 @@ export default Ember.Object.extend({
         if (typeof(data.settings.activeDesktop) !== 'undefined') {
             this.set('store.activeDesktop', data.settings.activeDesktop);
         }
+
+        this.set('store.email', data.settings.email);
+        this.set('store.emailConfirmed', data.settings.emailConfirmed);
     },
 
     _handleFriendsconfirm(data) {

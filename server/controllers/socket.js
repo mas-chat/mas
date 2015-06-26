@@ -23,6 +23,7 @@ const redis = require('../lib/redis').createClient(),
       requestController = require('../controllers/request'),
       log = require('../lib/log'),
       friends = require('../models/friends'),
+      settings = require('../models/settings'),
       alerts = require('../lib/alert'),
       conf = require('../lib/conf'),
       notification = require('../lib/notification'),
@@ -95,6 +96,7 @@ exports.setup = function(server) {
 
                 yield redis.run('initSession', userId, sessionId, maxBacklogMsgs, cachedUpto, ts);
 
+                yield settings.sendSet(userId, sessionId);
                 yield friends.sendFriends(userId, sessionId);
                 yield friends.sendFriendConfirm(userId, sessionId);
                 yield friends.informStateChange(userId, 'login');

@@ -50,7 +50,11 @@ export default Ember.Service.extend({
     alerts: null,
     networks: null,
 
+    // Settings
     activeDesktop: null,
+    email: '',
+    emailConfirmed: true,
+
     userId: null,
     windowListComplete: false,
     maxBacklogMsgs: 100000,

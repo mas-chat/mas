@@ -244,6 +244,7 @@ exports.create = function*() {
         let user = new User({
             name: form.data.name,
             email: form.data.email,
+            emailConfirmed: 'false',
             nick: form.data.nick,
             inuse: 'true',
             registrationtime: Math.round(Date.now() / 1000)
@@ -292,6 +293,10 @@ exports.createExt = function*() {
 
         user.data.name = form.data.name;
         user.data.email = form.data.email;
+
+        // If the user didn't change his email address, we trust what google/Yahoo gave us.
+        user.data.emailConfirmed = this.mas.email === form.data.email ? 'true' : 'false';
+
         user.data.nick = form.data.nick;
         user.data.inuse = 'true';
         user.data.registrationtime = Math.round(Date.now() / 1000);

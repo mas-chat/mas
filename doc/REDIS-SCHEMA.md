@@ -6,6 +6,7 @@ MAS Redis structures
  user:<userId> (hash)
    name (string)
    email (string)
+   emailconfirmed (string, 'true', 'false')
    inuse (string, 'true', 'false')
    deleted (string, 'true', 'false')
    lastlogout (int, unix time) (0 = online)
@@ -104,6 +105,9 @@ MAS Redis structures
  passwordresettoken:<token> (string with expiry time)
    <userId>
 
+ emailconfirmationtoken:<token> (string with expiry time)
+   <userId>
+
  alert:<id> (hash)
    message (text)
    expires (unix time)
@@ -128,6 +132,8 @@ MAS Redis structures
    senderNick
    groupName
    message
+
+
 
 ```
 

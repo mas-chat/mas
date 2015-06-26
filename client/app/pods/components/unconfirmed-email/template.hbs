@@ -1,0 +1,15 @@
+{{#unless emailConfirmed}}
+    <div class="flex-1 announcement-message">
+        Your email address {{email}} hasn't been confirmed.
+    </div>
+    <div>
+        <button {{action "requestConfirmation"}} type="button" class="btn btn-default">
+            Send confirmation link
+        </button>
+    </div>
+    <div>
+        <button {{action "openModal" "profile-modal"}} type="button" class="btn btn-default">
+            Change email address&hellip;
+        </button>
+    </div>
+{{/unless}}
