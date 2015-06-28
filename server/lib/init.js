@@ -80,8 +80,8 @@ module.exports = function configureProcess(serverName) {
 };
 
 function checkNodeVersion() {
-    if (semver.lt(process.version, 'v0.11.11')) {
-        console.log('ERROR: Installed Node.js version must be at least v0.11.11');
+    if (semver.lt(process.version, 'v0.12.0')) {
+        console.log('ERROR: Installed Node.js version must be at least v0.12.0');
         process.exit(1);
     }
 }
