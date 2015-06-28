@@ -61,10 +61,6 @@ directory=logs
 clear_at_startup=false
 rotate_daily=false
 
-[pid]
-enabled=true
-directory=run
-
 [loggly]
 enabled=false
 subdomain=example

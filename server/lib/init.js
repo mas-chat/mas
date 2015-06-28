@@ -18,7 +18,6 @@
 
 const path = require('path'),
       fs = require('fs'),
-      npid = require('npid'),
       semver = require('semver'),
       mkdirp = require('mkdirp'),
       conf = require('./conf'),
@@ -29,54 +28,11 @@ module.exports = function configureProcess(serverName) {
     checkNodeVersion();
 
     let processName = 'mas-' + serverName + '-' + conf.get('common:env');
-    let pid;
 
     process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
     process.title = processName;
-
-    if (conf.get('pid:enabled')) {
-        let pidDirectory = conf.get('pid:directory');
-
-        if (pidDirectory.charAt(0) !== path.sep) {
-            pidDirectory = path.join(__dirname, '..', '..', pidDirectory);
-        }
-
-        mkdirp.sync(pidDirectory); // Make sure pid directory exists
-
-        let pidFile = path.join(pidDirectory, processName + '.pid');
-
-        try {
-            pid = npid.create(pidFile);
-            pid.removeOnExit();
-        } catch (e) {
-            if (e.code === 'EEXIST') {
-                pid = parseInt(fs.readFileSync(pidFile));
-
-                try {
-                    process.kill(pid, 0);
-                } catch (killE) {
-                    // Process mentioned in the pid file is not running anymore
-                    log.info('Removing stale pid file: ' + pidFile);
-                    fs.unlinkSync(pidFile);
-                    pid = 0;
-                }
-
-                if (pid !== 0) {
-                    log.error('Pid file (' + pidFile + ') exists. Process is already running.');
-                }
-            } else {
-                log.error('Unknown pid file error.');
-            }
-        }
-
-        let deletePidAndExit = function() {
-            pid.remove();
-            courier.shutdown();
-        };
-
-        process.on('SIGINT', deletePidAndExit);
-        process.on('SIGTERM', deletePidAndExit);
-    }
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
 };
 
 function checkNodeVersion() {
