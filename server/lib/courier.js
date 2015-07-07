@@ -125,13 +125,15 @@ Courier.prototype.noop = function() {
 };
 
 Courier.prototype.quit = function() {
+    // TODO: Consider making this method to wait until cleanUp is done.
+
     quitPending = true;
 
     if (!processing) {
         // If we aren't processing a received message we can quit immediately
         cleanUp();
     }
-}
+};
 
 Courier.prototype._reply = function(msg, resp) {
     if (!msg.__uid) {
@@ -147,7 +149,7 @@ Courier.prototype._reply = function(msg, resp) {
 
     if (quitPending) {
         // Quit() has been called but we were middle of procesing a message, quit now.
-        cleanup();
+        cleanUp();
     }
 };
 
