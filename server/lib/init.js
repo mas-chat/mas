@@ -1,5 +1,5 @@
 //
-//   Copyright 2014 Ilkka Oksanen <iao@iki.fi>
+//   Copyright 2014-2015 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,23 +16,54 @@
 
 'use strict';
 
-const path = require('path'),
+const assert = require('assert'),
+      path = require('path'),
       fs = require('fs'),
       semver = require('semver'),
       mkdirp = require('mkdirp'),
+      _ = require('lodash'),
       conf = require('./conf'),
-      log = require('./log'),
-      courier = require('./courier');
+      log = require('./log');
 
-module.exports = function configureProcess(serverName) {
-    checkNodeVersion();
+checkNodeVersion();
 
+let stateChangeCallbacks = [];
+
+const shutdownOrder = {
+    beforeShutdown: 1,
+    shutdown: 2,
+    afterShutdown: 3
+};
+
+exports.configureProcess = function(serverName) {
     let processName = 'mas-' + serverName + '-' + conf.get('common:env');
 
     process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
     process.title = processName;
     process.on('SIGINT', shutdown);
     process.on('SIGTERM', shutdown);
+};
+
+exports.on = function(state, callback) {
+    assert(shutdownOrder[state]);
+
+    stateChangeCallbacks.push({ state: state, cb: callback });
+};
+
+exports.shutdown = function() {
+    let callbacks = _.sortBy(stateChangeCallbacks, function(entry) {
+        return shutdownOrder[entry.state];
+    });
+
+    co(function*() {
+        callbacks.forEach(function(callback) {
+            if (isGeneratorFunction(handler)) {
+                yield callback.cb();
+            } else {
+                callback.cb();
+            }
+        });
+    })();
 };
 
 function checkNodeVersion() {

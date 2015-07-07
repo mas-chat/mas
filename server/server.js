@@ -21,6 +21,7 @@ const fs = require('fs'),
       http = require('http'),
       https = require('https'),
       dropPriviledges = require('./lib/dropPriviledges'),
+      init = require('./lib/init'),
       conf = require('./lib/conf');
 
 const httpPort = conf.get('frontend:http_port');
@@ -78,7 +79,7 @@ function httpListenDone() {
 
 function listensDone() {
     dropPriviledges.drop();
+    init.configureProcess('frontend');
 
-    require('./lib/init')('frontend');
     require('./main').init(httpServer, httpsServer, setHTTPHandlers);
 }
