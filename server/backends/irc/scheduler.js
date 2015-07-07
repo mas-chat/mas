@@ -21,7 +21,7 @@ const co = require('co'),
       redis = require('../../lib/redis').createClient(),
       log = require('../../lib/log'),
       conf = require('../../lib/conf'),
-      courier = require('../../lib/courier').createEndPoint('ircscheduler');
+      courier = require('../../lib/courier').create();
 
 exports.init = function() {
     // Twice in a day

@@ -19,70 +19,71 @@
 const assert = require('assert'),
       uid2 = require('uid2'),
       redisModule = require('./redis'),
-      sendRedis = redisModule.createClient(),
       rcvRedis = redisModule.createClient(),
+      sendRedis = redisModule.createClient(),
       co = require('co'),
       log = require('./log');
 
-let shutdownInitiated = false;
+let quitPending = false;
 let processing = false;
+
+exports.create = function() {
+    // Can only send messages and receive replies. Doesn't have a well known endpoint name.
+    return new Courier();
+};
 
 exports.createEndPoint = function(name) {
     return new Courier(name);
 };
 
-exports.shutdown = function() {
-    if (!processing) {
-        exit();
-    } else {
-        shutdownInitiated = true;
-    }
-};
-
 function Courier(name) {
-    this.name = name;
+    this.name = name || uid2(32);
     this.handlers = {};
+    this.isEndpoint = !!name;
 
     log.info('Courier: New instance created.');
 }
 
-Courier.prototype.start = function() {
-    co(function*() {
-        while (1) {
-            let result = (yield rcvRedis.brpop(`inbox:${this.name}`, 0))[1];
+Courier.prototype.listen = function*() {
+    assert(this.isEndpoint);
 
-            processing = true;
+    while (1) {
+        let result = (yield rcvRedis.brpop(`inbox:${this.name}`, 0))[1];
 
-            let msg = JSON.parse(result);
-            let handler = this.handlers[msg.__type];
+        processing = true;
 
-            log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}] DATA: ${result}`);
+        let msg = JSON.parse(result);
+        let handler = this.handlers[msg.__type];
 
-            assert(handler, this.name + ': Missing message handler for: ' + msg.__type);
+        log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}] DATA: ${result}`);
 
-            if (isGeneratorFunction(handler)) {
-                co(function*() { // eslint-disable-line no-loop-func
-                    this._reply(msg, (yield handler(msg)));
-                }).call(this);
-            } else {
-                this._reply(msg, handler(msg));
-            }
+        assert(handler, this.name + ': Missing message handler for: ' + msg.__type);
 
-            processing = false;
-
-            if (shutdownInitiated) {
-                exit();
-            }
+        if (isGeneratorFunction(handler)) {
+            co(function*() { // eslint-disable-line no-loop-func
+                this._reply(msg, (yield handler(msg)));
+            }).call(this);
+        } else {
+            this._reply(msg, handler(msg));
         }
-    }).call(this);
+
+        if (quitPending) {
+            break;
+        }
+
+        processing = false;
+    }
 };
 
 Courier.prototype.call = function*(dest, type, params) {
+    assert(!quitPending && this.isEndpoint);
+
     let uid = Date.now() + uid2(10);
     let data = this._convertToString(type, params, uid);
     let reqRedis = redisModule.createClient();
 
     yield reqRedis.lpush(`inbox:${dest}`, data);
+
     let resp = yield reqRedis.brpop(`inbox:${this.name}:${uid}`, 60);
     yield reqRedis.quit();
 
@@ -96,11 +97,18 @@ Courier.prototype.call = function*(dest, type, params) {
     return resp;
 };
 
-Courier.prototype.callNoWait = function(dest, type, params) {
+Courier.prototype.callNoWait = function(dest, type, params, ttl) {
+    assert(!quitPending);
+
     let data = this._convertToString(type, params);
+    let key = `inbox:${dest}`;
 
     co(function*() {
-        yield sendRedis.lpush(`inbox:${dest}`, data);
+        yield sendRedis.lpush(key, data);
+
+        if (ttl) {
+            yield sendRedis.expire(key, ttl);
+        }
     })();
 };
 
@@ -116,6 +124,15 @@ Courier.prototype.noop = function() {
     return null;
 };
 
+Courier.prototype.quit = function() {
+    quitPending = true;
+
+    if (!processing) {
+        // If we aren't processing a received message we can quit immediately
+        cleanUp();
+    }
+}
+
 Courier.prototype._reply = function(msg, resp) {
     if (!msg.__uid) {
         // Not a request.
@@ -124,7 +141,14 @@ Courier.prototype._reply = function(msg, resp) {
 
     assert(resp);
 
-    this.callNoWait(`${msg.__sender}:${msg.__uid}`, null, resp);
+    // It might have taken the target too much time to respond. It's therefore possible that the
+    // sender is not waiting anymore. Use TTL 60s to guarantee cleanup in that case.
+    this.callNoWait(`${msg.__sender}:${msg.__uid}`, null, resp, 60);
+
+    if (quitPending) {
+        // Quit() has been called but we were middle of procesing a message, quit now.
+        cleanup();
+    }
 };
 
 Courier.prototype._convertToString = function(type, params, uid) {
@@ -143,11 +167,11 @@ Courier.prototype._convertToString = function(type, params, uid) {
     return JSON.stringify(msg);
 };
 
-function isGeneratorFunction(obj) {
-    return obj && obj.constructor && obj.constructor.name === 'GeneratorFunction';
+function cleanUp() {
+    sendRedis.quit();
+    rcvRedis.quit();
 }
 
-function exit() {
-    log.info('Courier: Courier ready. Exiting.');
-    process.exit(0);
+function isGeneratorFunction(obj) {
+    return obj && obj.constructor && obj.constructor.name === 'GeneratorFunction';
 }

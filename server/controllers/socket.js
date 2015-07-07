@@ -27,7 +27,7 @@ const redis = require('../lib/redis').createClient(),
       alerts = require('../lib/alert'),
       conf = require('../lib/conf'),
       notification = require('../lib/notification'),
-      courier = require('../lib/courier').createEndPoint('socket');
+      courier = require('../lib/courier').create();
 
 let networks = null;
 

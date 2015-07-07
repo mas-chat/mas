@@ -45,7 +45,8 @@ co(function*() {
     courier.on('create', processCreate);
     courier.on('join', processJoin);
     courier.on('close', courier.noop); // TBD: Should we do something?
-    courier.start();
+
+    courier.listen();
 })();
 
 function processTextCommand() {

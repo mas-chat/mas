@@ -127,7 +127,7 @@ courier.on('write', function(params) {
 co(function*() {
     yield courier.clearInbox('ircparser');
     courier.callNoWait('ircparser', 'restarted');
-    courier.start();
+    courier.listen();
 })();
 
 function connect(userId, nick, network) {

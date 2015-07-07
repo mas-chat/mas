@@ -101,7 +101,8 @@ co(function*() {
     courier.on('connected', processConnected);
     courier.on('disconnected', processDisconnected);
     courier.on('reconnectifinactive', processReconnectIfInactive);
-    courier.start();
+
+    yield courier.listen();
 })();
 
 // Upper layer messages
