@@ -21,15 +21,24 @@ const co = require('co'),
       CronJob = require('cron').CronJob,
       redis = require('./redis').createClient(),
       log = require('./log'),
+      init = require('./init'),
       conf = require('./conf'),
       mailer = require('./mailer'),
       friends = require('../models/friends');
 
+let jobs = [];
+
 exports.init = function() {
     // Once in an hour
-    new CronJob('0 0 */1 * * *', deleteStaleSessions, null, true); // eslint-disable-line no-new
+    jobs.push(new CronJob('0 0 */1 * * *', deleteStaleSessions, null, true));
     // Once in 15 minutes
-    new CronJob('0 */10 * * * *', deliverEmails, null, true); // eslint-disable-line no-new
+    jobs.push(new CronJob('0 */10 * * * *', deliverEmails, null, true));
+};
+
+exports.quit = function() {
+    for (let job of jobs) {
+        job.stop();
+    }
 };
 
 // Cleans stale sessions that might exist because of server crash
