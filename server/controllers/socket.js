@@ -29,15 +29,17 @@ const redis = require('../lib/redis').createClient(),
       notification = require('../lib/notification'),
       courier = require('../lib/courier').create();
 
+let io = socketIo(server);
 let networks = null;
+let clientSocketList = [];
 
 exports.setup = function(server) {
-    let io = socketIo(server);
-
     io.on('connection', function(socket) {
         let userId = null;
         let sessionId = null;
         let state = 'connected'; // connected, authenticated, disconnected
+
+        clientSocketList.push(socket);
 
         socket.on('init', function(data) {
             co(function*() {
@@ -152,7 +154,9 @@ exports.setup = function(server) {
 
         function *end(reason) {
             if (state !== 'disconnected') {
-                socket.disconnect();
+                clientSocketList.splice(clientSocketList.indexOf(socket), 1);
+                socket.disconnect(true);
+
                 state = 'disconnected';
 
                 let sessionIdExplained = `${sessionId} ` || '';
@@ -168,6 +172,16 @@ exports.setup = function(server) {
             }
         }
     });
+};
+
+exports.quit = function() {
+    log.info('Closing all socket.io connections');
+
+    io.httpServer.close();
+    terminateClientConnections();
+
+    yield redis.quit();
+    courier.quit();
 };
 
 function *sendNetworkList(userId, sessionId) {
@@ -192,6 +206,12 @@ function checkBacklogParameterBounds(value) {
     }
 
     return value;
+}
+
+function terminateClientConnections() {
+    clientSocketList.forEach(function(socket) {
+        socket.disconnect(true);
+    });
 }
 
 function isInteger(x) {
