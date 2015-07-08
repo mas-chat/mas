@@ -18,9 +18,9 @@
 
 const path = require('path'),
       fs = require('fs'),
-      mkdirp =require('mkdirp'),
       winston = require('winston'),
       MasTransport = require('./winstonMasTransport'),
+      init = require('./init'),
       conf = require('./conf');
 
 require('colors');
@@ -35,15 +35,21 @@ exports.info = function(userId, msg) {
 exports.warn = function(userId, msg) {
     logEntry('warn', userId, msg, function() {
         if (conf.get('common:dev_mode')) {
-            process.exit(6);
+            init.shutdown();
         }
     });
 };
 
 exports.error = function(userId, msg) {
     logEntry('error', userId, msg, function() {
-        process.exit(4);
+        init.shutdown();
     });
+};
+
+exports.quit = function() {
+    if (logger) {
+        logger.clear();
+    }
 };
 
 function logEntry(type, userId, msg, callback) {
@@ -77,7 +83,8 @@ function configTransports() {
         let fileName = path.join(logDirectory, process.title + '.log');
 
         if (!fs.existsSync(logDirectory)) {
-            mkdirp.sync(logDirectory); // Make sure log directory exists
+            console.error('ERROR: '.red + 'Log directory ' + logDirectory + ' doesn\'t exist.');
+            init.shutdown();
         }
 
         if (conf.get('log:clear_at_startup') && fs.existsSync(fileName)) {

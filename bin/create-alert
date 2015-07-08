@@ -72,8 +72,7 @@ co(function*() {
         yield notification.broadcast(userId, alert);
     }
 
-    yield redis.quit();
-    yield notification.shutdown();
+    yield redis.shutdown();
 
     console.log('Done. All OK.');
 })();

@@ -31,8 +31,10 @@ let rlh = redisLuaHelper({
     extension: 'lua'
 });
 
-exports.createClient = function() {
-    return createClient();
+let activeClients = [];
+
+exports.createClient = function(options) {
+    return createClient(options);
 };
 
 exports.loadScripts = function*() {
@@ -51,7 +53,7 @@ exports.loadScripts = function*() {
         }
     }
 
-    redisClient.quit();
+    yield redisClient.quit();
 };
 
 exports.initDB = function*() {
@@ -62,19 +64,28 @@ exports.initDB = function*() {
     yield redisClient.quit();
 };
 
-function createClient() {
+exports.shutdown = function() {
+    shutdown();
+};
+
+function createClient(options) {
+    options = {
+        autoClose: options.autoClose || true // Auto close client during server shutdown
+    };
+
     let plainRedisClient;
 
     if (conf.get('redis:connection_type') === 'socket') {
         plainRedisClient = redis.createClient(conf.get('redis:port'), conf.get('redis:host'));
     } else {
-        plainRedisClient = redis.createClient(conf.get('redis:unix_socket_path'));
+        plainRedisClient = redis.createClient('/tmp/redis.sock');
     }
 
     let coRedisClient = coRedis(plainRedisClient);
 
     coRedisClient.plainRedis = redis;
     coRedisClient.plainRedisClient = plainRedisClient;
+    coRedisClient.options = options;
 
     coRedisClient.run = function*() {
         let params = [].slice.call(arguments);
@@ -95,5 +106,27 @@ function createClient() {
         return res;
     };
 
+    coRedisClient.quit = function*() {
+        let index = activeClients.indexOf(plainRedisClient);
+
+        if (index > -1) {
+            activeClients.splice(index, 1);
+        }
+
+        plainRedisClient.quit();
+    };
+
+    if (options.autoClose) {
+        activeClients.push(plainRedisClient);
+    }
+
     return coRedisClient;
+}
+
+function shutdown() {
+    log.info(`Closing ${activeClients.length} redis connections`);
+
+    for (let client of activeClients) {
+        client.quit();
+    }
 }

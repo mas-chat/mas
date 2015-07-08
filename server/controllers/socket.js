@@ -29,11 +29,14 @@ const redis = require('../lib/redis').createClient(),
       notification = require('../lib/notification'),
       courier = require('../lib/courier').create();
 
-let io = socketIo(server);
+let ioServers = [];
 let networks = null;
 let clientSocketList = [];
 
 exports.setup = function(server) {
+    let io = socketIo(server);
+    ioServers.push(io);
+
     io.on('connection', function(socket) {
         let userId = null;
         let sessionId = null;
@@ -113,7 +116,7 @@ exports.setup = function(server) {
                     let loopTs = Math.round(Date.now() / 1000);
                     yield redis.zadd('sessionlastheartbeat', loopTs, userId + ':' + sessionId);
 
-                    let ntfs = yield notification.receive(userId, sessionId, 60);
+                    let ntfs = yield notification.receive(userId, sessionId, 10);
 
                     if (state !== 'authenticated') {
                         break;
@@ -138,7 +141,7 @@ exports.setup = function(server) {
                     return;
                 }
 
-                let resp = yield requestController(userId, sessionId, data);
+                let resp = yield requestController.process(userId, sessionId, data);
 
                 if (cb) {
                     cb(resp); // Send the response as Socket.io acknowledgment.
@@ -174,14 +177,14 @@ exports.setup = function(server) {
     });
 };
 
-exports.quit = function() {
-    log.info('Closing all socket.io connections');
+exports.shutdown = function*() {
+    for (let server of ioServers) {
+        server.close();
+    }
 
-    io.httpServer.close();
     terminateClientConnections();
 
-    yield redis.quit();
-    courier.quit();
+    yield courier.quit();
 };
 
 function *sendNetworkList(userId, sessionId) {
@@ -209,9 +212,11 @@ function checkBacklogParameterBounds(value) {
 }
 
 function terminateClientConnections() {
-    clientSocketList.forEach(function(socket) {
-        socket.disconnect(true);
-    });
+    log.info(`Closing all ${clientSocketList.length} socket.io connections`);
+
+    for(let socket of clientSocketList) {
+        socket.destroy(true);
+    }
 }
 
 function isInteger(x) {

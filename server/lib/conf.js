@@ -20,6 +20,7 @@ const path = require('path'),
       fs = require('fs'),
       nconf = require('nconf'),
       argv = require('yargs').argv,
+      init = require('./init'),
       log = require('./log');
 
 require('colors');
@@ -36,7 +37,7 @@ if (configFileOption && configFileOption.charAt(0) === path.sep) {
 
 if (!fs.existsSync(configFile)) {
     console.error('ERROR: '.red + 'Config file ' + configFile + ' missing.');
-    process.exit(1);
+    init.shutdown();
 }
 
 nconf.argv().add('file', {

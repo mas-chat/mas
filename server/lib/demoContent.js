@@ -25,7 +25,7 @@ const co = require('co'),
       masWindow = require('../models/window'),
       conversationFactory = require('../models/conversation');
 
-module.exports.enable = function() {
+exports.enable = function() {
     co(function*() {
         while (1) {
             yield wait(2000);

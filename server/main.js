@@ -29,6 +29,7 @@ const path = require('path'),
       passport = require('./lib/passport'),
       userSession = require('./lib/userSession'),
       routes = require('./routes/routes'),
+      init = require('./lib/init'),
       scheduler = require('./lib/scheduler'),
       demoContent = require('./lib/demoContent'),
       socketController = require('./controllers/socket'),
@@ -61,7 +62,7 @@ exports.init = function(httpServer, httpsServer, setHttpHandlers) {
         viewPath: path.join(__dirname, 'views')
     }));
 
-    app.use(userSession);
+    app.use(userSession.auth);
 
     handlebarsHelpers.registerHelpers(hbs);
     routes.register(app);
@@ -101,4 +102,15 @@ exports.init = function(httpServer, httpsServer, setHttpHandlers) {
     if (conf.get('frontend:demo_mode') === true) {
         demoContent.enable();
     }
+
+    init.on('beforeShutdown', function*() {
+        yield socketController.shutdown();
+        scheduler.quit();
+    });
+
+    init.on('afterShutdown', function*() {
+        redisModule.shutdown();
+        httpServer.close();
+        log.quit();
+    });
 };

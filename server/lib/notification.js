@@ -31,28 +31,25 @@ exports.broadcast = function*(userId, ntfs, excludeSessionId) {
 
 exports.receive = function*(userId, sessionId, timeout) {
     let command;
-    let ntfs = [];
+    let commands = [];
 
-    if (timeout) {
-        // Wait for first req/ntf to appear if timeout is given
-        // For every blocking redis call we need to create own redis client. Otherwise
-        // socket.io connections block each other.
-        let newClient = redisModule.createClient();
-        let result = yield newClient.brpop(`outbox:${userId}:${sessionId}`, timeout);
-        newClient.quit();
+    let client = redisModule.createClient({ autoClose: false });
+    let result = yield client.brpop(`outbox:${userId}:${sessionId}`, timeout);
 
-        if (result) {
-            command = result[1];
-            ntfs.push(JSON.parse(command));
-        }
+    if (result) {
+        commands.push(result[1]);
     }
 
     // Retrieve other ntfs if there are any
-    while ((command = yield redis.rpop(`outbox:${userId}:${sessionId}`)) !== null) {
-        ntfs.push(JSON.parse(command));
+    while ((command = yield client.rpop(`outbox:${userId}:${sessionId}`)) !== null) {
+        commands.push(command);
     }
 
-    return ntfs;
+    yield client.quit();
+
+    return commands.map(function(value) {
+        return JSON.parse(value);
+    });
 };
 
 exports.requeue = function*(userId, sessionId, ntfs) {
@@ -61,10 +58,6 @@ exports.requeue = function*(userId, sessionId, ntfs) {
     });
 
     yield redis.rpush.apply(redis, [ `outbox:${userId}:${sessionId}` ].concat(ntfs.reverse()));
-};
-
-exports.shutdown = function*() {
-    yield redis.quit();
 };
 
 function *queueNotifications(userId, sessionId, excludeSessionId, ntfs) {

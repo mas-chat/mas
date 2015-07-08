@@ -156,33 +156,3 @@ function authExt(openidId, oauthId, profile, done) {
         done(null, userId);
     })();
 }
-
-if (conf.get('googleauth:enabled') === true) {
-    let google = new GoogleStrategy({
-        clientID: conf.get('googleauth:client_id'),
-        clientSecret: conf.get('googleauth:client_secret'),
-        callbackURL: conf.get('googleauth:callback_url')
-    }, function(accessToken, refreshToken, params, profile, done) {
-        // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-        let openIdId = jwt.decode(params.id_token, null, true).openid_id;
-        authExt(openIdId, 'google:' + profile.id, profile, done);
-    });
-
-    passport.use(google);
-}
-
-if (conf.get('yahooauth:enabled') === true) {
-    let yahoo = new YahooStrategy({
-        returnURL: conf.get('site:url') + '/auth/yahoo/callback',
-        realm: conf.get('site:url')
-    }, function(openIdId, profile, done) {
-        authExt(openIdId, null, profile, done);
-    });
-
-    passport.use(yahoo);
-}
-
-let local = new LocalStrategy(authLocal);
-passport.use(local);
-
-module.exports = passport;

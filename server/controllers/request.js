@@ -56,7 +56,11 @@ const handlers = {
     SEND_CONFIRM_EMAIL: handleSendConfirmEmail
 };
 
-module.exports = function*(userId, sessionId, command) {
+init.on('beforeShutdown', function*() {
+    yield courier.quit();
+});
+
+exports.process = function*(userId, sessionId, command) {
     let windowId = command.windowId;
     let network = command.network;
 

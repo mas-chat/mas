@@ -17,6 +17,7 @@
 'use strict';
 
 const assert = require('assert'),
+      Promise = require('bluebird'),
       uid2 = require('uid2'),
       redisModule = require('./redis'),
       rcvRedis = redisModule.createClient(),
@@ -26,6 +27,7 @@ const assert = require('assert'),
 
 let quitPending = false;
 let processing = false;
+let quitDeferred = null;
 
 exports.create = function() {
     // Can only send messages and receive replies. Doesn't have a well known endpoint name.
@@ -125,14 +127,17 @@ Courier.prototype.noop = function() {
 };
 
 Courier.prototype.quit = function() {
-    // TODO: Consider making this method to wait until cleanUp is done.
+    log.info('Closing courier instance.');
 
+    quitDeferred = Promise.pending();
     quitPending = true;
 
     if (!processing) {
         // If we aren't processing a received message we can quit immediately
         cleanUp();
     }
+
+    return quitDeferred.promise;
 };
 
 Courier.prototype._reply = function(msg, resp) {
@@ -170,8 +175,12 @@ Courier.prototype._convertToString = function(type, params, uid) {
 };
 
 function cleanUp() {
-    sendRedis.quit();
-    rcvRedis.quit();
+    co(function*() {
+        yield sendRedis.quit();
+        yield rcvRedis.quit();
+
+        quitDeferred.fulfill();
+    })();
 }
 
 function isGeneratorFunction(obj) {

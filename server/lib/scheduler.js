@@ -21,7 +21,6 @@ const co = require('co'),
       CronJob = require('cron').CronJob,
       redis = require('./redis').createClient(),
       log = require('./log'),
-      init = require('./init'),
       conf = require('./conf'),
       mailer = require('./mailer'),
       friends = require('../models/friends');

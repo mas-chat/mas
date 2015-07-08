@@ -17,17 +17,16 @@
 'use strict';
 
 const assert = require('assert'),
-      path = require('path'),
-      fs = require('fs'),
       semver = require('semver'),
-      mkdirp = require('mkdirp'),
       _ = require('lodash'),
+      co = require('co'),
       conf = require('./conf'),
       log = require('./log');
 
 checkNodeVersion();
 
 let stateChangeCallbacks = [];
+let shutdownInProgress = false;
 
 const shutdownOrder = {
     beforeShutdown: 1,
@@ -51,24 +50,42 @@ exports.on = function(state, callback) {
 };
 
 exports.shutdown = function() {
-    let callbacks = _.sortBy(stateChangeCallbacks, function(entry) {
+    shutdown();
+};
+
+function shutdown() {
+    if (shutdownInProgress) {
+        return;
+    }
+
+    shutdownInProgress = true;
+
+    log.info('Shutdown sequence started.');
+
+    let entries = _.sortBy(stateChangeCallbacks, function(entry) {
         return shutdownOrder[entry.state];
     });
 
     co(function*() {
-        callbacks.forEach(function(callback) {
-            if (isGeneratorFunction(handler)) {
-                yield callback.cb();
+        for (let entry of entries) {
+            if (isGeneratorFunction(entry.cb)) {
+                yield entry.cb();
             } else {
-                callback.cb();
+                entry.cb();
             }
-        });
+        }
+
+        console.log('Shutdown complete.');
     })();
-};
+}
 
 function checkNodeVersion() {
     if (semver.lt(process.version, 'v0.12.0')) {
         console.log('ERROR: Installed Node.js version must be at least v0.12.0');
         process.exit(1);
     }
+}
+
+function isGeneratorFunction(obj) {
+    return obj && obj.constructor && obj.constructor.name === 'GeneratorFunction';
 }
