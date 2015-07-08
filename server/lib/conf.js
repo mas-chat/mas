@@ -37,7 +37,7 @@ if (configFileOption && configFileOption.charAt(0) === path.sep) {
 
 if (!fs.existsSync(configFile)) {
     console.error('ERROR: '.red + 'Config file ' + configFile + ' missing.');
-    init.shutdown();
+    process.exit(1);
 }
 
 nconf.argv().add('file', {

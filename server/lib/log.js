@@ -84,7 +84,7 @@ function configTransports() {
 
         if (!fs.existsSync(logDirectory)) {
             console.error('ERROR: '.red + 'Log directory ' + logDirectory + ' doesn\'t exist.');
-            init.shutdown();
+            process.exit(1);
         }
 
         if (conf.get('log:clear_at_startup') && fs.existsSync(fileName)) {
