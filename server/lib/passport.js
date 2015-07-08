@@ -25,13 +25,52 @@ const crypto = require('crypto'),
       GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
       YahooStrategy = require('passport-yahoo').Strategy,
       redis = require('./redis').createClient(),
-      User = require('../models/user'),
+      user = require('../models/user'),
       conf = require('./conf'),
       log = require('./log');
 
+exports.initialize = function() {
+    setup();
+    return passport.initialize();
+};
+
+exports.authenticate = function(type, cb) {
+    return passport.authenticate(type, cb);
+};
+
+function setup() {
+    if (conf.get('googleauth:enabled') === true) {
+        let google = new GoogleStrategy({
+            clientID: conf.get('googleauth:client_id'),
+            clientSecret: conf.get('googleauth:client_secret'),
+            callbackURL: conf.get('googleauth:callback_url')
+        }, function(accessToken, refreshToken, params, profile, done) {
+            // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+            let openIdId = jwt.decode(params.id_token, null, true).openid_id;
+            authExt(openIdId, 'google:' + profile.id, profile, done);
+        });
+
+        passport.use(google);
+    }
+
+    if (conf.get('yahooauth:enabled') === true) {
+        let yahoo = new YahooStrategy({
+            returnURL: conf.get('site:url') + '/auth/yahoo/callback',
+            realm: conf.get('site:url')
+        }, function(openIdId, profile, done) {
+            authExt(openIdId, null, profile, done);
+        });
+
+        passport.use(yahoo);
+    }
+
+    let local = new LocalStrategy(authLocal);
+    passport.use(local);
+}
+
 function authLocal(username, password, done) {
     co(function*() {
-        let user = null;
+        let userRecord = null;
         let userId = null;
         let correctPassword = false;
 
@@ -40,20 +79,20 @@ function authLocal(username, password, done) {
         }
 
         if (userId) {
-            user = yield redis.hgetall(`user:${userId}`);
+            userRecord = yield redis.hgetall(`user:${userId}`);
         }
 
-        if (user && !user.password && user.extAuthId) {
+        if (userRecord && !userRecord.password && userRecord.extAuthId) {
             done('useExt', false);
             return;
         }
 
-        if (!user || user.deleted === 'true' || !user.password) {
+        if (!userRecord || userRecord.deleted === 'true' || !userRecord.password) {
             done('invalid', false);
             return;
         }
 
-        let passwordParts = user.password.split(':');
+        let passwordParts = userRecord.password.split(':');
         let encryptionMethod = passwordParts[0];
         let encryptedHash = passwordParts[1];
 
@@ -75,7 +114,7 @@ function authLocal(username, password, done) {
             log.info('Login attempt with unencrypted password, result:' + correctPassword);
         }
 
-        if (correctPassword && user.inuse === 'true') {
+        if (correctPassword && userRecord.inuse === 'true') {
             done(null, userId);
         } else {
             done('invalid', false);
@@ -103,15 +142,15 @@ function authExt(openidId, oauthId, profile, done) {
         }
 
         if (userId === null) {
-            let user = new User({
+            let newUser = user.create({
                 name: profile.displayName,
                 email: profile.emails[0].value,
                 extAuthId: oauthId || openidId,
                 inuse: 'false'
             }, {}, []);
 
-            userId = yield user.generateUserId();
-            yield user.save();
+            userId = yield newUser.generateUserId();
+            yield newUser.save();
         }
 
         done(null, userId);

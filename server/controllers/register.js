@@ -25,7 +25,7 @@ const Promise = require('bluebird'),
       redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
       cookie = require('../lib/cookie'),
-      User = require('../models/user');
+      user = require('../models/user');
 
 let formFields = {
     name: fields.string({
@@ -191,10 +191,10 @@ exports.index = function*() {
 
         template = 'register-ext';
 
-        let user = yield redis.hgetall(`user:${this.mas.userId}`);
+        let newUser = yield redis.hgetall(`user:${this.mas.userId}`);
         form = registrationFormExt.bind({
-            name: user.name,
-            email: user.email,
+            name: newUser.name,
+            email: newUser.email,
             registrationType: 'ext'
         });
     } else {
@@ -241,18 +241,18 @@ exports.create = function*() {
     } else {
         log.info('Registration form data is valid');
 
-        let user = new User({
+        let newUser = user.create({
             name: form.data.name,
             email: form.data.email,
             emailConfirmed: 'false',
             nick: form.data.nick,
             inuse: 'true',
             registrationtime: Math.round(Date.now() / 1000)
-        }, {}, {});
+        }, {}, []);
 
-        user.setPassword(form.data.password);
-        let userId = yield user.generateUserId();
-        yield user.save();
+        newUser.setPassword(form.data.password);
+        let userId = yield newUser.generateUserId();
+        yield newUser.save();
 
         let resp = yield cookie.createSession(userId);
         cookie.set(userId, resp.secret, resp.expires, this);
@@ -269,12 +269,12 @@ exports.createExt = function*() {
         return;
     }
 
-    let user = new User();
-    yield user.load(this.mas.userId);
+    let newUser = user.create();
+    yield newUser.load(this.mas.userId);
 
     let emailInUse = false;
 
-    if (form.data.email && form.data.email.toLowerCase() === user.data.email.toLowerCase()) {
+    if (form.data.email && form.data.email.toLowerCase() === newUser.data.email.toLowerCase()) {
         // Keep using the email address from external authenticator
         emailInUse = false;
     } else {
@@ -289,18 +289,18 @@ exports.createExt = function*() {
         });
     } else {
         // TBD: User object doesn't support changing email address yet, hence the hack
-        yield redis.hdel('index:user', user.data.email);
+        yield redis.hdel('index:user', newUser.data.email);
 
-        user.data.name = form.data.name;
-        user.data.email = form.data.email;
+        newUser.data.name = form.data.name;
+        newUser.data.email = form.data.email;
 
         // If the user didn't change his email address, we trust what google/Yahoo gave us.
-        user.data.emailConfirmed = this.mas.email === form.data.email ? 'true' : 'false';
+        newUser.data.emailConfirmed = this.mas.email === form.data.email ? 'true' : 'false';
 
-        user.data.nick = form.data.nick;
-        user.data.inuse = 'true';
-        user.data.registrationtime = Math.round(Date.now() / 1000);
-        yield user.save();
+        newUser.data.nick = form.data.nick;
+        newUser.data.inuse = 'true';
+        newUser.data.registrationtime = Math.round(Date.now() / 1000);
+        yield newUser.save();
 
         this.response.redirect('/app');
     }
@@ -325,10 +325,10 @@ exports.createReset = function*() {
     } else {
         yield redis.del(`passwordresettoken:${form.data.token}`);
 
-        let user = new User();
-        yield user.load(userId);
-        user.setPassword(form.data.password);
-        yield user.save();
+        let newUser = user.create();
+        yield newUser.load(userId);
+        newUser.setPassword(form.data.password);
+        yield newUser.save();
 
         this.response.redirect('/');
     }

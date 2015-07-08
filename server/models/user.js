@@ -23,7 +23,9 @@ const bcrypt = require('bcrypt'),
 
 const RESERVED_USERIDS = 9000;
 
-module.exports = exports = User;
+exports.create = function(details, settings, friends) {
+    return new User(details, settings, friends);
+};
 
 function User(details, settings, friends) {
     if (!details) {

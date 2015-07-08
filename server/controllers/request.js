@@ -27,10 +27,11 @@ const co = require('co'),
       mailer = require('../lib/mailer'),
       conversationFactory = require('../models/conversation'),
       window = require('../models/window'),
-      User = require('../models/user'),
+      user = require('../models/user'),
       nick = require('../models/nick'),
       friends = require('../models/friends'),
-      ircUser = require('../backends/irc/ircUser');
+      ircUser = require('../backends/irc/ircUser'),
+      init = require('../lib/init');
 
 const handlers = {
     SEND: handleSend,
@@ -453,8 +454,8 @@ function *handleRemoveFriend(params) {
 }
 
 function *handleGetProfile(params) {
-    let user = yield redis.hgetall(`user:${params.userId}`);
-    return { name: user.name, email: user.email, nick: user.nick };
+    let userRecord = yield redis.hgetall(`user:${params.userId}`);
+    return { name: userRecord.name, email: userRecord.email, nick: userRecord.nick };
 }
 
 function *handleUpdateProfile(params) {
@@ -469,19 +470,19 @@ function *handleUpdateProfile(params) {
         return { status: 'ERROR', errorMsg: 'Invalid email address' };
     }
 
-    let user = new User();
+    let newUser = user.create();
 
-    yield user.load(userId);
-    user.data.name = params.command.name;
+    yield newUser.load(userId);
+    newUser.data.name = params.command.name;
 
-    if (user.data.email !== params.command.email) {
-        user.data.email = params.command.email;
-        user.data.emailConfirmed = 'false';
+    if (newUser.data.email !== params.command.email) {
+        newUser.data.email = params.command.email;
+        newUser.data.emailConfirmed = 'false';
 
-        yield sendEmailConfirmationEmail(userId, user.data.email);
+        yield sendEmailConfirmationEmail(userId, newUser.data.email);
     }
 
-    yield user.save();
+    yield newUser.save();
 
     return { status: 'OK' };
 }
@@ -489,9 +490,9 @@ function *handleUpdateProfile(params) {
 function *handleDestroyAccount(params) {
     let userId = params.userId;
 
-    let user = new User();
-    yield user.load(userId);
-    yield user.delete();
+    let newUser = user.create();
+    yield newUser.load(userId);
+    yield newUser.delete();
 
     let conversationIds = yield window.getAllConversationIds(userId);
 
@@ -522,21 +523,21 @@ function *handleSendConfirmEmail(params) {
 }
 
 function *sendEmailConfirmationEmail(userId, email) {
-    let user = yield redis.hgetall(`user:${userId}`);
+    let userRecord = yield redis.hgetall(`user:${userId}`);
     let emailConfirmationToken = uid2(25);
 
     yield redis.setex(`emailconfirmationtoken:${emailConfirmationToken}`, 60 * 60 * 24, userId);
 
     mailer.send('emails/build/confirmEmail.hbs', {
-        name: user.name,
+        name: userRecord.name,
         url: conf.get('site:url') + '/confirm-email/' + emailConfirmationToken
-    }, email || user.email, `Please confirm your email address`);
+    }, email || userRecord.email, `Please confirm your email address`);
 }
 
 function *userExistsCheck(userId) {
-    let user = yield redis.hgetall(`user:${userId}`);
+    let userRecord = yield redis.hgetall(`user:${userId}`);
 
-    return user && user.deleted !== 'true';
+    return userRecord && userRecord.deleted !== 'true';
 }
 
 function *removeFromConversation(userId, conversation) {
