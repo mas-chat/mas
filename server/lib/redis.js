@@ -69,6 +69,8 @@ exports.shutdown = function() {
 };
 
 function createClient(options) {
+    options = options || {};
+
     options = {
         autoClose: options.autoClose || true // Auto close client during server shutdown
     };
