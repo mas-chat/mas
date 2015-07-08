@@ -159,8 +159,8 @@ exports.setup = function(server) {
 
                 state = 'disconnected';
 
-                let sessionIdExplained = `${sessionId} ` || '';
-                log.info(userId, `Session ${sessionIdExplained}ended. Reason: ${reason}`);
+                let sessionIdExplained = sessionId || '<not assigned>';
+                log.info(userId, `Session ${sessionIdExplained} ended. Reason: ${reason}`);
 
                 if (sessionId) {
                     let last = yield redis.run('deleteSession', userId, sessionId);

@@ -20,9 +20,7 @@
 // Minimal connection manager that keeps TCP sockets alive even if
 // rest of the system is restarted. Allows nondistruptive updates.
 
-const init = require('../../lib/init');
-
-init.configureProcess('irc-connman');
+require('../../lib/init').configureProcess('irc-connman');
 
 const net = require('net'),
       tls = require('tls'),

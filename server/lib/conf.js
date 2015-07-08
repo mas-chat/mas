@@ -39,9 +39,7 @@ if (!fs.existsSync(configFile)) {
     process.exit(1);
 }
 
-nconf.argv();
-
-nconf.use('file', {
+nconf.argv().add('file', {
     file: configFile,
     format: nconf.formats.ini
 });

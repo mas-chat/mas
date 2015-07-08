@@ -17,13 +17,8 @@
 
 'use strict';
 
-const dropPriviledges = require('../../lib/dropPriviledges');
-
-dropPriviledges.drop();
-
-const init = require('../../lib/init');
-
-init.configureProcess('irc');
+require('../../lib/dropPriviledges').drop();
+require('../../lib/init').configureProcess('irc');
 
 const assert = require('assert'),
       co = require('co'),

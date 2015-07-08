@@ -16,8 +16,7 @@
 
 'use strict';
 
-const uuid = require('uid2'),
-      redis = require('../lib/redis').createClient(),
+const redis = require('../lib/redis').createClient(),
       settings = require('../models/settings');
 
 exports.show = function*() {
@@ -34,6 +33,6 @@ exports.show = function*() {
 
     yield this.render('confirmed-email', {
         page: 'confirmed-email',
-        title: 'Email confirmed',
+        title: 'Email confirmed'
     });
 };

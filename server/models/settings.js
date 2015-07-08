@@ -37,4 +37,4 @@ exports.sendSet = function*(userId, sessionId) {
     } else {
         yield notification.broadcast(userId, command);
     }
-}
+};

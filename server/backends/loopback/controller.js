@@ -17,13 +17,8 @@
 
 'use strict';
 
-const dropPriviledges = require('../../lib/dropPriviledges');
-
-dropPriviledges.drop();
-
-const init = require('../../lib/init')
-
-init.configureProcess('loopback');
+require('../../lib/dropPriviledges').drop();
+require('../../lib/init').configureProcess('loopback');
 
 const co = require('co'),
       redisModule = require('../../lib/redis'),

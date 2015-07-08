@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* globals $ */
+
 import Ember from 'ember';
 
 export default Ember.Component.extend({
@@ -33,7 +35,7 @@ export default Ember.Component.extend({
 
             this.get('socket').send({
                 id: 'SEND_CONFIRM_EMAIL'
-            }, function(resp) {
+            }, function() {
                 this.get('store').upsertModel('alert', {
                     message: msg,
                     dismissible: true,

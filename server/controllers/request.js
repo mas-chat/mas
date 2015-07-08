@@ -53,7 +53,7 @@ const handlers = {
     FRIEND_VERDICT: handleFriendVerdict,
     REMOVE_FRIEND: handleRemoveFriend,
     DESTROY_ACCOUNT: handleDestroyAccount,
-    SEND_CONFIRM_EMAIL: handleSendConfirmEmail,
+    SEND_CONFIRM_EMAIL: handleSendConfirmEmail
 };
 
 module.exports = function*(userId, sessionId, command) {
