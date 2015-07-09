@@ -22,15 +22,20 @@
 
 const net = require('net'),
       conf = require('../../lib/conf'),
+      log = require('../../lib/log'),
+      init = require('../../lib/init'),
       dropPriviledges = require('../../lib/dropPriviledges');
 
 const IDENTD_PORT = 113;
 
 let identHandler = function() {};
+let worker;
+let identServer;
 
 // Start IDENT server
 if (conf.get('irc:identd')) {
-    net.createServer(identHandlerSelector).listen(IDENTD_PORT, identdDone);
+    identServer = net.createServer(identHandlerSelector);
+    identServer.listen(IDENTD_PORT, identdDone);
 } else {
     identdDone();
 }
@@ -38,7 +43,7 @@ if (conf.get('irc:identd')) {
 function identdDone() {
     dropPriviledges.drop();
 
-    let worker = require('./connectionManagerWorker');
+    worker = require('./connectionManagerWorker');
     worker.init(setIdentdHandler);
 }
 
@@ -49,3 +54,15 @@ function identHandlerSelector(conn) {
 function setIdentdHandler(handler) {
     identHandler = handler;
 }
+
+init.on('beforeShutdown', function*() {
+    if (conf.get('irc:identd')) {
+        identServer.close();
+    }
+
+    yield worker.shutdown();
+});
+
+init.on('afterShutdown', function() {
+    log.quit();
+});

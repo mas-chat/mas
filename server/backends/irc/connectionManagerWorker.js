@@ -20,7 +20,9 @@
 // Minimal connection manager that keeps TCP sockets alive even if
 // rest of the system is restarted. Allows nondistruptive updates.
 
-require('../../lib/init').configureProcess('irc-connman');
+const init = require('../../lib/init');
+
+init.configureProcess('irc-connman');
 
 const net = require('net'),
       tls = require('tls'),
@@ -40,6 +42,16 @@ const LAG_POLL_INTERVAL = 60 * 1000; // 60s
 
 exports.init = function(setIdentdHandler) {
     setIdentdHandler(handleIdentConnection);
+};
+
+exports.shutdown = function*() {
+    yield courier.quit();
+
+    for (let key of Object.keys(sockets)) {
+        let socket = sockets[key];
+        socket.end('QUIT :MAS server restart.\r\n');
+        socket.destroy();
+    }
 };
 
 function handleIdentConnection(conn) {
@@ -125,7 +137,7 @@ courier.on('write', function(params) {
 co(function*() {
     yield courier.clearInbox('ircparser');
     courier.callNoWait('ircparser', 'restarted');
-    courier.listen();
+    yield courier.listen();
 })();
 
 function connect(userId, nick, network) {
