@@ -41,7 +41,7 @@ co(function*() {
     courier.on('join', processJoin);
     courier.on('close', courier.noop); // TBD: Should we do something?
 
-    courier.listen();
+    yield courier.listen();
 })();
 
 function processTextCommand() {
