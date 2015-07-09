@@ -41,6 +41,13 @@ exports.configureProcess = function(serverName) {
     process.title = processName;
     process.on('SIGINT', shutdown);
     process.on('SIGTERM', shutdown);
+
+    process.on('message', function(msg) {
+        // Message from PM2
+        if (msg === 'shutdown') {
+            shutdown();
+        }
+    });
 };
 
 exports.on = function(state, callback) {
