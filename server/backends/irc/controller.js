@@ -18,7 +18,9 @@
 'use strict';
 
 require('../../lib/dropPriviledges').drop();
-require('../../lib/init').configureProcess('irc');
+
+const init = require('../../lib/init');
+init.configureProcess('irc');
 
 const assert = require('assert'),
       co = require('co'),
@@ -78,6 +80,16 @@ let handlers = {
     NOTICE: handlePrivmsg,
     ERROR: handleError
 };
+
+init.on('beforeShutdown', function*() {
+    yield ircScheduler.quit();
+    yield courier.quit();
+});
+
+init.on('afterShutdown', function*() {
+    redisModule.shutdown();
+    log.quit();
+});
 
 co(function*() {
     yield redisModule.loadScripts();

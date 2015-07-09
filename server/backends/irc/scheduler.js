@@ -23,10 +23,19 @@ const co = require('co'),
       conf = require('../../lib/conf'),
       courier = require('../../lib/courier').create();
 
+let jobs = [];
+
 exports.init = function() {
     // Twice in a day
-    new CronJob( // eslint-disable-line no-new
-        '0 0 7,19 * * *', disconnectInactiveIRCUsers, null, true);
+    jobs.push(new CronJob('0 0 7,19 * * *', disconnectInactiveIRCUsers, null, true));
+};
+
+exports.quit = function*() {
+    for (let job of jobs) {
+        job.stop();
+    }
+
+    yield courier.quit();
 };
 
 function disconnectInactiveIRCUsers() {
