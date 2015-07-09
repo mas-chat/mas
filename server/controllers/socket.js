@@ -215,7 +215,7 @@ function terminateClientConnections() {
     log.info(`Closing all ${clientSocketList.length} socket.io connections`);
 
     for(let socket of clientSocketList) {
-        socket.destroy(true);
+        socket.disconnect(true);
     }
 }
 
