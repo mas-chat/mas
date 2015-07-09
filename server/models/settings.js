@@ -16,11 +16,17 @@
 
 'use strict';
 
-const redis = require('../lib/redis').createClient(),
+const _ = require('lodash'),
+      redis = require('../lib/redis').createClient(),
       notification = require('../lib/notification');
 
 exports.sendSet = function*(userId, sessionId) {
-    let settings = yield redis.hgetall(`settings:${userId}`);
+    let settings = (yield redis.hgetall(`settings:${userId}`)) || {};
+
+    _.defaults(settings, {
+        activeDesktop: 0
+    });
+
     let user = yield redis.hgetall(`user:${userId}`);
 
     let command = {
