@@ -140,7 +140,10 @@ export default Ember.Service.extend({
     clearModels(type, parent) {
         parent = parent || this;
 
-        delete parent.lookupTable[type];
+        if (parent.lookupTable) {
+            delete parent.lookupTable[type];
+        }
+
         this.get(type + 's').clear();
     },
 
