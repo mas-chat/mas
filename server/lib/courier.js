@@ -78,7 +78,7 @@ Courier.prototype.listen = function*() {
 };
 
 Courier.prototype.call = function*(dest, type, params) {
-    assert(!quitPending && this.isEndpoint);
+    assert(!quitPending);
 
     let uid = Date.now() + uid2(10);
     let data = this._convertToString(type, params, uid);
