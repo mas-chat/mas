@@ -144,7 +144,7 @@ export default Ember.Service.extend({
             delete parent.lookupTable[type];
         }
 
-        this.get(type + 's').clear();
+        parent.get(type + 's').clear();
     },
 
     _startDayChangedService() {
