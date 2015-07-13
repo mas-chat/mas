@@ -78,7 +78,10 @@ Courier.prototype.listen = function*() {
 };
 
 Courier.prototype.call = function*(dest, type, params) {
-    assert(!quitPending);
+    if (quitPending) {
+        log.warn('Not delivering message, shutdown is in progress.');
+        return null;
+    }
 
     let uid = Date.now() + uid2(10);
     let data = this._convertToString(type, params, uid);
@@ -100,7 +103,10 @@ Courier.prototype.call = function*(dest, type, params) {
 };
 
 Courier.prototype.callNoWait = function(dest, type, params, ttl) {
-    assert(!quitPending);
+    if (quitPending) {
+        log.warn('Not delivering message, shutdown is in progress.');
+        return;
+    }
 
     let data = this._convertToString(type, params);
     let key = `inbox:${dest}`;
