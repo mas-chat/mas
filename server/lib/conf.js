@@ -20,7 +20,6 @@ const path = require('path'),
       fs = require('fs'),
       nconf = require('nconf'),
       argv = require('yargs').argv,
-      init = require('./init'),
       log = require('./log');
 
 require('colors');
