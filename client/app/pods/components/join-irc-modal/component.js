@@ -36,12 +36,13 @@ export default Ember.Component.extend({
         joinIRC() {
             this.get('socket').send({
                 id: 'JOIN',
-                network: this.get('selectedNetwork') || this.get('ircNetworks')[0],
+                network: this.get('selectedNetwork'),
                 name: this.get('channel'),
                 password: this.get('password').trim()
             }, function(resp) {
                 if (resp.status === 'OK') {
                     this.sendAction('closeModal');
+                    this.set('selectedNetwork', null);
                 } else {
                     this.set('errorMsg', resp.errorMsg);
                 }

@@ -11,7 +11,7 @@
         </div>
         <div class="form-group">
             <label>IRC network</label>
-            {{view "select" content=ircNetworks value=selectedNetwork classNames="form-control"}}
+            {{ember-selectize content=ircNetworks value=selectedNetwork optionValuePath="content" optionLabelPath="content" placeholder="Select an IRC network" }}
         </div>
     </form>
 {{/modal-dialog}}
