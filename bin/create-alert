@@ -19,6 +19,7 @@
 
 let readlineSync = require('readline-sync'),
     co = require('co'),
+    log = require('../server/lib/log'),
     redisModule = require('../server/lib/redis'),
     redis = redisModule.createClient(),
     notification = require('../server/lib/notification');
@@ -72,7 +73,8 @@ co(function*() {
         yield notification.broadcast(userId, alert);
     }
 
-    yield redis.shutdown();
+    redisModule.shutdown();
+    log.quit();
 
     console.log('Done. All OK.');
 })();
