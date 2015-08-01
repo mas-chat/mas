@@ -92,6 +92,7 @@ export default Ember.Object.extend({
             let visibleLink;
             let media = false;
             let type = '';
+            let domain = urlObj.domain();
 
             if (start !== pos) {
                 this._parseText(result, source.substring(pos, start), network, cat);
@@ -101,7 +102,8 @@ export default Ember.Object.extend({
                 visibleLink = urlObj.filename();
                 media = true;
                 type = 'image';
-            } else if (urlObj.domain() === 'youtube.com' && urlObj.search(true).v) {
+            } else if ((domain === 'youtube.com' && urlObj.search(true).v) ||
+                domain === 'youtu.be') {
                 visibleLink = urlObj.toString();
                 media = true;
                 type = 'youtubelink';
