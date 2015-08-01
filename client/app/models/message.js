@@ -153,7 +153,8 @@ export default Ember.Object.extend({
 
         if (video) {
             let urlObj = new URI(video.url);
-            return urlObj.search(true).v;
+            // Format is https://www.youtube.com/watch?v=0P7O69GuCII or https://youtu.be/0P7O69GuCII
+            return urlObj.search(true).v || urlObj.pathname().substring(1).split('/')[0];
         } else {
             return null;
         }
