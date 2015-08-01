@@ -1,3 +1,4 @@
+
 <div class="window-title flex-row {{ircServerWindow}}">
     <div class="window-caption flex-1" data-toggle="tooltip" data-placement="bottom" data-delay='{"show": 1500, "hide": 300}' title={{content.tooltipTopic}}>
         {{content.decoratedTitle}} {{content.decoratedTopic}}
@@ -5,9 +6,9 @@
 
     <div class="window-title-buttons">
         {{#unless logOrMobileModeEnabled}}
-            <i class="window-title-button fa fa-arrows"></i>
+            <i class="window-title-button fa fa-arrows" data-toggle="tooltip" data-placement="bottom" title="Drag the arrow to move this window to a different place or desktop."></i>
             {{#if expanded}}
-                <i {{action "compress"}} class="window-title-button fa fa-compress"></i>
+                <i {{action "compress"}} class="window-title-button fa fa-compress" data-toggle="tooltip" data-placement="bottom" title="Maximize the size of this window."></i>
             {{else}}
                 <i {{action "expand"}} class="window-title-button fa fa-expand"></i>
             {{/if}}
@@ -103,3 +104,4 @@
         </div>
     </div>
 </div>
+
