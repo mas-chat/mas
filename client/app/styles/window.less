@@ -1,15 +1,14 @@
-@window-bg-color: white;//lighten(#2b3e50, 55%);
-@window-line-color: darken(@window-bg-color, 20%);
-@window-outer-line-color: lighten(@window-title-bg-color, 18%);
-
+@window-bg-color: white;
 @window-toolbar-bg-color: whitesmoke;
-@window-title-bg-color: #142F40;
+
+@window-brand-color-group: #1D8BD1;
+@window-brand-color-1on1: green;
 
 .window {
     font-size: 14px;
     color: #333333;
     position: absolute;
-    padding: @grid-padding;
+    padding: @grid-margin @grid-margin*1.4 @grid-margin @grid-margin*1.4;
     z-index: 0;
 
     // Initial value, overwritten by velocity animation
@@ -27,36 +26,73 @@
         opacity: 0.3;
     }
 
+    .window-content {
+        background-color: @window-bg-color;
+    }
+
     .window-title {
         padding: 4px 8px;
-        background-color: @window-title-bg-color;
-        border-bottom: 1px solid @window-outer-line-color;
         color: whitesmoke;
     }
 
     &.irc-server-window {
         .window-title {
             background-color: rgb(32, 147, 185);
+            border-left: 1px solid rgb(32, 147, 185);
+            border-right: 1px solid rgb(32, 147, 185);
+            border-top: 1px solid rgb(32, 147, 185);
         }
 
         .window-content {
-            background-color: rgb(241, 242, 244);
+            border-left: 1px solid rgb(32, 147, 185);
+            border-right: 1px solid rgb(32, 147, 185);
+        }
+
+        .window-toolbar {
+            border-left: 1px solid rgb(32, 147, 185);
+            border-right: 1px solid rgb(32, 147, 185);
+            border-bottom: 1px solid rgb(32, 147, 185);
         }
     }
 
     &.private-1on1 {
         .window-title {
-            background-color: green;
+            background-color: @window-brand-color-1on1;
+            border-left: 1px solid @window-brand-color-1on1;
+            border-right: 1px solid @window-brand-color-1on1;
+            border-top: 1px solid @window-brand-color-1on1;
         }
 
         .window-content {
-            background-color: #DFE6F0;
+            border-left: 1px solid @window-brand-color-1on1;
+            border-right: 1px solid @window-brand-color-1on1;
+            background-color: #f7fff7;
+        }
+
+        .window-toolbar {
+            border-left: 1px solid @window-brand-color-1on1;
+            border-right: 1px solid @window-brand-color-1on1;
+            border-bottom: 1px solid @window-brand-color-1on1;
         }
     }
 
     &.group {
+        .window-title {
+            border-left: 1px solid @window-brand-color-group;
+            border-right: 1px solid @window-brand-color-group;
+            border-top: 1px solid @window-brand-color-group;
+            background-color: @window-brand-color-group;
+        }
+
         .window-content {
-            background-color: white;
+            border-right: 1px solid @window-brand-color-group;
+            border-left: 1px solid @window-brand-color-group;
+        }
+
+        .window-toolbar {
+            border-left: 1px solid @window-brand-color-group;
+            border-right: 1px solid @window-brand-color-group;
+            border-bottom: 1px solid @window-brand-color-group;
         }
     }
 
@@ -87,7 +123,7 @@
 
     .window-messages {
         color: #333333;
-        padding: 5px;
+        padding: 7px;
         overflow-y: auto;
         overflow-x: hidden;
         line-height: 138%;
@@ -139,10 +175,10 @@
     }
 
     .nick-mention {
-        background-color: rgb(241, 241, 248);
-        border: 1px dotted #888;
+        background-color: lighten(#FCF399, 10%);
+        border: 1px solid darken(#FCF399, 25%);
         padding: 0px 3px;
-        border-radius: 5px;
+        border-radius: 2px;
     }
 
     .nick-mention::first-letter {
@@ -231,7 +267,7 @@
     }
 
     .line.mention {
-        background-color: #CCE4F8;
+        background-color: #FCF399;
     }
 
     .line.error {
@@ -324,7 +360,6 @@
 
     .window-members {
         width: 32px;
-        border-left: 1px solid @window-line-color;
         line-height: 150%;
         overflow-y: auto;
         padding-top: 3px;
@@ -365,7 +400,7 @@
     }
 
     .window-toolbar {
-        border-top: 1px solid @window-line-color;
+        border-top: 1px solid #ddd;
         background-color: whitesmoke;
         height: 32px;
 
@@ -382,7 +417,7 @@
         .form-control {
             background-color: white;
             box-shadow: none;
-            height: 31px;
+            height: 30px;
             padding: 0px 10px;
         }
     }
@@ -402,7 +437,6 @@
 
     .window-buttons {
         width: 100px;
-        border-left: 1px solid @window-line-color;
     }
 
     .window-add-text-container {

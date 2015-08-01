@@ -51,7 +51,7 @@
 }
 
 .grid {
-    margin: @grid-padding;
+    margin: @grid-margin;
     position: relative;
 }
 
@@ -152,8 +152,9 @@
 .sidebar {
     width: 50px;
     align-items: center;
-    padding: 20px 7px 10px 7px;
+    padding: 20px 0px 10px 0px;
     user-select: none;
+    background-color: @mas-brand-color;
 }
 
 .upper-sidebar {
@@ -244,13 +245,13 @@
 #window-cursor-inner {
     position: absolute;
     display: flex;
-    color: whitesmoke;
-    border: 1px dashed whitesmoke;
+    color: black;
+    border: 2px dashed black;
     z-index: 100;
-    top: @grid-padding;
-    bottom: @grid-padding;
-    left: @grid-padding;
-    right: @grid-padding;
+    top: @grid-margin;
+    bottom: @grid-margin;
+    left: @grid-margin;
+    right: @grid-margin;
 
     .fa {
         margin: auto;
@@ -282,9 +283,8 @@
 
 .main-desktop-button {
     position: relative;
-    height: 32px;
-    width: 32px;
-    background-color: #1AA8B7;
+    height: 45px;
+    width: 100%;
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -299,6 +299,7 @@
     bottom: -4px;
     right: -5px;
     font-size: .7em;
+    font-weight: 900;
     background: #d45b53;
     color: white;
     width: 16px;
@@ -312,12 +313,14 @@
 }
 
 .main-desktop-button-selected {
-    border: 2px solid white;
+    background-color: @mas-bg-color;
+    color: #333;
 }
 
 .main-desktop-droparea {
-    border: 1px dashed whitesmoke;
-    background-color: #28537E;
+    padding: 2px;
+    border: 2px dashed white;
+    background-color: green;
     cursor: copy;
 }
 

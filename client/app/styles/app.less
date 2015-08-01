@@ -14,7 +14,7 @@
 
 //@import url(//fonts.googleapis.com/css?family=Roboto:400,500&subset=latin,latin-ext);
 
-@grid-padding: 3px;
+@grid-margin: 4px;
 
 @import "window";
 @import "main";
@@ -47,15 +47,16 @@ body > .ember-view { // ember root element
 
 /* Bootswatch color customizations */
 
-@mas-bg-color: #28537E;
+@mas-brand-color: #303035;
+@mas-bg-color: lighten(@mas-brand-color, 65%);
 
 /* These bootswap/bootstrap less variable names are totally misleading. Some of them are used
    everywhere, not just in a single component as their name suggests */
-@navbar-default-bg: @mas-bg-color;
+@navbar-default-bg: lighten(@mas-brand-color, 10%);
 @body-bg: @mas-bg-color;
 @dropdown-divider-bg: lighten(@mas-bg-color, 50%);
 @table-bg-hover: darken(@well-bg, 7%);
-@dropdown-bg: @mas-bg-color;
+@dropdown-bg: lighten(@mas-brand-color, 10%);
 
 /* Bootstrap customizations */
 
