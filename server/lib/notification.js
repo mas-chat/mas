@@ -60,6 +60,11 @@ exports.requeue = function*(userId, sessionId, ntfs) {
     yield redis.rpush.apply(redis, [ `outbox:${userId}:${sessionId}` ].concat(ntfs.reverse()));
 };
 
+exports.communicateNewUserIds = function*(userId, sessionId, msg) {
+    // TBD: Refactor to a separate module
+    yield handleNewUserIds(userId, sessionId, null, [ msg ]);
+};
+
 function *queueNotifications(userId, sessionId, excludeSessionId, ntfs) {
     if (!util.isArray(ntfs)) {
         ntfs = [ ntfs ];

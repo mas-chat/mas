@@ -143,6 +143,8 @@ exports.setup = function(server) {
 
                 let resp = yield requestController.process(userId, sessionId, data);
 
+                yield notification.communicateNewUserIds(userId, sessionId, resp);
+
                 if (cb) {
                     cb(resp); // Send the response as Socket.io acknowledgment.
                 }
