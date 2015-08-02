@@ -405,21 +405,23 @@ function *handleGetConversationLog(params) {
 
 function *handleRequestFriend(params) {
     let userId = params.userId;
-    let requestorUserId = params.command.userId;
-    let exists = yield redis.exists(`user:${requestorUserId}`);
+    let friendCandidateUserId = params.command.userId;
+    let exists = yield redis.exists(`user:${friendCandidateUserId}`);
 
     if (!exists) {
         return { status: 'ERROR', errorMsg: 'Unknown userId.' };
+    } else if (userId === friendCandidateUserId) {
+        return { status: 'ERROR', errorMsg: 'You can\'t add yourself as a friend, sorry.' };
     }
 
-    let existingFriend = yield redis.sismember(`friends:${userId}`, requestorUserId);
+    let existingFriend = yield redis.sismember(`friends:${userId}`, friendCandidateUserId);
 
     if (existingFriend) {
         return { status: 'ERROR', errorMsg: 'This person is already on your contacts list.' };
     }
 
-    yield redis.sadd(`friendsrequests:${requestorUserId}`, userId);
-    yield friends.sendFriendConfirm(requestorUserId, params.sessionId);
+    yield redis.sadd(`friendsrequests:${friendCandidateUserId}`, userId);
+    yield friends.sendFriendConfirm(friendCandidateUserId, params.sessionId);
 
     return { status: 'OK' };
 }
