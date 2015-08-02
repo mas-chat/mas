@@ -273,6 +273,8 @@ export default Ember.Component.extend(UploadMixin, {
             onItem(context, e) {
                 let action = $(e.target).data('action');
                 that.sendAction('action', action, that.content, selectedUserId);
+
+                e.preventDefault();
             }
         });
 
