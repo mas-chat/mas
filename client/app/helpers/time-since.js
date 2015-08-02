@@ -20,16 +20,20 @@
 
 import Ember from 'ember';
 
-Ember.Handlebars.helper('timeSince', function(online, timeStamp) {
-    let dateString;
+export default Ember.Helper.extend({
+    compute(params, hash) {
+        let online = params[0];
+        let timeStamp = params[1];
+        let dateString;
 
-    if (online) {
-        dateString = '';
-    } else if (timeStamp === -1) {
-        dateString = 'never';
-    } else {
-        dateString = moment.unix(timeStamp).fromNow(true);
+        if (online) {
+            dateString = '';
+        } else if (timeStamp === -1) {
+            dateString = 'never';
+        } else {
+            dateString = moment.unix(timeStamp).fromNow(true);
+        }
+
+        return dateString;
     }
-
-    return dateString;
 });

@@ -19,7 +19,7 @@
 /* globals isMobile, moment */
 
 import Ember from 'ember';
-import TitleBuilder from '../helpers/title-builder';
+import TitleBuilder from '../utils/title-builder';
 import Message from './message';
 
 let titleBuilder = TitleBuilder.create();

@@ -19,7 +19,7 @@
 /* globals $, io, isMobile */
 
 import Ember from 'ember';
-import NotificationParser from '../helpers/notification-parser';
+import NotificationParser from '../utils/notification-parser';
 
 export default Ember.Service.extend({
     store: Ember.inject.service(),

@@ -10,7 +10,7 @@
             </div>
         {{else}}
             <div class="main-friend-ago">
-                {{timeSince friend.online friend.last}}
+                {{time-since friend.online friend.last}}
             </div>
         {{/if}}
         <div {{action "removeFriend" friend.userId}} data-toggle="tooltip" data-placement="top" title="Remove this person from the list" class="main-friend-remove">

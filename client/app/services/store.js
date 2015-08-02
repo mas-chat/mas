@@ -19,7 +19,7 @@
 /* globals moment */
 
 import Ember from 'ember';
-import Users from '../helpers/users';
+import Users from '../utils/users';
 import Window from '../models/window';
 import Message from '../models/message';
 import Friend from '../models/friend';

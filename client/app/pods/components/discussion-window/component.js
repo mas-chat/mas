@@ -19,7 +19,7 @@
 /* globals $, FileAPI, emojify, titlenotifier, isMobile */
 
 import Ember from 'ember';
-import { play } from '../../../helpers/sound';
+import { play } from '../../../utils/sound';
 import UploadMixin from '../../../mixins/upload';
 
 export default Ember.Component.extend(UploadMixin, {
