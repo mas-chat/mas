@@ -483,8 +483,9 @@ function *desktopTest() {
 
     for (let windowKey of windowKeys) {
         let masWindow = yield redis.hgetall(windowKey);
+        let desktopId = parseInt(masWindow.desktop, 10);
 
-        if (masWindow.desktop !== null && isNaN(masWindow.desktop)) {
+        if (masWindow.desktop !== null && !Number.isInteger(desktopId)) {
             passed = false;
 
             if (autoRepair) {

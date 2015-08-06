@@ -68,13 +68,13 @@ function handleIdentConnection(conn) {
 
     carrier.carry(conn, function(line) {
         let ports = line.split(',');
-        let localPort = parseInt(ports[0]);
-        let remotePort = parseInt(ports[1]);
+        let localPort = parseInt(ports[0], 10);
+        let remotePort = parseInt(ports[1], 10);
         let prefix = localPort + ', ' + remotePort;
         let found = false;
         let resp;
 
-        if (!isNaN(localPort) && !isNaN(remotePort)) {
+        if (Number.isInteger(localPort) && Number.isInteger(remotePort)) {
             for (let key in sockets) {
                 if (sockets[key].localPort === localPort &&
                     sockets[key].remotePort === remotePort &&

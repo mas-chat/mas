@@ -387,6 +387,7 @@ function *parseIrcMessage(params) {
         parts = line.split(' '),
         msg = {
             params: [],
+            numericReply: false,
             network: params.network,
             serverName: null,
             nick: null,
@@ -414,6 +415,7 @@ function *parseIrcMessage(params) {
 
     if (msg.command.match(/^[0-9]+$/) !== null) {
         // Numeric reply
+        msg.numericReply = true;
         msg.target = parts.shift();
 
         if (/^[&#!+]/.test(msg.target)) {
@@ -434,7 +436,7 @@ function *parseIrcMessage(params) {
 
     let handler = handlers[msg.command];
 
-    if (!handler && !isNaN(msg.command)) {
+    if (!handler && msg.numericReply) {
         // Default handler for all numeric replies
         handler = handleServerText;
     }

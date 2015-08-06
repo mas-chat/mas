@@ -37,7 +37,7 @@ exports.sendFriends = function*(userId, sessionId) {
 
         let online = last === 0;
 
-        if (isNaN(last)) {
+        if (!Number.isInteger(last)) {
             last = -1; // No recorded login or logout
         }
 

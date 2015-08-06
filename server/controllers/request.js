@@ -73,7 +73,7 @@ exports.process = function*(userId, sessionId, command) {
 
     let conversation = null;
 
-    if (!isNaN(windowId)) {
+    if (Number.isInteger(windowId)) {
         let conversationId = yield window.getConversationId(userId, windowId);
         conversation = yield conversationFactory.get(conversationId);
         network = conversation ? conversation.network : null;
