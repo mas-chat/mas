@@ -164,12 +164,20 @@ export default Ember.Object.extend({
     }),
 
     messageLimiter: Ember.observer('messages.[]', function() {
-        let sortedMessages = this.get('messages').sortBy('ts');
-        let maxBacklogMsgs = this.get('store.maxBacklogMsgs');
-
-        for (let i = 0; i < sortedMessages.length - maxBacklogMsgs; i++) {
-            this.get('store').removeModel('message', sortedMessages[i], this);
+        if (!this.get('store.windowListComplete')) {
+            return; // There's lot of going on in startup, limiting can wait.
         }
+
+        let maxBacklogMsgs = this.get('store.maxBacklogMsgs');
+        let messages = this.get('messages');
+
+        if (messages.length > maxBacklogMsgs) {
+            let sortedMessages = messages.sortBy('ts');
+
+            for (let i = 0; i < sortedMessages.length - maxBacklogMsgs; i++) {
+               this.get('store').removeModel('message', sortedMessages[i], this);
+           }
+       }
     }),
 
     syncServerPosition: Ember.observer('desktop', 'row', 'column', function() {
