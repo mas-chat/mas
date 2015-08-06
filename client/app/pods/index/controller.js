@@ -63,7 +63,7 @@ export default Ember.Controller.extend(SendMsgMixin, {
         return desktopsArray;
     }),
 
-    deletedDesktopCheck: Ember.observer('desktops.@each', 'store.windowListComplete', function() {
+    deletedDesktopCheck: Ember.observer('desktops.[]', 'store.windowListComplete', function() {
         if (!this.get('store.windowListComplete')) {
             return;
         }

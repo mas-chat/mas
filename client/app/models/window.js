@@ -67,7 +67,7 @@ export default Ember.Object.extend({
 
     password: null,
 
-    sortedMessages: Ember.computed('messages.@each', 'store.dayCounter', function() {
+    sortedMessages: Ember.computed('messages.[]', 'store.dayCounter', function() {
         let result = this.get('messages').sortBy('ts');
 
         let addDayDivider = (array, dateString, index) => {
@@ -104,15 +104,15 @@ export default Ember.Object.extend({
         return new RegExp(`(^|[@ ])${nick}[ :]`);
     }),
 
-    operatorNames: Ember.computed('operators.@each', 'store.users.isDirty', function() {
+    operatorNames: Ember.computed('operators.[]', 'store.users.isDirty', function() {
         return this._mapUserIdsToNicks('operators').sortBy('nick');
     }),
 
-    voiceNames: Ember.computed('voices.@each', 'store.users.isDirty', function() {
+    voiceNames: Ember.computed('voices.[]', 'store.users.isDirty', function() {
         return this._mapUserIdsToNicks('voices').sortBy('nick');
     }),
 
-    userNames: Ember.computed('users.@each', 'store.users.isDirty', function() {
+    userNames: Ember.computed('users.[]', 'store.users.isDirty', function() {
         return this._mapUserIdsToNicks('users').sortBy('nick');
     }),
 
@@ -163,7 +163,7 @@ export default Ember.Object.extend({
         }
     }),
 
-    messageLimiter: Ember.observer('messages.@each', function() {
+    messageLimiter: Ember.observer('messages.[]', function() {
         let sortedMessages = this.get('messages').sortBy('ts');
         let maxBacklogMsgs = this.get('store.maxBacklogMsgs');
 

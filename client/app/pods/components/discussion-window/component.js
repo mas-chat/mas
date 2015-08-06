@@ -109,8 +109,8 @@ export default Ember.Component.extend(UploadMixin, {
         }
     }),
 
-    nickCompletion: Ember.observer('content.userNames.@each', 'content.voiceNames.@each',
-        'content.operatorNames.@each', function() {
+    nickCompletion: Ember.observer('content.userNames.[]', 'content.voiceNames.[]',
+        'content.operatorNames.[]', function() {
         this._updateNickCompletionList();
     }),
 
