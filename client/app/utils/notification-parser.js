@@ -81,7 +81,7 @@ export default Ember.Object.extend({
 
         delete data.windowId;
 
-        if (!this.get('store.windowListComplete')) {
+        if (!this.get('store.initDone')) {
             // Optimization: Avoid re-renders after every message
             this.msgBuffer.push({ data: data, parent: targetWindow });
         } else {
@@ -112,7 +112,7 @@ export default Ember.Object.extend({
         Ember.Logger.info(`MsgBuffer processing ended.`);
 
         this.msgBuffer = [];
-        this.set('store.windowListComplete', true);
+        this.set('store.initDone', true);
     },
 
     _handleUsers(data) {

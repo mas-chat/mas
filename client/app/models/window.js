@@ -164,7 +164,7 @@ export default Ember.Object.extend({
     }),
 
     messageLimiter: Ember.observer('messages.[]', function() {
-        if (!this.get('store.windowListComplete')) {
+        if (!this.get('store.initDone')) {
             return; // There's lot of going on in startup, limiting can wait.
         }
 

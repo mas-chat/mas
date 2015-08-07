@@ -56,7 +56,7 @@ export default Ember.Service.extend({
     emailConfirmed: true,
 
     userId: null,
-    windowListComplete: false,
+    initDone: false,
     maxBacklogMsgs: 100000,
     dayCounter: 0,
 
@@ -216,7 +216,7 @@ export default Ember.Service.extend({
     _saveSnapshot() {
         let cachedUpto = 0;
 
-        if (!this.get('windowListComplete')) {
+        if (!this.get('initDone')) {
             return;
         }
 
@@ -325,8 +325,6 @@ export default Ember.Service.extend({
         }
 
         this.set('activeDesktop', data.activeDesktop);
-        this.set('windowListComplete', true);
-
         Ember.Logger.info('Snapshot processed.');
     }
 });

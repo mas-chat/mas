@@ -135,7 +135,7 @@ export default Ember.Service.extend({
     },
 
     _emitInit(userId, secret, cachedUpto) {
-        this.set('store.windowListComplete', false);
+        this.set('store.initDone', false);
 
         this.socket.emit('init', {
             clientName: 'web',

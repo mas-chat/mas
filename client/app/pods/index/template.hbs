@@ -1,7 +1,7 @@
 <div class="flex-1 flex-row">
     {{window-grid model=model activeDesktop=activeDesktop menuAction="menuAction" windowAction="windowAction" dragActiveAction="dragActiveAction"}}
 
-    {{#if store.windowListComplete}}
+    {{#if store.initDone}}
         <div class="sidebar flex-grow-column">
             <div class="upper-sidebar flex-1">
                 {{desktop-switcher desktops=desktops action="switchDesktop" activeDraggedWindow=activeDraggedWindow selected=activeDesktop}}

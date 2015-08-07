@@ -38,7 +38,7 @@ export default Ember.Component.extend({
     store: Ember.inject.service(),
     socket: Ember.inject.service(),
 
-    initReady: Ember.observer('store.windowListComplete', function() {
+    initReady: Ember.observer('store.initDone', function() {
         Ember.run.next(this, function() { this._layoutWindows(false); });
     }),
 
@@ -66,7 +66,7 @@ export default Ember.Component.extend({
         },
 
         relayout(options) {
-            if (!this.get('store.windowListComplete')) {
+            if (!this.get('store.initDone')) {
                 return;
             }
 
