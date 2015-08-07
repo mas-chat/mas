@@ -361,21 +361,13 @@ export default Ember.Component.extend(UploadMixin, {
             return;
         }
 
-        // TBD: Temporary trace to help to debug a rare bug. Remove when not needed.
-        Ember.Logger.info(`${this.get('content.simplifiedName')} scrolling, animate: ${animate}`);
-
         let duration = animate ? 200 : 0;
-
-        // There's an odd bug(?) in Chrome where extra empty space is added to the end of message
-        // backlog. User can scroll beyond end of backlog. I currently suspect it happens CSS
-        // rotation (load image spinner) and scrolling happen at the same time. Problem is not
-        // related to velocity.js. It happens with jQuery.scrollTop() as well.
 
         this.$messagesEndAnchor.velocity('stop').velocity('scroll', {
             container: this.$messagePanel,
             duration: duration,
             easing: 'spring',
-            offset: -1 * this.$messagePanel.innerHeight() + 5, // 5px is padding
+            offset: -1 * this.$messagePanel.innerHeight() + 15, // 5px padding plus some extra
             complete: Ember.run.bind(this, function() {
                 if (callback) {
                     callback();
