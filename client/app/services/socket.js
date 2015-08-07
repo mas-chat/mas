@@ -21,6 +21,8 @@
 import Ember from 'ember';
 import NotificationParser from '../utils/notification-parser';
 
+let socket = io.connect(); // Start connection as early as possible.
+
 export default Ember.Service.extend({
     store: Ember.inject.service(),
 
@@ -64,9 +66,8 @@ export default Ember.Service.extend({
     start(cachedUpto) {
         let userId = this.get('store.userId');
         let secret = this.get('secret');
-        let socket = io.connect();
 
-        Ember.Logger.info('Opened Socket.io connection.');
+        Ember.Logger.info('Initializing Socket.io connection.');
 
         this.set('socket', socket);
         this._emitInit(userId, secret, cachedUpto);
