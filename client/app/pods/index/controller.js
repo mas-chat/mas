@@ -76,12 +76,14 @@ export default Ember.Controller.extend(SendMsgMixin, {
     }),
 
     updateActiveDesktop: Ember.observer('activeDesktop', function() {
-        this.get('socket').send({
-            id: 'SET',
-            settings: {
-                activeDesktop: this.get('activeDesktop')
-            }
-        });
+        if (!isMobile.any) {
+            this.get('socket').send({
+                id: 'SET',
+                settings: {
+                    activeDesktop: this.get('activeDesktop')
+                }
+            });
+        }
     }),
 
     actions: {

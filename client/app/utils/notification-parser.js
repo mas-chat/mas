@@ -212,7 +212,7 @@ export default Ember.Object.extend({
             return;
         }
 
-        if (typeof(data.settings.activeDesktop) !== 'undefined') {
+        if (typeof(data.settings.activeDesktop) !== 'undefined' && !isMobile.any) {
             this.set('store.activeDesktop', data.settings.activeDesktop);
         }
 
