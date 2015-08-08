@@ -44,6 +44,7 @@ module.exports = function(defaults) {
     // please specify an object with the list of modules as keys
     // along with the exports of each module as its value.
 
+    app.import('bower_components/capture-video-frame/capture-video-frame.js');
     app.import('bower_components/momentjs/moment.js');
     app.import('bower_components/howler/howler.js');
     app.import('bower_components/bootstrap/dist/js/bootstrap.js');
@@ -60,7 +61,7 @@ module.exports = function(defaults) {
     app.import('bower_components/jquery-cookie/jquery.cookie.js');
     app.import('bower_components/TitleNotifier.js/title_notifier.js');
     app.import('bower_components/jquery.atwho/dist/js/jquery.atwho.js');
-    app.import('bower_components/FileAPI/dist/FileAPI.html5.js');
+    app.import('bower_components/getusermedia/dist/getUserMedia.noFallback.js');
     app.import('bower_components/Caret.js/dist/jquery.caret.min.js');
     app.import('bower_components/emojify.js/dist/js/emojify.js');
     app.import('bower_components/magnific-popup/dist/jquery.magnific-popup.js');

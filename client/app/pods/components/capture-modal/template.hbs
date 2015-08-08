@@ -1,7 +1,9 @@
 {{#modal-dialog title="Take a photo" proceedButton="Upload photo" cancel="closeModal" submit="uploadPhoto"}}
     <div class="webcam">
-        <div class="viewfinder"></div>
-        <div class="shot"></div>
+        <div id="webcam-viewfinder">
+        </div>
+
+        <img id="webcam-snapshot" />
 
         <div class="note">
             {{note}}

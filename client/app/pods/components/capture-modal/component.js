@@ -22,9 +22,7 @@ import Ember from 'ember';
 import UploadMixin from '../../../mixins/upload';
 
 export default Ember.Component.extend(UploadMixin, {
-    // TBD: Ditch FileAPI, use native APIs directly. Allows e.g. to prefer 16:9 aspect ratio.
-
-    webcam: null,
+    video: Ember.inject.service(),
     shot: null,
 
     note: 'Allow webcam access in your browser.',
@@ -32,60 +30,54 @@ export default Ember.Component.extend(UploadMixin, {
 
     actions: {
         uploadPhoto() {
-            let file = this.get('shot').preview(800, 600);
-            this.handleUpload([ file ], 'jpeg');
+            let file = this.get('shot');
+            this.handleUpload([ file ]);
             this.sendAction('closeModal');
         },
 
         takePhoto() {
-            if (!this.webcam.isActive()) {
+            if (!this.get('video.streamActive')) {
                 alert('camera not active'); // eslint-disable-line no-alert
             }
 
             this.$('[data-modal="submit"]').removeClass('disabled');
             this.$('.btn-capture').blur();
+            this.$('#webcam-snapshot').show();
 
-            let shot = this.webcam.shot();
+            let video = this.$('#webcam-viewfinder video')[0];
+            let { blob, dataUri } = captureVideoFrame(video, 'jpeg');
 
-            shot.clone().preview(160, 120).get(function(err, img) {
-                if (!err) {
-                    this.$('.shot').empty();
-                    this.$('.shot').append(img);
-                }
-            }.bind(this));
-
-            this.set('shot', shot);
+            this.$('#webcam-snapshot').attr('src', dataUri);
+            this.set('shot', blob);
         },
 
         closeModal() {
             this.sendAction('closeModal');
+            this.get('video').closeStream();
         }
     },
 
     didInsertElement() {
-        let box = this.$('.viewfinder')[0];
-
         this.$('[data-modal="submit"]').addClass('disabled');
         this.$('.btn-capture').addClass('disabled');
+        this.$('#webcam-snapshot').hide();
 
-        FileAPI.Camera.publish(box, {}, function(err, cam) {
-            let newMessage = '';
-
-            if (err) {
-                newMessage = 'Auch! Webcam is not available.';
-            } else {
-                this.webcam = cam;
-                this.$('.btn-capture').removeClass('disabled');
-            }
-
-            this.set('note', newMessage);
-        }.bind(this));
+        this.get('video').getStream(Ember.run.bind(this, this._getStreamSuccess),
+            Ember.run.bind(this, this._getStreamError));
     },
 
     willDestroyElement() {
-        if (this.webcam) {
-            this.webcam.stop();
-        }
-    }
+        this.get('video').closeStream();
+    },
 
+    _getStreamSuccess(stream) {
+        this.set('note', '');
+        this.$('.btn-capture').removeClass('disabled');
+
+        this.$('#webcam-viewfinder video').attr('src', window.URL.createObjectURL(stream));
+    },
+
+    _getStreamError() {
+        this.set('note', 'Auch! Webcam is not available.');
+    }
 });

@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals FileAPI, moment */
+/* globals moment */
 
 import Ember from 'ember';
 import SendMsgMixin from './sendMsg';
@@ -26,38 +26,37 @@ export default Ember.Mixin.create(SendMsgMixin, {
     store: Ember.inject.service(),
 
     actions: {
-        upload(files, transform) {
-            this.handleUpload(files, transform);
+        upload(files) {
+            this.handleUpload(files);
         }
     },
 
-    handleUpload(files, transform) {
+    handleUpload(files) {
         if (files.length === 0) {
             return;
         }
 
-        let options = {
-            url: '/api/v1/upload',
-            files: { userFiles: files },
-            complete: function(err, xhr) {
-                if (!err) {
-                    let url = JSON.parse(xhr.responseText).url[0];
-                    this._sendText(url, this.get('content'));
-                } else {
-                    this._printLine('File upload failed.', 'error');
-                }
-            }.bind(this),
-            data: { sessionId: this.get('socket').sessionId }
-        };
+        let formData = new FormData();
 
-        if (transform === 'jpeg') {
-            options.imageTransform = {
-                type: 'image/jpeg',
-                quality: 0.9
-            };
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+            let name = file.name || 'webcam-upload.jpg';
+
+            formData.append('file', file, name);
         }
 
-        FileAPI.upload(options);
+        formData.append('sessionId', this.get('socket').sessionId);
+
+        $.ajax({
+            url: '/api/v1/upload',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            success: data => this._sendText(data.url.join(' '), this.get('content')),
+            error: () => this._printLine('File upload failed.', 'error')
+       });
     },
 
     _printLine(text, cat) {

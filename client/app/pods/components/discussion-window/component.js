@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals $, FileAPI, emojify, titlenotifier, isMobile */
+/* globals $, emojify, titlenotifier, isMobile */
 
 import Ember from 'ember';
 import { play } from '../../../utils/sound';
@@ -318,12 +318,7 @@ export default Ember.Component.extend(UploadMixin, {
             }
         });
 
-        let fileInput = this.$('.btn-file input')[0];
-
-        FileAPI.event.on(fileInput, 'change', function(evt) {
-            let files = FileAPI.getFiles(evt); // Retrieve file list
-            this.send('upload', files, 'jpeg');
-        }.bind(this));
+        this.$('.btn-file input').change(e => this.send('upload', e.target.files));
 
         this.sendAction('relayout', { animate: false });
 
