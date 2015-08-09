@@ -25,6 +25,9 @@
                         {{~/if}}
                     {{~/if}}
                 {{~/each}}
+                {{#if message.hideImages}}
+                    <span {{action "toggleImages" message}} class="user-img-restore"><i class="fa fa-picture-o"></i></span>
+                {{/if}}
                 {{~#if message.hasMedia}}
                     <ul class="user-media" data-gid="{{message.gid}}" data-has-images="{{message.hasImages}}">
                         {{#if message.hasYoutubeVideo}}
@@ -38,7 +41,7 @@
                                     <a href="{{image.url}}" class="user-img">
                                         <div class="user-img-container">
                                             <img src="{{image.source}}">
-                                            <span {{action "hideImages" message on="mouseDown" bubbles=false}} class="user-img-close fa-stack">
+                                            <span {{action "toggleImages" message on="mouseDown" bubbles=false}} class="user-img-close fa-stack">
                                                 <i class="fa fa-circle fa-stack-2x"></i>
                                                 <i class="fa fa-times fa-stack-1x fa-inverse"></i>
                                             </span>

@@ -200,10 +200,6 @@ export default Ember.Component.extend(UploadMixin, {
         jumpToBottom() {
             this.set('scrollLock', false);
             this._goToBottom(true);
-        },
-
-        hideImages(message) {
-            message.set('hideImages', true);
         }
     },
 
