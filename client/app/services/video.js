@@ -22,7 +22,7 @@ export default Ember.Service.extend({
     stream: null,
 
     streamActive: Ember.computed('stream', function() {
-        return !!this.get('stream')
+        return !!this.get('stream');
     }),
 
     getStream(successCb, failureCb) {
@@ -34,12 +34,12 @@ export default Ember.Service.extend({
         }
 
         let options = {
-            "audio": false,
-            "video": true,
+            audio: false,
+            video: true,
 
             // the element (by id) you wish to use for
             // displaying the stream from a camera
-            el: "webcam-viewfinder",
+            el: 'webcam-viewfinder',
 
             extern: null,
             append: true,
@@ -47,12 +47,12 @@ export default Ember.Service.extend({
             width: 800,
             height: 600,
 
-            mode: "callback",
+            mode: 'callback'
         };
 
-        getUserMedia(options, Ember.run.bind(this, function(stream) {
-            this.set('stream', stream);
-            successCb(stream);
+        navigator.getUserMedia(options, Ember.run.bind(this, function(newStream) {
+            this.set('stream', newStream);
+            successCb(newStream);
         }), failureCb);
     },
 

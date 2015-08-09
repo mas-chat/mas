@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals moment */
+/* globals moment, $ */
 
 import Ember from 'ember';
 import SendMsgMixin from './sendMsg';
@@ -67,7 +67,7 @@ export default Ember.Mixin.create(SendMsgMixin, {
             cat: cat,
             userId: cat === 'mymsg' ? this.get('store.userId') : null,
             ts: moment().unix(),
-            gid: 0,
+            gid: 0
         }, this.get('content'));
     }
 });

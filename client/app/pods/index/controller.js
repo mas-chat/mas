@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* global $, moment */
+/* global $, moment, isMobile */
 
 import Ember from 'ember';
 import SendMsgMixin from '../../mixins/sendMsg';

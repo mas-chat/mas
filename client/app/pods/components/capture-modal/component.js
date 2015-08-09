@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* global FileAPI */
+/* global captureVideoFrame */
 
 import Ember from 'ember';
 import UploadMixin from '../../../mixins/upload';
