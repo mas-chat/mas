@@ -74,7 +74,7 @@ export default Ember.Object.extend({
             array.splice(index, 0, Message.create({
                 body: dateString,
                 cat: 'day-divider',
-                gid: dateString, // String, non-changing and unique, good enough as primary key
+                gid: 0,
                 window: this,
                 store: this.get('store')
             }));

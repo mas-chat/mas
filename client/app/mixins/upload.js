@@ -67,7 +67,7 @@ export default Ember.Mixin.create(SendMsgMixin, {
             cat: cat,
             userId: cat === 'mymsg' ? this.get('store.userId') : null,
             ts: moment().unix(),
-            gid: 'error'
+            gid: 0,
         }, this.get('content'));
     }
 });
