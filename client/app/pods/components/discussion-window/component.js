@@ -451,7 +451,7 @@ export default Ember.Component.extend(UploadMixin, {
 
         $image.one('load error', function(e) {
             if (e.type === 'error') {
-                $image.hide();
+                $image.parent().hide(); // Container list element
             }
 
             Ember.run(function() {
