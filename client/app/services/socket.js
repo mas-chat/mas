@@ -135,7 +135,7 @@ export default Ember.Service.extend({
         this.set('_networkErrorCallbackCtx', ctx);
     },
 
-    _emitInit(userId, secret, cachedUpto) {
+    _emitInit(userId, secret, cachedUpto = 0) {
         this.set('store.initDone', false);
 
         this.socket.emit('init', {
@@ -145,7 +145,7 @@ export default Ember.Service.extend({
             secret: secret,
             version: '1.0',
             maxBacklogMsgs: isMobile.any ? 80 : 160,
-            cachedUpto: cachedUpto || 0
+            cachedUpto: cachedUpto
         });
 
         Ember.Logger.info(`Sent INIT event, cachedUpto: ${cachedUpto}`);
