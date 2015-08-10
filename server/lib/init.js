@@ -83,6 +83,7 @@ function shutdown() {
         }
 
         console.log('Shutdown complete.');
+        process.exit(0);
     })();
 }
 
