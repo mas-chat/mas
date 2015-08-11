@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* globals getUserMedia */
+
 import Ember from 'ember';
 
 export default Ember.Service.extend({
@@ -50,7 +52,7 @@ export default Ember.Service.extend({
             mode: 'callback'
         };
 
-        navigator.getUserMedia(options, Ember.run.bind(this, function(newStream) {
+        getUserMedia(options, Ember.run.bind(this, function(newStream) {
             this.set('stream', newStream);
             successCb(newStream);
         }), failureCb);
