@@ -32,7 +32,7 @@ exports.create = function*() {
 
         mailer.send('emails/build/resetPassword.hbs', {
             name: user.name,
-            url: conf.get('site:url') + '/reset-password/' + token
+            url: conf.getComputed('site_url') + '/reset-password/' + token
         }, user.email, 'Password reset link');
 
         yield redis.set(`passwordresettoken:${token}`, userId);

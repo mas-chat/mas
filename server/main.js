@@ -89,8 +89,7 @@ exports.init = function(httpServer, httpsServer, setHttpHandlers) {
             // To keep things simple, force SSL is always activated if https is enabled
             forceSSLApp.use(function*() {
                 this.response.status = 301;
-                this.response.redirect(
-                    'https://' + this.hostname + ':' + httpsPort + this.request.url);
+                this.response.redirect(conf.getComputed('site_url') + this.request.url);
             });
 
             setHttpHandlers(forceSSLApp.callback(), app.callback());

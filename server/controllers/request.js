@@ -536,7 +536,7 @@ function *sendEmailConfirmationEmail(userId, email) {
 
     mailer.send('emails/build/confirmEmail.hbs', {
         name: userRecord.name,
-        url: conf.get('site:url') + '/confirm-email/' + emailConfirmationToken
+        url: conf.getComputed('site_url') + '/confirm-email/' + emailConfirmationToken
     }, email || userRecord.email, `Please confirm your email address`);
 }
 

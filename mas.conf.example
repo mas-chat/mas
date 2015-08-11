@@ -18,24 +18,24 @@ dev_mode=false
 test_mode=false
 
 [site]
-url=http://localhost:3200
+domain=localhost
 admin_email=admin@example.com
 
 [files]
 upload_directory=data/uploads/
 cache_directory=data/cache/
 
-; google auth callback must be /auth/google/oauth2callback
+; google auth to work, frontend:https must be true
 
 [googleauth]
 enabled=false
 client_id=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com
 client_secret=XXXXXXXXXXXXXXXXXXXXXXX
-callback_url=https://localhost:3200/auth/google/oauth2callback
 
 [yahooauth]
 enabled=false
 
+; if https is true, http server force redirects all request to https
 ; https_ca can be false or comma separated list of CA cert files
 
 [frontend]

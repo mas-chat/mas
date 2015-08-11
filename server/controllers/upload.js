@@ -80,7 +80,7 @@ module.exports = function*() {
             fs.writeFile(path.join(targetDirectory, name + '.json'), JSON.stringify(metaData),
                 createMetaDataFileHandler);
 
-            urls.push(conf.get('site:url') + '/files/' + name + extension);
+            urls.push(conf.getComputed('site_url') + '/files/' + name + extension);
         }
     }
 

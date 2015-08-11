@@ -17,6 +17,7 @@
 'use strict';
 
 const path = require('path'),
+      assert = require('assert'),
       fs = require('fs'),
       nconf = require('nconf'),
       argv = require('yargs').argv,
@@ -45,6 +46,34 @@ nconf.argv().add('file', {
 });
 
 exports.get = function(key) {
+    return get(key);
+};
+
+exports.getComputed = function(key) {
+    let ret = '';
+
+    switch(key) {
+        case 'site_url':
+            var protocol = 'http';
+            var port = get('frontend:http_port');
+
+            if (get('frontend:https')) {
+                protocol = 'https';
+                port = get('frontend:https_port');
+            }
+
+            port = port === 80 || port === 443 ? '' : `:${port}`;
+            ret = `${protocol}://${get('site:domain')}${port}`;
+            break;
+
+        default:
+            assert(0);
+    }
+
+    return ret;
+};
+
+function get(key) {
     let value = nconf.get(key);
 
     if (value === undefined) {
@@ -52,4 +81,4 @@ exports.get = function(key) {
     }
 
     return value;
-};
+}

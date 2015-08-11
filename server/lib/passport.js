@@ -43,7 +43,7 @@ function setup() {
         let google = new GoogleStrategy({
             clientID: conf.get('googleauth:client_id'),
             clientSecret: conf.get('googleauth:client_secret'),
-            callbackURL: conf.get('googleauth:callback_url')
+            callbackURL: conf.getComputed('site_url') + '/auth/google/oauth2callback'
         }, function(accessToken, refreshToken, params, profile, done) {
             // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
             let openIdId = jwt.decode(params.id_token, null, true).openid_id;
@@ -55,8 +55,8 @@ function setup() {
 
     if (conf.get('yahooauth:enabled') === true) {
         let yahoo = new YahooStrategy({
-            returnURL: conf.get('site:url') + '/auth/yahoo/callback',
-            realm: conf.get('site:url')
+            returnURL: conf.getComputed('site_url') + '/auth/yahoo/callback',
+            realm: conf.getComputed('site_url')
         }, function(openIdId, profile, done) {
             authExt(openIdId, null, profile, done);
         });
