@@ -100,10 +100,12 @@ function scanUserIds(obj) {
     }
 
     for (let key in obj) {
-        if (typeof obj[key] === 'object') {
-            res = res.concat(scanUserIds(obj[key]));
-        } else if (key === 'userId') {
-            res.push(obj[key]);
+        let value = obj[key];
+
+        if (typeof value === 'object') {
+            res = res.concat(scanUserIds(value));
+        } else if (key === 'userId' && value) {
+            res.push(value);
         }
     }
 
