@@ -321,13 +321,13 @@ export default Ember.Component.extend(UploadMixin, {
         this.get('content.messages').addArrayObserver(this);
     },
 
-    arrayWillChange: function(array, offset, removeCount) {
+    arrayWillChange(array, offset, removeCount) {
         if (removeCount > 0) {
             this.set('deletedLine', true);
         }
     },
 
-    arrayDidChange: function(array, offset, removeCount, addCount) {
+    arrayDidChange(array, offset, removeCount, addCount) {
         if (addCount > 0 && this.get('store.initDone')) {
             this._lineAdded();
         }
