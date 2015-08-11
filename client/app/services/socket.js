@@ -67,8 +67,7 @@ export default Ember.Service.extend({
         let userId = this.get('store.userId');
         let secret = this.get('secret');
 
-        Ember.Logger.info('Initializing Socket.io connection.');
-
+        this.set('store.initDone', false);
         this.set('socket', socket);
         this._emitInit(userId, secret, cachedUpto);
 
@@ -136,8 +135,6 @@ export default Ember.Service.extend({
     },
 
     _emitInit(userId, secret, cachedUpto = 0) {
-        this.set('store.initDone', false);
-
         this.socket.emit('init', {
             clientName: 'web',
             clientOS: navigator.platform,
