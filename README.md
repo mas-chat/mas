@@ -29,7 +29,7 @@ MacOS/Linux/Windows.
 
 ## Quick start
 
-1. Install Redis and latest release of io.js
+1. Install Redis and latest release of io.js (2.x)
 
    On Mac to get redis and io.js you can install [Homebrew](http://brew.sh/) and then do ```brew install iojs redis```
 
@@ -45,10 +45,10 @@ MacOS/Linux/Windows.
    $ npm install
    ```
 
-4. Install bower, gulp and ember-cli if you don't have them
+4. Install bower, gulp, pm2 and ember-cli if you don't have them
 
    ```bash
-   $ npm install -g bower gulp ember-cli
+   $ npm install -g bower gulp ember-cli pm2
    ```
 
 5. Build the web site
@@ -74,14 +74,10 @@ MacOS/Linux/Windows.
 8. Launch the server components
 
    ```bash
-   $ ./bin/masctl -c start
+   $ pm2 start apps.json
    ```
 
 9. Browse to ```http://localhost:3200/``` and register an account.
-
-## masctl
-
-Masctl is an utility for running MAS processes. `./script/masctl -h` shows the available options. In production, use `-b` parameter to daemonize MAS servers.
 
 ## Code Climate
 
