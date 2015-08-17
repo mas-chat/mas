@@ -17,7 +17,7 @@
 'use strict';
 
 const bcrypt = require('bcrypt'),
-      md5 = require('MD5'),
+      md5 = require('md5'),
       log = require('../lib/log'),
       redis = require('../lib/redis').createClient();
 
