@@ -51,16 +51,13 @@ exports.get = function(key) {
 
 exports.getComputed = function(key) {
     let ret = '';
+    let protocol;
+    let port;
 
     switch(key) {
-        case 'site_url':
-            var protocol = 'http';
-            var port = get('frontend:http_port');
-
-            if (get('frontend:https')) {
-                protocol = 'https';
-                port = get('frontend:https_port');
-            }
+        case 'site_urql':
+            protocol = get('frontend:https') ? 'https' : 'http';
+            port = get(`frontend:external_${protocol}_port`);
 
             port = port === 80 || port === 443 ? '' : `:${port}`;
             ret = `${protocol}://${get('site:domain')}${port}`;

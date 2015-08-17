@@ -22,10 +22,11 @@ const fs = require('fs'),
       https = require('https'),
       dropPriviledges = require('./lib/dropPriviledges'),
       init = require('./lib/init'),
-      conf = require('./lib/conf');
+      conf = require('./lib/conf'),
+      log = require('./lib/log');
 
-const httpPort = conf.get('frontend:http_port');
-const httpsPort = conf.get('frontend:https_port');
+const httpPort = conf.get('frontend:internal_http_port');
+const httpsPort = conf.get('frontend:internal_https_port');
 
 let httpHandler = initialHandler;
 let httpsHandler = initialHandler;
@@ -34,6 +35,7 @@ let httpServer = http.Server(httpHandlerSelector);
 let httpsServer = null;
 
 httpServer.listen(httpPort, httpListenDone);
+log.info(`MAS frontend http server listening, http://localhost:${httpPort}/`);
 
 if (conf.get('frontend:https')) {
     let caCerts = [];
@@ -50,7 +52,9 @@ if (conf.get('frontend:https')) {
         cert: fs.readFileSync(conf.get('frontend:https_cert')),
         ca: caCerts
     }, httpsHandlerSelector);
+
     httpsServer.listen(httpsPort, listensDone);
+    log.info(`MAS frontend https server listening, https://localhost:${httpsPort}/`);
 }
 
 function setHTTPHandlers(newHttpHandler, newHttpsHandler) {

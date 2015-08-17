@@ -38,9 +38,6 @@ const path = require('path'),
 const app = koa();
 
 exports.init = function(httpServer, httpsServer, setHttpHandlers) {
-    const httpPort = conf.get('frontend:http_port');
-    const httpsPort = conf.get('frontend:https_port');
-
     // Development only
     if (app.env === 'development') {
         app.use(error());
@@ -73,16 +70,10 @@ exports.init = function(httpServer, httpsServer, setHttpHandlers) {
 
         scheduler.init();
 
-        // Servers must be created after last app.use()
-
-        socketController.setup(httpServer);
-
-        log.info(`MAS frontend http server listening, http://localhost:${httpPort}/`);
+        // Socket.io server (socketController) must be created after last app.use()
 
         if (conf.get('frontend:https')) {
             socketController.setup(httpsServer);
-
-            log.info(`MAS frontend https server started, https://localhost:${httpsPort}/`);
 
             const forceSSLApp = koa();
 
@@ -94,6 +85,8 @@ exports.init = function(httpServer, httpsServer, setHttpHandlers) {
 
             setHttpHandlers(forceSSLApp.callback(), app.callback());
         } else {
+            socketController.setup(httpServer);
+
             setHttpHandlers(app.callback(), null);
         }
     })();
