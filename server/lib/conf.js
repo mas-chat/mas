@@ -55,7 +55,7 @@ exports.getComputed = function(key) {
     let port;
 
     switch(key) {
-        case 'site_urql':
+        case 'site_url':
             protocol = get('frontend:https') ? 'https' : 'http';
             port = get(`frontend:external_${protocol}_port`);
 
