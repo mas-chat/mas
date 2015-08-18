@@ -1,0 +1,21 @@
+{
+    "id": "com.meetandspeak.cloudronapp",
+    "title": "MeetAndSpeak",
+    "author": "iao@iki.fi",
+    "description": "MAS is a web group chat",
+    "tagline": "Group Chat For Everyone",
+    "version": "0.0.1",
+    "healthCheckPath": "/",
+    "httpPort": 3200,
+    "addons": {
+        "localstorage": {},
+        "redis": {},
+        "sendmail": {}
+    },
+    "minBoxVersion": "0.0.1",
+    "manifestVersion": 1,
+    "website": "http://meetandspeak.com",
+    "contactEmail": "iao@iki.fi",
+    "icon": "",
+    "mediaLinks": [ ]
+}
