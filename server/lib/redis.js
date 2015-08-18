@@ -79,7 +79,8 @@ function createClient(options) {
     let plainRedisClient;
 
     if (conf.get('redis:connection_type') === 'socket') {
-        plainRedisClient = redis.createClient(conf.get('redis:port'), conf.get('redis:host'));
+        plainRedisClient = redis.createClient(conf.get('redis:port'), conf.get('redis:host'),
+            { auth_pass: conf.get('redis:password') || null });
     } else {
         plainRedisClient = redis.createClient(conf.get('redis:unix_socket_path'));
     }
