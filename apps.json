@@ -9,7 +9,9 @@
     "cwd"         : ".",
     "pid_file"    : "./run/frontend.pid",
     "error_file"  : "./logs/frontend-stderr.log",
-    "out_file"    : "./logs/frontend-stdout.log"
+    "out_file"    : "./logs/frontend-stdout.log",
+    "min_uptime"  : 15000,
+    "max_restarts": 1
   }, {
     "name"        : "loopback-backend",
     "script"      : "./server/backends/loopback/controller.js",
@@ -20,7 +22,9 @@
     "cwd"         : ".",
     "pid_file"    : "./run/loopback-backend.pid",
     "error_file"  : "./logs/loopback-backend-stderr.log",
-    "out_file"    : "./logs/loopback-backend-stdout.log"
+    "out_file"    : "./logs/loopback-backend-stdout.log",
+    "min_uptime"  : 15000,
+    "max_restarts": 1
   }, {
     "name"        : "irc-backend",
     "script"      : "./server/backends/irc/controller.js",
@@ -31,6 +35,8 @@
     "cwd"         : ".",
     "pid_file"    : "./run/irc-backend.pid",
     "error_file"  : "./logs/irc-backend-stderr.log",
-    "out_file"    : "./logs/irc-backend-stdout.log"
+    "out_file"    : "./logs/irc-backend-stdout.log",
+    "min_uptime"  : 15000,
+    "max_restarts": 1
   }]
 }
