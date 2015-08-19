@@ -3,7 +3,7 @@ MAINTAINER iao@iki.fi <iao@iki.fi>
 
 ENV DEBIAN_FRONTEND noninteractive
 
-# Replace shell with bash so we can source files
+# Replace shell with bash so we can source files (required for nvm)
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 ENV NVM_DIR /usr/local/nvm
