@@ -35,4 +35,5 @@ RUN npm install
 RUN bower install --allow-root
 RUN ember build
 
+WORKDIR /app/code
 CMD [ "/app/code/cloudron/start.sh" ]
