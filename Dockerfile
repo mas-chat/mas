@@ -19,14 +19,10 @@ ENV PATH $NVM_DIR/versions/io.js/v2.5.0/bin:$PATH
 
 RUN npm install -g bower gulp ember-cli pm2
 
-WORKDIR /app/code
 ADD . /app/code
 RUN mkdir /app/code/logs /app/code/run
 
-EXPOSE 3200
-
 WORKDIR /app/code
-
 RUN npm install
 RUN gulp build-assets
 
@@ -34,6 +30,8 @@ WORKDIR /app/code/client
 RUN npm install
 RUN bower install --allow-root
 RUN ember build
+
+EXPOSE 3200
 
 WORKDIR /app/code
 CMD [ "/app/code/cloudron/start.sh" ]
