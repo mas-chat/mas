@@ -6,7 +6,7 @@ mkdir -p /app/cache
 rm -rf /app/cache/*
 
 # generate config
-echo "Generting config"
+echo "Generating config"
 if [[ ! -f "/app/code/mas.conf" ]]; then
     # TODO: generate mas.conf here
     sed -e 's/##DOMAIN/${HOSTNAME}/' \
