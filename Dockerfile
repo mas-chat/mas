@@ -21,7 +21,7 @@ RUN npm install -g bower gulp ember-cli pm2
 
 WORKDIR /app/code
 ADD . /app/code
-RUN mkdir /app/code/logs
+RUN mkdir /app/code/logs /app/code/run
 
 EXPOSE 3200
 
