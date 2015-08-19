@@ -1,4 +1,4 @@
-FROM cloudron/base:0.3.0
+FROM cloudron/base:0.3.3
 MAINTAINER iao@iki.fi <iao@iki.fi>
 
 ENV DEBIAN_FRONTEND noninteractive
