@@ -8,12 +8,11 @@ rm -rf /app/cache/*
 # generate config
 echo "Generating config"
 if [[ ! -f "/app/code/mas.conf" ]]; then
-    # TODO: generate mas.conf here
-    sed -e 's/##DOMAIN/${HOSTNAME}/' \
-        -e 's/##ADMIN_EMAIL/${MAIL_SMTP_USERNAME}@${MAIL_DOMAIN}/' \
-        -e 's/##REDIS_PORT/${REDIS_PORT}/' \
-        -e 's/##REDIS_HOST/${REDIS_HOST}/' \
-        -e 's/##REDIS_PASSWORD/${REDIS_PASSWORD}/' \
+    sed -e "s/##DOMAIN/${HOSTNAME}/" \
+        -e "s/##ADMIN_EMAIL/${MAIL_SMTP_USERNAME}@${MAIL_DOMAIN}/" \
+        -e "s/##REDIS_PORT/${REDIS_PORT}/" \
+        -e "s/##REDIS_HOST/${REDIS_HOST}/" \
+        -e "s/##REDIS_PASSWORD/${REDIS_PASSWORD}/" \
         /app/code/cloudron/mas.conf.template > /app/code/mas.conf
 fi
 
