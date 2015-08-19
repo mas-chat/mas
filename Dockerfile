@@ -31,7 +31,7 @@ RUN npm install
 RUN gulp build-assets
 
 WORKDIR /app/code/client
-RUN npm install --production
+RUN npm install
 RUN bower install --allow-root
 RUN ember build
 
