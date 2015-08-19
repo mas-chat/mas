@@ -21,6 +21,7 @@ const fs = require('fs'),
       nodemailer = require('nodemailer'),
       mailgun = require('nodemailer-mailgun-transport'),
       htmlToText = require('nodemailer-html-to-text').htmlToText,
+      smtpTransport = require('nodemailer-smtp-transport'),
       handlebars = require('handlebars'),
       conf = require('../lib/conf'),
       log = require('../lib/log');
@@ -64,6 +65,19 @@ function setupTransporter() {
         transporter = nodemailer.createTransport(mailgun(mailgunAuth));
         fromAddress = conf.get('mailgun:from');
         senderAddress = conf.get('mailgun:sender');
+    } else if (conf.get('smtp:enabled') === true) {
+        let smtpOptions = {
+            host: conf.get('smtp:server'),
+            port: conf.get('smtp:port'),
+            auth: {
+                user: conf.get('smtp:user'),
+                pass: conf.get('smtp:password')
+            }
+        };
+
+        transporter = nodemailer.createTransport(smtpTransport(smtpOptions));
+        fromAddress = conf.get('site:admin_email');
+        senderAddress = fromAddress;
     } else {
         transporter = nodemailer.createTransport();
         fromAddress = conf.get('site:admin_email');

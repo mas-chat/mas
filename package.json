@@ -40,6 +40,7 @@
     "nodemailer": "~1.4.0",
     "nodemailer-html-to-text": "~1.0.0",
     "nodemailer-mailgun-transport": "^1.0.0",
+    "nodemailer-smtp-transport": "^1.0.3",
     "passport-google-oauth": "~0.2.0",
     "passport-local": "~1.0.0",
     "passport-yahoo": "~0.3.0",

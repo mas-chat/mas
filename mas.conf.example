@@ -62,6 +62,13 @@ domain=mg.example.com
 from=support@example.com
 sender=support@mg.example.com
 
+[smtp]
+enabled=false
+server=smtp.example.com
+port=25
+user=user-xxxxxxxxxxxxxxxxxxx
+password=password-xxxxxxxxxxxxxxxx
+
 [log]
 enabled=true
 directory=logs
