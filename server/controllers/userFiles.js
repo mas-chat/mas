@@ -20,6 +20,7 @@ const path = require('path'),
       send = require('koa-send'),
       conf = require('../lib/conf');
 
+const oneYearInSeconds = 60 * 60 * 24 * 365;
 let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
 // TBD: move this to library. Add exists check.
@@ -31,7 +32,7 @@ module.exports = function*() {
     let file = this.params.file;
     let firstTwo = file.substring(0, 2);
 
-    yield send(this, dataDirectory + path.sep + firstTwo + path.sep + file, {
-        maxage: 1000 * 60 * 60 * 24 * 365 // 1 year
-    });
+    yield send(this, dataDirectory + path.sep + firstTwo + path.sep + file);
+
+    this.set('Cache-Control', 'public, max-age=' + oneYearInSeconds);
 };
