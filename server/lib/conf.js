@@ -54,7 +54,7 @@ exports.getComputed = function(key) {
 
     switch(key) {
         case 'site_url':
-            ret = get('common:site_url');
+            ret = get('site:site_url');
 
             if (ret.endsWith('/')) {
                 ret = ret.substring(0, ret.length - 1);

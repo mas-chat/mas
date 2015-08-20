@@ -9,9 +9,6 @@
 
 ; Test_mode is not used for anything currently
 
-; Unless there's a proxy in front of mas frontend, site_url must be a HTTPS url if
-; https is enabled in frontend section below. Also the port must match similarly.
-
 [common]
 user=false
 group=false
@@ -19,11 +16,14 @@ env=default
 admin=m1
 dev_mode=false
 test_mode=false
-site_url=http://localhost:3200
+
+; Unless there's a proxy in front of mas frontend, site_url must be a HTTPS URL if
+; HTTPS is enabled in frontend section below. Also the port must match similarly.
 
 [site]
 domain=localhost
 admin_email=admin@example.com
+site_url=http://localhost:3200
 
 [files]
 upload_directory=data/uploads/
