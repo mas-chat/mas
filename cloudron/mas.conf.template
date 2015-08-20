@@ -103,3 +103,9 @@ identd=false
 identd_port=113
 inactivity_timeout=10
 
+[irc.networks.FreeNode]
+host=irc.freenode.net
+port=6667
+ssl=false
+rate_limit=10
+
