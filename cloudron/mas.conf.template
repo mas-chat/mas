@@ -32,11 +32,9 @@ enabled=false
 ; https_ca can be false or comma separated list of CA cert files
 
 [frontend]
-external_http_port=3200
-internal_http_port=3200
+http_port=3200
 https=false
-external_https_port=443
-internal_https_port=443
+https_port=443
 https_key=ssl/server.key
 https_cert=ssl/server.crt
 https_ca=ssl/ca1.crt,ssl/ca2.crt

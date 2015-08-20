@@ -27,8 +27,8 @@ const fs = require('fs'),
 
 init.configureProcess('frontend');
 
-const httpPort = conf.get('frontend:internal_http_port');
-const httpsPort = conf.get('frontend:internal_https_port');
+const httpPort = conf.get('frontend:http_port');
+const httpsPort = conf.get('frontend:https_port');
 
 let httpHandler = initialHandler;
 let httpsHandler = initialHandler;
