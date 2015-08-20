@@ -90,7 +90,7 @@ host=localhost
 ; OPTIONS FOR THE LOOPBACK BACKEND
 
 [loopback]
-initial_groups=lobby,test
+initial_groups=lobby,dev
 
 ; OPTIONS FOR THE IRC BACKEND
 
@@ -98,25 +98,8 @@ initial_groups=lobby,test
 ; inactivity_timeout is no logins to mas in days
 
 [irc]
-enabled=true
+enabled=false
 identd=false
 identd_port=113
 inactivity_timeout=10
 
-[irc.networks.IRCNet]
-host=localhost
-port=6666
-ssl=false
-rate_limit=10
-
-[irc.networks.FreeNode]
-host=irc.freenode.net
-port=6667
-ssl=false
-rate_limit=10
-
-[irc.networks.W3C]
-host=irc.w3.org
-port=6665
-ssl=false
-rate_limit=10
