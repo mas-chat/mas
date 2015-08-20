@@ -11,6 +11,7 @@ mkdir -p /app/data/uploads
 echo "Generating config"
 if [[ ! -f "/app/code/mas.conf" ]]; then
     sed -e "s/##DOMAIN/${HOSTNAME}/" \
+        -e "s,##SITE_URL,https://${HOSTNAME}," \
         -e "s/##ADMIN_EMAIL/${MAIL_SMTP_USERNAME}@${MAIL_DOMAIN}/" \
         -e "s/##REDIS_PORT/${REDIS_PORT}/" \
         -e "s/##REDIS_HOST/${REDIS_HOST}/" \
