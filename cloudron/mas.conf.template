@@ -11,7 +11,6 @@ dev_mode=false
 test_mode=false
 
 [site]
-domain=##DOMAIN
 admin_email=##ADMIN_EMAIL
 site_url=##SITE_URL
 

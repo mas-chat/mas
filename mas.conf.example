@@ -17,19 +17,18 @@ admin=m1
 dev_mode=false
 test_mode=false
 
-; Unless there's a proxy in front of mas frontend, site_url must be a HTTPS URL if
+; Unless there's a proxy in front of mas frontend, 'site_url' should be a HTTPS URL if
 ; HTTPS is enabled in frontend section below. Also the port must match similarly.
 
 [site]
-domain=localhost
-admin_email=admin@example.com
 site_url=http://localhost:3200
+admin_email=admin@example.com
 
 [files]
 upload_directory=data/uploads/
 cache_directory=data/cache/
 
-; google auth to work, frontend:https must be true
+; google auth to work, 'frontend:https' must be true
 
 [googleauth]
 enabled=false
@@ -41,7 +40,7 @@ enabled=false
 
 ; If https is true, http server force redirects all request to https
 
-; https_ca can be false or comma separated list of CA cert files
+; 'https_ca' can be false or comma separated list of CA cert files
 
 [frontend]
 http_port=3200
@@ -84,7 +83,7 @@ idle_timeout=120
 max_backlog=160
 min_backlog=20
 
-; Redis connection_type can be socket or unix_socket
+; 'redis:connection_type' can be socket or unix_socket
 
 [redis]
 connection_type=socket
@@ -108,7 +107,7 @@ initial_groups=lobby,test
 ; inactivity_timeout is no logins to mas in days
 
 [irc]
-enabled=true
+enabled=false
 identd=false
 identd_port=113
 inactivity_timeout=10
