@@ -52,6 +52,10 @@ exports.yahooLogin = function*(next) {
     yield auth(this, next, 'yahoo');
 };
 
+exports.cloudronLogin = function*(next) {
+    yield auth(this, next, 'cloudron');
+};
+
 function *auth(ctx, next, provider) {
     yield passport.authenticate(provider, function*(err, userId) {
         if (err) {

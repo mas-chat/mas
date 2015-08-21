@@ -24,6 +24,7 @@ const crypto = require('crypto'),
       LocalStrategy = require('passport-local').Strategy,
       GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
       YahooStrategy = require('passport-yahoo').Strategy,
+      CloudronStrategy = require('passport-cloudron'),
       redis = require('./redis').createClient(),
       user = require('../models/user'),
       conf = require('./conf'),
@@ -62,6 +63,16 @@ function setup() {
         });
 
         passport.use(yahoo);
+    }
+
+    if (conf.get('cloudronauth:enabled') === true) {
+        let cloudron = new CloudronStrategy({
+            callbackURL: conf.getComputed('site_url') + '/auth/cloudron/callback'
+        }, function (token, tokenSecret, profile, done) {
+            authExt(profile.id, null, { displayName: profile.username, emails: [ { value: profile.email } ] } , done);
+        });
+
+        passport.use(cloudron);
     }
 
     let local = new LocalStrategy(authLocal);

@@ -52,6 +52,11 @@ exports.register = function(app) {
         app.get('/auth/yahoo/callback', loginController.yahooLogin);
     }
 
+    if (conf.get('cloudronauth:enabled') === true) {
+        app.get('/auth/cloudron', passport.authenticate('cloudron'));
+        app.get('/auth/cloudron/callback', loginController.cloudronLogin);
+    }
+
     app.post('/login', bodyParser(), loginController.localLogin);
 
     // File upload endpoint

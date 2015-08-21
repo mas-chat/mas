@@ -10,7 +10,8 @@
     "addons": {
         "localstorage": {},
         "redis": {},
-        "sendmail": {}
+        "sendmail": {},
+        "oauth": {}
     },
     "manifestVersion": 1,
     "website": "http://meetandspeak.com",
