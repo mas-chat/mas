@@ -2,7 +2,7 @@
     "id": "com.meetandspeak.cloudronapp",
     "title": "MeetAndSpeak",
     "author": "iao@iki.fi",
-    "description": "MAS is a web group chat",
+    "description": "file://cloudron/DESCRIPTION.md",
     "tagline": "Group Chat For Everyone",
     "version": "0.0.1",
     "healthCheckPath": "/",
