@@ -16,6 +16,6 @@
     "manifestVersion": 1,
     "website": "http://meetandspeak.com",
     "contactEmail": "iao@iki.fi",
-    "icon": "",
+    "icon": "file://cloudron/logo.png",
     "mediaLinks": [ ]
 }
