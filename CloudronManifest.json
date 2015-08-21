@@ -12,7 +12,6 @@
         "redis": {},
         "sendmail": {}
     },
-    "minBoxVersion": "0.0.1",
     "manifestVersion": 1,
     "website": "http://meetandspeak.com",
     "contactEmail": "iao@iki.fi",
