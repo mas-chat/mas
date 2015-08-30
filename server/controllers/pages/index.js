@@ -16,7 +16,7 @@
 
 'use strict';
 
-const conf = require('../../lib/authOptions');
+const authOptions = require('../../lib/authOptions');
 
 module.exports = function*() {
     if (this.mas.userId !== null) {
