@@ -10,32 +10,42 @@
     </div>
     <div>
         <div class="login">
-            <form id="login-form" method="post" class="form-horizontal">
-                <div class="login-error"></div>
-                <div id="email-or-nick" class="form-group">
-                    <input type="text" name="username" placeholder="Email or Nick" class="form-control">
-                </div>
-                <div class="form-group">
-                    <input type="password" name="password" placeholder="Password" class="form-control">
-                </div>
-                <button type="submit" class="btn btn-primary btn-login">Sign in</button> <a class="forgot" href="/forgot-password.html"><small>Forgot your password?</small></a>
-            </form>
+            {{#if auth.password}}
+                <form id="login-form" method="post" class="form-horizontal">
+                    <div class="login-error"></div>
+                    <div id="email-or-nick" class="form-group">
+                        <input type="text" name="username" placeholder="Email or Nick" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password" placeholder="Password" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-login">Sign in</button> <a class="forgot" href="/forgot-password.html"><small>Forgot your password?</small></a>
+                </form>
 
-            <div class="horizontal-divider">
-                <div class="or-label">OR</div>
-            </div>
+                {{#if auth.ext}}
+                    <div class="horizontal-divider">
+                        <div class="or-label">OR</div>
+                    </div>
+                {{/if}}
+            {{/if}}
 
-            <a class="btn btn-social btn-google-plus" href="/auth/google">
-                <i class="fa fa-google-plus"></i>Sign in with Google
-            </a>
+            {{#if auth.google}}
+                <a class="btn btn-social btn-google-plus" href="/auth/google">
+                    <i class="fa fa-google-plus"></i>Sign in with Google
+                </a>
+            {{/if}}
 
-            <a class="btn btn-social btn-yahoo" href="/auth/yahoo">
-                <i class="fa fa-yahoo"></i>Sign in with Yahoo
-            </a>
+            {{#if auth.yahoo}}
+                <a class="btn btn-social btn-yahoo" href="/auth/yahoo">
+                    <i class="fa fa-yahoo"></i>Sign in with Yahoo
+                </a>
+            {{/if}}
 
-            <a class="btn btn-social btn-cloudron" href="/auth/cloudron">
-                <i class="fa fa-cloud"></i>Sign in with Cloudron
-            </a>
+            {{#if auth.cloudron}}
+                <a class="btn btn-social btn-cloudron" href="/auth/cloudron">
+                    <i class="fa fa-cloud"></i>Sign in with Cloudron
+                </a>
+            {{/if}}
         </div>
     </div>
 </div>

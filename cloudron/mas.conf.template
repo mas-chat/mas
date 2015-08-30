@@ -18,6 +18,9 @@ site_url=##SITE_URL
 upload_directory=/app/data/uploads/
 cache_directory=/app/cache/
 
+[passwordauth]
+enabled=false
+
 ; google auth to work, frontend:https must be true
 
 [googleauth]
@@ -110,4 +113,3 @@ host=irc.freenode.net
 port=6667
 ssl=false
 rate_limit=10
-

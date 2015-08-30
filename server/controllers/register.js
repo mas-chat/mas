@@ -24,6 +24,7 @@ const Promise = require('bluebird'),
       httpStatus = require('statuses'),
       redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
+      authOptions = require('../lib/authOptions'),
       cookie = require('../lib/cookie'),
       user = require('../models/user');
 
@@ -205,7 +206,8 @@ exports.index = function*() {
     yield this.render(template, {
         page: 'register',
         title: 'Register',
-        registrationForm: form.toHTML()
+        registrationForm: form.toHTML(),
+        auth: authOptions
     });
 };
 

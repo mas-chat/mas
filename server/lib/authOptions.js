@@ -16,16 +16,17 @@
 
 'use strict';
 
-const conf = require('../../lib/authOptions');
+const conf = require('./conf');
 
-module.exports = function*() {
-    if (this.mas.userId !== null) {
-        this.redirect('/app');
-    } else {
-        yield this.render('index', {
-            page: 'frontpage',
-            title: '',
-            auth: authOptions
-        });
-    }
+let password = conf.get('passwordauth:enabled');
+let google = conf.get('googleauth:enabled');
+let yahoo = conf.get('yahooauth:enabled');
+let cloudron = conf.get('cloudronauth:enabled');
+
+module.exports = {
+    password: password,
+    google: google,
+    yahoo: yahoo,
+    cloudron: cloudron,
+    ext: google || yahoo || cloudron
 };

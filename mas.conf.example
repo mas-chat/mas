@@ -28,6 +28,9 @@ admin_email=admin@example.com
 upload_directory=data/uploads/
 cache_directory=data/cache/
 
+[passwordauth]
+enabled=true
+
 ; google auth to work, 'frontend:https' must be true
 
 [googleauth]

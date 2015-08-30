@@ -1,31 +1,40 @@
 <div class="narrow-container">
-    <div class="register-form-container">
+    {{#if auth.password}}
+        <div class="register-form-container">
 
-        Fill in the simple form below and click the button, you get an instant access.
+            Fill in the simple form below and click the button, you get an instant access.
 
-        <form id="register-form" class="register-form" action="/register" method="post" role="form" novalidate autocomplete="off">
-            {{{registrationForm}}}
+            <form id="register-form" class="register-form" action="/register" method="post" role="form" novalidate autocomplete="off">
+                {{{registrationForm}}}
 
-            <div class="register-controls">
-                <button type="submit" class="btn btn-primary">Complete Registration</button>
+                <div class="register-controls">
+                    <button type="submit" class="btn btn-primary">Complete Registration</button>
+                </div>
+            </form>
+        </div>
+
+        {{#if auth.ext}}
+            <div class="horizontal-divider">
+                <div class="or-label">OR</div>
             </div>
-        </form>
-    </div>
+        {{/if}}
+    {{/if}}
 
-    <div class="horizontal-divider">
-        <div class="or-label">OR</div>
-    </div>
+    {{#if auth.google}}
+        <a class="btn btn-social btn-google-plus" href="/auth/google">
+            <i class="fa fa-google-plus"></i>Register with Google account
+        </a>
+    {{/if}}
 
-    <a class="btn btn-social btn-google-plus" href="/auth/google">
-        <i class="fa fa-google-plus"></i>Register with Google account
-    </a>
+    {{#if auth.yahoo}}
+        <a class="btn btn-social btn-yahoo" href="/auth/yahoo">
+            <i class="fa fa-yahoo"></i>Register with Yahoo account
+        </a>
+    {{/if}}
 
-    <a class="btn btn-social btn-yahoo" href="/auth/yahoo">
-        <i class="fa fa-yahoo"></i>Register with Yahoo account
-    </a>
-
-    <a class="btn btn-social btn-cloudron" href="/auth/cloudron">
-        <i class="fa fa-cloudron"></i>Register with Cloudron account
-    </a>
-
+    {{#if auth.cloudron}}
+        <a class="btn btn-social btn-cloudron" href="/auth/cloudron">
+            <i class="fa fa-cloudron"></i>Register with Cloudron account
+        </a>
+    {{/if}}
 </div>
