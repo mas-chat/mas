@@ -130,11 +130,6 @@ for i = 1, #windowIds do
             message.id = 'MSG'
             message.windowId = tonumber(windowId)
 
-            if message.userId == userId and message.cat ~= 'join' and message.cat ~= 'part' and
-                message.cat ~= 'quit' then
-                message.cat = 'mymsg'
-            end
-
             redis.call('LPUSH', outbox, cjson.encode(message))
             seenUser(message.userId)
         end

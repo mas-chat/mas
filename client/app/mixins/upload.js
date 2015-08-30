@@ -55,17 +55,17 @@ export default Ember.Mixin.create(SendMsgMixin, {
             processData: false,
             contentType: false,
             success: data => this._sendText(data.url.join(' '), this.get('content')),
-            error: () => this._printLine('File upload failed.', 'error')
+            error: () => this._printError('File upload failed.')
        });
     },
 
-    _printLine(text, cat) {
+    _printError(text) {
         // Note that these errors share a special fixed gid. Gid is the primary key for messages so
         // only one is shown per window as new error replaces the existing one. This is intentional.
         this.get('store').upsertModel('message', {
             body: text,
             cat: cat,
-            userId: cat === 'mymsg' ? this.get('store.userId') : null,
+            userId: null,
             ts: moment().unix(),
             gid: 0
         }, this.get('content'));

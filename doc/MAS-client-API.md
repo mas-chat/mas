@@ -184,7 +184,6 @@ Add a messge line to window.
 | server  | Normal message from the IRC server                                |
 | banner  | Banner message from the IRC server (e.g MOTD line)                |
 | error   | Error message from the IRC server                                 |
-| mymsg   | Message that the user itself has sent earlier                     |
 | join    | Join indication, body is empty                                    |
 | part    | Part indication, body is the part message                         |
 | quit    | Quit indication, body is the quit reason                          |

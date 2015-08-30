@@ -202,7 +202,7 @@ function *remove(userId, windowId) {
 }
 
 function *sendBacklog(userId, conversationId, windowId) {
-    // TBD: This is same code as in initSession.lua
+    // TBD: This is similar code as in initSession.lua
     let maxBacklogLines = conf.get('session:max_backlog');
     let lines = yield redis.lrange(`conversationmsgs:${conversationId}`, 0, maxBacklogLines - 1);
 
@@ -215,11 +215,6 @@ function *sendBacklog(userId, conversationId, windowId) {
 
         message.id = 'MSG';
         message.windowId = windowId;
-
-        if (message.userId === userId && message.cat !== 'join' && message.cat !== 'part' &&
-            message.cat !== 'quit') {
-            message.cat = 'mymsg';
-        }
 
         yield notification.broadcast(userId, message);
     }
