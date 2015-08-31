@@ -66,16 +66,14 @@
 
 <div class="window-toolbar flex-row {{hiddenIfLogMode}}">
     <div class="window-add-text-container flex-1">
-        <form {{action "sendMessage" on="submit"}}>
-            {{input placeholder="Write here…" maxlength="500" class="form-control" value=newMessage}}
-            {{#if scrollLock}}
-                {{#if content.newMessagesCount}}
-                    <div {{action "jumpToBottom"}} class="window-new-messages">
-                        <span class="fa fa-chevron-down"></span> New messages
-                    </div>
-                {{/if}}
+        {{message-input placeholder="Write here…" rows=1 maxlength="500" class="form-control" sendMessage="sendMessage"}}
+        {{#if scrollLock}}
+            {{#if content.newMessagesCount}}
+                <div {{action "jumpToBottom"}} class="window-new-messages">
+                    <span class="fa fa-chevron-down"></span> New messages
+                </div>
             {{/if}}
-        </form>
+        {{/if}}
     </div>
 
     <div class="window-buttons flex-row">

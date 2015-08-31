@@ -180,12 +180,19 @@ export default Ember.Object.extend({
             text = text.replace(/ /g, 'ˑ'); // Preserve whitespace trick.
         }
 
-        // Emoji and @mention separation
+        // Emoji and @mention separation, uses capturing parentheses to save the separators also
         let parts = text.split(/(:\S+:|(?:^| )@\S+ )/);
 
         parts.forEach(function(part) {
             let emojiMatch = /^:(.+):$/.exec(part);
             let isEmoji = emojiMatch && emojify.emojiNames.indexOf(emojiMatch[1]) > -1;
+
+            if (part === '\n') {
+                this._pushPart(result, {
+                    linebreak: true
+                });
+                return;
+            }
 
             if (isEmoji) {
                 this._pushPart(result, {

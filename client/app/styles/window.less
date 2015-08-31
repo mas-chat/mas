@@ -447,21 +447,24 @@
     .window-add-text-container {
         position: relative;
 
-        input:focus {
+        textarea:focus {
             background-color: rgb(247, 243, 200);
             color: blue;
         }
 
-        input:focus::placeholder {
+        textarea:focus::placeholder {
             color:transparent;
         }
 
-        input {
+        textarea {
             position: absolute;
-            top: 0px;
+            height: 100%;
             bottom: 0px;
             left: 0px;
             right: 0px;
+            resize: none;
+            border: 0px;
+            line-height: 28px;
         }
     }
 

@@ -180,12 +180,9 @@ export default Ember.Component.extend(UploadMixin, {
             this.toggleProperty('content.minimizedNamesList');
         },
 
-        sendMessage() {
-            let message = this.get('newMessage');
-
-            if (message) {
-                this.sendAction('action', 'sendMessage', this.get('content'), message);
-                this.set('newMessage', '');
+        sendMessage(msg) {
+            if (msg !== '') {
+                this.sendAction('action', 'sendMessage', this.get('content'), msg);
             }
         },
 
