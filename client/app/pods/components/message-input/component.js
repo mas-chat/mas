@@ -16,15 +16,13 @@
 
 'use strict';
 
-/* globals moment, $ */
-
 import Ember from 'ember';
 
 export default Ember.TextArea.extend({
     pendingSubmit: false,
 
     keyPress(e) {
-        if (e.keyCode == 13 && e.shiftKey === false) {
+        if (e.keyCode === 13 && !e.shiftKey) {
             this.pendingSubmit = true;
         }
     },
@@ -50,6 +48,5 @@ export default Ember.TextArea.extend({
         }
 
         this.$().height(newHeight);
-        console.log(newHeight);
     }
 });
