@@ -181,7 +181,7 @@ export default Ember.Object.extend({
         }
 
         // Emoji and @mention separation, uses capturing parentheses to save the separators also
-        let parts = text.split(/(:\S+:|(?:^| )@\S+ )/);
+        let parts = text.split(/(:\S+:|(?:^| )@\S+ |\n)/);
 
         parts.forEach(function(part) {
             let emojiMatch = /^:(.+):$/.exec(part);
