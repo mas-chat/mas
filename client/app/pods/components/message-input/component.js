@@ -19,24 +19,20 @@
 import Ember from 'ember';
 
 export default Ember.TextArea.extend({
-    pendingSubmit: false,
-
-    keyPress(e) {
-        if (e.keyCode === 13 && !e.shiftKey) {
-            this.pendingSubmit = true;
-        }
+    keyDown() {
+        this.$().css('overflow', 'hidden');
     },
 
-    input() {
-        this._updateHeight();
-
-        if (this.pendingSubmit) {
+    keyUp(e) {
+        if (e.keyCode === 13 && !e.shiftKey) {
             this.sendAction('sendMessage', this.get('value'));
             this.set('value', '');
             this.$().height('100%');
-
-            this.pendingSubmit = false;
+        } else {
+            this._updateHeight();
         }
+
+        this.$().css('overflow', 'auto');
     },
 
     _updateHeight(height) {
