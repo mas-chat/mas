@@ -4,7 +4,7 @@
     "author": "iao@iki.fi",
     "description": "file://cloudron/DESCRIPTION.md",
     "tagline": "Group Chat For Everyone",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "healthCheckPath": "/",
     "httpPort": 3200,
     "addons": {
