@@ -17,5 +17,6 @@
     "website": "http://meetandspeak.com",
     "contactEmail": "iao@iki.fi",
     "icon": "file://cloudron/logo.png",
-    "mediaLinks": [ ]
+    "mediaLinks": [ ],
+    "memoryLimit": 524288000
 }
