@@ -24,6 +24,9 @@ local key = 'conversationbuffer:' .. conversationId
 -- that case duplicates would pass the check.
 msgBody = string.gsub(msgBody, "^(.-)%s*$", "%1")
 
+-- Undo the multiline to single line conversion that IRC backend does
+msgBody = string.gsub(msgBody, "\n", " ")
+
 local msgFingerprint = msgUserId .. ':' .. msgBody
 
 local existingReporter = redis.call('HGET', key, msgFingerprint)
