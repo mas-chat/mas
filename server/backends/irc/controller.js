@@ -130,8 +130,11 @@ function *processSend(params) {
         target = yield redis.hget(`ircuser:${targetUserId}`, 'nick');
     }
 
+    let text = params.text || '';
+    text = text.replace(/\n/g, ' ');
+
     if (target) {
-        sendPrivmsg(params.userId, conversation.network, target, params.text);
+        sendPrivmsg(params.userId, conversation.network, target, text);
     }
 }
 
