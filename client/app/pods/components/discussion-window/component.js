@@ -50,6 +50,7 @@ export default Ember.Component.extend(UploadMixin, {
     lazyImageTimer: null,
 
     selectedDesktop: 0,
+    participants: null,
 
     row: Ember.computed.alias('content.row'),
     column: Ember.computed.alias('content.column'),
@@ -109,29 +110,14 @@ export default Ember.Component.extend(UploadMixin, {
         }
     }),
 
-    nickCompletion: Ember.observer('content.userNames.[]', 'content.voiceNames.[]',
-        'content.operatorNames.[]', function() {
+    nickCompletion: function() {
         Ember.run.debounce(this, function() {
-            this._updateNickCompletionList();
+            this.set('participants',
+                this.get('content.operatorNames').concat(this.get('content.voiceNames'),
+                    this.get('content.userNames')));
         }, 1000);
-    }),
-
-    _updateNickCompletionList() {
-        let target = this.$('.form-control');
-
-        if (!target) {
-            return;
-        }
-
-        let nickList = this.get('content.operatorNames').concat(this.get('content.voiceNames'),
-            this.get('content.userNames')).map(item => item.nick);
-
-        target.atwho({
-            at: '@',
-            data: nickList,
-            limit: 15
-        });
-    },
+    }.observes('content.userNames.[]', 'content.voiceNames.[]',
+       'content.operatorNames.[]').on('init'),
 
     _lineAdded() {
         let messages = this.get('content.messages');
@@ -181,9 +167,7 @@ export default Ember.Component.extend(UploadMixin, {
         },
 
         sendMessage(msg) {
-            if (msg !== '') {
-                this.sendAction('action', 'sendMessage', this.get('content'), msg);
-            }
+            this.sendAction('action', 'sendMessage', this.get('content'), msg);
         },
 
         close() {
@@ -278,23 +262,6 @@ export default Ember.Component.extend(UploadMixin, {
             e.preventDefault();
             return false;
         });
-
-        let emojisList = $.map(emojify.emojiNames, function(value, i) {
-            return { id: i, name: value };
-        });
-
-        let emojiListTemplate = '<li><img src="/app/assets/images/emoji/${name}.png"> ${name}</li>';
-
-        this.$('.form-control').atwho({
-            at: ':',
-            displayTpl: emojiListTemplate,
-            insertTpl: ':${name}:',
-            data: emojisList,
-            highlightFirst: false,
-            limit: 20
-        });
-
-        this._updateNickCompletionList();
 
         this.$messagePanel.magnificPopup({
             type: 'image',

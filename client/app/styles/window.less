@@ -155,6 +155,10 @@
     .body {
         display: inline;
         flex: 1;
+
+        pre code {
+            font-size: 12px;
+        }
     }
 
     .msg-prefix {
@@ -172,6 +176,10 @@
         &:after {
             content: ":";
         }
+    }
+
+    .nick + pre { // Special case where pre starts the message
+        margin-top: 10px;
     }
 
     .nick-mention {

@@ -11,15 +11,7 @@
                 {{message.channelAction}}
             {{~else}}
                 {{~#each message.bodyParts as |bodyPart|}}
-                    {{~#if bodyPart.link}}
-                        <a href="{{bodyPart.url}}" target="_blank">{{bodyPart.text}}</a>
-                    {{~else if bodyPart.emoji}}
-                        <img align="absmiddle" alt=":{{bodyPart.emoji}}:" class="emoji" src="/app/assets/images/emoji/{{bodyPart.emoji}}.png" title=":{{bodyPart.emoji}}:" />
-                    {{~else if bodyPart.mention}}
-                        <span class="nick-mention">{{bodyPart.text}}</span>
-                    {{~else if bodyPart.linebreak}}
-                        <br>
-                    {{~else}}
+                    {{~#if bodyPart.text}}
                         {{{bodyPart.text}}}
                     {{~/if}}
                 {{~/each}}

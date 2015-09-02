@@ -87,26 +87,21 @@ export default Ember.Object.extend({
         let network = this.get('network');
         let cat = this.get('cat');
 
-        // TBD: Do parsing in two stages, first images and rest. Then rest in detail.
-        URI.withinString(body, function(url, start, end, source) {
+        // TODO: Security review the whole algorithm
+        body = this._escapeHTMLStartTag(body);
+
+        body = URI.withinString(body, (url, start, end, source) => {
             let urlObj = new URI(url);
             let visibleLink;
-            let media = false;
-            let type = '';
+            let type = 'generic';
             let domain = urlObj.domain();
-
-            if (start !== pos) {
-                this._parseText(result, source.substring(pos, start), network, cat);
-            }
 
             if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
                 visibleLink = urlObj.filename();
-                media = true;
                 type = 'image';
             } else if ((domain === 'youtube.com' && urlObj.search(true).v) ||
                 domain === 'youtu.be') {
                 visibleLink = urlObj.toString();
-                media = true;
                 type = 'youtubelink';
             } else {
                 visibleLink = urlObj.readable();
@@ -116,29 +111,28 @@ export default Ember.Object.extend({
                 urlObj.protocol('http');
             }
 
-            this._pushPart(result, {
-                link: true,
-                text: visibleLink,
-                url: urlObj.toString(),
-                media: media,
-                type: type,
-                source: ''
-            });
+            if (type === 'image' || type === 'youtubelink') {
+                this._pushPart(result, {
+                    type: type,
+                    url: urlObj.toString()
+                });
+            }
 
-            pos = end;
+            return this._renderLink(urlObj.normalize().toString(), visibleLink);
+        });
 
-            return url;
-        }.bind(this));
+        body = marked(body);
 
-        if (body && body.length !== pos) {
-            this._parseText(result, body.substring(pos), network, cat);
-        }
+        this._pushPart(result, {
+            type: 'text',
+            text: this._parseCustomFormatting(body, network, cat)
+        });
 
         return result;
     }),
 
     hasMedia: Ember.computed('bodyParts', function() {
-        return this.get('bodyParts').isAny('media', true);
+        return !this.get('bodyParts').isEvery('type', 'text');
     }),
 
     hasImages: Ember.computed('bodyParts', function() {
@@ -169,56 +163,51 @@ export default Ember.Object.extend({
         array.pushObject(Ember.Object.create(params));
     },
 
-    _parseText(result, text, network, cat) {
+    _parseCustomFormatting(text, network, cat) {
         if (network === 'Flowdock') {
-            text = text.replace(/^\[(.*?)\] &lt;&lt; (.*)/, function(match, p1, p2) {
-                return '[' + p1.substring(0, 9) + '] ' + p2;
-            });
+            text = text.replace(/^\[(.*?)\] &lt;&lt; (.*)/,
+                (match, p1, p2) => `[${p1.substring(0, 9)}] ${p2}`);
         }
 
-        if (cat === 'banner') {
-            text = text.replace(/ /g, 'ˑ'); // Preserve whitespace trick.
+        text = text.replace(/  /g, ' &nbsp;'); // Preserve whitespace.
+
+        // Find @ character 1) after space, 2) in the beginning of string, 3) after HTML tag (>)
+        text = text.replace(/(^| |>)(@\S+)(?=( |$))/g,
+            (match, p1, p2) => this._renderMention(p1, p2));
+
+        text = text.replace(/:(.+?):/g, (match, p1) => {
+            if (!emojify.emojiNames.includes(p1)) {
+                return match;
+            } else {
+                return this._renderEmoji(match, `/app/assets/images/emoji/${p1}.png`);
+            }
+        });
+
+        let keywords = text.match(/<(p|br)>/g);
+
+        // Assumes that marked is used which inserts at least one <p>, <ol>, or <ul>
+        let multiLine = !keywords || keywords.length > 1;
+
+        if (!multiLine) {
+            text = text.replace(/(\s*<p>|<\/p>\s*)/g, '');
         }
 
-        // Emoji and @mention separation, uses capturing parentheses to save the separators also
-        let parts = text.split(/(:\S+:|(?:^| )@\S+ |\n)/);
+        return text;
+    },
 
-        parts.forEach(function(part) {
-            let emojiMatch = /^:(.+):$/.exec(part);
-            let isEmoji = emojiMatch && emojify.emojiNames.indexOf(emojiMatch[1]) > -1;
+    _renderLink(url, label) {
+        return `<a href="${url}" target="_blank">${label}</a>`;
+    },
 
-            if (part === '\n') {
-                this._pushPart(result, {
-                    linebreak: true
-                });
-                return;
-            }
+    _renderEmoji(name, src) {
+        return `<img align="absmiddle" alt="${name}" class="emoji" src="${src}"/>`;
+    },
 
-            if (isEmoji) {
-                this._pushPart(result, {
-                    link: false,
-                    text: part,
-                    emoji: emojiMatch[1]
-                });
-                return;
-            }
+    _renderMention(beforeCharacter, nick) {
+        return `${beforeCharacter}<span class="nick-mention">${nick}</span>`;
+    },
 
-            let mentionMatch = /^\s?(@\S+) $/.exec(part);
-
-            if (mentionMatch) {
-                this._pushPart(result, {
-                    link: false,
-                    mention: true,
-                    text: mentionMatch[1]
-                });
-                return;
-            }
-
-            // Plain text
-            this._pushPart(result, {
-                link: false,
-                text: part
-            });
-        }.bind(this));
+    _escapeHTMLStartTag(text) {
+        return text.replace(/<]/g, '&lt;');
     }
 });

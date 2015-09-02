@@ -46,3 +46,8 @@ emojify.setConfig({
     img_dir: '/app/assets/images/emoji', // eslint-disable-line camelcase
     ignore_emoticons: true // eslint-disable-line camelcase
 });
+
+marked.setOptions({
+    breaks: true,
+    tables: false
+});

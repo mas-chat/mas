@@ -18,21 +18,54 @@
 
 import Ember from 'ember';
 
+let emojisList = emojify.emojiNames.map((value, i) => ({ id: i, name: value }));
+
 export default Ember.TextArea.extend({
-    keyDown() {
-        this.$().css('overflow', 'hidden');
+    participants: null,
+    pendingClear: false,
+
+    keyPress(e) {
+        if (e.keyCode === 13 && !e.shiftKey) {
+            e.preventDefault();
+
+            let value = this.get('value');
+
+            if (value !== '') {
+                this.sendAction('sendMessage', value);
+                this.set('value', '');
+                this.$().height('100%');
+            }
+        }
     },
 
-    keyUp(e) {
-        if (e.keyCode === 13 && !e.shiftKey) {
-            this.sendAction('sendMessage', this.get('value'));
-            this.set('value', '');
-            this.$().height('100%');
-        } else {
-            this._updateHeight();
-        }
+    input() {
+        this._updateHeight();
+    },
 
-        this.$().css('overflow', 'auto');
+    nickCompletion: Ember.observer('participants', function() {
+        let participants = this.get('participants') || [];
+        let nickList = this.get('participants').map(item => item.nick);
+
+        this.$().atwho({
+            at: '@',
+            data: nickList,
+            limit: 15
+        });
+    }),
+
+    didInsertElement() {
+        this.$().atwho({
+            at: ':',
+            displayTpl: '<li><img src="/app/assets/images/emoji/${name}.png"> ${name}</li>',
+            insertTpl: ':${name}:',
+            data: emojisList,
+            highlightFirst: false,
+            limit: 20
+        });
+
+        this.$().on('hidden.atwho', function(e, flag, query) {
+            e.stopPropagation();
+        });
     },
 
     _updateHeight(height) {

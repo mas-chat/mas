@@ -66,7 +66,7 @@
 
 <div class="window-toolbar flex-row {{hiddenIfLogMode}}">
     <div class="window-add-text-container flex-1">
-        {{message-input placeholder="Write here…" rows=1 maxlength="500" class="form-control" sendMessage="sendMessage"}}
+        {{message-input placeholder="Write here…" rows=1 maxlength="500" class="form-control" participants=participants sendMessage="sendMessage"}}
         {{#if scrollLock}}
             {{#if content.newMessagesCount}}
                 <div {{action "jumpToBottom"}} class="window-new-messages">
