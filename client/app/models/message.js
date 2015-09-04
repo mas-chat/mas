@@ -80,55 +80,25 @@ export default Ember.Object.extend({
     }),
 
     bodyParts: Ember.computed('body', function() {
-        let result = Ember.A([]);
-        let pos = 0;
-        let imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
         let body = this.get('body');
-        let network = this.get('network');
         let cat = this.get('cat');
 
-        // TODO: Security review the whole algorithm
+        let parts = [];
+
         body = this._escapeHTMLStartTag(body);
 
-        body = URI.withinString(body, (url, start, end, source) => {
-            let urlObj = new URI(url);
-            let visibleLink;
-            let type = 'generic';
-            let domain = urlObj.domain();
+        if (cat === 'msg') {
+            ({ body, parts } = this._parseLinks(body));
 
-            if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
-                visibleLink = urlObj.filename();
-                type = 'image';
-            } else if ((domain === 'youtube.com' && urlObj.search(true).v) ||
-                domain === 'youtu.be') {
-                visibleLink = urlObj.toString();
-                type = 'youtubelink';
-            } else {
-                visibleLink = urlObj.readable();
-            }
+            body = marked(body);
+            body = this._parseCustomFormatting(body, cat);
+        }
 
-            if (urlObj.protocol() === '') {
-                urlObj.protocol('http');
-            }
+        body = this._parseWhiteSpace(body);
 
-            if (type === 'image' || type === 'youtubelink') {
-                this._pushPart(result, {
-                    type: type,
-                    url: urlObj.toString()
-                });
-            }
+        parts.push({ type: 'text', text: body });
 
-            return this._renderLink(urlObj.normalize().toString(), visibleLink);
-        });
-
-        body = marked(body);
-
-        this._pushPart(result, {
-            type: 'text',
-            text: this._parseCustomFormatting(body, network, cat)
-        });
-
-        return result;
+        return Ember.A(parts.map(item => Ember.Object.create(item)));
     }),
 
     hasMedia: Ember.computed('bodyParts', function() {
@@ -159,17 +129,55 @@ export default Ember.Object.extend({
         return this.get('bodyParts').filterBy('type', 'image');
     }),
 
-    _pushPart(array, params) {
-        array.pushObject(Ember.Object.create(params));
+    _parseLinks(text) {
+        let imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
+        let media = [];
+
+        text = URI.withinString(text, (url, start, end, source) => {
+            let urlObj = new URI(url);
+            let visibleLink;
+            let type = 'generic';
+            let domain = urlObj.domain();
+
+            if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
+                visibleLink = urlObj.filename();
+                type = 'image';
+            } else if ((domain === 'youtube.com' && urlObj.search(true).v) ||
+                domain === 'youtu.be') {
+                visibleLink = urlObj.toString();
+                type = 'youtubelink';
+            } else {
+                visibleLink = urlObj.readable();
+            }
+
+            if (urlObj.protocol() === '') {
+                urlObj.protocol('http');
+            }
+
+            if (type === 'image' || type === 'youtubelink') {
+                media.push({
+                    type: type,
+                    url: urlObj.toString()
+                });
+            }
+
+            return this._renderLink(urlObj.normalize().toString(), visibleLink);
+        });
+
+        return { body: text, parts: media };
     },
 
-    _parseCustomFormatting(text, network, cat) {
+    _parseWhiteSpace(text) {
+        return text.replace(/  /g, ' &nbsp;'); // Preserve whitespace.
+    },
+
+    _parseCustomFormatting(text, cat) {
+        let network = this.get('network');
+
         if (network === 'Flowdock') {
             text = text.replace(/^\[(.*?)\] &lt;&lt; (.*)/,
                 (match, p1, p2) => `[${p1.substring(0, 9)}] ${p2}`);
         }
-
-        text = text.replace(/  /g, ' &nbsp;'); // Preserve whitespace.
 
         // Find @ character 1) after space, 2) in the beginning of string, 3) after HTML tag (>)
         text = text.replace(/(^| |>)(@\S+)(?=( |$))/g,
