@@ -26,15 +26,10 @@ export default Ember.Controller.extend(SendMsgMixin, {
     store: Ember.inject.service(),
 
     model: Ember.computed.alias('store.windows'),
-    friends: Ember.computed.alias('store.friends'),
     userId: Ember.computed.alias('store.userId'),
     activeDesktop: Ember.computed.alias('store.activeDesktop'),
 
     activeDraggedWindow: false,
-
-    friendsOnline: Ember.computed('friends.@each.online', function() {
-        return this.get('friends').filterBy('online', true).length;
-    }),
 
     desktops: Ember.computed('model.@each.desktop', 'model.@each.newMessagesCount', function() {
         let desktops = {};
@@ -89,18 +84,6 @@ export default Ember.Controller.extend(SendMsgMixin, {
     }),
 
     actions: {
-        logout() {
-            this.get('socket').send({ id: 'LOGOUT' }, function() {
-                $.removeCookie('auth', { path: '/' });
-
-                if (typeof Storage !== 'undefined') {
-                    window.localStorage.removeItem('data');
-                }
-
-                window.location = '/';
-            });
-        },
-
         windowAction(command, window, value) {
             this[`_handle${command.capitalize()}`](window, value);
         },
@@ -116,16 +99,8 @@ export default Ember.Controller.extend(SendMsgMixin, {
             this.send('openModal', modals[command], window);
         },
 
-        switchDesktop(desktop) {
-            this.set('activeDesktop', desktop);
-        },
-
         dragActiveAction(value) {
             this.set('activeDraggedWindow', value);
-        },
-
-        removeFriend(userId) {
-            this.send('openModal', 'remove-friend-modal', userId);
         }
     },
 
