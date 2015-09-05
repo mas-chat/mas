@@ -25,17 +25,17 @@ export default Ember.Controller.extend(SendMsgMixin, {
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
-    model: Ember.computed.alias('store.windows'),
+    windows: Ember.computed.alias('store.windows'),
     userId: Ember.computed.alias('store.userId'),
     activeDesktop: Ember.computed.alias('store.activeDesktop'),
 
     activeDraggedWindow: false,
 
-    desktops: Ember.computed('model.@each.desktop', 'model.@each.newMessagesCount', function() {
+    desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
         let desktops = {};
         let desktopsArray = Ember.A([]);
 
-        this.get('model').forEach(function(masWindow) {
+        this.get('windows').forEach(function(masWindow) {
             let newMessages = masWindow.get('newMessagesCount');
             let desktop = masWindow.get('desktop');
             let initials = masWindow.get('simplifiedName').substr(0, 2).toUpperCase();

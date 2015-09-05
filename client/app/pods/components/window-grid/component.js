@@ -23,20 +23,22 @@ import Ember from 'ember';
 const CURSORWIDTH = 50;
 
 export default Ember.Component.extend({
+    store: Ember.inject.service(),
+    socket: Ember.inject.service(),
+
     classNames: [ 'grid', 'flex-1', 'flex-grow-column' ],
 
     dimensions: null,
     cursor: {},
     movingWindow: null,
-    activeDesktop: 0,
 
     relayoutScheduled: false,
     relayoutAnimate: null,
 
     windowComponents: null,
 
-    store: Ember.inject.service(),
-    socket: Ember.inject.service(),
+    model: Ember.computed.alias('store.windows'),
+    activeDesktop: Ember.computed.alias('store.activeDesktop'),
 
     initReady: Ember.observer('store.initDone', function() {
         Ember.run.next(this, function() { this._layoutWindows(false); });
