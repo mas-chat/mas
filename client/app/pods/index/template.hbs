@@ -1,7 +1,7 @@
-<div class="flex-1 flex-row">
-    {{window-grid model=model activeDesktop=activeDesktop menuAction="menuAction" windowAction="windowAction" dragActiveAction="dragActiveAction"}}
+{{#if store.initDone}}
+    <div class="flex-1 flex-row">
+        {{window-grid model=model activeDesktop=activeDesktop menuAction="menuAction" windowAction="windowAction" dragActiveAction="dragActiveAction"}}
 
-    {{#if store.initDone}}
         <div class="sidebar flex-grow-column">
             <div class="upper-sidebar flex-1">
                 {{desktop-switcher desktops=desktops action="switchDesktop" activeDraggedWindow=activeDraggedWindow selected=activeDesktop}}
@@ -20,14 +20,6 @@
                         <li {{action "openModal" "join-irc-modal"}}><a href="#">Join IRC channel&#8230;</a></li>
                     </ul>
                 </div>
-
-                {{!
-
-                <button type="button" class="btn btn-default">
-                    <i class="fa fa-info fa-lg"></i>
-                </button>
-
-                }}
 
                 <div class="btn-group dropup pull-left">
                     <button type="button" class="btn btn-default btn-friends dropdown-toggle" data-toggle="dropdown">
@@ -68,15 +60,21 @@
                 </div>
             </div>
         </div>
-    {{/if}}
-</div>
+    </div>
 
-<div id="window-contextMenu" class="dropdown clearfix">
-    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-        <li class="dropdown-header"></li>
-        {{! <li class="divider"></li> }}
-        <li><a data-action="chat" href="#">Start private chat with</a></li>
-        {{! <li><a data-action="op" href="#">Give operator rights</a></li> }}
-        <li class="window-contexMenu-request-friend"><a data-action="requestFriend" href="#">Add to contacts list</a></li>
-    </ul>
-</div>
+    <div id="window-contextMenu" class="dropdown clearfix">
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+            <li class="dropdown-header"></li>
+            {{! <li class="divider"></li> }}
+            <li><a data-action="chat" href="#">Start private chat with</a></li>
+            {{! <li><a data-action="op" href="#">Give operator rights</a></li> }}
+            <li class="window-contexMenu-request-friend"><a data-action="requestFriend" href="#">Add to contacts list</a></li>
+        </ul>
+    </div>
+{{else}}
+    <div class="flex-grow-row flex-1 flex-align-center">
+        <div class="loader loader-big"></div>
+    </div>
+{{/if}}
+
+
