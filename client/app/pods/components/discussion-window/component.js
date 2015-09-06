@@ -103,15 +103,15 @@ export default Ember.Component.extend(UploadMixin, {
         }
     }),
 
-    visibilityChanged: Ember.observer('visible', function() {
-        if (this.get('visible')) {
+    visibilityChanged: function() {
+        if (this.get('visible') && !this.get('scrollLock')) {
             this.set('content.newMessagesCount', 0);
         }
 
         if (this.get('elementInserted')) {
             this.sendAction('relayout', { animate: false });
         }
-    }),
+    }.observes('visible').on('init'),
 
     nickCompletion: function() {
         Ember.run.debounce(this, function() {
@@ -354,9 +354,15 @@ export default Ember.Component.extend(UploadMixin, {
 
             if (scrollPos + $panel.innerHeight() >= bottomTreshhold) {
                 this.set('scrollLock', false);
+
+                if (this.get('visible')) {
+                    this.set('content.newMessagesCount', 0);
+                }
+
                 Ember.Logger.info('scrollock off');
             } else if (!this.get('deletedLine')) {
                 this.set('scrollLock', true);
+
                 Ember.Logger.info('scrollock on');
             }
 
