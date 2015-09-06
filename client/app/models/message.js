@@ -50,7 +50,7 @@ export default Ember.Object.extend({
             return 'flowdock-ignore';
         } else if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {
             return 'mention';
-        } else if (userId == this.get('store.userId')) {
+        } else if (userId == this.get('store.userId') && cat === 'msg') {
             return 'mymsg';
         }
 
