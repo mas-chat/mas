@@ -388,7 +388,7 @@ export default Ember.Component.extend(UploadMixin, {
             let $panel = this.$messagePanel;
             let scrollPos = $panel.scrollTop();
 
-            const scrollBottomThreshold = 8; // User doesn't need to scroll exactly to the end.
+            const scrollBottomThreshold = 30; // User doesn't need to scroll exactly to the end.
             const scrollTopThreshold = 30; // Or to up to trigger fetching of more messages.
 
             let bottomPosition = $panel.prop('scrollHeight') - scrollBottomThreshold;
