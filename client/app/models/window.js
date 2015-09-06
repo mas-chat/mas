@@ -175,9 +175,9 @@ export default Ember.Object.extend({
             let sortedMessages = messages.sortBy('ts');
 
             for (let i = 0; i < sortedMessages.length - maxBacklogMsgs; i++) {
-               this.get('store').removeModel('message', sortedMessages[i], this);
-           }
-       }
+                this.get('store').removeModel('message', sortedMessages[i], this);
+            }
+        }
     }),
 
     syncServerPosition: Ember.observer('desktop', 'row', 'column', function() {

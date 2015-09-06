@@ -52,7 +52,7 @@ exports.get = function(key) {
 exports.getComputed = function(key) {
     let ret = '';
 
-    switch(key) {
+    switch (key) {
         case 'site_url':
             ret = get('site:site_url');
 

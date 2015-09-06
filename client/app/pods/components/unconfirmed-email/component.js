@@ -31,7 +31,8 @@ export default Ember.Component.extend({
 
     actions: {
         requestConfirmation() {
-            let msg = 'Confirmation link sent. Check your spam folder if you don\'t see it in inbox.';
+            let msg =
+                'Confirmation link sent. Check your spam folder if you don\'t see it in inbox.';
 
             this.get('socket').send({
                 id: 'SEND_CONFIRM_EMAIL'

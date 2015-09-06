@@ -50,7 +50,7 @@ exports.send = function(templateName, data, address, subject) {
         to: address,
         subject: subject,
         html: template(data)
-    }, function (error, info) {
+    }, function(error, info) {
         if (error) {
             log.warn(`Failed to send email: ${error}`);
         } else {

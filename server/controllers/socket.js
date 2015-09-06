@@ -216,7 +216,7 @@ function checkBacklogParameterBounds(value) {
 function terminateClientConnections() {
     log.info(`Closing all ${clientSocketList.length} socket.io connections`);
 
-    for(let socket of clientSocketList) {
+    for (let socket of clientSocketList) {
         socket.disconnect(true);
     }
 }

@@ -56,7 +56,7 @@ export default Ember.Mixin.create(SendMsgMixin, {
             contentType: false,
             success: data => this._sendText(data.url.join(' '), this.get('content')),
             error: () => this._printError('File upload failed.')
-       });
+        });
     },
 
     _printError(text) {

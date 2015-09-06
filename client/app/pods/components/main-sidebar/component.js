@@ -59,5 +59,5 @@ export default Ember.Component.extend({
 
     friendsOnline: Ember.computed('friends.@each.online', function() {
         return this.get('friends').filterBy('online', true).length;
-    }),
+    })
 });
