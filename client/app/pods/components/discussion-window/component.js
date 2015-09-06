@@ -23,6 +23,8 @@ import { play } from '../../../utils/sound';
 import UploadMixin from '../../../mixins/upload';
 
 export default Ember.Component.extend(UploadMixin, {
+    store: Ember.inject.service(),
+
     classNames: [ 'window', 'flex-grow-column' ],
 
     classNameBindings: [
@@ -32,6 +34,8 @@ export default Ember.Component.extend(UploadMixin, {
         'ircServerWindow:irc-server-window:',
         'type'
     ],
+
+    activeDesktop: Ember.computed.alias('store.activeDesktop'),
 
     expanded: false,
     animating: false,
@@ -49,15 +53,14 @@ export default Ember.Component.extend(UploadMixin, {
     scrollTimer: null,
     lazyImageTimer: null,
 
-    selectedDesktop: 0,
     participants: null,
 
     row: Ember.computed.alias('content.row'),
     column: Ember.computed.alias('content.column'),
     desktop: Ember.computed.alias('content.desktop'),
 
-    visible: Ember.computed('selectedDesktop', 'content.desktop', function() {
-        return this.get('selectedDesktop') === this.get('content.desktop');
+    visible: Ember.computed('activeDesktop', 'content.desktop', function() {
+        return this.get('activeDesktop') === this.get('content.desktop');
     }),
 
     logOrMobileModeEnabled: Ember.computed('logModeEnabled', function() {

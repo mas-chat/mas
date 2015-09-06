@@ -38,7 +38,6 @@ export default Ember.Component.extend({
     windowComponents: null,
 
     model: Ember.computed.alias('store.windows'),
-    activeDesktop: Ember.computed.alias('store.activeDesktop'),
 
     initReady: Ember.observer('store.initDone', function() {
         Ember.run.next(this, function() { this._layoutWindows(false); });

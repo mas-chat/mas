@@ -70,9 +70,7 @@ export default Ember.Controller.extend(SendMsgMixin, {
         }
     }),
 
-    // Store.activeDesktop instead of just activedesktop because of
-    // https://github.com/emberjs/ember.js/issues/12234
-    updateActiveDesktop: Ember.observer('store.activeDesktop', function() {
+    updateActiveDesktop: Ember.observer('activeDesktop', function() {
         if (!isMobile.any) {
             this.get('socket').send({
                 id: 'SET',
