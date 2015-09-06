@@ -51,6 +51,7 @@ export default Ember.Object.extend({
     desktop: 0,
 
     messages: null,
+    didPrepend: false,
     logMessages: null,
 
     newMessagesCount: 0,
@@ -91,8 +92,6 @@ export default Ember.Object.extend({
                 dayOfNextMsg = day;
             }
         }
-
-        addDayDivider(result, dayOfNextMsg, 0); // Always start the backlog with a day divider
 
         return result;
     }),
@@ -160,23 +159,6 @@ export default Ember.Object.extend({
             return network === 'MAS' ? 'group' : 'channel';
         } else {
             return '1on1';
-        }
-    }),
-
-    messageLimiter: Ember.observer('messages.[]', function() {
-        if (!this.get('store.initDone')) {
-            return; // There's lot of going on in startup, limiting can wait.
-        }
-
-        let maxBacklogMsgs = this.get('store.maxBacklogMsgs');
-        let messages = this.get('messages');
-
-        if (messages.length > maxBacklogMsgs) {
-            let sortedMessages = messages.sortBy('ts');
-
-            for (let i = 0; i < sortedMessages.length - maxBacklogMsgs; i++) {
-                this.get('store').removeModel('message', sortedMessages[i], this);
-            }
         }
     }),
 

@@ -53,7 +53,8 @@ const handlers = {
     FRIEND_VERDICT: handleFriendVerdict,
     REMOVE_FRIEND: handleRemoveFriend,
     DESTROY_ACCOUNT: handleDestroyAccount,
-    SEND_CONFIRM_EMAIL: handleSendConfirmEmail
+    SEND_CONFIRM_EMAIL: handleSendConfirmEmail,
+    FETCH: handleFetch
 };
 
 init.on('beforeShutdown', function*() {
@@ -526,6 +527,21 @@ function *handleSendConfirmEmail(params) {
 
     yield sendEmailConfirmationEmail(userId);
     return { status: 'OK' };
+}
+
+function *handleFetch(params) {
+    let command = params.command;
+
+    if (!params.conversation) {
+        return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
+    } else if (!Number.isInteger(command.ts)) {
+        return { status: 'ERROR', errorMsg: 'Invalid ts parameter.' };
+    }
+
+    let conversationId = params.conversation.conversationId;
+    let messages = yield search.getMessagesByTs(conversationId, command.ts, 50);
+
+    return { status: 'OK', msgs: messages };
 }
 
 function *sendEmailConfirmationEmail(userId, email) {

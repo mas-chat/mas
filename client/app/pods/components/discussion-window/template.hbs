@@ -22,6 +22,13 @@
     {{/if}}
 
     <div class="window-messages flex-1 {{hiddenIfLogMode}}">
+        {{#if fetchingMore}}
+           <div class="window-upper-label">Loading older messages…</div>
+        {{else if beginningReached}}
+           <div class="window-start-label">Start of discussion.</div>
+        {{else}}
+           <div {{action "fetchMore"}} class="window-upper-label window-fetch-more">Click to see older messages</div>
+        {{/if}}
         {{message-list messages=content.sortedMessages}}
         <div class="window-upload">
             <div class="js-upload">

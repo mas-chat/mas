@@ -20,6 +20,7 @@
 
 import Ember from 'ember';
 import NotificationParser from '../utils/notification-parser';
+import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 
 let socket = io.connect(); // Start connection as early as possible.
 
@@ -76,6 +77,9 @@ export default Ember.Service.extend({
 
             this.set('sessionId', data.sessionId);
             this.set('store.maxBacklogMsgs', data.maxBacklogMsgs);
+
+            // TBD: Delete oldest messages for windows that have more messages than
+            // maxBacklogMsgs. They can be stale, when editing becomes possible.
 
             for (let command of this._disconnectedQueue) {
                 this._emitReq(command.command, command.callback);
@@ -135,23 +139,25 @@ export default Ember.Service.extend({
     },
 
     _emitInit(userId, secret, cachedUpto = 0) {
+        let maxBacklogMsgs = calcMsgHistorySize();
+
         this.socket.emit('init', {
             clientName: 'web',
             clientOS: navigator.platform,
             userId: userId,
             secret: secret,
             version: '1.0',
-            maxBacklogMsgs: isMobile.any ? 80 : 160,
+            maxBacklogMsgs: maxBacklogMsgs,
             cachedUpto: cachedUpto
         });
 
-        Ember.Logger.info(`Sent INIT event, cachedUpto: ${cachedUpto}`);
+        Ember.Logger.info(`→ INIT: cachedUpto: ${cachedUpto}, maxBacklogMsgs: ${maxBacklogMsgs}`);
     },
 
     _emitReq(command, callback) {
         this.socket.emit('req', command, function(data) {
             if (callback) {
-                Ember.Logger.info('← Response to REQ');
+                Ember.Logger.info('← RESP');
                 callback(data);
             }
         });

@@ -21,8 +21,7 @@ const Promise = require('bluebird'),
       log = require('./log');
 
 exports.storeMessage = function(conversationId, msg) {
-    if (!elasticSearchClient) {
-        warn();
+    if (!elasticSearchAvailable()) {
         return false;
     }
 
@@ -47,8 +46,7 @@ exports.storeMessage = function(conversationId, msg) {
 };
 
 exports.getMessagesForDay = function*(conversationId, start, end) {
-    if (!elasticSearchClient) {
-        warn();
+    if (!elasticSearchAvailable()) {
         return false;
     }
 
@@ -84,7 +82,50 @@ exports.getMessagesForDay = function*(conversationId, start, end) {
         }
     });
 
-    return response.hits.hits.map(function(hit) {
+    return convertToMsgs(response.hits.hits);
+};
+
+exports.getMessagesByTs = function*(conversationId, start, amount) {
+    if (!elasticSearchAvailable()) {
+        return false;
+    }
+
+    let response = yield elasticSearchClient.search({
+        index: 'messages',
+        body: {
+            size: amount,
+            sort: {
+                ts: {
+                    order: 'desc'
+                }
+            },
+            query: {
+                filtered: {
+                    filter: {
+                        and: [
+                            {
+                                term: {
+                                    conversationId: conversationId
+                                }
+                            }, {
+                                range: {
+                                    ts: {
+                                        lt: start * 1000
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    });
+
+    return convertToMsgs(response.hits.hits);
+};
+
+function convertToMsgs(hits) {
+    return hits.map(function(hit) {
         return {
             gid: hit._id,
             ts: Math.floor(hit._source.ts / 1000),
@@ -93,8 +134,13 @@ exports.getMessagesForDay = function*(conversationId, start, end) {
             userId: hit._source.userId
         };
     });
-};
+}
 
-function warn() {
-    log.warn('Fetch log request received even elasticsearch is disabled.');
+function elasticSearchAvailable() {
+    if (!elasticSearchClient) {
+        log.warn('Fetch log request received even elasticsearch is disabled.');
+        return false;
+    }
+
+    return true;
 }

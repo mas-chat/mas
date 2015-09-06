@@ -20,6 +20,7 @@
 
 import Ember from 'ember';
 import { play } from '../../../utils/sound';
+import { calcMsgHistorySize } from '../../../utils/msg-history-sizer';
 import UploadMixin from '../../../mixins/upload';
 
 export default Ember.Component.extend(UploadMixin, {
@@ -40,9 +41,12 @@ export default Ember.Component.extend(UploadMixin, {
     expanded: false,
     animating: false,
     scrollLock: false,
+    fetchingMore: false,
+    noOlderMessages: false,
 
     linesAmount: null,
     deletedLine: false,
+    prependPosition: 0,
 
     $messagePanel: null,
     $messagesEndAnchor: null,
@@ -65,6 +69,14 @@ export default Ember.Component.extend(UploadMixin, {
 
     logOrMobileModeEnabled: Ember.computed('logModeEnabled', function() {
         return this.get('logModeEnabled') || isMobile.any;
+    }),
+
+    fullBackLog: Ember.computed('content.messages.[]', function() {
+        return this.get('content.messages.length') >= this.get('store.maxBacklogMsgs');
+    }),
+
+    beginningReached: Ember.computed('fullBackLog', 'noOlderMessages', function() {
+        return !this.get('fullBackLog') || (this.get('noOlderMessages'));
     }),
 
     ircServerWindow: Ember.computed('content.userId', function() {
@@ -124,7 +136,7 @@ export default Ember.Component.extend(UploadMixin, {
 
     _lineAdded() {
         let messages = this.get('content.messages');
-        let cat = messages[messages.length - 1].cat; // Message that was just added.
+        let cat = messages.get('lastObject').cat; // Message that was added.
         let importantMessage = cat === 'msg' || cat === 'error' || cat === 'action';
 
         if ((!this.get('visible') || this.get('scrollLock')) && importantMessage) {
@@ -141,6 +153,12 @@ export default Ember.Component.extend(UploadMixin, {
             if (this.get('content.soundAlert')) {
                 play();
             }
+        }
+
+        // Remove the oldest message if the optimal history is visible
+        if (messages.length > calcMsgHistorySize()) {
+            this.get('store').removeModel('message', messages.sortBy('ts')[0], this.get('content'));
+            this.deletedLine = true;
         }
 
         Ember.run.scheduleOnce('afterRender', this, function() {
@@ -184,6 +202,10 @@ export default Ember.Component.extend(UploadMixin, {
         jumpToBottom() {
             this.set('scrollLock', false);
             this._goToBottom(true);
+        },
+
+        fetchMore() {
+            this._requestMoreMessages();
         }
     },
 
@@ -288,14 +310,12 @@ export default Ember.Component.extend(UploadMixin, {
         this.get('content.messages').addArrayObserver(this);
     },
 
-    arrayWillChange(array, offset, removeCount) {
-        if (removeCount > 0) {
-            this.set('deletedLine', true);
-        }
-    },
+    arrayWillChange() {},
 
     arrayDidChange(array, offset, removeCount, addCount) {
-        if (addCount > 0 && this.get('store.initDone')) {
+        if (addCount > 0 && this.get('store.initDone') && offset === array.length - 1) {
+            // Infinity scrolling adds the old messages to the beginning of the array. The offset
+            // check above makes sure that _lineAdded() is not called then (FETCH case).
             this._lineAdded();
         }
     },
@@ -312,6 +332,25 @@ export default Ember.Component.extend(UploadMixin, {
         Ember.run.scheduleOnce('afterRender', this, function() {
             this.sendAction('relayout', { animate: true });
         });
+    },
+
+    willRender() {
+        if (this.didPrepend) {
+            let $panel = this.$messagePanel;
+            let toBottom = $panel.prop('scrollHeight') - $panel.scrollTop();
+
+            this.prependPosition = toBottom;
+        }
+    },
+
+    didRender() {
+        if (this.didPrepend) {
+            let $panel = this.$messagePanel;
+            let oldPos = $panel.prop('scrollHeight') - this.prependPosition;
+
+            $panel.scrollTop(oldPos)
+            this.didPrepend = false;
+        }
     },
 
     _goToBottom(animate, callback) {
@@ -349,10 +388,17 @@ export default Ember.Component.extend(UploadMixin, {
             let $panel = this.$messagePanel;
             let scrollPos = $panel.scrollTop();
 
-            // User doesn't need to scroll exactly to the end.
-            let bottomTreshhold = $panel.prop('scrollHeight') - 5;
+            const scrollBottomThreshold = 8; // User doesn't need to scroll exactly to the end.
+            const scrollTopThreshold = 30; // Or to up to trigger fetching of more messages.
 
-            if (scrollPos + $panel.innerHeight() >= bottomTreshhold) {
+            let bottomPosition = $panel.prop('scrollHeight') - scrollBottomThreshold;
+            let topPosition = scrollTopThreshold;
+
+            if (scrollPos < topPosition) {
+                this._requestMoreMessages();
+            }
+
+            if (scrollPos + $panel.innerHeight() >= bottomPosition) {
                 this.set('scrollLock', false);
 
                 if (this.get('visible')) {
@@ -360,13 +406,13 @@ export default Ember.Component.extend(UploadMixin, {
                 }
 
                 Ember.Logger.info('scrollock off');
-            } else if (!this.get('deletedLine')) {
+            } else if (!this.deletedLine) {
                 this.set('scrollLock', true);
 
                 Ember.Logger.info('scrollock on');
             }
 
-            this.set('deletedLine', false); // Hack
+            this.deletedLine = false; // A hack
         };
 
         this.$messagePanel.on('scroll', () => {
@@ -402,6 +448,11 @@ export default Ember.Component.extend(UploadMixin, {
             if (pos + placeHolderHeight >= 0 && pos <= panelHeight) {
                 // Images of this message are in view port. Start to lazy load images.
                 let message = that.get('content.messages').findBy('gid', $imgContainer.data('gid'));
+
+                if (!message) {
+                    return;
+                }
+
                 let images = message.get('images') || [];
 
                 for (let i = 0; i < images.length; i++) {
@@ -431,6 +482,34 @@ export default Ember.Component.extend(UploadMixin, {
                 Ember.Logger.info('Lazy loaded image');
                 that._goToBottom(true);
             });
+        });
+    },
+
+    _requestMoreMessages() {
+        if (this.get('fetchingMore') || this.get('noOlderMessages')) {
+            return;
+        }
+
+        this.set('fetchingMore', true);
+
+        this.get('socket').send({
+            id: 'FETCH',
+            windowId: this.get('content.windowId'),
+            ts: this.get('content.messages').sortBy('ts').get('firstObject').get('ts')
+        }, resp => {
+            if (resp.msgs.length === 0) {
+                this.set('noOlderMessages', true);
+            } else {
+                for (let message of resp.msgs) {
+                    // Window messages are roughly sorted. First are old messages received by FETCH.
+                    // Then the messages received at startup and at runtime.
+                    this.get('store').upsertModelPrepend('message', message, this.get('content'));
+                }
+
+                this.didPrepend = true;
+            }
+
+            this.set('fetchingMore', false);
         });
     }
 });

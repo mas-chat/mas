@@ -24,6 +24,7 @@ import Window from '../models/window';
 import Message from '../models/message';
 import Friend from '../models/friend';
 import Alert from '../models/alert';
+import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 
 const modelNameMapping = {
     window: Window,
@@ -117,7 +118,11 @@ export default Ember.Service.extend({
     },
 
     upsertModel(type, data, parent) {
-        return this._upsert(data, primaryKeys[type], type, parent || this);
+        return this._upsert(data, primaryKeys[type], type, parent || this, false);
+    },
+
+    upsertModelPrepend(type, data, parent) {
+        return this._upsert(data, primaryKeys[type], type, parent || this, true);
     },
 
     removeModel(type, object, parent) {
@@ -159,7 +164,7 @@ export default Ember.Service.extend({
         Ember.run.later(this, changeDay, timeToTomorrow);
     },
 
-    _upsert(data, primaryKeyName, type, parent) {
+    _upsert(data, primaryKeyName, type, parent, prepend) {
         this._ensureLookupTableExists(type, parent);
         let object = parent.lookupTable[type][data[primaryKeyName]];
 
@@ -171,16 +176,18 @@ export default Ember.Service.extend({
             delete data[primaryKeyName];
             object.setProperties(data);
         } else {
-            object = this._insertObject(type, data, parent);
+            object = this._insertObject(type, data, parent, prepend);
             parent.lookupTable[type][data[primaryKeyName]] = object;
         }
 
         return object;
     },
 
-    _insertObject(type, data, parent) {
+    _insertObject(type, data, parent, prepend) {
         let object = this._createModel(type, data, parent);
-        return parent.get(type + 's').pushObject(object);
+        let collection = parent.get(type + 's');
+
+        return prepend ? collection.unshiftObject(object) : collection.pushObject(object);
     },
 
     _createModel(type, data, parent) {
@@ -228,10 +235,14 @@ export default Ember.Service.extend({
             version: 1
         };
 
+        let maxBacklogMsgs = calcMsgHistorySize();
+
         for (let masWindow of this.get('windows')) {
             let messages = [];
 
-            for (let message of masWindow.get('messages')) {
+            let sortedMessages = masWindow.get('messages').sortBy('ts').slice(-1 * maxBacklogMsgs);
+
+            for (let message of sortedMessages) {
                 let messageData = message.getProperties([
                     'gid',
                     'body',
