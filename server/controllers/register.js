@@ -238,7 +238,8 @@ exports.create = function*() {
         yield this.render('register', {
             page: 'register',
             title: 'Register',
-            registrationForm: form.toHTML()
+            registrationForm: form.toHTML(),
+            auth: authOptions
         });
     } else {
         log.info('Registration form data is valid');
