@@ -101,6 +101,14 @@ export default Ember.Object.extend({
         return Ember.A(parts.map(item => Ember.Object.create(item)));
     }),
 
+    text: Ember.computed('bodyParts', function() {
+        return this.get('bodyParts').findBy('type', 'text').text;
+    }),
+
+    images: Ember.computed('bodyParts', function() {
+        return this.get('bodyParts').filterBy('type', 'image');
+    }),
+
     hasMedia: Ember.computed('bodyParts', function() {
         return !this.get('bodyParts').isEvery('type', 'text');
     }),
@@ -123,10 +131,6 @@ export default Ember.Object.extend({
         } else {
             return null;
         }
-    }),
-
-    images: Ember.computed('bodyParts', function() {
-        return this.get('bodyParts').filterBy('type', 'image');
     }),
 
     _parseLinks(text) {
