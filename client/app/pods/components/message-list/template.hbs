@@ -10,7 +10,7 @@
             {{~#if message.channelAction}}
                 {{message.channelAction}}
             {{~else}}
-                {{message.text}}
+                {{{message.text}}}
                 {{#if message.hideImages}}
                     <span {{action "toggleImages" message}} class="user-img-restore"><i class="fa fa-picture-o"></i></span>
                 {{/if}}
