@@ -82,8 +82,8 @@ export default Ember.Controller.extend(SendMsgMixin, {
     }),
 
     actions: {
-        windowAction(command, window, value) {
-            this[`_handle${command.capitalize()}`](window, value);
+        windowAction(command, ...values) {
+            this[`_handle${command.capitalize()}`](...values);
         },
 
         menuAction(command, window) {
