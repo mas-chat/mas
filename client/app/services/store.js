@@ -250,6 +250,7 @@ export default Ember.Service.extend({
                     'cat',
                     'ts',
                     'userId',
+                    'status',
                     'type',
                     'hideImages'
                 ]);
