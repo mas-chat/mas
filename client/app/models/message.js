@@ -29,7 +29,7 @@ export default Ember.Object.extend({
     ts: null,
     userId: null,
     window: null,
-    status: null,
+    status: 'original',
 
     hideImages: false,
     editing: false,
