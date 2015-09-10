@@ -829,3 +829,27 @@ WARNING: Can't be undone.
   "status": "OK"
 }
 ```
+### FETCH
+
+Fetches old messages.
+
+```JSON
+{
+    "id": 'FETCH',
+    "windowId": 12,
+    "ts": 2093243
+}
+```
+
+#### Acknowledgment
+
+```JSON
+{
+  "status": "OK"
+  "msgs" : [
+     {
+
+     }
+  ]
+}
+```
