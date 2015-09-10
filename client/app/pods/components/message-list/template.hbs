@@ -10,9 +10,25 @@
             {{~#if message.channelAction}}
                 {{message.channelAction}}
             {{~else}}
-                {{{message.text}}}
+                {{#if message.editing}}
+                    {{textarea value=editBody}}
+                    <button {{action "change" message}} type="button" class="btn btn-default btn-xs">Change</button>
+                    <button {{action "cancel" message}} type="button" class="btn btn-default btn-xs">Cancel</button>
+                    <button {{action "delete" message}} type="button" class="btn btn-danger btn-xs">Delete</button>
+                {{else}}
+                    {{{message.text}}}
+                    {{~#if message.myNotDeletedMessage~}}
+                         <i {{action "edit" message}} class="edit-message-button fa fa-edit"></i>
+                    {{~/if~}}
+                    {{~#if message.edited~}}
+                         <i class="msg-edited-label fa fa-pencil"></i>
+                    {{~/if~}}
+                    {{~#if message.deleted~}}
+                         <span class="msg-deleted-label">DELETED</span>
+                    {{~/if~}}
+                {{/if}}
                 {{#if message.hideImages}}
-                    <span {{action "toggleImages" message}} class="user-img-restore"><i class="fa fa-picture-o"></i></span>
+                    <i {{action "toggleImages" message}} class="user-img-restore fa fa-picture-o"></i>
                 {{/if}}
                 {{~#if message.hasMedia}}
                     <ul class="user-media" data-gid="{{message.gid}}" data-has-images="{{message.hasImages}}">

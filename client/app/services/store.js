@@ -169,8 +169,9 @@ export default Ember.Service.extend({
         let object = parent.lookupTable[type][data[primaryKeyName]];
 
         if (object) {
-            if (type === 'message') {
-                return object; // TBD: Must be removed when messages are editable.
+            if (type === 'message' && data.status !== 'edited' && data.status !== 'deleted') {
+                // Messages are immutable in this case. Avoid work and bail out early.
+                return object;
             }
 
             delete data[primaryKeyName];

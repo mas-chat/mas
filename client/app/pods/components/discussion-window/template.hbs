@@ -29,7 +29,7 @@
         {{else}}
            <div {{action "fetchMore"}} class="window-upper-label window-fetch-more">Click to see older messages</div>
         {{/if}}
-        {{message-list messages=content.sortedMessages}}
+        {{message-list messages=content.sortedMessages editMessage="editMessage" deleteMessage="deleteMessage"}}
         <div class="window-upload">
             <div class="js-upload">
                 <div class="progress progress-success">

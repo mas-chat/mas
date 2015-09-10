@@ -45,6 +45,29 @@ exports.storeMessage = function(conversationId, msg) {
     return true;
 };
 
+exports.updateMessage = function(gid, msg) {
+    if (!elasticSearchAvailable()) {
+        return false;
+    }
+
+    elasticSearchClient.update({
+        index: 'messages',
+        type: 'message',
+        id: gid,
+        body: {
+            doc: {
+                body: msg
+            }
+        }
+    }, function(error) {
+        if (error) {
+            log.warn(msg.userId, 'Elasticsearch error. Failed to index messsage:' + error);
+        }
+    });
+
+    return true;
+};
+
 exports.getMessagesForDay = function*(conversationId, start, end) {
     if (!elasticSearchAvailable()) {
         return false;

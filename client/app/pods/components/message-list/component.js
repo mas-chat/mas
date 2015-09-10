@@ -19,9 +19,44 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+    editBody: null,
+    previousEditedMessage: null,
+
     actions: {
         toggleImages(message) {
             message.toggleProperty('hideImages');
+        },
+
+        edit(message) {
+            this._endEdit();
+
+            this.set('editBody', message.get('body'));
+            message.set('editing', true);
+
+            this.set('previousEditedMessage', message);
+        },
+
+        change(message) {
+            this.sendAction('editMessage', message.gid, this.get('editBody'));
+            this._endEdit();
+        },
+
+        cancel(message) {
+            this._endEdit();
+        },
+
+        delete(message) {
+            this.sendAction('deleteMessage', message.gid);
+            this._endEdit();
+        }
+    },
+
+    _endEdit() {
+        let previousEditedMessage = this.get('previousEditedMessage');
+
+        if (previousEditedMessage) {
+            previousEditedMessage.set('editing', false);
+            this.set('previousEditedMessage', null);
         }
     }
 });

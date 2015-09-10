@@ -268,6 +268,21 @@ Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, 
     return {};
 };
 
+Conversation.prototype.editMessage = function*(userId, gid, text) {
+    let result = yield redis.run('editMessage', this.conversationId, gid, userId, text);
+
+    if (!result) {
+        return false;
+    }
+
+    let msg = JSON.parse(result);
+    msg.id = 'MSG';
+
+    yield this._streamMsg(msg);
+
+    return true;
+};
+
 Conversation.prototype.sendAddMembers = function*(userId) {
     let windowId = yield window.findByConversationId(userId, this.conversationId);
     let membersList = [];

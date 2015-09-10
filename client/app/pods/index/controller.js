@@ -153,6 +153,19 @@ export default Ember.Controller.extend(SendMsgMixin, {
         this._sendText(text, window);
     },
 
+    _handleEditMessage(window, gid, text) {
+        this.get('socket').send({
+            id: 'EDIT',
+            windowId: window.get('windowId'),
+            gid: gid,
+            text: text
+        }, function(resp) {
+            if (resp.status !== 'OK') {
+                this.send('openModal', 'info-modal', { title: 'Error', body: resp.errorMsg });
+            }
+        }.bind(this));
+    },
+
     _handleChat(window, userId) {
         this.get('socket').send({
             id: 'CHAT',

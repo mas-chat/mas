@@ -167,8 +167,9 @@ Add a messge line to window.
   "windowId": 1,
   "body": "Hello worlds!",
   "cat": "msg",
-  "ts": "2093243",
+  "ts": 2093243,
   "userId": "m432454",
+  "status": "edited",
   "gid": 823458234
 }
 ```
@@ -193,6 +194,8 @@ Add a messge line to window.
 Client can for example use different colors for different categories.
 
 ```gid``` is a globally unique identifier (integer) for the message. Given two messages, a newer one has always larger gid. Gid can increase by more than one between subsequent messages inside a window.
+
+```status``` is an optional property. It can be have value 'original', 'edited', or 'deleted'. A missing ```status``` property means 'original'.
 
 ### CLOSE
 
@@ -484,6 +487,26 @@ Note that the session that sends SEND request doesn't receive the corresponding 
   "status": "OK",
   "gid": 382742993,
   "ts": 1429140481
+}
+```
+
+### EDIT
+
+```JSON
+{
+  "id": "EDIT",
+
+  "windowId": 23,
+  "gid": 234932,
+  "text": "Hello world!"
+}
+```
+
+#### Acknowledgment
+
+```JSON
+{
+  "status": "OK",
 }
 ```
 

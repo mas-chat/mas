@@ -120,14 +120,18 @@ for i = 1, #windowIds do
         ['members'] = members
     }))
 
-    local lines = redis.call('LRANGE',
-        'conversationmsgs:' .. conversationId, 0, maxBacklogLines - 1)
+    local lines = redis.call('LRANGE', 'conversationmsgs:' .. conversationId, 0, -1)
+    local firstBacklogMessage = #lines - maxBacklogLines
 
     for ii = #lines, 1, -1 do
         local message = cjson.decode(lines[ii])
 
-        if message.gid > cachedUpto then
+        local newMsg = message.gid >= firstBacklogMessage and message.gid > cachedUpto
+        local newEdit = message.status ~= nil and message.editTs >= cachedUpto
+
+        if newMsg or newEdit then
             message.id = 'MSG'
+            message.editTs = nil
             message.windowId = tonumber(windowId)
 
             redis.call('LPUSH', outbox, cjson.encode(message))

@@ -191,6 +191,14 @@ export default Ember.Component.extend(UploadMixin, {
             this.sendAction('action', 'sendMessage', this.get('content'), msg);
         },
 
+        editMessage(gid, msg) {
+            this.sendAction('action', 'editMessage', this.get('content'), gid, msg);
+        },
+
+        deleteMessage(gid) {
+            this.sendAction('action', 'editMessage', this.get('content'), gid, '');
+        },
+
         close() {
             this.sendAction('action', 'close', this.get('content'));
         },

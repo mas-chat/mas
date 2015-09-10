@@ -29,11 +29,22 @@ export default Ember.Object.extend({
     ts: null,
     userId: null,
     window: null,
+    status: null,
+
     hideImages: false,
+    editing: false,
 
     mentionedRegEx: Ember.computed.alias('window.userNickHighlightRegex'),
 
     ircMotd: false,
+
+    edited: Ember.computed('status', function() {
+        return this.get('status') === 'edited';
+    }),
+
+    deleted: Ember.computed('status', function() {
+        return this.get('status') === 'deleted';
+    }),
 
     nick: Ember.computed('userId', 'window', function() {
         return this.get('store.users').getNick(this.get('userId'), this.get('window.network'));
@@ -77,6 +88,10 @@ export default Ember.Object.extend({
             case 'kick':
                 return `${nick} was kicked from ${groupName}. Reason: ${body}`;
         }
+    }),
+
+    myNotDeletedMessage: Ember.computed('decoratedCat', function() {
+        return this.get('decoratedCat') === 'mymsg' && this.get('status') !== 'deleted';
     }),
 
     bodyParts: Ember.computed('body', function() {

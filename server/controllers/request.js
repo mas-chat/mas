@@ -35,6 +35,7 @@ const co = require('co'),
 
 const handlers = {
     SEND: handleSend,
+    EDIT: handleEdit,
     COMMAND: handleCommand,
     CREATE: handleCreate,
     JOIN: handleJoin,
@@ -136,6 +137,25 @@ function *handleSend(params) {
     });
 
     return { status: 'OK', gid: msg.gid, ts: msg.ts };
+}
+
+function *handleEdit(params) {
+    let text = params.command.text;
+    let gid = params.command.gid;
+
+    if (!params.conversation) {
+        return { status: 'ERROR', errorMsg: 'Protocol error: Invalid windowId.' };
+    } else if (!gid) {
+        return { status: 'ERROR', errorMsg: 'Protocol error: Missing gid.' };
+    }
+
+    let success = yield params.conversation.editMessage(params.userId, gid, text);
+
+    if (success) {
+        search.updateMessage(gid, text);
+    }
+
+    return success ? { status: 'OK' } : { status: 'ERROR', errorMsg: 'Editing failed.' };
 }
 
 function *handleCommand(params) {
