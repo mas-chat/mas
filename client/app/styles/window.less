@@ -411,13 +411,21 @@
         vertical-align: middle;
     }
 
-    .window-members {
+    .window-memers-list {
         width: 32px;
-        line-height: 150%;
+    }
+
+    .window-members-list.window-members-wide {
+        width: 100px;
+    }
+
+    .window-members {
+        width: 100%;
         overflow-y: auto;
         padding-top: 3px;
 
-        & > * {
+        .member-row {
+            height: 25px;
             cursor: default;
             padding: 1px 5px;
             user-select: none;
@@ -436,20 +444,29 @@
         }
 
         .gravatar {
-            height: 21px;
+            height: 23px;
+            width: 23px;
             margin: 1px 5px 1px 0px;
             border: 1px solid rgb(209, 209, 209);
             float: left;
         }
 
         .member-name {
+            padding-top: 3px;
             overflow-x: hidden;
             white-space: nowrap;
         }
     }
 
-    .window-members-wide {
-        width: 100px;
+    .window-members-resize {
+        height: 25px;
+        text-align: right;
+        padding-right: 9px;
+        color: #bbb;
+    }
+
+    .window-members-resize:hover {
+        color: #1d8bd1;
     }
 
     .window-toolbar {

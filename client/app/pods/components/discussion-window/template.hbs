@@ -42,31 +42,40 @@
     </div>
 
     {{#if isGroup}}
-        <div class="window-members {{hiddenIfLogMode}} {{wideUnlessminimizedNamesList}}">
-            {{#each content.operatorNames key="userId" as |name|}}
-                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="member-name window-operator {{hiddenIfMinimizedUserNames}}">
-                        {{name.nick}}
+        <div class="window-members-list {{hiddenIfLogMode}} {{wideUnlessminimizedNamesList}} flex-column">
+            <div class="window-members flex-1">
+                {{#each content.operatorNames key="userId" as |name|}}
+                    <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                        <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                        <div class="member-name window-operator {{hiddenIfMinimizedUserNames}}">
+                            {{name.nick}}
+                        </div>
                     </div>
-                </div>
-            {{/each}}
-            {{#each content.voiceNames key="userId" as |name|}}
-                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="member-name window-voice {{hiddenIfMinimizedUserNames}}">
-                        {{name.nick}}
+                {{/each}}
+                {{#each content.voiceNames key="userId" as |name|}}
+                    <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                        <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                        <div class="member-name window-voice {{hiddenIfMinimizedUserNames}}">
+                            {{name.nick}}
+                        </div>
                     </div>
-                </div>
-            {{/each}}
-            {{#each content.userNames key="userId" as |name|}}
-                <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                    <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                    <div class="member-name window-user {{hiddenIfMinimizedUserNames}}">
-                        {{name.nick}}
+                {{/each}}
+                {{#each content.userNames key="userId" as |name|}}
+                    <div class="member-row" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                        <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                        <div class="member-name window-user {{hiddenIfMinimizedUserNames}}">
+                            {{name.nick}}
+                        </div>
                     </div>
-                </div>
-            {{/each}}
+                {{/each}}
+            </div>
+            <div class="window-members-resize">
+                {{#if content.minimizedNamesList}}
+                    <i {{action "toggleMemberListWidth"}} class="fa fa-caret-square-o-left"></i>
+                {{else}}
+                    <i {{action "toggleMemberListWidth"}} class="fa fa-caret-square-o-right"></i>
+                {{/if}}
+            </div>
         </div>
     {{/if}}
 </div>
@@ -98,7 +107,6 @@
                 <li {{action "menu" "editPassword"}}><a href="#">Change password&hellip;</a></li>
                 <li {{action "menu" "editTopic"}}><a href="#">Edit topic&hellip;</a></li>
                 <li {{action "menu" "editAlerts"}}><a href="#">Configure alerts&hellip;</a></li>
-                <li {{action "toggleMemberListWidth"}}><a href="#">Toggle member list width</a></li>
                 <li class="divider"></li>
                 <li {{action "browse"}}><a href="#">Browse history&hellip;</a></li>
                 <li class="divider"></li>

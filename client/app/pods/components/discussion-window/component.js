@@ -185,6 +185,10 @@ export default Ember.Component.extend(UploadMixin, {
 
         toggleMemberListWidth() {
             this.toggleProperty('content.minimizedNamesList');
+
+            Ember.run.scheduleOnce('afterRender', this, function() {
+                this._goToBottom(true);
+            });
         },
 
         sendMessage(msg) {
