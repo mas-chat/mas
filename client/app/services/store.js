@@ -59,6 +59,7 @@ export default Ember.Service.extend({
     userId: null,
     initDone: false,
     maxBacklogMsgs: 100000,
+    cachedUpto: 0,
     dayCounter: 0,
 
     init() {
@@ -79,10 +80,14 @@ export default Ember.Service.extend({
                 data = this._loadSnapshot();
             }
 
+            if (data) {
+                this.set('cachedUpto', data.cachedUpto ? data.cachedUpto : 0);
+            }
+
             // It's now first possible time to start socket.io connection. Data from server
             // can't race with snapshot data as first socket.io event will be processed at
             // earliest in the next runloop.
-            this.get('socket').start(data && data.cachedUpto ? data.cachedUpto : 0);
+            this.get('socket').start();
 
             if (data) {
                 this._processSnapshot(data);
@@ -283,6 +288,8 @@ export default Ember.Service.extend({
         }
 
         data.cachedUpto = cachedUpto;
+
+        this.set('cachedUpto', cachedUpto);
 
         for (let userId of Object.keys(data.users)) {
             data.users[userId] = this.get('users.users.' + userId);

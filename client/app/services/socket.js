@@ -64,13 +64,13 @@ export default Ember.Service.extend({
         });
     },
 
-    start(cachedUpto) {
+    start() {
         let userId = this.get('store.userId');
         let secret = this.get('secret');
 
         this.set('store.initDone', false);
         this.set('socket', socket);
-        this._emitInit(userId, secret, cachedUpto);
+        this._emitInit(userId, secret);
 
         socket.on('initok', Ember.run.bind(this, function(data) {
             this.set('_connected', true);
@@ -138,8 +138,9 @@ export default Ember.Service.extend({
         this.set('_networkErrorCallbackCtx', ctx);
     },
 
-    _emitInit(userId, secret, cachedUpto = 0) {
+    _emitInit(userId, secret) {
         let maxBacklogMsgs = calcMsgHistorySize();
+        let cachedUpto = this.get('store.cachedUpto');
 
         this.socket.emit('init', {
             clientName: 'web',
