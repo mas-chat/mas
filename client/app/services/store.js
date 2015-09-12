@@ -249,6 +249,7 @@ export default Ember.Service.extend({
                     'body',
                     'cat',
                     'ts',
+                    'updatedTs',
                     'userId',
                     'status',
                     'type',
