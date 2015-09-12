@@ -70,11 +70,7 @@
                 {{/each}}
             </div>
             <div class="window-members-resize">
-                {{#if content.minimizedNamesList}}
-                    <i {{action "toggleMemberListWidth"}} class="fa fa-caret-square-o-left"></i>
-                {{else}}
-                    <i {{action "toggleMemberListWidth"}} class="fa fa-caret-square-o-right"></i>
-                {{/if}}
+                <i {{action "toggleMemberListWidth"}} class="fa {{if content.minimizedNamesList 'fa-caret-square-o-left' 'fa-caret-square-o-right'}}"></i>
             </div>
         </div>
     {{/if}}
