@@ -69,8 +69,8 @@
                     </div>
                 {{/each}}
             </div>
-            <div class="window-members-resize">
-                <i {{action "toggleMemberListWidth"}} class="fa {{if content.minimizedNamesList 'fa-caret-square-o-left' 'fa-caret-square-o-right'}}"></i>
+            <div {{action "toggleMemberListWidth"}} class="window-members-resize">
+                {{if content.minimizedNamesList '«' '»'}}
             </div>
         </div>
     {{/if}}
