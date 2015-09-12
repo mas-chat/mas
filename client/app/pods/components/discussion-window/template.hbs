@@ -45,7 +45,7 @@
         <div class="window-members-list {{hiddenIfLogMode}} {{wideUnlessminimizedNamesList}} flex-column">
             <div class="window-members flex-1">
                 {{#each content.operatorNames key="userId" as |name|}}
-                    <div class="member-row" data-toggle="tooltip" data-delay="5" title="{{name.nick}}" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                    <div class="member-row" data-toggle="tooltip" title="{{name.nick}}" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                         <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                         <div class="member-name window-operator {{hiddenIfMinimizedUserNames}}">
                             {{name.nick}}
@@ -53,7 +53,7 @@
                     </div>
                 {{/each}}
                 {{#each content.voiceNames key="userId" as |name|}}
-                    <div class="member-row" data-toggle="tooltip" data-delay="5" title="{{name.nick}}" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                    <div class="member-row" data-toggle="tooltip" title="{{name.nick}}" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                         <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                         <div class="member-name window-voice {{hiddenIfMinimizedUserNames}}">
                             {{name.nick}}
@@ -61,7 +61,7 @@
                     </div>
                 {{/each}}
                 {{#each content.userNames key="userId" as |name|}}
-                    <div class="member-row" data-toggle="tooltip" data-delay="5" title="{{name.nick}}" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
+                    <div class="member-row" data-toggle="tooltip" title="{{name.nick}}" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
                         <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
                         <div class="member-name window-user {{hiddenIfMinimizedUserNames}}">
                             {{name.nick}}
