@@ -21,10 +21,10 @@
                          <i {{action "edit" message}} class="edit-message-button fa fa-edit"></i>
                     {{~/if~}}
                     {{~#if message.edited~}}
-                         <i class="msg-edited-label fa fa-pencil"></i>
+                         <span class="msg-edited-label" data-toggle="tooltip" data-delay='{"show": 200, "hide": 200}' title="Last edited at {{message.updatedDate}}"><i class="fa fa-pencil"></i> at {{message.updatedTime}}</span>
                     {{~/if~}}
                     {{~#if message.deleted~}}
-                         <span class="msg-deleted-label">DELETED</span>
+                         <span class="msg-deleted-label">Deleted at {{message.updatedDate}}</span>
                     {{~/if~}}
                 {{/if}}
                 {{#if message.hideImages}}

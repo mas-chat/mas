@@ -168,6 +168,7 @@ Add a messge line to window.
   "body": "Hello worlds!",
   "cat": "msg",
   "ts": 2093243,
+  "updatedTs": 2093315.
   "userId": "m432454",
   "status": "edited",
   "gid": 823458234
@@ -175,6 +176,8 @@ Add a messge line to window.
 ```
 
 ```ts``` is a unix timestamp, seconds since epoch.
+
+```updatedTs`` is an optional last edit timestamp. Included if `status` is `edited` or `deleted`.
 
 ```cat``` can be
 

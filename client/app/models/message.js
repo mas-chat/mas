@@ -30,6 +30,7 @@ export default Ember.Object.extend({
     userId: null,
     window: null,
     status: 'original',
+    updatedTs: null,
 
     hideImages: false,
     editing: false,
@@ -44,6 +45,24 @@ export default Ember.Object.extend({
 
     deleted: Ember.computed('status', function() {
         return this.get('status') === 'deleted';
+    }),
+
+    updatedTime: Ember.computed('updatedTs', function() {
+        let updatedTs = this.get('updatedTs');
+
+        return updatedTs ? moment.unix(updatedTs).format('HH:mm') : '';
+    }),
+
+    updatedDate: Ember.computed('updatedTs', function() {
+        let updatedTs = this.get('updatedTs');
+
+        return updatedTs ? moment.unix(updatedTs).format('MMM Do HH:mm') : '';
+    }),
+
+    updatedDateLong: Ember.computed('updatedTs', function() {
+        let updatedTs = this.get('updatedTs');
+
+        return updatedTs ? moment.unix(updatedTs).format('dddd, MMMM D HH:mm') : '';
     }),
 
     nick: Ember.computed('userId', 'window', function() {

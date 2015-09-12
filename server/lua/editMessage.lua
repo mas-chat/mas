@@ -21,6 +21,7 @@ local conversationId = ARGV[1]
 local gid = tonumber(ARGV[2])
 local userId = ARGV[3]
 local text = ARGV[4]
+local ts = tonumber(ARGV[5])
 
 local key = 'conversationmsgs:' .. conversationId
 local lines = redis.call('LRANGE', key, 0, -1)
@@ -47,7 +48,11 @@ if message.userId ~= userId then
 end
 
 message.body = text
+
+-- Bad property name, but too late to change
 message.editTs = tonumber(redis.call('GET', 'nextGlobalMsgId'))
+
+message.updatedTs = ts
 
 if text == "" then
     message.status = "deleted"

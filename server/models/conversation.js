@@ -269,7 +269,9 @@ Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, 
 };
 
 Conversation.prototype.editMessage = function*(userId, gid, text) {
-    let result = yield redis.run('editMessage', this.conversationId, gid, userId, text);
+    let ts = Math.round(Date.now() / 1000);
+
+    let result = yield redis.run('editMessage', this.conversationId, gid, userId, text, ts);
 
     if (!result) {
         return false;

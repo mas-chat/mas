@@ -131,7 +131,7 @@ for i = 1, #windowIds do
 
         if newMsg or newEdit then
             message.id = 'MSG'
-            message.editTs = nil
+            message.editTs = nil -- editTs is an internal property
             message.windowId = tonumber(windowId)
 
             redis.call('LPUSH', outbox, cjson.encode(message))
