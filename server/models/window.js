@@ -121,7 +121,7 @@ function *create(userId, conversationId) {
         soundAlert: false,
         emailAlert: true,
         titleAlert: false,
-        minimizedNamesList: false,
+        minimizedNamesList: true,
         desktop: currentDesktop || 0,
         row: 0,
         column: 0
