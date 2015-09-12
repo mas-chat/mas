@@ -50,19 +50,19 @@ export default Ember.Object.extend({
     updatedTime: Ember.computed('updatedTs', function() {
         let updatedTs = this.get('updatedTs');
 
-        return updatedTs ? moment.unix(updatedTs).format('HH:mm') : '';
+        return updatedTs ? `at ${moment.unix(updatedTs).format('HH:mm')}` : '';
     }),
 
     updatedDate: Ember.computed('updatedTs', function() {
         let updatedTs = this.get('updatedTs');
 
-        return updatedTs ? moment.unix(updatedTs).format('MMM Do HH:mm') : '';
+        return updatedTs ? `at ${moment.unix(updatedTs).format('MMM Do HH:mm')}` : '';
     }),
 
     updatedDateLong: Ember.computed('updatedTs', function() {
         let updatedTs = this.get('updatedTs');
 
-        return updatedTs ? moment.unix(updatedTs).format('dddd, MMMM D HH:mm') : '';
+        return updatedTs ? `at ${moment.unix(updatedTs).format('dddd, MMMM D HH:mm')}` : '';
     }),
 
     nick: Ember.computed('userId', 'window', function() {
