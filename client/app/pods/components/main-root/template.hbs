@@ -1,0 +1,10 @@
+{{#if store.initDone}}
+    {{window-grid menuAction="menuAction" windowAction="windowAction" dragActiveAction="dragActiveAction"}}
+    {{main-sidebar desktops=desktops openModal="openModal" windowAction="windowAction" activeDraggedWindow=activeDraggedWindow}}
+
+    {{window-context-menu}}
+{{else}}
+    <div class="flex-grow-column flex-align-center">
+        <div class="loader loader-big"></div>
+    </div>
+{{/if}}

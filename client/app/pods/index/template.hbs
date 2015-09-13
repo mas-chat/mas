@@ -1,12 +1,3 @@
-{{#if store.initDone}}
-    <div class="flex-1 flex-row">
-        {{window-grid menuAction="menuAction" windowAction="windowAction" dragActiveAction="dragActiveAction"}}
-        {{main-sidebar desktops=desktops openModal="openModal" windowAction="windowAction" activeDraggedWindow=activeDraggedWindow}}
-    </div>
+{{main-root openModal="openModal"}}
 
-    {{window-context-menu}}
-{{else}}
-    <div class="flex-grow-row flex-1 flex-align-center">
-        <div class="loader loader-big"></div>
-    </div>
-{{/if}}
+{{unconfirmed-email openModal="openModal"}}

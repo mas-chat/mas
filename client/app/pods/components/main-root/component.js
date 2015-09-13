@@ -19,11 +19,13 @@
 /* global $, moment, isMobile */
 
 import Ember from 'ember';
-import SendMsgMixin from '../../mixins/sendMsg';
+import SendMsgMixin from '../../../mixins/sendMsg';
 
-export default Ember.Controller.extend(SendMsgMixin, {
+export default Ember.Component.extend(SendMsgMixin, {
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
+
+    classNames: [ 'flex-grow-row', 'flex-1' ],
 
     windows: Ember.computed.alias('store.windows'),
     userId: Ember.computed.alias('store.userId'),
@@ -82,6 +84,10 @@ export default Ember.Controller.extend(SendMsgMixin, {
     }),
 
     actions: {
+        openModal(modalName, model) {
+            this.sendAction('openModal', modalName, model);
+        },
+
         windowAction(command, ...values) {
             this[`_handle${command.capitalize()}`](...values);
         },
