@@ -21,10 +21,10 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    classNames: [ 'flex-row', 'unconfirmed-email' ],
-
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
+
+    classNames: [ 'flex-row', 'unconfirmed-email' ],
 
     email: Ember.computed.alias('store.email'),
     emailConfirmed: Ember.computed.alias('store.emailConfirmed'),
@@ -52,9 +52,5 @@ export default Ember.Component.extend({
         openModal(modal) {
             this.sendAction('openModal', modal);
         }
-    },
-
-    didRender() {
-        $(window).trigger('resize');
     }
 });

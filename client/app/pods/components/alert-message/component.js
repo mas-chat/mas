@@ -28,11 +28,6 @@ export default Ember.Component.extend({
     currentAlert: Ember.computed('alerts.[]', function() {
         let alerts = this.get('alerts');
 
-        Ember.run.next(this, function() {
-            // A trick to trigger window re-layout, see resize handler in grid component
-            $(window).trigger('resize');
-        });
-
         return alerts.length === 0 ? null : alerts.get('firstObject');
     }),
 

@@ -39,8 +39,14 @@ export default Ember.Component.extend({
 
     model: Ember.computed.alias('store.windows'),
 
-    initReady: Ember.observer('store.initDone', function() {
+    mustRelayout: Ember.observer('store.initDone', function() {
         Ember.run.next(this, function() { this._layoutWindows(false); });
+    }),
+
+    mustRelayoutAfterRender: Ember.observer('store.alerts.[]', 'store.emailConfirmed', function() {
+        Ember.run.scheduleOnce('afterRender', this, function() {
+            this._layoutWindows(false);
+        });
     }),
 
     init() {
