@@ -19,8 +19,6 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
-    fullScreenModalOpen: false,
-
     store: Ember.inject.service(),
 
     setupController(controller) {
@@ -30,25 +28,6 @@ export default Ember.Route.extend({
     actions: {
         openModal(modalName, model) {
             this.controllerFor('application').send('openModal', modalName, model);
-        },
-
-        toggleFullScreenModal(modalName, model) {
-            if (this.get('fullScreenModalOpen')) {
-                this.disconnectOutlet({
-                    outlet: 'fullscreen-modal',
-                    parentView: 'application'
-                });
-
-                this.set('fullScreenModalOpen', false);
-            } else {
-                this.render(modalName, {
-                    into: 'application',
-                    outlet: 'fullscreen-modal',
-                    model: model
-                });
-
-                this.set('fullScreenModalOpen', true);
-            }
         }
     }
 });
