@@ -100,8 +100,10 @@
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-right">
-                <li {{action "menu" "editPassword"}}><a href="#">Change password&hellip;</a></li>
-                <li {{action "menu" "editTopic"}}><a href="#">Edit topic&hellip;</a></li>
+                {{#if isGroup}}
+                    <li {{action "menu" "editPassword"}}><a href="#">Change password&hellip;</a></li>
+                    <li {{action "menu" "editTopic"}}><a href="#">Edit topic&hellip;</a></li>
+                {{/if}}
                 <li {{action "menu" "editAlerts"}}><a href="#">Configure alerts&hellip;</a></li>
                 <li class="divider"></li>
                 <li {{action "browse"}}><a href="#">Browse history&hellip;</a></li>
