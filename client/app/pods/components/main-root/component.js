@@ -25,13 +25,15 @@ export default Ember.Component.extend(SendMsgMixin, {
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
-    classNames: [ 'flex-grow-row', 'flex-1' ],
+    classNames: [ 'flex-grow-column', 'flex-1' ],
 
     windows: Ember.computed.alias('store.windows'),
     userId: Ember.computed.alias('store.userId'),
     activeDesktop: Ember.computed.alias('store.activeDesktop'),
 
     activeDraggedWindow: false,
+
+    modalQueue: Ember.A([]),
 
     desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
         let desktops = {};
@@ -85,7 +87,11 @@ export default Ember.Component.extend(SendMsgMixin, {
 
     actions: {
         openModal(modalName, model) {
-            this.sendAction('openModal', modalName, model);
+            // New modal goes to a queue if there's already a modal open.
+            this.get('modalQueue').pushObject({
+                name: modalName,
+                model: model
+            });
         },
 
         windowAction(command, ...values) {

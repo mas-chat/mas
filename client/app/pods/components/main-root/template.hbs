@@ -1,10 +1,16 @@
 {{#if store.initDone}}
-    {{window-grid menuAction="menuAction" windowAction="windowAction" dragActiveAction="dragActiveAction"}}
-    {{main-sidebar desktops=desktops openModal="openModal" windowAction="windowAction" activeDraggedWindow=activeDraggedWindow}}
+    {{modal-manager modalQueue=modalQueue}}
+    {{alert-message}}
+
+    <div class="flex-grow-row flex-1">
+        {{window-grid menuAction="menuAction" windowAction="windowAction" dragActiveAction="dragActiveAction"}}
+        {{main-sidebar desktops=desktops openModal="openModal" windowAction="windowAction" activeDraggedWindow=activeDraggedWindow}}
+    </div>
 
     {{window-context-menu}}
+    {{unconfirmed-email openModal="openModal"}}
 {{else}}
-    <div class="flex-grow-column flex-align-center">
+    <div class="flex-grow-row flex-1 flex-align-center">
         <div class="loader loader-big"></div>
     </div>
 {{/if}}

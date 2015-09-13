@@ -1,26 +1,26 @@
-{{#if alert}}
+{{#if currentAlert}}
     <div class="flex-1 announcement-message">
-        {{{alert.message}}}
+        {{{currentAlert.message}}}
     </div>
 
-    {{#if alert.dismissible}}
-        {{#if alert.postponeLabel}}
+    {{#if currentAlert.dismissible}}
+        {{#if currentAlert.postponeLabel}}
             <div>
                 <button {{action "close" "postpone"}} type="button" class="btn btn-default">
-                    {{alert.postponeLabel}}
+                    {{currentAlert.postponeLabel}}
                 </button>
             </div>
         {{/if}}
-        {{#if alert.nackLabel}}
+        {{#if currentAlert.nackLabel}}
             <div>
                 <button {{action "close" "nack"}} type="button" class="btn btn-default">
-                    {{alert.nackLabel}}
+                    {{currentAlert.nackLabel}}
                 </button>
             </div>
         {{/if}}
         <div>
             <button {{action "close" "ack"}} type="button" class="btn btn-primary">
-                {{alert.ackLabel}}
+                {{currentAlert.ackLabel}}
             </button>
         </div>
     {{/if}}

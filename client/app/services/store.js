@@ -70,35 +70,34 @@ export default Ember.Service.extend({
         this.set('windows', Ember.A([]));
         this.set('alerts', Ember.A([]));
         this.set('networks', Ember.A([]));
+    },
 
-        // We are service and fully initialized only after this run loop.
-        Ember.run.next(this, function() {
-            let data;
-            let localStorageSupported = typeof Storage !== 'undefined';
+    start() {
+        let data;
+        let localStorageSupported = typeof Storage !== 'undefined';
 
-            if (localStorageSupported) {
-                data = this._loadSnapshot();
-            }
+        if (localStorageSupported) {
+            data = this._loadSnapshot();
+        }
 
-            if (data) {
-                this.set('cachedUpto', data.cachedUpto ? data.cachedUpto : 0);
-            }
+        if (data) {
+            this.set('cachedUpto', data.cachedUpto ? data.cachedUpto : 0);
+        }
 
-            // It's now first possible time to start socket.io connection. Data from server
-            // can't race with snapshot data as first socket.io event will be processed at
-            // earliest in the next runloop.
-            this.get('socket').start();
+        // It's now first possible time to start socket.io connection. Data from server
+        // can't race with snapshot data as first socket.io event will be processed at
+        // earliest in the next runloop.
+        this.get('socket').start();
 
-            if (data) {
-                this._processSnapshot(data);
-            }
+        if (data) {
+            this._processSnapshot(data);
+        }
 
-            if (localStorageSupported) {
-                setInterval(function() {
-                    Ember.run.next(this, this._saveSnapshot);
-                }.bind(this), 60 * 1000); // Once in a minute
-            }
-        });
+        if (localStorageSupported) {
+            setInterval(function() {
+                Ember.run.next(this, this._saveSnapshot);
+            }.bind(this), 60 * 1000); // Once in a minute
+        }
 
         this._startDayChangedService();
     },

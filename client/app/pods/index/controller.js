@@ -16,18 +16,19 @@
 
 'use strict';
 
+/* globals $ */
+
 import Ember from 'ember';
 
-export default Ember.Route.extend({
+export default Ember.Controller.extend({
     store: Ember.inject.service(),
 
-    setupController(controller) {
-        controller.set('alerts', this.get('store.alerts'));
-    },
+    init() {
+        this._super();
 
-    actions: {
-        openModal(modalName, model) {
-            this.controllerFor('application').send('openModal', modalName, model);
-        }
+        // We are service and fully initialized only after this run loop.
+        Ember.run.next(this, function() {
+            this.get('store').start();
+        });
     }
 });

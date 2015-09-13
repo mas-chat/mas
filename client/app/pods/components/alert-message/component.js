@@ -19,17 +19,32 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+    store: Ember.inject.service(),
+
     classNames: [ 'flex-row', 'announcement' ],
+
+    alerts: Ember.computed.alias('store.alerts'),
+
+    currentAlert: Ember.computed('alerts.[]', function() {
+        let alerts = this.get('alerts');
+
+        Ember.run.next(this, function() {
+            // A trick to trigger window re-layout, see resize handler in grid component
+            $(window).trigger('resize');
+        });
+
+        return alerts.length === 0 ? null : alerts.get('firstObject');
+    }),
 
     actions: {
         close(result) {
-            let callback = this.get('alert.resultCallback');
+            let callback = this.get('currentAlert.resultCallback');
 
             if (callback) {
                 callback(result);
             }
 
-            this.sendAction('alertClosed');
+            this.get('alerts').shiftObject();
         }
     }
 });
