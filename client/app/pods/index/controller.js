@@ -16,8 +16,6 @@
 
 'use strict';
 
-/* globals $ */
-
 import Ember from 'ember';
 
 export default Ember.Controller.extend({
@@ -25,10 +23,6 @@ export default Ember.Controller.extend({
 
     init() {
         this._super();
-
-        // We are service and fully initialized only after this run loop.
-        Ember.run.next(this, function() {
-            this.get('store').start();
-        });
+        this.get('store').start(); // Everything starts here
     }
 });
