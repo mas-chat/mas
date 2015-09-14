@@ -50,7 +50,15 @@ export default Ember.Object.extend({
     updatedTime: Ember.computed('updatedTs', function() {
         let updatedTs = this.get('updatedTs');
 
-        return updatedTs ? `at ${moment.unix(updatedTs).format('HH:mm')}` : '';
+        if (!updatedTs) {
+            return '';
+        }
+
+        let originalTime = moment.unix(this.get('ts'));
+        let updatedTime = moment.unix(updatedTs);
+
+        return `at ${updatedTime.format(originalTime.isSame(updatedTime, 'd') ?
+            'HH:mm' : 'MMM Do HH:mm')}`;
     }),
 
     updatedDate: Ember.computed('updatedTs', function() {
