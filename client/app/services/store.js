@@ -286,6 +286,12 @@ export default Ember.Service.extend({
                     cachedUpto = messageData.gid;
                 }
 
+                if (!messageData.status || messageData.status === 'original') {
+                    // Save space
+                    delete messageData.status;
+                    delete messageData.updatedTs;
+                }
+
                 messages.push(messageData);
                 data.users[messageData.userId] = true;
             }
