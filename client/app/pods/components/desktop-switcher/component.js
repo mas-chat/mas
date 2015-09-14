@@ -33,11 +33,11 @@ export default Ember.Component.extend({
     actions: {
         switch(desktop) {
             this.set('activeDesktop', desktop);
-        }
+        },
 
         switchNext() {
             this._seekDesktop(1);
-        }
+        },
 
         switchPrevious() {
             this._seekDesktop(-1);
@@ -50,7 +50,7 @@ export default Ember.Component.extend({
 
         index += direction;
 
-        if index === desktops.length {
+        if (index === desktops.length) {
             index = 0;
         } else if (index === -1) {
             index = desktops.length - 1;
