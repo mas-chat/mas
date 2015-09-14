@@ -172,7 +172,7 @@ export default Ember.Component.extend({
         this.movingWindow.$().removeClass('moving').css('z-index', '');
         $('#window-cursor').hide();
 
-        if (this.cursor.x === null) {
+        if (cursor.x === null) {
             return;
         }
 
@@ -197,8 +197,8 @@ export default Ember.Component.extend({
             });
         });
 
-        this.movingWindow.set('row', this.cursor.y + (this.cursor.section === 'bottom' ? 1 : 0));
-        this.movingWindow.set('column', this.cursor.x + (this.cursor.section === 'right' ? 1 : 0));
+        this.movingWindow.set('row', cursor.y + (cursor.section === 'bottom' ? 1 : 0));
+        this.movingWindow.set('column', cursor.x + (cursor.section === 'right' ? 1 : 0));
     },
 
     _layoutWindows(animate) {
