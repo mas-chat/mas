@@ -54,10 +54,6 @@ export default Ember.Component.extend(SendMsgMixin, {
         },
     },
 
-    _oldestDesktop() {
-        return this.get('desktops').map(d => d.id).sort()[0];
-    },
-
     _handleSendMessage(window, text) {
         let command = false;
         let commandParams;

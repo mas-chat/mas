@@ -36,22 +36,6 @@ export default Ember.Component.extend({
         }
     },
 
-    mouseUp(event) {
-        // There's a second mouseup handler in window-grid component. That handler manages
-        // activeDraggedWindow property. This setup should still be safe because mouseup event
-        // bubble first here and then in window-grid. Thus no race condition.
-        let draggedWindow = this.get('activeDraggedWindow');
-
-        if (!draggedWindow) {
-            return;
-        }
-
-        // TBD: Fix
-        let id = $(event.target).closest('div').data('id');
-
-        draggedWindow.set('desktop', id === 'new' ? Math.floor(new Date() / 1000) : parseInt(id));
-    },
-
     desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
         console.log(this.get('activeDesktop'))
 
@@ -102,5 +86,9 @@ export default Ember.Component.extend({
                 }
             });
         }
-    })
+    }),
+
+    _oldestDesktop() {
+        return this.get('desktops').map(d => d.id).sort()[0];
+    }
 });
