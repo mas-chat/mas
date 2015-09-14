@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals moment */
+/* globals moment, $ */
 
 import Ember from 'ember';
 import Users from '../utils/users';
@@ -72,6 +72,21 @@ export default Ember.Service.extend({
         this.set('windows', Ember.A([]));
         this.set('alerts', Ember.A([]));
         this.set('networks', Ember.A([]));
+
+        let authCookie = $.cookie('auth');
+
+        if (!authCookie) {
+            this.logout();
+        }
+
+        let [ userId, secret ] = authCookie.split('-');
+
+        if (!userId || !secret) {
+            this.logout();
+        }
+
+        this.set('userId', userId);
+        this.set('secret', secret);
     },
 
     start() {
@@ -102,6 +117,11 @@ export default Ember.Service.extend({
         }
 
         this._startDayChangedService();
+    },
+
+    logout() {
+        $.removeCookie('auth', { path: '/' });
+        window.location = '/';
     },
 
     insertModels(type, models, parent) {
@@ -302,6 +322,8 @@ export default Ember.Service.extend({
         } catch (e) {
             Ember.Logger.info(`Failed to save snapshot: ${e}`);
         }
+
+        this.set('cachedUpto', cachedUpto);
     },
 
     _loadSnapshot() {
