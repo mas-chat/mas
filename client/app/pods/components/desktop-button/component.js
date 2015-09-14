@@ -19,7 +19,9 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    activeDraggedWindow: false,
+    store: Ember.inject.service(),
+
+    activeDraggedWindow: Ember.computed.alias('store.activeDraggedWindow'),
 
     dropAreaCSSClass: Ember.computed('activeDraggedWindow', function() {
         return this.get('activeDraggedWindow') ? 'main-desktop-droparea' : '';

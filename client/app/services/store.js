@@ -62,6 +62,8 @@ export default Ember.Service.extend({
     cachedUpto: 0,
     dayCounter: 0,
 
+    activeDraggedWindow: false,
+
     init() {
         this._super();
 

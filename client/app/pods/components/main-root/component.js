@@ -27,63 +27,7 @@ export default Ember.Component.extend(SendMsgMixin, {
 
     classNames: [ 'flex-grow-column', 'flex-1' ],
 
-    windows: Ember.computed.alias('store.windows'),
-    userId: Ember.computed.alias('store.userId'),
-    activeDesktop: Ember.computed.alias('store.activeDesktop'),
-
-    activeDraggedWindow: false,
-
     modalQueue: Ember.A([]),
-
-    desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
-        let desktops = {};
-        let desktopsArray = Ember.A([]);
-
-        this.get('windows').forEach(function(masWindow) {
-            let newMessages = masWindow.get('newMessagesCount');
-            let desktop = masWindow.get('desktop');
-            let initials = masWindow.get('simplifiedName').substr(0, 2).toUpperCase();
-
-            if (desktops[desktop]) {
-                desktops[desktop].messages += newMessages;
-            } else {
-                desktops[desktop] = { messages: newMessages, initials: initials };
-            }
-        });
-
-        Object.keys(desktops).forEach(function(desktop) {
-            desktopsArray.push({
-                id: parseInt(desktop),
-                initials: desktops[desktop].initials,
-                messages: desktops[desktop].messages
-            });
-        });
-
-        return desktopsArray;
-    }),
-
-    deletedDesktopCheck: Ember.observer('desktops.[]', 'store.initDone', function() {
-        if (!this.get('store.initDone')) {
-            return;
-        }
-
-        let desktopIds = this.get('desktops').map(d => d.id);
-
-        if (desktopIds.indexOf(this.get('activeDesktop')) === -1) {
-            this.set('activeDesktop', this._oldestDesktop());
-        }
-    }),
-
-    updateActiveDesktop: Ember.observer('activeDesktop', function() {
-        if (!isMobile.any) {
-            this.get('socket').send({
-                id: 'SET',
-                settings: {
-                    activeDesktop: this.get('activeDesktop')
-                }
-            });
-        }
-    }),
 
     actions: {
         openModal(modalName, model) {
@@ -108,10 +52,6 @@ export default Ember.Component.extend(SendMsgMixin, {
 
             this.send('openModal', modals[command], window);
         },
-
-        dragActiveAction(value) {
-            this.set('activeDraggedWindow', value);
-        }
     },
 
     _oldestDesktop() {

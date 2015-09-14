@@ -24,14 +24,10 @@ export default Ember.Component.extend({
 
     classNames: [ 'sidebar', 'flex-grow-column' ],
 
-    activeDesktop: Ember.computed.alias('store.activeDesktop'),
+    activeDraggedWindow: Ember.computed.alias('store.activeDraggedWindow'),
     friends: Ember.computed.alias('store.friends'),
 
     actions: {
-        switchDesktop(desktop) {
-            this.set('activeDesktop', desktop);
-        },
-
         openModal(modal) {
             this.sendAction('openModal', modal);
         },

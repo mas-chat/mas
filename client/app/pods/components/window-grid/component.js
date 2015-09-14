@@ -115,23 +115,22 @@ export default Ember.Component.extend({
     },
 
     _dragWindowStart(discussionWindow, event) {
-        let that = this;
         this.movingWindow = discussionWindow;
 
-        this.sendAction('dragActiveAction', discussionWindow);
+        this.set('store.activeDraggedWindow', discussionWindow);
 
         this.movingWindow.$().addClass('moving').css('z-index', 200);
         $('#window-cursor').show();
 
         this._dragWindow(event);
 
-        function handleDragMove(dragMoveEvent) {
-            that._dragWindow(dragMoveEvent);
+        let handleDragMove = dragMoveEvent => {
+            this._dragWindow(dragMoveEvent);
             event.preventDefault();
         }
 
-        function handleDragEnd() {
-            that._dragWindowEnd();
+        let handleDragEnd = () => {
+            this._dragWindowEnd();
 
             document.removeEventListener('mousemove', handleDragMove, false);
             document.removeEventListener('mouseup', handleDragEnd, false);
@@ -168,7 +167,7 @@ export default Ember.Component.extend({
     _dragWindowEnd() {
         let cursor = this.cursor;
 
-        this.sendAction('dragActiveAction', false);
+        this.set('store.activeDraggedWindow', false);
 
         this.movingWindow.$().removeClass('moving').css('z-index', '');
         $('#window-cursor').hide();
