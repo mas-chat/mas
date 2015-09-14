@@ -20,8 +20,9 @@
 
 import Ember from 'ember';
 import SendMsgMixin from '../../../mixins/sendMsg';
+import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 
-export default Ember.Component.extend(SendMsgMixin, {
+export default Ember.Component.extend(SendMsgMixin, KeyboardShortcuts, {
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
@@ -52,6 +53,18 @@ export default Ember.Component.extend(SendMsgMixin, {
 
             this.send('openModal', modals[command], window);
         },
+
+        activateHackerMode() {
+            $('<link/>', {
+                rel: 'stylesheet',
+                type: 'text/css',
+                href: '/app/theme-hacker.css'
+            }).appendTo('head');
+        }
+    },
+
+    keyboardShortcuts: {
+        'ctrl+h': 'activateHackerMode'
     },
 
     _handleSendMessage(window, text) {
