@@ -1,11 +1,11 @@
 body {
     font-family: monospace;
-    background-color: #444;
+    background-color: #333;
 }
 
 .window {
-    background-color: #444;
-    font-size: 12px;
+    background-color: #333;
+    font-size: 11px;
 }
 
 .window .window-content, .window.private-1on1 .window-content {
@@ -44,4 +44,8 @@ body {
 
 .window .window-members .gravatar {
     opacity: 0.3;
+}
+
+.sidebar {
+    background-color: black;
 }

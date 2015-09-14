@@ -64,7 +64,7 @@ export default Ember.Component.extend(SendMsgMixin, KeyboardShortcuts, {
     },
 
     keyboardShortcuts: {
-        'ctrl+h': 'activateHackerMode'
+        'up up down down i o': 'activateHackerMode'
     },
 
     _handleSendMessage(window, text) {
