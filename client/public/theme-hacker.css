@@ -1,0 +1,46 @@
+body {
+    font-family: monospace;
+    background-color: #444;
+}
+
+.window {
+    background-color: #444;
+    font-size: 12px;
+}
+
+.window .window-content, .window.private-1on1 .window-content {
+    background-color: black;
+}
+
+.window .timestamp {
+    margin-right: 8px;
+}
+
+.window .window-messages {
+    color: #A5A5A5;
+}
+
+.window .line.day-divider .body {
+    background-color: #1D2F1E;
+    color: #AFAFAF;
+}
+
+.window .window-toolbar .form-control {
+    background-color: black;
+}
+
+.window .window-add-text-container textarea:focus {
+    background-color: #222;
+}
+
+.window .window-toolbar {
+    border-top: 1px solid #A5A5A5;
+}
+
+.window .window-toolbar .btn, .window .window-buttons.flex-row {
+    background-color: #222;
+}
+
+.window .window-members .gravatar {
+    opacity: 0.3;
+}
