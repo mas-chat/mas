@@ -34,6 +34,29 @@ export default Ember.Component.extend({
         switch(desktop) {
             this.set('activeDesktop', desktop);
         }
+
+        switchNext() {
+            this._seekDesktop(1);
+        }
+
+        switchPrevious() {
+            this._seekDesktop(-1);
+        }
+    },
+
+    _seekDesktop(direction) {
+        let desktops = this.get('desktops');
+        let index = desktops.indexOf(desktops.findBy('id', this.get('activeDesktop')));
+
+        index += direction;
+
+        if index === desktops.length {
+            index = 0;
+        } else if (index === -1) {
+            index = desktops.length - 1;
+        }
+
+        this.set('activeDesktop', desktops[index].id);
     },
 
     desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
