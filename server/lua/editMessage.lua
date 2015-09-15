@@ -51,8 +51,6 @@ message.body = text
 
 -- Bad property name, but too late to change
 message.editTs = tonumber(redis.call('GET', 'nextGlobalMsgId'))
-message.EditTime
-
 message.updatedTs = ts
 
 if text == "" then
