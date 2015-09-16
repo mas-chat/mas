@@ -17,8 +17,9 @@
 'use strict';
 
 import Ember from 'ember';
+import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 
-export default Ember.Component.extend({
+export default Ember.Component.extend(KeyboardShortcuts, {
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
@@ -50,10 +51,23 @@ export default Ember.Component.extend({
 
                 window.location = '/';
             });
+        },
+
+        toggleDarkTheme() {
+            let newTheme = this.get('store.settings.theme') === 'dark' ? 'default' : 'dark';
+            this.set('store.settings.theme', newTheme);
         }
+    },
+
+    keyboardShortcuts: {
+        'up up down down i o': 'toggleDarkTheme'
     },
 
     friendsOnline: Ember.computed('friends.@each.online', function() {
         return this.get('friends').filterBy('online', true).length;
+    }),
+
+    darkTheme: Ember.computed('store.settings.theme', function() {
+        return this.get('store.settings.theme') === 'dark';
     })
 });

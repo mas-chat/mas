@@ -50,6 +50,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-right main-sidebar-button-up">
             <li {{action "openModal" "profile-modal"}}><a href="#">Profile&#8230;</a></li>
+            <li {{action "toggleDarkTheme"}}><a href="#"> {{#if darkTheme}}<i class="fa fa-check dropdown-checkmark"> </i>{{/if}}Dark theme (beta)</a></li>
             <li {{action "logout"}}><a href="#">Logout</a></li>
         </ul>
     </div>

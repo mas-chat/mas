@@ -20,9 +20,8 @@
 
 import Ember from 'ember';
 import SendMsgMixin from '../../../mixins/sendMsg';
-import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 
-export default Ember.Component.extend(SendMsgMixin, KeyboardShortcuts, {
+export default Ember.Component.extend(SendMsgMixin, {
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
@@ -52,20 +51,18 @@ export default Ember.Component.extend(SendMsgMixin, KeyboardShortcuts, {
             };
 
             this.send('openModal', modals[command], window);
-        },
-
-        activateHackerMode() {
-            $('<link/>', {
-                rel: 'stylesheet',
-                type: 'text/css',
-                href: '/app/theme-hacker.css'
-            }).appendTo('head');
         }
     },
 
-    keyboardShortcuts: {
-        'up up down down i o': 'activateHackerMode'
-    },
+    changeTheme: Ember.observer('store.settings.theme', function() {
+        let $themeStylesheet = $('#theme-stylesheet');
+
+        if (this.get('store.settings.theme') === 'dark') {
+            $themeStylesheet.attr('href', '/app/theme-dark.css');
+        } else {
+            $themeStylesheet.removeAttr('href');
+        }
+    }),
 
     _handleSendMessage(window, text) {
         let command = false;
