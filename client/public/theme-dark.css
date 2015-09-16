@@ -5,7 +5,7 @@ body {
 
 .window {
     background-color: #333;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .window .window-content, .window.private-1on1 .window-content {
@@ -23,6 +23,14 @@ body {
 .window .line.day-divider .body {
     background-color: #1D2F1E;
     color: #AFAFAF;
+}
+
+.window .nick::before {
+    content: "<";
+}
+
+.window .nick::after {
+    content: ">";
 }
 
 .window .window-toolbar .form-control {
