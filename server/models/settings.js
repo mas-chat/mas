@@ -24,7 +24,8 @@ exports.sendSet = function*(userId, sessionId) {
     let settings = (yield redis.hgetall(`settings:${userId}`)) || {};
 
     _.defaults(settings, {
-        activeDesktop: 0
+        activeDesktop: 0,
+        theme: 'default'
     });
 
     let user = yield redis.hgetall(`user:${userId}`);
@@ -33,6 +34,7 @@ exports.sendSet = function*(userId, sessionId) {
         id: 'SET',
         settings: {
             activeDesktop: parseInt(settings.activeDesktop),
+            theme: settings.theme,
             email: user.email,
             emailConfirmed: user.emailConfirmed === 'true'
         }
