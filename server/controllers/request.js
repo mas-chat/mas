@@ -323,22 +323,26 @@ function *handleUpdateTopic(params) {
 function *handleSet(params) {
     let properties = params.command.settings || {};
 
-    const allowed = [ 'activeDesktop' ];
-
     for (let prop of Object.keys(properties)) {
         let value = properties[prop];
 
-        if (allowed.indexOf(prop) === -1) {
-            return { status: 'ERROR', errorMsg: `'${prop}' is not a valid settings property` };
-        }
-
-        // TBD: Re-factor when there are multiple settings
-        if (yield window.isValidDesktop(params.userId, value)) {
-            yield redis.hset(`settings:${params.userId}`, 'activeDesktop', properties[prop]);
-        } else {
-            return { status: 'ERROR', errorMsg: `Desktop '${value}' doesn't exist` };
+        switch(prop) {
+            case 'activeDesktop':
+                if (!(yield window.isValidDesktop(params.userId, value))) {
+                    return { status: 'ERROR', errorMsg: `Desktop '${value}' doesn't exist` };
+                }
+                break;
+            case 'theme':
+                if (!(value === 'default' || value === 'dark')) {
+                    return { status: 'ERROR', errorMsg: 'Unknown theme' };
+                }
+                break;
+            default:
+                return { status: 'ERROR', errorMsg: `'${prop}' is not a valid settings property` };
         }
     }
+
+    yield redis.hmset(`settings:${params.userId}`, properties);
 
     return { status: 'OK' };
 }

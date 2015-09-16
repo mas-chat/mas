@@ -212,12 +212,11 @@ export default Ember.Object.extend({
             return;
         }
 
-        if (typeof(data.settings.activeDesktop) !== 'undefined' && !isMobile.any) {
-            this.set('store.activeDesktop', data.settings.activeDesktop);
+        if (isMobile.any) {
+            delete data.settings.activeDesktop;
         }
 
-        this.set('store.email', data.settings.email);
-        this.set('store.emailConfirmed', data.settings.emailConfirmed);
+        this.get('store.settings').setProperties(data.settings);
     },
 
     _handleFriendsconfirm(data) {

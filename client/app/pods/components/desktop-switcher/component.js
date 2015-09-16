@@ -26,7 +26,7 @@ export default Ember.Component.extend({
 
     classNames: [ 'main-desktop-switcher' ],
 
-    activeDesktop: Ember.computed.alias('store.activeDesktop'),
+    activeDesktop: Ember.computed.alias('store.settings.activeDesktop'),
     activeDraggedWindow: Ember.computed.alias('store.activeDraggedWindow'),
     windows: Ember.computed.alias('store.windows'),
 
@@ -97,17 +97,6 @@ export default Ember.Component.extend({
 
         if (desktopIds.indexOf(this.get('activeDesktop')) === -1) {
             this.set('activeDesktop', this._oldestDesktop());
-        }
-    }),
-
-    updateActiveDesktop: Ember.observer('activeDesktop', function() {
-        if (!isMobile.any) {
-            this.get('socket').send({
-                id: 'SET',
-                settings: {
-                    activeDesktop: this.get('activeDesktop')
-                }
-            });
         }
     }),
 

@@ -34,7 +34,7 @@ export default Ember.Component.extend({
                 if (resp.status === 'OK') {
                     this.sendAction('closeModal');
                     // Don't nag about unconfirmed email address anymore in this session
-                    this.set('store.emailConfirmed', true);
+                    this.set('store.settings.emailConfirmed', true);
                 } else {
                     this.set('errorMsg', resp.errorMsg);
                 }

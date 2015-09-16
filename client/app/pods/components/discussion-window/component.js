@@ -36,7 +36,7 @@ export default Ember.Component.extend(UploadMixin, {
         'type'
     ],
 
-    activeDesktop: Ember.computed.alias('store.activeDesktop'),
+    activeDesktop: Ember.computed.alias('store.settings.activeDesktop'),
 
     expanded: false,
     animating: false,

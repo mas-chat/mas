@@ -51,10 +51,7 @@ export default Ember.Service.extend({
     alerts: null,
     networks: null,
 
-    // Settings
-    activeDesktop: null,
-    email: '',
-    emailConfirmed: true,
+    settings: null,
 
     userId: null,
     initDone: false,
@@ -73,6 +70,13 @@ export default Ember.Service.extend({
         this.set('alerts', Ember.A([]));
         this.set('networks', Ember.A([]));
 
+        this.set('settings', Ember.Object.create({
+            theme: 'default',
+            activeDesktop: null,
+            email: '',
+            emailConfirmed: true,
+        }));
+
         let authCookie = $.cookie('auth');
 
         if (!authCookie) {
@@ -88,6 +92,16 @@ export default Ember.Service.extend({
         this.set('userId', userId);
         this.set('secret', secret);
     },
+
+    syncSettingsActiveDesktop: Ember.observer('settings.activeDesktop', function() {
+        if (!isMobile.any) {
+            this._sendSet('activeDesktop', this.get('settings.activeDesktop'));
+        }
+    }),
+
+    syncSettingsTheme: Ember.observer('settings.theme', function() {
+        this._sendSet('theme', this.get('settings.theme'));
+    }),
 
     start() {
         let data;
@@ -376,5 +390,15 @@ export default Ember.Service.extend({
 
         this.set('activeDesktop', data.activeDesktop);
         Ember.Logger.info('Snapshot processed.');
-    }
+    },
+
+    _sendSet(setting, value) {
+        let settings = {};
+        settings[setting] = value;
+
+        this.get('socket').send({
+            id: 'SET',
+            settings: settings
+        });
+    },
 });
