@@ -20,6 +20,7 @@
 
 import Ember from 'ember';
 import SendMsgMixin from '../../../mixins/sendMsg';
+import { darkTheme } from '../../../utils/theme-dark'
 
 export default Ember.Component.extend(SendMsgMixin, {
     socket: Ember.inject.service(),
@@ -55,13 +56,10 @@ export default Ember.Component.extend(SendMsgMixin, {
     },
 
     changeTheme: Ember.observer('store.settings.theme', function() {
-        let $themeStylesheet = $('#theme-stylesheet');
+        let theme = this.get('store.settings.theme');
 
-        if (this.get('store.settings.theme') === 'dark') {
-            $themeStylesheet.attr('href', '/app/theme-dark.css');
-        } else {
-            $themeStylesheet.removeAttr('href');
-        }
+        $('#theme-stylesheet').text(theme === 'dark' ? darkTheme : '');
+        this.incrementProperty('store.themeDirty');
     }),
 
     _handleSendMessage(window, text) {

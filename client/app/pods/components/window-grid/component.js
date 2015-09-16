@@ -39,7 +39,7 @@ export default Ember.Component.extend({
 
     model: Ember.computed.alias('store.windows'),
 
-    mustRelayout: Ember.observer('store.initDone', function() {
+    mustRelayout: Ember.observer('store.initDone', 'store.themeDirty', function() {
         Ember.run.next(this, function() { this._layoutWindows(false); });
     }),
 
