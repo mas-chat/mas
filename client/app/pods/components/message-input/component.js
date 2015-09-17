@@ -69,8 +69,10 @@ export default Ember.TextArea.extend({
     },
 
     _updateHeight(height) {
-        let contentHeight = this.$().prop('scrollHeight');
-        let newHeight = Math.min(contentHeight, 300);
+        this.$().height(0);
+
+        let scrollHeight = this.$().prop('scrollHeight');
+        let newHeight = Math.min(scrollHeight, 300);
 
         if (newHeight < 35) {
             newHeight = '100%';
