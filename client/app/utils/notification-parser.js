@@ -208,15 +208,17 @@ export default Ember.Object.extend({
     },
 
     _handleSet(data) {
-        if (!data.settings) {
+        let settings = data.settings;
+
+        if (!settings) {
             return;
         }
 
         if (isMobile.any) {
-            delete data.settings.activeDesktop;
+            settings.activeDesktop = 1;
         }
 
-        this.get('store.settings').setProperties(data.settings);
+        this.get('store.settings').setProperties(settings);
     },
 
     _handleFriendsconfirm(data) {
