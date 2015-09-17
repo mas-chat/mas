@@ -60,8 +60,6 @@ export default Ember.Component.extend({
     },
 
     desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
-        console.log(this.get('activeDesktop'))
-
         let desktops = {};
         let desktopsArray = Ember.A([]);
 

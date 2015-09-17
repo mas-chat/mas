@@ -68,16 +68,24 @@ export default Ember.TextArea.extend({
         });
     },
 
-    _updateHeight(height) {
-        this.$().height(0);
+    _updateHeight() {
+        let prevHeight = this.$().prop('style').height; // Get the non-computed value
 
-        let scrollHeight = this.$().prop('scrollHeight');
-        let newHeight = Math.min(scrollHeight, 300);
+        if (prevHeight !== '100%') {
+            // By setting the height to 100%, scrollHeight below returns the actual value even when
+            // content shrinks. We do this trick only when necessary as it causes noticeable lag
+            // on Firefox.
+            this.$().css('height', '100%');
+        }
+
+        let newHeight = Math.min(this.$().prop('scrollHeight'), 300);
 
         if (newHeight < 35) {
             newHeight = '100%';
         }
 
-        this.$().height(newHeight);
+        if (newHeight !== '100%') {
+            this.$().height(newHeight);
+        }
     }
 });
