@@ -16,7 +16,7 @@
 
 'use strict';
 
-export theme = ```
+export const darkTheme = `
 
 body {
     font-family: monospace;
@@ -78,4 +78,4 @@ body {
     background-color: black;
 }
 
-```;
+`;
