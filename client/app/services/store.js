@@ -74,7 +74,7 @@ export default Ember.Service.extend({
             theme: 'default',
             activeDesktop: null,
             email: '',
-            emailConfirmed: true,
+            emailConfirmed: true
         }));
 
         let authCookie = $.cookie('auth');
@@ -400,5 +400,5 @@ export default Ember.Service.extend({
             id: 'SET',
             settings: settings
         });
-    },
+    }
 });
