@@ -322,8 +322,13 @@ function *handleUpdateTopic(params) {
 
 function *handleSet(params) {
     let properties = params.command.settings || {};
+    let keys = Object.keys(properties);
 
-    for (let prop of Object.keys(properties)) {
+    if (keys.length === 0) {
+        return;
+    }
+
+    for (let prop of keys) {
         let value = properties[prop];
 
         switch(prop) {
