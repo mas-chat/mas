@@ -93,16 +93,6 @@ export default Ember.Service.extend({
         this.set('secret', secret);
     },
 
-    syncSettingsActiveDesktop: Ember.observer('settings.activeDesktop', function() {
-        if (!isMobile.any) {
-            this._sendSet('activeDesktop', this.get('settings.activeDesktop'));
-        }
-    }),
-
-    syncSettingsTheme: Ember.observer('settings.theme', function() {
-        this._sendSet('theme', this.get('settings.theme'));
-    }),
-
     start() {
         let data;
         let localStorageSupported = typeof Storage !== 'undefined';
@@ -392,15 +382,5 @@ export default Ember.Service.extend({
 
         this.set('activeDesktop', data.activeDesktop);
         Ember.Logger.info('Snapshot processed.');
-    },
-
-    _sendSet(setting, value) {
-        let settings = {};
-        settings[setting] = value;
-
-        this.get('socket').send({
-            id: 'SET',
-            settings: settings
-        });
     }
 });

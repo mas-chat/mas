@@ -55,7 +55,14 @@ export default Ember.Component.extend(KeyboardShortcuts, {
 
         toggleDarkTheme() {
             let newTheme = this.get('store.settings.theme') === 'dark' ? 'default' : 'dark';
+
             this.set('store.settings.theme', newTheme);
+            this.get('socket').send({
+                id: 'SET',
+                settings: {
+                    theme: newTheme
+                }
+            });
         }
     },
 

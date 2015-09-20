@@ -17,9 +17,8 @@
 'use strict';
 
 import Ember from 'ember';
-import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 
-export default Ember.Component.extend(KeyboardShortcuts, {
+export default Ember.Component.extend({
     store: Ember.inject.service(),
     socket: Ember.inject.service(),
 
@@ -30,8 +29,8 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     windows: Ember.computed.alias('store.windows'),
 
     actions: {
-        switch(desktop) {
-            this.set('activeDesktop', desktop);
+        switch(desktopId) {
+            this._changeDesktop(desktopId);
         },
 
         switchNext() {
@@ -55,7 +54,7 @@ export default Ember.Component.extend(KeyboardShortcuts, {
             index = desktops.length - 1;
         }
 
-        this.set('activeDesktop', desktops[index].id);
+        this._changeDesktop(desktops[index].id);
     },
 
     desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
@@ -93,11 +92,24 @@ export default Ember.Component.extend(KeyboardShortcuts, {
         let desktopIds = this.get('desktops').map(d => d.id);
 
         if (desktopIds.indexOf(this.get('activeDesktop')) === -1) {
-            this.set('activeDesktop', this._oldestDesktop());
+            this._changeDesktop(this._oldestDesktop());
         }
     }),
 
     _oldestDesktop() {
         return this.get('desktops').map(d => d.id).sort()[0];
+    },
+
+    _changeDesktop(desktopId) {
+        this.set('activeDesktop', desktopId);
+
+        if (!isMobile.any) {
+            this.get('socket').send({
+                id: 'SET',
+                settings: {
+                    activeDesktop: desktopId
+                }
+            });
+        }
     }
 });
