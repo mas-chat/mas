@@ -19,8 +19,9 @@
 /* globals URI, moment, emojify */
 
 import Ember from 'ember';
+import BaseModel from './base';
 
-export default Ember.Object.extend({
+export default BaseModel.extend({
     store: null,
 
     gid: 0,
@@ -75,6 +76,11 @@ export default Ember.Object.extend({
 
     nick: Ember.computed('userId', 'window', function() {
         return this.get('store.users').getNick(this.get('userId'), this.get('window.network'));
+    }),
+
+    avatarUrl: Ember.computed('userId', function() {
+        let hash = this.get('store.users').getAvatarHash(this.get('userId'));
+        return `//gravatar.com/avatar/${hash}?d=mm`;
     }),
 
     decoratedCat: Ember.computed('cat', 'nick', 'body', 'mentionedRegEx', function() {

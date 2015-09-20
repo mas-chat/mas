@@ -41,6 +41,8 @@ export default Ember.Component.extend({
         // There's a second mouseup handler in window-grid component. That handler manages
         // activeDraggedWindow property. This setup should still be safe because mouseup event
         // bubble first here and then in window-grid. Thus no race condition.
+
+        // TBD: Unify, move this code to window-grid.
         let draggedWindow = this.get('activeDraggedWindow');
         let id = this.get('id');
 

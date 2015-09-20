@@ -20,11 +20,12 @@
 
 import Ember from 'ember';
 import TitleBuilder from '../utils/title-builder';
+import BaseModel from './base';
 import Message from './message';
 
 let titleBuilder = TitleBuilder.create();
 
-export default Ember.Object.extend({
+export default BaseModel.extend({
     init() {
         this._super();
 
@@ -34,6 +35,13 @@ export default Ember.Object.extend({
         this.set('operators', Ember.A([]));
         this.set('voices', Ember.A([]));
         this.set('users', Ember.A([]));
+
+        this.set('alerts', Ember.Object.create({
+            email: false,
+            notification: false,
+            sound: false,
+            title: false
+        }));
     },
 
     socket: null,
@@ -55,14 +63,11 @@ export default Ember.Object.extend({
     logMessages: null,
 
     newMessagesCount: 0,
+    alerts: null,
 
     operators: null,
     voices: null,
     users: null,
-
-    titleAlert: false,
-    emailAlert: false,
-    soundAlert: false,
 
     minimizedNamesList: false,
 
@@ -159,32 +164,6 @@ export default Ember.Object.extend({
             return network === 'MAS' ? 'group' : 'channel';
         } else {
             return '1on1';
-        }
-    }),
-
-    syncServerPosition: Ember.observer('desktop', 'row', 'column', function() {
-        if (!window.disableUpdate && !isMobile.any) {
-            this.get('socket').send({
-                id: 'UPDATE',
-                windowId: this.get('windowId'),
-                row: this.get('row'),
-                column: this.get('column'),
-                desktop: this.get('desktop')
-            });
-        }
-    }),
-
-    syncServerAlerts: Ember.observer(
-        'emailAlert', 'titleAlert', 'soundAlert', 'minimizedNamesList', function() {
-        if (!window.disableUpdate) {
-            this.get('socket').send({
-                id: 'UPDATE',
-                windowId: this.get('windowId'),
-                minimizedNamesList: this.get('minimizedNamesList'),
-                soundAlert: this.get('soundAlert'),
-                emailAlert: this.get('emailAlert'),
-                titleAlert: this.get('titleAlert')
-            });
         }
     }),
 

@@ -55,6 +55,7 @@ MAS Redis structures
  window:<userId>:<windowId> (hash)
    conversationId (string)
    emailAlert (bool)
+   notificationAlert (bool)
    soundAlert (bool)
    titleAlert (bool)
    minimizedNamesList (bool)

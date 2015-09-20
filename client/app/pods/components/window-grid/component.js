@@ -198,8 +198,21 @@ export default Ember.Component.extend({
             });
         });
 
-        this.movingWindow.set('row', cursor.y + (cursor.section === 'bottom' ? 1 : 0));
-        this.movingWindow.set('column', cursor.x + (cursor.section === 'right' ? 1 : 0));
+        let newColumn = cursor.x + (cursor.section === 'right' ? 1 : 0);
+        let newRow = cursor.y + (cursor.section === 'bottom' ? 1 : 0);
+
+        this.movingWindow.set('column', newColumn);
+        this.movingWindow.set('row', newRow);
+
+        if (!isMobile.any) {
+            this.get('socket').send({
+                id: 'UPDATE',
+                windowId: this.movingWindow.get('content.windowId'),
+                desktop: this.movingWindow.get('content.desktop'),
+                column: newColumn,
+                row: newRow
+            });
+        }
     },
 
     _layoutWindows(animate) {

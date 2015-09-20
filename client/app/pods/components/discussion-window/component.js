@@ -134,10 +134,13 @@ export default Ember.Component.extend(UploadMixin, {
     }.observes('content.userNames.[]', 'content.voiceNames.[]',
        'content.operatorNames.[]').on('init'),
 
-    _lineAdded() {
-        let messages = this.get('content.messages');
-        let cat = messages.get('lastObject').cat; // Message that was added.
-        let importantMessage = cat === 'msg' || cat === 'error' || cat === 'action';
+    _lineAdded(messages) {
+        // Get the message that was added. Note: .get('lastObject') would work only after this
+        // run loop.
+        let message = messages[messages.length - 1];
+
+        let cat = message.cat;
+        let importantMessage = cat === 'msg' || cat === 'action';
 
         if ((!this.get('visible') || this.get('scrollLock')) && importantMessage) {
             this.incrementProperty('content.newMessagesCount');
@@ -145,13 +148,25 @@ export default Ember.Component.extend(UploadMixin, {
 
         if (document.hidden && importantMessage) {
             // Browser title notification
-            if (this.get('content.titleAlert')) {
+            if (this.get('content.alerts.title')) {
                 titlenotifier.add();
             }
 
             // Sound notification
-            if (this.get('content.soundAlert')) {
+            if (this.get('content.alerts.sound')) {
                 play();
+            }
+
+            if (this.get('content.alerts.notification') && 'Notification' in window &&
+                Notification.permission !== 'denied' && cat === 'msg') {
+                let src = message.get('type') === 'group' ? message.get('simplifiedName') : '1on1';
+
+                let ntf = new Notification(`${message.get('nick')} (${src})`, {
+                    body: message.get('body'),
+                    icon: message.get('avatarUrl')
+                });
+
+                setTimeout(() => ntf.close(), 5000);
             }
         }
 
@@ -184,10 +199,16 @@ export default Ember.Component.extend(UploadMixin, {
         },
 
         toggleMemberListWidth() {
-            this.toggleProperty('content.minimizedNamesList');
+            let newValue = this.toggleProperty('content.minimizedNamesList');
 
             Ember.run.scheduleOnce('afterRender', this, function() {
                 this._goToBottom(true);
+            });
+
+            this.get('socket').send({
+                id: 'UPDATE',
+                windowId: this.get('content.windowId'),
+                minimizedNamesList: newValue
             });
         },
 
@@ -328,7 +349,7 @@ export default Ember.Component.extend(UploadMixin, {
         if (addCount > 0 && this.get('store.initDone') && offset === array.length - 1) {
             // Infinity scrolling adds the old messages to the beginning of the array. The offset
             // check above makes sure that _lineAdded() is not called then (FETCH case).
-            this._lineAdded();
+            this._lineAdded(array);
         }
     },
 

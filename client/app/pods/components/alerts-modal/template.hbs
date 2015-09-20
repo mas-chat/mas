@@ -2,19 +2,25 @@
     <form role="form">
         <div class="new-row">
             <label>
-                {{input type="checkbox" checked=modalSoundAlert}} Play sound when new message arrives.
+                {{input type="checkbox" checked=alerts.sound}} Play sound when a new message arrives.
             </label>
         </div>
 
         <div class="new-row">
             <label>
-                {{input type="checkbox" checked=modalTitleAlert}} Increase the amount of unread messages in browser title bar when new message arrives.
+                {{input type="checkbox" checked=alerts.title}} Increase the amount of unread messages in the browser title bar when a new message arrives.
             </label>
         </div>
 
         <div class="new-row">
             <label>
-                {{input type="checkbox" checked=modalEmailAlert}} Send an email when I'm not logged in and somebody mentions (@mynick) me.
+                {{input type="checkbox" checked=alerts.notification}} Show notification when a message arrives.
+            </label>
+        </div>
+
+        <div class="new-row">
+            <label>
+                {{input type="checkbox" checked=alerts.email}} Send an email when I'm not logged in and somebody mentions (@mynick) me.
             </label>
         </div>
     </form>

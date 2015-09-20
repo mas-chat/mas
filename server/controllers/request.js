@@ -240,48 +240,53 @@ function *handleClose(params) {
 }
 
 function *handleUpdate(params) {
-    let accepted = [
-        'row',
-        'column',
-        'emailAlert',
-        'soundAlert',
-        'titleAlert',
-        'minimizedNamesList',
-        'desktop'
-    ];
+    let userId = params.userId;
+    let windowId = params.windowId;
 
-    let oldValues = yield redis.hgetall(`window:${params.userId}:${params.windowId}`);
+    let accepted = [ 'row', 'column', 'minimizedNamesList', 'desktop' ];
+    let acceptedAlerts = [ 'email', 'notification', 'sound', 'title' ];
+
+    let oldValues = yield redis.hgetall(`window:${userId}:${windowId}`);
 
     if (!oldValues) {
-        log.warn(params.userId,
-            'handleUpdate(): Client tried to update non-existent window, id: ' + params.windowId +
-            ', command:' + params.command);
+        log.warn(userId, `Client tried to update non-existent window, command: ${params.command}`);
         return { status: 'ERROR' };
     }
 
     let update = false;
+    let newAlerts = {};
 
-    for (let parameter of accepted) {
-        let prop = params.command[parameter];
+    for (let prop of accepted) {
+        let value = params.command[prop];
 
-        if (typeof(prop) !== 'undefined' && prop !== oldValues[parameter]) {
+        if (typeof(value) !== 'undefined' && value !== oldValues[prop]) {
             update = true;
-            yield redis.hset(`window:${params.userId}:${params.windowId}`, parameter, prop);
+            yield redis.hset(`window:${userId}:${windowId}`, prop, value);
+        }
+    }
+
+    if (typeof(params.command.alerts) !== 'undefined') {
+        for (let alertsKey of acceptedAlerts) {
+            let alertsValue = params.command.alerts[alertsKey];
+
+            if (typeof(alertsValue) !== 'undefined') {
+                update = true;
+                newAlerts[alertsKey] = alertsValue;
+                yield redis.hset(`window:${userId}:${windowId}`, `${alertsKey}Alert`, alertsValue);
+            }
         }
     }
 
     if (update) {
         // Notify all sessions. Undefined body properties won't appear in the JSON message
-        yield notification.broadcast(params.userId, {
+        yield notification.broadcast(userId, {
             id: 'UPDATE',
-            windowId: params.windowId,
+            windowId: windowId,
             row: params.command.row,
             column: params.command.column,
-            soundAlert: params.command.soundAlert,
-            emailAlert: params.command.emailAlert,
-            titleAlert: params.command.titleAlert,
             minimizedNamesList: params.command.minimizedNamesList,
-            desktop: params.command.desktop
+            desktop: params.command.desktop,
+            alerts: Object.keys(newAlerts) === 0 ? undefined : newAlerts
         }, params.sessionId);
     }
 
@@ -331,7 +336,7 @@ function *handleSet(params) {
     for (let prop of keys) {
         let value = properties[prop];
 
-        switch(prop) {
+        switch (prop) {
             case 'activeDesktop':
                 if (!(yield window.isValidDesktop(params.userId, value))) {
                     return { status: 'ERROR', errorMsg: `Desktop '${value}' doesn't exist` };

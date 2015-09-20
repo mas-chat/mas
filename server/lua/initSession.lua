@@ -89,9 +89,12 @@ for i = 1, #windowIds do
         ['name'] = conversation.name,
         ['userId'] = oneOnOneUserId, -- added if the window is 1on1
         ['type'] = conversation.type,
-        ['emailAlert'] = window.emailAlert == 'true',
-        ['soundAlert'] = window.soundAlert == 'true',
-        ['titleAlert'] = window.titleAlert == 'true',
+        ['alerts'] = {
+            ['email'] = window.emailAlert == 'true',
+            ['notification'] = window.notificationAlert == 'true',
+            ['sound'] = window.soundAlert == 'true',
+            ['title'] = window.titleAlert == 'true'
+        },
         ['minimizedNamesList'] = window.minimizedNamesList == 'true',
         ['role'] = role,
         ['row'] = tonumber(window.row),

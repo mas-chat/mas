@@ -118,8 +118,9 @@ function *create(userId, conversationId) {
 
     let newWindow = {
         conversationId: conversationId,
-        soundAlert: false,
         emailAlert: true,
+        notificationAlert: false,
+        soundAlert: false,
         titleAlert: false,
         minimizedNamesList: true,
         desktop: currentDesktop || 0,
@@ -146,11 +147,14 @@ function *create(userId, conversationId) {
         network: conversation.network,
         password: conversation.password || null,
         topic: conversation.topic,
-        emailAlert: newWindow.emailAlert,
-        titleAlert: newWindow.titleAlert,
+        alerts: {
+            email: newWindow.emailAlert,
+            notification: newWindow.notificationAlert,
+            sound: newWindow.soundAlert,
+            title: newWindow.titleAlert
+        },
         row: newWindow.row,
         column: newWindow.column,
-        soundAlert: newWindow.soundAlert,
         minimizedNamesList: newWindow.minimizedNamesList,
         desktop: newWindow.desktop,
         role: 'u' // Everybody starts as a normal user

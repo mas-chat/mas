@@ -215,7 +215,7 @@ export default Ember.Service.extend({
             }
 
             delete data[primaryKeyName];
-            object.setProperties(data);
+            object.setModelProperties(data);
         } else {
             object = this._insertObject(type, data, parent, prepend);
             parent.lookupTable[type][data[primaryKeyName]] = object;
@@ -232,7 +232,8 @@ export default Ember.Service.extend({
     },
 
     _createModel(type, data, parent) {
-        let object = modelNameMapping[type].create(data);
+        let object = modelNameMapping[type].create();
+        object.setModelProperties(data); // Never set properties with create()
 
         // TBD: Add 'arrayName' parameter so that logMessage type and primary key can be removed.
 
@@ -321,7 +322,8 @@ export default Ember.Service.extend({
                 'column',
                 'desktop',
                 'newMessagesCount',
-                'minimizedNamesList'
+                'minimizedNamesList',
+                'alerts'
             ]);
 
             windowProperties.messages = messages;

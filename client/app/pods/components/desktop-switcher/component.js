@@ -16,11 +16,10 @@
 
 'use strict';
 
-/* globals $ */
-
 import Ember from 'ember';
+import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 
-export default Ember.Component.extend({
+export default Ember.Component.extend(KeyboardShortcuts, {
     store: Ember.inject.service(),
     socket: Ember.inject.service(),
 

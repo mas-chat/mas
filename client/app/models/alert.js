@@ -17,6 +17,6 @@
 'use strict';
 
 import Ember from 'ember';
+import BaseModel from './base';
 
-export default Ember.Object.extend({
-});
+export default BaseModel.extend({});

@@ -63,11 +63,7 @@ export default Ember.Object.extend({
         }
 
         data.generation = this.get('socket.sessionId');
-
-        // A hack to prevent the client to echo new values immediately back to the server.
-        window.disableUpdate = true;
         this.get('store').upsertModel('window', data);
-        window.disableUpdate = false;
     },
 
     _handleClose(data, targetWindow) {
@@ -166,14 +162,9 @@ export default Ember.Object.extend({
     },
 
     _handleUpdate(data, targetWindow) {
-        if (!targetWindow) {
-            return;
+        if (targetWindow) {
+            targetWindow.setModelProperties(data);
         }
-
-        // A hack to prevent the client to echo new values immediately back to the server.
-        window.disableUpdate = true;
-        targetWindow.setProperties(data);
-        window.disableUpdate = false;
     },
 
     _handleFriends(data) {

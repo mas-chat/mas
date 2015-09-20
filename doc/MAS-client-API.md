@@ -226,9 +226,12 @@ Create new window. Window identifier is either ```userId``` or ```name```.
   "type": "group",
   "network": "MAS",
   "password": "",
-  "emailAlert": true,
-  "soundAlert": true,
-  "titleAlert": false,
+  "alerts": {
+    "email": true,
+    "notification": true,
+    "sound": true,
+    "title": false,
+  },
   "topic": "We meet tomorrow at 3PM",
   "role": "@",
   "minimizedNamesList": false,
@@ -437,12 +440,15 @@ Update existing parameter for existing window.
   "windowId": 1,
 
   "password": "newsecret"
+  "alerts": {
+    "sound": true
+  }
 }
 ```
 
 Updates a value initially received in ```CREATE``` command.
 
-Attributes in ```CREATE``` command that can be update are: ```password```, ```topic```, ```row```, ```column```, ```soundAlert```, ```role```, ```minimizedNamesList``, ```desktop```, ```emailAlert```, and ```titleAlert```.
+Attributes in ```CREATE``` command that can be update are: ```password```, ```topic```, ```row```, ```column```, ```role```, ```minimizedNamesList``, ```desktop```, and ```alerts```.
 
 ### FRIENDSCONFIRM
 
@@ -838,7 +844,7 @@ Fetches old messages.
 
 ```JSON
 {
-    "id": 'FETCH',
+    "id": "FETCH",
     "windowId": 12,
     "ts": 2093243
 }
@@ -849,7 +855,7 @@ Fetches old messages.
 ```JSON
 {
   "status": "OK"
-  "msgs" : [
+  "msgs": [
      {
 
      }

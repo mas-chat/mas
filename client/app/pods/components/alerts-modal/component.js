@@ -19,44 +19,32 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    model: null,
-    modalSoundAlert: false,
-    modalTitleAlert: false,
-    modalEmailAlert: false,
+    socket: Ember.inject.service(),
 
-    // TBD: Simplify when one-way bindings are available
+    model: null,
+    alerts: Ember.computed.oneWay('model.alerts'), // TBD: Use one way bindings in other modals too
 
     actions: {
         changeAlerts() {
-            this.set('model.soundAlert', this.get('modalSoundAlert'));
-            this.set('model.titleAlert', this.get('modalTitleAlert'));
-            this.set('model.emailAlert', this.get('modalEmailAlert'));
+            if (this.get('alerts.notification') && 'Notification' in window &&
+                Notification.permission !== 'granted') {
+                Notification.requestPermission();
+            }
 
+            this.set('model.alerts', this.get('alerts'));
             this.sendAction('closeModal');
+
+            this.get('socket').send({
+                id: 'UPDATE',
+                windowId: this.get('model.windowId'),
+                alerts: this.get('alerts')
+            });
         },
 
         closeModal() {
             this.sendAction('closeModal');
         }
     },
-
-    didInitAttrs() {
-        this.set('modalSoundAlert', this.get('model.soundAlert'));
-        this.set('modalTitleAlert', this.get('model.titleAlert'));
-        this.set('modalEmailAlert', this.get('model.emailAlert'));
-    },
-
-    soundAlertDidChange: Ember.observer('model.soundAlert', function() {
-        this.set('modalSoundAlert', this.get('model.soundAlert'));
-    }),
-
-    titleAlertDidChange: Ember.observer('model.titleAlert', function() {
-        this.set('modalTitleAlert', this.get('model.titleAlert'));
-    }),
-
-    emailAlertDidChange: Ember.observer('model.emailAlert', function() {
-        this.set('modalEmailAlert', this.get('model.emailAlert'));
-    }),
 
     alertsTitle: Ember.computed('model.name', function() {
         return 'Configure alerts for \'' + this.get('model.simplifiedName') + '\'';
