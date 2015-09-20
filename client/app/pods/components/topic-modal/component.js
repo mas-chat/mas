@@ -19,27 +19,20 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    modalTopic: null,
-
     socket: Ember.inject.service(),
 
-    topicTitle: Ember.computed('model.name', function() {
-        return 'Edit topic for \'' + this.get('model.name') + '\'';
-    }),
+    topic: Ember.computed.oneWay('model.topic'),
 
-    topicDidChange: function() {
-        this.set('modalTopic', this.get('model.topic'));
-    }.observes('model.topic').on('init'),
+    topicTitle: Ember.computed('model.name', function() {
+        return `Edit topic for '${this.get('model.name')}'`;
+    }),
 
     actions: {
         changeTopic() {
-            // User has clicked 'OK', send the new topic to server
-            let newTopic = this.get('modalTopic');
-
             this.get('socket').send({
                 id: 'UPDATE_TOPIC',
                 windowId: this.get('model.windowId'),
-                topic: newTopic
+                topic: this.get('topic')
             });
 
             this.sendAction('closeModal');

@@ -19,60 +19,43 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    model: null,
-    modalPassword: null,
-    modalPasswordEnabled: false,
-    errorMsg: '',
-
     socket: Ember.inject.service(),
 
-    modalPasswordDisabled: Ember.computed('modalPasswordEnabled', function() {
-        return !this.get('modalPasswordEnabled');
-    }),
+    model: null,
+    errorMsg: '',
+
+    password: Ember.computed.oneWay('model.password'),
+
+    passwordEnabled: false,
+    passwordDisabled: Ember.computed.not('passwordEnabled'),
 
     passwordTitle: Ember.computed('model.name', function() {
-        return 'Change Password for \'' + this.get('model.name') + '\'';
+        return `Change Password for '${this.get('model.name')}'`;
     }),
 
     didInitAttrs() {
-        this._updateModalPassword();
+        this.set('passwordEnabled', this.get('password') !== '');
     },
-
-    passwordDidChange: function() {
-        this._updateModalPassword();
-    }.observes('model.password'),
 
     actions: {
         changePassword() {
-            // User has clicked 'OK', send the new password to server
-            let newPassword = '';
-
-            if (this.get('modalPasswordEnabled')) {
-                newPassword = this.get('modalPassword');
-            }
+            let newPassword = this.get('passwordEnabled') ? this.get('password') : '';
 
             this.get('socket').send({
                 id: 'UPDATE_PASSWORD',
                 windowId: this.get('model.windowId'),
                 password: newPassword
-            }, function(resp) {
+            }, resp => {
                 if (resp.status === 'OK') {
                     this.sendAction('closeModal');
                 } else {
                     this.set('errorMsg', resp.errorMsg);
                 }
-            }.bind(this));
+            });
         },
 
         closeModal() {
             this.sendAction('closeModal');
         }
-    },
-
-    _updateModalPassword() {
-        let password = this.get('model.password');
-
-        this.set('modalPassword', password);
-        this.set('modalPasswordEnabled', password !== '');
     }
 });

@@ -3,12 +3,12 @@
     <form role="form">
         <div class="new-row">
             <label>
-                {{input type="checkbox" checked=modalPasswordEnabled}} Password enabled.
+                {{input type="checkbox" checked=passwordEnabled}} Password protection enabled.
             </label>
         </div>
         <div class="form-group">
             <label for="password">Password</label>
-            {{input class="form-control" elementId="password" value=modalPassword disabled=modalPasswordDisabled}}
+            {{input class="form-control" elementId="password" value=password disabled=passwordDisabled}}
         </div>
     </form>
 {{/modal-dialog}}

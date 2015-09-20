@@ -22,7 +22,7 @@ export default Ember.Component.extend({
     socket: Ember.inject.service(),
 
     model: null,
-    alerts: Ember.computed.oneWay('model.alerts'), // TBD: Use one way bindings in other modals too
+    alerts: Ember.computed.oneWay('model.alerts'),
 
     actions: {
         changeAlerts() {
