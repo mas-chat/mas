@@ -20,7 +20,6 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
     action: Ember.inject.service(),
-    socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
     classNames: [ 'flex-row', 'unconfirmed-email' ],
@@ -30,22 +29,7 @@ export default Ember.Component.extend({
 
     actions: {
         requestConfirmation() {
-            let msg =
-                'Confirmation link sent. Check your spam folder if you don\'t see it in inbox.';
-
-            this.get('socket').send({
-                id: 'SEND_CONFIRM_EMAIL'
-            }, function() {
-                this.get('store').upsertModel('alert', {
-                    message: msg,
-                    dismissible: true,
-                    report: false,
-                    postponeLabel: false,
-                    ackLabel: 'Okay'
-                });
-
-                this.set('emailConfirmed', true);
-            }.bind(this));
+            this.get('action').dispatch('CONFIRM_EMAIL');
         },
 
         openModal(modal) {

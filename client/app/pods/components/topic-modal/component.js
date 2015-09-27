@@ -17,7 +17,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    socket: Ember.inject.service(),
+    action: Ember.inject.service(),
 
     topic: Ember.computed.oneWay('model.topic'),
 
@@ -27,12 +27,12 @@ export default Ember.Component.extend({
 
     actions: {
         changeTopic() {
-            this.get('socket').send({
-                id: 'UPDATE_TOPIC',
-                windowId: this.get('model.windowId'),
-                topic: this.get('topic')
+            this.get('action').dispatch('UPDATE_TOPIC', {
+                topic: this.get('topic'),
+                window: this.get('model')
             });
 
+            // TBD: Handle error cases
             this.sendAction('closeModal');
         },
 

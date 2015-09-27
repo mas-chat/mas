@@ -32,39 +32,12 @@ export default Ember.Component.extend(KeyboardShortcuts, {
             this.get('action').dispatch('OPEN_MODAL', { name: modal });
         },
 
-        removeFriend(userId) {
-            this.get('action').dispatch('OPEN_MODAL', {
-                name: 'remove-friend-modal',
-                model: userId
-            });
-        },
-
-        windowAction(command, window, value) {
-            this.sendAction('windowAction', command, window, value);
-        },
-
         logout() {
-            this.get('socket').send({ id: 'LOGOUT' }, function() {
-                $.removeCookie('auth', { path: '/' });
-
-                if (typeof Storage !== 'undefined') {
-                    window.localStorage.removeItem('data');
-                }
-
-                window.location = '/';
-            });
+            this.get('action').dispatch('LOGOUT');
         },
 
         toggleDarkTheme() {
-            let newTheme = this.get('store.settings.theme') === 'dark' ? 'default' : 'dark';
-
-            this.set('store.settings.theme', newTheme);
-            this.get('socket').send({
-                id: 'SET',
-                settings: {
-                    theme: newTheme
-                }
-            });
+            this.get('action').dispatch('TOGGLE_THEME');
         }
     },
 

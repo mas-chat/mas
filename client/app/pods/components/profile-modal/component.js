@@ -18,30 +18,28 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
     action: Ember.inject.service(),
-    socket: Ember.inject.service(),
     store: Ember.inject.service(),
+
+    name: Ember.computed.alias('store.profile.name'),
+    email: Ember.computed.alias('store.profile.email'),
+    nick: Ember.computed.alias('store.profile.nick'),
 
     errorMsg: '',
 
     actions: {
         edit() {
-            this.get('socket').send({
-                id: 'UPDATE_PROFILE',
+            this.get('action').dispatch('UPDATE_PROFILE', {
                 name: this.get('name'),
                 email: this.get('email')
-            }, function(resp) {
-                if (resp.status === 'OK') {
-                    this.sendAction('closeModal');
-                    // Don't nag about unconfirmed email address anymore in this session
-                    this.set('store.settings.emailConfirmed', true);
-                } else {
-                    this.set('errorMsg', resp.errorMsg);
-                }
-            }.bind(this));
+            },
+            () => this.sendAction('closeModal'), // Accept
+            reason => this.set('errorMsg', reason)); // Reject
         },
 
         terminate() {
-            this.get('action').dispatch('OPEN_MODAL', { name: 'confirm-delete-account-modal' });
+            this.get('action').dispatch('OPEN_MODAL', {
+                name: 'confirm-delete-account-modal'
+            });
             this.sendAction('closeModal');
         },
 
@@ -51,12 +49,6 @@ export default Ember.Component.extend({
     },
 
     didInsertElement() {
-        this.get('socket').send({
-            id: 'GET_PROFILE'
-        }, function(resp) {
-            this.set('name', resp.name);
-            this.set('email', resp.email);
-            this.set('nick', resp.nick);
-        }.bind(this));
+        this.get('action').dispatch('FETCH_PROFILE');
     }
 });

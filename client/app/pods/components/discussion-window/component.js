@@ -211,24 +211,40 @@ export default Ember.Component.extend({
             });
         },
 
-        sendMessage(msg) {
-            this.sendAction('windowAction', 'sendMessage', this.get('content'), msg);
+        processLine(msg) {
+            this.get('action').dispatch('PROCESS_LINE', {
+                body: msg,
+                window: this.get('content')
+            });
         },
 
         editMessage(gid, msg) {
-            this.sendAction('windowAction', 'editMessage', this.get('content'), gid, msg);
+            this.get('action').dispatch('EDIT_MESSAGE', {
+                body: msg,
+                gid: gid,
+                window: this.get('content')
+            });
         },
 
         deleteMessage(gid) {
-            this.sendAction('windowAction', 'editMessage', this.get('content'), gid, '');
+            this.get('action').dispatch('EDIT_MESSAGE', {
+                body: '',
+                gid: gid,
+                window: this.get('content')
+            });
         },
 
         close() {
-            this.sendAction('windowAction', 'close', this.get('content'));
+            this.get('action').dispatch('CLOSE_WINDOW', {
+                window: this.get('content')
+            });
         },
 
-        menu(operation) {
-            this.sendAction('menuAction', operation, this.get('content'));
+        menu(modalName) {
+            this.get('action').dispatch('OPEN_MODAL', {
+                name: modalName,
+                model: this.get('content')
+            });
         },
 
         jumpToBottom() {
@@ -317,7 +333,16 @@ export default Ember.Component.extend({
             },
             onItem(context, e) {
                 let action = $(e.target).data('action');
-                that.sendAction('windowAction', action, that.content, selectedUserId);
+
+                if (action === 'chat') {
+                    that.get('action').dispatch('START_CHAT', {
+                        userId: selectedUserId
+                    });
+                } else {
+                    that.get('action').dispatch('REQUEST_FRIEND', {
+                        userId: selectedUserId
+                    });
+                }
 
                 e.preventDefault();
             }

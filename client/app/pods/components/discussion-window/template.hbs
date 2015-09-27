@@ -78,7 +78,7 @@
 
 <div class="window-toolbar flex-row {{hiddenIfLogMode}}">
     <div class="window-add-text-container flex-1">
-        {{message-input placeholder="Write here…" rows=1 maxlength="500" class="form-control" participants=participants sendMessage="sendMessage"}}
+        {{message-input placeholder="Write here…" rows=1 maxlength="500" class="form-control" participants=participants sendMessage="processLine"}}
         {{#if scrollLock}}
             {{#if content.newMessagesCount}}
                 <div {{action "jumpToBottom"}} class="window-new-messages">
@@ -101,14 +101,14 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-right">
                 {{#if isGroup}}
-                    <li {{action "menu" "editPassword"}}><a href="#">Change password&hellip;</a></li>
-                    <li {{action "menu" "editTopic"}}><a href="#">Edit topic&hellip;</a></li>
+                    <li {{action "menu" "password-modal"}}><a href="#">Change password&hellip;</a></li>
+                    <li {{action "menu" "topic-modal"}}><a href="#">Edit topic&hellip;</a></li>
                 {{/if}}
-                <li {{action "menu" "editAlerts"}}><a href="#">Configure alerts&hellip;</a></li>
+                <li {{action "menu" "alerts-modal"}}><a href="#">Configure alerts&hellip;</a></li>
                 <li class="divider"></li>
                 <li {{action "browse"}}><a href="#">Browse history&hellip;</a></li>
                 <li class="divider"></li>
-                <li {{action "menu" "takePhoto"}}><a href="#">Take and upload photo&hellip;</a></li>
+                <li {{action "menu" "capture-modal"}}><a href="#">Take and upload photo&hellip;</a></li>
                 <li class="divider"></li>
                 <li {{action "close"}}><a href="#">Close window and exit this {{content.explainedType}}</a></li>
             </ul>

@@ -24,5 +24,5 @@ export default Ember.Component.extend({
     activeDesktop: Ember.computed.alias('store.settings.activeDesktop'),
     activeDraggedWindow: Ember.computed.alias('store.activeDraggedWindow'),
 
-    desktops: Ember.computed.alias('store.desktops'),
+    desktops: Ember.computed.alias('store.desktops')
 });

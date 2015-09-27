@@ -37,7 +37,7 @@ export default Ember.Component.extend({
 
     model: Ember.computed.alias('store.windows'),
 
-    mustRelayout: Ember.observer('store.initDone', 'store.themeDirty', function() {
+    mustRelayout: Ember.observer('store.initDone', 'store.settings.theme', function() {
         Ember.run.next(this, function() { this._layoutWindows(false); });
     }),
 
@@ -61,14 +61,6 @@ export default Ember.Component.extend({
                 network: 'MAS',
                 name: 'lobby'
             });
-        },
-
-        menuAction(...values) {
-            this.sendAction('menuAction', ...values);
-        },
-
-        windowAction(...values) {
-            this.sendAction('windowAction', ...values);
         },
 
         relayout(options) {

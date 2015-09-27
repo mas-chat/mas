@@ -17,6 +17,8 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+    action: Ember.inject.service(),
+
     sortProperties: [ 'online:desc', 'last:desc', 'name' ],
     sortAscending: false,
 
@@ -24,11 +26,15 @@ export default Ember.Component.extend({
 
     actions: {
         startChat(userId) {
-            this.sendAction('windowAction', 'chat', null, userId);
+            this.get('action').dispatch('START_CHAT', {
+                userId: userId
+            });
         },
 
         removeFriend(userId) {
-            this.sendAction('removeFriend', userId);
+            this.get('action').dispatch('CONFIRM_REMOVE_FRIEND', {
+                userId: userId
+            });
         }
     }
 });

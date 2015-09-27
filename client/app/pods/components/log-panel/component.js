@@ -19,11 +19,11 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+    action: Ember.inject.service(),
+    store: Ember.inject.service(),
+
     classNames: [ 'flex-column', 'flex-1' ],
     classNameBindings: [ 'enabled:visible:hidden' ],
-
-    socket: Ember.inject.service(),
-    store: Ember.inject.service(),
 
     loading: true,
     enabled: true,
@@ -31,7 +31,9 @@ export default Ember.Component.extend({
 
     $dateInput: null,
     currentDate: null,
-    tooManyMessages: false, // Temporary solution, pagination is coming
+
+    // Temporary solution, pagination is coming
+    tooManyMessages: Ember.computed.gt('window.logMessages', 999),
 
     init() {
         this._super();
@@ -98,23 +100,14 @@ export default Ember.Component.extend({
 
         this.set('loading', true);
 
-        this.get('socket').send({
-            id: 'GET_CONVERSATION_LOG',
-            windowId: this.get('window.windowId'),
+        this.get('action').dispatch('FETCH_MESSAGES', {
+            window: this.get('window'),
             start: epochTsStart,
             end: epochTsEnd
-        }, function(resp) {
-            this.get('store').clearModels('logMessage', this.get('window'));
+        }, () => {
             this.set('loading', false);
-            // TBD: Temporary check, implement pagination
-            this.set('tooManyMessages', resp.results.length > 999);
-
-            resp.results.forEach(function(message) {
-                this.get('store').upsertModel('logMessage', message, this.get('window'));
-            }.bind(this));
-
             this._loadImages();
-        }.bind(this));
+        }); // Success);
     },
 
     _loadImages() {

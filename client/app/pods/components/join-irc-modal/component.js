@@ -17,12 +17,12 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+    action: Ember.inject.service(),
+    store: Ember.inject.service(),
+
     channel: '',
     password: '',
     errorMsg: '',
-
-    socket: Ember.inject.service(),
-    store: Ember.inject.service(),
 
     selectedNetwork: null,
 
@@ -32,19 +32,18 @@ export default Ember.Component.extend({
 
     actions: {
         joinIRC() {
-            this.get('socket').send({
-                id: 'JOIN',
-                network: this.get('selectedNetwork'),
+            let password = this.get('password').trim();
+
+            this.get('action').dispatch('JOIN_IRC_CHANNEL', {
                 name: this.get('channel'),
-                password: this.get('password').trim()
-            }, function(resp) {
-                if (resp.status === 'OK') {
-                    this.sendAction('closeModal');
-                    this.set('selectedNetwork', null);
-                } else {
-                    this.set('errorMsg', resp.errorMsg);
-                }
-            }.bind(this));
+                network: this.get('selectedNetwork'),
+                password: password
+            },
+            () => { // Accept
+                this.sendAction('closeModal');
+                this.set('selectedNetwork', null);
+            },
+            reason => this.set('errorMsg', reason)); // Reject
         },
 
         closeModal() {

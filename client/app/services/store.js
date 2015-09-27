@@ -51,6 +51,7 @@ export default Ember.Service.extend({
     modals: null,
 
     settings: null,
+    profile: null,
 
     userId: null,
     initDone: false,
@@ -73,8 +74,14 @@ export default Ember.Service.extend({
         this.set('settings', Ember.Object.create({
             theme: 'default',
             activeDesktop: null,
-            email: '',
+            email: '', // TBD: Remove from here, keep in profile
             emailConfirmed: true
+        }));
+
+        this.set('profile', Ember.Object.create({
+            nick: '',
+            name: '',
+            email: ''
         }));
 
         let authCookie = $.cookie('auth');

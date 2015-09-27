@@ -17,7 +17,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    socket: Ember.inject.service(),
+    action: Ember.inject.service(),
 
     model: null,
     errorMsg: '',
@@ -39,17 +39,12 @@ export default Ember.Component.extend({
         changePassword() {
             let newPassword = this.get('passwordEnabled') ? this.get('password') : '';
 
-            this.get('socket').send({
-                id: 'UPDATE_PASSWORD',
-                windowId: this.get('model.windowId'),
+            this.get('action').dispatch('UPDATE_PASSWORD', {
+                window: this.get('model'),
                 password: newPassword
-            }, resp => {
-                if (resp.status === 'OK') {
-                    this.sendAction('closeModal');
-                } else {
-                    this.set('errorMsg', resp.errorMsg);
-                }
-            });
+            },
+            () => this.sendAction('closeModal'), // Accept
+            reason => this.set('errorMsg', reason)); // Reject
         },
 
         closeModal() {

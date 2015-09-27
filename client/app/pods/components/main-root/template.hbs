@@ -1,10 +1,10 @@
 {{#if store.initDone}}
-    {{modal-manager modalQueue=modalQueue}}
+    {{modal-manager}}
     {{alert-message}}
 
     <div class="flex-grow-row flex-1">
-        {{window-grid menuAction="menuAction" windowAction="windowAction"}}
-        {{main-sidebar windowAction="windowAction"}}
+        {{window-grid}}
+        {{main-sidebar}}
     </div>
 
     {{window-context-menu}}

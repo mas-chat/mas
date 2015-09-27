@@ -17,7 +17,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    socket: Ember.inject.service(),
+    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     userId: Ember.computed.alias('model'),
@@ -32,8 +32,7 @@ export default Ember.Component.extend({
 
     actions: {
         remove() {
-            this.get('socket').send({
-                id: 'REMOVE_FRIEND',
+            this.get('action').dispatch('REMOVE_FRIEND', {
                 userId: this.get('userId')
             });
 

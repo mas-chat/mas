@@ -36,7 +36,7 @@ export default Ember.Component.extend({
                 password: password
             },
             () => this.sendAction('closeModal'), // Accept
-            (reason) => this.set('errorMsg', reason)); // Reject
+            reason => this.set('errorMsg', reason)); // Reject
         },
 
         closeModal() {
