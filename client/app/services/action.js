@@ -20,7 +20,7 @@ export default Ember.Service.extend({
     store: Ember.inject.service(),
     socket: Ember.inject.service(),
 
-    dispatch(type, data = {}, options = {}) {
+    dispatch(type, data = {}, acceptCb, rejectCb) {
         let name = type.split('_').map(part => part.toLowerCase().capitalize()).join('');
         let handler = `_handle${name}`;
 
@@ -28,7 +28,7 @@ export default Ember.Service.extend({
             Ember.Logger.error(`Unknown action: ${type}`);
         } else {
             Ember.Logger.info(`[ACT] ${type}`);
-            this[handler](data, options);
+            this[handler](data, acceptCb, rejectCb);
         }
     },
 
@@ -169,5 +169,47 @@ export default Ember.Service.extend({
 
     _handleClosePriorityModal() {
         this.get('store.modals').shiftObject();
+    },
+
+    _handleDestroyAccount() {
+        this.get('socket').send({
+            id: 'DESTROY_ACCOUNT'
+        }, () => {
+            $.removeCookie('auth', { path: '/' });
+            window.location = '/';
+        });
+    },
+
+    _handleCreateGroup(data, acceptCb, rejectCb) {
+        this.get('socket').send({
+            id: 'CREATE',
+            name: data.name,
+            password: data.password
+        }, (resp) => {
+            if (resp.status === 'OK') {
+                acceptCb();
+            } else {
+                rejectCb(resp.errorMsg);
+            }
+        });
+    },
+
+    _handleChangeWindowDesktop(data) {
+        let desktop = data.desktop;
+        let draggedWindow = this.get('store.activeDraggedWindow');
+
+        if (draggedWindow) {
+            console.log('jay')
+            draggedWindow.set('desktop', desktop === 'new' ?
+                Math.floor(new Date() / 1000) : parseInt(desktop));
+        }
+    },
+
+    _handleChangeActiveDesktop(data) {
+        this.get('store').changeDesktop(data.desktop);
+    },
+
+    _handleSeekActiveDesktop(data) {
+        this.get('store').seekDesktop(data.direction);
     }
 });

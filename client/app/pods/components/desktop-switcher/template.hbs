@@ -1,7 +1,7 @@
 {{#each desktops key="id" as |desktop|}}
-    {{desktop-button action="switch" id=desktop.id name=desktop.initials selected=activeDesktop messages=desktop.messages}}
+    {{desktop-button id=desktop.id name=desktop.initials selected=activeDesktop messages=desktop.messages}}
 {{/each}}
 
 {{#if activeDraggedWindow}}
-    {{desktop-button action="switch" id="new" name="+" selected=false messages=0}}
+    {{desktop-button id="new" name="+" selected=false messages=0}}
 {{/if}}

@@ -17,11 +17,11 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+    action: Ember.inject.service(),
+
     group: '',
     password: '',
     errorMsg: '',
-
-    socket: Ember.inject.service(),
 
     actions: {
         newGroup() {
@@ -31,17 +31,12 @@ export default Ember.Component.extend({
                 password = null;
             }
 
-            this.get('socket').send({
-                id: 'CREATE',
+            this.get('action').dispatch('CREATE_GROUP', {
                 name: this.get('group'),
                 password: password
-            }, function(resp) {
-                if (resp.status === 'OK') {
-                    this.sendAction('closeModal');
-                } else {
-                    this.set('errorMsg', resp.errorMsg);
-                }
-            }.bind(this));
+            },
+            () => this.sendAction('closeModal'), // Accept
+            (reason) => this.set('errorMsg', reason)); // Reject
         },
 
         closeModal() {

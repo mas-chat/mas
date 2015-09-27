@@ -19,7 +19,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    socket: Ember.inject.service(),
+    action: Ember.inject.service(),
 
     actions: {
         closeModal() {
@@ -27,12 +27,7 @@ export default Ember.Component.extend({
         },
 
         destroy() {
-            this.get('socket').send({
-                id: 'DESTROY_ACCOUNT'
-            }, function() {
-                $.removeCookie('auth', { path: '/' });
-                window.location = '/';
-            });
+            this.get('action').dispatch('DESTROY_ACCOUNT');
         }
     }
 });

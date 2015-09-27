@@ -17,6 +17,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     activeDraggedWindow: Ember.computed.alias('store.activeDraggedWindow'),
@@ -30,24 +31,28 @@ export default Ember.Component.extend({
     }),
 
     actions: {
-        switch() {
-            this.sendAction('action', this.get('id'));
+        switch(desktopId) {
+            this.get('action').dispatch('CHANGE_ACTIVE_DESKTOP', {
+                desktop: this.get('id')
+            });
+        },
+
+        switchNext() {
+            this.get('action').dispatch('SEEK_ACTIVE_DESKTOP', {
+                direction: 1
+            });
+        },
+
+        switchPrevious() {
+            this.get('action').dispatch('SEEK_ACTIVE_DESKTOP', {
+                direction: -1
+            });
         }
     },
 
     mouseUp(event) {
-        // There's a second mouseup handler in window-grid component. That handler manages
-        // activeDraggedWindow property. This setup should still be safe because mouseup event
-        // bubble first here and then in window-grid. Thus no race condition.
-
-        // TBD: Unify, move this code to window-grid.
-        let draggedWindow = this.get('activeDraggedWindow');
-        let id = this.get('id');
-
-        if (!draggedWindow) {
-            return;
-        }
-
-        draggedWindow.set('desktop', id === 'new' ? Math.floor(new Date() / 1000) : parseInt(id));
+        this.get('action').dispatch('CHANGE_WINDOW_DESKTOP', {
+            desktop: this.get('id')
+        });
     }
 });
