@@ -46,12 +46,12 @@ export default Ember.Object.extend({
             targetWindow = this.get('store.windows').findBy('windowId', windowId);
         }
 
-        let funcName = '_handle' + type.charAt(0) + type.substring(1).toLowerCase();
+        let handler = `_handle${type.charAt(0)}${type.substring(1).toLowerCase()}`;
 
-        if (!this[funcName]) {
-            Ember.Logger.warn('Unknown notification received: ' + type);
+        if (!this[handler]) {
+            Ember.Logger.warn(`Unknown notification received: ${type}`);
         } else {
-            this[funcName](notification, targetWindow);
+            this[handler](notification, targetWindow);
         }
     },
 

@@ -50,6 +50,7 @@ export default Ember.Service.extend({
     windows: null,
     alerts: null,
     networks: null,
+    modals: null,
 
     settings: null,
 
@@ -69,6 +70,7 @@ export default Ember.Service.extend({
         this.set('windows', Ember.A([]));
         this.set('alerts', Ember.A([]));
         this.set('networks', Ember.A([]));
+        this.set('modals', Ember.A([]));
 
         this.set('settings', Ember.Object.create({
             theme: 'default',

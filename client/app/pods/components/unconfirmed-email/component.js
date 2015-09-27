@@ -21,6 +21,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+    action: Ember.inject.service(),
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
@@ -50,7 +51,7 @@ export default Ember.Component.extend({
         },
 
         openModal(modal) {
-            this.sendAction('openModal', modal);
+            this.get('action').dispatch('OPEN_MODAL', { name: modal });
         }
     }
 });

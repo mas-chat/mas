@@ -19,10 +19,11 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    errorMsg: '',
-
+    action: Ember.inject.service(),
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
+
+    errorMsg: '',
 
     actions: {
         edit() {
@@ -42,7 +43,7 @@ export default Ember.Component.extend({
         },
 
         terminate() {
-            this.sendAction('openModal', 'confirm-delete-account-modal');
+            this.get('action').dispatch('OPEN_MODAL', { name: 'confirm-delete-account-modal' });
             this.sendAction('closeModal');
         },
 

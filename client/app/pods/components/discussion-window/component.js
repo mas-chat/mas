@@ -21,9 +21,10 @@
 import Ember from 'ember';
 import { play } from '../../../utils/sound';
 import { calcMsgHistorySize } from '../../../utils/msg-history-sizer';
-import UploadMixin from '../../../mixins/upload';
 
-export default Ember.Component.extend(UploadMixin, {
+export default Ember.Component.extend({
+    action: Ember.inject.service(),
+    socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
     classNames: [ 'window', 'flex-grow-column' ],
@@ -213,19 +214,19 @@ export default Ember.Component.extend(UploadMixin, {
         },
 
         sendMessage(msg) {
-            this.sendAction('action', 'sendMessage', this.get('content'), msg);
+            this.sendAction('windowAction', 'sendMessage', this.get('content'), msg);
         },
 
         editMessage(gid, msg) {
-            this.sendAction('action', 'editMessage', this.get('content'), gid, msg);
+            this.sendAction('windowAction', 'editMessage', this.get('content'), gid, msg);
         },
 
         deleteMessage(gid) {
-            this.sendAction('action', 'editMessage', this.get('content'), gid, '');
+            this.sendAction('windowAction', 'editMessage', this.get('content'), gid, '');
         },
 
         close() {
-            this.sendAction('action', 'close', this.get('content'));
+            this.sendAction('windowAction', 'close', this.get('content'));
         },
 
         menu(operation) {
@@ -239,6 +240,15 @@ export default Ember.Component.extend(UploadMixin, {
 
         fetchMore() {
             this._requestMoreMessages();
+        },
+
+        upload(files) {
+            this.get('action').dispatch('UPLOAD_FILES', {
+                files: files,
+                window: this.get('content')
+            });
+
+            this.$('input[name="files"]').val('');
         }
     },
 
@@ -309,7 +319,7 @@ export default Ember.Component.extend(UploadMixin, {
             },
             onItem(context, e) {
                 let action = $(e.target).data('action');
-                that.sendAction('action', action, that.content, selectedUserId);
+                that.sendAction('windowAction', action, that.content, selectedUserId);
 
                 e.preventDefault();
             }

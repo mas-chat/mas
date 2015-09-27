@@ -16,7 +16,7 @@
 
 'use strict';
 
-/* globals io, isMobile */
+/* globals $, io, isMobile */
 
 import Ember from 'ember';
 import NotificationParser from '../utils/notification-parser';
@@ -25,22 +25,36 @@ import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 let socket = io.connect(); // Start connection as early as possible.
 
 export default Ember.Service.extend({
+    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     sessionId: 0,
+    secret: '',
 
     _notificationParser: null,
     _connected: false,
     _disconnectedQueue: null,
-
-    _networkErrorStartCallback: null,
-    _networkErrorEndCallback: null,
-    _networkErrorCallbackCtx: null,
+    _disconnectedTimer: null,
 
     init() {
         this._super();
 
         this._disconnectedQueue = Ember.A([]);
+
+        let authCookie = $.cookie('auth');
+
+        if (!authCookie) {
+            this._logout();
+        }
+
+        let [ userId, secret ] = authCookie.split('-');
+
+        if (!userId || !secret) {
+            this._logout();
+        }
+
+        this.set('store.userId', userId);
+        this.set('secret', secret);
 
         this._notificationParser = NotificationParser.create({
             socket: this,
@@ -49,9 +63,12 @@ export default Ember.Service.extend({
     },
 
     start() {
+        let userId = this.get('store.userId');
+        let secret = this.get('secret');
+
         this.set('store.initDone', false);
         this.set('socket', socket);
-        this._emitInit();
+        this._emitInit(userId, secret);
 
         socket.on('initok', Ember.run.bind(this, function(data) {
             this.set('_connected', true);
@@ -70,7 +87,7 @@ export default Ember.Service.extend({
         }));
 
         this.socket.on('terminate', Ember.run.bind(this, function() {
-            this.get('store').logout();
+            this._logout();
         }));
 
         socket.on('ntf', Ember.run.bind(this, function(data) {
@@ -82,21 +99,29 @@ export default Ember.Service.extend({
 
             this.set('_connected', false);
 
-            let startCallback = this.get('_networkErrorStartCallback');
+            this.set('_disconnectedTimer', Ember.run.later(this, function() {
+                this.get('action').dispatch('OPEN_PRIORITY_MODAL', {
+                    name: 'non-interactive-modal',
+                    model: {
+                        title: 'Connection error',
+                        body: 'Connection to server lost. Trying to reconnect…'
+                    }
+                });
 
-            if (startCallback) {
-                startCallback.call(this.get('_networkErrorCallbackCtx'));
-            }
+                this.set('_disconnectedTimer', null);
+            }, 5000));
         }));
 
         socket.on('reconnect', Ember.run.bind(this, function() {
-            let endCallback = this.get('_networkErrorEndCallback');
+            let timer = this.get('_disconnectedTimer');
 
-            if (endCallback) {
-                endCallback.call(this.get('_networkErrorCallbackCtx'));
+            if (timer) {
+                Ember.run.cancel(timer);
+            } else {
+                this.get('action').dispatch('CLOSE_PRIORITY_MODAL');
             }
 
-            this._emitInit();
+            this._emitInit(userId, secret);
         }));
     },
 
@@ -113,21 +138,15 @@ export default Ember.Service.extend({
         }
     },
 
-    registerNetworkErrorHandlers(ctx, startCallback, endCallback) {
-        this.set('_networkErrorStartCallback', startCallback);
-        this.set('_networkErrorEndCallback', endCallback);
-        this.set('_networkErrorCallbackCtx', ctx);
-    },
-
-    _emitInit() {
+    _emitInit(userId, secret) {
         let maxBacklogMsgs = calcMsgHistorySize();
         let cachedUpto = this.get('store.cachedUpto');
 
         this.socket.emit('init', {
             clientName: 'web',
             clientOS: navigator.platform,
-            userId: this.get('store.userId'),
-            secret: this.get('store.secret'),
+            userId: userId,
+            secret: secret,
             version: '1.0',
             maxBacklogMsgs: maxBacklogMsgs,
             cachedUpto: cachedUpto
@@ -145,5 +164,10 @@ export default Ember.Service.extend({
         });
 
         Ember.Logger.info('→ REQ: ' + command.id);
+    },
+
+    _logout() {
+        $.removeCookie('auth', { path: '/' });
+        window.location = '/';
     }
 });

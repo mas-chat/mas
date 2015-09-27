@@ -19,7 +19,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    socket: Ember.inject.service(),
+    action: Ember.inject.service(),
 
     model: null,
     alerts: Ember.computed.oneWay('model.alerts'),
@@ -31,14 +31,12 @@ export default Ember.Component.extend({
                 Notification.requestPermission();
             }
 
-            this.set('model.alerts', this.get('alerts'));
-            this.sendAction('closeModal');
-
-            this.get('socket').send({
-                id: 'UPDATE',
-                windowId: this.get('model.windowId'),
+            this.get('action').dispatch('UPDATE_WINDOW_ALERTS', {
+                window: this.get('model'),
                 alerts: this.get('alerts')
             });
+
+            this.sendAction('closeModal');
         },
 
         closeModal() {

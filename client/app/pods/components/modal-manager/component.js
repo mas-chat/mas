@@ -21,54 +21,19 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    socket: Ember.inject.service(),
+    action: Ember.inject.service(),
+    store: Ember.inject.service(),
 
-    activeModel: Ember.computed('modalQueue.[]', function() {
-        let modalQueue = this.get('modalQueue');
+    activeModal: Ember.computed('store.modals.[]', function() {
+        let modalQueue = this.get('store.modals');
 
-        return modalQueue.length === 0 ? null : modalQueue.get('firstObject.model');
+        return modalQueue.length === 0 ?
+            { model: null, name: 'empty-modal' } : modalQueue.get('firstObject');
     }),
-
-    activeModal: Ember.computed('modalQueue.[]', function() {
-        let modalQueue = this.get('modalQueue');
-
-        return modalQueue.length === 0 ? 'empty-modal' : modalQueue.get('firstObject.name');
-    }),
-
-    _timer: null,
-
-    init() {
-        this._super();
-
-        this.get('socket').registerNetworkErrorHandlers(this, this._nwErrorStart, this._nwErrorEnd);
-    },
 
     actions: {
         closeModal() {
-            this.get('modalQueue').shiftObject();
-        }
-    },
-
-    _nwErrorStart() {
-        this.set('_timer', Ember.run.later(this, function() {
-            this.get('modalQueue').unshiftObject({ // Show immediately
-                name: 'non-interactive-modal',
-                model: {
-                    title: 'Connection error',
-                    body: 'Connection to server lost. Trying to reconnect…'
-                }
-            });
-            this.set('_timer', null);
-        }, 5000));
-    },
-
-    _nwErrorEnd() {
-        let timer = this.get('_timer');
-
-        if (timer) {
-            Ember.run.cancel(timer);
-        } else {
-            this.get('modalQueue').shiftObject();
+            this.get('action').dispatch('CLOSE_MODAL');
         }
     }
 });

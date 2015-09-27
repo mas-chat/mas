@@ -19,19 +19,24 @@
 /* global captureVideoFrame */
 
 import Ember from 'ember';
-import UploadMixin from '../../../mixins/upload';
 
-export default Ember.Component.extend(UploadMixin, {
+export default Ember.Component.extend({
+    action: Ember.inject.service(),
     video: Ember.inject.service(),
+
     shot: null,
 
     note: 'Allow webcam access in your browser.',
-    content: Ember.computed.alias('model'),
 
     actions: {
         uploadPhoto() {
             let file = this.get('shot');
-            this.handleUpload([ file ]);
+
+            this.get('action').dispatch('UPLOAD_FILES', {
+                files: [ file ],
+                window: this.get('model')
+            });
+
             this.sendAction('closeModal');
         },
 

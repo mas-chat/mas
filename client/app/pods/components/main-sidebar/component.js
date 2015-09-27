@@ -20,6 +20,7 @@ import Ember from 'ember';
 import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 
 export default Ember.Component.extend(KeyboardShortcuts, {
+    action: Ember.inject.service(),
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
@@ -30,11 +31,14 @@ export default Ember.Component.extend(KeyboardShortcuts, {
 
     actions: {
         openModal(modal) {
-            this.sendAction('openModal', modal);
+            this.get('action').dispatch('OPEN_MODAL', { name: modal });
         },
 
         removeFriend(userId) {
-            this.sendAction('openModal', 'remove-friend-modal', userId);
+            this.get('action').dispatch('OPEN_MODAL', {
+                name: 'remove-friend-modal',
+                model: userId
+            });
         },
 
         windowAction(command, window, value) {

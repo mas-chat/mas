@@ -19,11 +19,12 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     classNames: [ 'flex-row', 'announcement' ],
 
-    alerts: Ember.computed.alias('store.alerts'),
+    alerts: Ember.computed.oneWay('store.alerts'),
 
     currentAlert: Ember.computed('alerts.[]', function() {
         let alerts = this.get('alerts');
@@ -33,13 +34,7 @@ export default Ember.Component.extend({
 
     actions: {
         close(result) {
-            let callback = this.get('currentAlert.resultCallback');
-
-            if (callback) {
-                callback(result);
-            }
-
-            this.get('alerts').shiftObject();
+            this.get('action').dispatch('CLOSE_ALERT', { result: result });
         }
     }
 });

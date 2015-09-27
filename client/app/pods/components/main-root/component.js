@@ -19,26 +19,16 @@
 /* global $, moment, isMobile */
 
 import Ember from 'ember';
-import SendMsgMixin from '../../../mixins/sendMsg';
 import { darkTheme } from '../../../utils/theme-dark'
 
-export default Ember.Component.extend(SendMsgMixin, {
+export default Ember.Component.extend({
+    action: Ember.inject.service(),
     socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
     classNames: [ 'flex-grow-column', 'flex-1' ],
 
-    modalQueue: Ember.A([]),
-
     actions: {
-        openModal(modalName, model) {
-            // New modal goes to a queue if there's already a modal open.
-            this.get('modalQueue').pushObject({
-                name: modalName,
-                model: model
-            });
-        },
-
         windowAction(command, ...values) {
             this[`_handle${command.capitalize()}`](...values);
         },
@@ -51,7 +41,10 @@ export default Ember.Component.extend(SendMsgMixin, {
                 takePhoto: 'capture-modal'
             };
 
-            this.send('openModal', modals[command], window);
+            this.get('action').dispatch('OPEN_MODAL', {
+                name: modals[command],
+                model: window
+            });
         }
     },
 
@@ -61,6 +54,8 @@ export default Ember.Component.extend(SendMsgMixin, {
         $('#theme-stylesheet').text(theme === 'dark' ? darkTheme : '');
         this.incrementProperty('store.themeDirty');
     }),
+
+    // TBD: Move these to discussion window component
 
     _handleSendMessage(window, text) {
         let command = false;
@@ -75,38 +70,32 @@ export default Ember.Component.extend(SendMsgMixin, {
         let ircServer1on1 = window.get('type') === '1on1' && window.get('userId') === 'iSERVER';
 
         if (ircServer1on1 && !command) {
-            // Note that only one error is shown because of the shared fixed gid (=primary key).
-            this.get('store').upsertModel('message', {
+            this.get('action').dispatch('ADD_ERROR', {
                 body: 'Only commands allowed, e.g. /whois john',
-                cat: 'error',
-                ts: moment().unix(),
-                gid: 'error'
-            }, window);
-            return;
+                window: window
+            });
         }
 
         if (command === 'help') {
-            this.send('openModal', 'help-modal');
+            this.get('action').dispatch('OPEN_MODAL', { name: 'help-modal' });
             return;
         }
 
         // TBD: /me on an empty IRC channel is not shown to the sender.
 
         if (command) {
-            this.get('socket').send({
-                id: 'COMMAND',
+            this.get('action').dispatch('SEND_COMMAND', {
                 command: command,
                 params: commandParams.trim(),
-                windowId: window.get('windowId')
-            }, function(resp) {
-                if (resp.status !== 'OK') {
-                    this.send('openModal', 'info-modal', { title: 'Error', body: resp.errorMsg });
-                }
-            }.bind(this));
+                window: window
+            });
             return;
         }
 
-        this._sendText(text, window);
+        this.get('action').dispatch('SEND_TEXT', {
+            text: text,
+            window: window
+        });
     },
 
     _handleEditMessage(window, gid, text) {
@@ -117,7 +106,13 @@ export default Ember.Component.extend(SendMsgMixin, {
             text: text
         }, function(resp) {
             if (resp.status !== 'OK') {
-                this.send('openModal', 'info-modal', { title: 'Error', body: resp.errorMsg });
+                this.get('action').dispatch('OPEN_MODAL', {
+                    name: 'info-modal',
+                    model: {
+                       title: 'Error',
+                       body: resp.errorMsg
+                   }
+               });
             }
         }.bind(this));
     },
@@ -128,7 +123,13 @@ export default Ember.Component.extend(SendMsgMixin, {
             userId: userId
         }, function(resp) {
             if (resp.status !== 'OK') {
-                this.send('openModal', 'info-modal', { title: 'Error', body: resp.errorMsg });
+                this.get('action').dispatch('OPEN_MODAL', {
+                    name: 'info-modal',
+                    model: {
+                       title: 'Error',
+                       body: resp.errorMsg
+                   }
+               });
             }
         }.bind(this));
     },
