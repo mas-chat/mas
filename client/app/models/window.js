@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 /* globals isMobile, moment */
 
 import Ember from 'ember';

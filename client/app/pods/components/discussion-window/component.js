@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 /* globals $, emojify, titlenotifier, isMobile */
 
 import Ember from 'ember';

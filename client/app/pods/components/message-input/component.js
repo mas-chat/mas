@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 import Ember from 'ember';
 
 let emojisList = emojify.emojiNames.map((value, i) => ({ id: i, name: value }));
