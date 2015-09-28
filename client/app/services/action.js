@@ -250,16 +250,16 @@ export default Ember.Service.extend({
         });
     },
 
-    _handleFetchMessages(data, successCb) {
+    _handleFetchMessageRange(data, successCb) {
         this.get('socket').send({
-            id: 'GET_CONVERSATION_LOG',
+            id: 'FETCH',
             windowId: data.window.get('windowId'),
             start: data.start,
             end: data.end
         }, resp => {
             this.get('store').clearModels('logMessage', data.window);
 
-            for (let message of resp.results) {
+            for (let message of resp.msgs) {
                 this.get('store').upsertModel('logMessage', message, data.window);
             }
 
@@ -267,25 +267,20 @@ export default Ember.Service.extend({
         });
     },
 
-    _handleQueryMessages(data, successCb, rejectCb) {
-        // TBD: Merge with _handleFetchMessages(), this is the case end just missing and default
-        // amount of messages is returned.
+    _handleFetchOlderMessages(data, successCb, rejectCb) {
         this.get('socket').send({
             id: 'FETCH',
             windowId: data.window.get('windowId'),
-            ts: data.window.get('messages').sortBy('ts').get('firstObject').get('ts')
+            end: data.window.get('messages').sortBy('ts').get('firstObject').get('ts'),
+            limit: 1000,
         }, resp => {
-            if (resp.msgs.length === 0) {
-                rejectCb();
-            } else {
-                for (let message of resp.msgs) {
-                    // Window messages are roughly sorted. First are old messages received by FETCH.
-                    // Then the messages received at startup and at runtime.
-                    this.get('store').upsertModelPrepend('message', message, data.window);
-                }
-
-                successCb(resp.msgs);
+            for (let message of resp.msgs) {
+                // Window messages are roughly sorted. First are old messages received by FETCH.
+                // Then the messages received at startup and at runtime.
+                this.get('store').upsertModelPrepend('message', message, data.window);
             }
+
+            successCb(resp.msgs.length !== 0);
         });
     },
 

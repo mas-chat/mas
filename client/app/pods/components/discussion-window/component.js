@@ -552,15 +552,16 @@ export default Ember.Component.extend({
 
         this.set('fetchingMore', true);
 
-        this.get('action').dispatch('QUERY_MESSAGES', {
+        this.get('action').dispatch('FETCH_OLDER_MESSAGES', {
             window: this.get('content')
         },
-        () => {
-            this.didPrepend = true;
-            this.set('fetchingMore', false);
-        },
-        () => {
-            this.set('noOlderMessages', true);
+        (foundMessages) => {
+            if (foundMessages) {
+                this.didPrepend = true;
+            } else {
+                this.set('noOlderMessages', true);
+            }
+
             this.set('fetchingMore', false);
         });
     }

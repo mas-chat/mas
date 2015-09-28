@@ -47,7 +47,6 @@ const handlers = {
     CHAT: handleChat,
     ACKALERT: handleAckAlert,
     LOGOUT: handleLogout,
-    GET_CONVERSATION_LOG: handleGetConversationLog,
     GET_PROFILE: handleGetProfile,
     UPDATE_PROFILE: handleUpdateProfile,
     REQUEST_FRIEND: handleRequestFriend,
@@ -425,17 +424,19 @@ function *handleLogout(params) {
     return { status: 'OK' };
 }
 
-function *handleGetConversationLog(params) {
+function *handleFetch(params) {
     let command = params.command;
 
     if (!params.conversation) {
         return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
+    } else if (!Number.isInteger(command.end)) {
+        return { status: 'ERROR', errorMsg: 'Invalid end parameter.' };
     }
 
     let conversationId = params.conversation.conversationId;
-    let results = yield search.getMessagesForDay(conversationId, command.start, command.end);
+    let messages = yield search.getMessageRange(conversationId, command.start, command.end, command.limit, 50);
 
-    return { status: results === null ? 'ERROR' : 'OK', results: results };
+    return { status: 'OK', msgs: messages };
 }
 
 function *handleRequestFriend(params) {
@@ -561,21 +562,6 @@ function *handleSendConfirmEmail(params) {
 
     yield sendEmailConfirmationEmail(userId);
     return { status: 'OK' };
-}
-
-function *handleFetch(params) {
-    let command = params.command;
-
-    if (!params.conversation) {
-        return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
-    } else if (!Number.isInteger(command.ts)) {
-        return { status: 'ERROR', errorMsg: 'Invalid ts parameter.' };
-    }
-
-    let conversationId = params.conversation.conversationId;
-    let messages = yield search.getMessagesByTs(conversationId, command.ts, 50);
-
-    return { status: 'OK', msgs: messages };
 }
 
 function *sendEmailConfirmationEmail(userId, email) {

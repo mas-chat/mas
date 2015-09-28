@@ -68,55 +68,28 @@ exports.updateMessage = function(gid, msg) {
     return true;
 };
 
-exports.getMessagesForDay = function*(conversationId, start, end) {
+exports.getMessageRange = function*(conversationId, start, end, amount) {
     if (!elasticSearchAvailable()) {
         return false;
     }
 
-    let response = yield elasticSearchClient.search({
-        index: 'messages',
-        body: {
-            size: 1000,
-            sort: {
-                ts: {
-                    order: 'asc'
-                }
-            },
-            query: {
-                filtered: {
-                    filter: {
-                        and: [
-                            {
-                                term: {
-                                    conversationId: conversationId
-                                }
-                            }, {
-                                range: {
-                                    ts: {
-                                        gte: start * 1000,
-                                        lte: end * 1000
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
+    // TBD: If there are multiple messages at the boundary start/end ts, part of them can be lost.
+    // Theoretical problem mostly. Solution is not lte.
+
+    let range = {
+        ts: {
+            lt: end * 1000,
         }
-    });
+    };
 
-    return convertToMsgs(response.hits.hits);
-};
-
-exports.getMessagesByTs = function*(conversationId, start, amount) {
-    if (!elasticSearchAvailable()) {
-        return false;
+    if (start) {
+        range.ts.gte = start * 1000;
     }
 
     let response = yield elasticSearchClient.search({
         index: 'messages',
         body: {
-            size: amount,
+            size: amount || 1000,
             sort: {
                 ts: {
                     order: 'desc'
@@ -131,11 +104,7 @@ exports.getMessagesByTs = function*(conversationId, start, amount) {
                                     conversationId: conversationId
                                 }
                             }, {
-                                range: {
-                                    ts: {
-                                        lt: start * 1000
-                                    }
-                                }
+                                range: range
                             }
                         ]
                     }

@@ -846,7 +846,8 @@ Fetches old messages.
 {
     "id": "FETCH",
     "windowId": 12,
-    "ts": 2093243
+    "start": 2093243,
+    "limit": 500
 }
 ```
 

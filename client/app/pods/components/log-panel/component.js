@@ -100,7 +100,7 @@ export default Ember.Component.extend({
 
         this.set('loading', true);
 
-        this.get('action').dispatch('FETCH_MESSAGES', {
+        this.get('action').dispatch('FETCH_MESSAGE_RANGE', {
             window: this.get('window'),
             start: epochTsStart,
             end: epochTsEnd
