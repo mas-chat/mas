@@ -89,4 +89,11 @@ exports.register = function(app) {
 
     // Ember client assets
     app.use(mount('/app', serve(path.join(__dirname, '../../client/dist'))));
+
+    // Ember CLI Live Reload redirect hack
+    if (conf.get('common:dev_mode') === true) {
+        app.get('/ember-cli-live-reload.js', function*() {
+            this.redirect('http://localhost:4200/ember-cli-live-reload.js');
+        });
+    }
 };
