@@ -22,7 +22,6 @@ import { calcMsgHistorySize } from '../../../utils/msg-history-sizer';
 
 export default Ember.Component.extend({
     action: Ember.inject.service(),
-    socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
     classNames: [ 'window', 'flex-grow-column' ],
@@ -198,16 +197,12 @@ export default Ember.Component.extend({
         },
 
         toggleMemberListWidth() {
-            let newValue = this.toggleProperty('content.minimizedNamesList');
+            this.get('action').dispatch('TOGGLE_MEMBER_LIST_WIDTH', {
+                window: this.get('content')
+            });
 
             Ember.run.scheduleOnce('afterRender', this, function() {
                 this._goToBottom(true);
-            });
-
-            this.get('socket').send({
-                id: 'UPDATE',
-                windowId: this.get('content.windowId'),
-                minimizedNamesList: newValue
             });
         },
 
@@ -282,12 +277,10 @@ export default Ember.Component.extend({
     },
 
     mouseDown(event) {
-        if (!$(event.target).hasClass('fa-arrows')) {
-            return; // Not moving the window
+        if ($(event.target).hasClass('fa-arrows')) {
+            event.preventDefault();
+            this.sendAction('dragWindowStart', this, event);
         }
-
-        event.preventDefault();
-        this.sendAction('dragWindowStart', this, event);
     },
 
     didInsertElement() {
@@ -468,6 +461,7 @@ export default Ember.Component.extend({
                 this.set('scrollLock', false);
 
                 if (this.get('visible')) {
+                    // TBD: Mutates store
                     this.set('content.newMessagesCount', 0);
                 }
 
@@ -558,23 +552,15 @@ export default Ember.Component.extend({
 
         this.set('fetchingMore', true);
 
-        this.get('socket').send({
-            id: 'FETCH',
-            windowId: this.get('content.windowId'),
-            ts: this.get('content.messages').sortBy('ts').get('firstObject').get('ts')
-        }, resp => {
-            if (resp.msgs.length === 0) {
-                this.set('noOlderMessages', true);
-            } else {
-                for (let message of resp.msgs) {
-                    // Window messages are roughly sorted. First are old messages received by FETCH.
-                    // Then the messages received at startup and at runtime.
-                    this.get('store').upsertModelPrepend('message', message, this.get('content'));
-                }
-
-                this.didPrepend = true;
-            }
-
+        this.get('action').dispatch('QUERY_MESSAGES', {
+            window: this.get('content')
+        },
+        () => {
+            this.didPrepend = true;
+            this.set('fetchingMore', false);
+        },
+        () => {
+            this.set('noOlderMessages', true);
             this.set('fetchingMore', false);
         });
     }

@@ -21,8 +21,8 @@ import Ember from 'ember';
 const CURSORWIDTH = 50;
 
 export default Ember.Component.extend({
+    action: Ember.inject.service(),
     store: Ember.inject.service(),
-    socket: Ember.inject.service(),
 
     classNames: [ 'grid', 'flex-1', 'flex-grow-column' ],
 
@@ -56,10 +56,10 @@ export default Ember.Component.extend({
 
     actions: {
         joinLobby() {
-            this.get('socket').send({
-                id: 'JOIN',
+            this.get('action').dispatch('JOIN_GROUP', {
+                name: 'lobby',
                 network: 'MAS',
-                name: 'lobby'
+                password: ''
             });
         },
 
@@ -107,21 +107,16 @@ export default Ember.Component.extend({
 
     _dragWindowStart(discussionWindow, event) {
         this.movingWindow = discussionWindow;
-
-        this.set('store.activeDraggedWindow', discussionWindow);
+        this.set('draggedWindow', discussionWindow);
 
         this.movingWindow.$().addClass('moving').css('z-index', 200);
         $('#window-cursor').show();
 
         this._dragWindow(event);
 
-        let handleDragMove = dragMoveEvent => {
-            this._dragWindow(dragMoveEvent);
-            event.preventDefault();
-        }
-
-        let handleDragEnd = () => {
-            this._dragWindowEnd();
+        let handleDragMove = dragMoveEvent => this._dragWindow(dragMoveEvent);
+        let handleDragEnd = dragEndEvent => {
+            this._dragWindowEnd(dragEndEvent);
 
             document.removeEventListener('mousemove', handleDragMove, false);
             document.removeEventListener('mouseup', handleDragEnd, false);
@@ -153,26 +148,47 @@ export default Ember.Component.extend({
 
             this._animate(200);
         }
+
+        event.preventDefault();
     },
 
-    _dragWindowEnd() {
+    _dragWindowEnd(event) {
         let cursor = this.cursor;
 
-        this.set('store.activeDraggedWindow', false);
-
+        this.set('draggedWindow', false);
         this.movingWindow.$().removeClass('moving').css('z-index', '');
         $('#window-cursor').hide();
+
+        let desktop = $(event.target).data('desktop-id');
+
+        if (desktop) {
+            let desktopId = desktop === 'new' ? Math.floor(new Date() / 1000) : parseInt(desktop);
+
+            this.get('action').dispatch('MOVE_WINDOW', {
+                column: 0,
+                row: 0,
+                desktop: desktopId,
+                window: this.movingWindow.get('content')
+            });
+
+            this.get('action').dispatch('CHANGE_ACTIVE_DESKTOP', {
+                desktop: desktopId
+            });
+            return;
+        }
 
         if (cursor.x === null) {
             return;
         }
 
-        this.dimensions.forEach(function(row, rowIndex) {
-            row.forEach(function(masWindow, columnIndex) {
+        for (let [ rowIndex, row ] of this.dimensions.entries()) {
+            for (let [ columnIndex, masWindow ] of row.entries()) {
                 masWindow.cursor = 'none';
 
                 let deltaX = 0;
                 let deltaY = 0;
+                let oldRow = masWindow.component.get('row');
+                let oldColumn = masWindow.component.get('column');
 
                 if (cursor.section === 'top' || cursor.section === 'bottom') {
                     deltaY = rowIndex > cursor.y || (rowIndex === cursor.y &&
@@ -182,27 +198,27 @@ export default Ember.Component.extend({
                         (columnIndex === cursor.x && cursor.section === 'left')) ? 1 : 0;
                 }
 
-                let component = masWindow.component;
-                component.set('row', rowIndex + deltaY);
-                component.set('column', columnIndex + deltaX);
-            });
-        });
+                let newRow = rowIndex + deltaY;
+                let newColumn = columnIndex + deltaX;
+
+                if (oldRow !== newRow || oldColumn !== newColumn) {
+                    this.get('action').dispatch('MOVE_WINDOW', {
+                        column: newColumn,
+                        row: newRow,
+                        window: masWindow.component.get('content')
+                    });
+                }
+            }
+        }
 
         let newColumn = cursor.x + (cursor.section === 'right' ? 1 : 0);
         let newRow = cursor.y + (cursor.section === 'bottom' ? 1 : 0);
 
-        this.movingWindow.set('column', newColumn);
-        this.movingWindow.set('row', newRow);
-
-        if (!isMobile.any) {
-            this.get('socket').send({
-                id: 'UPDATE',
-                windowId: this.movingWindow.get('content.windowId'),
-                desktop: this.movingWindow.get('content.desktop'),
-                column: newColumn,
-                row: newRow
-            });
-        }
+        this.get('action').dispatch('MOVE_WINDOW', {
+            column: newColumn,
+            row: newRow,
+            window: this.movingWindow.get('content')
+        });
     },
 
     _layoutWindows(animate) {

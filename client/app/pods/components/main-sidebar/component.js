@@ -19,12 +19,11 @@ import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 
 export default Ember.Component.extend(KeyboardShortcuts, {
     action: Ember.inject.service(),
-    socket: Ember.inject.service(),
     store: Ember.inject.service(),
 
     classNames: [ 'sidebar', 'flex-grow-column' ],
 
-    activeDraggedWindow: Ember.computed.alias('store.activeDraggedWindow'),
+    draggedWindow: false,
     friends: Ember.computed.alias('store.friends'),
 
     actions: {

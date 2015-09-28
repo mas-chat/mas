@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals isMobile, moment */
+/* globals moment */
 
 import Ember from 'ember';
 import TitleBuilder from '../utils/title-builder';
@@ -42,7 +42,6 @@ export default BaseModel.extend({
         }));
     },
 
-    socket: null,
     store: null,
 
     windowId: 0,

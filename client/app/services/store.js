@@ -41,6 +41,7 @@ const primaryKeys = {
 };
 
 export default Ember.Service.extend({
+    action: Ember.inject.service(),
     socket: Ember.inject.service(),
 
     users: null,
@@ -58,8 +59,6 @@ export default Ember.Service.extend({
     maxBacklogMsgs: 100000,
     cachedUpto: 0,
     dayCounter: 0,
-
-    activeDraggedWindow: false,
 
     init() {
         this._super();
@@ -135,41 +134,11 @@ export default Ember.Service.extend({
         let desktopIds = this.get('desktops').map(d => d.id);
 
         if (desktopIds.indexOf(this.get('settings.activeDesktop')) === -1) {
-            this.changeDesktop(this._oldestDesktop());
-        }
-    }),
-
-    changeDesktop(desktopId) {
-        this.set('settings.activeDesktop', desktopId);
-
-        if (!isMobile.any) {
-            this.get('socket').send({
-                id: 'SET',
-                settings: {
-                    activeDesktop: desktopId
-                }
+            this.get('action').dispatch('CHANGE_ACTIVE_DESKTOP', {
+                desktop: this.get('desktops').map(d => d.id).sort()[0] // Oldest
             });
         }
-    },
-
-    seekDesktop(direction) {
-        let desktops = this.get('desktops');
-        let index = desktops.indexOf(desktops.findBy('id', this.get('settings.activeDesktop')));
-
-        index += direction;
-
-        if (index === desktops.length) {
-            index = 0;
-        } else if (index === -1) {
-            index = desktops.length - 1;
-        }
-
-        this.changeDesktop(desktops[index].id);
-    },
-
-    _oldestDesktop() {
-        return this.get('desktops').map(d => d.id).sort()[0];
-    },
+    }),
 
     start() {
         let data;
@@ -307,10 +276,6 @@ export default Ember.Service.extend({
 
         if (type === 'window' || type === 'message' || type === 'logMessage' || type === 'friend') {
             object.set('store', this);
-        }
-
-        if (type === 'window') {
-            object.set('socket', this.get('socket'));
         }
 
         if (type === 'message' || type === 'logMessage') {

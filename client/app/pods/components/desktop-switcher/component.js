@@ -22,7 +22,7 @@ export default Ember.Component.extend({
     classNames: [ 'main-desktop-switcher' ],
 
     activeDesktop: Ember.computed.alias('store.settings.activeDesktop'),
-    activeDraggedWindow: Ember.computed.alias('store.activeDraggedWindow'),
+    draggedWindow: false,
 
     desktops: Ember.computed.alias('store.desktops')
 });

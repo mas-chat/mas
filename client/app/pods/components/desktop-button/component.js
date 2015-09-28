@@ -18,12 +18,10 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
     action: Ember.inject.service(),
-    store: Ember.inject.service(),
+    draggedWindow: false,
 
-    activeDraggedWindow: Ember.computed.alias('store.activeDraggedWindow'),
-
-    dropAreaCSSClass: Ember.computed('activeDraggedWindow', function() {
-        return this.get('activeDraggedWindow') ? 'main-desktop-droparea' : '';
+    dropAreaCSSClass: Ember.computed('draggedWindow', function() {
+        return this.get('draggedWindow') ? 'main-desktop-droparea' : '';
     }),
 
     selectedCSSClass: Ember.computed('selected', 'id', function() {
@@ -48,11 +46,5 @@ export default Ember.Component.extend({
                 direction: -1
             });
         }
-    },
-
-    mouseUp(event) {
-        this.get('action').dispatch('CHANGE_WINDOW_DESKTOP', {
-            desktop: this.get('id')
-        });
     }
 });

@@ -16,11 +16,13 @@
 
 import Ember from 'ember';
 
+const noopCb = () => {};
+
 export default Ember.Service.extend({
     store: Ember.inject.service(),
     socket: Ember.inject.service(),
 
-    dispatch(type, data = {}, acceptCb, rejectCb) {
+    dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) {
         let name = type.split('_').map(part => part.toLowerCase().capitalize()).join('');
         let handler = `_handle${name}`;
 
@@ -224,25 +226,6 @@ export default Ember.Service.extend({
         });
     },
 
-    _handleChangeWindowDesktop(data) {
-        let desktop = data.desktop;
-        let draggedWindow = this.get('store.activeDraggedWindow');
-
-        if (draggedWindow) {
-            console.log('jay')
-            draggedWindow.set('desktop', desktop === 'new' ?
-                Math.floor(new Date() / 1000) : parseInt(desktop));
-        }
-    },
-
-    _handleChangeActiveDesktop(data) {
-        this.get('store').changeDesktop(data.desktop);
-    },
-
-    _handleSeekActiveDesktop(data) {
-        this.get('store').seekDesktop(data.direction);
-    },
-
     _handleStartChat(data) {
         this.get('socket').send({
             id: 'CHAT',
@@ -281,6 +264,28 @@ export default Ember.Service.extend({
             }
 
             successCb();
+        });
+    },
+
+    _handleQueryMessages(data, successCb, rejectCb) {
+        // TBD: Merge with _handleFetchMessages(), this is the case end just missing and default
+        // amount of messages is returned.
+        this.get('socket').send({
+            id: 'FETCH',
+            windowId: data.window.get('windowId'),
+            ts: data.window.get('messages').sortBy('ts').get('firstObject').get('ts')
+        }, resp => {
+            if (resp.msgs.length === 0) {
+                rejectCb();
+            } else {
+                for (let message of resp.msgs) {
+                    // Window messages are roughly sorted. First are old messages received by FETCH.
+                    // Then the messages received at startup and at runtime.
+                    this.get('store').upsertModelPrepend('message', message, data.window);
+                }
+
+                successCb(resp.msgs);
+            }
         });
     },
 
@@ -467,6 +472,67 @@ export default Ember.Service.extend({
             });
 
             this.set('store.emailConfirmed', true);
+        });
+    },
+
+    _handleMoveWindow(data) {
+        let props = [ 'column', 'row', 'desktop' ];
+
+        for (let prop of props) {
+            if (data.hasOwnProperty(prop)) {
+                data.window.set(prop, data[prop]);
+            }
+        }
+
+        if (!isMobile.any) {
+            this.get('socket').send({
+                id: 'UPDATE',
+                windowId: data.window.get('windowId'),
+                desktop: data.desktop,
+                column: data.column,
+                row: data.row
+            });
+        }
+    },
+
+    _handleToggleMemberListWidth(data) {
+        let newValue = data.window.toggleProperty('minimizedNamesList');
+
+        this.get('socket').send({
+            id: 'UPDATE',
+            windowId: data.window.get('windowId'),
+            minimizedNamesList: newValue
+        });
+    },
+
+    _handleChangeActiveDesktop(data) {
+        this.set('store.settings.activeDesktop', data.desktop);
+
+        if (!isMobile.any) {
+            this.get('socket').send({
+                id: 'SET',
+                settings: {
+                    activeDesktop: data.desktop
+                }
+            });
+        }
+    },
+
+    _handleSeekActiveDesktop(data) {
+        let desktops = this.get('store.desktops');
+        let activeDesktop = this.get('store.settings.activeDesktop');
+        let index = desktops.indexOf(desktops.findBy('id', activeDesktop));
+
+        index += direction;
+
+        if (index === desktops.length) {
+            index = 0;
+        } else if (index < 0) {
+            index = desktops.length - 1;
+        }
+
+        this.dispatch('CHANGE_ACTIVE_DESKTOP', {
+            desktop: desktops[index].id
         });
     }
 });

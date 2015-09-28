@@ -24,6 +24,8 @@ export default Ember.Component.extend({
 
     classNames: [ 'flex-grow-column', 'flex-1' ],
 
+    draggedWindow: false,
+
     changeTheme: Ember.observer('store.settings.theme', function() {
         $('#theme-stylesheet').text(this.get('store.settings.theme') === 'dark' ? darkTheme : '');
     })
