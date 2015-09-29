@@ -17,7 +17,7 @@
     "capture-video-frame": "~0.1.0",
     "ember": "2.1.0-beta.3",
     "ember-cli-shims": "ember-cli/ember-cli-shims#0.0.3",
-    "ember-cli-test-loader": "ember-cli-test-loader#0.1.3",
+    "ember-cli-test-loader": "ember-cli/ember-cli-test-loader#0.1.3",
     "ember-load-initializers": "ember-cli/ember-load-initializers#0.1.5",
     "ember-qunit": "0.4.9",
     "ember-qunit-notifications": "0.0.7",
@@ -39,7 +39,8 @@
     "socket.io-client": "~1.3.2",
     "uri.js": "~1.16.0",
     "velocity": "~1.2.1",
-    "mousetrap": "~1.5.2"
+    "mousetrap": "~1.5.2",
+    "ember-mocha": "~0.8.0"
   },
   "resolutions": {
     "ember": "2.1.0-beta.3"
