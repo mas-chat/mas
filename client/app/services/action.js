@@ -87,6 +87,14 @@ export default Ember.Service.extend({
     },
 
     _handleAddMessage(data) {
+        // data.window.messages.upsertObject({
+        //     body: data.body,
+        //     cat: 'msg',
+        //     userId: this.get('store.userId'),
+        //     ts: data.ts,
+        //     gid: data.gid
+        // });
+
         this.get('store').upsertModel('message', {
             body: data.body,
             cat: 'msg',
