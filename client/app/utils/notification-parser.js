@@ -41,7 +41,7 @@ export default Ember.Object.extend({
         }
 
         if (typeof windowId === 'number') {
-            targetWindow = this.get('store.windows').findBy('windowId', windowId);
+            targetWindow = this.get('store.windows').getByIndex(windowId);
         }
 
         let handler = `_handle${type.charAt(0)}${type.substring(1).toLowerCase()}`;
@@ -61,11 +61,13 @@ export default Ember.Object.extend({
         }
 
         data.generation = this.get('socket.sessionId');
-        this.get('store').upsertModel('window', data);
+        data.store = this.get('store');
+
+        this.get('store.windows').upsertModel(data);
     },
 
     _handleClose(data, targetWindow) {
-        this.get('store').removeModel('window', targetWindow);
+        this.get('store.windows').removeModel(targetWindow);
     },
 
     _handleMsg(data, targetWindow) {
@@ -74,12 +76,14 @@ export default Ember.Object.extend({
         }
 
         delete data.windowId;
+        data.window = targetWindow;
+        data.store = this.get('store');
 
         if (!this.get('store.initDone')) {
             // Optimization: Avoid re-renders after every message
             this.msgBuffer.push({ data: data, parent: targetWindow });
         } else {
-            this.get('store').upsertModel('message', data, targetWindow);
+            targetWindow.get('messages').upsertModel(data);
         }
     },
 
@@ -87,20 +91,20 @@ export default Ember.Object.extend({
         // Remove possible deleted windows.
         let deletedWindows = [];
 
-        for (let windowObject of this.get('store.windows')) {
+        this.get('store.windows').forEach(windowObject => {
             if (windowObject.get('generation') !== this.get('socket.sessionId')) {
                 deletedWindows.push(windowObject);
             }
-        }
+        });
 
-        this.get('store').removeModels('window', deletedWindows);
+        this.get('store.windows').removeModels(deletedWindows);
 
         // Insert buffered message in one go.
         Ember.Logger.info(`MsgBuffer processing started.`);
 
         for (let i = 0; i < this.msgBuffer.length; i++) {
             let item = this.msgBuffer[i];
-            this.get('store').upsertModel('message', item.data, item.parent);
+            item.parent.get('messages').upsertModel(item.data);
         }
 
         Ember.Logger.info(`MsgBuffer processing ended.`);
@@ -167,11 +171,12 @@ export default Ember.Object.extend({
 
     _handleFriends(data) {
         if (data.reset) {
-            this.get('store').clearModels('friend');
+            this.get('store.friends').clearModels();
         }
 
         for (let friend of data.friends) {
-            this.get('store').upsertModel('friend', friend);
+            friend.store = this.get('store');
+            this.get('store.friends').upsertModel(friend);
         }
     },
 
@@ -189,7 +194,7 @@ export default Ember.Object.extend({
             }
         }.bind(this);
 
-        this.get('store').upsertModel('alert', data);
+        this.get('store.alerts').upsertModel(data);
     },
 
     _handleNetworks(data) {
@@ -230,7 +235,7 @@ export default Ember.Object.extend({
             let realName = users.getName(friendCandidate.userId);
             let nick = users.getNick(friendCandidate.userId, 'MAS');
 
-            this.get('store').upsertModel('alert', {
+            this.get('store.alerts').upsertModel({
                 message: `Allow ${realName} (${nick}) to add you to his/her contacts list?`,
                 alertId: friendCandidate.userId,
                 dismissible: true,

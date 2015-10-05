@@ -65,7 +65,7 @@ export default Ember.ArrayProxy.extend({
 
         for (let object of objects) {
             let primaryKey = object[primaryKeyName];
-            Ember.assert('Primary key must exist', primaryKey);
+            Ember.assert(`Primary key '${primaryKeyName}' must exist`, primaryKey !== undefined);
 
             let existingModel = this.get('_lookupTable').get(primaryKey);
 

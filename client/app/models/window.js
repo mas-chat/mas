@@ -20,6 +20,7 @@ import Ember from 'ember';
 import TitleBuilder from '../utils/title-builder';
 import BaseModel from './base';
 import Message from './message';
+import IndexArray from '../utils/index-array';
 
 let titleBuilder = TitleBuilder.create();
 
@@ -27,8 +28,8 @@ export default BaseModel.extend({
     init() {
         this._super();
 
-        this.set('messages', Ember.A([]));
-        this.set('logMessages', Ember.A([]));
+        this.set('messages', IndexArray.create({ index: 'gid', factory: Message }));
+        this.set('logMessages', IndexArray.create({ index: 'gid', factory: Message }));
 
         this.set('operators', Ember.A([]));
         this.set('voices', Ember.A([]));

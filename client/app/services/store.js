@@ -19,26 +19,10 @@
 import Ember from 'ember';
 import Users from '../utils/users';
 import Window from '../models/window';
-import Message from '../models/message';
 import Friend from '../models/friend';
 import Alert from '../models/alert';
+import IndexArray from '../utils/index-array';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
-
-const modelNameMapping = {
-    window: Window,
-    message: Message,
-    logMessage: Message,
-    friend: Friend,
-    alert: Alert
-};
-
-const primaryKeys = {
-    window: 'windowId',
-    message: 'gid',
-    logMessage: 'gid',
-    friend: 'userId',
-    alert: 'alertId'
-};
 
 export default Ember.Service.extend({
     action: Ember.inject.service(),
@@ -64,11 +48,12 @@ export default Ember.Service.extend({
         this._super();
 
         this.set('users', Users.create());
-        this.set('friends', Ember.A([]));
-        this.set('windows', Ember.A([]));
-        this.set('alerts', Ember.A([]));
         this.set('networks', Ember.A([]));
         this.set('modals', Ember.A([]));
+
+        this.set('friends', IndexArray.create({ index: 'userId', factory: Friend }));
+        this.set('windows', IndexArray.create({ index: 'windowId', factory: Window }));
+        this.set('alerts', IndexArray.create({ index: 'alertId', factory: Alert }));
 
         this.set('settings', Ember.Object.create({
             theme: 'default',
@@ -175,60 +160,6 @@ export default Ember.Service.extend({
         window.location = '/';
     },
 
-    insertModels(type, models, parent) {
-        parent = parent || this;
-
-        let objects = [];
-        let primaryKeyName = primaryKeys[type];
-
-        this._ensureLookupTableExists(type, parent);
-
-        for (let data of models) {
-            let object = this._createModel(type, data, parent);
-            let primaryKey = data[primaryKeyName];
-
-            objects.push(object);
-            parent.lookupTable[type][primaryKey] = object;
-        }
-
-        parent.get(type + 's').pushObjects(objects);
-    },
-
-    upsertModel(type, data, parent) {
-        return this._upsert(data, primaryKeys[type], type, parent || this, false);
-    },
-
-    upsertModelPrepend(type, data, parent) {
-        return this._upsert(data, primaryKeys[type], type, parent || this, true);
-    },
-
-    removeModel(type, object, parent) {
-        this.removeModels(type, [ object ], parent);
-    },
-
-    removeModels(type, objects, parent) {
-        parent = parent || this;
-
-        for (let object of objects) {
-            let primaryKeyName = primaryKeys[type];
-            let primaryKeyValue = object[primaryKeyName];
-
-            delete parent.lookupTable[type][primaryKeyValue];
-        }
-
-        parent.get(type + 's').removeObjects(objects);
-    },
-
-    clearModels(type, parent) {
-        parent = parent || this;
-
-        if (parent.lookupTable) {
-            delete parent.lookupTable[type];
-        }
-
-        parent.get(type + 's').clear();
-    },
-
     _startDayChangedService() {
         // Day has changed service
         let timeToTomorrow = moment().endOf('day').diff(moment()) + 1;
@@ -239,60 +170,6 @@ export default Ember.Service.extend({
         };
 
         Ember.run.later(this, changeDay, timeToTomorrow);
-    },
-
-    _upsert(data, primaryKeyName, type, parent, prepend) {
-        this._ensureLookupTableExists(type, parent);
-        let object = parent.lookupTable[type][data[primaryKeyName]];
-
-        if (object) {
-            if (type === 'message' && data.status !== 'edited' && data.status !== 'deleted') {
-                // Messages are immutable in this case. Avoid work and bail out early.
-                return object;
-            }
-
-            delete data[primaryKeyName];
-            object.setModelProperties(data);
-        } else {
-            object = this._insertObject(type, data, parent, prepend);
-            parent.lookupTable[type][data[primaryKeyName]] = object;
-        }
-
-        return object;
-    },
-
-    _insertObject(type, data, parent, prepend) {
-        let object = this._createModel(type, data, parent);
-        let collection = parent.get(type + 's');
-
-        return prepend ? collection.unshiftObject(object) : collection.pushObject(object);
-    },
-
-    _createModel(type, data, parent) {
-        let object = modelNameMapping[type].create();
-        object.setModelProperties(data); // Never set properties with create()
-
-        // TBD: Add 'arrayName' parameter so that logMessage type and primary key can be removed.
-
-        if (type === 'window' || type === 'message' || type === 'logMessage' || type === 'friend') {
-            object.set('store', this);
-        }
-
-        if (type === 'message' || type === 'logMessage') {
-            object.set('window', parent);
-        }
-
-        return object;
-    },
-
-    _ensureLookupTableExists(type, parent) {
-        if (!parent.lookupTable) {
-            parent.lookupTable = {};
-        }
-
-        if (!parent.lookupTable[type]) {
-            parent.lookupTable[type] = {};
-        }
     },
 
     _saveSnapshot() {

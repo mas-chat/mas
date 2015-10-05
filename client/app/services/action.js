@@ -87,23 +87,27 @@ export default Ember.Service.extend({
     },
 
     _handleAddMessage(data) {
-        this.get('store').upsertModel('message', {
+        data.window.messages.upsertModel({
             body: data.body,
             cat: 'msg',
             userId: this.get('store.userId'),
             ts: data.ts,
-            gid: data.gid
-        }, data.window);
+            gid: data.gid,
+            window: data.window,
+            store: this.get('store')
+        });
     },
 
     _handleAddError(data) {
-        this.get('store').upsertModel('message', {
+        data.window.messages.upsertModel({
             body: data.body,
             cat: 'error',
             userId: null,
             ts: moment().unix(),
-            gid: 'error' // TODO: Not optimal, there's never second error message
-        }, data.window);
+            gid: 'error', // TODO: Not optimal, there's never second error message
+            window: data.window,
+            store: this.get('store')
+        });
     },
 
     _handleSendText(data) {
@@ -257,27 +261,32 @@ export default Ember.Service.extend({
             start: data.start,
             end: data.end
         }, resp => {
-            this.get('store').clearModels('logMessage', data.window);
+            data.window.get('logMessages').clearModels();
 
             for (let message of resp.msgs) {
-                this.get('store').upsertModel('logMessage', message, data.window);
+                message.window = data.window;
+                message.store = this.get('store');
+                data.window.get('logMessages').upsertModel(message);
             }
 
             successCb();
         });
     },
 
-    _handleFetchOlderMessages(data, successCb, rejectCb) {
+    _handleFetchOlderMessages(data, successCb) {
         this.get('socket').send({
             id: 'FETCH',
             windowId: data.window.get('windowId'),
             end: data.window.get('messages').sortBy('ts').get('firstObject').get('ts'),
-            limit: 1000,
+            limit: 1000
         }, resp => {
             for (let message of resp.msgs) {
+                message.window = data.window;
+                message.store = this.get('store');
+
                 // Window messages are roughly sorted. First are old messages received by FETCH.
                 // Then the messages received at startup and at runtime.
-                this.get('store').upsertModelPrepend('message', message, data.window);
+                data.window.get('messages').upsertModelPrepend(message);
             }
 
             successCb(resp.msgs.length !== 0);
@@ -355,7 +364,7 @@ export default Ember.Service.extend({
                 'Request sent. Contact will added to your list when he or she approves.' :
                 resp.errorMsg;
 
-            this.get('store').upsertModel('alert', {
+            this.get('store.alerts').upsertModel({
                 alertId: `internal:${Date.now()}`,
                 message: message,
                 dismissible: true,
@@ -429,7 +438,7 @@ export default Ember.Service.extend({
         });
     },
 
-    _handleFetchProfile(data) {
+    _handleFetchProfile() {
         this.get('socket').send({
             id: 'GET_PROFILE'
         }, resp => {
@@ -454,11 +463,11 @@ export default Ember.Service.extend({
         });
     },
 
-    _handleConfirmEmail(data, successCb, rejectCb) {
+    _handleConfirmEmail(data, successCb) {
         this.get('socket').send({
             id: 'SEND_CONFIRM_EMAIL'
         }, () => {
-            this.get('store').upsertModel('alert', {
+            this.get('store.alerts').upsertModel({
                 message: 'Confirmation link sent. Check your spam folder if you don\'t see it in inbox.',
                 dismissible: true,
                 report: false,
@@ -518,7 +527,7 @@ export default Ember.Service.extend({
         let activeDesktop = this.get('store.settings.activeDesktop');
         let index = desktops.indexOf(desktops.findBy('id', activeDesktop));
 
-        index += direction;
+        index += data.direction;
 
         if (index === desktops.length) {
             index = 0;

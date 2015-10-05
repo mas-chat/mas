@@ -30,7 +30,7 @@ describe('indexArray', function() {
         let model = Ember.Object.create({ name: 'Ilkka' });
 
         expect(this.obj.upsertModels.bind(this.obj, [ model ]))
-          .to.throw('Assertion Failed: Primary key must exist');
+          .to.throw('Assertion Failed: Primary key \'ssn\' must exist');
     });
 
     it('search by index', function() {

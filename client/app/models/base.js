@@ -18,12 +18,12 @@ import Ember from 'ember';
 
 export default Ember.Object.extend({
     setModelProperties(props) {
-        // Support second level nested object properties
+        // Support second level nested object simple properties
 
         for (let prop of Object.keys(props)) {
             let value = props[prop];
 
-            if (value !== null && typeof(value) === 'object') {
+            if (value !== null && typeof(value) === 'object' && !value.__ember_meta__) {
                 this.get(prop).setProperties(value)
                 delete props[prop];
             }
