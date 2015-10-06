@@ -22,7 +22,7 @@ import Window from '../models/window';
 import Friend from '../models/friend';
 import Alert from '../models/alert';
 import IndexArray from '../utils/index-array';
-import BaseStore from './base-store';
+import BaseStore from '../stores/base-store';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 
 export default BaseStore.extend({
@@ -144,12 +144,12 @@ export default BaseStore.extend({
         let maxBacklogMsgs = calcMsgHistorySize();
         let cachedUpto = 0;
 
-        for (let masWindow of this.get('windows')) {
+        this.get('windows').forEach(function(masWindow) {
             let messages = [];
 
             let sortedMessages = masWindow.get('messages').sortBy('ts').slice(-1 * maxBacklogMsgs);
 
-            for (let message of sortedMessages) {
+            sortedMessages.forEach(function(message) {
                 let messageData = message.getProperties([
                     'gid',
                     'body',
@@ -174,7 +174,7 @@ export default BaseStore.extend({
 
                 messages.push(messageData);
                 data.users[messageData.userId] = true;
-            }
+            });
 
             let windowProperties = masWindow.getProperties([
                 'windowId',
@@ -193,10 +193,9 @@ export default BaseStore.extend({
 
             windowProperties.messages = messages;
             data.windows.push(windowProperties);
-        }
+        });
 
         data.cachedUpto = cachedUpto;
-
         this.set('cachedUpto', cachedUpto);
 
         for (let userId of Object.keys(data.users)) {
@@ -214,11 +213,17 @@ export default BaseStore.extend({
         this.get('users').incrementProperty('isDirty');
 
         for (let windowData of data.windows) {
-            let messages = windowData.messages;
+            windowData.store = this;
             delete windowData.messages;
 
-            let windowObject = this.upsertModel('window', windowData);
-            this.insertModels('message', messages, windowObject);
+            let messages = windowData.messages;
+            let windowModel = this.get('windows').upsertModel(windowData);
+
+            for (let message of messages) {
+                message.store = this;
+                message.window = windowModel;
+                windowModel.get('messages').upsertModel(message);
+            }
         }
 
         this.set('activeDesktop', data.activeDesktop);

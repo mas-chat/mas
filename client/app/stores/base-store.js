@@ -40,8 +40,6 @@ export default Ember.Service.extend({
         } catch (e) {
             Ember.Logger.info(`Failed to save snapshot: ${e}`);
         }
-
-        this.set('cachedUpto', cachedUpto);
     },
 
     _loadSnapshot() {
