@@ -22,9 +22,10 @@ import Window from '../models/window';
 import Friend from '../models/friend';
 import Alert from '../models/alert';
 import IndexArray from '../utils/index-array';
+import BaseStore from './base-store';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 
-export default Ember.Service.extend({
+export default BaseStore.extend({
     action: Ember.inject.service(),
     socket: Ember.inject.service(),
 
@@ -68,16 +69,11 @@ export default Ember.Service.extend({
             email: ''
         }));
 
-        let authCookie = $.cookie('auth');
-
-        if (!authCookie) {
-            this.logout();
-        }
-
+        let authCookie = $.cookie('auth') || '';
         let [ userId, secret ] = authCookie.split('-');
 
         if (!userId || !secret) {
-            this.logout();
+            this.get('action').dispatch('LOGOUT');
         }
 
         this.set('userId', userId);
@@ -126,59 +122,17 @@ export default Ember.Service.extend({
     }),
 
     start() {
-        let data;
-        let localStorageSupported = typeof Storage !== 'undefined';
-
-        if (localStorageSupported) {
-            data = this._loadSnapshot();
-        }
-
-        if (data) {
-            this.set('cachedUpto', data.cachedUpto ? data.cachedUpto : 0);
-        }
+        let data = this._loadSnapshot();
 
         // It's now first possible time to start socket.io connection. Data from server
         // can't race with snapshot data as first socket.io event will be processed at
         // earliest in the next runloop.
         this.get('socket').start();
 
-        if (data) {
-            this._processSnapshot(data);
-        }
-
-        if (localStorageSupported) {
-            setInterval(function() {
-                Ember.run.next(this, this._saveSnapshot);
-            }.bind(this), 60 * 1000); // Once in a minute
-        }
-
         this._startDayChangedService();
     },
 
-    logout() {
-        $.removeCookie('auth', { path: '/' });
-        window.location = '/';
-    },
-
-    _startDayChangedService() {
-        // Day has changed service
-        let timeToTomorrow = moment().endOf('day').diff(moment()) + 1;
-
-        let changeDay = function() {
-            this.incrementProperty('dayCounter');
-            Ember.run.later(this, changeDay, 1000 * 60 * 60 * 24);
-        };
-
-        Ember.run.later(this, changeDay, timeToTomorrow);
-    },
-
-    _saveSnapshot() {
-        let cachedUpto = 0;
-
-        if (!this.get('initDone')) {
-            return;
-        }
-
+    toJSON() {
         let data = {
             windows: [],
             users: {},
@@ -188,6 +142,7 @@ export default Ember.Service.extend({
         };
 
         let maxBacklogMsgs = calcMsgHistorySize();
+        let cachedUpto = 0;
 
         for (let masWindow of this.get('windows')) {
             let messages = [];
@@ -248,44 +203,10 @@ export default Ember.Service.extend({
             data.users[userId] = this.get('users.users.' + userId);
         }
 
-        try {
-            window.localStorage.setItem('data', JSON.stringify(data));
-            Ember.Logger.info('Snapshot saved.');
-        } catch (e) {
-            Ember.Logger.info(`Failed to save snapshot: ${e}`);
-        }
-
-        this.set('cachedUpto', cachedUpto);
-    },
-
-    _loadSnapshot() {
-        let data;
-
-        Ember.Logger.info('Starting to load saved snapshot.');
-
-        try {
-            data = JSON.parse(window.localStorage.getItem('data'));
-
-            if (!data) {
-                Ember.Logger.info('Snapshot not found.');
-                return false;
-            }
-
-            if (!data.activeDesktop || data.userId !== this.get('userId') || data.version !== 1) {
-                Ember.Logger.info('Snapshot corrupted.');
-                window.localStorage.removeItem('data');
-                return false;
-            }
-
-            Ember.Logger.info('Snapshot loaded.');
-        } catch (e) {
-            Ember.Logger.info(`Failed to load or validate snapshot: ${e}`);
-        }
-
         return data;
     },
 
-    _processSnapshot(data) {
+    fromJSON(data) {
         for (let userId of Object.keys(data.users)) {
             this.set('users.users.' + userId, data.users[userId]);
         }
@@ -301,6 +222,18 @@ export default Ember.Service.extend({
         }
 
         this.set('activeDesktop', data.activeDesktop);
-        Ember.Logger.info('Snapshot processed.');
+        this.set('cachedUpto', data.cachedUpto ? data.cachedUpto : 0);
+    },
+
+    _startDayChangedService() {
+        // Day has changed service
+        let timeToTomorrow = moment().endOf('day').diff(moment()) + 1;
+
+        let changeDay = function() {
+            this.incrementProperty('dayCounter');
+            Ember.run.later(this, changeDay, 1000 * 60 * 60 * 24);
+        };
+
+        Ember.run.later(this, changeDay, timeToTomorrow);
     }
 });

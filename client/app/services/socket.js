@@ -36,7 +36,6 @@ export default Ember.Service.extend({
 
     init() {
         this._super();
-
         this._disconnectedQueue = Ember.A([]);
 
         let authCookie = $.cookie('auth');
