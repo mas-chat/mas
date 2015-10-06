@@ -134,8 +134,9 @@ export default Ember.Component.extend({
 
     _lineAdded(messages) {
         // Get the message that was added. Note: .get('lastObject') would work only after this
-        // run loop.
-        let message = messages[messages.length - 1];
+        // run loop. Also note that messages is IndexArray and everything must be accessed using
+        // .get()
+        let message = messages.content[messages.get('length') - 1];
 
         let cat = message.cat;
         let importantMessage = cat === 'msg' || cat === 'action';
@@ -169,7 +170,7 @@ export default Ember.Component.extend({
         }
 
         // Remove the oldest message if the optimal history is visible
-        if (messages.length > calcMsgHistorySize()) {
+        if (messages.get('length') > calcMsgHistorySize()) {
             // TBD: Do in store
             this.get('content.messages').removeModel(messages.sortBy('ts')[0]);
             this.deletedLine = true;
@@ -373,7 +374,7 @@ export default Ember.Component.extend({
     arrayWillChange() {},
 
     arrayDidChange(array, offset, removeCount, addCount) {
-        if (addCount > 0 && this.get('store.initDone') && offset === array.length - 1) {
+        if (addCount > 0 && this.get('store.initDone') && offset === array.get('length') - 1) {
             // Infinity scrolling adds the old messages to the beginning of the array. The offset
             // check above makes sure that _lineAdded() is not called then (FETCH case).
             this._lineAdded(array);
