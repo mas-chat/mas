@@ -78,7 +78,9 @@ exports.getWindowIdsForNetwork = function*(userId, network) {
         let conversationId = yield getConversationId(userId, masWindow);
         let conversation = yield conversationFactory.get(conversationId);
 
-        if (conversation.network === network) {
+        if (!conversation) {
+            log.warn(userId, `Conversation missing, id: ${conversationId}`);
+        } else if (conversation.network === network) {
             windowIds.push(masWindow);
         }
     }
