@@ -234,7 +234,7 @@ export default BaseModel.extend({
             (match, p1, p2) => this._renderMention(p1, p2));
 
         text = text.replace(/:(.+?):/g, (match, p1) => {
-            if (!emojify.emojiNames.includes(p1)) {
+            if (!emojify.emojiNames.indexOf(p1) !== -1) {
                 return match;
             } else {
                 return this._renderEmoji(match, `/app/assets/images/emoji/${p1}.png`);
