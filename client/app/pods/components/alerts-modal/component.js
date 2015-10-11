@@ -15,10 +15,9 @@
 //
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
-
     model: null,
     alerts: Ember.computed.oneWay('model.alerts'),
 
@@ -29,7 +28,7 @@ export default Ember.Component.extend({
                 Notification.requestPermission();
             }
 
-            this.get('action').dispatch('UPDATE_WINDOW_ALERTS', {
+            dispatch('UPDATE_WINDOW_ALERTS', {
                 window: this.get('model'),
                 alerts: this.get('alerts')
             });

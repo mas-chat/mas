@@ -15,9 +15,9 @@
 //
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     userId: Ember.computed.alias('model'),
@@ -32,7 +32,7 @@ export default Ember.Component.extend({
 
     actions: {
         remove() {
-            this.get('action').dispatch('REMOVE_FRIEND', {
+            dispatch('REMOVE_FRIEND', {
                 userId: this.get('userId')
             });
 

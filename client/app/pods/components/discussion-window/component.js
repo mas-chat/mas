@@ -19,9 +19,9 @@
 import Ember from 'ember';
 import { play } from '../../../utils/sound';
 import { calcMsgHistorySize } from '../../../utils/msg-history-sizer';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     classNames: [ 'window', 'flex-grow-column' ],
@@ -199,7 +199,7 @@ export default Ember.Component.extend({
         },
 
         toggleMemberListWidth() {
-            this.get('action').dispatch('TOGGLE_MEMBER_LIST_WIDTH', {
+            dispatch('TOGGLE_MEMBER_LIST_WIDTH', {
                 window: this.get('content')
             });
 
@@ -209,14 +209,14 @@ export default Ember.Component.extend({
         },
 
         processLine(msg) {
-            this.get('action').dispatch('PROCESS_LINE', {
+            dispatch('PROCESS_LINE', {
                 body: msg,
                 window: this.get('content')
             });
         },
 
         editMessage(gid, msg) {
-            this.get('action').dispatch('EDIT_MESSAGE', {
+            dispatch('EDIT_MESSAGE', {
                 body: msg,
                 gid: gid,
                 window: this.get('content')
@@ -224,7 +224,7 @@ export default Ember.Component.extend({
         },
 
         deleteMessage(gid) {
-            this.get('action').dispatch('EDIT_MESSAGE', {
+            dispatch('EDIT_MESSAGE', {
                 body: '',
                 gid: gid,
                 window: this.get('content')
@@ -232,13 +232,13 @@ export default Ember.Component.extend({
         },
 
         close() {
-            this.get('action').dispatch('CLOSE_WINDOW', {
+            dispatch('CLOSE_WINDOW', {
                 window: this.get('content')
             });
         },
 
         menu(modalName) {
-            this.get('action').dispatch('OPEN_MODAL', {
+            dispatch('OPEN_MODAL', {
                 name: modalName,
                 model: this.get('content')
             });
@@ -254,7 +254,7 @@ export default Ember.Component.extend({
         },
 
         upload(files) {
-            this.get('action').dispatch('UPLOAD_FILES', {
+            dispatch('UPLOAD_FILES', {
                 files: files,
                 window: this.get('content')
             });
@@ -330,11 +330,11 @@ export default Ember.Component.extend({
                 let action = $(e.target).data('action');
 
                 if (action === 'chat') {
-                    that.get('action').dispatch('START_CHAT', {
+                    dispatch('START_CHAT', {
                         userId: selectedUserId
                     });
                 } else {
-                    that.get('action').dispatch('REQUEST_FRIEND', {
+                    dispatch('REQUEST_FRIEND', {
                         userId: selectedUserId
                     });
                 }
@@ -554,7 +554,7 @@ export default Ember.Component.extend({
 
         this.set('fetchingMore', true);
 
-        this.get('action').dispatch('FETCH_OLDER_MESSAGES', {
+        dispatch('FETCH_OLDER_MESSAGES', {
             window: this.get('content')
         },
         (foundMessages) => {

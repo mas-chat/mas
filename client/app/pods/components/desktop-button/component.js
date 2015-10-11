@@ -15,9 +15,9 @@
 //
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
     draggedWindow: false,
 
     dropAreaCSSClass: Ember.computed('draggedWindow', function() {
@@ -30,19 +30,19 @@ export default Ember.Component.extend({
 
     actions: {
         switch(desktopId) {
-            this.get('action').dispatch('CHANGE_ACTIVE_DESKTOP', {
+            dispatch('CHANGE_ACTIVE_DESKTOP', {
                 desktop: this.get('id')
             });
         },
 
         switchNext() {
-            this.get('action').dispatch('SEEK_ACTIVE_DESKTOP', {
+            dispatch('SEEK_ACTIVE_DESKTOP', {
                 direction: 1
             });
         },
 
         switchPrevious() {
-            this.get('action').dispatch('SEEK_ACTIVE_DESKTOP', {
+            dispatch('SEEK_ACTIVE_DESKTOP', {
                 direction: -1
             });
         }

@@ -14,26 +14,30 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals $ */
-
 import Ember from 'ember';
-import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
-    store: Ember.inject.service(),
+const noopCb = () => {};
+let stores = [];
 
-    classNames: [ 'flex-row', 'unconfirmed-email' ],
+export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) {
+    let consumed = false;
+    let name = type.split('_').map(part => part.toLowerCase().capitalize()).join('');
+    let handler = `_handle${name}`;
 
-    email: Ember.computed.alias('store.settings.email'),
-    emailConfirmed: Ember.computed.alias('store.settings.emailConfirmed'),
-
-    actions: {
-        requestConfirmation() {
-            dispatch('CONFIRM_EMAIL');
-        },
-
-        openModal(modal) {
-            dispatch('OPEN_MODAL', { name: modal });
+    for (let store of stores) {
+        if (store[handler]) {
+            consumed = true;
+            store[handler].call(store, data, acceptCb, rejectCb);
+            Ember.Logger.info(`[ACT] ${type}`);
+            break;
         }
     }
-});
+
+    if (!consumed) {
+        Ember.Logger.error(`No store handled action: ${type}`);
+    }
+}
+
+export function register(store) {
+    stores.push(store);
+}

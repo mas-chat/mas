@@ -17,17 +17,16 @@
 /* globals $ */
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
-
     actions: {
         closeModal() {
             this.sendAction('closeModal');
         },
 
         destroy() {
-            this.get('action').dispatch('DESTROY_ACCOUNT');
+            dispatch('DESTROY_ACCOUNT');
         }
     }
 });

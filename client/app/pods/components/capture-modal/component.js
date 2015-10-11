@@ -17,20 +17,19 @@
 /* global captureVideoFrame */
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
     video: Ember.inject.service(),
 
     shot: null,
-
     note: 'Allow webcam access in your browser.',
 
     actions: {
         uploadPhoto() {
             let file = this.get('shot');
 
-            this.get('action').dispatch('UPLOAD_FILES', {
+            dispatch('UPLOAD_FILES', {
                 files: [ file ],
                 window: this.get('model')
             });

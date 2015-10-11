@@ -15,10 +15,9 @@
 //
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
-
     group: '',
     password: '',
     errorMsg: '',
@@ -31,7 +30,7 @@ export default Ember.Component.extend({
                 password = null;
             }
 
-            this.get('action').dispatch('JOIN_GROUP', {
+            dispatch('JOIN_GROUP', {
                 name: this.get('group'),
                 password: password
             },

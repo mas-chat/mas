@@ -17,11 +17,11 @@
 /* globals $ */
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 const CURSORWIDTH = 50;
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     classNames: [ 'grid', 'flex-1', 'flex-grow-column' ],
@@ -56,7 +56,7 @@ export default Ember.Component.extend({
 
     actions: {
         joinLobby() {
-            this.get('action').dispatch('JOIN_GROUP', {
+            dispatch('JOIN_GROUP', {
                 name: 'lobby',
                 network: 'MAS',
                 password: ''
@@ -164,14 +164,14 @@ export default Ember.Component.extend({
         if (desktop) {
             let desktopId = desktop === 'new' ? Math.floor(new Date() / 1000) : parseInt(desktop);
 
-            this.get('action').dispatch('MOVE_WINDOW', {
+            dispatch('MOVE_WINDOW', {
                 column: 0,
                 row: 0,
                 desktop: desktopId,
                 window: this.movingWindow.get('content')
             });
 
-            this.get('action').dispatch('CHANGE_ACTIVE_DESKTOP', {
+            dispatch('CHANGE_ACTIVE_DESKTOP', {
                 desktop: desktopId
             });
             return;
@@ -202,7 +202,7 @@ export default Ember.Component.extend({
                 let newColumn = columnIndex + deltaX;
 
                 if (oldRow !== newRow || oldColumn !== newColumn) {
-                    this.get('action').dispatch('MOVE_WINDOW', {
+                    dispatch('MOVE_WINDOW', {
                         column: newColumn,
                         row: newRow,
                         window: masWindow.component.get('content')
@@ -214,7 +214,7 @@ export default Ember.Component.extend({
         let newColumn = cursor.x + (cursor.section === 'right' ? 1 : 0);
         let newRow = cursor.y + (cursor.section === 'bottom' ? 1 : 0);
 
-        this.get('action').dispatch('MOVE_WINDOW', {
+        dispatch('MOVE_WINDOW', {
             column: newColumn,
             row: newRow,
             window: this.movingWindow.get('content')

@@ -15,11 +15,16 @@
 //
 
 import Ember from 'ember';
+import { register } from '../utils/dispatcher';
 
 let localStorageSupported = typeof Storage !== 'undefined';
 
 export default Ember.Service.extend({
+    socket: Ember.inject.service(),
+
     init() {
+        register(this);
+
         if (localStorageSupported) {
             setInterval(function() {
                 Ember.run.next(this, this._saveSnapshot);

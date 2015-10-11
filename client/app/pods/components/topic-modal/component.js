@@ -15,10 +15,9 @@
 //
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
-
     topic: Ember.computed.oneWay('model.topic'),
 
     topicTitle: Ember.computed('model.name', function() {
@@ -27,7 +26,7 @@ export default Ember.Component.extend({
 
     actions: {
         changeTopic() {
-            this.get('action').dispatch('UPDATE_TOPIC', {
+            dispatch('UPDATE_TOPIC', {
                 topic: this.get('topic'),
                 window: this.get('model')
             });

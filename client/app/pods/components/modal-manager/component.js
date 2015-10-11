@@ -17,9 +17,9 @@
 /* globals $ */
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     activeModal: Ember.computed('store.modals.[]', function() {
@@ -31,7 +31,7 @@ export default Ember.Component.extend({
 
     actions: {
         closeModal() {
-            this.get('action').dispatch('CLOSE_MODAL');
+            dispatch('CLOSE_MODAL');
         }
     }
 });

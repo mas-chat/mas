@@ -19,11 +19,11 @@
 import Ember from 'ember';
 import NotificationParser from '../utils/notification-parser';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
+import { dispatch } from '../utils/dispatcher';
 
 let socket = io.connect(); // Start connection as early as possible.
 
 export default Ember.Service.extend({
-    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     sessionId: 0,
@@ -97,7 +97,7 @@ export default Ember.Service.extend({
             this.set('_connected', false);
 
             this.set('_disconnectedTimer', Ember.run.later(this, function() {
-                this.get('action').dispatch('OPEN_PRIORITY_MODAL', {
+                dispatch('OPEN_PRIORITY_MODAL', {
                     name: 'non-interactive-modal',
                     model: {
                         title: 'Connection error',
@@ -115,7 +115,7 @@ export default Ember.Service.extend({
             if (timer) {
                 Ember.run.cancel(timer);
             } else {
-                this.get('action').dispatch('CLOSE_PRIORITY_MODAL');
+                dispatch('CLOSE_PRIORITY_MODAL');
             }
 
             this._emitInit(userId, secret);

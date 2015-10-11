@@ -15,10 +15,9 @@
 //
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
-
     model: null,
     errorMsg: '',
 
@@ -39,7 +38,7 @@ export default Ember.Component.extend({
         changePassword() {
             let newPassword = this.get('passwordEnabled') ? this.get('password') : '';
 
-            this.get('action').dispatch('UPDATE_PASSWORD', {
+            dispatch('UPDATE_PASSWORD', {
                 window: this.get('model'),
                 password: newPassword
             },

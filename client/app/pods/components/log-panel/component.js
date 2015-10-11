@@ -17,9 +17,9 @@
 /* globals moment, $ */
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     classNames: [ 'flex-column', 'flex-1' ],
@@ -100,7 +100,7 @@ export default Ember.Component.extend({
 
         this.set('loading', true);
 
-        this.get('action').dispatch('FETCH_MESSAGE_RANGE', {
+        dispatch('FETCH_MESSAGE_RANGE', {
             window: this.get('window'),
             start: epochTsStart,
             end: epochTsEnd

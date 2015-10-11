@@ -15,9 +15,9 @@
 //
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     name: Ember.computed.alias('store.profile.name'),
@@ -28,7 +28,7 @@ export default Ember.Component.extend({
 
     actions: {
         edit() {
-            this.get('action').dispatch('UPDATE_PROFILE', {
+            dispatch('UPDATE_PROFILE', {
                 name: this.get('name'),
                 email: this.get('email')
             },
@@ -37,7 +37,7 @@ export default Ember.Component.extend({
         },
 
         terminate() {
-            this.get('action').dispatch('OPEN_MODAL', {
+            dispatch('OPEN_MODAL', {
                 name: 'confirm-delete-account-modal'
             });
             this.sendAction('closeModal');
@@ -49,6 +49,6 @@ export default Ember.Component.extend({
     },
 
     didInsertElement() {
-        this.get('action').dispatch('FETCH_PROFILE');
+        dispatch('FETCH_PROFILE');
     }
 });

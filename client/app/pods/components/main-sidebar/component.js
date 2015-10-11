@@ -16,27 +16,28 @@
 
 import Ember from 'ember';
 import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend(KeyboardShortcuts, {
-    action: Ember.inject.service(),
     store: Ember.inject.service(),
+    friendsStore: Ember.inject.service(),
 
     classNames: [ 'sidebar', 'flex-grow-column' ],
 
     draggedWindow: false,
-    friends: Ember.computed.alias('store.friends'),
+    friends: Ember.computed.alias('friendsStore.friends'),
 
     actions: {
         openModal(modal) {
-            this.get('action').dispatch('OPEN_MODAL', { name: modal });
+            dispatch('OPEN_MODAL', { name: modal });
         },
 
         logout() {
-            this.get('action').dispatch('LOGOUT');
+            dispatch('LOGOUT');
         },
 
         toggleDarkTheme() {
-            this.get('action').dispatch('TOGGLE_THEME');
+            dispatch('TOGGLE_THEME');
         }
     },
 

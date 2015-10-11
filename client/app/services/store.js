@@ -19,18 +19,14 @@
 import Ember from 'ember';
 import Users from '../utils/users';
 import Window from '../models/window';
-import Friend from '../models/friend';
 import Alert from '../models/alert';
 import IndexArray from '../utils/index-array';
 import BaseStore from '../stores/base-store';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
+import { dispatch } from '../utils/dispatcher';
 
 export default BaseStore.extend({
-    action: Ember.inject.service(),
-    socket: Ember.inject.service(),
-
     users: null,
-    friends: null,
     windows: null,
     alerts: null,
     networks: null,
@@ -52,7 +48,6 @@ export default BaseStore.extend({
         this.set('networks', Ember.A([]));
         this.set('modals', Ember.A([]));
 
-        this.set('friends', IndexArray.create({ index: 'userId', factory: Friend }));
         this.set('windows', IndexArray.create({ index: 'windowId', factory: Window }));
         this.set('alerts', IndexArray.create({ index: 'alertId', factory: Alert }));
 
@@ -73,7 +68,7 @@ export default BaseStore.extend({
         let [ userId, secret ] = authCookie.split('-');
 
         if (!userId || !secret) {
-            this.get('action').dispatch('LOGOUT');
+            dispatch('LOGOUT');
         }
 
         this.set('userId', userId);
@@ -115,7 +110,7 @@ export default BaseStore.extend({
         let desktopIds = this.get('desktops').map(d => d.id);
 
         if (desktopIds.indexOf(this.get('settings.activeDesktop')) === -1) {
-            this.get('action').dispatch('CHANGE_ACTIVE_DESKTOP', {
+            dispatch('CHANGE_ACTIVE_DESKTOP', {
                 desktop: this.get('desktops').map(d => d.id).sort()[0] // Oldest
             });
         }
@@ -240,5 +235,481 @@ export default BaseStore.extend({
         };
 
         Ember.run.later(this, changeDay, timeToTomorrow);
+    },
+
+    _handleCloseAlert(data) {
+        let callback = this.get('alerts').get('firstObject').get('resultCallback');
+
+        if (callback) {
+            callback(data.result);
+        }
+
+        this.get('alerts').shiftObject();
+    },
+
+    _handleUpdateWindowAlerts(data) {
+        data.window.set('alerts', data.alerts);
+
+        this.get('socket').send({
+            id: 'UPDATE',
+            windowId: data.window.get('windowId'),
+            alerts: data.alerts
+        });
+    },
+
+    _handleUploadFiles(data) {
+        if (data.files.length === 0) {
+            return;
+        }
+
+        let formData = new FormData();
+        let files = Array.from(data.files);
+
+        for (let file of files) {
+            formData.append('file', file, file.name || 'webcam-upload.jpg');
+        }
+
+        formData.append('sessionId', this.get('socket').sessionId);
+
+        $.ajax({
+            url: '/api/v1/upload',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            success: resp => dispatch('SEND_TEXT', {
+                text: resp.url.join(' '),
+                window: data.window
+            }),
+            error: () => dispatch('ADD_ERROR', {
+                body: 'File upload failed.',
+                window: data.window
+            })
+        });
+    },
+
+    _handleAddMessage(data) {
+        data.window.messages.upsertModel({
+            body: data.body,
+            cat: 'msg',
+            userId: this.get('userId'),
+            ts: data.ts,
+            gid: data.gid,
+            window: data.window,
+            store: this.get('store')
+        });
+    },
+
+    _handleAddError(data) {
+        data.window.messages.upsertModel({
+            body: data.body,
+            cat: 'error',
+            userId: null,
+            ts: moment().unix(),
+            gid: 'error', // TODO: Not optimal, there's never second error message
+            window: data.window,
+            store: this.get('store')
+        });
+    },
+
+    _handleSendText(data) {
+        this.get('socket').send({
+            id: 'SEND',
+            text: data.text,
+            windowId: data.window.get('windowId')
+        }, resp => {
+            if (resp.status !== 'OK') {
+                dispatch('OPEN_MODAL', {
+                    name: 'info-modal',
+                    model: {
+                        title: 'Error',
+                        body: resp.errorMsg
+                    }
+                });
+            } else {
+                dispatch('ADD_MESSAGE', {
+                    body: data.text,
+                    ts: resp.ts,
+                    gid: resp.gid,
+                    window: data.window
+                });
+            }
+        });
+    },
+
+    _handleSendCommand(data) {
+        this.get('socket').send({
+            id: 'COMMAND',
+            command: data.command,
+            params: data.params,
+            windowId: data.window.get('windowId')
+        }, resp => {
+            if (resp.status !== 'OK') {
+                dispatch('OPEN_MODAL', {
+                    name: 'info-modal',
+                    model: {
+                        title: 'Error',
+                        body: resp.errorMsg
+                    }
+                });
+            }
+        });
+        return;
+    },
+
+    _handleOpenModal(data) {
+        this.get('modals').pushObject({
+            name: data.name,
+            model: data.model
+        });
+    },
+
+    _handleCloseModal() {
+        this.get('modals').shiftObject();
+    },
+
+    _handleOpenPriorityModal(data) {
+        this.get('modals').unshiftObject({ // Show immediately
+            name: data.name,
+            model: data.model
+        });
+    },
+
+    _handleClosePriorityModal() {
+        this.get('modals').shiftObject();
+    },
+
+    _handleDestroyAccount() {
+        this.get('socket').send({
+            id: 'DESTROY_ACCOUNT'
+        }, () => {
+            $.removeCookie('auth', { path: '/' });
+            window.location = '/';
+        });
+    },
+
+    _handleCreateGroup(data, acceptCb, rejectCb) {
+        this.get('socket').send({
+            id: 'CREATE',
+            name: data.name,
+            password: data.password
+        }, resp => {
+            if (resp.status === 'OK') {
+                acceptCb();
+            } else {
+                rejectCb(resp.errorMsg);
+            }
+        });
+    },
+
+    _handleJoinGroup(data, acceptCb, rejectCb) {
+        this.get('socket').send({
+            id: 'JOIN',
+            name: data.name,
+            network: 'MAS',
+            password: data.password
+        }, resp => {
+            if (resp.status === 'OK') {
+                acceptCb();
+            } else {
+                rejectCb(resp.errorMsg);
+            }
+        });
+    },
+
+    _handleJoinIrcChannel(data, acceptCb, rejectCb) {
+        this.get('socket').send({
+            id: 'JOIN',
+            name: data.name,
+            network: data.network,
+            password: data.password
+        }, resp => {
+            if (resp.status === 'OK') {
+                acceptCb();
+            } else {
+                rejectCb(resp.errorMsg);
+            }
+        });
+    },
+
+    _handleStartChat(data) {
+        this.get('socket').send({
+            id: 'CHAT',
+            userId: data.userId
+        }, resp  => {
+            if (resp.status !== 'OK') {
+                dispatch('OPEN_MODAL', {
+                    name: 'info-modal',
+                    model: {
+                        title: 'Error',
+                        body: resp.errorMsg
+                    }
+                });
+            }
+        });
+    },
+
+    _handleFetchMessageRange(data, successCb) {
+        this.get('socket').send({
+            id: 'FETCH',
+            windowId: data.window.get('windowId'),
+            start: data.start,
+            end: data.end
+        }, resp => {
+            data.window.get('logMessages').clearModels();
+
+            for (let message of resp.msgs) {
+                message.window = data.window;
+                message.store = this.get('store');
+                data.window.get('logMessages').upsertModel(message);
+            }
+
+            successCb();
+        });
+    },
+
+    _handleFetchOlderMessages(data, successCb) {
+        this.get('socket').send({
+            id: 'FETCH',
+            windowId: data.window.get('windowId'),
+            end: data.window.get('messages').sortBy('ts').get('firstObject').get('ts'),
+            limit: 1000
+        }, resp => {
+            for (let message of resp.msgs) {
+                message.window = data.window;
+                message.store = this.get('store');
+
+                // Window messages are roughly sorted. First are old messages received by FETCH.
+                // Then the messages received at startup and at runtime.
+                data.window.get('messages').upsertModelPrepend(message);
+            }
+
+            successCb(resp.msgs.length !== 0);
+        });
+    },
+
+    _handleProcessLine(data) {
+        let body = data.body;
+        let command = false;
+        let commandParams;
+
+        if (body.charAt(0) === '/') {
+            let data = /^(\S*)(.*)/.exec(body.substring(1));
+            command = data[1] ? data[1].toLowerCase() : '';
+            commandParams = data[2] ? data[2] : '';
+        }
+
+        let ircServer1on1 = data.window.get('type') === '1on1' &&
+            data.window.get('userId') === 'iSERVER';
+
+        if (ircServer1on1 && !command) {
+            dispatch('ADD_ERROR', {
+                body: 'Only commands allowed, e.g. /whois john',
+                window: window
+            });
+        }
+
+        if (command === 'help') {
+            dispatch('OPEN_MODAL', { name: 'help-modal' });
+            return;
+        }
+
+        // TBD: /me on an empty IRC channel is not shown to the sender.
+
+        if (command) {
+            dispatch('SEND_COMMAND', {
+                command: command,
+                params: commandParams.trim(),
+                window: data.window
+            });
+            return;
+        }
+
+        dispatch('SEND_TEXT', {
+            text: body,
+            window: data.window
+        });
+    },
+
+    _handleEditMessage(data) {
+        this.get('socket').send({
+            id: 'EDIT',
+            windowId: data.window.get('windowId'),
+            gid: data.gid,
+            text: data.body
+        }, resp => {
+            if (resp.status !== 'OK') {
+                dispatch('OPEN_MODAL', {
+                    name: 'info-modal',
+                    model: {
+                        title: 'Error',
+                        body: resp.errorMsg
+                    }
+                });
+            }
+        });
+    },
+
+    _handleCloseWindow(data) {
+        this.get('socket').send({
+            id: 'CLOSE',
+            windowId: data.window.get('windowId')
+        });
+    },
+
+    _handleLogout() {
+        this.get('socket').send({
+            id: 'LOGOUT'
+        }, () => {
+            $.removeCookie('auth', { path: '/' });
+
+            if (typeof Storage !== 'undefined') {
+                window.localStorage.removeItem('data');
+            }
+
+            window.location = '/';
+        });
+    },
+
+    _handleToggleTheme() {
+        let newTheme = this.get('settings.theme') === 'dark' ? 'default' : 'dark';
+
+        this.set('settings.theme', newTheme);
+        this.get('socket').send({
+            id: 'SET',
+            settings: {
+                theme: newTheme
+            }
+        });
+    },
+
+    _handleUpdatePassword(data, successCb, rejectCb) {
+        this.get('socket').send({
+            id: 'UPDATE_PASSWORD',
+            windowId: data.window.get('windowId'),
+            password: data.password
+        }, resp => {
+            if (resp.status === 'OK') {
+                successCb();
+            } else {
+                rejectCb(resp.errorMsg);
+            }
+        });
+    },
+
+    _handleUpdateProfile(data, successCb, rejectCb) {
+        this.get('socket').send({
+            id: 'UPDATE_PROFILE',
+            name: data.name,
+            email: data.email
+        }, resp => {
+            if (resp.status === 'OK') {
+                // Don't nag about unconfirmed email address anymore in this session
+                this.set('settings.emailConfirmed', true);
+                successCb();
+            } else {
+                rejectCb(resp.errorMsg);
+            }
+        });
+    },
+
+    _handleFetchProfile() {
+        this.get('socket').send({
+            id: 'GET_PROFILE'
+        }, resp => {
+            this.set('profile.name', resp.name);
+            this.set('profile.email', resp.email);
+            this.set('profile.nick', resp.nick);
+        });
+    },
+
+    _handleUpdateTopic(data) {
+        this.get('socket').send({
+            id: 'UPDATE_TOPIC',
+            windowId: data.window.get('windowId'),
+            topic: data.topic
+        });
+    },
+
+    _handleConfirmEmail(data, successCb) {
+        this.get('socket').send({
+            id: 'SEND_CONFIRM_EMAIL'
+        }, () => {
+            dispatch('SHOW_ALERT', {
+                message: 'Confirmation link sent. Check your spam folder if you don\'t see it in inbox.',
+                dismissible: true,
+                report: false,
+                postponeLabel: false,
+                ackLabel: 'Okay'
+            });
+
+            this.set('emailConfirmed', true);
+        });
+    },
+
+    _handleShowAlert(data) {
+        this.get('alerts').upsertModel(data);
+    },
+
+    _handleMoveWindow(data) {
+        let props = [ 'column', 'row', 'desktop' ];
+
+        for (let prop of props) {
+            if (data.hasOwnProperty(prop)) {
+                data.window.set(prop, data[prop]);
+            }
+        }
+
+        if (!isMobile.any) {
+            this.get('socket').send({
+                id: 'UPDATE',
+                windowId: data.window.get('windowId'),
+                desktop: data.desktop,
+                column: data.column,
+                row: data.row
+            });
+        }
+    },
+
+    _handleToggleMemberListWidth(data) {
+        let newValue = data.window.toggleProperty('minimizedNamesList');
+
+        this.get('socket').send({
+            id: 'UPDATE',
+            windowId: data.window.get('windowId'),
+            minimizedNamesList: newValue
+        });
+    },
+
+    _handleChangeActiveDesktop(data) {
+        this.set('settings.activeDesktop', data.desktop);
+
+        if (!isMobile.any) {
+            this.get('socket').send({
+                id: 'SET',
+                settings: {
+                    activeDesktop: data.desktop
+                }
+            });
+        }
+    },
+
+    _handleSeekActiveDesktop(data) {
+        let desktops = this.get('desktops');
+        let activeDesktop = this.get('settings.activeDesktop');
+        let index = desktops.indexOf(desktops.findBy('id', activeDesktop));
+
+        index += data.direction;
+
+        if (index === desktops.length) {
+            index = 0;
+        } else if (index < 0) {
+            index = desktops.length - 1;
+        }
+
+        dispatch('CHANGE_ACTIVE_DESKTOP', {
+            desktop: desktops[index].id
+        });
     }
 });

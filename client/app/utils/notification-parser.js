@@ -17,6 +17,7 @@
 /* globals isMobile */
 
 import Ember from 'ember';
+import { dispatch } from './dispatcher';
 
 export default Ember.Object.extend({
     store: null,
@@ -170,14 +171,7 @@ export default Ember.Object.extend({
     },
 
     _handleFriends(data) {
-        if (data.reset) {
-            this.get('store.friends').clearModels();
-        }
-
-        for (let friend of data.friends) {
-            friend.store = this.get('store');
-            this.get('store.friends').upsertModel(friend);
-        }
+        dispatch('ADD_FRIENDS', data);
     },
 
     _handleAlert(data) {
@@ -216,36 +210,7 @@ export default Ember.Object.extend({
     },
 
     _handleFriendsconfirm(data) {
-        let socket = this.get('socket');
-        let users = this.get('store.users');
-
-        function resultHandler(userId) {
-            return function(result) {
-                if (result === 'ack' || result === 'nack') {
-                    socket.send({
-                        id: 'FRIEND_VERDICT',
-                        userId: userId,
-                        allow: result === 'ack'
-                    });
-                }
-            };
-        }
-
-        data.friends.forEach(function(friendCandidate) {
-            let realName = users.getName(friendCandidate.userId);
-            let nick = users.getNick(friendCandidate.userId, 'MAS');
-
-            this.get('store.alerts').upsertModel({
-                message: `Allow ${realName} (${nick}) to add you to his/her contacts list?`,
-                alertId: friendCandidate.userId,
-                dismissible: true,
-                report: false,
-                postponeLabel: 'Decide later',
-                nackLabel: 'Ignore',
-                ackLabel: 'Allow',
-                resultCallback: resultHandler(friendCandidate.userId)
-            });
-        }.bind(this));
+        dispatch('CONFIRM_FRIENDS', data);
     },
 
     _removeUser(userId, targetWindow) {

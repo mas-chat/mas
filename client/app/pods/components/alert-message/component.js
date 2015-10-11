@@ -15,9 +15,9 @@
 //
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     classNames: [ 'flex-row', 'announcement' ],
@@ -32,7 +32,7 @@ export default Ember.Component.extend({
 
     actions: {
         close(result) {
-            this.get('action').dispatch('CLOSE_ALERT', { result: result });
+            dispatch('CLOSE_ALERT', { result: result });
         }
     }
 });

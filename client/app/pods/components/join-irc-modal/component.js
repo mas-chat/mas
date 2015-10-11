@@ -15,9 +15,9 @@
 //
 
 import Ember from 'ember';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
-    action: Ember.inject.service(),
     store: Ember.inject.service(),
 
     channel: '',
@@ -34,7 +34,7 @@ export default Ember.Component.extend({
         joinIRC() {
             let password = this.get('password').trim();
 
-            this.get('action').dispatch('JOIN_IRC_CHANNEL', {
+            dispatch('JOIN_IRC_CHANNEL', {
                 name: this.get('channel'),
                 network: this.get('selectedNetwork'),
                 password: password
