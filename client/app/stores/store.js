@@ -39,6 +39,7 @@ export default BaseStore.extend({
     userId: null,
     initDone: false,
     maxBacklogMsgs: 100000,
+    msgBuffer: null, // Only used during startup
     cachedUpto: 0,
     dayCounter: 0,
 
@@ -74,6 +75,8 @@ export default BaseStore.extend({
 
         this.set('userId', userId);
         this.set('secret', secret);
+
+        this.msgBuffer = [];
     },
 
     desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
@@ -297,6 +300,18 @@ export default BaseStore.extend({
             gid: data.gid,
             window: data.window,
         });
+    },
+
+    _handleAddMessageServer(data) {
+        data.window = this._getWindow(data.windowId);
+        delete window.windowId;
+
+        if (!this.get('initDone')) {
+            // Optimization: Avoid re-renders after every message
+            this.msgBuffer.push(data);
+        } else {
+            data.window.messages.upsertModel(data);
+        }
     },
 
     _handleAddError(data) {
@@ -546,11 +561,21 @@ export default BaseStore.extend({
         });
     },
 
+    _handleAddWindow(data) {
+        data.generation = socket.sessionId;
+        this.get('windows').upsertModel(data);
+    },
+
     _handleCloseWindow(data) {
         socket.send({
             id: 'CLOSE',
             windowId: data.window.get('windowId')
         });
+    },
+
+    _handleDeleteWindow(data) {
+        let window = this._getWindow(data.windowId);
+        this.get('windows').removeModel(window);
     },
 
     _handleLogout() {
@@ -706,5 +731,121 @@ export default BaseStore.extend({
         dispatch('CHANGE_ACTIVE_DESKTOP', {
             desktop: desktops[index].id
         });
+    },
+
+    _handleUpdateSettings(data) {
+        if (isMobile.any) {
+            data.settings.activeDesktop = 1;
+        }
+
+        this.get('settings').setProperties(data.settings);
+    },
+
+    _handleUpdateNetworks(data) {
+        this.get('networks').setObjects(data.networks);
+    },
+
+    _handleAddAlert(data) {
+        // Default labels for alerts
+        data.postponeLabel = 'Show again later';
+        data.ackLabel = 'Dismiss';
+
+        data.resultCallback = result => {
+            if (result === 'ack') {
+                socket.send({
+                    id: 'ACKALERT',
+                    alertId: data.alertId
+                });
+            }
+        };
+
+        this.get('alerts').upsertModel(data);
+    },
+
+    _handleFinishStartup() {
+        // Remove possible deleted windows.
+        let deletedWindows = [];
+
+        this.get('windows').forEach(windowObject => {
+            if (windowObject.get('generation') !== socket.sessionId) {
+                deletedWindows.push(windowObject);
+            }
+        });
+
+        this.get('windows').removeModels(deletedWindows);
+
+        // Insert buffered message in one go.
+        Ember.Logger.info(`MsgBuffer processing started.`);
+
+        for (let i = 0; i < this.msgBuffer.length; i++) {
+            let item = this.msgBuffer[i];
+            item.window.messages.upsertModel(item);
+        }
+
+        Ember.Logger.info(`MsgBuffer processing ended.`);
+
+        this.msgBuffer = [];
+        this.set('initDone', true);
+    },
+
+    _handleAddMembers(data) {
+        let window = this._getWindow(data.windowId);
+
+        if (data.reset) {
+            window.operators.clear();
+            window.voices.clear();
+            window.users.clear();
+        }
+
+        data.members.forEach(member => {
+            let userId = member.userId;
+
+            if (!data.reset) {
+                this._removeUser(userId, data.window);
+            }
+
+            switch (member.role) {
+                case '@':
+                    window.operators.pushObject(userId);
+                    break;
+                case '+':
+                    window.voices.pushObject(userId);
+                    break;
+                default:
+                    window.users.pushObject(userId);
+                    break;
+            }
+        });
+    },
+
+    _handleDeleteMembers(data) {
+        let window = this._getWindow(data.windowId);
+
+        data.members.forEach(member => {
+            this._removeUser(member.userId, window);
+        });
+    },
+
+    _handleUpdateWindow(data) {
+        let window = this._getWindow(data.windowId);
+        window.setModelProperties(data);
+    },
+
+    _handleUpsertUsers(data) {
+        for (let userId in data.mapping) {
+            this.set('users.users.' + userId, data.mapping[userId]);
+        }
+
+        this.get('users').incrementProperty('isDirty');
+    },
+
+    _removeUser(userId, window) {
+        window.operators.removeObject(userId);
+        window.voices.removeObject(userId);
+        window.users.removeObject(userId);
+    },
+
+    _getWindow(windowId) {
+        return this.get('windows').getByIndex(windowId);
     }
 }).create();

@@ -17,11 +17,26 @@
 /* globals $, io, isMobile */
 
 import Ember from 'ember';
-import NotificationParser from '../utils/notification-parser';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import { dispatch } from '../utils/dispatcher';
 
-let socket = io.connect(); // Start connection as early as possible.
+const mapServerIds = {
+    CREATE: 'ADD_WINDOW',
+    SET: 'UPDATE_SETTINGS',
+    CLOSE: 'DELETE_WINDOW',
+    MSG: 'ADD_MESSAGE_SERVER',
+    INITDONE: 'FINISH_STARTUP',
+    USERS: 'UPSERT_USERS',
+    ADDMEMBERS: 'ADD_MEMBERS',
+    DELMEMBERS: 'DELETE_MEMBERS',
+    UPDATE: 'UPDATE_WINDOW',
+    FRIENDS: 'ADD_FRIENDS',
+    ALERT: 'ADD_ALERT',
+    NETWORKS: 'UPDATE_NETWORKS',
+    FRIENDSCONFIRM: 'CONFIRM_FRIENDS'
+};
+
+let ioSocket = io.connect(); // Start connection as early as possible.
 
 let SocketService = Ember.Object.extend({
     store: null,
@@ -29,7 +44,6 @@ let SocketService = Ember.Object.extend({
     sessionId: 0,
     secret: '',
 
-    _notificationParser: null,
     _connected: false,
     _disconnectedQueue: null,
     _disconnectedTimer: null,
@@ -37,7 +51,6 @@ let SocketService = Ember.Object.extend({
     init() {
         this._super();
         this._disconnectedQueue = Ember.A([]);
-        this.set('socket', socket);
     },
 
     start(store) {
@@ -57,15 +70,10 @@ let SocketService = Ember.Object.extend({
         this.set('store.userId', userId);
         this.set('secret', secret);
 
-        this._notificationParser = NotificationParser.create({
-            socket: this,
-            store: this.get('store')
-        });
-
         this.set('store.initDone', false);
         this._emitInit(userId, secret);
 
-        socket.on('initok', Ember.run.bind(this, function(data) {
+        ioSocket.on('initok', Ember.run.bind(this, function(data) {
             this.set('_connected', true);
 
             this.set('sessionId', data.sessionId);
@@ -81,15 +89,28 @@ let SocketService = Ember.Object.extend({
             this._disconnectedQueue.clear();
         }));
 
-        this.socket.on('terminate', Ember.run.bind(this, function() {
+        ioSocket.on('terminate', Ember.run.bind(this, function() {
             this._logout();
         }));
 
-        socket.on('ntf', Ember.run.bind(this, function(data) {
-            this._notificationParser.process(data);
+        ioSocket.on('ntf', Ember.run.bind(this, function(notification) {
+            let type = notification.id;
+            delete notification.id;
+
+            if (type !== 'MSG') {
+                Ember.Logger.info(`← NTF: ${type}`);
+            }
+
+            let event = mapServerIds[type];
+
+            if (event) {
+                dispatch(event, notification);
+            } else {
+                Ember.Logger.warn(`Unknown notification received: ${type}`);
+            }
         }));
 
-        socket.on('disconnect', Ember.run.bind(this, function() {
+        ioSocket.on('disconnect', Ember.run.bind(this, function() {
             Ember.Logger.info('Socket.io connection lost.');
 
             this.set('_connected', false);
@@ -107,7 +128,7 @@ let SocketService = Ember.Object.extend({
             }, 5000));
         }));
 
-        socket.on('reconnect', Ember.run.bind(this, function() {
+        ioSocket.on('reconnect', Ember.run.bind(this, function() {
             let timer = this.get('_disconnectedTimer');
 
             if (timer) {
@@ -137,7 +158,7 @@ let SocketService = Ember.Object.extend({
         let maxBacklogMsgs = calcMsgHistorySize();
         let cachedUpto = this.get('store.cachedUpto');
 
-        this.socket.emit('init', {
+        ioSocket.emit('init', {
             clientName: 'web',
             clientOS: navigator.platform,
             userId: userId,
@@ -151,7 +172,7 @@ let SocketService = Ember.Object.extend({
     },
 
     _emitReq(command, callback) {
-        this.socket.emit('req', command, function(data) {
+        ioSocket.emit('req', command, function(data) {
             if (callback) {
                 Ember.Logger.info('← RESP');
                 callback(data);

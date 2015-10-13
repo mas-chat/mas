@@ -24,11 +24,14 @@ import IndexArray from '../utils/index-array';
 import store from '../stores/store';
 
 let titleBuilder = TitleBuilder.create();
+let mobileDesktop = 1;
 
 export default BaseModel.extend({
     init() {
         this._super();
         this.set('store', store);
+
+        this.set('_desktop', mobileDesktop++);
 
         this.set('messages', IndexArray.create({ index: 'gid', factory: Message }));
         this.set('logMessages', IndexArray.create({ index: 'gid', factory: Message }));
@@ -56,7 +59,6 @@ export default BaseModel.extend({
 
     row: 0,
     column: 0,
-    desktop: 0,
 
     messages: null,
     didPrepend: false,
@@ -72,6 +74,16 @@ export default BaseModel.extend({
     minimizedNamesList: false,
 
     password: null,
+
+    _desktop: null,
+
+    desktop: function(key, value, previousValue) {
+        if (arguments.length > 1 && !isMobile.any) {
+            this.set('_desktop',  value);
+        }
+
+        return this.get('_destkop');
+    }.property('_desktop'),
 
     sortedMessages: Ember.computed('messages.[]', 'store.dayCounter', function() {
         let result = this.get('messages').sortBy('ts');
