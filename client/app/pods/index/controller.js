@@ -15,12 +15,12 @@
 //
 
 import Ember from 'ember';
+import store from '../../stores/store';
 
 export default Ember.Controller.extend({
-    store: Ember.inject.service(),
 
     init() {
         this._super();
-        this.get('store').start(); // Everything starts here
+        store.start(); // Everything starts from here
     }
 });
