@@ -21,12 +21,14 @@ import TitleBuilder from '../utils/title-builder';
 import BaseModel from './base';
 import Message from './message';
 import IndexArray from '../utils/index-array';
+import store from '../stores/store';
 
 let titleBuilder = TitleBuilder.create();
 
 export default BaseModel.extend({
     init() {
         this._super();
+        this.set('store', store);
 
         this.set('messages', IndexArray.create({ index: 'gid', factory: Message }));
         this.set('logMessages', IndexArray.create({ index: 'gid', factory: Message }));
@@ -80,7 +82,6 @@ export default BaseModel.extend({
                 cat: 'day-divider',
                 gid: 0,
                 window: this,
-                store: this.get('store')
             }));
         };
 

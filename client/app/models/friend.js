@@ -16,14 +16,19 @@
 
 import Ember from 'ember';
 import BaseModel from './base';
+import store from '../stores/store';
 
 export default BaseModel.extend({
     store: null,
-
     userId: null,
 
     name: Ember.computed('store.users.isDirty', function() {
         let userId = this.get('userId');
         return this.get('store.users').getName(userId);
-    })
+    }),
+
+    init() {
+        this._super();
+        this.set('store', store);
+    }
 });
