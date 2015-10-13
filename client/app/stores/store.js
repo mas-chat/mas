@@ -22,6 +22,7 @@ import Window from '../models/window';
 import Alert from '../models/alert';
 import IndexArray from '../utils/index-array';
 import BaseStore from '../stores/base-store';
+import socket from '../utils/socket';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import { dispatch } from '../utils/dispatcher';
 
@@ -122,7 +123,7 @@ export default BaseStore.extend({
         // It's now first possible time to start socket.io connection. Data from server
         // can't race with snapshot data as first socket.io event will be processed at
         // earliest in the next runloop.
-        this.get('socket').start();
+        socket.start(this);
 
         this._startDayChangedService();
     },
@@ -208,14 +209,12 @@ export default BaseStore.extend({
         this.get('users').incrementProperty('isDirty');
 
         for (let windowData of data.windows) {
-            windowData.store = this;
             delete windowData.messages;
 
             let messages = windowData.messages;
             let windowModel = this.get('windows').upsertModel(windowData);
 
             for (let message of messages) {
-                message.store = this;
                 message.window = windowModel;
                 windowModel.get('messages').upsertModel(message);
             }
@@ -250,7 +249,7 @@ export default BaseStore.extend({
     _handleUpdateWindowAlerts(data) {
         data.window.set('alerts', data.alerts);
 
-        this.get('socket').send({
+        socket.send({
             id: 'UPDATE',
             windowId: data.window.get('windowId'),
             alerts: data.alerts
@@ -269,7 +268,7 @@ export default BaseStore.extend({
             formData.append('file', file, file.name || 'webcam-upload.jpg');
         }
 
-        formData.append('sessionId', this.get('socket').sessionId);
+        formData.append('sessionId', socket.get('sessionId'));
 
         $.ajax({
             url: '/api/v1/upload',
@@ -297,7 +296,6 @@ export default BaseStore.extend({
             ts: data.ts,
             gid: data.gid,
             window: data.window,
-            store: this.get('store')
         });
     },
 
@@ -309,12 +307,11 @@ export default BaseStore.extend({
             ts: moment().unix(),
             gid: 'error', // TODO: Not optimal, there's never second error message
             window: data.window,
-            store: this.get('store')
         });
     },
 
     _handleSendText(data) {
-        this.get('socket').send({
+        socket.send({
             id: 'SEND',
             text: data.text,
             windowId: data.window.get('windowId')
@@ -339,7 +336,7 @@ export default BaseStore.extend({
     },
 
     _handleSendCommand(data) {
-        this.get('socket').send({
+        socket.send({
             id: 'COMMAND',
             command: data.command,
             params: data.params,
@@ -381,7 +378,7 @@ export default BaseStore.extend({
     },
 
     _handleDestroyAccount() {
-        this.get('socket').send({
+        socket.send({
             id: 'DESTROY_ACCOUNT'
         }, () => {
             $.removeCookie('auth', { path: '/' });
@@ -390,7 +387,7 @@ export default BaseStore.extend({
     },
 
     _handleCreateGroup(data, acceptCb, rejectCb) {
-        this.get('socket').send({
+        socket.send({
             id: 'CREATE',
             name: data.name,
             password: data.password
@@ -404,7 +401,7 @@ export default BaseStore.extend({
     },
 
     _handleJoinGroup(data, acceptCb, rejectCb) {
-        this.get('socket').send({
+        socket.send({
             id: 'JOIN',
             name: data.name,
             network: 'MAS',
@@ -419,7 +416,7 @@ export default BaseStore.extend({
     },
 
     _handleJoinIrcChannel(data, acceptCb, rejectCb) {
-        this.get('socket').send({
+        socket.send({
             id: 'JOIN',
             name: data.name,
             network: data.network,
@@ -434,7 +431,7 @@ export default BaseStore.extend({
     },
 
     _handleStartChat(data) {
-        this.get('socket').send({
+        socket.send({
             id: 'CHAT',
             userId: data.userId
         }, resp  => {
@@ -451,7 +448,7 @@ export default BaseStore.extend({
     },
 
     _handleFetchMessageRange(data, successCb) {
-        this.get('socket').send({
+        socket.send({
             id: 'FETCH',
             windowId: data.window.get('windowId'),
             start: data.start,
@@ -461,7 +458,6 @@ export default BaseStore.extend({
 
             for (let message of resp.msgs) {
                 message.window = data.window;
-                message.store = this.get('store');
                 data.window.get('logMessages').upsertModel(message);
             }
 
@@ -470,7 +466,7 @@ export default BaseStore.extend({
     },
 
     _handleFetchOlderMessages(data, successCb) {
-        this.get('socket').send({
+        socket.send({
             id: 'FETCH',
             windowId: data.window.get('windowId'),
             end: data.window.get('messages').sortBy('ts').get('firstObject').get('ts'),
@@ -478,7 +474,6 @@ export default BaseStore.extend({
         }, resp => {
             for (let message of resp.msgs) {
                 message.window = data.window;
-                message.store = this.get('store');
 
                 // Window messages are roughly sorted. First are old messages received by FETCH.
                 // Then the messages received at startup and at runtime.
@@ -533,7 +528,7 @@ export default BaseStore.extend({
     },
 
     _handleEditMessage(data) {
-        this.get('socket').send({
+        socket.send({
             id: 'EDIT',
             windowId: data.window.get('windowId'),
             gid: data.gid,
@@ -552,14 +547,14 @@ export default BaseStore.extend({
     },
 
     _handleCloseWindow(data) {
-        this.get('socket').send({
+        socket.send({
             id: 'CLOSE',
             windowId: data.window.get('windowId')
         });
     },
 
     _handleLogout() {
-        this.get('socket').send({
+        socket.send({
             id: 'LOGOUT'
         }, () => {
             $.removeCookie('auth', { path: '/' });
@@ -576,7 +571,7 @@ export default BaseStore.extend({
         let newTheme = this.get('settings.theme') === 'dark' ? 'default' : 'dark';
 
         this.set('settings.theme', newTheme);
-        this.get('socket').send({
+        socket.send({
             id: 'SET',
             settings: {
                 theme: newTheme
@@ -585,7 +580,7 @@ export default BaseStore.extend({
     },
 
     _handleUpdatePassword(data, successCb, rejectCb) {
-        this.get('socket').send({
+        socket.send({
             id: 'UPDATE_PASSWORD',
             windowId: data.window.get('windowId'),
             password: data.password
@@ -599,7 +594,7 @@ export default BaseStore.extend({
     },
 
     _handleUpdateProfile(data, successCb, rejectCb) {
-        this.get('socket').send({
+        socket.send({
             id: 'UPDATE_PROFILE',
             name: data.name,
             email: data.email
@@ -615,7 +610,7 @@ export default BaseStore.extend({
     },
 
     _handleFetchProfile() {
-        this.get('socket').send({
+        socket.send({
             id: 'GET_PROFILE'
         }, resp => {
             this.set('profile.name', resp.name);
@@ -625,7 +620,7 @@ export default BaseStore.extend({
     },
 
     _handleUpdateTopic(data) {
-        this.get('socket').send({
+        socket.send({
             id: 'UPDATE_TOPIC',
             windowId: data.window.get('windowId'),
             topic: data.topic
@@ -633,7 +628,7 @@ export default BaseStore.extend({
     },
 
     _handleConfirmEmail(data, successCb) {
-        this.get('socket').send({
+        socket.send({
             id: 'SEND_CONFIRM_EMAIL'
         }, () => {
             dispatch('SHOW_ALERT', {
@@ -662,7 +657,7 @@ export default BaseStore.extend({
         }
 
         if (!isMobile.any) {
-            this.get('socket').send({
+            socket.send({
                 id: 'UPDATE',
                 windowId: data.window.get('windowId'),
                 desktop: data.desktop,
@@ -675,7 +670,7 @@ export default BaseStore.extend({
     _handleToggleMemberListWidth(data) {
         let newValue = data.window.toggleProperty('minimizedNamesList');
 
-        this.get('socket').send({
+        socket.send({
             id: 'UPDATE',
             windowId: data.window.get('windowId'),
             minimizedNamesList: newValue
@@ -686,7 +681,7 @@ export default BaseStore.extend({
         this.set('settings.activeDesktop', data.desktop);
 
         if (!isMobile.any) {
-            this.get('socket').send({
+            socket.send({
                 id: 'SET',
                 settings: {
                     activeDesktop: data.desktop
@@ -712,4 +707,4 @@ export default BaseStore.extend({
             desktop: desktops[index].id
         });
     }
-});
+}).create();

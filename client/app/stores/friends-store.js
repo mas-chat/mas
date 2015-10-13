@@ -15,18 +15,19 @@
 //
 
 import Ember from 'ember';
+import Friend from '../models/friend';
 import BaseStore from '../stores/base-store';
 import IndexArray from '../utils/index-array';
-import Friend from '../models/friend';
+import socket from '../utils/socket';
 import { dispatch } from '../utils/dispatcher';
+import store from './store';
 
 export default BaseStore.extend({
-    socket: Ember.inject.service(),
-    store: Ember.inject.service(),
     friends: null,
 
     init() {
         this._super();
+        this.set('store', store);
 
         this.set('friends', IndexArray.create({ index: 'userId', factory: Friend }));
     },
@@ -36,10 +37,7 @@ export default BaseStore.extend({
             this.get('friends').clearModels();
         }
 
-        for (let friend of data.friends) {
-            friend.store = this.get('store');
-           this.get('friends').upsertModel(friend);
-        }
+        this.get('friends').upsertModels(data.friends);
     },
 
     _handleConfirmRemoveFriend(data) {
@@ -50,7 +48,7 @@ export default BaseStore.extend({
     },
 
     _handleRequestFriend(data) {
-        this.get('socket').send({
+        socket.send({
             id: 'REQUEST_FRIEND',
             userId: data.userId
         }, resp => {
@@ -87,7 +85,7 @@ export default BaseStore.extend({
                 ackLabel: 'Allow',
                 resultCallback: (result) => {
                     if (result === 'ack' || result === 'nack') {
-                        this.get('socket').send({
+                        socket.send({
                             id: 'FRIEND_VERDICT',
                             userId: userId,
                             allow: result === 'ack'
@@ -99,9 +97,9 @@ export default BaseStore.extend({
     },
 
     _handleRemoveFriend(data) {
-        this.get('socket').send({
+        socket.send({
             id: 'REMOVE_FRIEND',
             userId: data.userId
         });
     }
-});
+}).create();
