@@ -38,7 +38,7 @@ export default Ember.Object.extend({
         let data = this.toJSON();
 
         try {
-            window.localStorage.setItem('data', JSON.stringify(data));
+            window.localStorage.setItem(this.get('name'), JSON.stringify(data));
             Ember.Logger.info('Snapshot saved.');
         } catch (e) {
             Ember.Logger.info(`Failed to save snapshot: ${e}`);
@@ -55,7 +55,7 @@ export default Ember.Object.extend({
         Ember.Logger.info('Starting to load saved snapshot.');
 
         try {
-            data = JSON.parse(window.localStorage.getItem('data'));
+            data = JSON.parse(window.localStorage.getItem(this.get('name')));
 
             if (!data) {
                 Ember.Logger.info('Snapshot not found.');

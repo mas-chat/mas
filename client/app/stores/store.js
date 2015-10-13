@@ -27,6 +27,8 @@ import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import { dispatch } from '../utils/dispatcher';
 
 export default BaseStore.extend({
+    name: 'windows',
+
     users: null,
     windows: null,
     alerts: null,

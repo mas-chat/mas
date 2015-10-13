@@ -23,6 +23,8 @@ import { dispatch } from '../utils/dispatcher';
 import store from './store';
 
 export default BaseStore.extend({
+    name: 'friends',
+
     friends: null,
 
     init() {
