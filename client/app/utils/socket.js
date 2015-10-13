@@ -23,8 +23,8 @@ import { dispatch } from '../utils/dispatcher';
 
 let socket = io.connect(); // Start connection as early as possible.
 
-export default Ember.Service.extend({
-    store: Ember.inject.service(),
+let SocketService = Ember.Object.extend({
+    store: null,
 
     sessionId: 0,
     secret: '',
@@ -37,7 +37,10 @@ export default Ember.Service.extend({
     init() {
         this._super();
         this._disconnectedQueue = Ember.A([]);
+        this.set('socket', socket);
+    },
 
+    start(store) {
         let authCookie = $.cookie('auth');
 
         if (!authCookie) {
@@ -50,6 +53,7 @@ export default Ember.Service.extend({
             this._logout();
         }
 
+        this.set('store', store);
         this.set('store.userId', userId);
         this.set('secret', secret);
 
@@ -57,14 +61,8 @@ export default Ember.Service.extend({
             socket: this,
             store: this.get('store')
         });
-    },
-
-    start() {
-        let userId = this.get('store.userId');
-        let secret = this.get('secret');
 
         this.set('store.initDone', false);
-        this.set('socket', socket);
         this._emitInit(userId, secret);
 
         socket.on('initok', Ember.run.bind(this, function(data) {
@@ -168,3 +166,5 @@ export default Ember.Service.extend({
         window.location = '/';
     }
 });
+
+export default SocketService.create();
