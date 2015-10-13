@@ -18,10 +18,9 @@
 
 import Ember from 'ember';
 import { darkTheme } from '../../../utils/theme-dark'
+import BaseComponent from '../base-component';
 
-export default Ember.Component.extend({
-    store: Ember.inject.service(),
-
+export default BaseComponent.extend({
     classNames: [ 'flex-grow-column', 'flex-1' ],
 
     draggedWindow: false,

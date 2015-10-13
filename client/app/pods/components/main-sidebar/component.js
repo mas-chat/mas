@@ -17,11 +17,9 @@
 import Ember from 'ember';
 import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 import { dispatch } from '../../../utils/dispatcher';
+import BaseComponent from '../base-component';
 
-export default Ember.Component.extend(KeyboardShortcuts, {
-    store: Ember.inject.service(),
-    friendsStore: Ember.inject.service(),
-
+export default BaseComponent.extend(KeyboardShortcuts, {
     classNames: [ 'sidebar', 'flex-grow-column' ],
 
     draggedWindow: false,

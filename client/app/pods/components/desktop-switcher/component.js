@@ -15,10 +15,9 @@
 //
 
 import Ember from 'ember';
+import BaseComponent from '../base-component';
 
-export default Ember.Component.extend({
-    store: Ember.inject.service(),
-
+export default BaseComponent.extend({
     classNames: [ 'main-desktop-switcher' ],
 
     activeDesktop: Ember.computed.alias('store.settings.activeDesktop'),

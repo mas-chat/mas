@@ -16,10 +16,9 @@
 
 import Ember from 'ember';
 import { dispatch } from '../../../utils/dispatcher';
+import BaseComponent from '../base-component';
 
-export default Ember.Component.extend({
-    store: Ember.inject.service(),
-
+export default BaseComponent.extend({
     userId: Ember.computed.alias('model'),
 
     name: Ember.computed('userId', function() {

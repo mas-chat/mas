@@ -18,10 +18,9 @@
 
 import Ember from 'ember';
 import { dispatch } from '../../../utils/dispatcher';
+import BaseComponent from '../base-component';
 
-export default Ember.Component.extend({
-    store: Ember.inject.service(),
-
+export default BaseComponent.extend({
     activeModal: Ember.computed('store.modals.[]', function() {
         let modalQueue = this.get('store.modals');
 

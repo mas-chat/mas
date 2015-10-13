@@ -20,10 +20,9 @@ import Ember from 'ember';
 import { play } from '../../../utils/sound';
 import { calcMsgHistorySize } from '../../../utils/msg-history-sizer';
 import { dispatch } from '../../../utils/dispatcher';
+import BaseComponent from '../base-component';
 
-export default Ember.Component.extend({
-    store: Ember.inject.service(),
-
+export default BaseComponent.extend({
     classNames: [ 'window', 'flex-grow-column' ],
 
     classNameBindings: [
