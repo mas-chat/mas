@@ -62,7 +62,6 @@ export default Ember.Object.extend({
         }
 
         data.generation = this.get('socket.sessionId');
-        data.store = this.get('store');
 
         this.get('store.windows').upsertModel(data);
     },
@@ -78,7 +77,6 @@ export default Ember.Object.extend({
 
         delete data.windowId;
         data.window = targetWindow;
-        data.store = this.get('store');
 
         if (!this.get('store.initDone')) {
             // Optimization: Avoid re-renders after every message
