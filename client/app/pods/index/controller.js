@@ -15,12 +15,11 @@
 //
 
 import Ember from 'ember';
-import store from '../../stores/store';
+import { init } from '../../utils/dispatcher';
 
 export default Ember.Controller.extend({
-
     init() {
         this._super();
-        store.start(); // Everything starts from here
+        init(); // Everything starts from here
     }
 });

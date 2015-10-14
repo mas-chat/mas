@@ -41,3 +41,14 @@ export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) 
 export function register(store) {
     stores.push(store);
 }
+
+export function init() {
+    Ember.run.next(this, function() {
+        for (let store of stores) {
+            store.loadSnapshot();
+        }
+
+        debugger
+        dispatch('START');
+    });
+}

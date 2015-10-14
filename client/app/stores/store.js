@@ -79,6 +79,8 @@ export default BaseStore.extend({
         this.set('secret', secret);
 
         this.msgBuffer = [];
+
+        this._startDayChangedService();
     },
 
     desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
@@ -121,17 +123,6 @@ export default BaseStore.extend({
             });
         }
     }),
-
-    start() {
-        let data = this._loadSnapshot();
-
-        // It's now first possible time to start socket.io connection. Data from server
-        // can't race with snapshot data as first socket.io event will be processed at
-        // earliest in the next runloop.
-        socket.start(this);
-
-        this._startDayChangedService();
-    },
 
     toJSON() {
         let data = {
@@ -239,6 +230,10 @@ export default BaseStore.extend({
         };
 
         Ember.run.later(this, changeDay, timeToTomorrow);
+    },
+
+    _handleStart() {
+        socket.start(this);
     },
 
     _handleCloseAlert(data) {
