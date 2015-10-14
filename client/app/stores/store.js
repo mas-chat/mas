@@ -205,15 +205,11 @@ export default BaseStore.extend({
         this.get('users').incrementProperty('isDirty');
 
         for (let windowData of data.windows) {
+            let messages = windowData.messages;
             delete windowData.messages;
 
-            let messages = windowData.messages;
             let windowModel = this.get('windows').upsertModel(windowData);
-
-            for (let message of messages) {
-                message.window = windowModel;
-                windowModel.get('messages').upsertModel(message);
-            }
+            windowModel.get('messages').upsertModels(messages, { window: windowModel });
         }
 
         this.set('activeDesktop', data.activeDesktop);
@@ -467,12 +463,7 @@ export default BaseStore.extend({
             end: data.end
         }, resp => {
             data.window.get('logMessages').clearModels();
-
-            for (let message of resp.msgs) {
-                message.window = data.window;
-                data.window.get('logMessages').upsertModel(message);
-            }
-
+            data.window.get('logMessages').upsertModels(resp.msgs, { window: data.window });
             successCb();
         });
     },
@@ -484,13 +475,9 @@ export default BaseStore.extend({
             end: data.window.get('messages').sortBy('ts').get('firstObject').get('ts'),
             limit: 1000
         }, resp => {
-            for (let message of resp.msgs) {
-                message.window = data.window;
-
-                // Window messages are roughly sorted. First are old messages received by FETCH.
-                // Then the messages received at startup and at runtime.
-                data.window.get('messages').upsertModelPrepend(message);
-            }
+            // Window messages are roughly sorted. First are old messages received by FETCH.
+            // Then the messages received at startup and at runtime.
+            data.window.get('messages').upsertModelsPrepend(resp.msgs, { window: data.window });
 
             successCb(resp.msgs.length !== 0);
         });
@@ -559,8 +546,7 @@ export default BaseStore.extend({
     },
 
     handleAddWindow(data) {
-        data.generation = socket.sessionId;
-        this.get('windows').upsertModel(data);
+        this.get('windows').upsertModel(data, { generation: socket.sessionId });
     },
 
     handleCloseWindow(data) {

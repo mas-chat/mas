@@ -30,16 +30,20 @@ export default Ember.ArrayProxy.extend({
         this.set('_lookupTable', new Map());
     },
 
-    upsertModel(object) {
-        return this._upsertObjects([ object ], { prepend: false });
+    upsertModel(object, mixin) {
+        return this._upsertObjects([ object ], { prepend: false, mixin: mixin });
     },
 
-    upsertModelPrepend(object) {
-        return this._upsertObjects([ object ], { prepend: true});
+    upsertModelPrepend(object, mixin) {
+        return this._upsertObjects([ object ], { prepend: true, mixin: mixin });
     },
 
-    upsertModels(objects) {
-        return this._upsertObjects(objects, { prepend: false });
+    upsertModels(objects, mixin) {
+        return this._upsertObjects(objects, { prepend: false, mixin: mixin });
+    },
+
+    upsertModelsPrepend(objects, mixin) {
+        return this._upsertObjects(objects, { prepend: true, mixin: mixin });
     },
 
     getByIndex(index) {
@@ -79,6 +83,12 @@ export default Ember.ArrayProxy.extend({
                     this.unshiftObject(model);
                 } else {
                     this.pushObject(model);
+                }
+            }
+
+            if (options.mixin) {
+                for (let prop of Object.keys(options.mixin)) {
+                    model.set(prop, options.mixin[prop]);
                 }
             }
         }
