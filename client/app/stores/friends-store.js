@@ -34,7 +34,7 @@ export default BaseStore.extend({
         this.set('friends', IndexArray.create({ index: 'userId', factory: Friend }));
     },
 
-    _handleAddFriends(data) {
+    handleAddFriends(data) {
         if (data.reset) {
             this.get('friends').clearModels();
         }
@@ -42,14 +42,14 @@ export default BaseStore.extend({
         this.get('friends').upsertModels(data.friends);
     },
 
-    _handleConfirmRemoveFriend(data) {
+    handleConfirmRemoveFriend(data) {
         dispatch('OPEN_MODAL', {
             name: 'remove-friend-modal',
             model: data.userId
         });
     },
 
-    _handleRequestFriend(data) {
+    handleRequestFriend(data) {
         socket.send({
             id: 'REQUEST_FRIEND',
             userId: data.userId
@@ -69,7 +69,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleConfirmFriends(data) {
+    handleConfirmFriends(data) {
         let users = this.get('store.users');
 
         for (let friendCandidate of data.friends) {
@@ -98,7 +98,7 @@ export default BaseStore.extend({
         };
     },
 
-    _handleRemoveFriend(data) {
+    handleRemoveFriend(data) {
         socket.send({
             id: 'REMOVE_FRIEND',
             userId: data.userId

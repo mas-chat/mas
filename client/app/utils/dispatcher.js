@@ -22,7 +22,7 @@ let stores = [];
 export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) {
     let consumed = false;
     let name = type.split('_').map(part => part.toLowerCase().capitalize()).join('');
-    let handler = `_handle${name}`;
+    let handler = `handle${name}`;
 
     for (let store of stores) {
         if (store[handler]) {

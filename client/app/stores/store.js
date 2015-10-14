@@ -232,11 +232,11 @@ export default BaseStore.extend({
         Ember.run.later(this, changeDay, timeToTomorrow);
     },
 
-    _handleStart() {
+    handleStart() {
         socket.start(this);
     },
 
-    _handleCloseAlert(data) {
+    handleCloseAlert(data) {
         let callback = this.get('alerts').get('firstObject').get('resultCallback');
 
         if (callback) {
@@ -246,7 +246,7 @@ export default BaseStore.extend({
         this.get('alerts').shiftObject();
     },
 
-    _handleUpdateWindowAlerts(data) {
+    handleUpdateWindowAlerts(data) {
         data.window.set('alerts', data.alerts);
 
         socket.send({
@@ -256,7 +256,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleUploadFiles(data) {
+    handleUploadFiles(data) {
         if (data.files.length === 0) {
             return;
         }
@@ -288,7 +288,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleAddMessage(data) {
+    handleAddMessage(data) {
         data.window.messages.upsertModel({
             body: data.body,
             cat: 'msg',
@@ -299,7 +299,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleAddMessageServer(data) {
+    handleAddMessageServer(data) {
         data.window = this._getWindow(data.windowId);
         delete window.windowId;
 
@@ -311,7 +311,7 @@ export default BaseStore.extend({
         }
     },
 
-    _handleAddError(data) {
+    handleAddError(data) {
         data.window.messages.upsertModel({
             body: data.body,
             cat: 'error',
@@ -322,7 +322,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleSendText(data) {
+    handleSendText(data) {
         socket.send({
             id: 'SEND',
             text: data.text,
@@ -347,7 +347,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleSendCommand(data) {
+    handleSendCommand(data) {
         socket.send({
             id: 'COMMAND',
             command: data.command,
@@ -367,29 +367,29 @@ export default BaseStore.extend({
         return;
     },
 
-    _handleOpenModal(data) {
+    handleOpenModal(data) {
         this.get('modals').pushObject({
             name: data.name,
             model: data.model
         });
     },
 
-    _handleCloseModal() {
+    handleCloseModal() {
         this.get('modals').shiftObject();
     },
 
-    _handleOpenPriorityModal(data) {
+    handleOpenPriorityModal(data) {
         this.get('modals').unshiftObject({ // Show immediately
             name: data.name,
             model: data.model
         });
     },
 
-    _handleClosePriorityModal() {
+    handleClosePriorityModal() {
         this.get('modals').shiftObject();
     },
 
-    _handleDestroyAccount() {
+    handleDestroyAccount() {
         socket.send({
             id: 'DESTROY_ACCOUNT'
         }, () => {
@@ -398,7 +398,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleCreateGroup(data, acceptCb, rejectCb) {
+    handleCreateGroup(data, acceptCb, rejectCb) {
         socket.send({
             id: 'CREATE',
             name: data.name,
@@ -412,7 +412,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleJoinGroup(data, acceptCb, rejectCb) {
+    handleJoinGroup(data, acceptCb, rejectCb) {
         socket.send({
             id: 'JOIN',
             name: data.name,
@@ -427,7 +427,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleJoinIrcChannel(data, acceptCb, rejectCb) {
+    handleJoinIrcChannel(data, acceptCb, rejectCb) {
         socket.send({
             id: 'JOIN',
             name: data.name,
@@ -442,7 +442,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleStartChat(data) {
+    handleStartChat(data) {
         socket.send({
             id: 'CHAT',
             userId: data.userId
@@ -459,7 +459,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleFetchMessageRange(data, successCb) {
+    handleFetchMessageRange(data, successCb) {
         socket.send({
             id: 'FETCH',
             windowId: data.window.get('windowId'),
@@ -477,7 +477,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleFetchOlderMessages(data, successCb) {
+    handleFetchOlderMessages(data, successCb) {
         socket.send({
             id: 'FETCH',
             windowId: data.window.get('windowId'),
@@ -496,7 +496,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleProcessLine(data) {
+    handleProcessLine(data) {
         let body = data.body;
         let command = false;
         let commandParams;
@@ -539,7 +539,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleEditMessage(data) {
+    handleEditMessage(data) {
         socket.send({
             id: 'EDIT',
             windowId: data.window.get('windowId'),
@@ -558,24 +558,24 @@ export default BaseStore.extend({
         });
     },
 
-    _handleAddWindow(data) {
+    handleAddWindow(data) {
         data.generation = socket.sessionId;
         this.get('windows').upsertModel(data);
     },
 
-    _handleCloseWindow(data) {
+    handleCloseWindow(data) {
         socket.send({
             id: 'CLOSE',
             windowId: data.window.get('windowId')
         });
     },
 
-    _handleDeleteWindow(data) {
+    handleDeleteWindow(data) {
         let window = this._getWindow(data.windowId);
         this.get('windows').removeModel(window);
     },
 
-    _handleLogout() {
+    handleLogout() {
         socket.send({
             id: 'LOGOUT'
         }, () => {
@@ -589,7 +589,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleToggleTheme() {
+    handleToggleTheme() {
         let newTheme = this.get('settings.theme') === 'dark' ? 'default' : 'dark';
 
         this.set('settings.theme', newTheme);
@@ -601,7 +601,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleUpdatePassword(data, successCb, rejectCb) {
+    handleUpdatePassword(data, successCb, rejectCb) {
         socket.send({
             id: 'UPDATE_PASSWORD',
             windowId: data.window.get('windowId'),
@@ -615,7 +615,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleUpdateProfile(data, successCb, rejectCb) {
+    handleUpdateProfile(data, successCb, rejectCb) {
         socket.send({
             id: 'UPDATE_PROFILE',
             name: data.name,
@@ -631,7 +631,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleFetchProfile() {
+    handleFetchProfile() {
         socket.send({
             id: 'GET_PROFILE'
         }, resp => {
@@ -641,7 +641,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleUpdateTopic(data) {
+    handleUpdateTopic(data) {
         socket.send({
             id: 'UPDATE_TOPIC',
             windowId: data.window.get('windowId'),
@@ -649,7 +649,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleConfirmEmail(data, successCb) {
+    handleConfirmEmail(data, successCb) {
         socket.send({
             id: 'SEND_CONFIRM_EMAIL'
         }, () => {
@@ -665,11 +665,11 @@ export default BaseStore.extend({
         });
     },
 
-    _handleShowAlert(data) {
+    handleShowAlert(data) {
         this.get('alerts').upsertModel(data);
     },
 
-    _handleMoveWindow(data) {
+    handleMoveWindow(data) {
         let props = [ 'column', 'row', 'desktop' ];
 
         for (let prop of props) {
@@ -689,7 +689,7 @@ export default BaseStore.extend({
         }
     },
 
-    _handleToggleMemberListWidth(data) {
+    handleToggleMemberListWidth(data) {
         let newValue = data.window.toggleProperty('minimizedNamesList');
 
         socket.send({
@@ -699,7 +699,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleChangeActiveDesktop(data) {
+    handleChangeActiveDesktop(data) {
         this.set('settings.activeDesktop', data.desktop);
 
         if (!isMobile.any) {
@@ -712,7 +712,7 @@ export default BaseStore.extend({
         }
     },
 
-    _handleSeekActiveDesktop(data) {
+    handleSeekActiveDesktop(data) {
         let desktops = this.get('desktops');
         let activeDesktop = this.get('settings.activeDesktop');
         let index = desktops.indexOf(desktops.findBy('id', activeDesktop));
@@ -730,7 +730,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleUpdateSettings(data) {
+    handleUpdateSettings(data) {
         if (isMobile.any) {
             data.settings.activeDesktop = 1;
         }
@@ -738,11 +738,11 @@ export default BaseStore.extend({
         this.get('settings').setProperties(data.settings);
     },
 
-    _handleUpdateNetworks(data) {
+    handleUpdateNetworks(data) {
         this.get('networks').setObjects(data.networks);
     },
 
-    _handleAddAlert(data) {
+    handleAddAlert(data) {
         // Default labels for alerts
         data.postponeLabel = 'Show again later';
         data.ackLabel = 'Dismiss';
@@ -759,7 +759,7 @@ export default BaseStore.extend({
         this.get('alerts').upsertModel(data);
     },
 
-    _handleFinishStartup() {
+    handleFinishStartup() {
         // Remove possible deleted windows.
         let deletedWindows = [];
 
@@ -785,7 +785,7 @@ export default BaseStore.extend({
         this.set('initDone', true);
     },
 
-    _handleAddMembers(data) {
+    handleAddMembers(data) {
         let window = this._getWindow(data.windowId);
 
         if (data.reset) {
@@ -815,7 +815,7 @@ export default BaseStore.extend({
         });
     },
 
-    _handleDeleteMembers(data) {
+    handleDeleteMembers(data) {
         let window = this._getWindow(data.windowId);
 
         data.members.forEach(member => {
@@ -823,12 +823,12 @@ export default BaseStore.extend({
         });
     },
 
-    _handleUpdateWindow(data) {
+    handleUpdateWindow(data) {
         let window = this._getWindow(data.windowId);
         window.setModelProperties(data);
     },
 
-    _handleUpsertUsers(data) {
+    handleUpsertUsers(data) {
         for (let userId in data.mapping) {
             this.set('users.users.' + userId, data.mapping[userId]);
         }
