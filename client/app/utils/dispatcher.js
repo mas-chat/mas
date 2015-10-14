@@ -48,7 +48,6 @@ export function init() {
             store.loadSnapshot();
         }
 
-        debugger
         dispatch('START');
     });
 }
