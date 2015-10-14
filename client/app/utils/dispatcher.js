@@ -42,12 +42,10 @@ export function register(store) {
     stores.push(store);
 }
 
-export function init() {
-    Ember.run.next(this, function() {
-        for (let store of stores) {
-            store.loadSnapshot();
-        }
+Ember.run.next(this, function() {
+    for (let store of stores) {
+        store.loadSnapshot();
+    }
 
-        dispatch('START');
-    });
-}
+    dispatch('START');
+});
