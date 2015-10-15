@@ -15,18 +15,19 @@
 //
 
 import Ember from 'ember';
-import { dispatch } from '../../../utils/dispatcher';
-import BaseComponent from '../base-component';
+import { dispatch } from 'mas/emflux/dispatcher';
 
-export default BaseComponent.extend({
+export default Ember.Component.extend({
+    stores: Ember.inject.service(),
+
     channel: '',
     password: '',
     errorMsg: '',
 
     selectedNetwork: null,
 
-    ircNetworks: Ember.computed('store.networks', function() {
-        return this.get('store.networks').removeObject('MAS');
+    ircNetworks: Ember.computed('stores.windows.networks', function() {
+        return this.get('stores.windows.networks').removeObject('MAS');
     }),
 
     actions: {

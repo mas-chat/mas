@@ -17,15 +17,17 @@
 /* global $, moment, isMobile */
 
 import Ember from 'ember';
+import { dispatch } from 'mas/emflux/dispatcher'; // hiukan fragile kun pitaa olla taalla
 import { darkTheme } from '../../../utils/theme-dark'
-import BaseComponent from '../base-component';
 
-export default BaseComponent.extend({
+export default Ember.Component.extend({
+    stores: Ember.inject.service(),
+
     classNames: [ 'flex-grow-column', 'flex-1' ],
 
     draggedWindow: false,
 
-    changeTheme: Ember.observer('store.settings.theme', function() {
-        $('#theme-stylesheet').text(this.get('store.settings.theme') === 'dark' ? darkTheme : '');
+    changeTheme: Ember.observer('stores.windows.settings.theme', function() {
+        $('#theme-stylesheet').text(this.get('stores.windows.settings.theme') === 'dark' ? darkTheme : '');
     })
 });

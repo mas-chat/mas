@@ -17,12 +17,11 @@
 /* globals $ */
 
 import Ember from 'ember';
-import { dispatch } from '../../../utils/dispatcher';
-import BaseComponent from '../base-component';
+import { dispatch } from 'mas/emflux/dispatcher';
 
-export default BaseComponent.extend({
-    activeModal: Ember.computed('store.modals.[]', function() {
-        let modalQueue = this.get('store.modals');
+export default Ember.Component.extend({
+    activeModal: Ember.computed('stores.windows.modals.[]', function() {
+        let modalQueue = this.get('stores.windows.modals');
 
         return modalQueue.length === 0 ?
             { model: null, name: 'empty-modal' } : modalQueue.get('firstObject');

@@ -15,13 +15,14 @@
 //
 
 import Ember from 'ember';
-import BaseComponent from '../base-component';
 
-export default BaseComponent.extend({
+export default Ember.Component.extend({
+    stores: Ember.inject.service(),
+
     classNames: [ 'main-desktop-switcher' ],
 
-    activeDesktop: Ember.computed.alias('store.settings.activeDesktop'),
+    activeDesktop: Ember.computed.alias('stores.windows.settings.activeDesktop'),
     draggedWindow: false,
 
-    desktops: Ember.computed.alias('store.desktops')
+    desktops: Ember.computed.alias('stores.windows.desktops')
 });

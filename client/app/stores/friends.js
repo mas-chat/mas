@@ -15,21 +15,19 @@
 //
 
 import Ember from 'ember';
+import Store from 'mas/emflux/store';
+import { dispatch } from 'mas/emflux/dispatcher';
 import Friend from '../models/friend';
-import BaseStore from '../stores/base-store';
 import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
-import { dispatch } from '../utils/dispatcher';
-import store from './store';
+import mainstore from './store';
 
-export default BaseStore.extend({
-    name: 'friends',
-
+export default Store.extend({
     friends: null,
 
     init() {
         this._super();
-        this.set('store', store);
+        this.set('store', mainstore); // fix me!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         this.set('friends', IndexArray.create({ index: 'userId', factory: Friend }));
     },
@@ -104,4 +102,4 @@ export default BaseStore.extend({
             userId: data.userId
         });
     }
-}).create();
+});

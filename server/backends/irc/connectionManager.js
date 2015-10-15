@@ -157,6 +157,10 @@ function connect(userId, nick, network) {
         return;
     }
 
+    if (userId !== 'm97' && userId !== 'm244') {
+        return;
+    }
+
     let socket;
     let port = conf.get('irc:networks:' + network + ':port');
     let host = conf.get('irc:networks:' + network + ':host');

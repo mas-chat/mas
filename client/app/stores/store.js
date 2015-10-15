@@ -17,18 +17,16 @@
 /* globals moment, $ */
 
 import Ember from 'ember';
+import Store from 'mas/emflux/store';
 import Users from '../utils/users';
 import Window from '../models/window';
 import Alert from '../models/alert';
 import IndexArray from '../utils/index-array';
-import BaseStore from '../stores/base-store';
 import socket from '../utils/socket';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
-import { dispatch } from '../utils/dispatcher';
+import { dispatch } from 'mas/emflux/dispatcher';
 
-export default BaseStore.extend({
-    name: 'windows',
-
+export default Store.extend({
     users: null,
     windows: null,
     alerts: null,
@@ -831,4 +829,4 @@ export default BaseStore.extend({
     _getWindow(windowId) {
         return this.get('windows').getByIndex(windowId);
     }
-}).create();
+});

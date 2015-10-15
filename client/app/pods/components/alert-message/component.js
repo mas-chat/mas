@@ -15,13 +15,16 @@
 //
 
 import Ember from 'ember';
-import { dispatch } from '../../../utils/dispatcher';
-import BaseComponent from '../base-component';
+import { dispatch } from 'mas/emflux/dispatcher';
 
-export default BaseComponent.extend({
+console.log('hello')
+
+export default Ember.Component.extend({
+    stores: Ember.inject.service(),
+
     classNames: [ 'flex-row', 'announcement' ],
 
-    alerts: Ember.computed.oneWay('store.alerts'),
+    alerts: Ember.computed.oneWay('stores.windows.alerts'),
 
     currentAlert: Ember.computed('alerts.[]', function() {
         let alerts = this.get('alerts');

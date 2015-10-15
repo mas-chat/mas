@@ -16,10 +16,11 @@
 
 import Ember from 'ember';
 import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
-import { dispatch } from '../../../utils/dispatcher';
-import BaseComponent from '../base-component';
+import { dispatch } from 'mas/emflux/dispatcher';
 
-export default BaseComponent.extend(KeyboardShortcuts, {
+export default Ember.Component.extend(KeyboardShortcuts, {
+    stores: Ember.inject.service(),
+
     classNames: [ 'sidebar', 'flex-grow-column' ],
 
     draggedWindow: false,
@@ -47,7 +48,7 @@ export default BaseComponent.extend(KeyboardShortcuts, {
         return this.get('friends').filterBy('online', true).length;
     }),
 
-    darkTheme: Ember.computed('store.settings.theme', function() {
-        return this.get('store.settings.theme') === 'dark';
+    darkTheme: Ember.computed('stores.windows.settings.theme', function() {
+        return this.get('stores.windows.settings.theme') === 'dark';
     })
 });

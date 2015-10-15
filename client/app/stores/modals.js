@@ -14,26 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals $ */
-
 import Ember from 'ember';
-import { dispatch } from 'mas/emflux/dispatcher';
+import Store from 'mas/emflux/store';
 
-export default Ember.Component.extend({
-    stores: Ember.inject.service(),
-
-    classNames: [ 'flex-row', 'unconfirmed-email' ],
-
-    email: Ember.computed.alias('stores.windows.settings.email'),
-    emailConfirmed: Ember.computed.alias('stores.windows.settings.emailConfirmed'),
-
-    actions: {
-        requestConfirmation() {
-            dispatch('CONFIRM_EMAIL');
-        },
-
-        openModal(modal) {
-            dispatch('OPEN_MODAL', { name: modal });
-        }
-    }
-});
+export default Store.extend({});

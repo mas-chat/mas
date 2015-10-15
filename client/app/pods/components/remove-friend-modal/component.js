@@ -15,18 +15,19 @@
 //
 
 import Ember from 'ember';
-import { dispatch } from '../../../utils/dispatcher';
-import BaseComponent from '../base-component';
+import { dispatch } from 'mas/emflux/dispatcher';
 
-export default BaseComponent.extend({
+export default Ember.Component.extend({
+    stores: Ember.inject.service(),
+
     userId: Ember.computed.alias('model'),
 
     name: Ember.computed('userId', function() {
-        return this.get('store.users').getName(this.get('userId'), 'MAS');
+        return this.get('stores.windows.users').getName(this.get('userId'), 'MAS');
     }),
 
     nick: Ember.computed('userId', function() {
-        return this.get('store.users').getNick(this.get('userId'), 'MAS');
+        return this.get('stores.windows.users').getNick(this.get('userId'), 'MAS');
     }),
 
     actions: {

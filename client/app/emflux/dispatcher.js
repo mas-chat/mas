@@ -15,9 +15,32 @@
 //
 
 import Ember from 'ember';
+import Resolver from 'ember/resolver';
 
 const noopCb = () => {};
-let stores = [];
+let storeNames = [];
+let failure = false;
+
+let myResolver = Resolver.create();
+
+export let stores = [];
+
+for (let module of Object.keys(require.entries)) {
+    let [ firstLevel, secondLevel, thirdLevel ] = module.split('/');
+
+    if (secondLevel === 'stores') {
+        let storeClass = require(module)['default'];
+        let store = storeClass.create();
+        let name = thirdLevel;
+
+        stores.push(store);
+        storeNames.push(name);
+
+        store.loadSnapshot();
+
+        Ember.Logger.info(`Registered store: ${name}`);
+    }
+}
 
 export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) {
     let consumed = false;
@@ -38,14 +61,10 @@ export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) 
     }
 }
 
-export function register(store) {
-    stores.push(store);
-}
+// testaa ilman nextia
 
-Ember.run.next(this, function() {
-    for (let store of stores) {
-        store.loadSnapshot();
+Ember.run.next(this, function() { // Give ember time to start
+    if (!failure) {
+        dispatch('START');
     }
-
-    dispatch('START');
 });

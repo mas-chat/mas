@@ -10,7 +10,6 @@ module.exports = function(defaults) {
     let app = new EmberApp(defaults, {
         hinting: false,
         babel: {
-            includePolyfill: true
         },
         lessOptions: {
             paths: [
