@@ -70,7 +70,7 @@ exports.updateMessage = function(gid, msg) {
 
 exports.getMessageRange = function*(conversationId, start, end, amount) {
     if (!elasticSearchAvailable()) {
-        return false;
+        return [];
     }
 
     // TBD: If there are multiple messages at the boundary start/end ts, part of them can be lost.
