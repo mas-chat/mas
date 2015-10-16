@@ -29,6 +29,8 @@ export default Ember.Object.extend({
             }
         }
 
-        return this.setProperties(props);
+        this.setProperties(props);
+
+        return this;
     }
 });
