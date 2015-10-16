@@ -17,7 +17,7 @@
 /* globals $ */
 
 import Ember from 'ember';
-import { dispatch } from '../../../utils/dispatcher';
+import { dispatch } from 'emflux/dispatcher';
 
 export default Ember.Component.extend({
     actions: {

@@ -17,18 +17,16 @@
 /* globals moment, $ */
 
 import Ember from 'ember';
+import Store from 'emflux/store';
+import { dispatch } from 'emflux/dispatcher';
 import Users from '../utils/users';
 import Window from '../models/window';
 import Alert from '../models/alert';
 import IndexArray from '../utils/index-array';
-import BaseStore from '../stores/base-store';
 import socket from '../utils/socket';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
-import { dispatch } from '../utils/dispatcher';
 
-export default BaseStore.extend({
-    name: 'windows',
-
+export default Store.extend({
     users: null,
     windows: null,
     alerts: null,
@@ -640,6 +638,7 @@ export default BaseStore.extend({
             id: 'SEND_CONFIRM_EMAIL'
         }, () => {
             dispatch('SHOW_ALERT', {
+                alertId: `client-${Date.now()}`,
                 message: 'Confirmation link sent. Check your spam folder if you don\'t see it in inbox.',
                 dismissible: true,
                 report: false,
@@ -647,7 +646,7 @@ export default BaseStore.extend({
                 ackLabel: 'Okay'
             });
 
-            this.set('emailConfirmed', true);
+            this.set('settings.emailConfirmed', true);
         });
     },
 
@@ -784,7 +783,7 @@ export default BaseStore.extend({
             let userId = member.userId;
 
             if (!data.reset) {
-                this._removeUser(userId, data.window);
+                this._removeUser(userId, window);
             }
 
             switch (member.role) {
@@ -831,4 +830,4 @@ export default BaseStore.extend({
     _getWindow(windowId) {
         return this.get('windows').getByIndex(windowId);
     }
-}).create();
+});

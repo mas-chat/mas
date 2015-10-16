@@ -18,7 +18,7 @@
 
 import Ember from 'ember';
 import BaseModel from './base';
-import store from '../stores/store';
+import { getStore } from 'emflux/dispatcher';
 
 export default BaseModel.extend({
     store: null,
@@ -182,7 +182,7 @@ export default BaseModel.extend({
 
     init() {
         this._super();
-        this.set('store', store);
+        this.set('store', getStore('windows'));
     },
 
     _parseLinks(text) {

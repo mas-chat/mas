@@ -15,21 +15,18 @@
 //
 
 import Ember from 'ember';
+import Store from 'emflux/store';
+import { dispatch, getStore } from 'emflux/dispatcher';
 import Friend from '../models/friend';
-import BaseStore from '../stores/base-store';
 import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
-import { dispatch } from '../utils/dispatcher';
-import store from './store';
 
-export default BaseStore.extend({
-    name: 'friends',
-
+export default Store.extend({
     friends: null,
 
     init() {
         this._super();
-        this.set('store', store);
+        this.set('store', getStore('windows')); // TBD: Rename
 
         this.set('friends', IndexArray.create({ index: 'userId', factory: Friend }));
     },
@@ -104,4 +101,4 @@ export default BaseStore.extend({
             userId: data.userId
         });
     }
-}).create();
+});

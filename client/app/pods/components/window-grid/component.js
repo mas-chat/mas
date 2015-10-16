@@ -17,12 +17,13 @@
 /* globals $ */
 
 import Ember from 'ember';
-import { dispatch } from '../../../utils/dispatcher';
-import BaseComponent from '../base-component';
+import { dispatch } from 'emflux/dispatcher';
 
 const CURSORWIDTH = 50;
 
-export default BaseComponent.extend({
+export default Ember.Component.extend({
+    stores: Ember.inject.service(),
+
     classNames: [ 'grid', 'flex-1', 'flex-grow-column' ],
 
     dimensions: null,
@@ -34,14 +35,14 @@ export default BaseComponent.extend({
 
     windowComponents: null,
 
-    model: Ember.computed.alias('store.windows'),
+    model: Ember.computed.alias('stores.windows.windows'),
 
-    mustRelayout: Ember.observer('store.initDone', 'store.settings.theme', function() {
+    mustRelayout: Ember.observer('stores.windows.initDone', 'stores.windows.settings.theme', function() {
         Ember.run.next(this, function() { this._layoutWindows(false); });
     }),
 
     mustRelayoutAfterRender: Ember.observer(
-        'store.alerts.[]', 'store.settings.emailConfirmed', function() {
+        'stores.windows.alerts.[]', 'stores.windows.settings.emailConfirmed', function() {
         Ember.run.scheduleOnce('afterRender', this, function() {
             this._layoutWindows(false);
         });
@@ -63,7 +64,7 @@ export default BaseComponent.extend({
         },
 
         relayout(options) {
-            if (!this.get('store.initDone')) {
+            if (!this.get('stores.windows.initDone')) {
                 return;
             }
 

@@ -18,7 +18,7 @@
 
 import Ember from 'ember';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
-import { dispatch } from '../utils/dispatcher';
+import { dispatch } from 'emflux/dispatcher';
 
 const mapServerIds = {
     CREATE: 'ADD_WINDOW',

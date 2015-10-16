@@ -17,12 +17,13 @@
 /* globals $, emojify, titlenotifier, isMobile */
 
 import Ember from 'ember';
+import { dispatch } from 'emflux/dispatcher';
 import { play } from '../../../utils/sound';
 import { calcMsgHistorySize } from '../../../utils/msg-history-sizer';
-import { dispatch } from '../../../utils/dispatcher';
-import BaseComponent from '../base-component';
 
-export default BaseComponent.extend({
+export default Ember.Component.extend({
+    stores: Ember.inject.service(),
+
     classNames: [ 'window', 'flex-grow-column' ],
 
     classNameBindings: [
@@ -33,7 +34,7 @@ export default BaseComponent.extend({
         'type'
     ],
 
-    activeDesktop: Ember.computed.alias('store.settings.activeDesktop'),
+    activeDesktop: Ember.computed.alias('stores.windows.settings.activeDesktop'),
 
     expanded: false,
     animating: false,
@@ -69,7 +70,7 @@ export default BaseComponent.extend({
     }),
 
     fullBackLog: Ember.computed('content.messages.[]', function() {
-        return this.get('content.messages.length') >= this.get('store.maxBacklogMsgs');
+        return this.get('content.messages.length') >= this.get('stores.windows.maxBacklogMsgs');
     }),
 
     beginningReached: Ember.computed('fullBackLog', 'noOlderMessages', function() {
@@ -373,7 +374,7 @@ export default BaseComponent.extend({
     arrayWillChange() {},
 
     arrayDidChange(array, offset, removeCount, addCount) {
-        if (addCount > 0 && this.get('store.initDone') && offset === array.get('length') - 1) {
+        if (addCount > 0 && this.get('stores.windows.initDone') && offset === array.get('length') - 1) {
             // Infinity scrolling adds the old messages to the beginning of the array. The offset
             // check above makes sure that _lineAdded() is not called then (FETCH case).
             this._lineAdded(array);

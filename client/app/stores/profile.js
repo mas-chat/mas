@@ -1,5 +1,5 @@
 //
-//   Copyright 2009-2014 Ilkka Oksanen <iao@iki.fi>
+//   Copyright 2009-2015 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -14,24 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals $ */
-
 import Ember from 'ember';
-import { dispatch } from 'emflux/dispatcher';
+import Store from 'emflux/store';
 
-export default Ember.Component.extend({
-    stores: Ember.inject.service(),
-
-    activeModal: Ember.computed('stores.windows.modals.[]', function() {
-        let modalQueue = this.get('stores.windows.modals');
-
-        return modalQueue.length === 0 ?
-            { model: null, name: 'empty-modal' } : modalQueue.get('firstObject');
-    }),
-
-    actions: {
-        closeModal() {
-            dispatch('CLOSE_MODAL');
-        }
-    }
-});
+export default Store.extend({});

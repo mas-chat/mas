@@ -15,13 +15,14 @@
 //
 
 import Ember from 'ember';
-import { dispatch } from '../../../utils/dispatcher';
-import BaseComponent from '../base-component';
+import { dispatch } from 'emflux/dispatcher';
 
-export default BaseComponent.extend({
-    name: Ember.computed.alias('store.profile.name'),
-    email: Ember.computed.alias('store.profile.email'),
-    nick: Ember.computed.alias('store.profile.nick'),
+export default Ember.Component.extend({
+    stores: Ember.inject.service(),
+
+    name: Ember.computed.alias('stores.windows.profile.name'),
+    email: Ember.computed.alias('stores.windows.profile.email'),
+    nick: Ember.computed.alias('stores.windows.profile.nick'),
 
     errorMsg: '',
 

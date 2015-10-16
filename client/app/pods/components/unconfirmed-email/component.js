@@ -17,14 +17,15 @@
 /* globals $ */
 
 import Ember from 'ember';
-import { dispatch } from '../../../utils/dispatcher';
-import BaseComponent from '../base-component';
+import { dispatch } from 'emflux/dispatcher';
 
-export default BaseComponent.extend({
+export default Ember.Component.extend({
+    stores: Ember.inject.service(),
+
     classNames: [ 'flex-row', 'unconfirmed-email' ],
 
-    email: Ember.computed.alias('store.settings.email'),
-    emailConfirmed: Ember.computed.alias('store.settings.emailConfirmed'),
+    email: Ember.computed.alias('stores.windows.settings.email'),
+    emailConfirmed: Ember.computed.alias('stores.windows.settings.emailConfirmed'),
 
     actions: {
         requestConfirmation() {

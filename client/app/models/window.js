@@ -21,7 +21,7 @@ import TitleBuilder from '../utils/title-builder';
 import BaseModel from './base';
 import Message from './message';
 import IndexArray from '../utils/index-array';
-import store from '../stores/store';
+import { getStore } from 'emflux/dispatcher';
 
 let titleBuilder = TitleBuilder.create();
 let mobileDesktop = 1;
@@ -29,7 +29,7 @@ let mobileDesktop = 1;
 export default BaseModel.extend({
     init() {
         this._super();
-        this.set('store', store);
+        this.set('store', getStore('windows'));
 
         this.set('_desktop', mobileDesktop++);
 

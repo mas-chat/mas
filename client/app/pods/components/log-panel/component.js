@@ -17,10 +17,9 @@
 /* globals moment, $ */
 
 import Ember from 'ember';
-import { dispatch } from '../../../utils/dispatcher';
-import BaseComponent from '../base-component';
+import { dispatch } from 'emflux/dispatcher';
 
-export default BaseComponent.extend({
+export default Ember.Component.extend({
     classNames: [ 'flex-column', 'flex-1' ],
     classNameBindings: [ 'enabled:visible:hidden' ],
 
