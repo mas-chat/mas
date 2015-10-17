@@ -39,13 +39,13 @@ const mapServerIds = {
 let ioSocket = io.connect(); // Start connection as early as possible.
 
 let SocketService = Ember.Object.extend({
-    windows: null,
-
     sessionId: 0,
 
     _connected: false,
     _disconnectedQueue: null,
     _disconnectedTimer: null,
+
+    _windowsStore: null,
 
     init() {
         this._super();
@@ -53,16 +53,16 @@ let SocketService = Ember.Object.extend({
     },
 
     start() {
-        this.set('windows', getStore('windows'));
+        this.set('_windowsStore', getStore('windows'));
 
-        this.set('windows.initDone', false);
-        this._emitInit(this.get('windows.userId'), this.get('windows.secret'));
+        this.set('_windowsStore.initDone', false);
+        this._emitInit(this.get('_windowsStore.userId'), this.get('_windowsStore.secret'));
 
         ioSocket.on('initok', Ember.run.bind(this, function(data) {
             this.set('_connected', true);
 
             this.set('sessionId', data.sessionId);
-            this.set('windows.maxBacklogMsgs', data.maxBacklogMsgs);
+            this.set('_windowsStore.maxBacklogMsgs', data.maxBacklogMsgs);
 
             // TBD: Delete oldest messages for windows that have more messages than
             // maxBacklogMsgs. They can be stale, when editing becomes possible.
@@ -141,7 +141,7 @@ let SocketService = Ember.Object.extend({
 
     _emitInit(userId, secret) {
         let maxBacklogMsgs = calcMsgHistorySize();
-        let cachedUpto = this.get('windows.cachedUpto');
+        let cachedUpto = this.get('_windowsStore.cachedUpto');
 
         ioSocket.emit('init', {
             clientName: 'web',
