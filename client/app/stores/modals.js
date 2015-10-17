@@ -17,4 +17,28 @@
 import Ember from 'ember';
 import Store from 'emflux/store';
 
-export default Store.extend({});
+export default Store.extend({
+    modals: Ember.A([]),
+
+    handleOpenModal(data) {
+        this.get('modals').pushObject({
+            name: data.name,
+            model: data.model
+        });
+    },
+
+    handleCloseModal() {
+        this.get('modals').shiftObject();
+    },
+
+    handleOpenPriorityModal(data) {
+        this.get('modals').unshiftObject({ // Show immediately
+            name: data.name,
+            model: data.model
+        });
+    },
+
+    handleClosePriorityModal() {
+        this.get('modals').shiftObject();
+    },
+});

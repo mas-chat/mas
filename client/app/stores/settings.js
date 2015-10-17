@@ -16,5 +16,65 @@
 
 import Ember from 'ember';
 import Store from 'emflux/store';
+import socket from '../utils/socket';
 
-export default Store.extend({});
+export default Store.extend({
+    theme: 'default',
+    activeDesktop: null,
+    email: '', // TBD: Remove from here, keep in profile
+    emailConfirmed: true,
+
+    handleToggleTheme() {
+        let newTheme = this.get('theme') === 'dark' ? 'default' : 'dark';
+
+        this.set('theme', newTheme);
+        socket.send({
+            id: 'SET',
+            settings: {
+                theme: newTheme
+            }
+        });
+    },
+
+    handleConfirmEmail(data, successCb) {
+        socket.send({
+            id: 'SEND_CONFIRM_EMAIL'
+        }, () => {
+            dispatch('SHOW_ALERT', {
+                alertId: `client-${Date.now()}`,
+                message: 'Confirmation link sent. Check your spam folder if you don\'t see it in inbox.',
+                dismissible: true,
+                report: false,
+                postponeLabel: false,
+                ackLabel: 'Okay'
+            });
+
+            this.set('emailConfirmed', true);
+        });
+    },
+
+    handleSetEmailConfirmed() {
+        this.set('emailConfirmed', true);
+    },
+
+    handleChangeActiveDesktop(data) {
+        this.set('activeDesktop', data.desktop);
+
+        if (!isMobile.any) {
+            socket.send({
+                id: 'SET',
+                settings: {
+                    activeDesktop: data.desktop
+                }
+            });
+        }
+    },
+
+    handleUpdateSettings(data) {
+        if (isMobile.any) {
+            data.settings.activeDesktop = 1;
+        }
+
+        this.setProperties(data.settings);
+    },
+});

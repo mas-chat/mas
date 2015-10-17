@@ -16,5 +16,37 @@
 
 import Ember from 'ember';
 import Store from 'emflux/store';
+import { dispatch } from 'emflux/dispatcher';
+import socket from '../utils/socket';
 
-export default Store.extend({});
+export default Store.extend({
+    nick: '',
+    name: '',
+    email: '',
+
+    handleUpdateProfile(data, successCb, rejectCb) {
+        socket.send({
+            id: 'UPDATE_PROFILE',
+            name: data.name,
+            email: data.email
+        }, resp => {
+            if (resp.status === 'OK') {
+                // Don't nag about unconfirmed email address anymore in this session
+                dispatch('SET_EMAIL_CONFIRMED');
+                successCb();
+            } else {
+                rejectCb(resp.errorMsg);
+            }
+        });
+    },
+
+    handleFetchProfile() {
+        socket.send({
+            id: 'GET_PROFILE'
+        }, resp => {
+            this.set('name', resp.name);
+            this.set('email', resp.email);
+            this.set('nick', resp.nick);
+        });
+    }
+});

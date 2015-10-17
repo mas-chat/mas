@@ -17,7 +17,7 @@
 /* global $, moment, isMobile */
 
 import Ember from 'ember';
-import { dispatch } from 'emflux/dispatcher'; // hiukan fragile kun pitaa olla taalla
+import socket from '../../../utils/socket'
 import { darkTheme } from '../../../utils/theme-dark'
 
 export default Ember.Component.extend({
@@ -29,10 +29,10 @@ export default Ember.Component.extend({
 
     init() {
         this._super(...arguments);
-        dispatch('START'); // Let's get the show started.
+        socket.start(); // Let's get the show started.
     },
 
-    changeTheme: Ember.observer('stores.windows.settings.theme', function() {
-        $('#theme-stylesheet').text(this.get('stores.windows.settings.theme') === 'dark' ? darkTheme : '');
+    changeTheme: Ember.observer('stores.settings.theme', function() {
+        $('#theme-stylesheet').text(this.get('stores.settings.theme') === 'dark' ? darkTheme : '');
     })
 });

@@ -1,5 +1,5 @@
 //
-//   Copyright 2009-2014 Ilkka Oksanen <iao@iki.fi>
+//   Copyright 2009-2015 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -15,21 +15,12 @@
 //
 
 import Ember from 'ember';
-import BaseModel from './base';
-import { getStore } from 'emflux/dispatcher';
+import Store from 'emflux/store';
 
-export default BaseModel.extend({
-    userId: null,
+export default Store.extend({
+    networks: Ember.A([]),
 
-    _usersStore: null,
-
-    init() {
-        this._super();
-        this.set('_usersStore', getStore('users'));
-    },
-
-    name: Ember.computed('_usersStore.users.isDirty', function() {
-        let userId = this.get('userId');
-        return this.get('_usersStore.users').getName(userId);
-    })
+    handleUpdateNetworks(data) {
+        this.get('networks').setObjects(data.networks);
+    }
 });

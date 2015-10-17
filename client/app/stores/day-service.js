@@ -1,5 +1,5 @@
 //
-//   Copyright 2009-2014 Ilkka Oksanen <iao@iki.fi>
+//   Copyright 2009-2015 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -15,21 +15,26 @@
 //
 
 import Ember from 'ember';
-import BaseModel from './base';
-import { getStore } from 'emflux/dispatcher';
+import Store from 'emflux/store';
 
-export default BaseModel.extend({
-    userId: null,
-
-    _usersStore: null,
+export default Store.extend({
+    dayCounter: 0,
 
     init() {
         this._super();
-        this.set('_usersStore', getStore('users'));
+
+        this._startDayChangedService();
     },
 
-    name: Ember.computed('_usersStore.users.isDirty', function() {
-        let userId = this.get('userId');
-        return this.get('_usersStore.users').getName(userId);
-    })
+    _startDayChangedService() {
+        // Day has changed service
+        let timeToTomorrow = moment().endOf('day').diff(moment()) + 1;
+
+        let changeDay = function() {
+            this.incrementProperty('dayCounter');
+            Ember.run.later(this, changeDay, 1000 * 60 * 60 * 24);
+        };
+
+        Ember.run.later(this, changeDay, timeToTomorrow);
+    },
 });

@@ -21,8 +21,6 @@ import BaseModel from './base';
 import { getStore } from 'emflux/dispatcher';
 
 export default BaseModel.extend({
-    store: null,
-
     gid: 0,
     body: null,
     cat: null,
@@ -34,6 +32,17 @@ export default BaseModel.extend({
 
     hideImages: false,
     editing: false,
+
+    // Other stores
+    _windowsStore: null,
+    _usersStore: null,
+
+    init() {
+        this._super();
+
+        this.set('_windowsStore', getStore('windows'));
+        this.set('_usersStore', getStore('users'));
+    },
 
     mentionedRegEx: Ember.computed.alias('window.userNickHighlightRegex'),
 
@@ -74,11 +83,11 @@ export default BaseModel.extend({
     }),
 
     nick: Ember.computed('userId', 'window', function() {
-        return this.get('store.users').getNick(this.get('userId'), this.get('window.network'));
+        return this.get('_usersStore.users').getNick(this.get('userId'), this.get('window.network'));
     }),
 
     avatarUrl: Ember.computed('userId', function() {
-        let hash = this.get('store.users').getAvatarHash(this.get('userId'));
+        let hash = this.get('_usersStore.users').getAvatarHash(this.get('userId'));
         return `//gravatar.com/avatar/${hash}?d=mm`;
     }),
 
@@ -93,7 +102,7 @@ export default BaseModel.extend({
             return 'flowdock-ignore';
         } else if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {
             return 'mention';
-        } else if (userId == this.get('store.userId') && cat === 'msg') {
+        } else if (userId == this.get('_windowsStore.userId') && cat === 'msg') {
             return 'mymsg';
         }
 
@@ -179,11 +188,6 @@ export default BaseModel.extend({
             return null;
         }
     }),
-
-    init() {
-        this._super();
-        this.set('store', getStore('windows'));
-    },
 
     _parseLinks(text) {
         let imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];

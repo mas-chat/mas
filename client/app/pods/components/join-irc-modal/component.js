@@ -26,8 +26,8 @@ export default Ember.Component.extend({
 
     selectedNetwork: null,
 
-    ircNetworks: Ember.computed('stores.windows.networks', function() {
-        return this.get('stores.windows.networks').removeObject('MAS');
+    ircNetworks: Ember.computed('stores.networks.networks', function() {
+        return this.get('stores.networks.networks').removeObject('MAS');
     }),
 
     actions: {

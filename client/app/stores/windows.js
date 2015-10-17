@@ -18,56 +18,28 @@
 
 import Ember from 'ember';
 import Store from 'emflux/store';
-import { dispatch } from 'emflux/dispatcher';
-import Users from '../utils/users';
+import { dispatch, getStore } from 'emflux/dispatcher';
 import Window from '../models/window';
-import Alert from '../models/alert';
 import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 
 export default Store.extend({
-    users: null,
-    windows: null,
-    alerts: null,
-    networks: null,
-    modals: null,
-
-    settings: null,
-    profile: null,
-
-    userId: null,
-    initDone: false,
-    maxBacklogMsgs: 100000,
+    windows: IndexArray.create({ index: 'windowId', factory: Window }),
     msgBuffer: null, // Only used during startup
+    maxBacklogMsgs: 100000,
     cachedUpto: 0,
-    dayCounter: 0,
+
+    // TBD: Re-factor leftovers
+    userId: null,
+    secret: null,
+
+    initDone: false,
 
     init() {
         this._super();
 
-        this.set('users', Users.create());
-        this.set('networks', Ember.A([]));
-        this.set('modals', Ember.A([]));
-
-        this.set('windows', IndexArray.create({ index: 'windowId', factory: Window }));
-        this.set('alerts', IndexArray.create({ index: 'alertId', factory: Alert }));
-
-        this.set('settings', Ember.Object.create({
-            theme: 'default',
-            activeDesktop: null,
-            email: '', // TBD: Remove from here, keep in profile
-            emailConfirmed: true
-        }));
-
-        this.set('profile', Ember.Object.create({
-            nick: '',
-            name: '',
-            email: ''
-        }));
-
-        let authCookie = $.cookie('auth') || '';
-        let [ userId, secret ] = authCookie.split('-');
+        let [ userId, secret ] = ($.cookie('auth') || '').split('-');
 
         if (!userId || !secret) {
             dispatch('LOGOUT');
@@ -77,8 +49,6 @@ export default Store.extend({
         this.set('secret', secret);
 
         this.msgBuffer = [];
-
-        this._startDayChangedService();
     },
 
     desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
@@ -115,7 +85,7 @@ export default Store.extend({
 
         let desktopIds = this.get('desktops').map(d => d.id);
 
-        if (desktopIds.indexOf(this.get('settings.activeDesktop')) === -1) {
+        if (desktopIds.indexOf(getStore('settings').get('activeDesktop')) === -1) {
             dispatch('CHANGE_ACTIVE_DESKTOP', {
                 desktop: this.get('desktops').map(d => d.id).sort()[0] // Oldest
             });
@@ -125,7 +95,6 @@ export default Store.extend({
     toJSON() {
         let data = {
             windows: [],
-            users: {},
             activeDesktop: this.get('activeDesktop'),
             userId: this.get('userId'),
             version: 1
@@ -163,7 +132,6 @@ export default Store.extend({
                 }
 
                 messages.push(messageData);
-                data.users[messageData.userId] = true;
             });
 
             let windowProperties = masWindow.getProperties([
@@ -188,20 +156,10 @@ export default Store.extend({
         data.cachedUpto = cachedUpto;
         this.set('cachedUpto', cachedUpto);
 
-        for (let userId of Object.keys(data.users)) {
-            data.users[userId] = this.get('users.users.' + userId);
-        }
-
         return data;
     },
 
     fromJSON(data) {
-        for (let userId of Object.keys(data.users)) {
-            this.set('users.users.' + userId, data.users[userId]);
-        }
-
-        this.get('users').incrementProperty('isDirty');
-
         for (let windowData of data.windows) {
             let messages = windowData.messages;
             delete windowData.messages;
@@ -212,42 +170,6 @@ export default Store.extend({
 
         this.set('activeDesktop', data.activeDesktop);
         this.set('cachedUpto', data.cachedUpto ? data.cachedUpto : 0);
-    },
-
-    _startDayChangedService() {
-        // Day has changed service
-        let timeToTomorrow = moment().endOf('day').diff(moment()) + 1;
-
-        let changeDay = function() {
-            this.incrementProperty('dayCounter');
-            Ember.run.later(this, changeDay, 1000 * 60 * 60 * 24);
-        };
-
-        Ember.run.later(this, changeDay, timeToTomorrow);
-    },
-
-    handleStart() {
-        socket.start(this);
-    },
-
-    handleCloseAlert(data) {
-        let callback = this.get('alerts').get('firstObject').get('resultCallback');
-
-        if (callback) {
-            callback(data.result);
-        }
-
-        this.get('alerts').shiftObject();
-    },
-
-    handleUpdateWindowAlerts(data) {
-        data.window.set('alerts', data.alerts);
-
-        socket.send({
-            id: 'UPDATE',
-            windowId: data.window.get('windowId'),
-            alerts: data.alerts
-        });
     },
 
     handleUploadFiles(data) {
@@ -359,37 +281,6 @@ export default Store.extend({
             }
         });
         return;
-    },
-
-    handleOpenModal(data) {
-        this.get('modals').pushObject({
-            name: data.name,
-            model: data.model
-        });
-    },
-
-    handleCloseModal() {
-        this.get('modals').shiftObject();
-    },
-
-    handleOpenPriorityModal(data) {
-        this.get('modals').unshiftObject({ // Show immediately
-            name: data.name,
-            model: data.model
-        });
-    },
-
-    handleClosePriorityModal() {
-        this.get('modals').shiftObject();
-    },
-
-    handleDestroyAccount() {
-        socket.send({
-            id: 'DESTROY_ACCOUNT'
-        }, () => {
-            $.removeCookie('auth', { path: '/' });
-            window.location = '/';
-        });
     },
 
     handleCreateGroup(data, acceptCb, rejectCb) {
@@ -554,35 +445,14 @@ export default Store.extend({
         });
     },
 
+    handleUpdateWindow(data) {
+        let window = this._getWindow(data.windowId);
+        window.setModelProperties(data);
+    },
+
     handleDeleteWindow(data) {
         let window = this._getWindow(data.windowId);
         this.get('windows').removeModel(window);
-    },
-
-    handleLogout() {
-        socket.send({
-            id: 'LOGOUT'
-        }, () => {
-            $.removeCookie('auth', { path: '/' });
-
-            if (typeof Storage !== 'undefined') {
-                window.localStorage.removeItem('data');
-            }
-
-            window.location = '/';
-        });
-    },
-
-    handleToggleTheme() {
-        let newTheme = this.get('settings.theme') === 'dark' ? 'default' : 'dark';
-
-        this.set('settings.theme', newTheme);
-        socket.send({
-            id: 'SET',
-            settings: {
-                theme: newTheme
-            }
-        });
     },
 
     handleUpdatePassword(data, successCb, rejectCb) {
@@ -599,32 +469,6 @@ export default Store.extend({
         });
     },
 
-    handleUpdateProfile(data, successCb, rejectCb) {
-        socket.send({
-            id: 'UPDATE_PROFILE',
-            name: data.name,
-            email: data.email
-        }, resp => {
-            if (resp.status === 'OK') {
-                // Don't nag about unconfirmed email address anymore in this session
-                this.set('settings.emailConfirmed', true);
-                successCb();
-            } else {
-                rejectCb(resp.errorMsg);
-            }
-        });
-    },
-
-    handleFetchProfile() {
-        socket.send({
-            id: 'GET_PROFILE'
-        }, resp => {
-            this.set('profile.name', resp.name);
-            this.set('profile.email', resp.email);
-            this.set('profile.nick', resp.nick);
-        });
-    },
-
     handleUpdateTopic(data) {
         socket.send({
             id: 'UPDATE_TOPIC',
@@ -633,25 +477,14 @@ export default Store.extend({
         });
     },
 
-    handleConfirmEmail(data, successCb) {
+    handleUpdateWindowAlerts(data) {
+        data.window.set('alerts', data.alerts);
+
         socket.send({
-            id: 'SEND_CONFIRM_EMAIL'
-        }, () => {
-            dispatch('SHOW_ALERT', {
-                alertId: `client-${Date.now()}`,
-                message: 'Confirmation link sent. Check your spam folder if you don\'t see it in inbox.',
-                dismissible: true,
-                report: false,
-                postponeLabel: false,
-                ackLabel: 'Okay'
-            });
-
-            this.set('settings.emailConfirmed', true);
+            id: 'UPDATE',
+            windowId: data.window.get('windowId'),
+            alerts: data.alerts
         });
-    },
-
-    handleShowAlert(data) {
-        this.get('alerts').upsertModel(data);
     },
 
     handleMoveWindow(data) {
@@ -684,22 +517,9 @@ export default Store.extend({
         });
     },
 
-    handleChangeActiveDesktop(data) {
-        this.set('settings.activeDesktop', data.desktop);
-
-        if (!isMobile.any) {
-            socket.send({
-                id: 'SET',
-                settings: {
-                    activeDesktop: data.desktop
-                }
-            });
-        }
-    },
-
     handleSeekActiveDesktop(data) {
         let desktops = this.get('desktops');
-        let activeDesktop = this.get('settings.activeDesktop');
+        let activeDesktop = getStore('settings').get('activeDesktop');
         let index = desktops.indexOf(desktops.findBy('id', activeDesktop));
 
         index += data.direction;
@@ -713,35 +533,6 @@ export default Store.extend({
         dispatch('CHANGE_ACTIVE_DESKTOP', {
             desktop: desktops[index].id
         });
-    },
-
-    handleUpdateSettings(data) {
-        if (isMobile.any) {
-            data.settings.activeDesktop = 1;
-        }
-
-        this.get('settings').setProperties(data.settings);
-    },
-
-    handleUpdateNetworks(data) {
-        this.get('networks').setObjects(data.networks);
-    },
-
-    handleAddAlert(data) {
-        // Default labels for alerts
-        data.postponeLabel = 'Show again later';
-        data.ackLabel = 'Dismiss';
-
-        data.resultCallback = result => {
-            if (result === 'ack') {
-                socket.send({
-                    id: 'ACKALERT',
-                    alertId: data.alertId
-                });
-            }
-        };
-
-        this.get('alerts').upsertModel(data);
     },
 
     handleFinishStartup() {
@@ -808,17 +599,29 @@ export default Store.extend({
         });
     },
 
-    handleUpdateWindow(data) {
-        let window = this._getWindow(data.windowId);
-        window.setModelProperties(data);
+    // TBD: Move these handlers somewhere else
+
+    handleLogout() {
+        socket.send({
+            id: 'LOGOUT'
+        }, () => {
+            $.removeCookie('auth', { path: '/' });
+
+            if (typeof Storage !== 'undefined') {
+                window.localStorage.removeItem('data');
+            }
+
+            window.location = '/';
+        });
     },
 
-    handleUpsertUsers(data) {
-        for (let userId in data.mapping) {
-            this.set('users.users.' + userId, data.mapping[userId]);
-        }
-
-        this.get('users').incrementProperty('isDirty');
+    handleDestroyAccount() {
+        socket.send({
+            id: 'DESTROY_ACCOUNT'
+        }, () => {
+            $.removeCookie('auth', { path: '/' });
+            window.location = '/';
+        });
     },
 
     _removeUser(userId, window) {

@@ -22,14 +22,7 @@ import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
 
 export default Store.extend({
-    friends: null,
-
-    init() {
-        this._super();
-        this.set('store', getStore('windows')); // TBD: Rename
-
-        this.set('friends', IndexArray.create({ index: 'userId', factory: Friend }));
-    },
+    friends: IndexArray.create({ index: 'userId', factory: Friend }),
 
     handleAddFriends(data) {
         if (data.reset) {
@@ -67,7 +60,7 @@ export default Store.extend({
     },
 
     handleConfirmFriends(data) {
-        let users = this.get('store.users');
+        let users = getStore('windows').get('users');
 
         for (let friendCandidate of data.friends) {
             let realName = users.getName(friendCandidate.userId);

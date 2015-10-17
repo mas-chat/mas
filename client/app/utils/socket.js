@@ -18,7 +18,7 @@
 
 import Ember from 'ember';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
-import { dispatch } from 'emflux/dispatcher';
+import { dispatch, getStore } from 'emflux/dispatcher';
 
 const mapServerIds = {
     CREATE: 'ADD_WINDOW',
@@ -39,10 +39,9 @@ const mapServerIds = {
 let ioSocket = io.connect(); // Start connection as early as possible.
 
 let SocketService = Ember.Object.extend({
-    store: null,
+    windows: null,
 
     sessionId: 0,
-    secret: '',
 
     _connected: false,
     _disconnectedQueue: null,
@@ -53,31 +52,17 @@ let SocketService = Ember.Object.extend({
         this._disconnectedQueue = Ember.A([]);
     },
 
-    start(store) {
-        let authCookie = $.cookie('auth');
+    start() {
+        this.set('windows', getStore('windows'));
 
-        if (!authCookie) {
-            this._logout();
-        }
-
-        let [ userId, secret ] = authCookie.split('-');
-
-        if (!userId || !secret) {
-            this._logout();
-        }
-
-        this.set('store', store);
-        this.set('store.userId', userId);
-        this.set('secret', secret);
-
-        this.set('store.initDone', false);
-        this._emitInit(userId, secret);
+        this.set('windows.initDone', false);
+        this._emitInit(this.get('windows.userId'), this.get('windows.secret'));
 
         ioSocket.on('initok', Ember.run.bind(this, function(data) {
             this.set('_connected', true);
 
             this.set('sessionId', data.sessionId);
-            this.set('store.maxBacklogMsgs', data.maxBacklogMsgs);
+            this.set('windows.maxBacklogMsgs', data.maxBacklogMsgs);
 
             // TBD: Delete oldest messages for windows that have more messages than
             // maxBacklogMsgs. They can be stale, when editing becomes possible.
@@ -156,7 +141,7 @@ let SocketService = Ember.Object.extend({
 
     _emitInit(userId, secret) {
         let maxBacklogMsgs = calcMsgHistorySize();
-        let cachedUpto = this.get('store.cachedUpto');
+        let cachedUpto = this.get('windows.cachedUpto');
 
         ioSocket.emit('init', {
             clientName: 'web',

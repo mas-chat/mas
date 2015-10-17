@@ -22,7 +22,7 @@ export default Ember.Component.extend({
 
     classNames: [ 'flex-row', 'announcement' ],
 
-    alerts: Ember.computed.oneWay('stores.windows.alerts'),
+    alerts: Ember.computed.oneWay('stores.alerts.alerts'),
 
     currentAlert: Ember.computed('alerts.[]', function() {
         let alerts = this.get('alerts');

@@ -24,8 +24,8 @@ export default Ember.Component.extend({
 
     classNames: [ 'flex-row', 'unconfirmed-email' ],
 
-    email: Ember.computed.alias('stores.windows.settings.email'),
-    emailConfirmed: Ember.computed.alias('stores.windows.settings.emailConfirmed'),
+    email: Ember.computed.alias('stores.settings.email'),
+    emailConfirmed: Ember.computed.alias('stores.settings.emailConfirmed'),
 
     actions: {
         requestConfirmation() {

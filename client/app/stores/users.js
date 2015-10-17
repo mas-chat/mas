@@ -16,5 +16,44 @@
 
 import Ember from 'ember';
 import Store from 'emflux/store';
+import { getStore } from 'emflux/dispatcher';
+import Users from '../utils/users';
 
-export default Store.extend({});
+export default Store.extend({
+    users: Users.create(),
+
+    toJSON() {
+        let data = {};
+
+        // Only persist recent users
+        getStore('windows').get('windows').forEach(function(masWindow) {
+            let sortedMessages = masWindow.get('messages').sortBy('ts').slice(-1 * maxBacklogMsgs);
+
+            sortedMessages.forEach(function(message) {
+                data[message.get('userId')] = true;
+            });
+        });
+
+        for (let userId of Object.keys(data)) {
+            data[userId] = this.get('users.users.' + userId);
+        }
+
+        return data;
+    },
+
+    fromJSON(data) {
+        for (let userId of Object.keys(data)) {
+            this.set('users.users.' + userId, data[userId]);
+        }
+
+        this.get('users').incrementProperty('isDirty');
+    },
+
+    handleUpsertUsers(data) {
+        for (let userId in data.mapping) {
+            this.set('users.users.' + userId, data.mapping[userId]);
+        }
+
+        this.get('users').incrementProperty('isDirty');
+    }
+});

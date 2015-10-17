@@ -17,39 +17,14 @@
 /* globals moment */
 
 import Ember from 'ember';
-import TitleBuilder from '../utils/title-builder';
 import BaseModel from './base';
 import Message from './message';
 import IndexArray from '../utils/index-array';
 import { getStore } from 'emflux/dispatcher';
 
-let titleBuilder = TitleBuilder.create();
 let mobileDesktop = 1;
 
 export default BaseModel.extend({
-    init() {
-        this._super();
-        this.set('store', getStore('windows'));
-
-        this.set('_desktop', mobileDesktop++);
-
-        this.set('messages', IndexArray.create({ index: 'gid', factory: Message }));
-        this.set('logMessages', IndexArray.create({ index: 'gid', factory: Message }));
-
-        this.set('operators', Ember.A([]));
-        this.set('voices', Ember.A([]));
-        this.set('users', Ember.A([]));
-
-        this.set('alerts', Ember.Object.create({
-            email: false,
-            notification: false,
-            sound: false,
-            title: false
-        }));
-    },
-
-    store: null,
-
     windowId: 0,
     generation: '',
     name: null,
@@ -77,6 +52,34 @@ export default BaseModel.extend({
 
     _desktop: null,
 
+    _dayServiceStore: null,
+    _windowsStore: null,
+    _usersStore: null,
+
+    init() {
+        this._super();
+
+        this.set('_dayServiceStore', getStore('day-service'));
+        this.set('_windowsStore', getStore('windows'));
+        this.set('_usersStore', getStore('users'));
+
+        this.set('_desktop', mobileDesktop++);
+
+        this.set('messages', IndexArray.create({ index: 'gid', factory: Message }));
+        this.set('logMessages', IndexArray.create({ index: 'gid', factory: Message }));
+
+        this.set('operators', Ember.A([]));
+        this.set('voices', Ember.A([]));
+        this.set('users', Ember.A([]));
+
+        this.set('alerts', Ember.Object.create({
+            email: false,
+            notification: false,
+            sound: false,
+            title: false
+        }));
+    },
+
     desktop: function(key, value, previousValue) {
         if (arguments.length > 1 && !isMobile.any) {
             this.set('_desktop',  value);
@@ -85,7 +88,7 @@ export default BaseModel.extend({
         return this.get('_destkop');
     }.property('_desktop'),
 
-    sortedMessages: Ember.computed('messages.[]', 'store.dayCounter', function() {
+    sortedMessages: Ember.computed('messages.[]', '_dayServiceStore.dayCounter', function() {
         let result = this.get('messages').sortBy('ts');
 
         let addDayDivider = (array, dateString, index) => {
@@ -112,33 +115,46 @@ export default BaseModel.extend({
         return result;
     }),
 
-    userNickHighlightRegex: Ember.computed('store.userId', 'store.users.isDirty', function() {
-        let userId = this.get('store.userId');
-        let nick = this.get('store.users').getNick(userId, this.get('network'));
+    userNickHighlightRegex: Ember.computed('_windowsStore.userId', '_usersStore.users.isDirty', function() {
+        let userId = this.get('_windowsStore.userId');
+        let nick = this.get('_usersStore.users').getNick(userId, this.get('network'));
 
         return new RegExp(`(^|[@ ])${nick}[ :]`);
     }),
 
-    operatorNames: Ember.computed('operators.[]', 'store.users.isDirty', function() {
+    operatorNames: Ember.computed('operators.[]', '_usersStore.users.isDirty', function() {
         return this._mapUserIdsToNicks('operators').sortBy('nick');
     }),
 
-    voiceNames: Ember.computed('voices.[]', 'store.users.isDirty', function() {
+    voiceNames: Ember.computed('voices.[]', '_usersStore.users.isDirty', function() {
         return this._mapUserIdsToNicks('voices').sortBy('nick');
     }),
 
-    userNames: Ember.computed('users.[]', 'store.users.isDirty', function() {
+    userNames: Ember.computed('users.[]', '_usersStore.users.isDirty', function() {
         return this._mapUserIdsToNicks('users').sortBy('nick');
     }),
 
-    decoratedTitle: Ember.computed('name', 'network', 'type', 'store.users.isDirty', function() {
-        return titleBuilder.build({
-            name: this.get('name'),
-            network: this.get('network'),
-            type: this.get('type'),
-            userId: this.get('userId'),
-            store: this.get('store')
-        });
+    decoratedTitle: Ember.computed('name', 'network', 'type', '_usersStore.users.isDirty', function() {
+        let title;
+        let type = this.get('type');
+        let userId = this.get('userId');
+        let network = this.get('network');
+        let name = this.get('name');
+
+        if (type === '1on1' && userId === 'iSERVER') {
+            title = `${network} Server Messages`;
+        } else if (type === '1on1') {
+            let ircNetwork = network === 'MAS' ? '' : `${network} `;
+            let target = this.get('_usersStore.users').getNick(userId, network);
+
+            title = `Private ${ircNetwork} conversation with ${target}`;
+        } else if (network === 'MAS') {
+            title = `Group: ${name.charAt(0).toUpperCase()}${name.substr(1)}`;
+        } else {
+            title = `${network}: ${name}`;
+        }
+
+        return title;
     }),
 
     decoratedTopic: Ember.computed('topic', function() {
@@ -157,7 +173,7 @@ export default BaseModel.extend({
 
             windowName = windowName.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
         } else {
-            windowName = this.get('store.users').getNick(this.get('userId'), this.get('network'));
+            windowName = this.get('_usersStore.users').getNick(this.get('userId'), this.get('network'));
         }
         return windowName;
     }),
@@ -180,7 +196,7 @@ export default BaseModel.extend({
 
     _mapUserIdsToNicks(role) {
         return this.get(role).map(function(userId) {
-            let users = this.get('store.users');
+            let users = this.get('_usersStore.users');
 
             return {
                 userId: userId,

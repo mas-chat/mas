@@ -22,8 +22,8 @@ import { dispatch } from 'emflux/dispatcher';
 export default Ember.Component.extend({
     stores: Ember.inject.service(),
 
-    activeModal: Ember.computed('stores.windows.modals.[]', function() {
-        let modalQueue = this.get('stores.windows.modals');
+    activeModal: Ember.computed('stores.modals.modals.[]', function() {
+        let modalQueue = this.get('stores.modals.modals');
 
         return modalQueue.length === 0 ?
             { model: null, name: 'empty-modal' } : modalQueue.get('firstObject');

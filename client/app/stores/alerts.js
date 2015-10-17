@@ -16,5 +16,40 @@
 
 import Ember from 'ember';
 import Store from 'emflux/store';
+import IndexArray from '../utils/index-array';
+import Alert from '../models/alert';
 
-export default Store.extend({});
+export default Store.extend({
+    alerts: IndexArray.create({ index: 'alertId', factory: Alert }),
+
+    handleShowAlert(data) {
+        this.get('alerts').upsertModel(data);
+    },
+
+    handleAddAlert(data) {
+        // Default labels for alerts
+        data.postponeLabel = 'Show again later';
+        data.ackLabel = 'Dismiss';
+
+        data.resultCallback = result => {
+            if (result === 'ack') {
+                socket.send({
+                    id: 'ACKALERT',
+                    alertId: data.alertId
+                });
+            }
+        };
+
+        this.get('alerts').upsertModel(data);
+    },
+
+    handleCloseAlert(data) {
+        let callback = this.get('alerts').get('firstObject').get('resultCallback');
+
+        if (callback) {
+            callback(data.result);
+        }
+
+        this.get('alerts').shiftObject();
+    }
+});

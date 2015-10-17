@@ -20,9 +20,9 @@ import { dispatch } from 'emflux/dispatcher';
 export default Ember.Component.extend({
     stores: Ember.inject.service(),
 
-    name: Ember.computed.alias('stores.windows.profile.name'),
-    email: Ember.computed.alias('stores.windows.profile.email'),
-    nick: Ember.computed.alias('stores.windows.profile.nick'),
+    name: Ember.computed.alias('stores.profile.name'),
+    email: Ember.computed.alias('stores.profile.email'),
+    nick: Ember.computed.alias('stores.profile.nick'),
 
     errorMsg: '',
 

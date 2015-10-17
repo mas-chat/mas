@@ -34,7 +34,7 @@ export default Ember.Component.extend({
         'type'
     ],
 
-    activeDesktop: Ember.computed.alias('stores.windows.settings.activeDesktop'),
+    activeDesktop: Ember.computed.alias('stores.settings.activeDesktop'),
 
     expanded: false,
     animating: false,

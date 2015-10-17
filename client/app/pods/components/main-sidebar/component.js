@@ -48,7 +48,7 @@ export default Ember.Component.extend(KeyboardShortcuts, {
         return this.get('friends').filterBy('online', true).length;
     }),
 
-    darkTheme: Ember.computed('stores.windows.settings.theme', function() {
-        return this.get('stores.windows.settings.theme') === 'dark';
+    darkTheme: Ember.computed('stores.settings.theme', function() {
+        return this.get('stores.settings.theme') === 'dark';
     })
 });
