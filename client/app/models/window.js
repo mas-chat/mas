@@ -80,13 +80,18 @@ export default BaseModel.extend({
         }));
     },
 
-    desktop: function(key, value, previousValue) {
-        if (arguments.length > 1 && !isMobile.any) {
-            this.set('_desktop',  value);
-        }
+    desktop: Ember.computed('_desktop', {
+        get() {
+            return this.get('_desktop');
+        },
+        set(key, value) {
+            if (!isMobile.any) {
+                this.set('_desktop',  value);
+            }
 
-        return this.get('_destkop');
-    }.property('_desktop'),
+            return this.get('_desktop');
+        }
+    }),
 
     sortedMessages: Ember.computed('messages.[]', '_dayServiceStore.dayCounter', function() {
         let result = this.get('messages').sortBy('ts');
