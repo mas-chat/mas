@@ -59,8 +59,8 @@ export default Store.extend({
         });
     },
 
-    handleConfirmFriends(data) {
-        let users = getStore('windows').get('users');
+    handleConfirmFriendsServer(data) {
+        let users = getStore('users').get('users');
 
         for (let friendCandidate of data.friends) {
             let userId = friendCandidate.userId;
