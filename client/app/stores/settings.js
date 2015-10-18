@@ -20,9 +20,24 @@ import socket from '../utils/socket';
 
 export default Store.extend({
     theme: 'default',
-    activeDesktop: null,
+    activeDesktop: 1,
     email: '', // TBD: Remove from here, keep in profile
     emailConfirmed: true,
+
+    toJSON() {
+        return {
+            version: 1,
+            activeDesktop: this.get('activeDesktop')
+        };
+    },
+
+    fromJSON(data) {
+        if (data.version !== 1) {
+            return;
+        }
+
+        this.set('activeDesktop', data.activeDesktop);
+    },
 
     handleToggleTheme() {
         let newTheme = this.get('theme') === 'dark' ? 'default' : 'dark';
@@ -72,7 +87,7 @@ export default Store.extend({
 
     handleUpdateSettings(data) {
         if (isMobile.any) {
-            data.settings.activeDesktop = 1;
+            delete data.settings.activeDesktop;
         }
 
         this.setProperties(data.settings);
