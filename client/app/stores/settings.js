@@ -85,7 +85,7 @@ export default Store.extend({
         }
     },
 
-    handleUpdateSettings(data) {
+    handleUpdateSettingsServer(data) {
         if (isMobile.any) {
             delete data.settings.activeDesktop;
         }

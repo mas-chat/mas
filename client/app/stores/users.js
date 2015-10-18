@@ -65,7 +65,7 @@ export default Store.extend({
         this.incrementProperty('isDirty');
     },
 
-    handleUpsertUsers(data) {
+    handleAddUsersServer(data) {
         for (let userId in data.mapping) {
             let user = data.mapping[userId];
             user.userId = userId;

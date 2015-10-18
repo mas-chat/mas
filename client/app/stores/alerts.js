@@ -26,7 +26,7 @@ export default Store.extend({
         this.get('alerts').upsertModel(data);
     },
 
-    handleAddAlert(data) {
+    handleShowAlertServer(data) {
         // Default labels for alerts
         data.postponeLabel = 'Show again later';
         data.ackLabel = 'Dismiss';

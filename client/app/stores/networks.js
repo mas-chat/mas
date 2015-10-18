@@ -20,7 +20,7 @@ import Store from 'emflux/store';
 export default Store.extend({
     networks: Ember.A([]),
 
-    handleUpdateNetworks(data) {
+    handleUpdateNetworksServer(data) {
         this.get('networks').setObjects(data.networks);
     }
 });

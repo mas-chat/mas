@@ -437,7 +437,7 @@ export default Store.extend({
         });
     },
 
-    handleAddWindow(data) {
+    handleAddWindowServer(data) {
         this.get('windows').upsertModel(data, { generation: socket.sessionId });
     },
 
@@ -448,12 +448,12 @@ export default Store.extend({
         });
     },
 
-    handleUpdateWindow(data) {
+    handleUpdateWindowServer(data) {
         let window = this._getWindow(data.windowId);
         window.setModelProperties(data);
     },
 
-    handleDeleteWindow(data) {
+    handleDeleteWindowServer(data) {
         let window = this._getWindow(data.windowId);
         this.get('windows').removeModel(window);
     },
@@ -538,7 +538,7 @@ export default Store.extend({
         });
     },
 
-    handleFinishStartup() {
+    handleFinishStartupServer() {
         // Remove possible deleted windows.
         let deletedWindows = [];
 
@@ -564,7 +564,7 @@ export default Store.extend({
         this.set('initDone', true);
     },
 
-    handleAddMembers(data) {
+    handleAddMembersServer(data) {
         let window = this._getWindow(data.windowId);
 
         if (data.reset) {
@@ -594,7 +594,7 @@ export default Store.extend({
         });
     },
 
-    handleDeleteMembers(data) {
+    handleDeleteMembersServer(data) {
         let window = this._getWindow(data.windowId);
 
         data.members.forEach(member => {

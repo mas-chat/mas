@@ -24,7 +24,7 @@ import socket from '../utils/socket';
 export default Store.extend({
     friends: IndexArray.create({ index: 'userId', factory: Friend }),
 
-    handleAddFriends(data) {
+    handleAddFriendsServer(data) {
         if (data.reset) {
             this.get('friends').clearModels();
         }
