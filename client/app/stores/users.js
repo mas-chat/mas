@@ -17,43 +17,62 @@
 import Ember from 'ember';
 import Store from 'emflux/store';
 import { getStore } from 'emflux/dispatcher';
-import Users from '../utils/users';
+import { calcMsgHistorySize } from '../utils/msg-history-sizer';
+import User from '../models/user';
+import IndexArray from '../utils/index-array';
 
 export default Store.extend({
-    users: Users.create(),
+    users: IndexArray.create({ index: 'userId', factory: User }),
+    isDirty: 0,
 
     toJSON() {
-        let data = {};
+        let data = {
+            version: 2,
+            users: {}
+        };
 
-        // Only persist recent users
+        // Only persist users of recent messages
         getStore('windows').get('windows').forEach(function(masWindow) {
-            let sortedMessages = masWindow.get('messages').sortBy('ts').slice(-1 * maxBacklogMsgs);
+            let sortedMessages = masWindow.get('messages').sortBy('ts')
+                .slice(-1 * calcMsgHistorySize());
 
             sortedMessages.forEach(function(message) {
-                data[message.get('userId')] = true;
+                let userId = message.get('userId');
+
+                if (userId) {
+                    data.users[userId] = true;
+                }
             });
         });
 
-        for (let userId of Object.keys(data)) {
-            data[userId] = this.get('users.users.' + userId);
+        for (let userId in data.users) {
+            let user = this.get('users').getByIndex(userId);
+            data.users[userId] = user.getProperties([ 'userId', 'name', 'nick', 'gravatar' ]);
         }
 
         return data;
     },
 
     fromJSON(data) {
-        for (let userId of Object.keys(data)) {
-            this.set('users.users.' + userId, data[userId]);
+        if (data.version !== 2) {
+            return;
         }
 
-        this.get('users').incrementProperty('isDirty');
+        for (let userId in data.users) {
+            this.get('users').upsertModel(data[userId]);
+        }
+
+        this.incrementProperty('isDirty');
     },
 
     handleUpsertUsers(data) {
         for (let userId in data.mapping) {
-            this.set('users.users.' + userId, data.mapping[userId]);
+            let user = data.mapping[userId];
+            user.userId = userId;
+
+            this.get('users').upsertModel(user);
         }
 
-        this.get('users').incrementProperty('isDirty');
+        this.incrementProperty('isDirty');
     }
 });

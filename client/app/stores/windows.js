@@ -94,14 +94,13 @@ export default Store.extend({
 
     toJSON() {
         let data = {
+            version: 2,
             windows: [],
-            activeDesktop: this.get('activeDesktop'),
             userId: this.get('userId'),
-            version: 1
+            cachedUpto: 0
         };
 
         let maxBacklogMsgs = calcMsgHistorySize();
-        let cachedUpto = 0;
 
         this.get('windows').forEach(function(masWindow) {
             let messages = [];
@@ -121,8 +120,8 @@ export default Store.extend({
                     'hideImages'
                 ]);
 
-                if (messageData.gid > cachedUpto) {
-                    cachedUpto = messageData.gid;
+                if (messageData.gid > data.cachedUpto) {
+                    data.cachedUpto = messageData.gid;
                 }
 
                 if (!messageData.status || messageData.status === 'original') {
@@ -153,13 +152,16 @@ export default Store.extend({
             data.windows.push(windowProperties);
         });
 
-        data.cachedUpto = cachedUpto;
-        this.set('cachedUpto', cachedUpto);
+        this.set('cachedUpto', data.cachedUpto);
 
         return data;
     },
 
     fromJSON(data) {
+        if (data.version !== 2) {
+            return;
+        }
+
         for (let windowData of data.windows) {
             let messages = windowData.messages;
             delete windowData.messages;
@@ -168,8 +170,7 @@ export default Store.extend({
             windowModel.get('messages').upsertModels(messages, { window: windowModel });
         }
 
-        this.set('activeDesktop', data.activeDesktop);
-        this.set('cachedUpto', data.cachedUpto ? data.cachedUpto : 0);
+        this.set('cachedUpto', data.cachedUpto);
     },
 
     handleUploadFiles(data) {
@@ -225,6 +226,8 @@ export default Store.extend({
         } else {
             data.window.messages.upsertModel(data);
         }
+
+        return true;
     },
 
     handleAddError(data) {

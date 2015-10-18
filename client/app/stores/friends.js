@@ -63,13 +63,15 @@ export default Store.extend({
         let users = getStore('windows').get('users');
 
         for (let friendCandidate of data.friends) {
-            let realName = users.getName(friendCandidate.userId);
-            let nick = users.getNick(friendCandidate.userId, 'MAS');
             let userId = friendCandidate.userId;
+            let user = users.getByIndex(userId);
+            let nick = user.get('nick')['MAS'];
+
+            let message = `Allow ${user.get('name')} (${nick}) to add you to his/her contacts list?`
 
             dispatch('SHOW_ALERT', {
                 alertId: friendCandidate.userId,
-                message: `Allow ${realName} (${nick}) to add you to his/her contacts list?`,
+                message: message,
                 dismissible: true,
                 report: false,
                 postponeLabel: 'Decide later',

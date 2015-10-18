@@ -115,26 +115,26 @@ export default BaseModel.extend({
         return result;
     }),
 
-    userNickHighlightRegex: Ember.computed('_windowsStore.userId', '_usersStore.users.isDirty', function() {
+    userNickHighlightRegex: Ember.computed('_windowsStore.userId', '_usersStore.isDirty', function() {
         let userId = this.get('_windowsStore.userId');
-        let nick = this.get('_usersStore.users').getNick(userId, this.get('network'));
+        let nick = this.get('_usersStore.users').getByIndex(userId).get('nick')[this.get('network')];
 
         return new RegExp(`(^|[@ ])${nick}[ :]`);
     }),
 
-    operatorNames: Ember.computed('operators.[]', '_usersStore.users.isDirty', function() {
+    operatorNames: Ember.computed('operators.[]', '_usersStore.isDirty', function() {
         return this._mapUserIdsToNicks('operators').sortBy('nick');
     }),
 
-    voiceNames: Ember.computed('voices.[]', '_usersStore.users.isDirty', function() {
+    voiceNames: Ember.computed('voices.[]', '_usersStore.isDirty', function() {
         return this._mapUserIdsToNicks('voices').sortBy('nick');
     }),
 
-    userNames: Ember.computed('users.[]', '_usersStore.users.isDirty', function() {
+    userNames: Ember.computed('users.[]', '_usersStore.isDirty', function() {
         return this._mapUserIdsToNicks('users').sortBy('nick');
     }),
 
-    decoratedTitle: Ember.computed('name', 'network', 'type', '_usersStore.users.isDirty', function() {
+    decoratedTitle: Ember.computed('name', 'network', 'type', '_usersStore.isDirty', function() {
         let title;
         let type = this.get('type');
         let userId = this.get('userId');
@@ -145,8 +145,7 @@ export default BaseModel.extend({
             title = `${network} Server Messages`;
         } else if (type === '1on1') {
             let ircNetwork = network === 'MAS' ? '' : `${network} `;
-            let target = this.get('_usersStore.users').getNick(userId, network);
-
+            let target = this.get('_usersStore.users').getByIndex(userId).get('nick')[network];
             title = `Private ${ircNetwork} conversation with ${target}`;
         } else if (network === 'MAS') {
             title = `Group: ${name.charAt(0).toUpperCase()}${name.substr(1)}`;
@@ -173,7 +172,8 @@ export default BaseModel.extend({
 
             windowName = windowName.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
         } else {
-            windowName = this.get('_usersStore.users').getNick(this.get('userId'), this.get('network'));
+            let userId = this.get('userId');
+            windowName = this.get('_usersStore.users').getByIndex(userId).get('nick')[network];
         }
         return windowName;
     }),
@@ -195,14 +195,14 @@ export default BaseModel.extend({
     }),
 
     _mapUserIdsToNicks(role) {
-        return this.get(role).map(function(userId) {
-            let users = this.get('_usersStore.users');
+        return this.get(role).map(userId => {
+            let user = this.get('_usersStore.users').getByIndex(userId);
 
             return {
                 userId: userId,
-                nick: users.getNick(userId, this.get('network')),
-                gravatar: users.getAvatarHash(userId)
+                nick: user.get('nick')[this.get('network')],
+                gravatar: user.get('gravatar')
             };
-        }, this);
+        });
     }
 });

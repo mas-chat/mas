@@ -83,12 +83,13 @@ export default BaseModel.extend({
     }),
 
     nick: Ember.computed('userId', 'window', function() {
-        return this.get('_usersStore.users').getNick(this.get('userId'), this.get('window.network'));
+        let user = this.get('_usersStore.users').getByIndex(this.get('userId'));
+        return user ? user.get('nick')[this.get('window.network')] : '';
     }),
 
     avatarUrl: Ember.computed('userId', function() {
-        let hash = this.get('_usersStore.users').getAvatarHash(this.get('userId'));
-        return `//gravatar.com/avatar/${hash}?d=mm`;
+        let user = this.get('_usersStore.users').getByIndex(this.get('userId'));
+        return user ? `//gravatar.com/avatar/${user.get('gravatar')}?d=mm` : '';
     }),
 
     decoratedCat: Ember.computed('cat', 'nick', 'body', 'mentionedRegEx', function() {

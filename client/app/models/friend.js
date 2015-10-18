@@ -28,8 +28,8 @@ export default BaseModel.extend({
         this.set('_usersStore', getStore('users'));
     },
 
-    name: Ember.computed('_usersStore.users.isDirty', function() {
+    name: Ember.computed('_usersStore.isDirty', function() {
         let userId = this.get('userId');
-        return this.get('_usersStore.users').getName(userId);
+        return this.get('_usersStore.users').getByIndex(userId).get('name');
     })
 });

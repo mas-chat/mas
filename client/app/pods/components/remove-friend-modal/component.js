@@ -23,11 +23,11 @@ export default Ember.Component.extend({
     userId: Ember.computed.alias('model'),
 
     name: Ember.computed('userId', function() {
-        return this.get('stores.windows.users').getName(this.get('userId'), 'MAS');
+        return this.get('stores.users.users').getByIndex(this.get('userId')).get('name');
     }),
 
     nick: Ember.computed('userId', function() {
-        return this.get('stores.windows.users').getNick(this.get('userId'), 'MAS');
+        return this.get('stores.users.users').getByIndex(this.get('userId')).get('nick')['MAS'];
     }),
 
     actions: {
