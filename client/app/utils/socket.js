@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals $, io, isMobile */
+/* globals $, io */
 
 import Ember from 'ember';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
@@ -56,7 +56,7 @@ let SocketService = Ember.Object.extend({
         this.set('_windowsStore', getStore('windows'));
 
         this.set('_windowsStore.initDone', false);
-        this._emitInit(this.get('_windowsStore.userId'), this.get('_windowsStore.secret'));
+        this._emitInit();
 
         ioSocket.on('initok', Ember.run.bind(this, function(data) {
             this.set('_connected', true);
@@ -122,7 +122,7 @@ let SocketService = Ember.Object.extend({
                 dispatch('CLOSE_PRIORITY_MODAL');
             }
 
-            this._emitInit(userId, secret);
+            this._emitInit();
         }));
     },
 
@@ -139,9 +139,11 @@ let SocketService = Ember.Object.extend({
         }
     },
 
-    _emitInit(userId, secret) {
+    _emitInit() {
         let maxBacklogMsgs = calcMsgHistorySize();
         let cachedUpto = this.get('_windowsStore.cachedUpto');
+        let userId = this.get('_windowsStore.userId');
+        let secret = this.get('_windowsStore.secret');
 
         ioSocket.emit('init', {
             clientName: 'web',
