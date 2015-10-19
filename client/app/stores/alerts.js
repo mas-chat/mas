@@ -14,7 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
 import Store from 'emflux/store';
 import IndexArray from '../utils/index-array';
 import Alert from '../models/alert';

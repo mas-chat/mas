@@ -14,7 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
 import BaseModel from './base';
 
 export default BaseModel.extend({});

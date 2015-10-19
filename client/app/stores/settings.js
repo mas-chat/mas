@@ -14,8 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
 import Store from 'emflux/store';
+import { dispatch } from 'emflux/dispatcher';
 import socket from '../utils/socket';
 
 export default Store.extend({
@@ -51,7 +51,7 @@ export default Store.extend({
         });
     },
 
-    handleConfirmEmail(data, successCb) {
+    handleConfirmEmail(data) {
         socket.send({
             id: 'SEND_CONFIRM_EMAIL'
         }, () => {
@@ -91,5 +91,5 @@ export default Store.extend({
         }
 
         this.setProperties(data.settings);
-    },
+    }
 });
