@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals URI, moment, emojify */
+/* globals URI, moment, emojify, marked */
 
 import Ember from 'ember';
 import BaseModel from './base';
@@ -148,7 +148,7 @@ export default BaseModel.extend({
             ({ body, parts } = this._parseLinks(body));
 
             body = marked(body);
-            body = this._parseCustomFormatting(body, cat);
+            body = this._parseCustomFormatting(body);
         }
 
         body = this._parseWhiteSpace(body);
@@ -194,7 +194,7 @@ export default BaseModel.extend({
         let imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
         let media = [];
 
-        text = URI.withinString(text, (url, start, end, source) => {
+        text = URI.withinString(text, url => {
             let urlObj = new URI(url);
             let visibleLink;
             let type = 'generic';
@@ -229,10 +229,10 @@ export default BaseModel.extend({
     },
 
     _parseWhiteSpace(text) {
-        return text.replace(/  /g, ' &nbsp;'); // Preserve whitespace.
+        return text.replace(/ {2}/g, ' &nbsp;'); // Preserve whitespace.
     },
 
-    _parseCustomFormatting(text, cat) {
+    _parseCustomFormatting(text) {
         let network = this.get('network');
 
         if (network === 'Flowdock') {

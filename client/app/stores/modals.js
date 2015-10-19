@@ -40,5 +40,5 @@ export default Store.extend({
 
     handleClosePriorityModal() {
         this.get('modals').shiftObject();
-    },
+    }
 });

@@ -78,7 +78,7 @@ exports.getMessageRange = function*(conversationId, start, end, amount) {
 
     let range = {
         ts: {
-            lt: end * 1000,
+            lt: end * 1000
         }
     };
 

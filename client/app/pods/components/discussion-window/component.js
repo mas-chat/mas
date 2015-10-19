@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals $, emojify, titlenotifier, isMobile */
+/* globals $, titlenotifier, isMobile */
 
 import Ember from 'ember';
 import { dispatch } from 'emflux/dispatcher';
@@ -286,8 +286,6 @@ export default Ember.Component.extend({
     },
 
     didInsertElement() {
-        let that = this;
-
         this.sendAction('register', this);
         this.set('elementInserted', true);
 

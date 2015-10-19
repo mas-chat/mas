@@ -39,7 +39,7 @@ export default Ember.Component.extend({
             this._endEdit();
         },
 
-        cancel(message) {
+        cancel() {
             this._endEdit();
         },
 

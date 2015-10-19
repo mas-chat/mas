@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals $ */
-
 import Ember from 'ember';
 import { dispatch } from 'emflux/dispatcher';
 

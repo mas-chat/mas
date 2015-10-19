@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals moment */
+/* globals moment, isMobile */
 
 import Ember from 'ember';
 import BaseModel from './base';
@@ -101,7 +101,7 @@ export default BaseModel.extend({
                 body: dateString,
                 cat: 'day-divider',
                 gid: 0,
-                window: this,
+                window: this
             }));
         };
 

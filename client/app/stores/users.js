@@ -14,7 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
 import Store from 'emflux/store';
 import { getStore } from 'emflux/dispatcher';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';

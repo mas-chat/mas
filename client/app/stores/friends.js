@@ -14,7 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
 import Store from 'emflux/store';
 import { dispatch, getStore } from 'emflux/dispatcher';
 import Friend from '../models/friend';
@@ -87,7 +86,7 @@ export default Store.extend({
                     }
                 }
             });
-        };
+        }
     },
 
     handleRemoveFriend(data) {

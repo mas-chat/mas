@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* global $, moment, isMobile */
+/* global $ */
 
 import Ember from 'ember';
 import socket from '../../../utils/socket'

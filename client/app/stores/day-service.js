@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+/* global moment */
+
 import Ember from 'ember';
 import Store from 'emflux/store';
 
@@ -36,5 +38,5 @@ export default Store.extend({
         };
 
         Ember.run.later(this, changeDay, timeToTomorrow);
-    },
+    }
 });

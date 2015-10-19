@@ -29,7 +29,7 @@ export default Ember.Component.extend({
     }),
 
     actions: {
-        switch(desktopId) {
+        switch() {
             dispatch('CHANGE_ACTIVE_DESKTOP', {
                 desktop: this.get('id')
             });

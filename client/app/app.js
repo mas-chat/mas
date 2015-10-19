@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals titlenotifier, emojify */
+/* globals titlenotifier, emojify, marked */
 
 import Ember from 'ember';
 import Resolver from 'ember/resolver';

@@ -17,6 +17,7 @@
 import Store from 'emflux/store';
 import IndexArray from '../utils/index-array';
 import Alert from '../models/alert';
+import socket from '../utils/socket';
 
 export default Store.extend({
     alerts: IndexArray.create({ index: 'alertId', factory: Alert }),

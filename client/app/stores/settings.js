@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+/* global isMobile */
+
 import Store from 'emflux/store';
 import { dispatch } from 'emflux/dispatcher';
 import socket from '../utils/socket';
@@ -51,7 +53,7 @@ export default Store.extend({
         });
     },
 
-    handleConfirmEmail(data) {
+    handleConfirmEmail() {
         socket.send({
             id: 'SEND_CONFIRM_EMAIL'
         }, () => {

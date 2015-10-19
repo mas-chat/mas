@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+/* global emojify */
+
 import Ember from 'ember';
 
 let emojisList = emojify.emojiNames.map((value, i) => ({ id: i, name: value }));
@@ -42,11 +44,10 @@ export default Ember.TextArea.extend({
 
     nickCompletion: Ember.observer('participants', function() {
         let participants = this.get('participants') || [];
-        let nickList = this.get('participants').map(item => item.nick);
 
         this.$().atwho({
             at: '@',
-            data: nickList,
+            data: participants.map(item => item.nick),
             limit: 15
         });
     }),
@@ -61,7 +62,7 @@ export default Ember.TextArea.extend({
             limit: 20
         });
 
-        this.$().on('hidden.atwho', function(e, flag, query) {
+        this.$().on('hidden.atwho', function(e) {
             e.stopPropagation();
         });
     },

@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+/* globals $ */
+
 export function calcMsgHistorySize() {
     const minLines = 40;
     const maxLines = 180;

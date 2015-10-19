@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals moment, $ */
+/* globals moment, $, isMobile */
 
 import Ember from 'ember';
 import Store from 'emflux/store';
@@ -212,7 +212,7 @@ export default Store.extend({
             userId: this.get('userId'),
             ts: data.ts,
             gid: data.gid,
-            window: data.window,
+            window: data.window
         });
     },
 
@@ -237,7 +237,7 @@ export default Store.extend({
             userId: null,
             ts: moment().unix(),
             gid: 'error', // TODO: Not optimal, there's never second error message
-            window: data.window,
+            window: data.window
         });
     },
 
