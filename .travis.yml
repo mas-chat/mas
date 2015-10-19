@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-    - "iojs-3"
+    - "4.1"
 env:
   global:
     - secure: VQo8YGo8BM+yuBpTl6lQq5TmmW9jSOm0+FML9k/vS+ccSatY7XDL2RLjkqDe8wM/jx0UuU+XVDUU2pTO2OcVYTpaYeIpA81M2Oi60mqpBdl05hQexl291KPuwsvGN+0HRTg/ddoIGW/sgq/ThG0SQ9Uyn1eJmu7SHK6fwLTrnQs=
@@ -10,6 +10,7 @@ addons:
 cache:
   directories:
     - node_modules
+sudo: required
 before_install:
   - npm config set loglevel warn --global
   - npm install -g gulp
