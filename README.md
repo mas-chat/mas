@@ -1,14 +1,27 @@
 MAS server and desktop web app
 ==============================
 
-MAS is a web group chat application.
+MAS is a web group chat application with a sleek windowed UI.
 
-NOTE: Redis database schema will freeze only after 1.0 release. This is also when the project becomes suitable for general use.
+![Screenshot](http://i.imgur.com/dlagvoY.gif)
+
+*NOTE:* Redis database format will change before 1.0 release. Supported migration tool is not guaranteed. After 1.0 release, mas becomes suitable for the general use.
 
 For more info, see
 
 - [Architecture page](https://github.com/ilkkao/mas/wiki)
 - [MAS client API](https://github.com/ilkkao/mas/blob/master/doc/MAS-client-API.md)
+
+## Main features
+
+- Next generation windowed UI
+- Messages can include mentions, links, emojis, images, and youtube videos
+- Opt-in email alerts of missed messages
+- Infinite scrolling to get older messages
+- Another view to browse messages by group and date
+- Support for 1on1s, local groups and IRC channels (IRC backend implements RFC 2812)
+- IRC connections are kept active also when the user is not logged in
+- Separate mobile mode
 
 ## Status:
 
@@ -22,6 +35,7 @@ For more info, see
 
 - io.js: http://iojs.org/
 - Redis: http://redis.io/
+- Elasticsearch: https://www.elastic.co/products/elasticsearch/ (optional)
 
 ## OS support
 
@@ -29,9 +43,9 @@ MacOS/Linux/Windows.
 
 ## Quick start
 
-1. Install Redis and latest release of io.js (2.x)
+1. Install Redis and latest release of node.js (4.x)
 
-   On Mac to get redis and io.js you can install [Homebrew](http://brew.sh/) and then do ```brew install iojs redis```
+   On Mac to get redis and node.js you can install [Homebrew](http://brew.sh/) and then do ```brew install node redis```
 
 2. Create the configuration file. You don't need to edit it, default options should work.
 
