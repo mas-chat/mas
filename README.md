@@ -15,7 +15,7 @@ For more info, see
 ## Main features
 
 - Next generation windowed UI
-- Messages can include mentions, links, emojis, images, and youtube videos
+- Messages can include mentions, links, emojis, markdown, images, and youtube videos
 - Opt-in email alerts of missed messages
 - Infinite scrolling to get older messages
 - Another view to browse messages by group and date
