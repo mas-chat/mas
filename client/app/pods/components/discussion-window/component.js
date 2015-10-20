@@ -372,7 +372,8 @@ export default Ember.Component.extend({
     arrayWillChange() {},
 
     arrayDidChange(array, offset, removeCount, addCount) {
-        if (addCount > 0 && this.get('stores.windows.initDone') && offset === array.get('length') - 1) {
+        if (addCount > 0 && this.get('stores.windows.initDone') &&
+            offset === array.get('length') - 1) {
             // Infinity scrolling adds the old messages to the beginning of the array. The offset
             // check above makes sure that _lineAdded() is not called then (FETCH case).
             this._lineAdded(array);

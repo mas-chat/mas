@@ -54,12 +54,14 @@ export default Store.extend({
     },
 
     handleConfirmEmail() {
+        const msg = 'Confirmation link sent. Check your spam folder if you don\'t see it in inbox.';
+
         socket.send({
             id: 'SEND_CONFIRM_EMAIL'
         }, () => {
             dispatch('SHOW_ALERT', {
                 alertId: `client-${Date.now()}`,
-                message: 'Confirmation link sent. Check your spam folder if you don\'t see it in inbox.',
+                message: msg,
                 dismissible: true,
                 report: false,
                 postponeLabel: false,

@@ -434,7 +434,8 @@ function *handleFetch(params) {
     }
 
     let conversationId = params.conversation.conversationId;
-    let messages = yield search.getMessageRange(conversationId, command.start, command.end, command.limit, 50);
+    let messages = yield search.getMessageRange(
+        conversationId, command.start, command.end, command.limit, 50);
 
     return { status: 'OK', msgs: messages };
 }

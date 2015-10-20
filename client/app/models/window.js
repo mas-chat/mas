@@ -120,9 +120,11 @@ export default BaseModel.extend({
         return result;
     }),
 
-    userNickHighlightRegex: Ember.computed('_windowsStore.userId', '_usersStore.isDirty', function() {
+    userNickHighlightRegex: Ember.computed('_windowsStore.userId', '_usersStore.isDirty',
+        function() {
         let userId = this.get('_windowsStore.userId');
-        let nick = this.get('_usersStore.users').getByIndex(userId).get('nick')[this.get('network')];
+        let nick = this.get('_usersStore.users').getByIndex(userId)
+            .get('nick')[this.get('network')];
 
         return new RegExp(`(^|[@ ])${nick}[ :]`);
     }),
