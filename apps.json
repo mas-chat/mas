@@ -2,7 +2,7 @@
   "apps" : [{
     "name"        : "frontend",
     "script"      : "./server/server.js",
-    "args"        : [ "--configFile mas.conf" ],
+    "args"        : [ "--configFile=mas.conf" ],
     "merge_logs"  : false,
     "exec_mode"   : "fork",
     "instances"   : 1,
@@ -15,7 +15,7 @@
   }, {
     "name"        : "loopback-backend",
     "script"      : "./server/backends/loopback/controller.js",
-    "args"        : [ "--configFile mas.conf" ],
+    "args"        : [ "--configFile=mas.conf" ],
     "merge_logs"  : false,
     "exec_mode"   : "fork",
     "instances"   : 1,
@@ -28,7 +28,7 @@
   }, {
     "name"        : "irc-backend",
     "script"      : "./server/backends/irc/controller.js",
-    "args"        : [ "--configFile mas.conf" ],
+    "args"        : [ "--configFile=mas.conf" ],
     "merge_logs"  : false,
     "exec_mode"   : "fork",
     "instances"   : 1,

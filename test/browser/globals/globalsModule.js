@@ -16,6 +16,7 @@ module.exports = {
             yield redis.flushdb();
             yield redis.quit();
 
+            yield redisModule.loadScripts();
             yield redisModule.initDB();
             done();
         })();

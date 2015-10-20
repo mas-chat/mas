@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 if [[ ( $# < 1 ) ]]; then
     echo "Usage: $0 <env> [test]"
     exit 1
@@ -16,7 +18,7 @@ fi
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
 cd $ROOT
 
-redis-server --port 44144 &
+redis-server conf/redis.test.conf
 REDIS_PID=$!
 
 echo "Waiting 1 second for the redis to start."
@@ -25,12 +27,12 @@ sleep 1
 pm2 start pm2/test.json
 
 if [ "$NIGHTWATCH_ENV" == "local" ]; then
-    node ./bin/nightwatch --env local $SINGLE_TEST --configFile test/mas-test.conf
+    node ./bin/nightwatch --env local $SINGLE_TEST --configFile=test/mas-test.conf
 else
     # Can't run in parallel until there are multiple redises.
-    node ./bin/nightwatch --env saucelabs-firefox-mac --configFile test/mas-test.conf
-    node ./bin/nightwatch --env saucelabs-chrome-linux --configFile test/mas-test.conf
-    node ./bin/nightwatch --env saucelabs-ie-win --configFile test/mas-test.conf
+    node ./bin/nightwatch --env saucelabs-firefox-mac --configFile=test/mas-test.conf
+    node ./bin/nightwatch --env saucelabs-chrome-linux --configFile=test/mas-test.conf
+    node ./bin/nightwatch --env saucelabs-ie-win --configFile=test/mas-test.conf
 fi
 
 pm2 stop pm2/test.json

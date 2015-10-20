@@ -2,7 +2,7 @@
   "apps" : [{
     "name"        : "irc-backend-connman",
     "script"      : "./server/backends/irc/connectionManager.js",
-    "args"        : [ "--configFile mas.conf" ],
+    "args"        : [ "--configFile=mas.conf" ],
     "exec_mode"   : "fork",
     "merge_logs"  : false,
     "instances"   : 1,

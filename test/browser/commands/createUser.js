@@ -25,7 +25,7 @@ exports.command = function(options) {
             });
 
             co(function*() {
-                let user = new User(values, {}, []);
+                let user = User.create(values, {}, []);
                 yield user.generateUserId();
                 yield user.save();
 
