@@ -60,7 +60,7 @@ module.exports = function(defaults) {
 
     //app.import('bower_components/jquery/dist/jquery.js');
     app.import('bower_components/jquery-cookie/jquery.cookie.js');
-    app.import('bower_components/TitleNotifier.js/title_notifier.js');
+    app.import('bower_components/TitleNotifier.js/src/title_notifier.js');
     app.import('bower_components/jquery.atwho/dist/js/jquery.atwho.js');
     app.import('bower_components/getusermedia/dist/getUserMedia.noFallback.js');
     app.import('bower_components/Caret.js/dist/jquery.caret.min.js');
