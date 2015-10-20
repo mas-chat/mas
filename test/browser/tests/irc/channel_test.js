@@ -43,6 +43,8 @@ module.exports = {
             // Join #test IRC channel
             .waitForElementVisible('.modal-content', 3000)
             .setValue('input#join_irc_name', '#test')
+            .click('.selectize-input')
+            .click('[data-value="IRCNet"]')
             .click('.modal-content .btn-primary')
 
             // Verify that the join is acknowledged by the bot
@@ -51,7 +53,7 @@ module.exports = {
             .useCss()
 
             // Request pong
-            .setValue('.window:not(.irc-server-window) input', [ 'ping', browser.Keys.ENTER ])
+            .setValue('.window:not(.irc-server-window) textarea', [ 'ping', browser.Keys.ENTER ])
 
             // Very that bot's pong reply gets delivered
             .useXpath()
@@ -59,7 +61,7 @@ module.exports = {
             .useCss()
 
             // Receive msg from an another IRC user. Window not open
-            .setValue('.window:not(.irc-server-window) input', [ 'ping1on1', browser.Keys.ENTER ])
+            .setValue('.window:not(.irc-server-window) textarea', [ 'ping1on1', browser.Keys.ENTER ])
             .useXpath()
             .waitForElementVisible('//*[contains(text(), "pong1on1")]', 5000)
             .useXpath()
