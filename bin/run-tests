@@ -2,10 +2,19 @@
 
 set -e
 
+ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
+cd $ROOT
+
 if [[ ( $# < 1 ) ]]; then
     echo "Usage: $0 <env> [test]"
     exit 1
 fi
+
+### Ember tests
+
+cd client && ember test && cd ..
+
+### Nightwatch tests
 
 NIGHTWATCH_ENV=$1
 
@@ -14,9 +23,6 @@ if [[ -z "$2" ]]; then
 else
     SINGLE_TEST="--test $2"
 fi
-
-ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
-cd $ROOT
 
 redis-server conf/redis.test.conf
 REDIS_PID=$!
