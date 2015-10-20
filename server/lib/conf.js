@@ -36,7 +36,8 @@ if (configFileOption && configFileOption.charAt(0) === path.sep) {
 }
 
 if (!fs.existsSync(configFile)) {
-    console.error('ERROR: '.red + 'Config file ' + configFile + ' missing.');
+    const msg = 'ERROR: '.red + `Config file ${configFile} missing.`;
+    console.error(msg); // eslint-disable-line no-console
     process.exit(1);
 }
 

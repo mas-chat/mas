@@ -10,7 +10,6 @@ describe('User', function() {
         it('should have a default name', function(done) {
             let user = new User({ email: 'iao@iki.fi' });
             user.get('maxwindows', function() {
-                console.log('done');
                 done();
             });
         });

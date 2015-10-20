@@ -82,14 +82,15 @@ function shutdown() {
             }
         }
 
-        console.log('Shutdown complete.');
+        console.log('Shutdown complete.'); // eslint-disable-line no-console
         process.exit(0);
     })();
 }
 
 function checkNodeVersion() {
-    if (semver.lt(process.version, 'v0.12.0')) {
-        console.log('ERROR: Installed Node.js version must be at least v0.12.0');
+    if (semver.lt(process.version, 'v4.0.0')) {
+        let msg = 'ERROR: Installed Node.js version must be at least v4.0.0';
+        console.log(msg); // eslint-disable-line no-console
         process.exit(1);
     }
 }

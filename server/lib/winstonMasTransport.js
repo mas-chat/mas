@@ -98,7 +98,7 @@ MasConsoleLogger.prototype.logException = function(msg, meta, callback) {
     this.log('error', msg, meta, function() { });
 
     meta.stack.forEach(function(line) {
-        console.log(line.red);
+        console.log(line.red); // eslint-disable-line no-console
     });
 };
 

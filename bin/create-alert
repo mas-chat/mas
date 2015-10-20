@@ -59,7 +59,7 @@ co(function*() {
     }
 
     // Deliver the alert
-    console.log('Delivering the alert to all logged in users...');
+    console.log('Delivering the alert to all logged in users...'); // eslint-disable-line no-console
 
     let allUsers = yield redis.smembers('userlist');
 
@@ -76,7 +76,7 @@ co(function*() {
     redisModule.shutdown();
     log.quit();
 
-    console.log('Done. All OK.');
+    console.log('Done. All OK.'); // eslint-disable-line no-console
 })();
 
 function yesOrNo(label) {

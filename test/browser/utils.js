@@ -1,6 +1,8 @@
 
 'use strict';
 
+/* eslint no-console: 0 */
+
 let request = require('superagent');
 
 exports.tearDown = function(done) {
