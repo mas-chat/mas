@@ -22,18 +22,20 @@ REDIS_PID=$!
 echo "Waiting 1 second for the redis to start."
 sleep 1
 
-./bin/masctl -b -c start --configFile test/mas-test.conf
+pm2 start pm2/test.json
+
+#./bin/masctl -b -c start --configFile test/mas-test.conf
 
 if [ "$NIGHTWATCH_ENV" == "local" ]; then
-    node --harmony ./bin/nightwatch --env local $SINGLE_TEST --configFile test/mas-test.conf
+    node ./bin/nightwatch --env local $SINGLE_TEST --configFile test/mas-test.conf
 else
     # Can't run in parallel until there are multiple redises.
-    node --harmony ./bin/nightwatch --env saucelabs-firefox-mac --configFile test/mas-test.conf
-    node --harmony ./bin/nightwatch --env saucelabs-chrome-linux --configFile test/mas-test.conf
-    node --harmony ./bin/nightwatch --env saucelabs-ie-win --configFile test/mas-test.conf
+    node ./bin/nightwatch --env saucelabs-firefox-mac --configFile test/mas-test.conf
+    node ./bin/nightwatch --env saucelabs-chrome-linux --configFile test/mas-test.conf
+    node ./bin/nightwatch --env saucelabs-ie-win --configFile test/mas-test.conf
 fi
 
-./bin/masctl -c stop --configFile test/mas-test.conf
+pm2 stop pm2/test.json
 
 kill $REDIS_PID
 wait $REDIS_PID

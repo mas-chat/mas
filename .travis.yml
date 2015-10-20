@@ -20,8 +20,6 @@ cache:
 sudo: required
 before_install:
   - npm config set loglevel warn --global
-  - npm install -g gulp
-  - npm install -g ember-cli
-  - npm install -g bower
+  - npm install -g gulp ember-cli bower pm2
   - sudo apt-get install ircd-irc2
   - sudo /etc/init.d/ircd-irc2 start
