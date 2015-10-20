@@ -24,8 +24,6 @@ sleep 1
 
 pm2 start pm2/test.json
 
-#./bin/masctl -b -c start --configFile test/mas-test.conf
-
 if [ "$NIGHTWATCH_ENV" == "local" ]; then
     node ./bin/nightwatch --env local $SINGLE_TEST --configFile test/mas-test.conf
 else
