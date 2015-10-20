@@ -19,6 +19,7 @@ For more info, see
 - Opt-in email alerts of missed messages
 - Infinite scrolling to get older messages
 - Another view to browse messages by group and date
+- Contacts list with precense information
 - Support for 1on1s, local groups and IRC channels (IRC backend implements RFC 2812)
 - IRC connections are kept active also when the user is not logged in
 - Separate mobile mode
