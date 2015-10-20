@@ -61,7 +61,8 @@ module.exports = {
             .useCss()
 
             // Receive msg from an another IRC user. Window not open
-            .setValue('.window:not(.irc-server-window) textarea', [ 'ping1on1', browser.Keys.ENTER ])
+            .setValue('.window:not(.irc-server-window) textarea',
+                [ 'ping1on1', browser.Keys.ENTER ])
             .useXpath()
             .waitForElementVisible('//*[contains(text(), "pong1on1")]', 5000)
             .useXpath()
