@@ -48,7 +48,6 @@ module.exports = {
             .click('[data-value="IRCNet"]')
             .pause(1000)
             .click('.modal-content .btn-primary')
-            .waitForElementNotVisible('.modal-dialog', 1000)
 
             // Verify that the join is acknowledged by the bot
             .useXpath()
