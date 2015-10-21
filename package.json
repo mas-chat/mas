@@ -79,7 +79,7 @@
     "superagent": "~1.4.0"
   },
   "scripts": {
-    "test": "gulp eslint jscs && ./bin/bootstrap && ./bin/run-tests saucelabs"
+    "test": "gulp eslint && gulp jscs && ./bin/bootstrap && ./bin/run-tests saucelabs"
   },
   "repository": {
     "type": "git",
