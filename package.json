@@ -74,7 +74,7 @@
     "install": "~0.1.7",
     "irc": "~0.4.0",
     "mocha-co": "~1.17.1-co.1",
-    "nightwatch": "~0.7.0",
+    "nightwatch": "~0.8.0",
     "rimraf": "~2.4.0",
     "superagent": "~1.3.0"
   },
