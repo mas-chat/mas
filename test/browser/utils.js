@@ -12,12 +12,13 @@ exports.tearDown = function(done) {
     if (!this.client.globals.dontReportSauceLabs) {
         let userName = this.client.options.username;
         let accessKey = this.client.options.accessKey;
-        let sessionId = this.client.sessionId;
+        let sessionId = this.client.capabilities['webdriver.remote.sessionid'];
+
         let baseUrl = 'https://saucelabs.com/rest/v1/';
 
         console.log('Sending final result to Saucelabs...');
 
-        if (userName && accessKey) {
+        if (userName && accessKey && sessionId) {
             request
             .put(baseUrl + userName + '/jobs/' + sessionId)
             .send({ passed: passedStatus })
