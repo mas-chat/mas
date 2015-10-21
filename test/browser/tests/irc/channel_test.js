@@ -49,7 +49,7 @@ module.exports = {
 
             // Verify that the join is acknowledged by the bot
             .useXpath()
-            .waitForElementVisible('//*[contains(text(), "welcome!")]', 7000)
+            .waitForElementVisible('//div[contains(text(), "welcome")]', 7000)
             .useCss()
 
             // Request pong
@@ -57,14 +57,14 @@ module.exports = {
 
             // Very that bot's pong reply gets delivered
             .useXpath()
-            .waitForElementVisible('//*[contains(text(), "pong")]', 7000)
+            .waitForElementVisible('//div[contains(text(), "pong")]', 7000)
             .useCss()
 
             // Receive msg from an another IRC user. Window not open
             .setValue('.window:not(.irc-server-window) textarea',
                 [ 'ping1on1', browser.Keys.ENTER ])
             .useXpath()
-            .waitForElementVisible('//*[contains(text(), "pong1on1")]', 7000)
+            .waitForElementVisible('//div[contains(text(), "pong1on1")]', 7000)
             .useXpath()
             .end();
     },
