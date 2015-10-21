@@ -41,11 +41,14 @@ module.exports = {
             .useCss()
 
             // Join #test IRC channel
-            .waitForElementVisible('.modal-content', 3000)
+            .waitForElementVisible('.modal-dialog', 3000)
             .setValue('input#join_irc_name', '#test')
             .click('.selectize-input')
+            .pause(1000)
             .click('[data-value="IRCNet"]')
+            .pause(1000)
             .click('.modal-content .btn-primary')
+            .waitForElementNotVisible('.modal-dialog', 1000);
 
             // Verify that the join is acknowledged by the bot
             .useXpath()
