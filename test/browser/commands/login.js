@@ -10,7 +10,7 @@ exports.command = function(nick, password) {
         .setValue('input[name="username"]', nick)
         .setValue('input[name="password"]', password)
         .click('#login-form button')
-        .waitForElementVisible('.fa-wrench', 3000);
+        .waitForElementVisible('.fa-wrench', 5000);
 
     return this;
 };
