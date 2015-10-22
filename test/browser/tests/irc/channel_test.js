@@ -15,7 +15,7 @@ module.exports = {
 
                 ircClient.addListener('join#test', function() {
                     // Greet everybody who joins
-                    ircClient.say('#test', 'welcome!');
+                    ircClient.say('#test', 'whats up!');
                     done();
                 });
 
@@ -48,27 +48,22 @@ module.exports = {
             .setValue('.selectize-input input', [ 'IRCNet', browser.Keys.ENTER ])
             .pause(2000)
             .click('button.modal-proceed')
-            .pause()
 
-            // Verify that the join is acknowledged by the bot
-            .useXpath()
-            .waitForElementVisible('//div[contains(text(), "welcome")]')
-            .useCss()
+            .waitForElementVisible('.window:not(.irc-server-window')
 
             // Request pong
             .setValue('.window:not(.irc-server-window) textarea', [ 'ping', browser.Keys.ENTER ])
 
-            // Very that bot's pong reply gets delivered
-            .useXpath()
-            .waitForElementVisible('//div[contains(text(), "pong")]')
-            .useCss()
-
-            // Receive msg from an another IRC user. Window not open
+            // Request pong on 1on1 window
             .setValue('.window:not(.irc-server-window) textarea',
                 [ 'ping1on1', browser.Keys.ENTER ])
+
+            // Verify that the join and pings were acknowledged by the bot
             .useXpath()
-            .waitForElementVisible('//div[contains(text(), "pong1on1")]')
-            .useXpath()
+            .waitForElementVisible('//*[contains(., "pong")]')
+            .waitForElementVisible('//*[contains(., "pong1on1")]')
+            .waitForElementVisible('//*[contains(., "whats up")]')
+
             .end();
     },
 
