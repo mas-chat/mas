@@ -28,7 +28,7 @@ export default Ember.Component.extend({
             this.sendAction('cancel');
         },
 
-        submit() {
+        proceed() {
             this.sendAction('submit');
         }
     },
