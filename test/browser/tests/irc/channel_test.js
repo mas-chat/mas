@@ -46,8 +46,9 @@ module.exports = {
             .click('.selectize-input')
             .pause(1000)
             .setValue('.selectize-input input', [ 'IRCNet', browser.Keys.ENTER ])
-            .pause(1000)
+            .pause(2000)
             .click('button.modal-proceed')
+            .pause()
 
             // Verify that the join is acknowledged by the bot
             .useXpath()
