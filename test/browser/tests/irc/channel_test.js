@@ -41,17 +41,17 @@ module.exports = {
             .useCss()
 
             // Join #test IRC channel
-            .waitForElementVisible('.modal-dialog', 3000)
+            .waitForElementVisible('.modal-dialog')
             .setValue('input#join_irc_name', '#test')
             .click('.selectize-input')
             .pause(1000)
             .setValue('.selectize-input input', [ 'IRCNet', browser.Keys.ENTER ])
             .pause(1000)
-            .click('.modal-content .btn-primary')
+            .click('button.modal-proceed')
 
             // Verify that the join is acknowledged by the bot
             .useXpath()
-            .waitForElementVisible('//div[contains(text(), "welcome")]', 7000)
+            .waitForElementVisible('//div[contains(text(), "welcome")]')
             .useCss()
 
             // Request pong
@@ -59,14 +59,14 @@ module.exports = {
 
             // Very that bot's pong reply gets delivered
             .useXpath()
-            .waitForElementVisible('//div[contains(text(), "pong")]', 7000)
+            .waitForElementVisible('//div[contains(text(), "pong")]')
             .useCss()
 
             // Receive msg from an another IRC user. Window not open
             .setValue('.window:not(.irc-server-window) textarea',
                 [ 'ping1on1', browser.Keys.ENTER ])
             .useXpath()
-            .waitForElementVisible('//div[contains(text(), "pong1on1")]', 7000)
+            .waitForElementVisible('//div[contains(text(), "pong1on1")]')
             .useXpath()
             .end();
     },
