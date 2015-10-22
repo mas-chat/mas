@@ -7,9 +7,10 @@ let co = require('co'),
 
 module.exports = {
     local: {
-        dontReportSauceLabs: true,
-        waitForConditionTimeout: 15000
+        dontReportSauceLabs: true
     },
+
+    waitForConditionTimeout: 15000,
 
     before: function(done) {
         co(function*() {
