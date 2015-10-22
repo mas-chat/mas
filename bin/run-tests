@@ -37,7 +37,15 @@ if [ "$NIGHTWATCH_ENV" == "local" ]; then
 else
     # Can't run in parallel until there are multiple redises.
     node ./bin/nightwatch --env saucelabs-chrome-linux --configFile=test/mas-test.conf
+
+    pm2 restart pm2/test.json
+    sleep 5
+
     node ./bin/nightwatch --env saucelabs-ie-win --configFile=test/mas-test.conf
+
+    pm2 restart pm2/test.json
+    sleep 5
+
     node ./bin/nightwatch --env saucelabs-firefox-mac --configFile=test/mas-test.conf
 fi
 
