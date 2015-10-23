@@ -2,6 +2,13 @@
 
 set -e
 
+function reset_server {
+    pm2 stop pm2/test.json
+    sleep 5
+    redis-cli -p 44144 flushall
+    pm2 start pm2/test.json
+}
+
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
 cd $ROOT
 
@@ -37,15 +44,9 @@ if [ "$NIGHTWATCH_ENV" == "local" ]; then
 else
     # Can't run in parallel until there are multiple redises.
     node ./bin/nightwatch --env saucelabs-chrome-linux --configFile=test/mas-test.conf
-
-    pm2 restart pm2/test.json
-    sleep 5
-
+    reset_server
     node ./bin/nightwatch --env saucelabs-ie-win --configFile=test/mas-test.conf
-
-    pm2 restart pm2/test.json
-    sleep 5
-
+    reset_server
     node ./bin/nightwatch --env saucelabs-firefox-mac --configFile=test/mas-test.conf
 fi
 
