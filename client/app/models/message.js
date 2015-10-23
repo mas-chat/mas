@@ -96,6 +96,7 @@ export default BaseModel.extend({
         let cat = this.get('cat');
         let body = this.get('body');
         let userId = this.get('userId');
+        let nick = this.get('nick');
         let mentionedRegEx = this.get('mentionedRegEx');
 
         // TBD: Network === flowdock check is missing
@@ -105,9 +106,11 @@ export default BaseModel.extend({
             return 'mention';
         } else if (userId == this.get('_windowsStore.userId') && cat === 'msg') {
             return 'mymsg';
+        } else if (nick === 'ruuskanen') {
+            return 'service';
         }
 
-        return this.get('nick') === 'Flowdock' ? 'flowdock' : cat;
+        return nick === 'Flowdock' ? 'flowdock' : cat;
     }),
 
     decoratedTs: Ember.computed('ts', function() {
