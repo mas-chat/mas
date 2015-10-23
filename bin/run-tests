@@ -7,6 +7,7 @@ function reset_server {
     sleep 5
     redis-cli -p 44144 flushall
     pm2 start pm2/test.json
+    sleep 3
 }
 
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
@@ -38,6 +39,7 @@ echo "Waiting 1 second for the redis to start."
 sleep 1
 
 pm2 start pm2/test.json
+sleep 3
 
 if [ "$NIGHTWATCH_ENV" == "local" ]; then
     node ./bin/nightwatch --env local $SINGLE_TEST --configFile=test/mas-test.conf
