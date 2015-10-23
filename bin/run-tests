@@ -52,5 +52,4 @@ fi
 
 pm2 stop pm2/test.json
 
-kill $REDIS_PID
-wait $REDIS_PID
+killall "redis-server *:44144"
