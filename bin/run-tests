@@ -33,8 +33,6 @@ else
 fi
 
 redis-server conf/redis.test.conf
-REDIS_PID=$!
-
 echo "Waiting 1 second for the redis to start."
 sleep 1
 
@@ -53,5 +51,4 @@ else
 fi
 
 pm2 stop pm2/test.json
-
-killall "redis-server *:44144"
+kill `cat test/redis-test.pid`
