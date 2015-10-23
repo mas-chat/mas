@@ -51,4 +51,4 @@ else
 fi
 
 pm2 stop pm2/test.json
-kill `cat test/redis-test.pid`
+kill `cat /tmp/redis-mas-test.pid`
