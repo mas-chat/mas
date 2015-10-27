@@ -77,7 +77,8 @@
     "superagent": "~1.4.0"
   },
   "scripts": {
-    "test": "gulp eslint && gulp jscs && ./bin/bootstrap && ./bin/run-tests saucelabs"
+    "test": "gulp eslint && gulp jscs && ./bin/bootstrap && ./bin/run-tests saucelabs",
+    "dev": "pm2 start --no-daemon pm2/apps.json"
   },
   "repository": {
     "type": "git",
