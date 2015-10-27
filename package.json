@@ -5,7 +5,7 @@
   "description": "MAS Web App",
   "dependencies": {
     "bcrypt": "~0.8.1",
-    "bluebird": "~2.10.0",
+    "bluebird": "~3.0.0",
     "carrier": "~0.2.0",
     "co": "~3.1.0",
     "co-busboy": "~1.3.0",
