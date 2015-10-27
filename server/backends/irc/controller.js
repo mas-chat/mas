@@ -591,12 +591,15 @@ function *handle366(userId, msg) {
     // :pratchett.freenode.net 366 il3kkaoksWEB #testi1 :End of /NAMES list.
     let channel = msg.params[0];
     let conversation = yield conversationFactory.findGroup(channel, msg.network);
-    let key = 'namesbuffer:' + userId + ':' + conversation.conversationId;
 
+    if (!conversation) {
+        return;
+    }
+
+    let key = `namesbuffer:${userId}:${conversation.conversationId}`;
     let namesHash = yield redis.hgetall(key);
-    yield redis.del(key);
 
-    if (conversation && Object.keys(namesHash).length > 0) {
+    if (Object.keys(namesHash).length > 0) {
         // During the server boot-up or reconnect after a network outage it's very possible that
         // 366 replies get reordered if more than one mas user joins a same channel. Then an
         // older 366 reply (with fewer names on the list) is used to the reset the group members
@@ -612,6 +615,8 @@ function *handle366(userId, msg) {
             yield conversation.setGroupMembers(namesHash);
         }
     }
+
+    yield redis.del(key);
 }
 
 function *handle376(userId, msg) {
