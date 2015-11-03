@@ -27,7 +27,7 @@ const assert = require('assert'),
 
 let quitPending = false;
 let processing = false;
-let quitDeferred = null;
+let resolveQuit = null;
 
 exports.create = function() {
     // Can only send messages and receive replies. Doesn't have a well known endpoint name.
@@ -70,6 +70,7 @@ Courier.prototype.listen = function*() {
         }
 
         if (quitPending) {
+            resolveQuit();
             break;
         }
 
@@ -135,15 +136,15 @@ Courier.prototype.noop = function() {
 Courier.prototype.quit = function() {
     log.info('Closing courier instance.');
 
-    quitDeferred = Promise.pending();
-    quitPending = true;
+    return new Promise(function (resolve, reject) {
+        if (!processing) {
+            resolve();
+            return;
+        }
 
-    if (!processing) {
-        // If we aren't processing a received message we can quit immediately
-        cleanUp();
-    }
-
-    return quitDeferred.promise;
+        resolveQuit = resolve;
+        quitPending = true;
+    });
 };
 
 Courier.prototype._reply = function(msg, resp) {
@@ -157,11 +158,6 @@ Courier.prototype._reply = function(msg, resp) {
     // It might have taken the target too much time to respond. It's therefore possible that the
     // sender is not waiting anymore. Use TTL 60s to guarantee cleanup in that case.
     this.callNoWait(`${msg.__sender}:${msg.__uid}`, null, resp, 60);
-
-    if (quitPending) {
-        // Quit() has been called but we were middle of procesing a message, quit now.
-        cleanUp();
-    }
 };
 
 Courier.prototype._convertToString = function(type, params, uid) {
@@ -179,15 +175,6 @@ Courier.prototype._convertToString = function(type, params, uid) {
 
     return JSON.stringify(msg);
 };
-
-function cleanUp() {
-    co(function*() {
-        yield sendRedis.quit();
-        yield rcvRedis.quit();
-
-        quitDeferred.fulfill();
-    })();
-}
 
 function isGeneratorFunction(obj) {
     return obj && obj.constructor && obj.constructor.name === 'GeneratorFunction';
