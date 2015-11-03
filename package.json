@@ -71,7 +71,6 @@
     "gulp-rev": "~6.0.0",
     "gulp-uglify": "~1.4.0",
     "gulp-util": "~3.0.0",
-    "install": "~0.1.7",
     "irc": "~0.4.0",
     "mocha-co": "1.17.1-co.1",
     "nightwatch": "~0.8.0",
