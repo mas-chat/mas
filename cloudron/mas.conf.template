@@ -62,7 +62,8 @@ user=
 password=
 
 [log]
-enabled=true
+console=false
+file=true
 directory=logs
 clear_at_startup=true
 rotate_daily=false

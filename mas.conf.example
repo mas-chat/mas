@@ -73,7 +73,8 @@ user=user-xxxxxxxxxxxxxxxxxxx
 password=password-xxxxxxxxxxxxxxxx
 
 [log]
-enabled=true
+console=false
+file=true
 directory=logs
 clear_at_startup=false
 rotate_daily=false

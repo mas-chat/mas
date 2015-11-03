@@ -73,7 +73,7 @@ function logEntry(type, userId, msg, callback) {
 function configTransports() {
     let transports = [];
 
-    if (conf.get('log:enabled')) {
+    if (conf.get('log:file')) {
         let logDirectory = path.normalize(conf.get('log:directory'));
 
         if (logDirectory.charAt(0) !== path.sep) {
@@ -105,11 +105,13 @@ function configTransports() {
         transports.push(fileTransport);
     }
 
-    let consoleTransport = new (MasTransport)({
-        handleExceptions: true
-    });
+    if (conf.get('log:console')) {
+        let consoleTransport = new (MasTransport)({
+            handleExceptions: true
+        });
 
-    transports.push(consoleTransport);
+        transports.push(consoleTransport);
+    }
 
     if (conf.get('loggly:enabled')) {
         let logglyTransport = new (winston.transports.Loggly)({
