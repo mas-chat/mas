@@ -30,9 +30,9 @@ if (dataDirectory.charAt(0) !== path.sep) {
 
 module.exports = function*() {
     let file = this.params.file;
-    let firstTwo = file.substring(0, 2);
+    let filePath = path.join(file.substring(0, 2), file);
 
-    yield send(this, dataDirectory + path.sep + firstTwo + path.sep + file);
+    yield send(this, filePath, { root: dataDirectory });
 
     this.set('Cache-Control', 'public, max-age=' + oneYearInSeconds);
 };
