@@ -34,7 +34,7 @@ For more info, see
 
 ## Dependencies:
 
-- io.js: http://iojs.org/
+- Node.js: http://nodejs.org/
 - Redis: http://redis.io/
 - Elasticsearch: https://www.elastic.co/products/elasticsearch/ (optional)
 
