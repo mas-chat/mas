@@ -25,7 +25,6 @@ const assert = require('assert'),
       co = require('co'),
       log = require('./log');
 
-let quitPending = false;
 let processing = false;
 let resolveQuit = null;
 
@@ -69,7 +68,7 @@ Courier.prototype.listen = function*() {
             this._reply(msg, handler(msg));
         }
 
-        if (quitPending) {
+        if (resolveQuit) {
             resolveQuit();
             break;
         }
@@ -79,7 +78,7 @@ Courier.prototype.listen = function*() {
 };
 
 Courier.prototype.call = function*(dest, type, params) {
-    if (quitPending) {
+    if (resolveQuit) {
         log.warn('Not delivering message, shutdown is in progress.');
         return null;
     }
@@ -104,7 +103,7 @@ Courier.prototype.call = function*(dest, type, params) {
 };
 
 Courier.prototype.callNoWait = function(dest, type, params, ttl) {
-    if (quitPending) {
+    if (resolveQuit) {
         log.warn('Not delivering message, shutdown is in progress.');
         return;
     }
@@ -139,11 +138,9 @@ Courier.prototype.quit = function() {
     return new Promise(function (resolve, reject) {
         if (!processing) {
             resolve();
-            return;
+        } else {
+            resolveQuit = resolve;
         }
-
-        resolveQuit = resolve;
-        quitPending = true;
     });
 };
 
