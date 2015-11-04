@@ -150,23 +150,21 @@ let registrationFormReset = forms.create({
 });
 
 function decodeForm(req, inputForm) {
-    let deferred = Promise.pending();
-
-    inputForm.handle(req, {
-        success: function(form) {
-            deferred.fulfill(form);
-        },
-        error: function(form) {
-            log.info('Registration form data is invalid');
-            deferred.fulfill(form);
-        },
-        empty: function(form) {
-            log.info('There is no form');
-            deferred.fulfill(form);
-        }
+    return new Promise(function (resolve, reject) {
+        inputForm.handle(req, {
+            success: function(form) {
+                resolve(form);
+            },
+            error: function(form) {
+                log.info('Registration form data is invalid');
+                resolve(form);
+            },
+            empty: function(form) {
+                log.info('There is no form');
+                resolve(form);
+            }
+        });
     });
-
-    return deferred.promise;
 }
 
 function *nickOrEmailTaken(nickOrEmail, field, type) {
