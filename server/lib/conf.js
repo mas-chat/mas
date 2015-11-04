@@ -20,8 +20,7 @@ const path = require('path'),
       assert = require('assert'),
       fs = require('fs'),
       nconf = require('nconf'),
-      argv = require('yargs').argv,
-      log = require('./log');
+      argv = require('yargs').argv;
 
 require('colors');
 
@@ -73,7 +72,9 @@ function get(key) {
     let value = nconf.get(key);
 
     if (value === undefined) {
-        log.error('Config variable missing in the config file: ' + key);
+        // TODO: Add config validator, allows very early exit
+        console.error(`Config variable missing in the config file: ${key}`);
+        process.exit(1);
     }
 
     return value;
