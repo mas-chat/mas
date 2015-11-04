@@ -54,7 +54,7 @@
     "thunkify": "~2.1.1",
     "uid2": "~0.0.3",
     "winston": "~1.1.0",
-    "winston-loggly": "~1.1.0",
+    "winston-loggly": "~1.2.0",
     "yargs": "~3.29.0"
   },
   "devDependencies": {
