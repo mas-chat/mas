@@ -59,14 +59,19 @@ init.on('afterShutdown', function() {
     log.quit();
 });
 
-function handleIdentConnection(conn) {
+function handleIdentConnection(socket) {
     let timer = setTimeout(function() {
-        if (conn) {
-            conn.destroy();
+        if (socket) {
+            socket.destroy();
         }
     }, 3000);
 
-    carrier.carry(conn, function(line) {
+    socket.on('error', function(error) {
+        log.info(`Ident socket error: ${error}`);
+        socket.destroy();
+    });
+
+    carrier.carry(socket, function(line) {
         let ports = line.split(',');
         let localPort = parseInt(ports[0], 10);
         let remotePort = parseInt(ports[1], 10);
@@ -78,7 +83,7 @@ function handleIdentConnection(conn) {
             for (let key in sockets) {
                 if (sockets[key].localPort === localPort &&
                     sockets[key].remotePort === remotePort &&
-                    ip.isEqual(sockets[key].remoteAddress, conn.remoteAddress)) {
+                    ip.isEqual(sockets[key].remoteAddress, socket.remoteAddress)) {
                     found = true;
                     resp = `USERID : UNIX : ${sockets[key].nick}`;
                     break;
@@ -93,11 +98,11 @@ function handleIdentConnection(conn) {
         clearTimeout(timer);
 
         if (resp) {
-            conn.write(`${prefix} : ${resp}\r\n`);
+            socket.write(`${prefix} : ${resp}\r\n`);
         }
-        conn.end();
+        socket.end();
 
-        log.info(`Ident request from ${conn.remoteAddress}, req: ${line}, resp: ${resp}`);
+        log.info(`Ident request from ${socket.remoteAddress}, req: ${line}, resp: ${resp}`);
     });
 }
 
