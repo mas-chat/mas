@@ -27,8 +27,10 @@ For more info, see
 ## Status:
 
 [![Build Status](https://secure.travis-ci.org/ilkkao/mas.png)](http://travis-ci.org/ilkkao/mas)
-[![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat)](https://david-dm.org/ilkkao/mas)
-[![devDependency Status](https://david-dm.org/ilkkao/mas/dev-status.svg?style=flat)](https://david-dm.org/ilkkao/mas#info=devDependencies)
+
+Server: [![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat)](https://david-dm.org/ilkkao/mas) [![devDependency Status](https://david-dm.org/ilkkao/mas/dev-status.svg?style=flat)](https://david-dm.org/ilkkao/mas#info=devDependencies)
+
+Client: [![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat&path=client)](https://david-dm.org/ilkkao/mas?path=client) [![devDependency Status](https://david-dm.org/ilkkao/mas/dev-status.svg?style=flat&path=client)](https://david-dm.org/ilkkao/mas?path=client#info=devDependencies)
 
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/mas-ci.svg)](https://saucelabs.com/u/mas-ci)
 
