@@ -78,7 +78,7 @@
   },
   "scripts": {
     "test": "gulp eslint && gulp jscs && ./bin/bootstrap && ./bin/run-tests saucelabs",
-    "dev": "pm2 start --no-daemon pm2/apps.json"
+    "dev": "pm2 start --no-daemon --no-autorestart pm2/apps.json"
   },
   "repository": {
     "type": "git",
