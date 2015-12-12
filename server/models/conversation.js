@@ -61,6 +61,7 @@ exports.findGroup = function*(name, network) {
 
     if (!conversationId) {
         log.info('Searched non-existing group: ' + network + ':' + name);
+        return null;
     }
 
     return yield get(conversationId);
