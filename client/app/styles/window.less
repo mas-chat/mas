@@ -178,6 +178,24 @@
         }
     }
 
+    .line:hover .edit-message-button {
+        display: inline-block;
+    }
+
+    .edit-message-button {
+        position: absolute;
+        display: none;
+        color: #777;
+        padding: 1px 13px 1px 13px;
+        width: 39px;
+        background-color: whitesmoke;
+        border: 1px solid #bbb;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
     .nick + pre { // Special case where pre starts the message
         margin-top: 10px;
     }
@@ -402,21 +420,6 @@
     .user-img-restore {
         cursor: pointer;
         padding-left: 4px;
-    }
-
-    .line:hover .edit-message-button {
-        display: inline-block;
-    }
-
-    .edit-message-button {
-        display: none;
-        color: #0C7BC6;
-        padding-left: 5px;
-
-        &:hover {
-            color: red;
-            cursor: pointer;
-        }
     }
 
     iframe.youtube-preview {
