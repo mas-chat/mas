@@ -1,7 +1,7 @@
 {{#each messages key="gid" as |message|}}
     <div class="line {{message.decoratedCat}}">
         {{~#if message.myNotDeletedMessage~}}
-            <i {{action "edit" message}} class="edit-message-button fa fa-pencil-square"></i>
+            <i {{action "edit" message}} class="edit-message-button fa fa-pencil"></i>
         {{~/if~}}
         <div class="timestamp">
             {{message.decoratedTs}}
