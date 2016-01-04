@@ -1,20 +1,8 @@
-@import "bootstrap/less/bootstrap";
-@import "bootswatch/yeti/bootswatch";
-@import "bootswatch/yeti/variables";
-
+@import (inline) "bootstrap/dist/css/bootstrap.css";
 @import "font-awesome/less/font-awesome";
 @fa-font-path: "/dist/fonts";
 
-@import "bootstrap-social/bootstrap-social";
-
-// Not used but need to be defined
-@grid-margin: 3px;
-@mas-brand-color: blue;
-@mas-bg-color: white;
-
-@import "../../../client/app/styles/main";
-
-@body-bg: #28537E;
+@import (inline) "bootstrap-social/bootstrap-social.css";
 
 body, html {
     height: 100%;
@@ -22,19 +10,29 @@ body, html {
 }
 
 .login-register-container {
-    width: 85%;
-    max-width: 1500px;
-    margin-left: auto;
-    margin-right: auto;
-    flex-flow: row wrap;
-    justify-content: space-around;
+    width: 100%;
+    height: 100%;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
 
     .info {
-        min-width: 380px;
+        display: flex;
+        justify-content: center;
+        flex: 2;
+        padding: 10px 30px;
     }
 
-    & > div {
-        display: inline-block;
+    .info-content {
+        max-width: 500px;
+    }
+
+    .controls {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        height: 100%;
+        background-color: #D1DBF3;
     }
 
     .logo {
@@ -52,13 +50,12 @@ body, html {
         margin-right: 0px;
     }
 
-    .btn {
-        padding: 7px 28px;
+    .btn-social>:first-child {
+        width: 38px;
     }
 
     .btn-register {
         width: 100%;
-        max-width: 350px;
         margin-top: 40px;
     }
 
@@ -71,6 +68,37 @@ body, html {
         color: red;
         padding-bottom: 15px;
     }
+}
+
+@media screen and (max-width: 730px) {
+    .login-register-container {
+        flex-direction: column;
+
+        .logo {
+            font-size: 65vw;
+        }
+    }
+
+    .info-content {
+        padding: 30px;
+
+        h2 {
+            font-size: 7vw;
+        }
+    }
+
+    body {
+        height: auto;
+    }
+
+    .controls {
+        padding: 30px 0px;
+        margin: 30px 0px;
+    }
+}
+
+.btn-social {
+    margin: 10px 0px;
 }
 
 .narrow-container {
@@ -93,7 +121,7 @@ body, html {
     }
 
     .register-controls {
-        margin-top: 50px;
+        margin: 40px 0px;
     }
 
     ul[role=alert] {
@@ -121,13 +149,6 @@ body, html {
     margin-bottom: 40px;
 }
 
-.btn.btn-social {
-    margin: 10px 0px;
-    padding: 6px 6px 6px 45px;
-    width: 100%;
-    display: block;
-}
-
 .btn.btn-social.btn-cloudron {
     background-color: #62bdfc;
     border: 1px solid #62bdfc;
@@ -141,7 +162,7 @@ body, html {
 
 .horizontal-divider {
     height: 1px;
-    background-color: #ddd;
+    background-color: #999;
     margin: 30px 0px;
 }
 
@@ -149,16 +170,13 @@ body, html {
     position: relative;
     display: inline;
     font-size: 12px;
-    color: #aaa;
+    color: #999;
     padding: 0px 5px;
     left: 46%;
-    top: -11px;
-    background-color: white;
+    top: -13px;
+    background-color: #D1DBF3;
 }
 
-/* Bootswatch customizations */
-
-.form-control {
-    box-shadow: none;
-    color: rgb(31, 31, 216);
+.or-label.or-label-white {
+    background-color: #fff;
 }

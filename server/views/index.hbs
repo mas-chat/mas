@@ -1,14 +1,15 @@
 <div class="flex-grow-row login-register-container flex-align-center">
     <div class="info">
-        <i class="fa fa-weixin logo"></i>
-        <h2>MAS - A modern open source chat tool</h2>
-        <p><a href="http://github.com/ilkkao/mas">http://github.com/ilkkao/mas</a></p>
-
-        <div class="register">
-            <a href="/register" class="btn btn-register btn-primary btn-lg">Register &raquo;</a>
+        <div class="info-content">
+            <i class="fa fa-weixin logo"></i>
+            <h2>MAS - A modern open source chat tool</h2>
+            <p><a href="http://github.com/ilkkao/mas">http://github.com/ilkkao/mas</a></p>
+            <div class="register">
+                <a href="/register" class="btn btn-register btn-primary btn-lg">Register &raquo;</a>
+            </div>
         </div>
     </div>
-    <div>
+    <div class="controls">
         <div class="login">
             {{#if auth.password}}
                 <form id="login-form" method="post" class="form-horizontal">
@@ -19,7 +20,7 @@
                     <div class="form-group">
                         <input type="password" name="password" placeholder="Password" class="form-control">
                     </div>
-                    <button type="submit" class="btn btn-primary btn-login">Sign in</button> <a class="forgot" href="/forgot-password.html"><small>Forgot your password?</small></a>
+                    <button type="submit" class="btn btn-primary btn-login">Log In</button> <a class="forgot" href="/forgot-password.html"><small>Forgot your password?</small></a>
                 </form>
 
                 {{#if auth.ext}}
@@ -30,13 +31,13 @@
             {{/if}}
 
             {{#if auth.google}}
-                <a class="btn btn-social btn-google-plus" href="/auth/google">
+                <a class="btn btn-block btn-social btn-google" href="/auth/google">
                     <i class="fa fa-google-plus"></i>Sign in with Google
                 </a>
             {{/if}}
 
             {{#if auth.yahoo}}
-                <a class="btn btn-social btn-yahoo" href="/auth/yahoo">
+                <a class="btn btn-block btn-social btn-yahoo" href="/auth/yahoo">
                     <i class="fa fa-yahoo"></i>Sign in with Yahoo
                 </a>
             {{/if}}
