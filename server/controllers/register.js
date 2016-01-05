@@ -150,7 +150,7 @@ let registrationFormReset = forms.create({
 });
 
 function decodeForm(req, inputForm) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve) {
         inputForm.handle(req, {
             success: function(form) {
                 resolve(form);

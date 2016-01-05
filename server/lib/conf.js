@@ -73,7 +73,7 @@ function get(key) {
 
     if (value === undefined) {
         // TODO: Add config validator, allows very early exit
-        console.error(`Config variable missing in the config file: ${key}`);
+        console.error(`Missing config variable: ${key}`); // eslint-disable-line no-console
         process.exit(1);
     }
 

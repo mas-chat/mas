@@ -135,7 +135,7 @@ Courier.prototype.noop = function() {
 Courier.prototype.quit = function() {
     log.info('Closing courier instance.');
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve) {
         if (!processing) {
             resolve();
         } else {
