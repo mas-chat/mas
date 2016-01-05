@@ -59,26 +59,26 @@
   },
   "devDependencies": {
     "chai": "~3.4.0",
+    "eslint": "~1.10.3",
     "gulp": "~3.9.0",
-    "gulp-bower": "~0.0.6",
     "gulp-concat": "~2.6.0",
-    "gulp-debug": "~2.1.0",
-    "gulp-eslint": "~1.1.0",
     "gulp-inline-css": "~3.0.0",
-    "gulp-jscs": "~3.0.0",
     "gulp-less": "~3.0.0",
     "gulp-minify-css": "~1.2.0",
     "gulp-rev": "~6.0.0",
     "gulp-uglify": "~1.5.0",
     "gulp-util": "~3.0.0",
     "irc": "~0.4.0",
+    "jscs": "^2.8.0",
     "nightwatch": "~0.8.0",
     "rimraf": "~2.5.0",
     "superagent": "~1.4.0"
   },
   "scripts": {
-    "test": "gulp eslint && gulp jscs && ./bin/bootstrap && ./bin/run-tests saucelabs",
-    "dev": "pm2 start --no-daemon --no-autorestart pm2/apps.json"
+    "test": "npm run eslint && npm run jscs && ./bin/bootstrap && ./bin/run-tests saucelabs",
+    "dev": "pm2 start --no-daemon --no-autorestart pm2/apps.json",
+    "jscs": "jscs gulpfile.js server/**/*.js bin/create-alert client/app/**/*.js test/browser/**/*.js",
+    "eslint": "eslint gulpfile.js server/**/*.js bin/create-alert client/app/**/*.js test/browser/**/*.js"
   },
   "repository": {
     "type": "git",

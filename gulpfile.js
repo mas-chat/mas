@@ -3,13 +3,9 @@
 const path = require('path'),
       argv = require('yargs').argv,
       gulp = require('gulp'),
-//    debug = require('gulp-debug'),
       util = require('gulp-util'),
       concat = require('gulp-concat'),
       uglify = require('gulp-uglify'),
-      eslint = require('gulp-eslint'),
-      jscs = require('gulp-jscs'),
-      bower = require('gulp-bower'),
       less = require('gulp-less'),
       minifyCSS = require('gulp-minify-css'),
       rev = require('gulp-rev'),
@@ -17,26 +13,10 @@ const path = require('path'),
       inlineCss = require('gulp-inline-css');
 
 const paths = {
-    serverJavaScripts: [
-        'gulpfile.js',
-        'server/**/*.js',
-        '!server/public/dist/**/*.js',
-        'bin/masctl',
-        'bin/create-alert'
-    ],
-    clientJavaScripts: [
-        'client/app/**/*.js'
-    ],
-    pagesCSS: [
-        'server/pages/stylesheets/*.less'
-    ],
     pagesLibs: [
         'jquery/dist/jquery.js',
         'jquery-cookie/jquery.cookie.js',
         'bootstrap/dist/js/bootstrap.js'
-    ],
-    testJavaScripts: [
-        'test/browser/**/*.js'
     ]
 };
 
@@ -46,34 +26,14 @@ function appendPath(libs) {
 
 paths.pagesLibs = appendPath(paths.pagesLibs);
 
-gulp.task('jscs', function() {
-    return gulp.src(paths.serverJavaScripts
-        .concat(paths.clientJavaScripts)
-        .concat(paths.testJavaScripts))
-        .pipe(jscs());
-});
-
-gulp.task('eslint', function() {
-    return gulp.src(paths.serverJavaScripts
-        .concat(paths.clientJavaScripts)
-        .concat(paths.testJavaScripts))
-        .pipe(eslint())
-        .pipe(eslint.format());
-    //  .pipe(eslint.failOnError());
-});
-
-gulp.task('bower', function() {
-    return bower();
-});
-
-gulp.task('libs-pages', [ 'bower' ], function() {
+gulp.task('libs-pages', function() {
     return gulp.src(paths.pagesLibs)
         .pipe(concat('pages-libs.js'))
         .pipe(argv.prod ? uglify() : util.noop())
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('less-pages', [ 'bower' ], function() {
+gulp.task('less-pages', function() {
     gulp.src('./server/pages/stylesheets/pages.less')
         .pipe(less({
             paths: [ path.join(__dirname, 'bower_components') ]
@@ -82,7 +42,7 @@ gulp.task('less-pages', [ 'bower' ], function() {
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('fonts', [ 'bower' ], function() {
+gulp.task('fonts', function() {
     gulp.src([ './bower_components/bootstrap/dist/fonts/*',
         './bower_components/font-awesome/fonts/*' ])
         .pipe(gulp.dest('./server/public/dist/fonts'));
@@ -112,10 +72,3 @@ gulp.task('build-assets', [ 'libs-pages', 'less-pages', 'fonts', 'emails' ], fun
             .pipe(gulp.dest('./server/public/dist'));
     }
 });
-
-gulp.task('watch', function() {
-    gulp.watch(paths.pagesCSS, [ 'less-pages' ]);
-});
-
-// The default task
-gulp.task('default', [ 'jscs', 'eslint' ]);
