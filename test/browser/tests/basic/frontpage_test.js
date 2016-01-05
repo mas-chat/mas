@@ -8,7 +8,7 @@ module.exports = {
         browser
             .url('http://localhost:44199')
             .waitForElementVisible('body')
-            .assert.containsText('.login', 'Sign in')
+            .assert.containsText('.login', 'Log In')
             .end();
     },
 
