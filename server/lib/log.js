@@ -20,6 +20,7 @@ const path = require('path'),
       fs = require('fs'),
       winston = require('winston'),
       MasTransport = require('./winstonMasTransport'),
+      DailyRotateFile = require('winston-daily-rotate-file'),
       init = require('./init'),
       conf = require('./conf');
 
@@ -99,7 +100,7 @@ function configTransports() {
         };
 
         let fileTransport = conf.get('log:rotate_daily') ?
-            new (winston.transports.DailyRotateFile)(fileTransportOptions) :
+            new DailyRotateFile(fileTransportOptions) :
             new (winston.transports.File)(fileTransportOptions);
 
         transports.push(fileTransport);
