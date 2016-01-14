@@ -300,6 +300,12 @@ export default Ember.Component.extend({
 
         let selectedUserId;
 
+        let membersEl = this.$('.window-members')[0];
+
+        if (membersEl) {
+            Ps.initialize(membersEl);
+        }
+
         this.$('.window-members').contextmenu({
             target: '#window-contextMenu',
             before(e) {

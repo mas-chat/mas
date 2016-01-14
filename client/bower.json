@@ -40,7 +40,8 @@
     "uri.js": "~1.17.0",
     "velocity": "~1.2.1",
     "mousetrap": "~1.5.2",
-    "ember-mocha": "~0.8.0"
+    "ember-mocha": "~0.8.0",
+    "perfect-scrollbar": "~0.6.8"
   },
   "resolutions": {
     "qunit-notifications": "~0.1.0"
