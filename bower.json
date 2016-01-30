@@ -13,7 +13,8 @@
     "jquery-cookie": "~1.4.0",
     "bootstrap": "4.0.0-alpha.2",
     "bootstrap-social": "~4.12.0",
-    "font-awesome": "~4.5.0"
+    "font-awesome": "~4.5.0",
+    "tether": "^1.1.1"
   },
   "resolutions": {
     "font-awesome": "~4.5.0",

@@ -16,6 +16,7 @@ const paths = {
     pagesLibs: [
         'jquery/dist/jquery.js',
         'jquery-cookie/jquery.cookie.js',
+        'tether/dist/js/tether.js', // Bootstrap tooltips require Tether
         'bootstrap/dist/js/bootstrap.js'
     ]
 };
