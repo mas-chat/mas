@@ -42,13 +42,14 @@ export default Store.extend({
         let [ userId, secret ] = ($.cookie('auth') || '').split('-');
 
         if (!userId || !secret) {
-            dispatch('LOGOUT');
+            Ember.Logger.info(`Authentication cookie not found. Exiting.`);
+            this._logout({ informServer: false });
+        } else {
+            this.set('userId', userId);
+            this.set('secret', secret);
+
+            this.msgBuffer = [];
         }
-
-        this.set('userId', userId);
-        this.set('secret', secret);
-
-        this.msgBuffer = [];
     },
 
     desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
@@ -605,17 +606,7 @@ export default Store.extend({
     // TBD: Move these handlers somewhere else
 
     handleLogout() {
-        socket.send({
-            id: 'LOGOUT'
-        }, () => {
-            $.removeCookie('auth', { path: '/' });
-
-            if (typeof Storage !== 'undefined') {
-                window.localStorage.removeItem('data');
-            }
-
-            window.location = '/';
-        });
+        this._logout({ informServer: true });
     },
 
     handleDestroyAccount() {
@@ -635,5 +626,25 @@ export default Store.extend({
 
     _getWindow(windowId) {
         return this.get('windows').getByIndex(windowId);
+    },
+
+    _logout({ informServer = false } = {}) {
+        $.removeCookie('auth', { path: '/' });
+
+        if (typeof Storage !== 'undefined') {
+            window.localStorage.removeItem('data');
+        }
+
+        function exit() {
+            window.location = '/';
+        }
+
+        if (informServer) {
+            socket.send({
+                id: 'LOGOUT'
+            }, exit);
+        } else {
+            exit();
+        }
     }
 });
