@@ -62,16 +62,16 @@ MacOS/Linux/Windows.
    $ npm install
    ```
 
-4. Install bower, gulp, pm2 and ember-cli if you don't have them
+4. Install bower, pm2 and ember-cli if you don't have them
 
    ```bash
-   $ npm install -g bower gulp ember-cli pm2
+   $ npm install -g bower ember-cli pm2
    ```
 
 5. Build the web site
 
    ```bash
-   $ gulp build-assets
+   $ npm run build-pages
    ```
 
 6. Build the client web app

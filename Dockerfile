@@ -24,7 +24,7 @@ RUN mkdir /app/code/logs /app/code/run
 
 WORKDIR /app/code
 RUN npm install
-RUN gulp build-assets
+RUN gulp build-pages
 
 WORKDIR /app/code/client
 RUN npm install

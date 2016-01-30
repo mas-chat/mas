@@ -63,7 +63,7 @@ gulp.task('clean-assets', function(cb) {
     rimraf('./server/public/dist', cb);
 });
 
-gulp.task('build-assets', [ 'libs-pages', 'less-pages', 'fonts', 'emails' ], function() {
+gulp.task('build-pages', [ 'libs-pages', 'less-pages', 'fonts', 'emails' ], function() {
     if (argv.prod) {
         gulp.src('./server/public/dist/**/*')
             .pipe(rev())

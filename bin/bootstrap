@@ -9,7 +9,7 @@ fi
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
 cd $ROOT
 
-gulp build-assets
+npm run build-pages
 
 cd client
 
