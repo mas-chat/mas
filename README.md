@@ -5,6 +5,8 @@ MAS is a web group chat application with a sleek windowed UI.
 
 ![Screenshot](http://i.imgur.com/dlagvoY.gif)
 
+*NOTE:* Code in master branch requires a node compiled with V8 4.9! Use: https://github.com/nodejs/node/pull/4722
+
 *NOTE:* Redis database format will change before 1.0 release. Supported migration tool is not guaranteed. After 1.0 release, mas becomes suitable for the general use.
 
 For more info, see
