@@ -4,7 +4,7 @@ const chai = require("chai"),
       expect = require('chai').expect,
       userValidator = require('../../validators/user.js');
 
-describe('Validation of ', () => {
+describe('UserValidator', () => {
     it('name, email, and password fails', () => {
         const res = userValidator.validate({
             name: 'Ilkka',
@@ -17,7 +17,6 @@ describe('Validation of ', () => {
             errors: {
                 email: 'Please enter a valid email address.',
                 name: 'Please enter at least 6 characters.',
-                password: 'Please enter at least 6 characters.'
             }
         });
     });
