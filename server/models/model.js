@@ -127,7 +127,7 @@ module.exports = class Model {
         if (err === 'notUnique') {
             this.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
         } else if (err) {
-            throw new Error('DB error');
+            throw new Error(`DB ERROR: ${err}`);
         } else {
             this.errors = {};
             Object.assign(this._props, props);
