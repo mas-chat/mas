@@ -63,20 +63,32 @@ module.exports = class Model {
         return record;
     }
 
-    static *findFirst(value, field) {
-        if (!value) {
+    static *fetchMany(ids) {
+        const res = yield ids.map(id => db.get(this.collection, id));
+
+        return res.filter(({ error }) => !error).map(({ val }, index) => {
+            const record = new this(this.collection, ids[index]);
+            record._props = val;
+            return record;
+        });
+    }
+
+    static *find(value, field, { onlyFirst = false } = {}) {
+        if (!field) {
             return null;
         }
 
         const { val } = yield db.find(this.collection, { [field]: value });
 
-        if (!val || val.length === 0) {
+        if (!val || (onlyFirst && val.length === 0)) {
             return null;
         }
 
-        const id = val[0];
+        return yield onlyFirst ? this.fetch(val[0]) : this.fetchMany(val);
+    }
 
-        return yield this.fetch(id);
+    static *findFirst(value, field) {
+        return yield this.find(value, field, { onlyFirst: true });
     }
 
     static *create(props) {
@@ -84,10 +96,7 @@ module.exports = class Model {
 
         if (record.config.validator) {
             const { valid, errors } = record.config.validator.validate(props);
-
-            if (!valid) {
-                record.errors = errors;
-            }
+            record.errors = errors || {};
         }
 
         if (record.valid) {
@@ -96,9 +105,9 @@ module.exports = class Model {
             if (err === 'notUnique') {
                 record.errors = explainIndexErrors(indices, record.config.indexErrorDescriptions);
             } else if (err) {
-                throw new Error('DB error');
+                throw new Error(`DB ERROR: ${err}`);
             } else {
-                record.id = val;
+                record.id = val || null;
                 record._props = props;
             }
         }

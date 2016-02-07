@@ -199,4 +199,38 @@ describe('Model', function() {
             id: 42
         });
     });
+
+
+    it('find() succeeds', function*() {
+        rigiddbStub.prototype.find = function*(db, props) {
+            expect(db).to.equal('customers');
+            expect(props).to.deep.equal({ name: 'Ilkka' });
+
+            return { val: [ 42, 43 ], err: false };
+        };
+
+        let expectedId = 42
+        let age = 34;
+
+        rigiddbStub.prototype.get = function*(db, id) {
+            expect(db).to.equal('customers');
+            expect(id).equal(expectedId++);
+
+            return { val: { name: 'Ilkka', age: age++ }, err: false };
+        };
+
+        const customerObjs = yield Customer.find('Ilkka', 'name');
+
+        expect(customerObjs).to.deep.equal([{
+            collection: 'customers',
+            _props: { name: 'Ilkka', age: 34 },
+            errors: {},
+            id: 42
+        }, {
+            collection: 'customers',
+            _props: { name: 'Ilkka', age: 35 },
+            errors: {},
+            id: 43
+        }]);
+    });
 });
