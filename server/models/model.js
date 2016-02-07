@@ -21,7 +21,7 @@ const rigiddb = require('rigiddb');
 const db = new rigiddb('mas', { db: 10 });
 
 module.exports = class Model {
-    constructor(collection, id = null) {
+    constructor(collection, id = null, initialProps = {}) {
         if (collection === 'models') {
             throw new Error('An abstract Model class cannot be instantiated.');
         }
@@ -30,7 +30,7 @@ module.exports = class Model {
         this.id = id;
         this.errors = {};
 
-        this._props = {};
+        this._props = initialProps;
     }
 
     get config() {
@@ -66,11 +66,8 @@ module.exports = class Model {
     static *fetchMany(ids) {
         const res = yield ids.map(id => db.get(this.collection, id));
 
-        return res.filter(({ error }) => !error).map(({ val }, index) => {
-            const record = new this(this.collection, ids[index]);
-            record._props = val;
-            return record;
-        });
+        return res.filter(({ error }) => !error).map(({ val }, index) =>
+            new this(this.collection, ids[index], val));
     }
 
     static *find(value, field, { onlyFirst = false } = {}) {
