@@ -22,6 +22,10 @@ const db = new rigiddb('mas', { db: 10 });
 
 module.exports = class Model {
     constructor(collection, id = null, initialProps = {}) {
+        if (typeof(id) !== 'number' && id !== null) {
+            throw new Error(`ID must be a number or null.`);
+        }
+
         if (collection === 'models') {
             throw new Error('An abstract Model class cannot be instantiated.');
         }
