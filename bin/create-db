@@ -24,22 +24,23 @@ const store = new ObjectStore('mas', { db: 10 });
 store.setSchema(1, {
     users: {
         definition: {
-            deleted: 'boolean',
-            deletionTime: { type: 'timestamp', allowNull: true },
-            email: { type: 'string', allowNull: true },
-            deletedEmail: { type: 'string', allowNull: true },
-            emailConfirmed: 'boolean',
-            emailMD5: { type: 'string', allowNull: true },
-            extAuthId: { type: 'string', allowNull: true },
-            inUse: 'boolean',
-            lastIp: { type: 'string', allowNull: true },
-            lastLogout: { type: 'timestamp', allowNull: true },
+            deleted: { type: 'boolean', allowNull: false },
+            deletionTime: 'timestamp',
+            email: 'string',
+            deletedEmail: 'string',
+            emailConfirmed: { type: 'boolean', allowNull: false },
+            emailMD5: 'string',
+            extAuthId: 'string',
+            inUse: { type: 'boolean', allowNull: false },
+            lastIp: 'string',
+            lastLogout: 'timestamp',
             name: 'string',
-            nick: { type: 'string', allowNull: true },
-            password: { type: 'string', allowNull: true },
-            registrationTime: 'timestamp',
-            secret: { type: 'string', allowNull: true },
-            secretExpires: { type: 'timestamp', allowNull: true }
+            nick: 'string',
+            password: 'string',
+            passwordType: 'string',
+            registrationTime: { type: 'timestamp', allowNull: false },
+            secret: 'string',
+            secretExpires: 'timestamp'
         },
         indices: {
             email: {
@@ -54,16 +55,16 @@ store.setSchema(1, {
                     { name: 'nick', caseInsensitive: true }
                 ]
             },
-            extAuthUrl: {
+            extAuth: {
                 uniq: true,
-                fields: [ 'extAuthId']
+                fields: [ 'extAuthId' ]
             }
         }
     },
     windows: {
         definition: {
-            userId: 'int',
-            conversationId: 'int',
+            userId: { type: 'int', allowNull: false },
+            conversationId: { type: 'int', allowNull: false },
             emailAlert: 'boolean',
             notificationAlert: 'boolean',
             soundAlert: 'boolean',
@@ -85,6 +86,40 @@ store.setSchema(1, {
             userIdConversationId: {
                 uniq: true,
                 fields: [ 'userId', 'conversationId' ]
+            }
+        }
+    },
+    settings: {
+        definition: {
+            userId: { type: 'int', allowNull: false },
+            activeDesktop: 'int',
+            theme: 'string',
+        },
+        indices: {
+            userId: {
+                uniq: true,
+                fields: [ 'userId' ]
+            }
+        }
+    },
+    friends: {
+        definition: {
+            srcUserId: { type: 'int', allowNull: false },
+            dstUserId: { type: 'int', allowNull: false },
+            state: { type: 'string', allowNull: false } // pending, blocked, active
+        },
+        indices: {
+            srcUserId: {
+                uniq: false,
+                fields: [ 'srcUserId' ]
+            },
+            dstUserId: {
+                uniq: false,
+                fields: [ 'dstUserId' ]
+            },
+            friends: {
+                uniq: true,
+                fields: [ 'srcUserId', 'dstUserId']
             }
         }
     }
