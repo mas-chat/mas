@@ -70,7 +70,7 @@ module.exports = class Model {
     static *fetchMany(ids) {
         const res = yield ids.map(id => db.get(this.collection, id));
 
-        return res.filter(({ error }) => !error).map(({ val }, index) =>
+        return res.filter(({ err }) => !err).map(({ val }, index) =>
             new this(this.collection, ids[index], val));
     }
 
