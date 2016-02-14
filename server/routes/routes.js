@@ -26,8 +26,7 @@ const path = require('path'),
       cacheFilter = require('../lib/cacheFilter'),
       registerController = require('../controllers/register'),
       loginController = require('../controllers/login'),
-      indexPageController = require('../controllers/pages'),
-      pagesController = require('../controllers/pages/pages'),
+      pagesController = require('../controllers/pages'),
       uploadController = require('../controllers/upload'),
       userFilesController = require('../controllers/userFiles'),
       forgotPasswordController = require('../controllers/forgotPassword'),
@@ -75,9 +74,8 @@ exports.register = function(app) {
     // Confirm email
     app.get('/confirm-email/:token', confirmEmailController.show);
 
-    // Web site page routes
-    app.get('/', indexPageController);
-    app.get(/.html$/, pagesController); // All other pages
+    // Web site pages route
+    app.get(/(^\/|.html)$/, pagesController);
 
     // Public assets
     app.get('/files/:file', userFilesController);
