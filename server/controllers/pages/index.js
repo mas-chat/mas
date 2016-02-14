@@ -19,13 +19,24 @@
 const authOptions = require('../../lib/authOptions');
 
 module.exports = function*() {
-    if (this.mas.userId !== null) {
-        this.redirect('/app');
+    const path = this.request.path;
+
+    if (path === '/' || path === '/index.html') {
+        if (this.mas.user) {
+            this.redirect('/app');
+        } else {
+            yield this.render('index', {
+                page: 'frontpage',
+                title: 'Chat Service',
+                auth: authOptions
+            });
+        }
     } else {
-        yield this.render('index', {
-            page: 'frontpage',
-            title: '',
-            auth: authOptions
+        const page = path.replace(/\/(.*)\.html/, '$1');
+
+        yield this.render(page, {
+            page: page,
+            title: page
         });
     }
 };
