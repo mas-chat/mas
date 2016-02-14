@@ -18,27 +18,29 @@
 
 const uuid = require('uid2'),
       redis = require('../lib/redis').createClient(),
+      User = require('../models/user'),
       log = require('../lib/log'),
       mailer = require('../lib/mailer'),
       conf = require('../lib/conf');
 
 exports.create = function*() {
     let email = this.request.body.email;
-    let userId = yield redis.hget('index:user', email.toLowerCase());
 
-    if (userId) {
+    let userRecord = yield User.findFirst(email.trim(), 'email');
+
+    if (userRecord) {
         let token = uuid(30);
-        let user = yield redis.hgetall(`user:${userId}`);
+        let link = `${conf.getComputed('site_url')}/reset-password/${token}`;
 
         mailer.send('emails/build/resetPassword.hbs', {
-            name: user.name,
-            url: conf.getComputed('site_url') + '/reset-password/' + token
-        }, user.email, 'Password reset link');
+            name: userRecord.get('name'),
+            url: link
+        }, userRecord.get('email'), 'Password reset link');
 
-        yield redis.set(`passwordresettoken:${token}`, userId);
+        yield redis.set(`passwordresettoken:${token}`, userRecord.id);
         yield redis.expire(`passwordresettoken:${token}`, 60 * 60 * 24); // 24 hours
 
-        log.info(userId, 'Password reset email sent');
+        log.info(userRecord.id, `Password reset email sent, link is: ${link}`);
     } else {
         log.warn('Bogus password reset request received');
     }
