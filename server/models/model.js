@@ -96,7 +96,7 @@ module.exports = class Model {
         let record = new this(this.collection);
 
         if (record.config.validator) {
-            const { valid, errors } = record.config.validator.validate(props);
+            const { errors } = record.config.validator.validate(props);
             record.errors = errors || {};
         }
 

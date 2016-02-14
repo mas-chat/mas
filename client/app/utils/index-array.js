@@ -14,6 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
+/* globals Map */
+
 import Ember from 'ember';
 
 export default Ember.ArrayProxy.extend({

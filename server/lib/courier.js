@@ -48,7 +48,7 @@ function Courier(name) {
 Courier.prototype.listen = function*() {
     assert(this.isEndpoint);
 
-    while (1) {
+    for (;;) {
         let result = (yield rcvRedis.brpop(`inbox:${this.name}`, 0))[1];
 
         processing = true;
