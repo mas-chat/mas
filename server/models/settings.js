@@ -16,33 +16,28 @@
 
 'use strict';
 
-const _ = require('lodash'),
-      redis = require('../lib/redis').createClient(),
-      notification = require('../lib/notification');
+const Model = require('./model');
 
-exports.sendSet = function*(userId, sessionId) {
-    let settings = (yield redis.hgetall(`settings:${userId}`)) || {};
+module.exports = class Setting extends Model {
+    static *findOrCreate(userId) {
+        let record = yield this.findFirst(userId, 'userId');
 
-    _.defaults(settings, {
-        activeDesktop: 0,
-        theme: 'default'
-    });
-
-    let user = yield redis.hgetall(`user:${userId}`);
-
-    let command = {
-        id: 'SET',
-        settings: {
-            activeDesktop: parseInt(settings.activeDesktop),
-            theme: settings.theme,
-            email: user.email,
-            emailConfirmed: user.emailConfirmed === 'true'
+        if (!record) {
+            record = yield this.create({
+                userId: userId
+            });
         }
-    };
 
-    if (sessionId) {
-        yield notification.send(userId, sessionId, command);
-    } else {
-        yield notification.broadcast(userId, command);
+        return record;
+    }
+
+    static *create(props) {
+        const data = {
+            userId: props.userId,
+            activeDesktop: props.activeDesktop || 0,
+            theme: props.theme || 'default'
+        };
+
+        return yield super.create(data);
     }
 };
