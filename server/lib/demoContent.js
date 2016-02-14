@@ -27,7 +27,7 @@ const co = require('co'),
 
 exports.enable = function() {
     co(function*() {
-        while (1) {
+        for (;;) {
             yield wait(2000);
 
             let demoUserEmail = conf.get('frontend:demo_user_email');
