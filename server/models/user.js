@@ -16,127 +16,155 @@
 
 'use strict';
 
-const bcrypt = require('bcrypt'),
+const crypto = require('crypto'),
+      bcrypt = require('bcrypt'),
+      uuid = require('uid2'),
       md5 = require('md5'),
-      log = require('../lib/log'),
-      redis = require('../lib/redis').createClient();
+      Model = require('./model'),
+      userValidator = require('../validators/user');
 
-const RESERVED_USERIDS = 9000;
+module.exports = class User extends Model {
+    static *create(props) {
+        trimWhiteSpace(props);
 
-exports.create = function(details, settings, friends) {
-    return new User(details, settings, friends);
-};
+        const passwordValidation = validatePassword(props.password);
 
-function User(details, settings, friends) {
-    if (!details) {
-        // Create empty an user object that can be initialized with load()
-        return;
+        if (!passwordValidation.valid) {
+            let user = new User();
+            user.errors = { password: passwordValidation.error };
+            return user;
+        }
+
+        const data = {
+            deleted: false,
+            deletionTime: null,
+            email: props.email,
+            deletedEmail: null,
+            emailConfirmed: false,
+            emailMD5: md5(props.email.toLowerCase()),
+            extAuthId: null,
+            inUse: true,
+            lastIp: null,
+            lastLogout: new Date(0),
+            name: props.name,
+            nick: props.nick,
+            password: bcrypt.hashSync(props.password, bcrypt.genSaltSync(10)),
+            passwordType: 'bcrypt',
+            registrationTime: new Date(),
+            secret: null,
+            secretExpires: null
+        };
+
+        return yield super.create(data);
     }
 
-    this.data = details;
-    this.settings = settings;
-    this.friends = friends;
+    get config() {
+        return {
+            validator: userValidator,
+            allowedProps: [
+                'extAuthId',
+                'inUse',
+                'lastIp',
+                'lastLogout',
+                'name',
+                'nick',
+                'registrationTime'
+            ],
+            indexErrorDescriptions: {
+                nick: 'This nick is already reserved.',
+                email: 'This email address is already reserved.'
+            }
+        };
+    }
 
-    // Initialize additional variables
-    this.data.nextwindowid = -1;
+    *generateNewSecret() {
+        let ts = new Date();
+
+        let secret = {
+            secret: uuid(20),
+            secretExpires: new Date(ts.getTime() + 14 * 24 * 60 * 60 * 1000)
+        };
+
+        return yield this.set(secret);
+    }
+
+    *changeEmail(email) {
+        email = email.trim();
+
+        if (this.get('email') !== email) {
+            yield this.set({
+                email: email,
+                emailMD5: md5(email.toLowerCase()),
+                emailConfirmed: false
+            });
+
+            // TBD: yield sendEmailConfirmationEmail(this.id, email);
+        }
+    }
+
+    *changePassword(password) {
+        const passwordValidation = validatePassword(password);
+
+        if (!passwordValidation.valid) {
+            this.errors = { password: passwordValidation.error };
+            return;
+        }
+
+        return yield this.set({
+            password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+            passwordType: 'bcrypt'
+        });
+    }
+
+    *verifyPassword(password) {
+        const encryptedPassword = this.get('password');
+        const encryptionMethod = this.get('passwordType');
+
+        if (!encryptedPassword) {
+            return false;
+        }
+
+        if (encryptionMethod === 'sha256') {
+            let expectedSha = crypto.createHash('sha256').update(password, 'utf8').digest('hex');
+
+            if (encryptedPassword === expectedSha) {
+                // Migrate to bcrypt
+                yield this.changePassword(password); // TBD: Can't fail
+                return true;
+            }
+        } else if (encryptionMethod === 'bcrypt') {
+            return bcrypt.compareSync(password, encryptedPassword);
+        } else if (encryptionMethod === 'plain') {
+            // Only used in testing
+            return encryptedPassword === password;
+        }
+
+        return false;
+    }
+
+    *disableUser() {
+        return yield this.set({
+            deleted: true,
+            deletionTime: Date.now(),
+            email: null,
+            deletedEmail: this._props['email'],
+            emailMD5: null,
+            extAuthId: null
+        });
+    }
+};
+
+function trimWhiteSpace(props) {
+    for (let prop in props) {
+        props[prop] = props[prop].trim();
+    }
 }
 
-User.prototype.load = function*(userId) {
-    this.data = yield redis.hgetall(`user:${userId}`);
-
-    // See save()
-    this._oldNick = this.data.nick;
-    this._oldEmail = this.data.email;
-    this._oldExtAuthId = this.data.extAuthId;
-
-    this.settings = yield redis.hgetall(`settings:${userId}`);
-    this.friends = yield redis.smembers(`friends:${userId}`);
-
-    if (this.settings === null) {
-        this.settings = {};
+function validatePassword(password) {
+    if (!password || password.length < 6) {
+        return { valid: false, error: 'Please enter at least 6 characters.' };
     }
 
-    if (this.friends === null) {
-        this.friends = [];
-    }
-};
+    return { valid: true };
+}
 
-User.prototype.setPassword = function(password) {
-    let salt = bcrypt.genSaltSync(10);
-    let hash = bcrypt.hashSync(password, salt);
-    this.data.password = 'bcrypt:' + hash;
-};
-
-User.prototype.generateUserId = function*() {
-    let userId = yield redis.incr('nextGlobalUserId');
-    userId = 'm' + (userId + RESERVED_USERIDS);
-    this.data.userId = userId;
-    return userId;
-};
-
-User.prototype.save = function*() {
-    let index = {};
-    let userId = this.data.userId;
-
-    if (this.data.nick) {
-        let normalizedNick = this.data.nick.toLowerCase().trim();
-        index[normalizedNick] = userId;
-    }
-
-    if (this.data.email) {
-        let normalizedEmail = this.data.email.toLowerCase().trim();
-
-        index[normalizedEmail] = userId;
-        this.data.emailMD5 = md5(normalizedEmail); // For gravatar support
-    } else {
-        log.warn(userId, 'No email is defined while saving User model.');
-    }
-
-    if (this.data.extAuthId) {
-        index[this.data.extAuthId] = userId;
-    }
-
-    yield redis.hmset(`user:${userId}`, this.data);
-    yield redis.sadd('userlist', userId);
-
-    // Update index
-    if (this._oldNick) {
-        yield redis.hdel('index:user', this._oldNick);
-    }
-
-    if (this._oldEmail) {
-        yield redis.hdel('index:user', this._oldEmail);
-    }
-
-    if (this._oldExtAuthId) {
-        yield redis.hdel('index:user', this._oldExtAuthId);
-    }
-
-    yield redis.hmset('index:user', index);
-
-    if (Object.keys(this.settings).length > 0) {
-        yield redis.hmset(`settings:${userId}`, this.settings);
-    }
-
-    if (this.friends.length > 0) {
-        yield redis.sadd(`friends:${userId}`, this.friends);
-    }
-};
-
-User.prototype.delete = function*() {
-    let userId = this.data.userId;
-
-    yield redis.hmset(`user:${userId}`, {
-        deleted: 'true',
-        deletionTime: Math.round(Date.now() / 1000)
-    });
-
-    // Free email address and extAuthId but not nick. Nicks are kept forever to not to
-    // break conversation logs.
-    yield redis.hdel('index:user', this.data.email.toLowerCase().trim());
-    yield redis.hdel('index:user', this.data.extAuthId);
-
-    yield redis.del(`settings:${userId}`);
-
-    yield redis.del(`activealerts:${userId}`);
-};
