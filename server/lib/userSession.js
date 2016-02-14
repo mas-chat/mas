@@ -16,47 +16,25 @@
 
 'use strict';
 
-const redis = require('../lib/redis').createClient();
+const user = require('../models/user');
 
 exports.auth = function*(next) {
-    let valid = true;
-    let userId, secret, data;
-    let cookie = this.cookies.get('auth');
-    let ts = Math.round(Date.now() / 1000);
-
-    if (!cookie) {
-        valid = false;
-    }
-
-    if (valid) {
-        data = cookie.split('-');
-
-        if (data.length !== 3) {
-            valid = false;
-        } else {
-            userId = data[0];
-            secret = data[1];
-
-            if (!userId || !secret) {
-                valid = false;
-            }
-        }
-    }
-
-    let user;
-
-    if (valid) {
-        user = yield redis.hgetall(`user:${userId}`);
-
-        if (!(user && user.secretExpires > ts && user.secret === secret)) {
-            valid = false;
-        }
-    }
+    let cookie = this.cookies.get('auth') || '';
+    let ts = new Date();
 
     this.mas = this.mas || {};
-    this.mas.userId = valid ? userId : null;
-    this.mas.email = valid ? user.email : null;
-    this.mas.inUse = valid ? user.inuse === 'true' : null;
+    this.mas.user = null;
+
+    let [ userId, secret ] = cookie.split('-');
+
+    if (userId && secret) {
+        let userRecord = yield user.fetch(parseInt(userId));
+
+        if (userRecord && userRecord.get('secretExpires') > ts &&
+            userRecord.get('secret') === secret) {
+            this.mas.user = userRecord;
+        }
+    }
 
     yield next;
 };

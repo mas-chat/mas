@@ -18,29 +18,27 @@
 
 const passport = require('../lib/passport'),
       log = require('../lib/log'),
-      redis = require('../lib/redis').createClient(),
       cookie = require('../lib/cookie');
 
 exports.localLogin = function*(next) {
     let that = this;
 
-    yield passport.authenticate('local', function*(err, userId) {
+    yield passport.authenticate('local', function*(err, user) {
+        let success = false;
+        let msg;
+
         if (err === 'useExt') {
-            that.body = {
-                success: false,
-                msg: 'This email address can login only through Google/Yahoo login.'
-            };
-        } else if (err || userId === false) {
+            msg = 'This email address can login only through Google/Yahoo login.';
+        } else if (err || !user) {
             // Unknown user, wrong password, or disabled account
-            that.body = {
-                success: false,
-                msg: 'Incorrect password or nick/email.'
-            };
+            msg = 'Incorrect password or nick/email.';
         } else {
-            yield updateIpAddress(that, userId);
-            that.body = yield cookie.createSession(userId);
-            that.body.success = true;
+            yield user.set('lastIp', that.req.connection.remoteAddress);
+            yield cookie.createSession(user, that);
+            success = true;
         }
+
+        that.body = { success, msg };
     }).call(this, next);
 };
 
@@ -57,32 +55,25 @@ exports.cloudronLogin = function*(next) {
 };
 
 function *auth(ctx, next, provider) {
-    yield passport.authenticate(provider, function*(err, userId) {
+    yield passport.authenticate(provider, function*(err, user) {
         if (err) {
             ctx.body = 'External login failed, reason: ' + err;
             log.warn('Invalid external login attempt, reason: ' + err);
             return;
-        } else if (userId === false) {
+        } else if (!user) {
             ctx.body = 'No account found. Login failed.';
             return;
         }
 
         log.info('External login finished');
 
-        let resp = yield cookie.createSession(userId);
-        cookie.set(userId, resp.secret, resp.expires, ctx);
+        yield cookie.createSession(user, ctx);
 
-        let inUse = yield redis.hget(`user:${userId}`, 'inuse');
-
-        if (inUse === 'true') {
-            yield updateIpAddress(ctx, userId);
+        if (user.get('inUse')) {
+            //TODOyield updateIpAddress(ctx, userId);
             ctx.redirect('/app/');
         } else {
             ctx.redirect('/register?ext=true');
         }
     }).call(ctx, next);
-}
-
-function *updateIpAddress(ctx, userId) {
-    yield redis.hset(`user:${userId}`, 'lastip', ctx.req.connection.remoteAddress);
 }

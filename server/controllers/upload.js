@@ -32,12 +32,12 @@ if (dataDirectory.charAt(0) !== path.sep) {
 }
 
 module.exports = function*() {
-    if (!this.request.is('multipart/*')) {
+    if (!this.request.is('multipart/*') || !this.mas.user) {
         // The body isn't multipart, so busboy can't parse it
         return;
     }
 
-    let userId = this.mas.userId;
+    let userId = this.mas.user.id;
     let parts = parse(this);
     let part;
     let urls = [];
@@ -50,7 +50,6 @@ module.exports = function*() {
 
     while ((part = yield parts)) {
         if (part.length) {
-            part = part;
             // TDB: Handle if field
             // key: part[0]
             // value: part[1]

@@ -16,19 +16,15 @@
 
 'use strict';
 
-const crypto = require('crypto'),
-      bcrypt = require('bcrypt'),
-      co = require('co'),
+const co = require('co'),
       jwt = require('jwt-simple'),
       passport = require('koa-passport'),
       LocalStrategy = require('passport-local').Strategy,
       GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
       YahooStrategy = require('passport-yahoo').Strategy,
       CloudronStrategy = require('passport-cloudron'),
-      redis = require('./redis').createClient(),
-      user = require('../models/user'),
-      conf = require('./conf'),
-      log = require('./log');
+      User = require('../models/user'),
+      conf = require('./conf');
 
 exports.initialize = function() {
     setup();
@@ -84,52 +80,26 @@ function setup() {
 
 function authLocal(username, password, done) {
     co(function*() {
-        let userRecord = null;
-        let userId = null;
-        let correctPassword = false;
-
-        if (username) {
-            userId = yield redis.hget('index:user', username.toLowerCase());
-        }
-
-        if (userId) {
-            userRecord = yield redis.hgetall(`user:${userId}`);
-        }
-
-        if (userRecord && !userRecord.password && userRecord.extAuthId) {
-            done('useExt', false);
+        if (!username) {
             return;
         }
 
-        if (!userRecord || userRecord.deleted === 'true' || !userRecord.password) {
+        const userRecord = yield User.findFirst(username, username.includes('@') ? 'email' : 'nick');
+
+        if (!userRecord || userRecord.get('deleted')) {
             done('invalid', false);
             return;
         }
 
-        let passwordParts = userRecord.password.split(':');
-        let encryptionMethod = passwordParts[0];
-        let encryptedHash = passwordParts[1];
-
-        if (encryptionMethod === 'sha256') {
-            let expectedSha = crypto.createHash('sha256').update(password, 'utf8').digest('hex');
-
-            if (encryptedHash === expectedSha) {
-                correctPassword = true;
-                // Migrate to bcrypt
-                let salt = bcrypt.genSaltSync(10);
-                let hash = bcrypt.hashSync(password, salt);
-                yield redis.hset(`user:${userId}`, 'password', 'bcrypt:' + hash);
-            }
-        } else if (encryptionMethod === 'bcrypt') {
-            correctPassword = bcrypt.compareSync(password, encryptedHash);
-        } else if (encryptionMethod === 'plain') {
-            // Only used in testing
-            correctPassword = password === encryptedHash;
-            log.info('Login attempt with unencrypted password, result:' + correctPassword);
+        if (userRecord && !userRecord.get('password') && userRecord.get('extAuthId')) {
+            done('useExt', false);
+            return;
         }
 
-        if (correctPassword && userRecord.inuse === 'true') {
-            done(null, userId);
+        const correctPassword = yield userRecord.verifyPassword(password);
+
+        if (correctPassword && userRecord.get('inUse')) {
+            done(null, userRecord);
         } else {
             done('invalid', false);
         }
@@ -140,33 +110,25 @@ function authExt(openidId, oauthId, profile, done) {
     co(function*() {
         // Some old users are known by their google OpenID 2.0 identifier. Google is closing down
         // OpenID support so always convert in that case to OAuth 2.0 id.
+        let userRecord = yield User.find(openidId, 'extAuthId');
 
-        let userId = yield redis.hget('index:user', openidId);
-
-        if (oauthId) {
-            if (userId) {
-                // User is identified by his OpenID 2.0 identifier even we know his OAuth 2.0 id.
-                // Start to solely use OAuth 2.0 id.
-                yield redis.hset(`user:${userId}`, 'extAuthId', oauthId);
-                yield redis.hdel('index:user', openidId);
-                yield redis.hset('index:user', oauthId, userId);
-            } else {
-                userId = yield redis.hget('index:user', oauthId);
-            }
+        if (userRecord && oauthId) {
+            // User is identified by his OpenID 2.0 identifier even we know his OAuth 2.0 id.
+            // Start to solely use OAuth 2.0 id.
+            yield userRecord.set('extAuthId', oauthId);
+        } else if (oauthId) {
+            userRecord = yield User.find(oauthId, 'extAuthId');
         }
 
-        if (userId === null) {
-            let newUser = user.create({
+        if (!userRecord) {
+            userRecord = User.create({
                 name: profile.displayName,
                 email: profile.emails[0].value,
                 extAuthId: oauthId || openidId,
-                inuse: 'false'
-            }, {}, []);
-
-            userId = yield newUser.generateUserId();
-            yield newUser.save();
+                inUse: false // authentication is not yet complete
+            });
         }
 
-        done(null, userId);
+        done(null, userRecord);
     })();
 }

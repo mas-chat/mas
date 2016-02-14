@@ -23,7 +23,7 @@ const co = require('co'),
       log = require('./log'),
       conf = require('./conf'),
       mailer = require('./mailer'),
-      friends = require('../models/friends');
+      friends = require('../services/friends');
 
 let jobs = [];
 

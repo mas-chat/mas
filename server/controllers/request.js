@@ -29,7 +29,7 @@ const co = require('co'),
       window = require('../models/window'),
       user = require('../models/user'),
       nick = require('../models/nick'),
-      friends = require('../models/friends'),
+      friends = require('../services/friends'),
       ircUser = require('../backends/irc/ircUser'),
       init = require('../lib/init');
 
@@ -61,9 +61,10 @@ init.on('beforeShutdown', function*() {
     yield courier.quit();
 });
 
-exports.process = function*(userId, sessionId, command) {
+exports.process = function*(user, sessionId, command) {
     let windowId = command.windowId;
     let network = command.network;
+    let userId = user.id;
 
     let userExists = yield userExistsCheck(userId);
 
@@ -513,19 +514,10 @@ function *handleUpdateProfile(params) {
         return { status: 'ERROR', errorMsg: 'Invalid email address' };
     }
 
-    let newUser = user.create();
-
-    yield newUser.load(userId);
-    newUser.data.name = params.command.name;
-
-    if (newUser.data.email !== params.command.email) {
-        newUser.data.email = params.command.email;
-        newUser.data.emailConfirmed = 'false';
-
-        yield sendEmailConfirmationEmail(userId, newUser.data.email);
-    }
-
-    yield newUser.save();
+    user.update(userId, {
+        email: params.command.email,
+        name: params.comman.name
+    });
 
     return { status: 'OK' };
 }
@@ -533,9 +525,7 @@ function *handleUpdateProfile(params) {
 function *handleDestroyAccount(params) {
     let userId = params.userId;
 
-    let newUser = user.create();
-    yield newUser.load(userId);
-    yield newUser.delete();
+    user.delete(userId);
 
     let conversationIds = yield window.getAllConversationIds(userId);
 
@@ -561,6 +551,7 @@ function *handleDestroyAccount(params) {
 function *handleSendConfirmEmail(params) {
     let userId = params.userId;
 
+    // TBD: This has moved
     yield sendEmailConfirmationEmail(userId);
     return { status: 'OK' };
 }

@@ -20,10 +20,11 @@ const redis = require('../lib/redis').createClient(),
       socketIo = require('socket.io'),
       co = require('co'),
       uuid = require('uid2'),
-      requestController = require('../controllers/request'),
+      requestController = require('./request'),
       log = require('../lib/log'),
-      friends = require('../models/friends'),
-      settings = require('../models/settings'),
+      friendsService = require('../services/friends'),
+      settingsService = require('../services/settings'),
+      User = require('../models/user'),
       alerts = require('../lib/alert'),
       conf = require('../lib/conf'),
       notification = require('../lib/notification'),
@@ -39,6 +40,7 @@ exports.setup = function(server) {
 
     io.on('connection', function(socket) {
         let userId = null;
+        let userRecord = null;
         let sessionId = null;
         let state = 'connected'; // connected, authenticated, disconnected
 
@@ -58,9 +60,9 @@ exports.setup = function(server) {
                 let ts = Math.round(Date.now() / 1000);
                 let secret = data.secret;
 
-                userId = data.userId;
+                userId = parseInt(data.userId);
 
-                if (!userId || !secret) {
+                if (isNaN(userId) || !secret) {
                     log.info('Invalid init socket.io message.');
                     socket.emit('terminate', {
                         code: 'INVALID_INIT',
@@ -70,12 +72,11 @@ exports.setup = function(server) {
                     return;
                 }
 
-                let userRecord = yield redis.hgetall(`user:${userId}`);
+                userRecord = yield User.fetch(userId);
 
-                if (!(userRecord &&
-                    userRecord.secretExpires > ts &&
-                    userRecord.secret === secret &&
-                    userRecord.inuse === 'true')) {
+                if (!(userRecord && userRecord.get('secretExpires') > ts &&
+                    userRecord.get('secret') === secret &&
+                    userRecord.get('inUse'))) {
                     log.info(userId, 'Init message with incorrect or expired secret.');
                     socket.emit('terminate', {
                         code: 'INVALID_SECRET',
@@ -101,10 +102,12 @@ exports.setup = function(server) {
 
                 yield redis.run('initSession', userId, sessionId, maxBacklogMsgs, cachedUpto, ts);
 
-                yield settings.sendSet(userId, sessionId);
-                yield friends.sendFriends(userId, sessionId);
-                yield friends.sendFriendConfirm(userId, sessionId);
-                yield friends.informStateChange(userId, 'login');
+                yield settingsService.sendSet(userRecord, sessionId);
+
+                yield friendsService.sendFriends(userRecord, sessionId);
+         //       yield friends.sendFriendConfirm(userId, sessionId);
+         //       yield friends.informStateChange(userId, 'login');
+
                 yield alerts.sendAlerts(userId, sessionId);
                 yield sendNetworkList(userId, sessionId);
 
@@ -112,7 +115,7 @@ exports.setup = function(server) {
                 courier.callNoWait('ircparser', 'reconnectifinactive', { userId: userId });
 
                 // Event loop
-                while (1) {
+                for (;;) {
                     let loopTs = Math.round(Date.now() / 1000);
                     yield redis.zadd('sessionlastheartbeat', loopTs, userId + ':' + sessionId);
 
@@ -141,7 +144,7 @@ exports.setup = function(server) {
                     return;
                 }
 
-                let resp = yield requestController.process(userId, sessionId, data);
+                let resp = yield requestController.process(userRecord, sessionId, data);
 
                 yield notification.communicateNewUserIds(userId, sessionId, resp);
 
@@ -171,7 +174,7 @@ exports.setup = function(server) {
                     let last = yield redis.run('deleteSession', userId, sessionId);
 
                     if (last) {
-                        yield friends.informStateChange(userId, 'logout');
+                        yield friendsService.informStateChange(userId, 'logout');
                     }
                 }
             }

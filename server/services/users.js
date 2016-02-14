@@ -1,5 +1,5 @@
 //
-//   Copyright 2014 Ilkka Oksanen <iao@iki.fi>
+//   Copyright 2016 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,18 +16,4 @@
 
 'use strict';
 
-exports.createSession = function*(user, ctx) {
-    let ts = new Date();
-    let secret = user.get('secret');
-    let secretExpires = user.get('secretExpires');
-
-    if (!secret || !secretExpires || ts > secretExpires) {
-        ({ secret, secretExpires } = yield user.generateNewSecret());
-    }
-
-    ctx.cookies.set('auth', `${user.id}-${secret}-n`, {
-        expires: secretExpires,
-        path: '/',
-        httpOnly: false
-    });
-};
+// TBD: Send password update mail here!?
