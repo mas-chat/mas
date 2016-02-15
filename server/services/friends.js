@@ -18,7 +18,7 @@
 
 const Friend = require('../models/friend'),
       User = require('../models/user'),
-      redis = require('./redis').createClient(),
+      redis = require('../lib/redis').createClient(),
       notification = require('../lib/notification');
 
 const EPOCH_DATE = new Date(1);
@@ -66,19 +66,17 @@ exports.sendFriends = function*(user, sessionId) {
     }
 };
 
-exports.sendFriendConfirm = function*(userId, sessionId) {
-    let friendRequests = yield redis.smembers(`friendsrequests:${userId}`);
+exports.sendFriendConfirm = function*(user, sessionId) {
+    const friendAsDst = yield Friend.find(user.id, 'dstUserId');
 
-    if (friendRequests && friendRequests.length > 0) {
+    const userIds = friendAsDst.filter(record => record.get('state') === 'pending');
+
+    if (userIds.length > 0) {
         // Uses userId property so that related USERS notification is send automatically
-        // See lib/notification.js for details.
-        friendRequests = friendRequests.map(function(friendUserId) {
-            return { userId: friendUserId };
-        });
-
-        yield notification.send(userId, sessionId, {
+        // See lib/notification.js for the details.
+        yield notification.send(user.id, sessionId, {
             id: 'FRIENDSCONFIRM',
-            friends: friendRequests
+            friends: userIds.map(friendUserId => ({ userId: friendUserId }))
         });
     }
 };

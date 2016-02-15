@@ -105,7 +105,7 @@ exports.setup = function(server) {
                 yield settingsService.sendSet(userRecord, sessionId);
 
                 yield friendsService.sendFriends(userRecord, sessionId);
-         //       yield friends.sendFriendConfirm(userId, sessionId);
+                yield friendsService.sendFriendConfirm(userRecord, sessionId);
          //       yield friends.informStateChange(userId, 'login');
 
                 yield alerts.sendAlerts(userId, sessionId);
