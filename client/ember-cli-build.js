@@ -87,19 +87,11 @@ module.exports = function(defaults) {
         destDir: '/assets/images/emoji'
     });
 
-    // Temporarily use NPM favicon
-    let favicon = pickFiles('node_modules/ember-cli/node_modules/npm/html', {
-        srcDir: '/',
-        files: [ 'favicon.ico' ],
-        destDir: '/assets/images'
-    });
-
     // Merge the app tree and our new font assets.
     return mergeTrees([
         app.toTree(),
         fontsFontAwesome,
         fontsBootstrap,
-        emojify,
-        favicon
+        emojify
     ]);
 };
