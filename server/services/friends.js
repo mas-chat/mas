@@ -18,7 +18,6 @@
 
 const Friend = require('../models/friend'),
       User = require('../models/user'),
-      redis = require('../lib/redis').createClient(),
       notification = require('../lib/notification');
 
 const EPOCH_DATE = new Date(1);
@@ -32,15 +31,7 @@ exports.sendFriends = function*(user, sessionId) {
         friends: []
     };
 
-    const [ friendAsSrc, friendAsDst ] = yield [
-        Friend.find(user.id, 'srcUserId'),
-        Friend.find(user.id, 'dstUserId')
-    ];
-
-    const userIds = friendAsSrc.concat(friendAsDst).filter(record =>
-        record.get('state') === 'active').map(record =>
-            record.get(record.get('srcUserId') === user.id ? 'dstUserId' : 'srcUserId'));
-
+    const userIds = yield getFriendUserIds(user);
     const friendUserRecords = yield User.fetchMany(userIds);
 
     for (let friendRecord of friendUserRecords) {
@@ -81,12 +72,12 @@ exports.sendFriendConfirm = function*(user, sessionId) {
     }
 };
 
-exports.informStateChange = function*(userId, eventType) {
+exports.informStateChange = function*(user, eventType) {
     let command = {
         id: 'FRIENDS',
         reset: false,
         friends: [ {
-            userId: userId,
+            userId: user.id,
             online: eventType === 'login'
         } ]
     };
@@ -95,26 +86,40 @@ exports.informStateChange = function*(userId, eventType) {
     let ts = 0;
 
     if (eventType !== 'login') {
-        ts = Math.round(Date.now() / 1000);
-        command.friends[0].last = ts;
+        ts = Date.now();
+        command.friends[0].last = Math.round(ts / 1000);
     }
 
-    yield redis.hset(`user:${userId}`, 'lastlogout', ts);
+    yield user.set('lastLogout', ts);
 
-    let friendIds = yield redis.smembers(`friends:${userId}`);
+    const userIds = yield getFriendUserIds(user);
 
-    for (let friendUserId of friendIds) {
+    for (let friendUserId of userIds) {
         yield notification.broadcast(friendUserId, command);
     }
 };
 
-exports.removeUser = function*(userId) {
-    let friendIds = yield redis.smembers(`friends:${userId}`);
+exports.removeUser = function*(user) {
+    const [ friendAsSrc, friendAsDst ] = yield [
+        Friend.find(user.id, 'srcUserId'),
+        Friend.find(user.id, 'dstUserId')
+    ];
 
-    for (let friendUserId of friendIds) {
-        yield redis.srem(`friends:${friendUserId}`, userId);
+    const friendIds = friendAsSrc.concat(friendAsDst);
+    const friendUserRecords = yield User.fetchMany(friendIds);
+
+    for (let friend of friendUserRecords) {
+        yield friend.delete();
     }
-
-    yield redis.del(`friends:${userId}`);
-    yield redis.del(`friendsrequests:${userId}`);
 };
+
+function *getFriendUserIds(user) {
+    const [ friendAsSrc, friendAsDst ] = yield [
+        Friend.find(user.id, 'srcUserId'),
+        Friend.find(user.id, 'dstUserId')
+    ];
+
+    return friendAsSrc.concat(friendAsDst).filter(record =>
+        record.get('state') === 'active').map(record =>
+            record.get(record.get('srcUserId') === user.id ? 'dstUserId' : 'srcUserId'));
+}
