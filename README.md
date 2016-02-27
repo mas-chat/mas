@@ -48,7 +48,7 @@ MacOS/Linux/Windows.
 
 ## Quick start
 
-1. Install Redis and latest release of node.js (4.x)
+1. Install Redis and latest release of node.js (5.x)
 
    On Mac to get redis and node.js you can install [Homebrew](http://brew.sh/) and then do ```brew install node redis```
 
@@ -84,7 +84,7 @@ MacOS/Linux/Windows.
    $ bower install
    $ ember build
    ```
-7. Launch redis in one window
+7. Launch redis in one terminal
 
   ```bash
   $ redis-server
