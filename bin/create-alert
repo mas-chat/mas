@@ -18,7 +18,6 @@
 'use strict';
 
 let readlineSync = require('readline-sync'),
-    co = require('co'),
     log = require('../server/lib/log'),
     redisModule = require('../server/lib/redis'),
     redis = redisModule.createClient(),
@@ -31,10 +30,10 @@ let dismissible = yesOrNo('Can be dismissed?');
 let now = Math.round(Date.now() / 1000);
 let ts = now + expiresInHours * 60 * 60;
 
-co(function*() {
-    yield redisModule.loadScripts();
+(async function() {
+    await redisModule.loadScripts();
 
-    let alertId = yield redis.incr('nextGlobalAlertId');
+    let alertId = await redis.incr('nextGlobalAlertId');
 
     let alert = {
         message: message,
@@ -43,14 +42,14 @@ co(function*() {
         report: true
     };
 
-    yield redis.hmset(`alert:${alertId}`, alert);
-    yield redis.sadd('alertlist', alertId);
+    await redis.hmset(`alert:${alertId}`, alert);
+    await redis.sadd('alertlist', alertId);
 
-    let allIds = yield redis.smembers('alertlist');
+    let allIds = await redis.smembers('alertlist');
 
     // Delete expired alerts
     for (let oldAlertId of allIds) {
-        let oldAlert = yield redis.hgetall(`alert:${oldAlertId}`);
+        let oldAlert = await redis.hgetall(`alert:${oldAlertId}`);
 
         if (now > oldAlert.expires) {
             redis.del('`alert:${oldAlertId})`');
@@ -61,7 +60,7 @@ co(function*() {
     // Deliver the alert
     console.log('Delivering the alert to all logged in users...'); // eslint-disable-line no-console
 
-    let allUsers = yield redis.smembers('userlist');
+    let allUsers = await redis.smembers('userlist');
 
     // Convert object to MAS notification
     alert.id = 'ALERT';
@@ -69,8 +68,8 @@ co(function*() {
     delete alert.expires;
 
     for (let userId of allUsers) {
-        yield redis.sadd(`activealerts:${userId}`, alertId);
-        yield notification.broadcast(userId, alert);
+        await redis.sadd(`activealerts:${userId}`, alertId);
+        await notification.broadcast(userId, alert);
     }
 
     redisModule.shutdown();
