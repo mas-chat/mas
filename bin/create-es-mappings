@@ -17,10 +17,9 @@
 
 'use strict';
 
-let co = require('co'),
-    Promise = require('bluebird'),
-    elasticsearch = require('elasticsearch'),
-    argv = require('yargs').argv;
+const Promise = require('bluebird'),
+      elasticsearch = require('elasticsearch'),
+      argv = require('yargs').argv;
 
 let client = new elasticsearch.Client({
     host: 'localhost:9200',
@@ -29,30 +28,30 @@ let client = new elasticsearch.Client({
 
 client.indices = Promise.promisifyAll(client.indices);
 
-co(function *() {
+(async function() {
     if (argv.deleteIndices) {
         console.log('Deleting all indices...');
-        yield client.indices.delete({
+        await client.indices.delete({
             index: '_all'
         });
     }
 
     console.log('Creating index "messages1"...');
 
-    yield client.indices.create({
+    await client.indices.create({
         index: 'messages1'
     });
 
     console.log('Creating alias "messages", points to "messages1"...');
 
-    yield client.indices.putAlias({
+    await client.indices.putAlias({
         name: 'messages',
         index: 'messages1'
     });
 
     console.log('Setting mapping for "messages1"...');
 
-    yield client.indices.putMapping({
+    await client.indices.putMapping({
         index: 'messages1',
         type: 'message',
         body: {
