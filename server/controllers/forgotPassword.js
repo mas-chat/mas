@@ -23,10 +23,10 @@ const uuid = require('uid2'),
       mailer = require('../lib/mailer'),
       conf = require('../lib/conf');
 
-exports.create = function*() {
+exports.create = async function() {
     let email = this.request.body.email;
 
-    let userRecord = yield User.findFirst(email.trim(), 'email');
+    let userRecord = await User.findFirst(email.trim(), 'email');
 
     if (userRecord) {
         let token = uuid(30);
@@ -37,8 +37,8 @@ exports.create = function*() {
             url: link
         }, userRecord.get('email'), 'Password reset link');
 
-        yield redis.set(`passwordresettoken:${token}`, userRecord.id);
-        yield redis.expire(`passwordresettoken:${token}`, 60 * 60 * 24); // 24 hours
+        await redis.set(`passwordresettoken:${token}`, userRecord.id);
+        await redis.expire(`passwordresettoken:${token}`, 60 * 60 * 24); // 24 hours
 
         log.info(userRecord.id, `Password reset email sent, link is: ${link}`);
     } else {

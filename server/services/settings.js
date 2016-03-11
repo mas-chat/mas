@@ -19,8 +19,8 @@
 const Settings = require('../models/settings'),
       notification = require('../lib/notification');
 
-exports.sendSet = function*(userRecord, sessionId) {
-    let settingsRecord = yield Settings.findOrCreate(userRecord.id);
+exports.sendSet = async function(userRecord, sessionId) {
+    let settingsRecord = await Settings.findOrCreate(userRecord.id);
 
     let command = {
         id: 'SET',
@@ -33,8 +33,8 @@ exports.sendSet = function*(userRecord, sessionId) {
     };
 
     if (sessionId) {
-        yield notification.send(userRecord.id, sessionId, command);
+        await notification.send(userRecord.id, sessionId, command);
     } else {
-        yield notification.broadcast(userRecord.id, command);
+        await notification.broadcast(userRecord.id, command);
     }
 };

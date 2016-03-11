@@ -19,21 +19,21 @@
 const notification = require('../lib/notification'),
       redis = require('../lib/redis').createClient();
 
-exports.sendAlerts = function*(userId, sessionId) {
+exports.sendAlerts = async function(userId, sessionId) {
     let now = Math.round(Date.now() / 1000);
-    let alertIds = yield redis.smembers(`activealerts:${userId}`);
+    let alertIds = await redis.smembers(`activealerts:${userId}`);
 
     for (let alertId of alertIds) {
-        let alert = yield redis.hgetall(`alert:${alertId}`);
+        let alert = await redis.hgetall(`alert:${alertId}`);
 
         if (alert && now < alert.expires) {
             alert.id = 'ALERT';
             alert.alertId = alertId;
 
-            yield notification.send(userId, sessionId, alert);
+            await notification.send(userId, sessionId, alert);
         } else {
             // Alert has expired
-            yield redis.srem(`activealerts:${userId}`, alertId);
+            await redis.srem(`activealerts:${userId}`, alertId);
         }
     }
 };

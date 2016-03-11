@@ -68,7 +68,7 @@ exports.updateMessage = function(gid, msg) {
     return true;
 };
 
-exports.getMessageRange = function*(conversationId, start, end, amount) {
+exports.getMessageRange = async function(conversationId, start, end, amount) {
     if (!elasticSearchAvailable()) {
         return [];
     }
@@ -86,7 +86,7 @@ exports.getMessageRange = function*(conversationId, start, end, amount) {
         range.ts.gte = start * 1000;
     }
 
-    let response = yield elasticSearchClient.search({
+    let response = await elasticSearchClient.search({
         index: 'messages',
         body: {
             size: amount || 1000,

@@ -22,7 +22,6 @@ const path = require('path'),
       error = require('koa-error'),
       compress = require('koa-compress'),
       // logger = require('koa-logger'),
-      co = require('co'),
       handlebarsHelpers = require('./lib/handlebarsHelpers'),
       log = require('./lib/log'),
       redisModule = require('./lib/redis'),
@@ -37,7 +36,7 @@ const path = require('path'),
 
 const app = koa();
 
-exports.init = function(httpServer, httpsServer, setHttpHandlers) {
+exports.init = async function(httpServer, httpsServer, setHttpHandlers) {
     // Development only
     if (app.env === 'development') {
         app.use(error());
@@ -62,45 +61,44 @@ exports.init = function(httpServer, httpsServer, setHttpHandlers) {
     app.use(userSession.auth);
 
     handlebarsHelpers.registerHelpers(hbs);
+
     routes.register(app);
 
-    co(function*() {
-        yield redisModule.loadScripts();
-        yield redisModule.initDB();
+    await redisModule.loadScripts();
+    await redisModule.initDB();
 
-        scheduler.init();
+    scheduler.init();
 
-        // Socket.io server (socketController) must be created after last app.use()
+    // Socket.io server (socketController) must be created after last app.use()
 
-        if (conf.get('frontend:https')) {
-            socketController.setup(httpsServer);
+    if (conf.get('frontend:https')) {
+        socketController.setup(httpsServer);
 
-            const forceSSLApp = koa();
+        const forceSSLApp = koa();
 
-            // To keep things simple, force SSL is always activated if https is enabled
-            forceSSLApp.use(function*() {
-                this.response.status = 301;
-                this.response.redirect(conf.getComputed('site_url') + this.request.url);
-            });
+        // To keep things simple, force SSL is always activated if https is enabled
+        forceSSLApp.use(function*() {
+            this.response.status = 301;
+            this.response.redirect(conf.getComputed('site_url') + this.request.url);
+        });
 
-            setHttpHandlers(forceSSLApp.callback(), app.callback());
-        } else {
-            socketController.setup(httpServer);
+        setHttpHandlers(forceSSLApp.callback(), app.callback());
+    } else {
+        socketController.setup(httpServer);
 
-            setHttpHandlers(app.callback(), null);
-        }
-    })();
+        setHttpHandlers(app.callback(), null);
+    }
 
     if (conf.get('frontend:demo_mode') === true) {
         demoContent.enable();
     }
 
-    init.on('beforeShutdown', function*() {
-        yield socketController.shutdown();
+    init.on('beforeShutdown', async function() {
+        await socketController.shutdown();
         scheduler.quit();
     });
 
-    init.on('afterShutdown', function*() {
+    init.on('afterShutdown', async function() {
         redisModule.shutdown();
         httpServer.close();
         log.quit();

@@ -19,7 +19,6 @@
 const assert = require('assert'),
       semver = require('semver'),
       _ = require('lodash'),
-      co = require('co'),
       conf = require('./conf'),
       log = require('./log');
 
@@ -60,7 +59,7 @@ exports.shutdown = function() {
     shutdown();
 };
 
-function shutdown() {
+async function shutdown() {
     if (shutdownInProgress) {
         return;
     }
@@ -73,28 +72,18 @@ function shutdown() {
         return shutdownOrder[entry.state];
     });
 
-    co(function*() {
-        for (let entry of entries) {
-            if (isGeneratorFunction(entry.cb)) {
-                yield entry.cb();
-            } else {
-                entry.cb();
-            }
-        }
+    for (let entry of entries) {
+        await entry.cb();
 
         console.log('Shutdown complete.'); // eslint-disable-line no-console
         process.exit(0);
-    })();
+    }
 }
 
 function checkNodeVersion() {
     if (semver.lt(process.version, 'v4.0.0')) {
-        let msg = 'ERROR: Installed Node.js version must be at least v4.0.0';
+        let msg = 'ERROR: Installed Node.js version must be at least v5.0.0';
         console.log(msg); // eslint-disable-line no-console
         process.exit(1);
     }
-}
-
-function isGeneratorFunction(obj) {
-    return obj && obj.constructor && obj.constructor.name === 'GeneratorFunction';
 }

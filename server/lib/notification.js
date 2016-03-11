@@ -21,66 +21,66 @@ const util = require('util'),
       redisModule = require('./redis'),
       redis = redisModule.createClient();
 
-exports.send = function*(userId, sessionId, ntfs) {
-    yield queueNotifications(userId, sessionId, null, ntfs);
+exports.send = async function(userId, sessionId, ntfs) {
+    await queueNotifications(userId, sessionId, null, ntfs);
 };
 
-exports.broadcast = function*(userId, ntfs, excludeSessionId) {
-    yield queueNotifications(userId, null, excludeSessionId, ntfs);
+exports.broadcast = async function(userId, ntfs, excludeSessionId) {
+    await queueNotifications(userId, null, excludeSessionId, ntfs);
 };
 
-exports.receive = function*(userId, sessionId, timeout) {
+exports.receive = async function(userId, sessionId, timeout) {
     let command;
     let commands = [];
 
     let client = redisModule.createClient({ autoClose: false });
-    let result = yield client.brpop(`outbox:${userId}:${sessionId}`, timeout);
+    let result = await client.brpop(`outbox:${userId}:${sessionId}`, timeout);
 
     if (result) {
         commands.push(result[1]);
     }
 
     // Retrieve other ntfs if there are any
-    while ((command = yield client.rpop(`outbox:${userId}:${sessionId}`)) !== null) {
+    while ((command = await client.rpop(`outbox:${userId}:${sessionId}`)) !== null) {
         commands.push(command);
     }
 
-    yield client.quit();
+    await client.quit();
 
     return commands.map(function(value) {
         return JSON.parse(value);
     });
 };
 
-exports.requeue = function*(userId, sessionId, ntfs) {
+exports.requeue = async function(userId, sessionId, ntfs) {
     ntfs = ntfs.map(function(ntf) {
         return JSON.stringify(ntf);
     });
 
-    yield redis.rpush.apply(redis, [ `outbox:${userId}:${sessionId}` ].concat(ntfs.reverse()));
+    await redis.rpush.apply(redis, [ `outbox:${userId}:${sessionId}` ].concat(ntfs.reverse()));
 };
 
-exports.communicateNewUserIds = function*(userId, sessionId, msg) {
+exports.communicateNewUserIds = async function(userId, sessionId, msg) {
     // TBD: Refactor to a separate module
-    yield handleNewUserIds(userId, sessionId, null, [ msg ]);
+    await handleNewUserIds(userId, sessionId, null, [ msg ]);
 };
 
-function *queueNotifications(userId, sessionId, excludeSessionId, ntfs) {
+async function queueNotifications(userId, sessionId, excludeSessionId, ntfs) {
     if (!util.isArray(ntfs)) {
         ntfs = [ ntfs ];
     }
 
-    yield handleNewUserIds(userId, sessionId, excludeSessionId, ntfs);
+    await handleNewUserIds(userId, sessionId, excludeSessionId, ntfs);
 
     ntfs = ntfs.map(function(value) {
         return typeof(value) === 'string' ? value : JSON.stringify(value);
     });
 
-    yield redis.run.apply(null,
+    await redis.run.apply(null,
         [ 'queueOutbox', userId, sessionId, excludeSessionId ].concat(ntfs));
 }
 
-function *handleNewUserIds(userId, sessionId, excludeSessionId, ntfs) {
+async function handleNewUserIds(userId, sessionId, excludeSessionId, ntfs) {
     let allUserIds = [];
 
     ntfs.forEach(function(command) {
@@ -88,7 +88,7 @@ function *handleNewUserIds(userId, sessionId, excludeSessionId, ntfs) {
     });
 
     allUserIds = _.uniq(allUserIds);
-    yield redis.run.apply(null,
+    await redis.run.apply(null,
         [ 'introduceNewUserIds', userId, sessionId, excludeSessionId, false ].concat(allUserIds));
 }
 

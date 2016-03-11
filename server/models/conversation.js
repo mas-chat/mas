@@ -27,36 +27,36 @@ const assert = require('assert'),
 
 let MSG_BUFFER_SIZE = 200; // TBD: This should come from session:max_backlog setting
 
-exports.create = function*(options) {
-    return yield create(options);
+exports.create = async function(options) {
+    return await create(options);
 };
 
-exports.delete = function*(conversationId) {
-    let conversation = yield get(conversationId);
-    yield conversation._remove();
+exports.delete = async function(conversationId) {
+    let conversation = await get(conversationId);
+    await conversation._remove();
 };
 
-exports.get = function*(conversationId) {
-    return yield get(conversationId);
+exports.get = async function(conversationId) {
+    return await get(conversationId);
 };
 
-exports.getAllIncludingUser = function*(userId) {
+exports.getAllIncludingUser = async function(userId) {
     // conversationlist structure must be maintained. Getting this information from windowlist would
     // work only for MAS users, not for external (IRC) users
     let conversations = [];
-    let conversationIds = (yield redis.smembers(`conversationlist:${userId}`)) || [];
+    let conversationIds = (await redis.smembers(`conversationlist:${userId}`)) || [];
 
     for (let conversationId of conversationIds) {
-        conversations.push(yield get(conversationId));
+        conversations.push(await get(conversationId));
     }
 
     return conversations;
 };
 
-exports.findGroup = function*(name, network) {
+exports.findGroup = async function(name, network) {
     assert(network && name);
 
-    let conversationId = yield redis.hget(
+    let conversationId = await redis.hget(
         'index:conversation', 'group:' + network + ':' + name.toLowerCase());
 
     if (!conversationId) {
@@ -64,31 +64,31 @@ exports.findGroup = function*(name, network) {
         return null;
     }
 
-    return yield get(conversationId);
+    return await get(conversationId);
 };
 
-exports.findOrCreate1on1 = function*(userId, peerUserId, network) {
+exports.findOrCreate1on1 = async function(userId, peerUserId, network) {
     assert(userId && peerUserId && network);
 
     let conversation;
     let userIds = [ userId, peerUserId ].sort();
-    let conversationId = yield redis.hget('index:conversation',
+    let conversationId = await redis.hget('index:conversation',
         '1on1:' + network + ':' + userIds[0] + ':' + userIds[1]);
 
     // TBD: Make sure peerUserId is either valid MAS user or that user doesn't have too many
     // 1on1 conversations.
 
     if (!conversationId) {
-        conversation = yield create({
+        conversation = await create({
             owner: userId,
             type: '1on1',
             name: '',
             network: network
         });
 
-        yield conversation.set1on1Members(userId, peerUserId);
+        await conversation.set1on1Members(userId, peerUserId);
     } else {
-        conversation = yield get(conversationId);
+        conversation = await get(conversationId);
     }
 
     return conversation;
@@ -106,100 +106,100 @@ function Conversation(conversationId, record, members) {
     return this;
 }
 
-Conversation.prototype.getMemberRole = function*(userId) {
+Conversation.prototype.getMemberRole = async function(userId) {
     return this.members[userId];
 };
 
-Conversation.prototype.setMemberRole = function*(userId, role) {
-    yield this._setMember(userId, role);
-    yield this._streamAddMembers(userId, role);
+Conversation.prototype.setMemberRole = async function(userId, role) {
+    await this._setMember(userId, role);
+    await this._streamAddMembers(userId, role);
 };
 
-Conversation.prototype.getPeerUserId = function*(userId) {
+Conversation.prototype.getPeerUserId = async function(userId) {
     let members = Object.keys(this.members);
     return members[0] === userId ? members[1] : members[0];
 };
 
-Conversation.prototype.set1on1Members = function*(userId, peerUserId) {
+Conversation.prototype.set1on1Members = async function(userId, peerUserId) {
     let userIds = [ userId, peerUserId ].sort();
     let userHash = {};
 
     userHash[userId] = 'u';
     userHash[peerUserId] = 'u';
 
-    yield this._insertMembers(userHash);
+    await this._insertMembers(userHash);
 
     // Update 1on1 index
-    yield redis.hset('index:conversation',
+    await redis.hset('index:conversation',
         '1on1:' + this.network + ':' + userIds[0] + ':' + userIds[1], this.conversationId);
 
     // Update 1on1 conversation history
     if (userId.charAt(0) === 'm') {
-        yield redis.sadd(`1on1conversationhistory:${userId}`, this.conversationId);
+        await redis.sadd(`1on1conversationhistory:${userId}`, this.conversationId);
     }
 
     if (peerUserId.charAt(0) === 'm') {
-        yield redis.sadd(`1on1conversationhistory:${peerUserId}`, this.conversationId);
+        await redis.sadd(`1on1conversationhistory:${peerUserId}`, this.conversationId);
     }
 };
 
-Conversation.prototype.setGroupMembers = function*(members) {
+Conversation.prototype.setGroupMembers = async function(members) {
     let oldMembers = Object.keys(this.members);
 
     for (let userId of oldMembers) {
         if (members && !members[userId]) {
-            yield this.removeGroupMember(userId, true);
+            await this.removeGroupMember(userId, true);
         }
     }
 
-    yield this._insertMembers(members);
+    await this._insertMembers(members);
 
     let newMembers = Object.keys(members);
 
     for (let userId of newMembers) {
         if (userId.charAt(0) === 'm') {
-            yield this.sendAddMembers(userId);
+            await this.sendAddMembers(userId);
         }
     }
 };
 
-Conversation.prototype.addGroupMember = function*(userId, role) {
+Conversation.prototype.addGroupMember = async function(userId, role) {
     assert(role === 'u' || role === '+' || role === '@' || role === '*');
 
-    let newField = yield this._setMember(userId, role);
+    let newField = await this._setMember(userId, role);
 
     if (newField) {
-        yield this.addMessage({
+        await this.addMessage({
             userId: userId,
             cat: 'join',
             body: ''
         });
 
-        yield this._streamAddMembers(userId, role);
+        await this._streamAddMembers(userId, role);
     }
 };
 
-Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKicked, reason) {
+Conversation.prototype.removeGroupMember = async function(userId, skipCleanUp, wasKicked, reason) {
     assert(this.type === 'group');
 
-    let removed = yield redis.hdel(`conversationmembers:${this.conversationId}`, userId);
-    yield redis.srem(`conversationlist:${userId}`, this.conversationId);
+    let removed = await redis.hdel(`conversationmembers:${this.conversationId}`, userId);
+    await redis.srem(`conversationlist:${userId}`, this.conversationId);
 
     if (removed === 1) {
         log.info(`User: ${userId} removed from conversation: ${this.conversationId}`);
 
         delete this.members[userId];
 
-        yield this.addMessage({
+        await this.addMessage({
             userId: userId,
             cat: wasKicked ? 'kick' : 'part',
             body: wasKicked && reason ? reason : ''
         });
 
-        yield this._streamRemoveMembers(userId);
+        await this._streamRemoveMembers(userId);
 
         // Never let window to exist alone without linked conversation
-        yield this._removeConversationWindow(userId);
+        await this._removeConversationWindow(userId);
 
         let removeConversation = true;
 
@@ -212,16 +212,16 @@ Conversation.prototype.removeGroupMember = function*(userId, skipCleanUp, wasKic
         if (removeConversation && !skipCleanUp) {
             log.info(userId,
                 'Last member parted, removing conversation, id: ' + this.conversationId);
-            yield this._remove(this);
+            await this._remove(this);
         }
     }
 };
 
-Conversation.prototype.remove1on1Member = function*(userId) {
+Conversation.prototype.remove1on1Member = async function(userId) {
     assert(this.members[userId]);
 
     // Never let window to exist alone without linked conversation
-    yield this._removeConversationWindow(userId);
+    await this._removeConversationWindow(userId);
 
     // No clean-up is currently needed. 1on1 discussions are never deleted. Group discussions
     // are deleted when the last member parts. This makes sense as groups are then totally reseted
@@ -230,27 +230,27 @@ Conversation.prototype.remove1on1Member = function*(userId) {
     // dead 1on1s start to pile eventually on Redis.
 };
 
-Conversation.prototype.isMember = function*(userId) {
+Conversation.prototype.isMember = async function(userId) {
     return !!this.members[userId];
 };
 
-Conversation.prototype.addMessage = function*(msg, excludeSession) {
-    msg.gid = yield redis.incr('nextGlobalMsgId');
+Conversation.prototype.addMessage = async function(msg, excludeSession) {
+    msg.gid = await redis.incr('nextGlobalMsgId');
     msg.ts = Math.round(Date.now() / 1000);
 
-    yield this._scanForEmailNotifications(msg);
+    await this._scanForEmailNotifications(msg);
 
-    yield redis.lpush(`conversationmsgs:${this.conversationId}`, JSON.stringify(msg));
-    yield redis.ltrim(`conversationmsgs:${this.conversationId}`, 0, MSG_BUFFER_SIZE - 1);
+    await redis.lpush(`conversationmsgs:${this.conversationId}`, JSON.stringify(msg));
+    await redis.ltrim(`conversationmsgs:${this.conversationId}`, 0, MSG_BUFFER_SIZE - 1);
 
-    yield this._streamMsg(msg, excludeSession);
+    await this._streamMsg(msg, excludeSession);
 
     search.storeMessage(this.conversationId, msg);
 
     return msg;
 };
 
-Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, excludeSession) {
+Conversation.prototype.addMessageUnlessDuplicate = async function(sourceUserId, msg, excludeSession) {
     // A special filter for IRC backend.
 
     // To support Flowdock network where MAS user's message can come from the IRC server
@@ -259,20 +259,20 @@ Conversation.prototype.addMessageUnlessDuplicate = function*(sourceUserId, msg, 
     // works because IRC server doesn't echo messages back to their senders. If that wasn't
     // the case, lua reporter logic would fail. (If a reporter sees a new identical message
     // it's not considered as duplicate. Somebody is just repeating their line.)
-    let duplicate = yield redis.run('duplicateMsgFilter', sourceUserId, this.conversationId,
+    let duplicate = await redis.run('duplicateMsgFilter', sourceUserId, this.conversationId,
         msg.userId, msg.body);
 
     if (!duplicate) {
-        return yield this.addMessage(msg, excludeSession);
+        return await this.addMessage(msg, excludeSession);
     }
 
     return {};
 };
 
-Conversation.prototype.editMessage = function*(userId, gid, text) {
+Conversation.prototype.editMessage = async function(userId, gid, text) {
     let ts = Math.round(Date.now() / 1000);
 
-    let result = yield redis.run('editMessage', this.conversationId, gid, userId, text, ts);
+    let result = await redis.run('editMessage', this.conversationId, gid, userId, text, ts);
 
     if (!result) {
         return false;
@@ -281,13 +281,13 @@ Conversation.prototype.editMessage = function*(userId, gid, text) {
     let msg = JSON.parse(result);
     msg.id = 'MSG';
 
-    yield this._streamMsg(msg);
+    await this._streamMsg(msg);
 
     return true;
 };
 
-Conversation.prototype.sendAddMembers = function*(userId) {
-    let windowId = yield window.findByConversationId(userId, this.conversationId);
+Conversation.prototype.sendAddMembers = async function(userId) {
+    let windowId = await window.findByConversationId(userId, this.conversationId);
     let membersList = [];
 
     Object.keys(this.members).forEach(function(key) {
@@ -297,7 +297,7 @@ Conversation.prototype.sendAddMembers = function*(userId) {
         });
     }.bind(this));
 
-    yield notification.broadcast(userId, {
+    await notification.broadcast(userId, {
         id: 'ADDMEMBERS',
         windowId: parseInt(windowId),
         reset: true,
@@ -305,16 +305,16 @@ Conversation.prototype.sendAddMembers = function*(userId) {
     });
 };
 
-Conversation.prototype.sendUsers = function*(userId) {
+Conversation.prototype.sendUsers = async function(userId) {
     let userIds = Object.keys(this.members);
 
     for (let masUserId of userIds) {
-        yield redis.run('introduceNewUserIds', masUserId, null, null, true, userId);
+        await redis.run('introduceNewUserIds', masUserId, null, null, true, userId);
     }
 };
 
-Conversation.prototype.setTopic = function*(topic, nickName) {
-    let changed = yield redis.run('setConversationField', this.conversationId, 'topic', topic);
+Conversation.prototype.setTopic = async function(topic, nickName) {
+    let changed = await redis.run('setConversationField', this.conversationId, 'topic', topic);
 
     if (!changed) {
         return;
@@ -322,19 +322,19 @@ Conversation.prototype.setTopic = function*(topic, nickName) {
 
     this.topic = topic;
 
-    yield this._stream({
+    await this._stream({
         id: 'UPDATE',
         topic: topic
     });
 
-    yield this.addMessage({
+    await this.addMessage({
         cat: 'info',
         body: nickName + ' has changed the topic to: "' + topic + '".'
     });
 };
 
-Conversation.prototype.setPassword = function*(password) {
-    let changed = yield redis.run(
+Conversation.prototype.setPassword = async function(password) {
+    let changed = await redis.run(
         'setConversationField', this.conversationId, 'password', password);
 
     if (!changed) {
@@ -343,7 +343,7 @@ Conversation.prototype.setPassword = function*(password) {
 
     this.password = password;
 
-    yield this._stream({
+    await this._stream({
         id: 'UPDATE',
         password: password
     });
@@ -352,19 +352,19 @@ Conversation.prototype.setPassword = function*(password) {
         'Password protection has been removed from this channel.' :
         'The password for this channel has been changed to ' + password + '.';
 
-    yield this.addMessage({
+    await this.addMessage({
         cat: 'info',
         body: text
     });
 };
 
-Conversation.prototype._streamMsg = function*(msg, excludeSession) {
+Conversation.prototype._streamMsg = async function(msg, excludeSession) {
     msg.id = 'MSG';
-    yield this._stream(msg, excludeSession);
+    await this._stream(msg, excludeSession);
 };
 
-Conversation.prototype._streamAddMembers = function*(userId, role) {
-    yield this._stream({
+Conversation.prototype._streamAddMembers = async function(userId, role) {
+    await this._stream({
         id: 'ADDMEMBERS',
         reset: false,
         members: [ {
@@ -374,8 +374,8 @@ Conversation.prototype._streamAddMembers = function*(userId, role) {
     });
 };
 
-Conversation.prototype._streamRemoveMembers = function*(userId) {
-    yield this._stream({
+Conversation.prototype._streamRemoveMembers = async function(userId) {
+    await this._stream({
         id: 'DELMEMBERS',
         members: [ {
             userId: userId
@@ -383,7 +383,7 @@ Conversation.prototype._streamRemoveMembers = function*(userId) {
     });
 };
 
-Conversation.prototype._stream = function*(msg, excludeSession) {
+Conversation.prototype._stream = async function(msg, excludeSession) {
     let members = Object.keys(this.members);
 
     for (let userId of members) {
@@ -391,11 +391,11 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
             continue;
         }
 
-        let windowId = yield window.findByConversationId(userId, this.conversationId);
+        let windowId = await window.findByConversationId(userId, this.conversationId);
 
         if (!windowId && msg.id === 'MSG' && this.type === '1on1') {
             // The case where one of the 1on1 members has closed his window
-            windowId = yield window.create(userId, this.conversationId);
+            windowId = await window.create(userId, this.conversationId);
         }
 
         if (!windowId) {
@@ -405,25 +405,25 @@ Conversation.prototype._stream = function*(msg, excludeSession) {
 
         msg.windowId = parseInt(windowId);
 
-        yield notification.broadcast(userId, msg, excludeSession);
+        await notification.broadcast(userId, msg, excludeSession);
     }
 };
 
-Conversation.prototype._insertMembers = function*(members) {
+Conversation.prototype._insertMembers = async function(members) {
     assert(members);
 
     for (let userId of Object.keys(members)) {
         this.members[userId] = members[userId];
-        yield redis.sadd(`conversationlist:${userId}`, this.conversationId);
+        await redis.sadd(`conversationlist:${userId}`, this.conversationId);
     }
 
-    yield redis.hmset(`conversationmembers:${this.conversationId}`, members);
+    await redis.hmset(`conversationmembers:${this.conversationId}`, members);
 };
 
-Conversation.prototype._remove = function*() {
-    yield redis.del(`conversation:${this.conversationId}`);
-    yield redis.del(`conversationmsgs:${this.conversationId}`);
-    yield this._removeAllMembers();
+Conversation.prototype._remove = async function() {
+    await redis.del(`conversation:${this.conversationId}`);
+    await redis.del(`conversationmsgs:${this.conversationId}`);
+    await this._removeAllMembers();
 
     let key;
 
@@ -435,42 +435,42 @@ Conversation.prototype._remove = function*() {
         key = '1on1:' + this.network + ':' + userIds[0] + ':' + userIds[1];
     }
 
-    let removed = yield redis.hdel('index:conversation', key);
+    let removed = await redis.hdel('index:conversation', key);
 
     if (removed !== 1) {
         log.warn(`Tried to remove index:conversation entry that doesn\'t exist, key: ${key}`);
     }
 };
 
-Conversation.prototype._removeAllMembers = function*() {
+Conversation.prototype._removeAllMembers = async function() {
     let members = Object.keys(this.members);
 
     for (let userId of members) {
-        yield redis.srem(`conversationlist:${userId}`, this.conversationId);
+        await redis.srem(`conversationlist:${userId}`, this.conversationId);
     }
 
     this.members = {};
-    yield redis.del(`conversationmembers:${this.conversationId}`);
+    await redis.del(`conversationmembers:${this.conversationId}`);
 };
 
-Conversation.prototype._removeConversationWindow = function*(userId) {
+Conversation.prototype._removeConversationWindow = async function(userId) {
     if (userId.charAt(0) === 'm') {
-        yield window.removeByConversationId(userId, this.conversationId);
+        await window.removeByConversationId(userId, this.conversationId);
     }
 };
 
-Conversation.prototype._setMember = function*(userId, role) {
+Conversation.prototype._setMember = async function(userId, role) {
     this.members[userId] = role;
-    let newField = yield redis.hset(`conversationmembers:${this.conversationId}`, userId, role);
+    let newField = await redis.hset(`conversationmembers:${this.conversationId}`, userId, role);
 
     if (newField) {
-        yield redis.sadd(`conversationlist:${userId}`, this.conversationId);
+        await redis.sadd(`conversationlist:${userId}`, this.conversationId);
     }
 
     return newField;
 };
 
-Conversation.prototype._scanForEmailNotifications = function*(message) {
+Conversation.prototype._scanForEmailNotifications = async function(message) {
     if (message.userId === 'iSERVER') {
         return;
     }
@@ -485,7 +485,7 @@ Conversation.prototype._scanForEmailNotifications = function*(message) {
         }
 
         for (let mention of mentions) {
-            let userId = yield nick.getUserIdFromNick(mention.substring(1), this.network);
+            let userId = await nick.getUserIdFromNick(mention.substring(1), this.network);
 
             if (userId) {
                 userIds.push(userId);
@@ -496,34 +496,34 @@ Conversation.prototype._scanForEmailNotifications = function*(message) {
             return;
         }
     } else {
-        userIds = [ yield this.getPeerUserId(message.userId) ];
+        userIds = [ await this.getPeerUserId(message.userId) ];
     }
 
     for (let userId of userIds) {
-        let user = yield redis.hgetall(`user:${userId}`);
+        let user = await redis.hgetall(`user:${userId}`);
 
         if (!user || parseInt(user.lastlogout) === 0) {
             continue; // Mentioned user is IRC user or online
         }
 
-        let windowId = yield window.findByConversationId(userId, this.conversationId);
+        let windowId = await window.findByConversationId(userId, this.conversationId);
 
         if (!windowId) {
             continue; // Mentioned user is not on this group
         }
 
-        let emailAlertSetting = yield redis.hget(`window:${userId}:${windowId}`, 'emailAlert');
+        let emailAlertSetting = await redis.hget(`window:${userId}:${windowId}`, 'emailAlert');
 
         if (emailAlertSetting === 'true') {
-            let nickName = yield nick.getCurrentNick(message.userId, this.network);
-            let name = (yield redis.hget(`user:${message.userId}`, 'name')) || nickName;
+            let nickName = await nick.getCurrentNick(message.userId, this.network);
+            let name = (await redis.hget(`user:${message.userId}`, 'name')) || nickName;
             let notificationId = uuid(20);
 
             // TBD: Needs to be transaction, add lua script
-            yield redis.sadd('emailnotifications', userId);
-            yield redis.lpush(`emailnotificationslist:${userId}`, notificationId);
+            await redis.sadd('emailnotifications', userId);
+            await redis.lpush(`emailnotificationslist:${userId}`, notificationId);
 
-            yield redis.hmset(`emailnotification:${notificationId}`, {
+            await redis.hmset(`emailnotification:${notificationId}`, {
                 type: this.type,
                 senderName: name,
                 senderNick: nickName,
@@ -534,19 +534,19 @@ Conversation.prototype._scanForEmailNotifications = function*(message) {
     }
 };
 
-function *create(options) {
-    let conversationId = yield redis.incr('nextGlobalConversationId');
+async function create(options) {
+    let conversationId = await redis.incr('nextGlobalConversationId');
 
     Object.keys(options).forEach(function(prop) {
         // Can't store null to redis
         options[prop] = options[prop] === null ? '' : options[prop];
     });
 
-    yield redis.hmset(`conversation:${conversationId}`, options);
+    await redis.hmset(`conversation:${conversationId}`, options);
 
     if (options.type === 'group') {
         // Update group index
-        yield redis.hset('index:conversation',
+        await redis.hset('index:conversation',
             'group:' + options.network + ':' + options.name.toLowerCase(), conversationId);
     }
 
@@ -556,9 +556,9 @@ function *create(options) {
     return new Conversation(conversationId, options, {});
 }
 
-function *get(conversationId) {
-    let record = yield redis.hgetall(`conversation:${conversationId}`);
-    let members = yield redis.hgetall(`conversationmembers:${conversationId}`);
+async function get(conversationId) {
+    let record = await redis.hgetall(`conversation:${conversationId}`);
+    let members = await redis.hgetall(`conversationmembers:${conversationId}`);
 
     if (record) {
         return new Conversation(conversationId, record, members || {});
