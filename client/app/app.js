@@ -39,7 +39,6 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
-/* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
 emojify.setConfig({
     img_dir: '/app/assets/images/emoji', // eslint-disable-line camelcase
     ignore_emoticons: true // eslint-disable-line camelcase
