@@ -1,6 +1,5 @@
-
-MAS Redis structures
-====================
+Deleted
+======
 
 ```
  user:<userId> (hash)
@@ -22,18 +21,6 @@ MAS Redis structures
 
  userlist (set)
    <userId1>, <userId2> ...
-
- sessionlist:<userId> (zset)
-   sessionId1, timeStamp1, sessionId2, timeStamp2 ...
-
- sessionknownuserids:<userId>:<sessionId> set
-   <userId1>, <userId2>, ...
-
- sessionlastheartbeat (zset)
-   userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...
-
- outbox:<userId>:<sessionId> (list)
-   msg1, msg2
 
  index:user (hash)
    <email> (int, userId)
@@ -66,6 +53,23 @@ MAS Redis structures
 
  index:windowIds (hash)
    <userId>:<conversationId> (int, windowId)
+```
+
+MAS Redis structures
+====================
+
+```
+ sessionlist:<userId> (zset)
+   sessionId1, timeStamp1, sessionId2, timeStamp2 ...
+
+ sessionknownuserids:<userId>:<sessionId> set
+   <userId1>, <userId2>, ...
+
+ sessionlastheartbeat (zset)
+   userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...
+
+ outbox:<userId>:<sessionId> (list)
+   msg1, msg2
 
  networks:<userId>:<network> (hash)
    state (string) (e.g. 'connected', 'connecting', 'disconnected')
@@ -133,9 +137,6 @@ MAS Redis structures
    senderNick
    groupName
    message
-
-
-
 ```
 
  IRC backend
