@@ -16,8 +16,7 @@
 
 'use strict';
 
-const co = require('co'),
-      CronJob = require('cron').CronJob,
+const CronJob = require('cron').CronJob,
       redis = require('../../lib/redis').createClient(),
       log = require('../../lib/log'),
       conf = require('../../lib/conf'),
@@ -30,12 +29,12 @@ exports.init = function() {
     jobs.push(new CronJob('0 0 7,19 * * *', disconnectInactiveIRCUsers, null, true));
 };
 
-exports.quit = function*() {
+exports.quit = async function() {
     for (let job of jobs) {
         job.stop();
     }
 
-    yield courier.quit();
+    await courier.quit();
 };
 
 function disconnectInactiveIRCUsers() {
@@ -44,19 +43,19 @@ function disconnectInactiveIRCUsers() {
     let inactivityTimeout = conf.get('irc:inactivity_timeout') * 24 * 60 * 60;
     let minAllowedLogoutTime = Math.round(Date.now() / 1000) - inactivityTimeout;
 
-    co(function*() {
-        let users = yield redis.smembers('userlist'); // TBD: Doesn't scale too far
-        let networks = yield redis.smembers('networklist');
+    (async function() {
+        let users = await redis.smembers('userlist'); // TBD: Doesn't scale too far
+        let networks = await redis.smembers('networklist');
 
         for (let userId of users) {
-            let lastLogout = parseInt(yield redis.hget(`user:${userId}`, 'lastlogout'));
+            let lastLogout = parseInt(await redis.hget(`user:${userId}`, 'lastlogout'));
 
             if (lastLogout !== 0 && lastLogout < minAllowedLogoutTime) {
                 for (let network of networks) {
-                    let state = yield redis.hget(`networks:${userId}:${network}`, 'state');
+                    let state = await redis.hget(`networks:${userId}:${network}`, 'state');
 
                     if (state === 'connected') {
-                        yield redis.hset(`networks:${userId}:${network}`, 'state', 'idleclosing');
+                        await redis.hset(`networks:${userId}:${network}`, 'state', 'idleclosing');
 
                         courier.callNoWait('connectionmanager', 'disconnect', {
                             userId: userId,

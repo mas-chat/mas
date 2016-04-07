@@ -20,7 +20,7 @@
 // Minimal connection manager that keeps TCP sockets alive even if
 // rest of the system is restarted. Allows nondistruptive updates.
 
-const init = require('../../lib/init');
+const init = require('../../../lib/init');
 
 init.configureProcess('irc-connman');
 
@@ -30,10 +30,9 @@ const net = require('net'),
       isUtf8 = require('is-utf8'),
       iconv = require('iconv-lite'),
       ip = require('ip'),
-      co = require('co'),
-      conf = require('../../lib/conf'),
-      log = require('../../lib/log'),
-      courier = require('../../lib/courier').createEndPoint('connectionmanager');
+      conf = require('../../../lib/conf'),
+      log = require('../../../lib/log'),
+      courier = require('../../../lib/courier').createEndPoint('connectionmanager');
 
 let sockets = {};
 let identServer;
@@ -41,12 +40,12 @@ let nextNetworkConnectionSlot = {};
 
 const LAG_POLL_INTERVAL = 60 * 1000; // 60s
 
-init.on('beforeShutdown', function*() {
+init.on('beforeShutdown', async function() {
     if (conf.get('irc:identd')) {
         identServer.close();
     }
 
-    yield courier.quit();
+    await courier.quit();
 
     for (let key of Object.keys(sockets)) {
         let socket = sockets[key];
@@ -144,16 +143,16 @@ courier.on('write', function(params) {
     write({ userId: params.userId, network: params.network, reportError: true }, params.line);
 });
 
-co(function*() {
+(async function() {
     // Start IDENT server
     if (conf.get('irc:identd')) {
         identServer = net.createServer(handleIdentConnection);
         identServer.listen(conf.get('irc:identd_port'));
     }
 
-    yield courier.clearInbox('ircparser');
+    await courier.clearInbox('ircparser');
     courier.callNoWait('ircparser', 'restarted');
-    yield courier.listen();
+    await courier.listen();
 })();
 
 function connect(userId, nick, network) {

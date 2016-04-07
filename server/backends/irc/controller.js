@@ -17,19 +17,16 @@
 
 'use strict';
 
-require('../../lib/dropPriviledges').drop();
-
 const init = require('../../lib/init');
 init.configureProcess('irc');
 
 const assert = require('assert'),
-      co = require('co'),
       log = require('../../lib/log'),
       redisModule = require('../../lib/redis'),
       redis = redisModule.createClient(),
       courier = require('../../lib/courier').createEndPoint('ircparser'),
       conversationFactory = require('../../models/conversation'),
-      window = require('../../models/window'),
+      window = require('../../services/windows'),
       nicks = require('../../models/nick'),
       ircUser = require('./ircUser'),
       ircScheduler = require('./scheduler');
@@ -81,19 +78,19 @@ let handlers = {
     ERROR: handleError
 };
 
-init.on('beforeShutdown', function*() {
-    yield ircScheduler.quit();
-    yield courier.quit();
+init.on('beforeShutdown', async function() {
+    await ircScheduler.quit();
+    await courier.quit();
 });
 
-init.on('afterShutdown', function*() {
+init.on('afterShutdown', async function() {
     redisModule.shutdown();
     log.quit();
 });
 
-co(function*() {
-    yield redisModule.loadScripts();
-    yield redisModule.initDB();
+(async function() {
+    await redisModule.loadScripts();
+    await redisModule.initDB();
     ircScheduler.init();
 
     courier.on('send', processSend);
@@ -109,15 +106,15 @@ co(function*() {
     courier.on('disconnected', processDisconnected);
     courier.on('reconnectifinactive', processReconnectIfInactive);
 
-    yield courier.listen();
+    await courier.listen();
 })();
 
 // Upper layer messages
 
-function *processSend(params) {
+async function processSend(params) {
     assert(params.conversationId);
 
-    let conversation = yield conversationFactory.get(params.conversationId);
+    let conversation = await conversationFactory.get(params.conversationId);
 
     if (!conversation) {
         return;
@@ -126,8 +123,8 @@ function *processSend(params) {
     let target = conversation.name;
 
     if (conversation.type === '1on1') {
-        let targetUserId = yield conversation.getPeerUserId(params.userId);
-        target = yield redis.hget(`ircuser:${targetUserId}`, 'nick');
+        let targetUserId = await conversation.getPeerUserId(params.userId);
+        target = await redis.hget(`ircuser:${targetUserId}`, 'nick');
     }
 
     let text = params.text || '';
@@ -138,8 +135,8 @@ function *processSend(params) {
     }
 }
 
-function *processTextCommand(params) {
-    let conversation = yield conversationFactory.get(params.conversationId);
+async function processTextCommand(params) {
+    let conversation = await conversationFactory.get(params.conversationId);
     let command = params.command;
     let commandParams = params.commandParams;
     let network = conversation.network;
@@ -168,8 +165,8 @@ function *processTextCommand(params) {
     return { status: 'OK' };
 }
 
-function *processJoin(params) {
-    let state = yield redis.hget(`networks:${params.userId}:${params.network}`, 'state');
+async function processJoin(params) {
+    let state = await redis.hget(`networks:${params.userId}:${params.network}`, 'state');
     let channelName = params.name;
     let hasChannelPrefixRegex = /^[&#!+]/;
     let illegalNameRegEx = /\s|\cG|,/; // See RFC2812, section 1.3
@@ -182,35 +179,35 @@ function *processJoin(params) {
         channelName = '#' + channelName;
     }
 
-    yield redis.hset(`ircchannelsubscriptions:${params.userId}:${params.network}`,
+    await redis.hset(`ircchannelsubscriptions:${params.userId}:${params.network}`,
         channelName.toLowerCase(), params.password);
 
     if (state === 'connected') {
         sendJoin(params.userId, params.network, channelName, params.password);
     } else if (state !== 'connecting') {
-        yield connect(params.userId, params.network);
+        await connect(params.userId, params.network);
     }
 
     return { status: 'OK' };
 }
 
-function *processClose(params) {
-    let state = yield redis.hget(`networks:${params.userId}:${params.network}`, 'state');
+async function processClose(params) {
+    let state = await redis.hget(`networks:${params.userId}:${params.network}`, 'state');
 
-    yield redis.hdel(`ircchannelsubscriptions:${params.userId}:${params.network}`,
+    await redis.hdel(`ircchannelsubscriptions:${params.userId}:${params.network}`,
        params.name.toLowerCase());
 
     if (state === 'connected' && params.conversationType === 'group') {
         sendIRCPart(params.userId, params.network, params.name);
     }
 
-    yield disconnectIfIdle(params.userId, params.network);
+    await disconnectIfIdle(params.userId, params.network);
 }
 
-function *processUpdatePassword(params) {
-    let conversation = yield conversationFactory.get(params.conversationId);
+async function processUpdatePassword(params) {
+    let conversation = await conversationFactory.get(params.conversationId);
     let network = conversation.network;
-    let state = yield redis.hget(`networks:${params.userId}:${network}`, 'state');
+    let state = await redis.hget(`networks:${params.userId}:${network}`, 'state');
     let modeline = 'MODE ' + conversation.name + ' ';
 
     if (params.password === '') {
@@ -232,9 +229,9 @@ function *processUpdatePassword(params) {
     return { status: 'OK' };
 }
 
-function *processUpdateTopic(params) {
-    let conversation = yield conversationFactory.get(params.conversationId);
-    let state = yield redis.hget(`networks:${params.userId}:${conversation.network}`, 'state');
+async function processUpdateTopic(params) {
+    let conversation = await conversationFactory.get(params.conversationId);
+    let state = await redis.hget(`networks:${params.userId}:${conversation.network}`, 'state');
 
     if (state !== 'connected') {
         return {
@@ -252,19 +249,19 @@ function *processUpdateTopic(params) {
     }
 }
 
-function *processReconnectIfInactive(params) {
+async function processReconnectIfInactive(params) {
     let userId = params.userId;
-    let networks = yield redis.smembers('networklist');
+    let networks = await redis.smembers('networklist');
 
     for (let network of networks) {
-        let state = yield redis.hget(`networks:${userId}:${network}`, 'state');
+        let state = await redis.hget(`networks:${userId}:${network}`, 'state');
 
         if (state === 'idledisconnected') {
-            yield addSystemMessage(userId, network, 'info',
+            await addSystemMessage(userId, network, 'info',
                 'You were disconnected from IRC because you haven\'t used MAS for a long time. ' +
                 'Welcome back! Reconnecting...');
 
-            yield connect(userId, network);
+            await connect(userId, network);
         }
     }
 }
@@ -272,26 +269,26 @@ function *processReconnectIfInactive(params) {
 // Connection manager messages
 
 // Restarted
-function *processRestarted() {
-    yield iterateUsersAndNetworks(function*(userId, network) {
-        let channels = yield redis.hgetall(`ircchannelsubscriptions:${userId}:${network}`);
-        let state = yield redis.hget(`networks:${userId}:${network}`, 'state');
+async function processRestarted() {
+    await iterateUsersAndNetworks(async function(userId, network) {
+        let channels = await redis.hgetall(`ircchannelsubscriptions:${userId}:${network}`);
+        let state = await redis.hget(`networks:${userId}:${network}`, 'state');
 
         if (channels && state !== 'idledisconnected') {
             log.info(userId, 'Scheduling connect() to IRC network: ' + network);
 
-            yield addSystemMessage(userId, network, 'info',
+            await addSystemMessage(userId, network, 'info',
                 'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
                 ' server enabled. Next connect will be slow.');
 
-            yield connect(userId, network);
+            await connect(userId, network);
         }
     });
 }
 
-function *iterateUsersAndNetworks(callback) {
-    let allUsers = yield redis.smembers('userlist');
-    let networks = yield redis.smembers('networklist');
+async function iterateUsersAndNetworks(callback) {
+    let allUsers = await redis.smembers('userlist');
+    let networks = await redis.smembers('networklist');
 
     if (networks.length === 0) {
         log.error('No networks.');
@@ -300,14 +297,14 @@ function *iterateUsersAndNetworks(callback) {
     for (let userId of allUsers) {
         for (let network of networks) {
             if (network !== 'MAS') {
-                yield callback(userId, network);
+                await callback(userId, network);
             }
         }
     }
 }
 
 // Data
-function *processData(params) {
+async function processData(params) {
     let key = params.userId + params.network;
 
     if (!ircMessageBuffer[key]) {
@@ -323,21 +320,21 @@ function *processData(params) {
     if (ircMessageBuffer[key].length === 1) {
         // Works because this function is reentrant!
         while (ircMessageBuffer[key].length > 0) {
-            yield parseIrcMessage(ircMessageBuffer[key][0]);
+            await parseIrcMessage(ircMessageBuffer[key][0]);
             ircMessageBuffer[key].shift();
         }
     }
 }
 
 // No connection
-function *processNoConnection(params) {
-    yield addSystemMessage(params.userId, params.network, 'error',
+async function processNoConnection(params) {
+    await addSystemMessage(params.userId, params.network, 'error',
         'Can\'t send. Not connected to IRC currently.');
 }
 
 // Connected
-function *processConnected(params) {
-    let user = yield redis.hgetall(`user:${params.userId}`);
+async function processConnected(params) {
+    let user = await redis.hgetall(`user:${params.userId}`);
     let network = params.network;
 
     log.info(params.userId, 'Connected to IRC server');
@@ -352,15 +349,15 @@ function *processConnected(params) {
 }
 
 // Disconnected
-function *processDisconnected(params) {
+async function processDisconnected(params) {
     let userId = params.userId;
     let network = params.network;
-    let previousState = yield redis.hget(`networks:${userId}:${network}`, 'state');
+    let previousState = await redis.hget(`networks:${userId}:${network}`, 'state');
 
-    yield redis.hset(`networks:${userId}:${network}`, 'state',
+    await redis.hset(`networks:${userId}:${network}`, 'state',
         previousState === 'idleclosing' ? 'idledisconnected' : 'disconnected');
 
-    yield nicks.removeCurrentNick(userId, network);
+    await nicks.removeCurrentNick(userId, network);
 
     if (previousState === 'closing' || previousState === 'idleclosing') {
         // We wanted to close the connection, don't reconnect
@@ -369,7 +366,7 @@ function *processDisconnected(params) {
 
     let delay = 30 * 1000; // 30s
     let msg = `Lost connection to IRC server (${params.reason}). Scheduling a reconnect attempt...`;
-    let count = yield redis.hincrby(`networks:${userId}:${network}`, 'retryCount', 1);
+    let count = await redis.hincrby(`networks:${userId}:${network}`, 'retryCount', 1);
 
     // Set the backoff timer
     if (count > 3 && count < 8) {
@@ -381,11 +378,11 @@ function *processDisconnected(params) {
             'IRC network if you do not wish to retry.';
     }
 
-    yield addSystemMessage(userId, network, 'error', msg);
-    yield connect(params.userId, params.network, true, delay);
+    await addSystemMessage(userId, network, 'error', msg);
+    await connect(params.userId, params.network, true, delay);
 }
 
-function *parseIrcMessage(params) {
+async function parseIrcMessage(params) {
     let line = params.line.trim(),
         parts = line.split(' '),
         msg = {
@@ -445,32 +442,32 @@ function *parseIrcMessage(params) {
     }
 
     if (handler) {
-        yield handler(params.userId, msg, msg.command);
+        await handler(params.userId, msg, msg.command);
     }
 }
 
-function *addSystemMessage(userId, network, cat, body) {
-    let conversation = yield conversationFactory.findOrCreate1on1(userId, 'iSERVER', network);
+async function addSystemMessage(userId, network, cat, body) {
+    let conversation = await conversationFactory.findOrCreate1on1(userId, 'iSERVER', network);
 
-    yield conversation.addMessage({
+    await conversation.addMessage({
         userId: 'iSERVER',
         cat: cat,
         body: body
     });
 }
 
-function *connect(userId, network, skipRetryCountReset, delay) {
-    let nick = yield redis.hget(`user:${userId}`, 'nick');
-    yield nicks.updateCurrentNick(userId, network, nick);
+async function connect(userId, network, skipRetryCountReset, delay) {
+    let nick = await redis.hget(`user:${userId}`, 'nick');
+    await nicks.updateCurrentNick(userId, network, nick);
 
-    yield redis.hset(`networks:${userId}:${network}`, 'state', 'connecting');
+    await redis.hset(`networks:${userId}:${network}`, 'state', 'connecting');
 
     if (!skipRetryCountReset) {
-        yield resetRetryCount(userId, network);
+        await resetRetryCount(userId, network);
     }
 
     let delayText = delay ? ` in ${Math.round(delay / 1000 / 60)} minutes` : '';
-    yield addSystemMessage(userId, network, 'info', `Connecting to IRC server${delayText}...`);
+    await addSystemMessage(userId, network, 'info', `Connecting to IRC server${delayText}...`);
 
     ircMessageBuffer[userId + network] = [];
 
@@ -483,8 +480,8 @@ function *connect(userId, network, skipRetryCountReset, delay) {
         });
 }
 
-function *disconnect(userId, network) {
-    yield redis.hset(`networks:${userId}:${network}`, 'state', 'closing');
+async function disconnect(userId, network) {
+    await redis.hset(`networks:${userId}:${network}`, 'state', 'closing');
 
     courier.callNoWait('connectionmanager', 'disconnect', {
         userId: userId,
@@ -493,111 +490,111 @@ function *disconnect(userId, network) {
     });
 }
 
-function *handleNoop() {
+async function handleNoop() {
 }
 
-function *handleServerText(userId, msg, code) {
+async function handleServerText(userId, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     let text = msg.params.join(' ');
     // 371, 372 and 375 = MOTD and INFO lines
     let cat = code === '372' || code === '375' || code === '371' ? 'banner' : 'server';
 
     if (text) {
-        yield addSystemMessage(userId, msg.network, cat, text);
+        await addSystemMessage(userId, msg.network, cat, text);
     }
 }
 
-function *handle401(userId, msg) {
+async function handle401(userId, msg) {
     // :irc.localhost 401 ilkka dadaa :No such nick/channel
-    let targetUserId = yield ircUser.getUserId(msg.params[0], msg.network);
-    let conversation = yield conversationFactory.findOrCreate1on1(
+    let targetUserId = await ircUser.getUserId(msg.params[0], msg.network);
+    let conversation = await conversationFactory.findOrCreate1on1(
         userId, targetUserId, msg.network);
 
-    yield conversation.addMessage({
+    await conversation.addMessage({
         userId: 'iSERVER',
         cat: 'error',
         body: `${msg.params[0]} is not in IRC.`
     });
 }
 
-function *handle043(userId, msg) {
+async function handle043(userId, msg) {
     // :*.pl 043 AnDy 0PNEAKPLG :nickname collision, forcing nick change to your unique ID.
     let newNick = msg.params[0];
     let oldNick = msg.target;
 
-    yield updateNick(userId, msg.network, oldNick, newNick);
-    yield tryDifferentNick(userId, msg.network);
+    await updateNick(userId, msg.network, oldNick, newNick);
+    await tryDifferentNick(userId, msg.network);
 }
 
-function *handle311(userId, msg) {
+async function handle311(userId, msg) {
     // :irc.localhost 311 ilkka_ Mika7 ~Mika7 127.0.0.1 * :Real Name (Ralph v1.0)
     let nick = msg.params[0];
     let user = msg.params[1];
     let host = msg.params[2];
     let realName = msg.params[4];
 
-    yield addSystemMessage(userId, msg.network, 'server',
+    await addSystemMessage(userId, msg.network, 'server',
         `--- ${nick} is [${user}@${host}] (${realName})`);
 }
 
-function *handle312(userId, msg) {
+async function handle312(userId, msg) {
     // :irc.localhost 312 ilkka_ Mika7 irc.localhost :Darwin ircd default configuration
     let server = msg.params[1];
     let serverInfo = msg.params[2];
 
-    yield addSystemMessage(userId, msg.network, 'server',
+    await addSystemMessage(userId, msg.network, 'server',
         `--- using server ${server} [${serverInfo}]`);
 }
 
-function *handle317(userId, msg) {
+async function handle317(userId, msg) {
     // irc.localhost 317 ilkka_ Mika7 44082 1428703143 :seconds idle, signon time
     let idleTime = msg.params[1];
     let signonTime = new Date(parseInt(msg.params[2]) * 1000).toUTCString();
 
-    yield addSystemMessage(userId, msg.network, 'server',
+    await addSystemMessage(userId, msg.network, 'server',
         `--- has been idle ${idleTime} seconds. Signed on ${signonTime}`);
 }
 
-function *handle319(userId, msg) {
+async function handle319(userId, msg) {
     // :irc.localhost 319 ilkka_ Mika7 :#portaali @#hemmot @#ilves #ceeassa
     let channels = msg.params[1];
 
-    yield addSystemMessage(userId, msg.network, 'server', `--- on channels ${channels}`);
+    await addSystemMessage(userId, msg.network, 'server', `--- on channels ${channels}`);
 }
 
-function *handle332(userId, msg) {
+async function handle332(userId, msg) {
     // :portaali.org 332 ilkka #portaali :Cool topic
     let channel = msg.params[0];
     let topic = msg.params[1];
-    let conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let conversation = await conversationFactory.findGroup(channel, msg.network);
 
     if (conversation) {
-        yield conversation.setTopic(topic, msg.target);
+        await conversation.setTopic(topic, msg.target);
     }
 }
 
-function *handle353(userId, msg) {
+async function handle353(userId, msg) {
     // :own.freenode.net 353 drwillie @ #evergreenproject :drwillie ilkkaoks
     let channel = msg.params[1];
-    let conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let conversation = await conversationFactory.findGroup(channel, msg.network);
     let names = msg.params[2].split(' ');
 
     if (conversation) {
-        yield bufferNames(names, userId, msg.network, conversation.conversationId);
+        await bufferNames(names, userId, msg.network, conversation.conversationId);
     }
 }
 
-function *handle366(userId, msg) {
+async function handle366(userId, msg) {
     // :pratchett.freenode.net 366 il3kkaoksWEB #testi1 :End of /NAMES list.
     let channel = msg.params[0];
-    let conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let conversation = await conversationFactory.findGroup(channel, msg.network);
 
     if (!conversation) {
         return;
     }
 
     let key = `namesbuffer:${userId}:${conversation.conversationId}`;
-    let namesHash = yield redis.hgetall(key);
+    let namesHash = await redis.hgetall(key);
 
     if (Object.keys(namesHash).length > 0) {
         // During the server boot-up or reconnect after a network outage it's very possible that
@@ -607,33 +604,33 @@ function *handle366(userId, msg) {
         // only one 266 reply is parsed from a burst. For rest of the changes we rely on getting
         // incremental JOINS messages (preferably from the original reporter.) This leaves some
         // theoretical error edge cases (left as homework) that maybe are worth of fixing.
-        let noActiveReporter = yield redis.setnx(
+        let noActiveReporter = await redis.setnx(
             `ircnamesreporter:${conversation.conversationId}`, userId);
 
         if (noActiveReporter) {
-            yield redis.expire(`ircnamesreporter:${conversation.conversationId}`, 15); // 15s
-            yield conversation.setGroupMembers(namesHash);
+            await redis.expire(`ircnamesreporter:${conversation.conversationId}`, 15); // 15s
+            await conversation.setGroupMembers(namesHash);
         }
     }
 
-    yield redis.del(key);
+    await redis.del(key);
 }
 
-function *handle376(userId, msg) {
-    let state = yield redis.hget(`networks:${userId}:${msg.network}`, 'state');
+async function handle376(userId, msg) {
+    let state = await redis.hget(`networks:${userId}:${msg.network}`, 'state');
 
-    yield addSystemMessage(userId, msg.network, 'server', msg.params.join(' '));
+    await addSystemMessage(userId, msg.network, 'server', msg.params.join(' '));
 
     if (state !== 'connected') {
-        yield redis.hset(`networks:${userId}:${msg.network}`, 'state', 'connected');
-        yield resetRetryCount(userId, msg.network);
+        await redis.hset(`networks:${userId}:${msg.network}`, 'state', 'connected');
+        await resetRetryCount(userId, msg.network);
 
-        yield addSystemMessage(userId, msg.network, 'info', 'Connected to IRC server.');
-        yield addSystemMessage(userId, msg.network, 'info',
+        await addSystemMessage(userId, msg.network, 'info', 'Connected to IRC server.');
+        await addSystemMessage(userId, msg.network, 'info',
             'You can close this window at any time. It\'ll reappear when needed.');
 
         // Tell the client nick we got
-        yield redis.run('introduceNewUserIds', userId, null, null, true, userId);
+        await redis.run('introduceNewUserIds', userId, null, null, true, userId);
 
         if (msg.network === 'Flowdock') {
             // TBD: The odd case of Flowdock, temporary
@@ -641,12 +638,12 @@ function *handle376(userId, msg) {
             return;
         }
 
-        let channelsToJoin = yield redis.hgetall(
+        let channelsToJoin = await redis.hgetall(
             `ircchannelsubscriptions:${userId}:${msg.network}`);
 
         if (!channelsToJoin) {
             log.info(userId, 'Connected, but no channels/1on1s to join. Disconnecting');
-            yield disconnect(userId, msg.network);
+            await disconnect(userId, msg.network);
             return;
         }
 
@@ -656,29 +653,29 @@ function *handle376(userId, msg) {
     }
 }
 
-function *handle433(userId, msg) {
+async function handle433(userId, msg) {
     // :mas.example.org 433 * ilkka :Nickname is already in use.
-    yield tryDifferentNick(userId, msg.network);
+    await tryDifferentNick(userId, msg.network);
 }
 
-function *handle482(userId, msg) {
+async function handle482(userId, msg) {
     // irc.localhost 482 ilkka #test2 :You're not channel operator
     let channel = msg.params[0];
 
-    yield addSystemMessage(
+    await addSystemMessage(
         userId, msg.network, 'error', 'You\'re not channel operator on ' + channel);
 }
 
-function *handleJoin(userId, msg) {
+async function handleJoin(userId, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
     let channel = msg.params[0];
     let network = msg.network;
-    let targetUserId = yield ircUser.getUserId(msg.nick, network);
-    let conversation = yield conversationFactory.findGroup(channel, network);
+    let targetUserId = await ircUser.getUserId(msg.nick, network);
+    let conversation = await conversationFactory.findGroup(channel, network);
     let subscriptionsKey = `ircchannelsubscriptions:${userId}:${network}`;
 
     if (userId === targetUserId) {
-        let password = yield redis.hget(subscriptionsKey, channel.toLowerCase());
+        let password = await redis.hget(subscriptionsKey, channel.toLowerCase());
 
         if (password === null) {
             // ircchannelsubscriptions entry is missing. This means IRC server has added the user
@@ -686,11 +683,11 @@ function *handleJoin(userId, msg) {
             // ircchannelsubscriptions must be updated as it's used to rejoin channels after a
             // server restart.
             password = '';
-            yield redis.hset(subscriptionsKey, channel.toLowerCase(), password);
+            await redis.hset(subscriptionsKey, channel.toLowerCase(), password);
         }
 
         if (!conversation) {
-            conversation = yield conversationFactory.create({
+            conversation = await conversationFactory.create({
                 owner: msg.userId,
                 type: 'group',
                 name: channel,
@@ -701,11 +698,11 @@ function *handleJoin(userId, msg) {
             log.info(userId, 'First mas user joined channel: ' + network + ':' + channel);
         }
 
-        let windowId = yield window.findByConversationId(userId, conversation.conversationId);
+        let windowId = await window.findByConversationId(userId, conversation.conversationId);
 
         if (!windowId) {
-            yield window.create(userId, conversation.conversationId);
-            yield conversation.sendAddMembers(userId);
+            await window.create(userId, conversation.conversationId);
+            await conversation.sendAddMembers(userId);
         }
 
         if (password) {
@@ -713,47 +710,47 @@ function *handleJoin(userId, msg) {
             // the channel. Update conversation password as it's possible that all other
             // mas users were locked out during a server downtime and conversation.password is
             // out of date.
-            yield conversation.setPassword(password);
+            await conversation.setPassword(password);
         }
     }
 
     if (conversation) {
-        yield conversation.addGroupMember(targetUserId, 'u');
+        await conversation.addGroupMember(targetUserId, 'u');
     }
 }
 
-function *handleJoinReject(userId, msg) {
+async function handleJoinReject(userId, msg) {
     let channel = msg.params[0];
     let reason = msg.params[1];
-    let conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let conversation = await conversationFactory.findGroup(channel, msg.network);
 
-    yield addSystemMessage(userId, msg.network,
+    await addSystemMessage(userId, msg.network,
         'error', 'Failed to join ' + channel + '. Reason: ' + reason);
 
-    yield redis.hdel(`ircchannelsubscriptions:${userId}:${msg.network}`, channel.toLowerCase());
+    await redis.hdel(`ircchannelsubscriptions:${userId}:${msg.network}`, channel.toLowerCase());
 
     if (conversation) {
-        yield conversation.removeGroupMember(userId, false, false);
+        await conversation.removeGroupMember(userId, false, false);
 
-        let windowId = yield window.findByConversationId(userId, conversation.conversationId);
+        let windowId = await window.findByConversationId(userId, conversation.conversationId);
 
         if (windowId) {
-            yield window.remove(userId, windowId);
+            await window.remove(userId, windowId);
         }
     }
 
-    yield disconnectIfIdle(userId, msg.network);
+    await disconnectIfIdle(userId, msg.network);
 }
 
-function *handleQuit(userId, msg) {
+async function handleQuit(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com QUIT :"leaving"
     // let reason = msg.params[0];
-    let targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
-    let conversationIds = yield window.getAllConversationIds(userId);
+    let targetUserId = await ircUser.getUserId(msg.nick, msg.network);
+    let conversationIds = await window.getAllConversationIds(userId);
 
     for (let conversationId of conversationIds) {
         // TBD: Send a real quit message instead of part
-        let conversation = yield conversationFactory.get(conversationId);
+        let conversation = await conversationFactory.get(conversationId);
 
         if (!conversation) {
             // TBD: Temporary, should be assert
@@ -764,84 +761,84 @@ function *handleQuit(userId, msg) {
         if (conversation.network === msg.network && conversation.type === 'group') {
             // No need to check if the targetUser is on this channel,
             // removeGroupMember() is clever enough
-            yield conversation.removeGroupMember(targetUserId);
+            await conversation.removeGroupMember(targetUserId);
         }
     }
 }
 
-function *handleNick(userId, msg) {
+async function handleNick(userId, msg) {
     // :ilkkao!~ilkkao@localhost NICK :foobar
     let newNick = msg.params[0];
     let oldNick = msg.nick;
 
-    yield updateNick(userId, msg.network, oldNick, newNick);
+    await updateNick(userId, msg.network, oldNick, newNick);
 }
 
-function *handleError(userId, msg) {
+async function handleError(userId, msg) {
     let reason = msg.params[0];
 
-    yield addSystemMessage(
+    await addSystemMessage(
         userId, msg.network, 'error', 'Connection lost. Server reason: ' + reason);
 
     if (reason.includes('Too many host connections')) {
         log.warn(userId, 'Too many connections to: ' + msg.network);
 
-        yield addSystemMessage(userId, msg.network, 'error',
+        await addSystemMessage(userId, msg.network, 'error',
             msg.network + ' IRC network doesn\'t allow more connections. ' +
             'Close all windows related to this IRC network and rejoin another day to try again.');
 
         // Disable auto-reconnect
-        yield redis.hset(`networks:${userId}:${msg.network}`, 'state', 'closing');
+        await redis.hset(`networks:${userId}:${msg.network}`, 'state', 'closing');
     }
 }
 
-function *handleInvite(userId, msg) {
+async function handleInvite(userId, msg) {
     // :ilkkao!~ilkkao@127.0.0.1 INVITE buppe :#test2
     let channel = msg.params[1];
 
-    yield addSystemMessage(
+    await addSystemMessage(
         userId, msg.network, 'info', msg.nick + ' has invited you to channel ' + channel);
 }
 
-function *handleKick(userId, msg) {
+async function handleKick(userId, msg) {
     // :ilkkao!~ilkkao@127.0.0.1 KICK #portaali AnDy :no reason
     let channel = msg.params[0];
     let targetNick = msg.params[1];
     let reason = msg.params[2];
 
-    let conversation = yield conversationFactory.findGroup(channel, msg.network);
-    let targetUserId = yield ircUser.getUserId(targetNick, msg.network);
+    let conversation = await conversationFactory.findGroup(channel, msg.network);
+    let targetUserId = await ircUser.getUserId(targetNick, msg.network);
 
     if (conversation) {
-        yield conversation.removeGroupMember(targetUserId, false, true, reason);
+        await conversation.removeGroupMember(targetUserId, false, true, reason);
     }
 
     if (targetUserId === userId) {
         // I was kicked
-        yield addSystemMessage(userId, msg.network,
+        await addSystemMessage(userId, msg.network,
             'error', 'You have been kicked from ' + channel + ', Reason: ' + reason);
 
-        let windowId = yield window.findByConversationId(userId, conversation.conversationId);
-        yield window.remove(userId, windowId);
+        let windowId = await window.findByConversationId(userId, conversation.conversationId);
+        await window.remove(userId, windowId);
 
-        yield disconnectIfIdle(userId, msg.network);
+        await disconnectIfIdle(userId, msg.network);
     }
 }
 
-function *handlePart(userId, msg) {
+async function handlePart(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com PART #portaali :
     let channel = msg.params[0];
     let reason = msg.params[1];
 
-    let conversation = yield conversationFactory.findGroup(channel, msg.network);
-    let targetUserId = yield ircUser.getUserId(msg.nick, msg.network);
+    let conversation = await conversationFactory.findGroup(channel, msg.network);
+    let targetUserId = await ircUser.getUserId(msg.nick, msg.network);
 
     if (conversation) {
-        yield conversation.removeGroupMember(targetUserId, false, false, reason);
+        await conversation.removeGroupMember(targetUserId, false, false, reason);
     }
 }
 
-function *handleMode(userId, msg) {
+async function handleMode(userId, msg) {
     // :ilkka9!~ilkka9@localhost.myrootshell.com MODE #sunnuntai +k foobar3
     let target = msg.params[0];
 
@@ -850,13 +847,13 @@ function *handleMode(userId, msg) {
         return;
     }
 
-    let conversation = yield conversationFactory.findGroup(target, msg.network);
+    let conversation = await conversationFactory.findGroup(target, msg.network);
 
     if (!conversation) {
         return;
     }
 
-    yield conversation.addMessageUnlessDuplicate(userId, {
+    await conversation.addMessageUnlessDuplicate(userId, {
         cat: 'info',
         body: 'Mode change: ' + msg.params.join(' ') + ' by ' +
             (msg.nick ? msg.nick : msg.serverName)
@@ -886,7 +883,7 @@ function *handleMode(userId, msg) {
                     log.warn(userId, 'Received broken MODE command, parameter missing');
                     continue;
                 } else if (mode.match(/[ov]/)) {
-                    targetUserId = yield ircUser.getUserId(param, msg.network);
+                    targetUserId = await ircUser.getUserId(param, msg.network);
                 }
             }
 
@@ -897,7 +894,7 @@ function *handleMode(userId, msg) {
                 // Lost oper status
                 newClass = USER;
             } else if (mode === 'v') {
-                let oldClass = yield conversation.getMemberRole(targetUserId);
+                let oldClass = await conversation.getMemberRole(targetUserId);
 
                 if (oldClass !== OPER) {
                     if (oper === '+') {
@@ -911,40 +908,40 @@ function *handleMode(userId, msg) {
             } else if (mode === 'k') {
                 let newPassword = oper === '+' ? param : '';
 
-                yield conversation.setPassword(newPassword);
-                yield redis.hset(`ircchannelsubscriptions:${userId}:${msg.network}`,
+                await conversation.setPassword(newPassword);
+                await redis.hset(`ircchannelsubscriptions:${userId}:${msg.network}`,
                     target.toLowerCase(), newPassword);
             }
 
             if (newClass) {
-                yield conversation.setMemberRole(targetUserId, newClass);
+                await conversation.setMemberRole(targetUserId, newClass);
             }
         }
     }
 }
 
-function *handleTopic(userId, msg) {
+async function handleTopic(userId, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com TOPIC #portaali :My new topic
     let channel = msg.params[0];
     let topic = msg.params[1];
-    let conversation = yield conversationFactory.findGroup(channel, msg.network);
+    let conversation = await conversationFactory.findGroup(channel, msg.network);
 
     if (conversation) {
-        yield conversation.setTopic(topic, msg.nick);
+        await conversation.setTopic(topic, msg.nick);
     }
 }
 
-function *handlePrivmsg(userId, msg, command) {
+async function handlePrivmsg(userId, msg, command) {
     // :ilkkao!~ilkkao@127.0.0.1 NOTICE buppe :foo
     let conversation;
     let sourceUserId;
     let target = msg.params[0];
     let text = msg.params[1];
     let cat = 'msg';
-    let currentNick = yield nicks.getCurrentNick(userId, msg.network);
+    let currentNick = await nicks.getCurrentNick(userId, msg.network);
 
     if (msg.nick) {
-        sourceUserId = yield ircUser.getUserId(msg.nick, msg.network);
+        sourceUserId = await ircUser.getUserId(msg.nick, msg.network);
     } else {
         // Message is from the server if the nick is missing
         sourceUserId = 'iSERVER';
@@ -975,50 +972,50 @@ function *handlePrivmsg(userId, msg, command) {
 
     if (target.toLowerCase() === currentNick.toLowerCase()) {
         // Message is for the user only
-        conversation = yield conversationFactory.findOrCreate1on1(
+        conversation = await conversationFactory.findOrCreate1on1(
             userId, sourceUserId, msg.network);
     } else {
-        conversation = yield conversationFactory.findGroup(target, msg.network);
+        conversation = await conversationFactory.findGroup(target, msg.network);
 
         if (conversation === null) {
             // :verne.freenode.net NOTICE * :*** Got Ident response
-            yield addSystemMessage(userId, msg.network, 'info', text);
+            await addSystemMessage(userId, msg.network, 'info', text);
             return;
         }
     }
 
-    yield conversation.addMessageUnlessDuplicate(userId, {
+    await conversation.addMessageUnlessDuplicate(userId, {
         userId: sourceUserId,
         cat: cat,
         body: text
     });
 }
 
-function *updateNick(userId, network, oldNick, newNick) {
-    let targetUserId = yield redis.run('updateNick', userId, network, oldNick, newNick);
+async function updateNick(userId, network, oldNick, newNick) {
+    let targetUserId = await redis.run('updateNick', userId, network, oldNick, newNick);
 
     if (targetUserId) {
         log.info(userId, 'I\'m first and handle ' + oldNick + ' -> ' + newNick + ' nick change.');
 
         // We haven't heard about this change before
-        let conversations = yield conversationFactory.getAllIncludingUser(targetUserId);
+        let conversations = await conversationFactory.getAllIncludingUser(targetUserId);
 
         for (let conversation of conversations) {
             if (conversation.network === network) {
-                yield conversation.addMessageUnlessDuplicate(userId, {
+                await conversation.addMessageUnlessDuplicate(userId, {
                     cat: 'info',
                     body: oldNick + ' is now known as ' + newNick
                 });
 
-                yield conversation.sendUsers(targetUserId);
+                await conversation.sendUsers(targetUserId);
             }
         }
     }
 }
 
-function *tryDifferentNick(userId, network) {
-    let nick = yield redis.hget(`user:${userId}`, 'nick');
-    let currentNick = yield nicks.getCurrentNick(userId, network);
+async function tryDifferentNick(userId, network) {
+    let nick = await redis.hget(`user:${userId}`, 'nick');
+    let currentNick = await nicks.getCurrentNick(userId, network);
 
     if (nick !== currentNick.substring(0, nick.length)) {
         // Current nick is unique ID, let's try to change it to something unique immediately
@@ -1034,7 +1031,7 @@ function *tryDifferentNick(userId, network) {
         currentNick = currentNick + (Math.floor((Math.random() * 10)));
     }
 
-    yield nicks.updateCurrentNick(userId, network, currentNick);
+    await nicks.updateCurrentNick(userId, network, currentNick);
 
     courier.callNoWait('connectionmanager', 'write', {
         userId: userId,
@@ -1046,18 +1043,18 @@ function *tryDifferentNick(userId, network) {
 // TBD: Add a timer (every 15min?) to send one NAMES to every irc channel to make sure memberslist
 // is in sync?
 
-function *disconnectIfIdle(userId, network) {
-    let windowIds = yield window.getWindowIdsForNetwork(userId, network);
+async function disconnectIfIdle(userId, network) {
+    let windowIds = await window.getWindowIdsForNetwork(userId, network);
     let onlyServer1on1Left = false;
 
     if (windowIds.length === 1) {
         // There's only one window left, is it IRC server 1on1?
         // If yes, we can disconnect from the server
-        let lastConversationId = yield window.getConversationId(userId, windowIds[0]);
-        let lastConversation = yield conversationFactory.get(lastConversationId);
+        let lastConversationId = await window.getConversationId(userId, windowIds[0]);
+        let lastConversation = await conversationFactory.get(lastConversationId);
 
         if (lastConversation.type === '1on1') {
-            let peeruserId = yield lastConversation.getPeerUserId(userId);
+            let peeruserId = await lastConversation.getPeerUserId(userId);
 
             if (peeruserId === 'iSERVER') {
                 onlyServer1on1Left = true;
@@ -1066,16 +1063,16 @@ function *disconnectIfIdle(userId, network) {
     }
 
     if (windowIds.length === 0 || onlyServer1on1Left) {
-        yield disconnect(userId, network);
+        await disconnect(userId, network);
     }
 
     if (onlyServer1on1Left) {
-        yield addSystemMessage(userId, network,
+        await addSystemMessage(userId, network,
            'info', 'No open windows left for this network. Disconnected.');
     }
 }
 
-function *bufferNames(names, userId, network, conversationId) {
+async function bufferNames(names, userId, network, conversationId) {
     let namesHash = {};
 
     for (let nick of names) {
@@ -1094,13 +1091,13 @@ function *bufferNames(names, userId, network, conversationId) {
             nick = nick.substring(1);
         }
 
-        let memberUserId = yield ircUser.getUserId(nick, network);
+        let memberUserId = await ircUser.getUserId(nick, network);
         namesHash[memberUserId] = userClass;
     }
 
     let key = 'namesbuffer:' + userId + ':' + conversationId;
-    yield redis.hmset(key, namesHash);
-    yield redis.expire(key, 60); // 1 minute. Does cleanup if we never get End of NAMES list reply.
+    await redis.hmset(key, namesHash);
+    await redis.expire(key, 60); // 1 minute. Does cleanup if we never get End of NAMES list reply.
 }
 
 function parseCTCPMessage(text) {
@@ -1127,8 +1124,8 @@ function parseCTCPMessage(text) {
     return { type: 'UNKNOWN' };
 }
 
-function *resetRetryCount(userId, network) {
-    yield redis.hset(`networks:${userId}:${network}`, 'retryCount', 0);
+async function resetRetryCount(userId, network) {
+    await redis.hset(`networks:${userId}:${network}`, 'retryCount', 0);
 }
 
 function isChannel(text) {
