@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 //
 //   Copyright 2009-2014 Ilkka Oksanen <iao@iki.fi>
 //
@@ -17,38 +16,51 @@
 
 'use strict';
 
-require('../../lib/dropPriviledges').drop();
-require('../../lib/init').configureProcess('loopback');
+require("babel-register");
 
-const co = require('co'),
-      redisModule = require('../../lib/redis'),
+const init = require('../../lib/init');
+init.configureProcess('loopback');
+
+const redisModule = require('../../lib/redis'),
       conf = require('../../lib/conf'),
+      log = require('../../lib/log'),
       courier = require('../../lib/courier').createEndPoint('loopbackparser'),
-      masWindow = require('../../models/window'),
+      masWindow = require('../../services/windows'),
       nicks = require('../../models/nick'),
       conversationFactory = require('../../models/conversation');
 
-co(function*() {
-    yield redisModule.loadScripts();
-    yield redisModule.initDB();
-    yield createInitialGroups();
+init.on('beforeShutdown', function*() {
+    yield courier.quit();
+});
 
-    courier.on('send', courier.noop);
-    courier.on('textCommand', processTextCommand);
-    courier.on('updateTopic', processUpdateTopic);
-    courier.on('updatePassword', processUpdatePassword);
-    courier.on('create', processCreate);
-    courier.on('join', processJoin);
-    courier.on('close', courier.noop); // TBD: Should we do something?
+init.on('afterShutdown', function*() {
+    redisModule.shutdown();
+    log.quit();
+});
 
-    yield courier.listen();
-})();
+exports.init = function() {
+    (async function() {
+        await redisModule.loadScripts();
+        await redisModule.initDB();
+        await createInitialGroups();
+
+        courier.on('send', courier.noop);
+        courier.on('textCommand', processTextCommand);
+        courier.on('updateTopic', processUpdateTopic);
+        courier.on('updatePassword', processUpdatePassword);
+        courier.on('create', processCreate);
+        courier.on('join', processJoin);
+        courier.on('close', courier.noop); // TBD: Should we do something?
+
+        await courier.listen();
+    })();
+};
 
 function processTextCommand() {
     return { status: 'ERROR', errorMsg: 'Unknown command in this context. Try /help' };
 }
 
-function *processCreate(params) {
+async function processCreate(params) {
     let userId = params.userId;
     let groupName = params.name;
     let password = params.password;
@@ -57,7 +69,7 @@ function *processCreate(params) {
         return { status: 'ERROR_NAME_MISSING', errorMsg: 'Name can\'t be empty.' };
     }
 
-    let conversation = yield conversationFactory.findGroup(groupName, 'MAS');
+    let conversation = await conversationFactory.findGroup(groupName, 'MAS');
 
     if (conversation) {
         return {
@@ -68,7 +80,7 @@ function *processCreate(params) {
 
     // TBD Add other checks
 
-    conversation = yield conversationFactory.create({
+    conversation = await conversationFactory.create({
         owner: userId,
         type: 'group',
         name: groupName,
@@ -78,15 +90,15 @@ function *processCreate(params) {
         apikey: ''
     });
 
-    yield joinGroup(conversation, userId, '*');
+    await joinGroup(conversation, userId, '*');
 
     return { status: 'OK' };
 }
 
-function *processJoin(params) {
+async function processJoin(params) {
     let groupName = params.name;
     let userId = params.userId;
-    let conversation = yield conversationFactory.findGroup(groupName, 'MAS');
+    let conversation = await conversationFactory.findGroup(groupName, 'MAS');
 
     if (!conversation) {
         return { status: 'NOT_FOUND', errorMsg: 'Group doesn\'t exist.' };
@@ -97,42 +109,42 @@ function *processJoin(params) {
     // Owner might have returned
     let role = conversation.owner === userId ? '*' : 'u';
 
-    yield joinGroup(conversation, userId, role);
+    await joinGroup(conversation, userId, role);
 
     return { status: 'OK' };
 }
 
-function *processUpdatePassword(params) {
-    let conversation = yield conversationFactory.get(params.conversationId);
-    yield conversation.setPassword(params.password);
+async function processUpdatePassword(params) {
+    let conversation = await conversationFactory.get(params.conversationId);
+    await conversation.setPassword(params.password);
 
     return { status: 'OK' };
 }
 
-function *processUpdateTopic(params) {
-    let conversation = yield conversationFactory.get(params.conversationId);
-    let nick = yield nicks.getCurrentNick(params.userId, conversation.network);
+async function processUpdateTopic(params) {
+    let conversation = await conversationFactory.get(params.conversationId);
+    let nick = await nicks.getCurrentNick(params.userId, conversation.network);
 
-    yield conversation.setTopic(params.topic, nick);
+    await conversation.setTopic(params.topic, nick);
 
     return { status: 'OK' };
 }
 
-function *joinGroup(conversation, userId, role) {
-    yield masWindow.create(userId, conversation.conversationId);
-    yield conversation.addGroupMember(userId, role);
-    yield conversation.sendAddMembers(userId);
+async function joinGroup(conversation, userId, role) {
+    await masWindow.create(userId, conversation.conversationId);
+    await conversation.addGroupMember(userId, role);
+    await conversation.sendAddMembers(userId);
 }
 
-function *createInitialGroups() {
+async function createInitialGroups() {
     let groups = conf.get('loopback:initial_groups').split(',');
     let admin = conf.get('common:admin') || 1;
 
     for (let group of groups) {
-        let existingGroup = yield conversationFactory.findGroup(group, 'MAS');
+        let existingGroup = await conversationFactory.findGroup(group, 'MAS');
 
         if (!existingGroup) {
-            yield conversationFactory.create({
+            await conversationFactory.create({
                 owner: admin,
                 type: 'group',
                 name: group,
