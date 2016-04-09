@@ -17,6 +17,8 @@
 
 'use strict';
 
+require("babel-register");
+
 const fs = require('fs'),
       http = require('http'),
       https = require('https'),
