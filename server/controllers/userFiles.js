@@ -28,11 +28,11 @@ if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
-module.exports = function*() {
+module.exports = async function() {
     let file = this.params.file;
     let filePath = path.join(file.substring(0, 2), file);
 
-    yield send(this, filePath, { root: dataDirectory });
+    await send(this, filePath, { root: dataDirectory });
 
-    this.set('Cache-Control', 'public, max-age=' + oneYearInSeconds);
+    this.set('Cache-Control', `public, max-age=${oneYearInSeconds}`);
 };

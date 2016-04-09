@@ -31,7 +31,7 @@ if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
-module.exports = function*() {
+module.exports = async function() {
     if (!this.request.is('multipart/*') || !this.mas.user) {
         // The body isn't multipart, so busboy can't parse it
         return;
@@ -48,7 +48,7 @@ module.exports = function*() {
         }
     }
 
-    while ((part = yield parts)) {
+    while ((part = await parts)) {
         if (part.length) {
             // TDB: Handle if field
             // key: part[0]

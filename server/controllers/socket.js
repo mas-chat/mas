@@ -18,7 +18,6 @@
 
 const redis = require('../lib/redis').createClient(),
       socketIo = require('socket.io'),
-      co = require('co'),
       uuid = require('uid2'),
       requestController = require('./request'),
       log = require('../lib/log'),
@@ -46,121 +45,114 @@ exports.setup = function(server) {
 
         clientSocketList.push(socket);
 
-        socket.on('init', function(data) {
-            co(function*() {
-                if (sessionId) {
-                    socket.emit('terminate', {
-                        code: 'MULTIPLE_INITS',
-                        reason: 'INIT event can be send only once per socket.io connection.'
-                    });
-                    yield end('Multiple inits.');
-                    return;
-                }
-
-                let ts = Math.round(Date.now() / 1000);
-                let secret = data.secret;
-
-                userId = parseInt(data.userId);
-
-                if (isNaN(userId) || !secret) {
-                    log.info('Invalid init socket.io message.');
-                    socket.emit('terminate', {
-                        code: 'INVALID_INIT',
-                        reason: 'Invalid init event.'
-                    });
-                    yield end('Invalid init.');
-                    return;
-                }
-
-                userRecord = yield User.fetch(userId);
-
-                if (!(userRecord && userRecord.get('secretExpires') > ts &&
-                    userRecord.get('secret') === secret &&
-                    userRecord.get('inUse'))) {
-                    log.info(userId, 'Init message with incorrect or expired secret.');
-                    socket.emit('terminate', {
-                        code: 'INVALID_SECRET',
-                        reason: 'Invalid or expired secret.'
-                    });
-                    yield end('Invalid secret.');
-                    return;
-                }
-
-                state = 'authenticated';
-                sessionId = uuid(15);
-
-                let maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
-                let cachedUpto = isInteger(data.cachedUpto) ? data.cachedUpto : 0;
-
-                socket.emit('initok', {
-                    sessionId: sessionId,
-                    maxBacklogMsgs: maxBacklogMsgs
+        socket.on('init', async function(data) {
+            if (sessionId) {
+                socket.emit('terminate', {
+                    code: 'MULTIPLE_INITS',
+                    reason: 'INIT event can be send only once per socket.io connection.'
                 });
+                await end('Multiple inits.');
+                return;
+            }
 
-                log.info(userId, `New session init: ${sessionId}, client: ${data.clientName}`);
-                log.info(userId, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
+            let ts = Math.round(Date.now() / 1000);
+            let secret = data.secret;
 
-                yield redis.run('initSession', userId, sessionId, maxBacklogMsgs, cachedUpto, ts);
+            userId = parseInt(data.userId);
 
-                yield settingsService.sendSet(userRecord, sessionId);
+            if (isNaN(userId) || !secret) {
+                log.info('Invalid init socket.io message.');
+                socket.emit('terminate', {
+                    code: 'INVALID_INIT',
+                    reason: 'Invalid init event.'
+                });
+                await end('Invalid init.');
+                return;
+            }
 
-                yield friendsService.sendFriends(userRecord, sessionId);
-                yield friendsService.sendFriendConfirm(userRecord, sessionId);
-                yield friendsService.informStateChange(userRecord, 'login');
+            userRecord = await User.fetch(userId);
 
-                yield alerts.sendAlerts(userId, sessionId);
-                yield sendNetworkList(userId, sessionId);
+            if (!(userRecord && userRecord.get('secretExpires') > ts &&
+                userRecord.get('secret') === secret && userRecord.get('inUse'))) {
+                log.info(userId, 'Init message with incorrect or expired secret.');
+                socket.emit('terminate', {
+                    code: 'INVALID_SECRET',
+                    reason: 'Invalid or expired secret.'
+                });
+                await end('Invalid secret.');
+                return;
+            }
 
-                // Check if the user was away too long
-                courier.callNoWait('ircparser', 'reconnectifinactive', { userId: userId });
+            state = 'authenticated';
+            sessionId = uuid(15);
 
-                // Event loop
-                for (;;) {
-                    let loopTs = Math.round(Date.now() / 1000);
-                    yield redis.zadd('sessionlastheartbeat', loopTs, userId + ':' + sessionId);
+            let maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
+            let cachedUpto = isInteger(data.cachedUpto) ? data.cachedUpto : 0;
 
-                    let ntfs = yield notification.receive(userId, sessionId, 10);
+            socket.emit('initok', {
+                sessionId: sessionId,
+                maxBacklogMsgs: maxBacklogMsgs
+            });
 
-                    if (state !== 'authenticated') {
-                        break;
-                    }
+            log.info(userId, `New session init: ${sessionId}, client: ${data.clientName}`);
+            log.info(userId, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
 
-                    for (let ntf of ntfs) {
-                        if (ntf.id !== 'MSG') {
-                            log.info(userId,
-                                `Emitted ${ntf.id}. SesId: ${sessionId}, [${JSON.stringify(ntf)}]`);
-                        }
+            await redis.run('initSession', userId, sessionId, maxBacklogMsgs, cachedUpto, ts);
 
-                        socket.emit('ntf', ntf);
-                    }
-                }
-            })();
-        });
+            await settingsService.sendSet(userRecord, sessionId);
 
-        socket.on('req', function(data, cb) {
-            co(function*() {
+            await friendsService.sendFriends(userRecord, sessionId);
+            await friendsService.sendFriendConfirm(userRecord, sessionId);
+            await friendsService.informStateChange(userRecord, 'login');
+
+            await alerts.sendAlerts(userId, sessionId);
+            await sendNetworkList(userId, sessionId);
+
+            // Check if the user was away too long
+            courier.callNoWait('ircparser', 'reconnectifinactive', { userId: userId });
+
+            // Event loop
+            for (;;) {
+                let loopTs = Math.round(Date.now() / 1000);
+                await redis.zadd('sessionlastheartbeat', loopTs, userId + ':' + sessionId);
+
+                let ntfs = await notification.receive(userId, sessionId, 10);
+
                 if (state !== 'authenticated') {
-                    yield end('Request arrived before init.');
-                    return;
+                    break;
                 }
 
-                let resp = yield requestController.process(userRecord, sessionId, data);
+                for (let ntf of ntfs) {
+                    if (ntf.id !== 'MSG') {
+                        log.info(userId,
+                           `Emitted ${ntf.id}. SesId: ${sessionId}, [${JSON.stringify(ntf)}]`);
+                    }
 
-                yield notification.communicateNewUserIds(userId, sessionId, resp);
-
-                if (cb) {
-                    cb(resp); // Send the response as Socket.io acknowledgment.
+                    socket.emit('ntf', ntf);
                 }
-            })();
+            }
         });
 
-        socket.on('disconnect', function() {
-            co(function*() {
-                yield end('Socket.io disconnect.');
-            })();
+        socket.on('req', async function(data, cb) {
+            if (state !== 'authenticated') {
+                await end('Request arrived before init.');
+                return;
+            }
+
+            let resp = await requestController.process(userRecord, sessionId, data);
+
+            await notification.communicateNewUserIds(userId, sessionId, resp);
+
+            if (cb) {
+                cb(resp); // Send the response as Socket.io acknowledgment.
+            }
         });
 
-        function *end(reason) {
+        socket.on('disconnect', async function() {
+            await end('Socket.io disconnect.');
+        });
+
+        async function end(reason) {
             if (state !== 'disconnected') {
                 clientSocketList.splice(clientSocketList.indexOf(socket), 1);
                 socket.disconnect(true);
@@ -171,10 +163,10 @@ exports.setup = function(server) {
                 log.info(userId, `Session ${sessionIdExplained} ended. Reason: ${reason}`);
 
                 if (sessionId) {
-                    let last = yield redis.run('deleteSession', userId, sessionId);
+                    let last = await redis.run('deleteSession', userId, sessionId);
 
                     if (last) {
-                        yield friendsService.informStateChange(userId, 'logout');
+                        await friendsService.informStateChange(userId, 'logout');
                     }
                 }
             }
@@ -182,20 +174,20 @@ exports.setup = function(server) {
     });
 };
 
-exports.shutdown = function*() {
+exports.shutdown = async function() {
     for (let server of ioServers) {
         server.close();
     }
 
     terminateClientConnections();
 
-    yield courier.quit();
+    await courier.quit();
 };
 
-function *sendNetworkList(userId, sessionId) {
-    networks = networks || (yield redis.smembers('networklist'));
+async function sendNetworkList(userId, sessionId) {
+    networks = networks || (await redis.smembers('networklist'));
 
-    yield notification.send(userId, sessionId, {
+    await notification.send(userId, sessionId, {
         id: 'NETWORKS',
         networks: networks
     });
