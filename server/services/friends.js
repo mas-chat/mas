@@ -24,15 +24,15 @@ const EPOCH_DATE = new Date(1);
 
 // TBD: Instead of FRIENDS and FRIENDSUPDATE, use ADDFRIENDS
 
-exports.sendFriends = function*(user, sessionId) {
+exports.sendFriends = async function(user, sessionId) {
     const command = {
         id: 'FRIENDS',
         reset: true,
         friends: []
     };
 
-    const userIds = yield getFriendUserIds(user);
-    const friendUserRecords = yield User.fetchMany(userIds);
+    const userIds = await getFriendUserIds(user);
+    const friendUserRecords = await User.fetchMany(userIds);
 
     for (let friendRecord of friendUserRecords) {
         const last = friendRecord.get('lastLogout');
@@ -51,28 +51,28 @@ exports.sendFriends = function*(user, sessionId) {
     }
 
     if (sessionId) {
-        yield notification.send(user.id, sessionId, command);
+        await notification.send(user.id, sessionId, command);
     } else {
-        yield notification.broadcast(user.id, command);
+        await notification.broadcast(user.id, command);
     }
 };
 
-exports.sendFriendConfirm = function*(user, sessionId) {
-    const friendAsDst = yield Friend.find(user.id, 'dstUserId');
+exports.sendFriendConfirm = async function(user, sessionId) {
+    const friendAsDst = await Friend.find(user.id, 'dstUserId');
 
     const userIds = friendAsDst.filter(record => record.get('state') === 'pending');
 
     if (userIds.length > 0) {
         // Uses userId property so that related USERS notification is send automatically
         // See lib/notification.js for the details.
-        yield notification.send(user.id, sessionId, {
+        await notification.send(user.id, sessionId, {
             id: 'FRIENDSCONFIRM',
             friends: userIds.map(friendUserId => ({ userId: friendUserId }))
         });
     }
 };
 
-exports.informStateChange = function*(user, eventType) {
+exports.informStateChange = async function(user, eventType) {
     let command = {
         id: 'FRIENDS',
         reset: false,
@@ -90,34 +90,34 @@ exports.informStateChange = function*(user, eventType) {
         command.friends[0].last = Math.round(ts / 1000);
     }
 
-    yield user.set('lastLogout', ts);
+    await user.set('lastLogout', ts);
 
-    const userIds = yield getFriendUserIds(user);
+    const userIds = await getFriendUserIds(user);
 
     for (let friendUserId of userIds) {
-        yield notification.broadcast(friendUserId, command);
+        await notification.broadcast(friendUserId, command);
     }
 };
 
-exports.removeUser = function*(user) {
-    const [ friendAsSrc, friendAsDst ] = yield [
+exports.removeUser = async function(user) {
+    const [ friendAsSrc, friendAsDst ] = await Promise.all([
         Friend.find(user.id, 'srcUserId'),
         Friend.find(user.id, 'dstUserId')
-    ];
+    ]);
 
     const friendIds = friendAsSrc.concat(friendAsDst);
-    const friendUserRecords = yield User.fetchMany(friendIds);
+    const friendUserRecords = await User.fetchMany(friendIds);
 
     for (let friend of friendUserRecords) {
-        yield friend.delete();
+        await friend.delete();
     }
 };
 
-function *getFriendUserIds(user) {
-    const [ friendAsSrc, friendAsDst ] = yield [
+async function getFriendUserIds(user) {
+    const [ friendAsSrc, friendAsDst ] = await Promise.all([
         Friend.find(user.id, 'srcUserId'),
         Friend.find(user.id, 'dstUserId')
-    ];
+    ]);
 
     return friendAsSrc.concat(friendAsDst).filter(record =>
         record.get('state') === 'active').map(record =>
