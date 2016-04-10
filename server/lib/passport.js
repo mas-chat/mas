@@ -16,8 +16,7 @@
 
 'use strict';
 
-const co = require('co'),
-      jwt = require('jwt-simple'),
+const jwt = require('jwt-simple'),
       passport = require('koa-passport'),
       LocalStrategy = require('passport-local').Strategy,
       GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
@@ -42,7 +41,6 @@ function setup() {
             clientSecret: conf.get('googleauth:client_secret'),
             callbackURL: conf.getComputed('site_url') + '/auth/google/oauth2callback'
         }, function(accessToken, refreshToken, params, profile, done) {
-            // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
             let openIdId = jwt.decode(params.id_token, null, true).openid_id;
             authExt(openIdId, 'google:' + profile.id, profile, done);
         });
@@ -78,57 +76,53 @@ function setup() {
     passport.use(local);
 }
 
-function authLocal(username, password, done) {
-    co(function*() {
-        if (!username) {
-            return;
-        }
+async function authLocal(username, password, done) {
+    if (!username) {
+        return;
+    }
 
-        const userRecord = yield User.findFirst(username, username.includes('@') ? 'email' : 'nick');
+    const userRecord = await User.findFirst(username, username.includes('@') ? 'email' : 'nick');
 
-        if (!userRecord || userRecord.get('deleted')) {
-            done('invalid', false);
-            return;
-        }
+    if (!userRecord || userRecord.get('deleted')) {
+        done('invalid', false);
+        return;
+    }
 
-        if (userRecord && !userRecord.get('password') && userRecord.get('extAuthId')) {
-            done('useExt', false);
-            return;
-        }
+    if (userRecord && !userRecord.get('password') && userRecord.get('extAuthId')) {
+        done('useExt', false);
+        return;
+    }
 
-        const correctPassword = yield userRecord.verifyPassword(password);
+    const correctPassword = await userRecord.verifyPassword(password);
 
-        if (correctPassword && userRecord.get('inUse')) {
-            done(null, userRecord);
-        } else {
-            done('invalid', false);
-        }
-    })();
+    if (correctPassword && userRecord.get('inUse')) {
+        done(null, userRecord);
+    } else {
+        done('invalid', false);
+    }
 }
 
-function authExt(openidId, oauthId, profile, done) {
-    co(function*() {
-        // Some old users are known by their google OpenID 2.0 identifier. Google is closing down
-        // OpenID support so always convert in that case to OAuth 2.0 id.
-        let userRecord = yield User.find(openidId, 'extAuthId');
+async function authExt(openidId, oauthId, profile, done) {
+    // Some old users are known by their google OpenID 2.0 identifier. Google is closing down
+    // OpenID support so always convert in that case to OAuth 2.0 id.
+    let userRecord = await User.find(openidId, 'extAuthId');
 
-        if (userRecord && oauthId) {
-            // User is identified by his OpenID 2.0 identifier even we know his OAuth 2.0 id.
-            // Start to solely use OAuth 2.0 id.
-            yield userRecord.set('extAuthId', oauthId);
-        } else if (oauthId) {
-            userRecord = yield User.find(oauthId, 'extAuthId');
-        }
+    if (userRecord && oauthId) {
+        // User is identified by his OpenID 2.0 identifier even we know his OAuth 2.0 id.
+        // Start to solely use OAuth 2.0 id.
+        await userRecord.set('extAuthId', oauthId);
+    } else if (oauthId) {
+        userRecord = await User.find(oauthId, 'extAuthId');
+    }
 
-        if (!userRecord) {
-            userRecord = User.create({
-                name: profile.displayName,
-                email: profile.emails[0].value,
-                extAuthId: oauthId || openidId,
-                inUse: false // authentication is not yet complete
-            });
-        }
+    if (!userRecord) {
+        userRecord = User.create({
+            name: profile.displayName,
+            email: profile.emails[0].value,
+            extAuthId: oauthId || openidId,
+            inUse: false // authentication is not yet complete
+        });
+    }
 
-        done(null, userRecord);
-    })();
+    done(null, userRecord);
 }

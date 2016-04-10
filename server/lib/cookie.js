@@ -16,13 +16,13 @@
 
 'use strict';
 
-exports.createSession = function*(user, ctx) {
+exports.createSession = async function(user, ctx) {
     let ts = new Date();
     let secret = user.get('secret');
     let secretExpires = user.get('secretExpires');
 
     if (!secret || !secretExpires || ts > secretExpires) {
-        ({ secret, secretExpires } = yield user.generateNewSecret());
+        ({ secret, secretExpires } = await user.generateNewSecret());
     }
 
     ctx.cookies.set('auth', `${user.id}-${secret}-n`, {

@@ -22,7 +22,6 @@ const assert = require('assert'),
       redisModule = require('./redis'),
       rcvRedis = redisModule.createClient(),
       sendRedis = redisModule.createClient(),
-      co = require('co'),
       log = require('./log');
 
 let processing = false;
@@ -45,11 +44,11 @@ function Courier(name) {
     log.info('Courier: New instance created.');
 }
 
-Courier.prototype.listen = function*() {
+Courier.prototype.listen = async function() {
     assert(this.isEndpoint);
 
     for (;;) {
-        let result = (yield rcvRedis.brpop(`inbox:${this.name}`, 0))[1];
+        let result = (await rcvRedis.brpop(`inbox:${this.name}`, 0))[1];
 
         processing = true;
 
@@ -60,13 +59,7 @@ Courier.prototype.listen = function*() {
 
         assert(handler, this.name + ': Missing message handler for: ' + msg.__type);
 
-        if (isGeneratorFunction(handler)) {
-            co(function*() { // eslint-disable-line no-loop-func
-                this._reply(msg, (yield handler(msg)));
-            }).call(this);
-        } else {
-            this._reply(msg, handler(msg));
-        }
+        await this._reply(msg, handler(msg));
 
         if (resolveQuit) {
             resolveQuit();
@@ -77,7 +70,7 @@ Courier.prototype.listen = function*() {
     }
 };
 
-Courier.prototype.call = function*(dest, type, params) {
+Courier.prototype.call = async function(dest, type, params) {
     if (resolveQuit) {
         log.warn('Not delivering message, shutdown is in progress.');
         return null;
@@ -87,10 +80,10 @@ Courier.prototype.call = function*(dest, type, params) {
     let data = this._convertToString(type, params, uid);
     let reqRedis = redisModule.createClient();
 
-    yield reqRedis.lpush(`inbox:${dest}`, data);
+    await reqRedis.lpush(`inbox:${dest}`, data);
 
-    let resp = yield reqRedis.brpop(`inbox:${this.name}:${uid}`, 60);
-    yield reqRedis.quit();
+    let resp = await reqRedis.brpop(`inbox:${this.name}:${uid}`, 60);
+    await reqRedis.quit();
 
     if (resp === null) {
         log.warn('Courier: No reply received from ' + dest);
@@ -102,7 +95,7 @@ Courier.prototype.call = function*(dest, type, params) {
     return resp;
 };
 
-Courier.prototype.callNoWait = function(dest, type, params, ttl) {
+Courier.prototype.callNoWait = async function(dest, type, params, ttl) {
     if (resolveQuit) {
         log.warn('Not delivering message, shutdown is in progress.');
         return;
@@ -111,17 +104,15 @@ Courier.prototype.callNoWait = function(dest, type, params, ttl) {
     let data = this._convertToString(type, params);
     let key = `inbox:${dest}`;
 
-    co(function*() {
-        yield sendRedis.lpush(key, data);
+    await sendRedis.lpush(key, data);
 
-        if (ttl) {
-            yield sendRedis.expire(key, ttl);
-        }
-    })();
+    if (ttl) {
+        await sendRedis.expire(key, ttl);
+    }
 };
 
-Courier.prototype.clearInbox = function*(name) {
-    yield sendRedis.del(`inbox:${name}`);
+Courier.prototype.clearInbox = async function(name) {
+    await sendRedis.del(`inbox:${name}`);
 };
 
 Courier.prototype.on = function(type, callback) {
@@ -172,7 +163,3 @@ Courier.prototype._convertToString = function(type, params, uid) {
 
     return JSON.stringify(msg);
 };
-
-function isGeneratorFunction(obj) {
-    return obj && obj.constructor && obj.constructor.name === 'GeneratorFunction';
-}
