@@ -19,11 +19,11 @@
 const Model = require('./model');
 
 module.exports = class Setting extends Model {
-    static *findOrCreate(userId) {
-        let record = yield this.findFirst(userId, 'userId');
+    static async findOrCreate(userId) {
+        let record = await this.findFirst(userId, 'userId');
 
         if (!record) {
-            record = yield this.create({
+            record = await this.create({
                 userId: userId
             });
         }
@@ -31,13 +31,14 @@ module.exports = class Setting extends Model {
         return record;
     }
 
-    static *create(props) {
+    static async create(props) {
         const data = {
             userId: props.userId,
             activeDesktop: props.activeDesktop || 0,
             theme: props.theme || 'default'
         };
 
-        return yield super.create(data);
+        return await Model.create.call(this, data);
+     //   return await super.create(data);
     }
 };

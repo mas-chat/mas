@@ -24,7 +24,7 @@ const crypto = require('crypto'),
       userValidator = require('../validators/user');
 
 module.exports = class User extends Model {
-    static *create(props) {
+    static async create(props) {
         trimWhiteSpace(props);
 
         const passwordValidation = validatePassword(props.password);
@@ -55,7 +55,8 @@ module.exports = class User extends Model {
             secretExpires: null
         };
 
-        return yield super.create(data);
+        return await Model.create.call(this, data);
+       // return await super.create(data);
     }
 
     get config() {
@@ -77,7 +78,7 @@ module.exports = class User extends Model {
         };
     }
 
-    *generateNewSecret() {
+    async generateNewSecret() {
         let ts = new Date();
 
         let secret = {
@@ -85,24 +86,24 @@ module.exports = class User extends Model {
             secretExpires: new Date(ts.getTime() + 14 * 24 * 60 * 60 * 1000)
         };
 
-        return yield this.set(secret);
+        return await this.set(secret);
     }
 
-    *changeEmail(email) {
+    async changeEmail(email) {
         email = email.trim();
 
         if (this.get('email') !== email) {
-            yield this.set({
+            await this.set({
                 email: email,
                 emailMD5: md5(email.toLowerCase()),
                 emailConfirmed: false
             });
 
-            // TBD: yield sendEmailConfirmationEmail(this.id, email);
+            // TBD: await sendEmailConfirmationEmail(this.id, email);
         }
     }
 
-    *changePassword(password) {
+    async changePassword(password) {
         const passwordValidation = validatePassword(password);
 
         if (!passwordValidation.valid) {
@@ -110,13 +111,13 @@ module.exports = class User extends Model {
             return;
         }
 
-        return yield this.set({
+        return await this.set({
             password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
             passwordType: 'bcrypt'
         });
     }
 
-    *verifyPassword(password) {
+    async verifyPassword(password) {
         const encryptedPassword = this.get('password');
         const encryptionMethod = this.get('passwordType');
 
@@ -129,7 +130,7 @@ module.exports = class User extends Model {
 
             if (encryptedPassword === expectedSha) {
                 // Migrate to bcrypt
-                yield this.changePassword(password); // TBD: Can't fail
+                await this.changePassword(password); // TBD: Can't fail
                 return true;
             }
         } else if (encryptionMethod === 'bcrypt') {
@@ -142,8 +143,8 @@ module.exports = class User extends Model {
         return false;
     }
 
-    *disableUser() {
-        return yield this.set({
+    async disableUser() {
+        return await this.set({
             deleted: true,
             deletionTime: Date.now(),
             email: null,
@@ -167,4 +168,3 @@ function validatePassword(password) {
 
     return { valid: true };
 }
-

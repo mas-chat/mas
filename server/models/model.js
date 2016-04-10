@@ -54,10 +54,10 @@ module.exports = class Model {
         return Object.keys(this.errors).length === 0;
     }
 
-    static *fetch(id) {
+    static async fetch(id) {
         let record = new this(this.collection, id);
 
-        const { error, val } = yield db.get(record.collection, id);
+        const { error, val } = await db.get(record.collection, id);
 
         if (error) {
             return null;
@@ -67,32 +67,32 @@ module.exports = class Model {
         return record;
     }
 
-    static *fetchMany(ids) {
-        const res = yield ids.map(id => db.get(this.collection, id));
+    static async fetchMany(ids) {
+        const res = await ids.map(id => db.get(this.collection, id));
 
         return res.filter(({ err }) => !err).map(({ val }, index) =>
             new this(this.collection, ids[index], val));
     }
 
-    static *find(value, field, { onlyFirst = false } = {}) {
+    static async find(value, field, { onlyFirst = false } = {}) {
         if (!field) {
             return null;
         }
 
-        const { val } = yield db.find(this.collection, { [field]: value });
+        const { val } = await db.find(this.collection, { [field]: value });
 
         if (!val || (onlyFirst && val.length === 0)) {
             return null;
         }
 
-        return yield onlyFirst ? this.fetch(val[0]) : this.fetchMany(val);
+        return await onlyFirst ? this.fetch(val[0]) : this.fetchMany(val);
     }
 
-    static *findFirst(value, field) {
-        return yield this.find(value, field, { onlyFirst: true });
+    static async findFirst(value, field) {
+        return await this.find(value, field, { onlyFirst: true });
     }
 
-    static *create(props) {
+    static async create(props) {
         let record = new this(this.collection);
 
         if (record.config.validator) {
@@ -101,7 +101,9 @@ module.exports = class Model {
         }
 
         if (record.valid) {
-            const { err, val, indices } = yield db.create(record.collection, props);
+            const { err, val, indices } = await db.create(record.collection, props);
+
+            console.log(record.collection, props);
 
             if (err === 'notUnique') {
                 record.errors = explainIndexErrors(indices, record.config.indexErrorDescriptions);
@@ -120,7 +122,7 @@ module.exports = class Model {
         return this._props[prop];
     }
 
-    *set(props, value) {
+    async set(props, value) {
         props = convertToObject(props, value);
 
         if (this.validator) {
@@ -132,7 +134,7 @@ module.exports = class Model {
             }
         }
 
-        const { err, indices } = yield db.update(this.collection, this.id, props);
+        const { err, indices } = await db.update(this.collection, this.id, props);
 
         if (err === 'notUnique') {
             this.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
@@ -146,7 +148,7 @@ module.exports = class Model {
         return props;
     }
 
-    *setProperty(props, value) {
+    async setProperty(props, value) {
         props = convertToObject(props, value);
 
         for (const prop of Object.keys(props)) {
@@ -155,11 +157,11 @@ module.exports = class Model {
             }
         }
 
-        return yield this.set(props);
+        return await this.set(props);
     }
 
-    *delete() {
-        const { val } = yield db.delete(this.collection, this.id);
+    async delete() {
+        const { val } = await db.delete(this.collection, this.id);
 
         return val;
     }

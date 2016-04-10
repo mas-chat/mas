@@ -23,46 +23,46 @@ const redis = require('../lib/redis').createClient();
 // These two locations have their own indices. In the future, nick in MAS network could be
 // be stored also in networks:<userId>:MAS?
 
-exports.updateCurrentNick = function*(userId, network, nick) {
-    yield removeCurrentNickFromIndex(userId, network);
+exports.updateCurrentNick = async function(userId, network, nick) {
+    await removeCurrentNickFromIndex(userId, network);
 
-    yield redis.hset(`networks:${userId}:${network}`, 'currentnick', nick);
-    yield redis.hset('index:currentnick', network + ':' + nick.toLowerCase(), userId);
+    await redis.hset(`networks:${userId}:${network}`, 'currentnick', nick);
+    await redis.hset('index:currentnick', network + ':' + nick.toLowerCase(), userId);
 };
 
-exports.removeCurrentNick = function*(userId, network) {
-    yield removeCurrentNickFromIndex(userId, network);
+exports.removeCurrentNick = async function(userId, network) {
+    await removeCurrentNickFromIndex(userId, network);
 
     // Don't remove or modify currentnick of networks:<userId>:<network> here as the now stale
     // nick is still needed for USERS command when old discussions are shown.
 };
 
-exports.getUserIdFromNick = function*(nick, network) {
+exports.getUserIdFromNick = async function(nick, network) {
     if (network === 'MAS') {
-        let userId = yield redis.hget('index:user', nick);
+        let userId = await redis.hget('index:user', nick);
 
         if (userId) {
-            return (yield redis.hget(`user:${userId}`, 'deleted')) === 'true' ? null : userId;
+            return (await redis.hget(`user:${userId}`, 'deleted')) === 'true' ? null : userId;
         } else {
             return null;
         }
     } else {
-        return yield redis.hget('index:currentnick', network + ':' + nick.toLowerCase());
+        return await redis.hget('index:currentnick', network + ':' + nick.toLowerCase());
     }
 };
 
-exports.getCurrentNick = function*(userId, network) {
+exports.getCurrentNick = async function(userId, network) {
     if (network === 'MAS') {
-        return yield redis.hget(`user:${userId}`, 'nick');
+        return await redis.hget(`user:${userId}`, 'nick');
     } else {
-        return yield redis.hget(`networks:${userId}:${network}`, 'currentnick');
+        return await redis.hget(`networks:${userId}:${network}`, 'currentnick');
     }
 };
 
-function *removeCurrentNickFromIndex(userId, network) {
-    let oldNick = yield redis.hget(`networks:${userId}:${network}`, 'currentnick');
+async function removeCurrentNickFromIndex(userId, network) {
+    let oldNick = await redis.hget(`networks:${userId}:${network}`, 'currentnick');
 
     if (oldNick) {
-        yield redis.hdel('index:currentnick', network + ':' + oldNick.toLowerCase());
+        await redis.hdel('index:currentnick', network + ':' + oldNick.toLowerCase());
     }
 }
