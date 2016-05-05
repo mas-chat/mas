@@ -14,6 +14,10 @@
 --   governing permissions and limitations under the License.
 --
 
+local function userKey(userId)
+    return 'mas:users:' .. string.sub(userId, 2, -1)
+end
+
 local function getNicks(userId)
     local class = string.sub(userId, 1, 1)
     local nicks = {}
@@ -37,8 +41,9 @@ local function getNicks(userId)
                 nicks[networks[i]] = networkNick
             end
         end
-
-        nicks['MAS'] = redis.call('HGET', 'user:' .. userId, 'nick')
+        redis.call("SELECT", 10) -- TBD: Fix me!
+        nicks['MAS'] = redis.call('HGET', userKey(userId), 'nick')
+        redis.call("SELECT", 0)
     elseif class == 'i' then
         local networkNick = redis.call('HGET', 'ircuser:' .. userId, 'nick')
 
@@ -61,7 +66,11 @@ local function getName(userId)
     local class = string.sub(userId, 1, 1)
 
     if class == 'm' then
-        return redis.call('HGET', 'user:' .. userId, 'name')
+        local res
+        redis.call("SELECT", 10) -- TBD: Fix me!
+        res = redis.call('HGET', userKey(userId), 'name')
+        redis.call("SELECT", 0)
+        return res
     elseif class == 'i' then
         -- It would be too expensive to ask everybodys name using IRC protocol
         return 'IRC User'
@@ -72,7 +81,11 @@ local function getAvatarHash(userId)
     local class = string.sub(userId, 1, 1)
 
     if class == 'm' then
-        return redis.call('HGET', 'user:' .. userId, 'emailMD5')
+        local res
+        redis.call("SELECT", 10) -- TBD: Fix me!
+        res = redis.call('HGET', userKey(userId), 'emailMD5')
+        redis.call("SELECT", 0)
+        return res
     else
         return ''
     end
