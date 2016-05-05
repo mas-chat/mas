@@ -23,9 +23,11 @@ const redis = require('../lib/redis').createClient(),
       log = require('../lib/log'),
       friendsService = require('../services/friends'),
       settingsService = require('../services/settings'),
+      sessionService = require('../services/session'),
       User = require('../models/user'),
       alerts = require('../lib/alert'),
       conf = require('../lib/conf'),
+      userIdHelper = require('../lib/userIdHelper'),
       notification = require('../lib/notification'),
       courier = require('../lib/courier').create();
 
@@ -39,7 +41,7 @@ exports.setup = function(server) {
 
     io.on('connection', function(socket) {
         let userId = null;
-        let userRecord = null;
+        let user = null;
         let sessionId = null;
         let state = 'connected'; // connected, authenticated, disconnected
 
@@ -58,9 +60,9 @@ exports.setup = function(server) {
             let ts = Math.round(Date.now() / 1000);
             let secret = data.secret;
 
-            userId = parseInt(data.userId);
+            userId = userIdHelper.fromString(data.userId);
 
-            if (isNaN(userId) || !secret) {
+            if (!userId || !secret) {
                 log.info('Invalid init socket.io message.');
                 socket.emit('terminate', {
                     code: 'INVALID_INIT',
@@ -70,11 +72,11 @@ exports.setup = function(server) {
                 return;
             }
 
-            userRecord = await User.fetch(userId);
+            user = await User.fetch(userId.id);
 
-            if (!(userRecord && userRecord.get('secretExpires') > ts &&
-                userRecord.get('secret') === secret && userRecord.get('inUse'))) {
-                log.info(userId, 'Init message with incorrect or expired secret.');
+            if (!(user && user.get('secretExpires') > ts &&
+                user.get('secret') === secret && user.get('inUse'))) {
+                log.info(user, 'Init message with incorrect or expired secret.');
                 socket.emit('terminate', {
                     code: 'INVALID_SECRET',
                     reason: 'Invalid or expired secret.'
@@ -94,19 +96,17 @@ exports.setup = function(server) {
                 maxBacklogMsgs: maxBacklogMsgs
             });
 
-            log.info(userId, `New session init: ${sessionId}, client: ${data.clientName}`);
-            log.info(userId, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
+            log.info(user, `New session init: ${sessionId}, client: ${data.clientName}`);
+            log.info(user, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
 
-            await redis.run('initSession', userId, sessionId, maxBacklogMsgs, cachedUpto, ts);
+            await sessionService.init(user, sessionId, maxBacklogMsgs, cachedUpto, ts);
+            await settingsService.sendSet(user, sessionId);
+            await friendsService.sendFriends(user, sessionId);
+            await friendsService.sendFriendConfirm(user, sessionId);
+            await friendsService.informStateChange(user, 'login');
 
-            await settingsService.sendSet(userRecord, sessionId);
-
-            await friendsService.sendFriends(userRecord, sessionId);
-            await friendsService.sendFriendConfirm(userRecord, sessionId);
-            await friendsService.informStateChange(userRecord, 'login');
-
-            await alerts.sendAlerts(userId, sessionId);
-            await sendNetworkList(userId, sessionId);
+            await alerts.sendAlerts(user, sessionId);
+            await sendNetworkList(user, sessionId);
 
             // Check if the user was away too long
             courier.callNoWait('ircparser', 'reconnectifinactive', { userId: userId });
@@ -116,7 +116,7 @@ exports.setup = function(server) {
                 let loopTs = Math.round(Date.now() / 1000);
                 await redis.zadd('sessionlastheartbeat', loopTs, userId + ':' + sessionId);
 
-                let ntfs = await notification.receive(userId, sessionId, 10);
+                let ntfs = await notification.receive(user, sessionId, 10);
 
                 if (state !== 'authenticated') {
                     break;
@@ -124,8 +124,8 @@ exports.setup = function(server) {
 
                 for (let ntf of ntfs) {
                     if (ntf.id !== 'MSG') {
-                        log.info(userId,
-                           `Emitted ${ntf.id}. SesId: ${sessionId}, [${JSON.stringify(ntf)}]`);
+                        log.info(user,
+                            `Emitted ${ntf.id}. SesId: ${sessionId}, [${JSON.stringify(ntf)}]`);
                     }
 
                     socket.emit('ntf', ntf);
@@ -139,7 +139,7 @@ exports.setup = function(server) {
                 return;
             }
 
-            let resp = await requestController.process(userRecord, sessionId, data);
+            let resp = await requestController.process(user, sessionId, data);
 
             await notification.communicateNewUserIds(userId, sessionId, resp);
 
@@ -160,7 +160,7 @@ exports.setup = function(server) {
                 state = 'disconnected';
 
                 let sessionIdExplained = sessionId || '<not assigned>';
-                log.info(userId, `Session ${sessionIdExplained} ended. Reason: ${reason}`);
+                log.info(`Session ${sessionIdExplained} ended. Reason: ${reason}`);
 
                 if (sessionId) {
                     let last = await redis.run('deleteSession', userId, sessionId);
