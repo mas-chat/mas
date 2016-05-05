@@ -25,7 +25,7 @@ exports.createSession = async function(user, ctx) {
         ({ secret, secretExpires } = await user.generateNewSecret());
     }
 
-    ctx.cookies.set('auth', `${user.id}-${secret}-n`, {
+    ctx.cookies.set('auth', `${user.gId}-${secret}-n`, {
         expires: secretExpires,
         path: '/',
         httpOnly: false
