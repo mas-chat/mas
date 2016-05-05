@@ -26,7 +26,7 @@ const uuid = require('uid2'),
 exports.create = async function() {
     let email = this.request.body.email;
 
-    let userRecord = await User.findFirst(email.trim(), 'email');
+    let userRecord = await User.findFirst({ email: email.trim() });
 
     if (userRecord) {
         let token = uuid(30);
