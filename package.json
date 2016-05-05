@@ -51,7 +51,7 @@
     "readline-sync": "~1.4.0",
     "redis": "~2.5.0",
     "redis-lua-helper": "~0.2.0",
-    "rigiddb": "~0.6.0",
+    "rigiddb": "~0.7.0",
     "semver": "~5.1.0",
     "socket.io": "~1.4.4",
     "statuses": "~1.2.0",
