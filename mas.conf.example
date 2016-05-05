@@ -96,6 +96,7 @@ min_backlog=20
 connection_type=socket
 port=6379
 host=localhost
+password=
 unix_socket_path=/tmp/redis.sock
 
 [elasticsearch]
