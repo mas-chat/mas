@@ -78,6 +78,10 @@ module.exports = class User extends Model {
         };
     }
 
+    get gId() {
+        return `m${this.id}`;
+    }
+
     async generateNewSecret() {
         let ts = new Date();
 
