@@ -22,6 +22,8 @@ const _ = require('lodash'),
       log = require('./log'),
       conf = require('./conf'),
       mailer = require('./mailer'),
+      UserGId = require('../model/UserGId'),
+      User = require('../model/user'),
       friends = require('../services/friends');
 
 let jobs = [];
@@ -48,14 +50,15 @@ async function deleteStaleSessions() {
 
     for (let item of list) {
         let fields = item.split(':');
-        let userId = fields[0];
+        let userGIdString = fields[0];
         let sessionId = fields[1];
+        const user = User.fetch(new UserGId(userGIdString).id);
 
-        let last = await redis.run('deleteSession', userId, sessionId);
-        log.info(userId, 'Removed stale session. SessionId: ' + sessionId);
+        let last = await redis.run('deleteSession', userGIdString, sessionId);
+        log.info(user, 'Removed stale session. SessionId: ' + sessionId);
 
         if (last) {
-            await friends.informStateChange(userId, 'logout');
+            await friends.informStateChange(user, 'logout');
         }
     }
 }
