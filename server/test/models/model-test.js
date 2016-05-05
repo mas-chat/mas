@@ -190,7 +190,7 @@ describe('Model', function() {
             return { val: { name: 'Ilkka', age: 36 }, err: false };
         };
 
-        const customerObj = yield Customer.findFirst('Ilkka', 'name');
+        const customerObj = yield Customer.findFirst({ name: 'Ilkka');
 
         expect(customerObj).to.deep.equal({
             collection: 'customers',
@@ -219,7 +219,7 @@ describe('Model', function() {
             return { val: { name: 'Ilkka', age: age++ }, err: false };
         };
 
-        const customerObjs = yield Customer.find('Ilkka', 'name');
+        const customerObjs = yield Customer.find({ name: 'Ilkka' });
 
         expect(customerObjs).to.deep.equal([{
             collection: 'customers',
