@@ -81,22 +81,24 @@ async function authLocal(username, password, done) {
         return;
     }
 
-    const userRecord = await User.findFirst(username, username.includes('@') ? 'email' : 'nick');
+    const user = await User.findFirst({
+        [ username.includes('@') ? 'email' : 'nick' ]: username
+    });
 
-    if (!userRecord || userRecord.get('deleted')) {
+    if (!user || user.get('deleted')) {
         done('invalid', false);
         return;
     }
 
-    if (userRecord && !userRecord.get('password') && userRecord.get('extAuthId')) {
+    if (user && !user.get('password') && user.get('extAuthId')) {
         done('useExt', false);
         return;
     }
 
-    const correctPassword = await userRecord.verifyPassword(password);
+    const correctPassword = await user.verifyPassword(password);
 
-    if (correctPassword && userRecord.get('inUse')) {
-        done(null, userRecord);
+    if (correctPassword && user.get('inUse')) {
+        done(null, user);
     } else {
         done('invalid', false);
     }
@@ -105,18 +107,18 @@ async function authLocal(username, password, done) {
 async function authExt(openidId, oauthId, profile, done) {
     // Some old users are known by their google OpenID 2.0 identifier. Google is closing down
     // OpenID support so always convert in that case to OAuth 2.0 id.
-    let userRecord = await User.find(openidId, 'extAuthId');
+    let user = await User.findFirst({ extAuthId: openidId });
 
-    if (userRecord && oauthId) {
+    if (user && oauthId) {
         // User is identified by his OpenID 2.0 identifier even we know his OAuth 2.0 id.
         // Start to solely use OAuth 2.0 id.
-        await userRecord.set('extAuthId', oauthId);
+        await user.set('extAuthId', oauthId);
     } else if (oauthId) {
-        userRecord = await User.find(oauthId, 'extAuthId');
+        user = await User.findFirst({ extAuthId: oauthId });
     }
 
-    if (!userRecord) {
-        userRecord = User.create({
+    if (!user) {
+        user = User.create({
             name: profile.displayName,
             email: profile.emails[0].value,
             extAuthId: oauthId || openidId,
@@ -124,5 +126,5 @@ async function authExt(openidId, oauthId, profile, done) {
         });
     }
 
-    done(null, userRecord);
+    done(null, user);
 }
