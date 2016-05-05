@@ -17,173 +17,150 @@
 'use strict';
 
 const assert = require('assert'),
+    redis = require('../lib/redis').createClient(),
       Window = require('../models/window'),
       Settings = require('../models/settings'),
+      Conversation = require('../models/conversation'),
+      ConversationMember = require('../models/ConversationMember'),
+      User = require('../models/user'),
       notification = require('../lib/notification'),
       log = require('../lib/log'),
-      conf = require('../lib/conf'),
-      conversationFactory = require('../models/conversation');
+      conf = require('../lib/conf');
 
-
-exports.create = async function(userId, conversationId) {
-    return await create(userId, conversationId);
+exports.create = async function(user, conversation) {
+    return await create(user, conversation);
 };
 
-exports.remove = async function(userId, windowId) {
-    const windowRecords = await Window.find(userId, 'userId');
-    const windowRecord = windowRecords.find(item => item.id == windowId);
+exports.remove = async function(user, windowId) {
+    const windows = await Window.find({ userId: user.id });
+    const window = windows.find(item => item.id == windowId);
 
-    await remove(windowRecord);
+    await remove(window);
 };
 
-exports.isValidDesktop = async function(userId, desktop) {
-    const windowRecords = await Window.find(userId, 'userId');
+exports.isValidDesktop = async function(user, desktop) {
+    const windows = await Window.find({ userId: user.id });
 
-    return windowRecords.some(item => item.get('existingDesktop') === desktop);
+    return windows.some(window => window.get('existingDesktop') === desktop);
 };
 
-exports.removeByConversationId = async function(userId, conversationId) {
-    const windowRecords = await Window.find(userId, 'userId');
+exports.removeByConversation = async function(user, conversation) {
+    const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
 
-    const toBeDeleted = windowRecords.filter(item => item.get('conversationId') === conversationId)
-
-    for (const windowRecord of toBeDeleted) {
-        await remove(windowRecord);
+    if (window) {
+        await remove(window);
     }
 };
 
-exports.findByConversationId = async function(userId, conversationId) {
-    assert(conversationId);
-
-    const windowRecords = await Window.find(userId, 'userId');
-
-    return windowRecords.find(item => item.get('conversationId') === conversationId);
+exports.findByConversation = async function(user, conversation) {
+    return await Window.findFirst({ userId: user.id, conversationId: conversation.id });
 };
 
-exports.getAllConversationIds = async function(userId) {
-    return await getAllConversationIds(userId);
+exports.getAllConversations = async function(user) {
+    return await getAllConversations(user);
 };
 
-exports.getWindowIdsForNetwork = async function(userId, network) {
-    const windowRecords = await Window.find(userId, 'userId');
-    let windowIds = [];
+exports.getWindowsForNetwork = async function(user, network) {
+    const windows = await Window.find({ userId: user.id });
+    let matchingWindows = [];
 
-    for (const windowRecord of windowRecords) {
-        let conversation = await conversationFactory.get(windowRecord.conversationId);
+    for (const window of windows) {
+        let conversation = await Conversation.fetch(window.get('conversationId'));
 
         if (!conversation) {
-            log.warn(userId, `Conversation missing, id: ${conversationId}`);
-        } else if (conversation.network === network) {
-            windowIds.push(masWindow);
+            log.warn(user, `Conversation missing, id: ${conversation.id}`);
+        } else if (conversation.get('network') === network) {
+            matchingWindows.push(window);
         }
     }
 
-    return windowIds;
+    return matchingWindows;
 };
 
-exports.getNetworks = async function(userId) {
-    let conversationIds = await getAllConversationIds(userId);
+exports.getNetworks = async function(user) {
+    let conversations = await getAllConversations(user);
     let networks = {};
-    let res = [];
 
-    for (let conversationId of conversationIds) {
-        let conversation = await conversationFactory.get(conversationId);
-        networks[conversation.network] = true;
+    for (let conversation of conversations) {
+        networks[conversation.get('network')] = true;
     }
 
-    Object.keys(networks).forEach(function(key) {
-        res.push(key);
-    });
-
-    return res;
+    return Object.keys(networks);
 };
 
-exports.getConversationId = async function(userId, windowId) {
-    const windowRecord = await Window.fetch(windowId);
-
-    return windowRecord.get('conversationId');
-};
-
-async function create(userId, conversationId) {
-    let conversation = await conversationFactory.get(conversationId);
-    let userId1on1 = null;
+async function create(user, conversation) {
+    let peerMember = undefined;
 
     assert(conversation);
 
-    const settingsRecord = await Settings.findFirst(userId, 'userId');
+    const settings = await Settings.findFirst({ userId: user.id });
 
-    console.log('ok')
-
-    const windowRecord = await Window.create({
-        userId: userId,
-        conversationId: conversationId,
-        desktop: settingsRecord.get('currentDesktop')
+    const window = await Window.create({
+        userId: user.globalUserId,
+        conversationId: conversation.id,
+        desktop: settings.get('currentDesktop')
     });
 
-        console.log('c')
-
-    if (conversation.type === '1on1') {
-        let ids = Object.keys(conversation.members);
-        userId1on1 = ids[0] === userId ? ids[1] : ids[0];
+    if (conversation.get('type') === '1on1') {
+        const members = await ConversationMember.find({ conversationId: conversation.id });
+        peerMember = members.find(member => member.get('userGId') !== user.gId);
     }
 
-        console.log('d')
-
-    await notification.broadcast(userId, {
+    await notification.broadcast(user, {
         id: 'CREATE',
-        windowId: windowRecord.id,
-        name: conversation.name,
-        userId: userId1on1,
-        type: conversation.type,
-        network: conversation.network,
-        password: conversation.password || null,
-        topic: conversation.topic,
+        windowId: window.id,
+        name: conversation.get('name'),
+        userId: peerMember.get('userGId'),
+        type: conversation.get('type'),
+        network: conversation.get('network'),
+        password: conversation.get('password') || null,
+        topic: conversation.get('topic'),
         alerts: {
-            email: windowRecord.get('emailAlert'),
-            notification: windowRecord.get('notificationAlert'),
-            sound: windowRecord.get('soundAlert'),
-            title: windowRecord.get('titleAlert')
+            email: window.get('emailAlert'),
+            notification: window.get('notificationAlert'),
+            sound: window.get('soundAlert'),
+            title: window.get('titleAlert')
         },
-        row: windowRecord.get('row'),
-        column: windowRecord.get('column'),
-        minimizedNamesList: windowRecord.get('minimizedNamesList'),
-        desktop: windowRecord.get('desktop'),
+        row: window.get('row'),
+        column: window.get('column'),
+        minimizedNamesList: window.get('minimizedNamesList'),
+        desktop: window.get('desktop'),
         role: 'u' // Everybody starts as a normal user
     });
 
-    console.log('e')
+    await sendBacklog(user, conversation, window);
 
-    await sendBacklog(userId, conversationId, windowRecord.id);
-
-    return windowRecord.id;
+    return window.id;
 }
 
-async function getAllConversationIds(userId) {
-    const windowRecords = await Window.find(userId, 'userId');
-    let conversationIds = [];
+async function getAllConversations(user) {
+    const windows = await Window.find({ userId: user.id });
+    let conversations = [];
 
-    for (const windowRecord of windowRecords) {
-        conversationIds.push(windowRecord.get('conversationId'));
+    for (const window of windows) {
+        const conversation = await Conversation.fetch(window.get('conversationId'));
+        conversations.push(conversation);
     }
 
-    return conversationIds;
+    return conversations;
 }
 
-async function remove(windowRecord) {
-    const userId = windowRecord.get('userId');
+async function remove(window) {
+    const user = await User.fetch(window.get('userId'));
 
-    log.info(userId, `Removing window, id: ${windowRecord.id}`);
+    log.info(user, `Removing window, id: ${window.id}`);
 
-    await notification.broadcast(userId, {
+    await notification.broadcast(user, {
         id: 'CLOSE',
-        windowId: windowRecord.id
+        windowId: window.id
     });
+
+    await window.remove();
 }
 
-async function sendBacklog(userId, conversationId, windowId) {
-    // TBD: This is similar code as in initSession.lua
+async function sendBacklog(user, conversation, window) {
     let maxBacklogLines = conf.get('session:max_backlog');
-    let lines = await redis.lrange(`conversationmsgs:${conversationId}`, 0, maxBacklogLines - 1);
+    let lines = await redis.lrange(`conversationmsgs:${conversation.id}`, 0, maxBacklogLines - 1);
 
     if (!lines) {
         return;
@@ -193,8 +170,8 @@ async function sendBacklog(userId, conversationId, windowId) {
         let message = JSON.parse(line);
 
         message.id = 'MSG';
-        message.windowId = windowId;
+        message.windowId = window.id;
 
-        await notification.broadcast(userId, message);
+        await notification.broadcast(user, message);
     }
 }

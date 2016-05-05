@@ -19,22 +19,22 @@
 const Settings = require('../models/settings'),
       notification = require('../lib/notification');
 
-exports.sendSet = async function(userRecord, sessionId) {
-    let settingsRecord = await Settings.findOrCreate(userRecord.id);
+exports.sendSet = async function(user, sessionId) {
+    let settingsRecord = await Settings.findOrCreate(user.id);
 
     let command = {
         id: 'SET',
         settings: {
             activeDesktop: settingsRecord.get('activeDesktop'),
             theme: settingsRecord.get('theme'),
-            email: userRecord.get('email'),
-            emailConfirmed: userRecord.get('emailConfirmed')
+            email: user.get('email'),
+            emailConfirmed: user.get('emailConfirmed')
         }
     };
 
     if (sessionId) {
-        await notification.send(userRecord.id, sessionId, command);
+        await notification.send(user, sessionId, command);
     } else {
-        await notification.broadcast(userRecord.id, command);
+        await notification.broadcast(user, command);
     }
 };
