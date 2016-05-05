@@ -702,7 +702,7 @@ async function handleJoin(userId, msg) {
 
         if (!windowId) {
             await window.create(userId, conversation.conversationId);
-            await conversation.sendAddMembers(userId);
+            await conversation.sendFullAddMembers(userId);
         }
 
         if (password) {
