@@ -22,5 +22,4 @@ require("babel-register")({
     ]
 });
 
-require('../../lib/dropPriviledges').drop();
 require('./controller.js').init();

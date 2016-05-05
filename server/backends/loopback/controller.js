@@ -16,18 +16,20 @@
 
 'use strict';
 
-require("babel-register");
+require('../../lib/dropPriviledges').drop();
 
 const init = require('../../lib/init');
+
 init.configureProcess('loopback');
 
 const redisModule = require('../../lib/redis'),
       conf = require('../../lib/conf'),
       log = require('../../lib/log'),
       courier = require('../../lib/courier').createEndPoint('loopbackparser'),
-      masWindow = require('../../services/windows'),
-      nicks = require('../../models/nick'),
-      conversationFactory = require('../../models/conversation');
+      Conversation = require('../../model/conversation'),
+      windowsService = require('../../services/windows'),
+      nicksService = require('../../services/nicks'),
+      conversationsService = require('../../services/conversation');
 
 init.on('beforeShutdown', function*() {
     yield courier.quit();
@@ -38,121 +40,128 @@ init.on('afterShutdown', function*() {
     log.quit();
 });
 
-exports.init = function() {
-    (async function() {
-        await redisModule.loadScripts();
-        await redisModule.initDB();
-        await createInitialGroups();
+exports.init = async function() {
+    await redisModule.loadScripts();
+    await redisModule.initDB();
+    await createInitialGroups();
 
-        courier.on('send', courier.noop);
-        courier.on('textCommand', processTextCommand);
-        courier.on('updateTopic', processUpdateTopic);
-        courier.on('updatePassword', processUpdatePassword);
-        courier.on('create', processCreate);
-        courier.on('join', processJoin);
-        courier.on('close', courier.noop); // TBD: Should we do something?
+    courier.on('send', processSend);
+    courier.on('textCommand', processText);
+    courier.on('updateTopic', processUpdateTopic);
+    courier.on('updatePassword', processUpdatePassword);
+    courier.on('create', processCreate);
+    courier.on('join', processJoin);
+    courier.on('close', courier.noop); // TBD: Should we do something?
 
-        await courier.listen();
-    })();
+    await courier.listen();
 };
 
-function processTextCommand() {
+function processText() {
     return { status: 'ERROR', errorMsg: 'Unknown command in this context. Try /help' };
 }
 
-async function processCreate(params) {
-    let userId = params.userId;
-    let groupName = params.name;
-    let password = params.password;
+function processSend({ userId, conversationId }) {
+    const conversation = await Conversation.fetch(conversationId);
 
-    if (!groupName) {
-        return { status: 'ERROR_NAME_MISSING', errorMsg: 'Name can\'t be empty.' };
+    if (conversation.get('type') === '1on1') {
+        let targetUser = await getPeerMember(conversation, user);
+        let userExists = await userExistsCheck(targetUser);
+
+        // TBD: move to controller
+        if (!userExists) {
+            return { status: 'ERROR',
+                errorMsg: 'This MAS user\'s account is deleted. Please close this conversation.' };
+        }
     }
+}
 
-    let conversation = await conversationFactory.findGroup(groupName, 'MAS');
+async function processCreate({ userId, name, password }) {
+    const user = await User.fetch(userId);
 
-    if (conversation) {
-        return {
-            status: 'ERROR_EXISTS',
-            errorMsg: 'A group by this name already exists. If you\'d like, you can try to join it.'
-        };
+    if (!name) {
+        return { status: 'ERROR_NAME_MISSING', errorMsg: 'Name can\'t be empty.' };
     }
 
     // TBD Add other checks
 
-    conversation = await conversationFactory.create({
+    const conversation = await Conversation.create({
         owner: userId,
         type: 'group',
-        name: groupName,
+        name: name,
         network: 'MAS',
         topic: 'Welcome!',
         password: password,
         apikey: ''
     });
 
-    await joinGroup(conversation, userId, '*');
+    if (!conversation.valid) { // TBD: Don't assume ERROR_EXISTS is the only possible error
+        return {
+            status: 'ERROR_EXISTS',
+            errorMsg: 'A group by this name already exists. If you\'d like, you can try to join it.'
+        };
+    }
+
+    await joinGroup(conversation, user, '*');
 
     return { status: 'OK' };
 }
 
-async function processJoin(params) {
-    let groupName = params.name;
-    let userId = params.userId;
-    let conversation = await conversationFactory.findGroup(groupName, 'MAS');
+async function processJoin({ userId, name, password }) {
+    const user = await User.fetch(userId);
+    const conversation = await Conversation.findFirst({ type: 'group', network: 'MAS', name });
 
     if (!conversation) {
         return { status: 'NOT_FOUND', errorMsg: 'Group doesn\'t exist.' };
-    } else if (conversation.password !== '' && conversation.password !== params.password) {
+    } else if (conversation.get('password') && conversation.get('password') !== password) {
         return { status: 'INCORRECT_PASSWORD', errorMsg: 'Incorrect password.' };
     }
 
     // Owner might have returned
-    let role = conversation.owner === userId ? '*' : 'u';
+    const role = conversation.get('owner') === user.globalUserId ? '*' : 'u';
 
-    await joinGroup(conversation, userId, role);
-
-    return { status: 'OK' };
-}
-
-async function processUpdatePassword(params) {
-    let conversation = await conversationFactory.get(params.conversationId);
-    await conversation.setPassword(params.password);
+    await joinGroup(conversation, user, role);
 
     return { status: 'OK' };
 }
 
-async function processUpdateTopic(params) {
-    let conversation = await conversationFactory.get(params.conversationId);
-    let nick = await nicks.getCurrentNick(params.userId, conversation.network);
+async function processUpdatePassword({ conversationId, password }) {
+    const conversation = await Conversation.fetch(conversationId);
 
-    await conversation.setTopic(params.topic, nick);
+    await conversationsService.setPassword(conversation, password);
 
     return { status: 'OK' };
 }
 
-async function joinGroup(conversation, userId, role) {
-    await masWindow.create(userId, conversation.conversationId);
-    await conversation.addGroupMember(userId, role);
-    await conversation.sendAddMembers(userId);
+async function processUpdateTopic({ userId, conversationId, topic }) {
+    const conversation = await Conversation.fetch(conversationId);
+    const user = await User.fetch(userId);
+    const nick = await nicksService.getCurrentNick(user, conversation.get('network'));
+
+    await conversationsService.setTopic(conversation, topic, nick);
+
+    return { status: 'OK' };
+}
+
+async function joinGroup(conversation, user, role) {
+    await windowsService.create(user, conversation);
+    await conversationsService.addGroupMember(conversation, user, role);
+    await conversationsService.sendFullAddMembers(conversation, user);
 }
 
 async function createInitialGroups() {
     let groups = conf.get('loopback:initial_groups').split(',');
-    let admin = conf.get('common:admin') || 1;
+    let admin = conf.get('common:admin');
 
-    for (let group of groups) {
-        let existingGroup = await conversationFactory.findGroup(group, 'MAS');
-
-        if (!existingGroup) {
-            await conversationFactory.create({
-                owner: admin,
-                type: 'group',
-                name: group,
-                network: 'MAS',
-                topic: 'Welcome!',
-                password: '',
-                apikey: ''
-            });
-        }
+    for (let name of groups) {
+        // Create fails if the group already exists
+        await conversationsService.create({
+            owner: admin,
+            type: 'group',
+            name: name,
+            network: 'MAS',
+            topic: 'Welcome!',
+            password: null,
+            apikey: ''
+        });
     }
 }
