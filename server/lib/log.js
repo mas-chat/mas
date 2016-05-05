@@ -29,20 +29,20 @@ require('winston-loggly');
 
 let logger = null;
 
-exports.info = function(userId, msg) {
-    logEntry('info', userId, msg, function() {});
+exports.info = function(user, msg) {
+    logEntry('info', user, msg, function() {});
 };
 
-exports.warn = function(userId, msg) {
-    logEntry('warn', userId, msg, function() {
+exports.warn = function(user, msg) {
+    logEntry('warn', user, msg, function() {
         if (conf.get('common:dev_mode')) {
             init.shutdown();
         }
     });
 };
 
-exports.error = function(userId, msg) {
-    logEntry('error', userId, msg, function() {
+exports.error = function(user, msg) {
+    logEntry('error', user, msg, function() {
         init.shutdown();
     });
 };
@@ -53,7 +53,7 @@ exports.quit = function() {
     }
 };
 
-function logEntry(type, userId, msg, callback) {
+function logEntry(type, user, msg, callback) {
     let entry = {};
 
     if (logger === null) {
@@ -63,9 +63,9 @@ function logEntry(type, userId, msg, callback) {
     }
 
     if (msg === undefined) {
-        msg = userId;
+        msg = user;
     } else {
-        entry.userId = userId;
+        entry.userId = user.id;
     }
 
     logger.log(type, msg, entry, callback);
