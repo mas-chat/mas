@@ -62,9 +62,10 @@
     "yargs": "~4.4.0"
   },
   "devDependencies": {
+    "babel-eslint": "^6.0.4",
     "chai": "~3.5.0",
     "co-mocha": "~1.1.2",
-    "eslint": "~2.7.0",
+    "eslint": "^2.9.0",
     "gulp": "~3.9.0",
     "gulp-concat": "~2.6.0",
     "gulp-inline-css": "~3.1.0",

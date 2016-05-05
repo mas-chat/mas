@@ -1,4 +1,5 @@
 {
+    "parser": "babel-eslint",
     "env": {
         // TBD: Split this file for client and server
         "browser": true,
