@@ -19,7 +19,7 @@
 local function introduceNewUserIds(userId, sessionId, excludeSessionId, force, userIdList)
     local sessions
 
-    if sessionId ~= nil then
+    if sessionId == nil then
         sessions = redis.call('ZRANGE', 'sessionlist:' .. userId, 0, -1)
     else
         sessions = { sessionId }
