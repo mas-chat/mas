@@ -53,6 +53,23 @@ Deleted
 
  index:windowIds (hash)
    <userId>:<conversationId> (int, windowId)
+
+ conversation:<conversationId> (hash)
+   owner (string, userId) (mas group only)
+   type (string, 'group', '1on1')
+   name (string) (e.g. '#foo', 'bar'. '' if not group)
+   network (string) (e.g 'MAS' or 'IRCNet', 'FreeNode', 'W3C')
+   topic (string)
+   password (string)
+   apikey (string)
+
+index:conversation (hash)
+   group:<network>:<name> (int, conversationId)
+   1on1:<network>:<userId1>:<userId2> (int, conversationId)
+
+conversationmembers:<conversationId> (hash)
+   <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user)
+   ...
 ```
 
 MAS Redis structures
@@ -82,25 +99,8 @@ MAS Redis structures
  index:currentnick (hash)
    <network>:<nick> (string, userId)
 
- conversation:<conversationId> (hash)
-   owner (string, userId) (mas group only)
-   type (string, 'group', '1on1')
-   name (string) (e.g. '#foo', 'bar'. '' if not group)
-   network (string) (e.g 'MAS' or 'IRCNet', 'FreeNode', 'W3C')
-   topic (string)
-   password (string)
-   apikey (string)
-
- index:conversation (hash)
-   group:<network>:<name> (int, conversationId)
-   1on1:<network>:<userId1>:<userId2> (int, conversationId)
-
  1on1conversationhistory:<userId> (list)
    <conversationId1>, <conversationId2>
-
- conversationmembers:<conversationId> (hash)
-   <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user)
-   ...
 
  conversationlist:<userId> (set)
    <conversationId1>, <conversationId2>, ...
