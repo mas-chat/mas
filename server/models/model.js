@@ -16,7 +16,8 @@
 
 'use strict';
 
-const rigiddb = require('rigiddb');
+const assert = require('assert'),
+      rigiddb = require('rigiddb');
 
 const db = new rigiddb('mas', { db: 10 });
 
@@ -47,10 +48,11 @@ module.exports = class Model {
     }
 
     static get collection() {
-        return this.name.toLowerCase() + 's'; // TBD: Construct real plural
+        return `${this.name[0].toLowerCase()}${this.name.substring(1)}s`;
     }
 
     get valid() {
+        assert(!this.deleted);
         return Object.keys(this.errors).length === 0;
     }
 
@@ -68,18 +70,22 @@ module.exports = class Model {
     }
 
     static async fetchMany(ids) {
-        const res = await ids.map(id => db.get(this.collection, id));
+        let res = [];
+
+        for (const id of ids) {
+            res.push(await db.get(this.collection, id));
+        }
 
         return res.filter(({ err }) => !err).map(({ val }, index) =>
             new this(this.collection, ids[index], val));
     }
 
-    static async find(value, field, { onlyFirst = false } = {}) {
-        if (!field) {
+    static async find(props, { onlyFirst = false } = {}) {
+        if (!props || Object.keys(props) === 0) {
             return null;
         }
 
-        const { val } = await db.find(this.collection, { [field]: value });
+        const { err, val } = await db.find(this.collection, props);
 
         if (!val || (onlyFirst && val.length === 0)) {
             return null;
@@ -88,8 +94,8 @@ module.exports = class Model {
         return await onlyFirst ? this.fetch(val[0]) : this.fetchMany(val);
     }
 
-    static async findFirst(value, field) {
-        return await this.find(value, field, { onlyFirst: true });
+    static async findFirst(props) {
+        return await this.find(props, { onlyFirst: true });
     }
 
     static async create(props) {
@@ -102,8 +108,6 @@ module.exports = class Model {
 
         if (record.valid) {
             const { err, val, indices } = await db.create(record.collection, props);
-
-            console.log(record.collection, props);
 
             if (err === 'notUnique') {
                 record.errors = explainIndexErrors(indices, record.config.indexErrorDescriptions);
@@ -119,10 +123,14 @@ module.exports = class Model {
     }
 
     get(prop) {
+        assert(!this.deleted);
+
         return this._props[prop];
     }
 
     async set(props, value) {
+        assert(!this.deleted);
+
         props = convertToObject(props, value);
 
         if (this.validator) {
@@ -134,7 +142,7 @@ module.exports = class Model {
             }
         }
 
-        const { err, indices } = await db.update(this.collection, this.id, props);
+        const { err, indices, val } = await db.update(this.collection, this.id, props);
 
         if (err === 'notUnique') {
             this.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
@@ -145,10 +153,12 @@ module.exports = class Model {
             Object.assign(this._props, props);
         }
 
-        return props;
+        return val;
     }
 
     async setProperty(props, value) {
+        assert(!this.deleted);
+
         props = convertToObject(props, value);
 
         for (const prop of Object.keys(props)) {
@@ -161,7 +171,10 @@ module.exports = class Model {
     }
 
     async delete() {
+        assert(!this.deleted);
+
         const { val } = await db.delete(this.collection, this.id);
+        this.deleted = true;
 
         return val;
     }
