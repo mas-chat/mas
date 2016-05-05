@@ -33,6 +33,10 @@ const shutdownOrder = {
     afterShutdown: 3
 };
 
+process.on('unhandledRejection', function(reason, p){
+    console.log("Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason);
+});
+
 exports.configureProcess = function(serverName) {
     let processName = 'mas-' + serverName + '-' + conf.get('common:env');
 
