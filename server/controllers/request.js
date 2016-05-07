@@ -28,7 +28,7 @@ const log = require('../lib/log'),
       conversationsService = require('../services/conversations'),
       windowsService = require('../services/windows'),
       friendsService = require('../services/friends'),
-      nicksService = require('../models/nick'),
+      nicksService = require('../services/nicks'),
       Conversation = require('../models/conversation'),
       User = require('../models/user'),
       Window = require('../models/window'),
@@ -420,7 +420,7 @@ async function handleFetch({ command, conversation }) {
 
 async function handleRequestFriend({ user, command }) {
     let friendCandidateUserGId = new UserGId(command.userId);
-    let exists = !!await User.fetch(friendCandidateUserGId.id));
+    let exists = !!await User.fetch(friendCandidateUserGId.id);
 
     if (!exists) {
         return { status: 'ERROR', errorMsg: 'Unknown userId.' };

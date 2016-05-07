@@ -17,10 +17,10 @@
 'use strict';
 
 const redis = require('../../lib/redis').createClient(),
-      nicks = require('../../models/nick');
+      nicksService = require('../../services/nicks');
 
 exports.getUserId = function*(nick, network) {
-    let masUserId = yield nicks.getUserIdFromNick(nick, network);
+    let masUserId = yield nicksService.getUserIdFromNick(nick, network);
 
     if (masUserId) {
         return masUserId;

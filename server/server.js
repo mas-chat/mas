@@ -17,7 +17,12 @@
 
 'use strict';
 
-require("babel-register");
+require("babel-register")({
+    plugins: [
+        'syntax-async-functions',
+        'transform-async-to-generator'
+    ]
+});
 
 const fs = require('fs'),
       http = require('http'),

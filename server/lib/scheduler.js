@@ -22,8 +22,8 @@ const _ = require('lodash'),
       log = require('./log'),
       conf = require('./conf'),
       mailer = require('./mailer'),
-      UserGId = require('../model/UserGId'),
-      User = require('../model/user'),
+      UserGId = require('../models/userGId'),
+      User = require('../models/user'),
       friends = require('../services/friends');
 
 let jobs = [];

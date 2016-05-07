@@ -25,9 +25,9 @@ const redis = require('../lib/redis').createClient(),
       settingsService = require('../services/settings'),
       sessionService = require('../services/session'),
       User = require('../models/user'),
+      UserGId = require('../models/userGId'),
       alerts = require('../lib/alert'),
       conf = require('../lib/conf'),
-      userIdHelper = require('../lib/userIdHelper'),
       notification = require('../lib/notification'),
       courier = require('../lib/courier').create();
 
@@ -40,7 +40,7 @@ exports.setup = function(server) {
     ioServers.push(io);
 
     io.on('connection', function(socket) {
-        let userId = null;
+        let userGid = null;
         let user = null;
         let sessionId = null;
         let state = 'connected'; // connected, authenticated, disconnected
@@ -60,9 +60,9 @@ exports.setup = function(server) {
             let ts = Math.round(Date.now() / 1000);
             let secret = data.secret;
 
-            userId = userIdHelper.fromString(data.userId);
+            userGid = UserGId.create(data.userGid);
 
-            if (!userId || !secret) {
+            if (!userGid.valid || !secret) {
                 log.info('Invalid init socket.io message.');
                 socket.emit('terminate', {
                     code: 'INVALID_INIT',
@@ -72,7 +72,7 @@ exports.setup = function(server) {
                 return;
             }
 
-            user = await User.fetch(userId.id);
+            user = await User.fetch(userGid.id);
 
             if (!(user && user.get('secretExpires') > ts &&
                 user.get('secret') === secret && user.get('inUse'))) {
@@ -109,12 +109,12 @@ exports.setup = function(server) {
             await sendNetworkList(user, sessionId);
 
             // Check if the user was away too long
-            courier.callNoWait('ircparser', 'reconnectifinactive', { userId: userId });
+            courier.callNoWait('ircparser', 'reconnectifinactive', { userGid: userGid });
 
             // Event loop
             for (;;) {
                 let loopTs = Math.round(Date.now() / 1000);
-                await redis.zadd('sessionlastheartbeat', loopTs, userId + ':' + sessionId);
+                await redis.zadd('sessionlastheartbeat', loopTs, userGid + ':' + sessionId);
 
                 let ntfs = await notification.receive(user, sessionId, 10);
 
@@ -141,7 +141,7 @@ exports.setup = function(server) {
 
             let resp = await requestController.process(user, sessionId, data);
 
-            await notification.communicateNewUserIds(userId, sessionId, resp);
+            await notification.communicateNewUserIds(userGid, sessionId, resp);
 
             if (cb) {
                 cb(resp); // Send the response as Socket.io acknowledgment.
@@ -163,10 +163,10 @@ exports.setup = function(server) {
                 log.info(`Session ${sessionIdExplained} ended. Reason: ${reason}`);
 
                 if (sessionId) {
-                    let last = await redis.run('deleteSession', userId, sessionId);
+                    let last = await redis.run('deleteSession', userGid, sessionId);
 
                     if (last) {
-                        await friendsService.informStateChange(userId, 'logout');
+                        await friendsService.informStateChange(userGid, 'logout');
                     }
                 }
             }
@@ -184,10 +184,10 @@ exports.shutdown = async function() {
     await courier.quit();
 };
 
-async function sendNetworkList(userId, sessionId) {
+async function sendNetworkList(userGid, sessionId) {
     networks = networks || (await redis.smembers('networklist'));
 
-    await notification.send(userId, sessionId, {
+    await notification.send(userGid, sessionId, {
         id: 'NETWORKS',
         networks: networks
     });
