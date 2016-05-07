@@ -21,17 +21,17 @@ const TYPES = {
     irc: 'i'
 };
 
-module.exports = class UserGID {
-    static async create(userGIDString) {
-        if (!userGIDString) {
+module.exports = class UserGId {
+    static create(userGIdString) {
+        if (!userGIdString) {
             return null;
         }
 
-        const type = Object.keys(TYPES).find(validType => TYPES[validType] === userGIDString[0]);
-        const id = parseInt(userGIDString.substring(1));
-        const userGID = new this({ id, type });
+        const type = Object.keys(TYPES).find(validType => TYPES[validType] === userGIdString[0]);
+        const id = parseInt(userGIdString.substring(1));
+        const userGId = new this({ id, type });
 
-        return userGID.valid ? userGID : null;
+        return userGId.valid ? userGId : null;
     }
 
     constructor({ id, type }) {
