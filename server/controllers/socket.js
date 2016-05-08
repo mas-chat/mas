@@ -60,7 +60,7 @@ exports.setup = function(server) {
             let ts = Math.round(Date.now() / 1000);
             let secret = data.secret;
 
-            userGid = UserGId.create(data.userGid);
+            userGId = UserGId.create(data.userId);
 
             if (!userGid.valid || !secret) {
                 log.info('Invalid init socket.io message.');
