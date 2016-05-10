@@ -83,14 +83,14 @@ module.exports = class User extends Model {
     }
 
     async generateNewSecret() {
-        let ts = new Date();
-
-        let secret = {
+        const newSecret = {
             secret: uuid(20),
-            secretExpires: new Date(ts.getTime() + 14 * 24 * 60 * 60 * 1000)
+            secretExpires: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
         };
 
-        return await this.set(secret);
+        await this.set(newSecret)
+
+        return newSecret;
     }
 
     async changeEmail(email) {
@@ -115,10 +115,14 @@ module.exports = class User extends Model {
             return;
         }
 
-        return await this.set({
+        const newPassword = {
             password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
             passwordType: 'bcrypt'
-        });
+        };
+
+        await this.set(newPassword);
+
+        return newPassword;
     }
 
     async verifyPassword(password) {
