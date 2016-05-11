@@ -117,7 +117,7 @@ async function processJoin({ userId, name, password }) {
     }
 
     // Owner might have returned
-    const role = conversation.get('owner') === user.globalUserId ? '*' : 'u';
+    const role = conversation.get('owner') === user.gId ? '*' : 'u';
 
     await joinGroup(conversation, user, role);
 

@@ -78,7 +78,7 @@ exports.process = async function(user, sessionId, command) {
     if (Number.isInteger(windowId)) {
         window = await Window.fetch(windowId);
 
-        if (window && window.get('userId') === user.globalUserId) {
+        if (window && window.get('userId') === user.id) {
             conversation = await Conversation.fetch(window.get('conversationId'));
         } else {
             window = null;

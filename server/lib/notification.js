@@ -34,14 +34,14 @@ exports.receive = async function(user, sessionId, timeout) {
     let commands = [];
 
     let client = redisModule.createClient({ autoClose: false });
-    let result = await client.brpop(`outbox:${user.globalUserId}:${sessionId}`, timeout);
+    let result = await client.brpop(`outbox:${user.gId}:${sessionId}`, timeout);
 
     if (result) {
         commands.push(result[1]);
     }
 
     // Retrieve other ntfs if there are any
-    while ((command = await client.rpop(`outbox:${user.globalUserId}:${sessionId}`)) !== null) {
+    while ((command = await client.rpop(`outbox:${user.gId}:${sessionId}`)) !== null) {
         commands.push(command);
     }
 
@@ -68,7 +68,7 @@ async function queueNotifications(user, sessionId, excludeSessionId, ntfs) {
         return typeof(value) === 'string' ? value : JSON.stringify(value);
     });
 
-    await redis.run('queueOutbox', user.globalUserId, sessionId, excludeSessionId, ...ntfs);
+    await redis.run('queueOutbox', user.gId, sessionId, excludeSessionId, ...ntfs);
 }
 
 async function handleNewUserIds(user, sessionId, excludeSessionId, ntfs) {
@@ -80,7 +80,7 @@ async function handleNewUserIds(user, sessionId, excludeSessionId, ntfs) {
 
     allUserIds = _.uniq(allUserIds);
     await redis.run(
-        'introduceNewUserIds', user.globalUserId, sessionId, excludeSessionId, false, ...allUserIds);
+        'introduceNewUserIds', user.gId, sessionId, excludeSessionId, false, ...allUserIds);
 }
 
 function scanUserIds(obj) {

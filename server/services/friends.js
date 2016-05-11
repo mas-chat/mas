@@ -66,7 +66,7 @@ exports.sendFriendConfirm = async function(user, sessionId) {
         // See lib/notification.js for the details.
         await notification.send(user, sessionId, {
             id: 'FRIENDSCONFIRM',
-            friends: friendUsers.map(friendUser => ({ userId: friendUser.globalUserId }))
+            friends: friendUsers.map(friendUser => ({ userId: friendUser.gId }))
         });
     }
 };

@@ -166,7 +166,7 @@ exports.setup = function(server) {
                     let last = await redis.run('deleteSession', userGId, sessionId);
 
                     if (last) {
-                        await friendsService.informStateChange(userGId, 'logout');
+                        await friendsService.informStateChange(user, 'logout');
                     }
                 }
             }

@@ -96,7 +96,7 @@ async function create(user, conversation) {
     const settings = await Settings.findFirst({ userId: user.id });
 
     const window = await Window.create({
-        userId: user.globalUserId,
+        userId: user.id,
         conversationId: conversation.id,
         desktop: settings.get('currentDesktop')
     });

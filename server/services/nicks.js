@@ -23,15 +23,15 @@ const redis = require('../lib/redis').createClient();
 // These two locations have their own indices. In the future, nick in MAS network could be
 // be stored also in networks:<userId>:MAS?
 
-exports.updateCurrentNick = async function(userId, network, nick) {
-    await removeCurrentNickFromIndex(userId, network);
+exports.updateCurrentNick = async function(userGId, network, nick) {
+    await removeCurrentNickFromIndex(userGId, network);
 
-    await redis.hset(`networks:${userId}:${network}`, 'currentnick', nick);
-    await redis.hset('index:currentnick', network + ':' + nick.toLowerCase(), userId);
+    await redis.hset(`networks:${userGId}:${network}`, 'currentnick', nick);
+    await redis.hset('index:currentnick', network + ':' + nick.toLowerCase(), userGId);
 };
 
-exports.removeCurrentNick = async function(userId, network) {
-    await removeCurrentNickFromIndex(userId, network);
+exports.removeCurrentNick = async function(userGId, network) {
+    await removeCurrentNickFromIndex(userGId, network);
 
     // Don't remove or modify currentnick of networks:<userId>:<network> here as the now stale
     // nick is still needed for USERS command when old discussions are shown.
@@ -55,12 +55,12 @@ exports.getCurrentNick = async function(user, network) {
     if (network === 'MAS') {
         return await user.get('nick');
     } else {
-        return await redis.hget(`networks:${user.globalUserId}:${network}`, 'currentnick');
+        return await redis.hget(`networks:${user.gId}:${network}`, 'currentnick');
     }
 };
 
-async function removeCurrentNickFromIndex(userId, network) {
-    let oldNick = await redis.hget(`networks:${userId}:${network}`, 'currentnick');
+async function removeCurrentNickFromIndex(userGId, network) {
+    let oldNick = await redis.hget(`networks:${userGId}:${network}`, 'currentnick');
 
     if (oldNick) {
         await redis.hdel('index:currentnick', network + ':' + oldNick.toLowerCase());

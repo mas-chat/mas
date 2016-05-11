@@ -25,19 +25,19 @@ const redis = require('../lib/redis').createClient(),
 exports.init = async function(user, sessionId, maxBacklogLines, cachedUpto, ts) {
     const messages = [];
     const seenUserIds = {};
-    const windows = await Window.find({ userId: user.globalUserId });
+    const windows = await Window.find({ userId: user.id });
 
-    await redis.zadd(`sessionlist:${user.globalUserId}}`, ts, sessionId);
+    await redis.zadd(`sessionlist:${user.gId}}`, ts, sessionId);
 
     for (const window of windows) {
         const conversationId = window.get('conversationId');
         const conversation = await Conversation.fetch(conversationId);
         const members = await ConversationMember.find({ conversationId });
-        const role = members.find(member => member.get('userId') === user.globalUserId).get('role');
+        const role = members.find(member => member.get('userId') === user.gId).get('role');
         let oneOnOneMember = undefined;
 
         if (conversation.get('type') === '1on1') {
-            oneOnOneMember = members.find(member => member.get('userId') !== user.globalUserId);
+            oneOnOneMember = members.find(member => member.get('userId') !== user.gId);
         }
 
         members.forEach(member => seenUserIds[member.get('userId')] = true);
@@ -95,11 +95,9 @@ exports.init = async function(user, sessionId, maxBacklogLines, cachedUpto, ts) 
     }
 
     const userIdList = Object.keys(seenUserIds);
-    userIdList.push(user.globalUserId); // Always include info about the user itself
+    userIdList.push(user.gId); // Always include info about the user itself
 
-    console.log(userIdList)
-
-    await redis.run('introduceNewUserIds', user.globalUserId, sessionId, null, false, ...userIdList);
+    await redis.run('introduceNewUserIds', user.gId, sessionId, null, false, ...userIdList);
 
     messages.push({
         id: 'INITDONE'
