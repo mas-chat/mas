@@ -74,6 +74,9 @@ exports.process = async function(user, sessionId, command) {
 
     let conversation = null;
     let window = null;
+    let backend = null;
+
+    log.info(user, 'Processing command: ' + JSON.stringify(command));
 
     if (Number.isInteger(windowId)) {
         window = await Window.fetch(windowId);
@@ -85,16 +88,17 @@ exports.process = async function(user, sessionId, command) {
         }
     }
 
-    let backend = conversation.get('network') === 'MAS' ? 'loopbackparser' : 'ircparser';
-
-    log.info(user, 'Processing command: ' + JSON.stringify(command));
+    if (conversation) {
+        backend = conversation.get('network') === 'MAS' ? 'loopbackparser' : 'ircparser';
+    }
 
     if (handlers[command.id]) {
-        const id = command.id;
-        return await handlers[id]({ user, sessionId, window, conversation, backend, command });
+        return await handlers[command.id]({
+            user, sessionId, window, conversation, backend, command
+        });
     } else {
         log.warn(user, `Reveiced unknown request: ${command.id}`);
-        return {};
+        return { status: 'ERROR', errorMsg: 'Unknown request' };
     }
 };
 
