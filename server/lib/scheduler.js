@@ -52,7 +52,7 @@ async function deleteStaleSessions() {
         let fields = item.split(':');
         let userGIdString = fields[0];
         let sessionId = fields[1];
-        const user = User.fetch(new UserGId(userGIdString).id);
+        const user = await User.fetch(new UserGId(userGIdString).id);
 
         let last = await redis.run('deleteSession', userGIdString, sessionId);
         log.info(user, 'Removed stale session. SessionId: ' + sessionId);
