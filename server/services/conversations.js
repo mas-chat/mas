@@ -23,6 +23,7 @@ const assert = require('assert'),
       search = require('../lib/search'),
       notification = require('../lib/notification'),
       User = require('../models/user'),
+      Window = require('../models/window'),
       Conversation = require('../models/conversation'),
       ConversationMember = require('../models/conversationMember'),
       UserGId = require('../models/userGID'),
@@ -288,7 +289,7 @@ async function broadcast(conversation, msg, excludeSession) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     for (const member of members) {
-        let window = Window.findFirst({
+        let window = await Window.findFirst({
            userId: member.get('userGId'),
            conversationId: conversation.id
         });
