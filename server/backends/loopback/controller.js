@@ -28,6 +28,7 @@ const redisModule = require('../../lib/redis'),
       courier = require('../../lib/courier').createEndPoint('loopbackparser'),
       Conversation = require('../../models/conversation'),
       User = require('../../models/user'),
+      UserGId = require('../../models/userGId'),
       windowsService = require('../../services/windows'),
       nicksService = require('../../services/nicks'),
       conversationsService = require('../../services/conversations');
@@ -145,7 +146,10 @@ async function processUpdateTopic({ userId, conversationId, topic }) {
 
 async function joinGroup(conversation, user, role) {
     await windowsService.create(user, conversation);
-    await conversationsService.addGroupMember(conversation, user, role);
+
+    const userGId = UserGId.create(user);
+    await conversationsService.addGroupMember(conversation, userGId, role);
+
     await conversationsService.sendFullAddMembers(conversation, user);
 }
 

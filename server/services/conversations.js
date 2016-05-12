@@ -119,7 +119,8 @@ exports.setGroupMembers = async function(conversation, members) {
         const userGId = new UserGId(userGIdString);
 
         if (userGId.type === 'mas') {
-            await sendFullAddMembers(conversation, userGId);
+            const user = await User.fetch(UserGId.id);
+            await sendFullAddMembers(conversation, user);
         }
     }
 };
@@ -133,12 +134,12 @@ exports.addGroupMember = async function(conversation, userGId, role) {
     if (!member) {
         await ConversationMember.create({
             conversationId: conversation.id,
-            userId: userGId,
+            userGId: userGId,
             role: role
         });
 
         await broadcastAddMessage(conversation, {
-            userId: userGId,
+            userId: userGId.toString(),
             cat: 'join',
             body: ''
         });
@@ -217,8 +218,8 @@ exports.editMessage = async function(conversation, userGId, gid, text) {
     return true;
 };
 
-exports.sendFullAddMembers = async function(conversation, userGId) {
-    return await sendFullAddMembers(conversation, userGId);
+exports.sendFullAddMembers = async function(conversation, user) {
+    return await sendFullAddMembers(conversation, user);
 }
 
 exports.sendUsers = async function(conversation, userGId) {
@@ -305,8 +306,8 @@ async function broadcast(conversation, msg, excludeSession) {
     }
 }
 
-async function sendFullAddMembers(conversation, userGId) {
-    const window = await Window.findFirst({ userId: userGId, conversationId: conversation.id });
+async function sendFullAddMembers(conversation, user) {
+    const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     let membersList = members.map(member => ({
@@ -314,7 +315,7 @@ async function sendFullAddMembers(conversation, userGId) {
         role: member.get('role')
     }));
 
-    await notification.broadcast(userGId, {
+    await notification.broadcast(user, {
         id: 'ADDMEMBERS',
         windowId: window.id,
         reset: true,

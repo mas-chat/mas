@@ -27,6 +27,10 @@ module.exports = class UserGId {
             return null;
         }
 
+        if (typeof(userGIdString) === 'object') {
+            userGIdString = userGIdString.gId;
+        }
+
         const type = Object.keys(TYPES).find(validType => TYPES[validType] === userGIdString[0]);
         const id = parseInt(userGIdString.substring(1));
         const userGId = new this({ id, type });
