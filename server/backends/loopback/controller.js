@@ -155,14 +155,13 @@ async function createInitialGroups() {
 
     for (let name of groups) {
         // Create fails if the group already exists
-        await conversationsService.create({
+        await Conversation.create({
             owner: admin,
             type: 'group',
             name: name,
             network: 'MAS',
             topic: 'Welcome!',
-            password: null,
-            apikey: ''
+            password: null
         });
     }
 }
