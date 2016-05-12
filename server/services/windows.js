@@ -110,7 +110,7 @@ async function create(user, conversation) {
         id: 'CREATE',
         windowId: window.id,
         name: conversation.get('name'),
-        userId: peerMember.get('userGId'),
+        userId: peerMember && peerMember.get('userGId'),
         type: conversation.get('type'),
         network: conversation.get('network'),
         password: conversation.get('password') || null,
