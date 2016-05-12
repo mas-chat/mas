@@ -26,10 +26,11 @@ const redisModule = require('../../lib/redis'),
       conf = require('../../lib/conf'),
       log = require('../../lib/log'),
       courier = require('../../lib/courier').createEndPoint('loopbackparser'),
-      Conversation = require('../../model/conversation'),
+      Conversation = require('../../models/conversation'),
+      User = require('../../models/user'),
       windowsService = require('../../services/windows'),
       nicksService = require('../../services/nicks'),
-      conversationsService = require('../../services/conversation');
+      conversationsService = require('../../services/conversations');
 
 init.on('beforeShutdown', function*() {
     yield courier.quit();
