@@ -61,7 +61,7 @@ function processText() {
     return { status: 'ERROR', errorMsg: 'Unknown command in this context. Try /help' };
 }
 
-function processSend({ userId, conversationId }) {
+async function processSend({ userId, conversationId }) {
     const conversation = await Conversation.fetch(conversationId);
 
     if (conversation.get('type') === '1on1') {
