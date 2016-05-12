@@ -90,6 +90,8 @@ exports.process = async function(user, sessionId, command) {
 
     if (conversation) {
         backend = conversation.get('network') === 'MAS' ? 'loopbackparser' : 'ircparser';
+    } else if (network) {
+        backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
     }
 
     if (handlers[command.id]) {
