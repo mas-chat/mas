@@ -106,7 +106,7 @@ store.setSchema(1, {
         definition: {
             srcUserId: { type: 'int', allowNull: false },
             dstUserId: { type: 'int', allowNull: false },
-            state: { type: 'string', allowNull: false } // pending, blocked, active
+            state: { type: 'string', allowNull: false } // asking, pending, blocked, active
         },
         indices: {
             srcUserId: {
