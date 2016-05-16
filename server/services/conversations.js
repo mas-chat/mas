@@ -26,7 +26,7 @@ const assert = require('assert'),
       Window = require('../models/window'),
       Conversation = require('../models/conversation'),
       ConversationMember = require('../models/conversationMember'),
-      UserGId = require('../models/userGID'),
+      UserGId = require('../models/userGId'),
       windowService = require('../services/windows'),
       nicksService = require('../services/nicks');
 
@@ -117,7 +117,7 @@ exports.setGroupMembers = async function(conversation, members) {
     }
 
     for (let userGIdString of Object.keys(members)) {
-        const userGId = new UserGId(userGIdString);
+        const userGId = UserGId.create(userGIdString);
 
         if (userGId.type === 'mas') {
             const user = await User.fetch(UserGId.id);
@@ -140,7 +140,7 @@ exports.addGroupMember = async function(conversation, userGId, role) {
         });
 
         await broadcastAddMessage(conversation, {
-            userId: userGId,
+            userId: userGId.toString(),
             cat: 'join',
             body: ''
         });
@@ -372,7 +372,7 @@ async function scanForEmailNotifications(conversation, message) {
                 mention.substring(1), conversation.get('network'));
 
             if (userGIdString) {
-                userGIds.push(new UserGId(userGIdString));
+                userGIds.push(UserGId.create(userGIdString));
             }
         }
 
@@ -380,7 +380,7 @@ async function scanForEmailNotifications(conversation, message) {
             return;
         }
     } else {
-        userGIds = [ await getPeerMember(conversation, new UserGId(message.userId)) ];
+        userGIds = [ await getPeerMember(conversation, UserGId.create(message.userId)) ];
     }
 
     for (const userGId of userGIds) {
@@ -452,12 +452,12 @@ async function removeGroupMember(conversation, member, skipCleanUp, wasKicked, r
     });
 
     // Never let window to exist alone without linked conversation
-    await removeConversationWindow(conversation, new UserGId(member.get('userGId')));
+    await removeConversationWindow(conversation, UserGId.create(member.get('userGId')));
 
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     const masUserExists = members.some(member => {
-        const userGId = new UserGId(member.get('userGId'));
+        const userGId = UserGId.create(member.get('userGId'));
         return userGId.type === 'mas'
     });
 
