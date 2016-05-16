@@ -25,35 +25,7 @@ const EPOCH_DATE = new Date(1);
 // TBD: Instead of FRIENDS and FRIENDSUPDATE, use ADDFRIENDS
 
 exports.sendFriends = async function(user, sessionId) {
-    const command = {
-        id: 'FRIENDS',
-        reset: true,
-        friends: []
-    };
-
-    const friendUsers = await getFriendUsers(user);
-
-    for (let friendUser of friendUsers) {
-        const last = friendUser.get('lastLogout');
-        const online = last === null;
-
-        const friendData = {
-            userId: `m${friendUser.id}`,
-            online: online
-        };
-
-        if (!online) {
-            friendData.last = last < EPOCH_DATE ? -1 : Math.floor(last.getTime() / 1000);
-        }
-
-        command.friends.push(friendData);
-    }
-
-    if (sessionId) {
-        await notification.send(user, sessionId, command);
-    } else {
-        await notification.broadcast(user, command);
-    }
+    sendFriends(user, sessionId);
 };
 
 exports.sendFriendConfirm = async function(user, sessionId) {
@@ -98,6 +70,54 @@ exports.informStateChange = async function(user, eventType) {
     }
 };
 
+exports.createPending = async function(user, friendUser) {
+    await Friend.create({
+        srcUserId: user.id,
+        dstUserId: friendUser.id,
+        state: 'asking'
+    });
+
+    await Friend.create({
+        srcUserId: friendUser.id,
+        dstUserId: user.id,
+        state: 'pending'
+    });
+};
+
+exports.activateFriends = async function(user, friendUser) {
+    const srcFriend = await Friend.findFirst({
+        srcUserId: user.id,
+        dstUserId: friendUser.id
+    })
+
+    const dstFriend = await Friend.findFirst({
+        srcUserId: friendUser.id,
+        dstUserId: user.id
+    })
+
+    await srcFriend.set({ state: 'active' });
+    await dstFriend.set({ state: 'active' });
+
+    // Inform both parties
+    await sendFriends(user);
+    await sendFriends(friendUser);
+}
+
+exports.removeFriends = async function(user, friendUser) {
+    const srcFriend = await Friend.findFirst({
+        srcUserId: user.id,
+        dstUserId: friendUser.id
+    })
+
+    const dstFriend = await Friend.findFirst({
+        srcUserId: friendUser.id,
+        dstUserId: user.id
+    })
+
+    await srcFriend.delete();
+    await dstFriend.delete();
+}
+
 exports.removeUser = async function(user) {
     const [ friendAsSrc, friendAsDst ] = await Promise.all([
         Friend.find({ srcUserId: user.id }),
@@ -110,6 +130,38 @@ exports.removeUser = async function(user) {
         await friend.delete();
     }
 };
+
+async function sendFriends(user, sessionId) {
+    const command = {
+        id: 'FRIENDS',
+        reset: true,
+        friends: []
+    };
+
+    const friendUsers = await getFriendUsers(user);
+
+    for (let friendUser of friendUsers) {
+        const last = friendUser.get('lastLogout');
+        const online = last === null;
+
+        const friendData = {
+            userId: `m${friendUser.id}`,
+            online: online
+        };
+
+        if (!online) {
+            friendData.last = last < EPOCH_DATE ? -1 : Math.floor(last.getTime() / 1000);
+        }
+
+        command.friends.push(friendData);
+    }
+
+    if (sessionId) {
+        await notification.send(user, sessionId, command);
+    } else {
+        await notification.broadcast(user, command);
+    }
+}
 
 async function getFriendUsers(user) {
     const [ friendAsSrc, friendAsDst ] = await Promise.all([
