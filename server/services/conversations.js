@@ -140,7 +140,7 @@ exports.addGroupMember = async function(conversation, userGId, role) {
         });
 
         await broadcastAddMessage(conversation, {
-            userId: userGId.toString(),
+            userId: userGId,
             cat: 'join',
             body: ''
         });
