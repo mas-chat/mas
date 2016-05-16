@@ -20,7 +20,7 @@ local excludeSessionId = table.remove(ARGV, 1)
 local commands = ARGV -- Rest of the parameters are commands
 local sessions
 
-if sessionId == nil then
+if sessionId == '' then
     -- Broadcast command to all active sessions
     sessions = redis.call('ZRANGE', 'sessionlist:' .. userId, 0, -1)
 else
