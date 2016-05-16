@@ -109,7 +109,7 @@ exports.setup = function(server) {
             await sendNetworkList(user, sessionId);
 
             // Check if the user was away too long
-            courier.callNoWait('ircparser', 'reconnectifinactive', { userGId: userGId });
+            courier.callNoWait('ircparser', 'reconnectifinactive', { userId: user.id });
 
             // Event loop
             for (;;) {
