@@ -31,6 +31,7 @@ const log = require('../lib/log'),
       nicksService = require('../services/nicks'),
       Conversation = require('../models/conversation'),
       User = require('../models/user'),
+      Friend = require('../models/friend'),
       Window = require('../models/window'),
       Settings = require('../models/settings'),
       UserGId = require('../models/userGId'),
@@ -401,7 +402,7 @@ async function handleLogout({ user, sessionId }) {
 
     setTimeout(async function() {
         // Give the system some time to deliver the acknowledgment before cleanup
-        let last = await redis.run('deleteSession', userGId, sessionId);
+        let last = await redis.run('deleteSession', user.gId, sessionId);
 
         if (last) {
             await friendsService.informStateChange(user, 'logout');
@@ -424,95 +425,81 @@ async function handleFetch({ command, conversation }) {
     return { status: 'OK', msgs: messages };
 }
 
-async function handleRequestFriend({ user, command }) {
+async function handleRequestFriend({ user, command, sessionId }) {
     let friendCandidateUserGId = new UserGId(command.userId);
-    let exists = !!await User.fetch(friendCandidateUserGId.id);
+    let friendUser = await User.fetch(friendCandidateUserGId.id);
 
-    if (!exists) {
+    if (!friendUser) {
         return { status: 'ERROR', errorMsg: 'Unknown userId.' };
-    } else if (user.id === friendCandidateUserGId.id) {
+    } else if (user.id === friendUser.id) {
         return { status: 'ERROR', errorMsg: 'You can\'t add yourself as a friend, sorry.' };
     }
 
-    let existingFriend = await redis.sismember(`friends:${userId}`, friendCandidateUserId);
+    const existingFriend = await Friend.find({ srcUserId: user.id, dstUserId: friendUser.id });
 
     if (existingFriend) {
         return { status: 'ERROR', errorMsg: 'This person is already on your contacts list.' };
     }
 
-    await redis.sadd(`friendsrequests:${friendCandidateUserId}`, userId);
-    await friendService.sendFriendConfirm(friendCandidateUserId, params.sessionId);
+    await friendsService.createPending(user, friendUser);
+    await friendsService.sendFriendConfirm(friendUser, sessionId);
 
     return { status: 'OK' };
 }
 
-async function handleFriendVerdict(params) {
-    let userId = params.userId;
-    let requestorUserId = params.command.userId;
+async function handleFriendVerdict({ user, command }) {
+    let requestorUserGId = new UserGId(command.userId);
+    let friendUser = await User.fetch(requestorUserGId.id);
 
-    let removed = await redis.srem(`friendsrequests:${userId}`, requestorUserId);
+    if (command.allow) {
+        await friendsService.activateFriends(user, friendUser);
+    }
 
-    if (removed === 0) {
+    return { status: 'OK' };
+}
+
+async function handleRemoveFriend({ user, command }) {
+    if (!command.userId) {
         return { status: 'ERROR', errorMsg: 'Invalid userId.' };
     }
 
-    if (params.command.allow) {
-        await redis.sadd(`friends:${userId}`, requestorUserId);
-        await redis.sadd(`friends:${requestorUserId}`, userId);
+    let friendUserGId = new UserGId(command.userId);
+    let friendUser = await User.fetch(friendUserGId.id);
 
-        // Inform both parties
-        await friendService.sendFriends(requestorUserId);
-        await friendService.sendFriends(userId);
-    }
+    await friendsService.removeFriends(user, friendUser);
+    await friendsService.sendFriends(user.id);
 
     return { status: 'OK' };
 }
 
-async function handleRemoveFriend(params) {
-    if (!params.command.userId) {
-        return { status: 'ERROR', errorMsg: 'Invalid userId.' };
+async function handleGetProfile({ user }) {
+    return { name: user.get('name'), email: user.get('email'), nick: user.get('nick') };
+}
+
+async function handleUpdateProfile({ user, command }) {
+    let newName = command.name;
+    let newEmail = command.email;
+
+    if (newName) {
+        await user.set('name', newName);
     }
 
-    await redis.srem(`friends:${params.userId}`, params.command.userId);
-    await friendService.sendFriends(params.userId);
+    if (newEmail) {
+        await user.set('email', newEmail);
+    }
+
+    // TBD: Check and report validation errors
 
     return { status: 'OK' };
 }
 
-async function handleGetProfile(params) {
-    let userRecord = await redis.hgetall(`user:${params.userId}`);
-    return { name: userRecord.name, email: userRecord.email, nick: userRecord.nick };
-}
+async function handleDestroyAccount({ user }) {
+    await user.set('deleted', true);
 
-async function handleUpdateProfile(params) {
-    let userId = params.userId;
-    let newName = params.command.name;
-    let newEmail = params.command.email;
-
-    // Keep in sync with register controller.
-    if (newName.length < 6) {
-        return { status: 'ERROR', errorMsg: 'Name is too short.' };
-    } else if (!(/\S+@\S+\.\S+/.test(newEmail))) {
-        return { status: 'ERROR', errorMsg: 'Invalid email address' };
-    }
-
-    user.update(userId, {
-        email: params.command.email,
-        name: params.comman.name
-    });
-
-    return { status: 'OK' };
-}
-
-async function handleDestroyAccount(params) {
-    let userId = params.userId;
-
-    user.delete(userId);
-
-    let conversationIds = await windowService.getAllConversationIds(userId);
+    let conversationIds = await windowsService.getAllConversationIds(user);
 
     for (let conversationId of conversationIds) {
-        let conversation = await conversationService.get(conversationId);
+        let conversation = await conversationsService.get(conversationId);
         await removeFromConversation(user, conversation);
     }
 
@@ -522,32 +509,28 @@ async function handleDestroyAccount(params) {
         // Don't remove 'networks::${userId}:${network}' entries as they are needed to
         // keep discussion logs parseable. Those logs contain userIds, not nicks.
 
-        await redis.del(`ircchannelsubscriptions:${userId}:${network}`);
+        await redis.del(`ircchannelsubscriptions:${user.gId}:${network}`);
     }
 
-    await friendService.removeUser(userId);
+    await friendsService.removeUser(user);
 
     return { status: 'OK' };
 }
 
-async function handleSendConfirmEmail(params) {
-    let userId = params.userId;
-
-    // TBD: This has moved
-    await sendEmailConfirmationEmail(userId);
+async function handleSendConfirmEmail({ user }) {
+    await sendEmailConfirmationEmail(user);
     return { status: 'OK' };
 }
 
-async function sendEmailConfirmationEmail(userId, email) {
-    let userRecord = await redis.hgetall(`user:${userId}`);
+async function sendEmailConfirmationEmail(user, email) {
     let emailConfirmationToken = uid2(25);
 
-    await redis.setex(`emailconfirmationtoken:${emailConfirmationToken}`, 60 * 60 * 24, userId);
+    await redis.setex(`emailconfirmationtoken:${emailConfirmationToken}`, 60 * 60 * 24, user.gId);
 
     mailer.send('emails/build/confirmEmail.hbs', {
-        name: userRecord.name,
+        name: user.get('name'),
         url: conf.getComputed('site_url') + '/confirm-email/' + emailConfirmationToken
-    }, email || userRecord.email, `Please confirm your email address`);
+    }, email || user.get('email'), `Please confirm your email address`);
 }
 
 function userExistsCheck(user) {
@@ -556,9 +539,9 @@ function userExistsCheck(user) {
 
 async function removeFromConversation(user, conversation) {
     if (conversation.get('type') === 'group') {
-        await conversationService.removeGroupMember(user.gId);
+        await conversationsService.removeGroupMember(user.gId);
     } else {
-        await conversationService.remove1on1Member(user.gId);
+        await conversationsService.remove1on1Member(user.gId);
     }
 
     // Backend specific cleanup
