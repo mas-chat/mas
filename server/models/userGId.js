@@ -44,6 +44,10 @@ module.exports = class UserGId {
         this.valid = id >= 0 && TYPES[type];
     }
 
+    isMASUser() {
+        return this.type === 'mas';
+    }
+
     toString() {
         return `${TYPES[this.type]}${this.id}`;
     }
