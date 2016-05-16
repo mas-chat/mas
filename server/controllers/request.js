@@ -116,7 +116,7 @@ async function handleSend({ command, conversation, user, sessionId, backend }) {
         return { status: 'ERROR', errorMsg: 'Message too long. Maximum length is 500 characters.' };
     }
 
-    const msg = await conversationsService.addMessageUnlessDuplicate(user, {
+    const msg = await conversationsService.addMessageUnlessDuplicate(conversation, user.gId, {
         userId: user.gId,
         cat: 'msg',
         body: text
