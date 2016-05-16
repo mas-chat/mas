@@ -27,7 +27,7 @@ exports.init = async function(user, sessionId, maxBacklogLines, cachedUpto, ts) 
     const seenUserIds = {};
     const windows = await Window.find({ userId: user.id });
 
-    await redis.zadd(`sessionlist:${user.gId}}`, ts, sessionId);
+    await redis.zadd(`sessionlist:${user.gId}`, ts, sessionId);
 
     for (const window of windows) {
         const conversationId = window.get('conversationId');
