@@ -289,21 +289,28 @@ async function broadcast(conversation, msg, excludeSession) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     for (const member of members) {
-        let window = await Window.findFirst({
-           userId: member.get('userGId'),
-           conversationId: conversation.id
-        });
+        let userGId = UserGId.create(member.get('userGId'));
+
+        if (!userGId.isMASUser) {
+            continue;
+        }
+
+        const user = await User.fetch(userGId.id);
+
+        let window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
 
         if (!window && msg.id === 'MSG' && conversation.get('type') === '1on1') {
             // The case where one of the 1on1 members has closed his window
-            window = await Window.create(member.get('userGId'), conversation.id);
+            window = await Window.create({ userId: user.id, conversationId: conversation.id });
         } else if (!window) {
-            return;
+            log.warn(user,
+                `User is a member of conversation ${conversation.id}, but the window is missing`);
+            continue;
         }
 
         msg.windowId = window.id;
 
-        await notification.broadcast(member.get('userGId'), msg, excludeSession);
+        await notification.broadcast(user, msg, excludeSession);
     }
 }
 
