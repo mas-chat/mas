@@ -59,7 +59,7 @@ Courier.prototype.listen = async function() {
 
         assert(handler, this.name + ': Missing message handler for: ' + msg.__type);
 
-        await this._reply(msg, handler(msg));
+        await this._reply(msg, await handler(msg));
 
         if (resolveQuit) {
             resolveQuit();
