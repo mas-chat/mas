@@ -698,7 +698,7 @@ async function handleJoin(userId, msg) {
             log.info(userId, 'First mas user joined channel: ' + network + ':' + channel);
         }
 
-        let windowId = await window.findByConversationId(userId, conversation.conversationId);
+        let windowId = await window.findByConversation(userId, conversation);
 
         if (!windowId) {
             await window.create(userId, conversation.conversationId);
@@ -731,12 +731,6 @@ async function handleJoinReject(userId, msg) {
 
     if (conversation) {
         await conversation.removeGroupMember(userId, false, false);
-
-        let windowId = await window.findByConversationId(userId, conversation.conversationId);
-
-        if (windowId) {
-            await window.remove(userId, windowId);
-        }
     }
 
     await disconnectIfIdle(userId, msg.network);
@@ -817,9 +811,6 @@ async function handleKick(userId, msg) {
         // I was kicked
         await addSystemMessage(userId, msg.network,
             'error', 'You have been kicked from ' + channel + ', Reason: ' + reason);
-
-        let windowId = await window.findByConversationId(userId, conversation.conversationId);
-        await window.remove(userId, windowId);
 
         await disconnectIfIdle(userId, msg.network);
     }
