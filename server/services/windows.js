@@ -1,4 +1,4 @@
-qq//
+//
 //   Copyright 2014 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,6 @@ const assert = require('assert'),
       Settings = require('../models/settings'),
       Conversation = require('../models/conversation'),
       ConversationMember = require('../models/ConversationMember'),
-      User = require('../models/user'),
       notification = require('../lib/notification'),
       log = require('../lib/log'),
       conf = require('../lib/conf');
@@ -86,21 +85,6 @@ exports.create = async function(user, conversation) {
 
 exports.findByConversation = async function(user, conversation) {
     return await Window.findFirst({ userId: user.id, conversationId: conversation.id });
-};
-
-exports.removeByConversation = async function(user, conversation) {
-    const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
-
-    if (window) {
-        log.info(user, `Removing window, id: ${window.id}`);
-
-        await notification.broadcast(user, {
-            id: 'CLOSE',
-            windowId: window.id
-        });
-
-        await window.remove();
-    }
 };
 
 exports.isValidDesktop = async function(user, desktop) {

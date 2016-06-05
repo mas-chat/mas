@@ -27,7 +27,6 @@ const assert = require('assert'),
       Conversation = require('../models/conversation'),
       ConversationMember = require('../models/conversationMember'),
       UserGId = require('../models/userGId'),
-      windowService = require('../services/windows'),
       nicksService = require('../services/nicks');
 
 let MSG_BUFFER_SIZE = 200; // TBD: This should come from session:max_backlog setting
@@ -356,7 +355,19 @@ async function remove(conversation) {
 
 async function removeConversationWindow(conversation, userGId) {
     if (userGId.type === 'mas') {
-        await windowService.removeByConversationId(userGId, conversation);
+        const user = await User.fetch(userGId.id);
+        const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
+
+        if (window) {
+            log.info(user, `Removing window, id: ${window.id}`);
+
+            await notification.broadcast(user, {
+                id: 'CLOSE',
+                windowId: window.id
+            });
+
+            await window.remove();
+        }
     }
 }
 
