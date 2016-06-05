@@ -496,10 +496,9 @@ async function handleUpdateProfile({ user, command }) {
 async function handleDestroyAccount({ user }) {
     await user.set('deleted', true);
 
-    let conversationIds = await windowsService.getAllConversationIds(user);
+    let conversations = await windowsService.getAllConversations(user);
 
-    for (let conversationId of conversationIds) {
-        let conversation = await conversationsService.get(conversationId);
+    for (const conversation of conversations) {
         await removeFromConversation(user, conversation);
     }
 
