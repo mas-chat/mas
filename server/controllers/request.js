@@ -254,7 +254,7 @@ async function handleUpdate({ user, command, window, sessionId }) {
         }
     }
 
-    if (typeof(command.alerts) !== 'undefined') {
+    if (command.alerts) {
         for (let alertsKey of acceptedAlerts) {
             let alertsValue = command.alerts[alertsKey];
 
