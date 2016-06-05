@@ -17,7 +17,6 @@
 'use strict';
 
 const path = require('path'),
-      assert = require('assert'),
       redis = require('ioredis'),
       Promise = require('bluebird'),
       redisLuaHelper = require('redis-lua-helper'),
@@ -85,11 +84,8 @@ function createClient({ autoClose = true } = {}) {
     client.__quit = client.quit;
 
     client.run = async function(scriptName, ...params) {
-        let sha = rlh.shasum(scriptName);
-        let res;
-
         try {
-            return client.evalsha(sha, 0, ...params);
+            return client.evalsha(rlh.shasum(scriptName), 0, ...params);
         } catch (e) {
             log.warn(`Lua script failed: ${scriptName}, ${e}`);
         }
