@@ -114,17 +114,6 @@ exports.getWindowsForNetwork = async function(user, network) {
     return matchingWindows;
 };
 
-exports.getNetworks = async function(user) {
-    let conversations = await getAllConversations(user);
-    let networks = {};
-
-    for (let conversation of conversations) {
-        networks[conversation.get('network')] = true;
-    }
-
-    return Object.keys(networks);
-};
-
 async function getAllConversations(user) {
     const windows = await Window.find({ userId: user.id });
     let conversations = [];
