@@ -267,6 +267,18 @@ exports.setPassword = async function(conversation, password) {
     });
 };
 
+exports.getAllConversations = async function(user) {
+    const windows = await Window.find({ userId: user.id });
+    let conversations = [];
+
+    for (const window of windows) {
+        const conversation = await Conversation.fetch(window.get('conversationId'));
+        conversations.push(conversation);
+    }
+
+    return conversations;
+};
+
 async function broadcastAddMessage(conversation, msg, excludeSession) {
     msg.gid = await redis.incr('nextGlobalMsgId');
     msg.ts = Math.round(Date.now() / 1000);

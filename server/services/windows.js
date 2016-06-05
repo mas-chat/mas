@@ -93,10 +93,6 @@ exports.isValidDesktop = async function(user, desktop) {
     return windows.some(window => window.get('desktop') === desktop);
 };
 
-exports.getAllConversations = async function(user) {
-    return await getAllConversations(user);
-};
-
 exports.getWindowsForNetwork = async function(user, network) {
     const windows = await Window.find({ userId: user.id });
     let matchingWindows = [];
@@ -113,15 +109,3 @@ exports.getWindowsForNetwork = async function(user, network) {
 
     return matchingWindows;
 };
-
-async function getAllConversations(user) {
-    const windows = await Window.find({ userId: user.id });
-    let conversations = [];
-
-    for (const window of windows) {
-        const conversation = await Conversation.fetch(window.get('conversationId'));
-        conversations.push(conversation);
-    }
-
-    return conversations;
-}
