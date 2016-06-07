@@ -68,7 +68,7 @@ init.on('beforeShutdown', async function() {
 exports.process = async function(user, sessionId, command) {
     let { windowId, network } = command;
 
-    if (!userExistsCheck(user)) {
+    if (!userExists(user)) {
         // Account has been deleted very recently
         return {};
     }
@@ -77,7 +77,7 @@ exports.process = async function(user, sessionId, command) {
     let window = null;
     let backend = null;
 
-    log.info(user, 'Processing command: ' + JSON.stringify(command));
+    log.info(user, `Processing command: ${JSON.stringify(command)}`);
 
     if (Number.isInteger(windowId)) {
         window = await Window.fetch(windowId);
@@ -95,10 +95,10 @@ exports.process = async function(user, sessionId, command) {
         backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
     }
 
-    if (handlers[command.id]) {
-        return await handlers[command.id]({
-            user, sessionId, window, conversation, backend, command
-        });
+    const handler = handlers[command.id];
+
+    if (handler) {
+        return await handler({ user, sessionId, window, conversation, backend, command });
     } else {
         log.warn(user, `Reveiced unknown request: ${command.id}`);
         return { status: 'ERROR', errorMsg: 'Unknown request' };
@@ -368,7 +368,7 @@ async function start1on1(user, targetUserGId, network) {
     }
 
     if (targetUserGId.type === 'mas') {
-        let userExists = userExistsCheck(targetUserGId);
+        let userExists = userExists(targetUserGId);
 
         if (!userExists) {
             return { status: 'ERROR', errorMsg: 'Unknown MAS userId.' };
@@ -532,7 +532,7 @@ async function sendEmailConfirmationEmail(user, email) {
     }, email || user.get('email'), `Please confirm your email address`);
 }
 
-function userExistsCheck(user) {
+function userExists(user) {
     return user && !user.get('deleted');
 }
 
