@@ -1035,10 +1035,10 @@ async function tryDifferentNick(userId, network) {
 // is in sync?
 
 async function disconnectIfIdle(userId, network) {
-    let windowIds = await window.getWindowIdsForNetwork(userId, network);
+    let windows = await window.getWindowForNetwork(userId, network);
     let onlyServer1on1Left = false;
 
-    if (windowIds.length === 1) {
+    if (windows.length === 1) {
         // There's only one window left, is it IRC server 1on1?
         // If yes, we can disconnect from the server
         let lastConversationId = await window.getConversationId(userId, windowIds[0]);
