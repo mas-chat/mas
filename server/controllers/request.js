@@ -150,44 +150,41 @@ async function handleEdit({ command, conversation, user }) {
     }
 }
 
-async function handleCommand(params) {
-    let userId = params.userId;
-    let command = params.command.command;
-    let commandParams = params.command.params;
-    let targetUserId;
+async function handleCommand({ command, conversation, user, backend }) {
+    const { command: name, params } = command;
 
-    if (!params.conversation) {
+    if (!conversation) {
         return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
     }
 
-    switch (command) {
-        case '1on1':
-            targetUserId = await nicksService.getUserIdFromNick(commandParams.trim(), 'MAS');
+    if (name === '1on1') {
+        const targetUser = await nicksService.getUserFromNick(params.trim(), 'MAS');
 
-            if (!targetUserId) {
-                return { status: 'ERROR', errorMsg: 'Unknown MAS nick.' };
-            }
+        if (!targetUser) {
+            return { status: 'ERROR', errorMsg: 'Unknown MAS nick.' };
+        }
 
-            return await start1on1(userId, targetUserId, 'MAS');
-        case 'ircquery':
-            if (params.network === 'MAS') {
-                return { status: 'ERROR', errorMsg: 'You can only use /ircquery on IRC window' };
-            }
+        return await start1on1(user, targetUser.id, 'MAS');
+    } else if (name === 'ircquery') {
+        if (backend === 'loopbackparser') {
+            return { status: 'ERROR', errorMsg: 'You can only use /ircquery on IRC window' };
+        }
 
-            targetUserId = await ircUser.getUserId(commandParams.trim(), params.network);
+        const targetUserGId = await ircUser.getUserGId(params.trim(), params.network);
 
-            // 1on1s between MAS users are forced through loopback backend as multiple 1on1s between
-            // same people via different networks isn't useful feature, just confusing.
-            return await start1on1(
-                userId, targetUserId, targetUserId.charAt(0) === 'm' ? 'MAS' : params.network);
+        // 1on1s between MAS users are forced through loopback backend as multiple 1on1s between
+        // same people via different networks isn't useful feature, just confusing.
+        const network = targetUserGId.isMASUser() ? 'MAS' : params.network;
+
+        return await start1on1(user, targetUserGId, network);
+    } else {
+        return await courier.call(params.backend, 'textCommand', {
+            userId: userId,
+            conversationId: params.conversation.conversationId,
+            command: command,
+            commandParams: commandParams
+        });
     }
-
-    return await courier.call(params.backend, 'textCommand', {
-        userId: userId,
-        conversationId: params.conversation.conversationId,
-        command: command,
-        commandParams: commandParams
-    });
 }
 
 async function handleCreate({ command, user }) {
