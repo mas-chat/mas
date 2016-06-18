@@ -79,7 +79,11 @@ module.exports = class User extends Model {
     }
 
     get gId() {
-        return `m${this.id}`;
+        if (!this.gId) {
+            this.gId = UserGId.create({ type: 'mas', id: this.id });
+        }
+
+        return this.gId;
     }
 
     async generateNewSecret() {

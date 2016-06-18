@@ -146,10 +146,7 @@ async function processUpdateTopic({ userId, conversationId, topic }) {
 
 async function joinGroup(conversation, user, role) {
     await windowsService.create(user, conversation);
-
-    const userGId = UserGId.create(user);
-    await conversationsService.addGroupMember(conversation, userGId, role);
-
+    await conversationsService.addGroupMember(conversation, user.gId, role);
     await conversationsService.sendFullAddMembers(conversation, user);
 }
 

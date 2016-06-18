@@ -22,18 +22,19 @@ const TYPES = {
 };
 
 module.exports = class UserGId {
-    static create(userGIdString) {
-        if (!userGIdString) {
-            return null;
+    static create(params = {}) {
+        let options = {};
+
+        if (typeof(params) === 'string') {
+            options = {
+                id: parseInt(params.substring(1)),
+                type: Object.keys(TYPES).find(validType => TYPES[validType] === params[0])
+            };
+        } else if (typeof(params) === 'object') {
+            options = params;
         }
 
-        if (typeof(userGIdString) === 'object') {
-            userGIdString = userGIdString.gId;
-        }
-
-        const type = Object.keys(TYPES).find(validType => TYPES[validType] === userGIdString[0]);
-        const id = parseInt(userGIdString.substring(1));
-        const userGId = new this({ id, type });
+        const userGId = new this(options);
 
         return userGId.valid ? userGId : null;
     }
@@ -46,6 +47,10 @@ module.exports = class UserGId {
 
     isMASUser() {
         return this.type === 'mas';
+    }
+
+    isIrcUser() {
+        return this.type === 'irc';
     }
 
     toString() {
