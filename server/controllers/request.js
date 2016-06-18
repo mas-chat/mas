@@ -363,7 +363,7 @@ async function start1on1(user, targetUserGId, network) {
         return { status: 'ERROR', errorMsg: 'Malformed request.' };
     }
 
-    if (user.gId === targetUserGId) {
+    if (targetUserGId.equals(user.gId)) {
         return { status: 'ERROR', errorMsg: 'You can\'t chat with yourself.' };
     }
 
