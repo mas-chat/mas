@@ -131,23 +131,23 @@ async function handleSend({ command, conversation, user, sessionId, backend }) {
     return { status: 'OK', gid: msg.gid, ts: msg.ts };
 }
 
-async function handleEdit(params) {
-    let text = params.command.text;
-    let gid = params.command.gid;
+async function handleEdit({ command, conversation, user }) {
+    const { text, gid } = params.command;
 
-    if (!params.conversation) {
+    if (!conversation) {
         return { status: 'ERROR', errorMsg: 'Protocol error: Invalid windowId.' };
     } else if (!gid) {
         return { status: 'ERROR', errorMsg: 'Protocol error: Missing gid.' };
     }
 
-    let success = await params.conversation.editMessage(params.userId, gid, text);
+    let success = await conversation.editMessage(user, gid, text);
 
     if (success) {
         search.updateMessage(gid, text);
+        return { status: 'OK' };
+    } else {
+        return { status: 'ERROR', errorMsg: 'Editing failed.' };
     }
-
-    return success ? { status: 'OK' } : { status: 'ERROR', errorMsg: 'Editing failed.' };
 }
 
 async function handleCommand(params) {
