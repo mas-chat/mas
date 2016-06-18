@@ -190,11 +190,11 @@ async function handleCommand(params) {
     });
 }
 
-async function handleCreate(params) {
+async function handleCreate({ command, user }) {
     return await courier.call('loopbackparser', 'create', {
-        userId: params.userId,
-        name: params.command.name,
-        password: params.command.password
+        userId: user.id,
+        name: command.name,
+        password: command.password
     });
 }
 
