@@ -20,6 +20,7 @@ const crypto = require('crypto'),
       bcrypt = require('bcrypt'),
       uuid = require('uid2'),
       md5 = require('md5'),
+      UserGId =  require('./userGId'),
       Model = require('./model'),
       userValidator = require('../validators/user');
 
@@ -79,11 +80,11 @@ module.exports = class User extends Model {
     }
 
     get gId() {
-        if (!this.gId) {
-            this.gId = UserGId.create({ type: 'mas', id: this.id });
+        if (!this._gId) {
+            this._gId = UserGId.create({ type: 'mas', id: this.id });
         }
 
-        return this.gId;
+        return this._gId;
     }
 
     async generateNewSecret() {
