@@ -42,7 +42,7 @@ module.exports = class UserGId {
     constructor({ id, type }) {
         this.id = id;
         this.type = type;
-        this.valid = id >= 0 && TYPES[type];
+        this.valid = !!(id >= 0 && TYPES[type]);
     }
 
     isMASUser() {
