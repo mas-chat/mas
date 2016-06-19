@@ -18,9 +18,17 @@
 
 const redis = require('../lib/redis').createClient(),
       notification = require('../lib/notification'),
+      alerts = require('../lib/alert'),
+      courier = require('../lib/courier').create(),
+      friendsService = require('../services/friends'),
+      settingsService = require('../services/settings'),
       Conversation = require('../models/conversation'),
       ConversationMember = require('../models/conversationMember'),
       Window = require('../models/window');
+
+let networks = null;
+
+// TBD: Is courier quit() needed?
 
 exports.init = async function(user, sessionId, maxBacklogLines, cachedUpto, ts) {
     const messages = [];
@@ -33,14 +41,15 @@ exports.init = async function(user, sessionId, maxBacklogLines, cachedUpto, ts) 
         const conversationId = window.get('conversationId');
         const conversation = await Conversation.fetch(conversationId);
         const members = await ConversationMember.find({ conversationId });
-        const role = members.find(member => member.get('userId') === user.gId).get('role');
+
+        const role = members.find(member => member.get('userGId') === user.gId.toString()).get('role');
         let oneOnOneMember = undefined;
 
         if (conversation.get('type') === '1on1') {
-            oneOnOneMember = members.find(member => member.get('userId') !== user.gId);
+            oneOnOneMember = members.find(member => member.get('userGId') !== user.gId);
         }
 
-        members.forEach(member => seenUserIds[member.get('userId')] = true);
+        members.forEach(member => seenUserIds[member.get('userGId')] = true);
 
         messages.push({
             id: 'CREATE',
@@ -69,7 +78,7 @@ exports.init = async function(user, sessionId, maxBacklogLines, cachedUpto, ts) 
             windowId: window.id,
             reset: true,
             members: members.map(member => ({
-                userId: member.get('userId'),
+                userId: member.get('userGId'),
                 role: member.get('role')
             }))
         });
@@ -92,6 +101,17 @@ exports.init = async function(user, sessionId, maxBacklogLines, cachedUpto, ts) 
                 seenUserIds[message.userId] = true;
             }
         });
+
+        await settingsService.sendSet(user, sessionId);
+        await friendsService.sendFriends(user, sessionId);
+        await friendsService.sendFriendConfirm(user, sessionId);
+        await friendsService.informStateChange(user, 'login');
+
+        await alerts.sendAlerts(user, sessionId);
+        await sendNetworkList(user, sessionId);
+
+        // Check if the user was away too long
+        courier.callNoWait('ircparser', 'reconnectifinactive', { userId: user.id });
     }
 
     const userIdList = Object.keys(seenUserIds);
@@ -105,3 +125,12 @@ exports.init = async function(user, sessionId, maxBacklogLines, cachedUpto, ts) 
 
     await notification.send(user, sessionId, messages);
 };
+
+async function sendNetworkList(userGId, sessionId) {
+    networks = networks || (await redis.smembers('networklist'));
+
+    await notification.send(userGId, sessionId, {
+        id: 'NETWORKS',
+        networks: networks
+    });
+}

@@ -22,17 +22,13 @@ const redis = require('../lib/redis').createClient(),
       requestController = require('./request'),
       log = require('../lib/log'),
       friendsService = require('../services/friends'),
-      settingsService = require('../services/settings'),
       sessionService = require('../services/session'),
       User = require('../models/user'),
       UserGId = require('../models/userGId'),
-      alerts = require('../lib/alert'),
       conf = require('../lib/conf'),
-      notification = require('../lib/notification'),
-      courier = require('../lib/courier').create();
+      notification = require('../lib/notification');
 
 let ioServers = [];
-let networks = null;
 let clientSocketList = [];
 
 exports.setup = function(server) {
@@ -100,16 +96,6 @@ exports.setup = function(server) {
             log.info(user, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
 
             await sessionService.init(user, sessionId, maxBacklogMsgs, cachedUpto, ts);
-            await settingsService.sendSet(user, sessionId);
-            await friendsService.sendFriends(user, sessionId);
-            await friendsService.sendFriendConfirm(user, sessionId);
-            await friendsService.informStateChange(user, 'login');
-
-            await alerts.sendAlerts(user, sessionId);
-            await sendNetworkList(user, sessionId);
-
-            // Check if the user was away too long
-            courier.callNoWait('ircparser', 'reconnectifinactive', { userId: user.id });
 
             // Event loop
             for (;;) {
@@ -180,18 +166,7 @@ exports.shutdown = async function() {
     }
 
     terminateClientConnections();
-
-    await courier.quit();
 };
-
-async function sendNetworkList(userGId, sessionId) {
-    networks = networks || (await redis.smembers('networklist'));
-
-    await notification.send(userGId, sessionId, {
-        id: 'NETWORKS',
-        networks: networks
-    });
-}
 
 function checkBacklogParameterBounds(value) {
     let minAllowedBacklog = conf.get('session:min_backlog');
