@@ -16,12 +16,22 @@
 
 'use strict';
 
-const redis = require('../lib/redis').createClient();
+const redis = require('../lib/redis').createClient(),
+      User = require('../models/user');
 
 // User's nick in MAS network is stored 'nick' property in user:<userId> hash. User's nicks in
 // other networks are stored in 'currentnick' property in networks:<userId>:<network> hash.
 // These two locations have their own indices. In the future, nick in MAS network could be
 // be stored also in networks:<userId>:MAS?
+
+exports.getCurrentNick = async function(userGId, network) {
+    if (network === 'MAS') {
+        const user = await User.fetch(userGId.id);
+        return await user.get('nick');
+    } else {
+        return await redis.hget(`networks:${userGId}:${network}`, 'currentnick');
+    }
+};
 
 exports.updateCurrentNick = async function(userGId, network, nick) {
     await removeCurrentNickFromIndex(userGId, network);
@@ -48,14 +58,6 @@ exports.getUserIdFromNick = async function(nick, network) {
         }
     } else {
         return await redis.hget('index:currentnick', network + ':' + nick.toLowerCase());
-    }
-};
-
-exports.getCurrentNick = async function(user, network) {
-    if (network === 'MAS') {
-        return await user.get('nick');
-    } else {
-        return await redis.hget(`networks:${user.gId}:${network}`, 'currentnick');
     }
 };
 
