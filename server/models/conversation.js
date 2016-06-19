@@ -18,4 +18,18 @@
 
 const Model = require('./model');
 
-module.exports = class Conversation extends Model {};
+module.exports = class Conversation extends Model {
+    static async create(props) {
+        const data = {
+            type: props.type,
+            network: props.network,
+            name: props.name,
+            owner: props.name || null,
+            topic: props.topic || null,
+            password: props.password || null
+        };
+
+        return await Model.create.call(this, data);
+   //   return await super.create(data);
+    }
+};
