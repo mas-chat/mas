@@ -17,6 +17,8 @@
 'use strict';
 
 const Promise = require('bluebird'),
+      UserGId = require('../models/userGId'),
+      User = require('../models/user'),
       Friend = require('../models/friend'),
       notification = require('../lib/notification');
 
@@ -29,17 +31,29 @@ exports.sendFriends = async function(user, sessionId) {
 };
 
 exports.sendFriendConfirm = async function(user, sessionId) {
-    const friendAsDst = await Friend.find({ dstUserId: user.id });
-
-    const friendUsers = friendAsDst.filter(record => record.get('state') === 'pending');
+    const friendAsDst = await Friend.find({ srcUserId: user.id });
+    const friendUsers = friendAsDst.filter(friend => friend.get('state') === 'pending');
 
     if (friendUsers.length > 0) {
         // Uses userId property so that related USERS notification is send automatically
         // See lib/notification.js for the details.
-        await notification.send(user, sessionId, {
+        const ntf = {
             id: 'FRIENDSCONFIRM',
-            friends: friendUsers.map(friendUser => ({ userId: friendUser.gId }))
-        });
+            friends: friendUsers.map(friendUser => {
+                const friendUserGId = UserGId.create({
+                    id: friendUser.get('dstUserId'),
+                    type: 'mas'
+                });
+
+                return { userId: friendUserGId.toString() }
+            })
+        };
+
+        if (sessionId) {
+            await notification.send(user, sessionId, ntf);
+        } else {
+            await notification.broadcast(user, ntf);
+        }
     }
 };
 
@@ -53,8 +67,8 @@ exports.informStateChange = async function(user, eventType) {
         } ]
     };
 
-    // Zero means the user is currently online
-    let ts = 0;
+    // null means the user is currently online
+    let ts = null;
 
     if (eventType !== 'login') {
         ts = Date.now();
@@ -164,10 +178,13 @@ async function sendFriends(user, sessionId) {
 }
 
 async function getFriendUsers(user) {
-    const [ friendAsSrc, friendAsDst ] = await Promise.all([
-        Friend.find({ srcUserId: user.id }),
-        Friend.find({ dstUserId: user.id })
-    ]);
+    const friends = await Friend.find({ srcUserId: user.id });
+    const activeFriends = friends.filter(friend => friend.get('state') === 'active');
+    const friendUsers = [];
 
-    return friendAsSrc.concat(friendAsDst).filter(record => record.get('state') === 'active');
+    for (const friend of activeFriends) {
+        friendUsers.push(await User.fetch(friend.get('dstUserId')));
+    }
+
+    return friendUsers;
 }
