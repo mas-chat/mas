@@ -132,7 +132,7 @@ async function handleSend({ command, conversation, user, sessionId, backend }) {
 }
 
 async function handleEdit({ command, conversation, user }) {
-    const { text, gid } = params.command;
+    const { text, gid } = command;
 
     if (!conversation) {
         return { status: 'ERROR', errorMsg: 'Protocol error: Invalid windowId.' };
@@ -418,7 +418,7 @@ async function handleFetch({ command, conversation }) {
     return { status: 'OK', msgs: messages };
 }
 
-async function handleRequestFriend({ user, command, sessionId }) {
+async function handleRequestFriend({ user, command }) {
     let friendCandidateUserGId = UserGId.create(command.userId);
     let friendUser = await User.fetch(friendCandidateUserGId.id);
 
