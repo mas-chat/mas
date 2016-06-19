@@ -66,10 +66,10 @@ async function processSend({ userId, conversationId }) {
     const conversation = await Conversation.fetch(conversationId);
 
     if (conversation.get('type') === '1on1') {
-        let targetUser = await getPeerMember(conversation, user);
-        let userExists = await userExistsCheck(targetUser);
+        const targetMember = await conversationsService.getPeerMember(conversation, user);
+        const targetUser = await User.fetch(targetMember.id);
+        const userExists = await userExists(targetUser);
 
-        // TBD: move to controller
         if (!userExists) {
             return { status: 'ERROR',
                 errorMsg: 'This MAS user\'s account is deleted. Please close this conversation.' };
@@ -165,4 +165,8 @@ async function createInitialGroups() {
             password: null
         });
     }
+}
+
+function userExists(user) {
+    return user && !user.get('deleted');
 }
