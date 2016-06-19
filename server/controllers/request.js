@@ -117,7 +117,7 @@ async function handleSend({ command, conversation, user, sessionId, backend }) {
     }
 
     const msg = await conversationsService.addMessageUnlessDuplicate(conversation, user.gId, {
-        userId: user.gId,
+        userId: user.gId.toString(),
         cat: 'msg',
         body: text
     }, sessionId);
@@ -178,11 +178,11 @@ async function handleCommand({ command, conversation, user, backend }) {
 
         return await start1on1(user, targetUserGId, network);
     } else {
-        return await courier.call(params.backend, 'textCommand', {
-            userId: userId,
-            conversationId: params.conversation.conversationId,
-            command: command,
-            commandParams: commandParams
+        return await courier.call(backend, 'textCommand', {
+            userId: user.id,
+            conversationId: conversation.id,
+            command: name,
+            commandParams: params
         });
     }
 }
@@ -345,7 +345,7 @@ async function handleSet({ user, command }) {
 }
 
 async function handleChat({ user, command }) {
-    let targetUserGId = new UserGId(command.userId);
+    let targetUserGId = UserGId.create(command.userId);
     let network = 'MAS';
 
     if (targetUserGId.type === 'irc') {
@@ -358,16 +358,12 @@ async function handleChat({ user, command }) {
 async function start1on1(user, targetUserGId, network) {
     if (!targetUserGId || !targetUserGId.valid) {
         return { status: 'ERROR', errorMsg: 'Malformed request.' };
-    }
-
-    if (targetUserGId.equals(user.gId)) {
+    } else if (targetUserGId.equals(user.gId)) {
         return { status: 'ERROR', errorMsg: 'You can\'t chat with yourself.' };
-    }
+    } else if (targetUserGId.type === 'mas') {
+        const targetUser = await User.fetch(targetUserGId.id);
 
-    if (targetUserGId.type === 'mas') {
-        let userExists = userExists(targetUserGId);
-
-        if (!userExists) {
+        if (!userExists(targetUser)) {
             return { status: 'ERROR', errorMsg: 'Unknown MAS userId.' };
         }
     }
@@ -423,7 +419,7 @@ async function handleFetch({ command, conversation }) {
 }
 
 async function handleRequestFriend({ user, command, sessionId }) {
-    let friendCandidateUserGId = new UserGId(command.userId);
+    let friendCandidateUserGId = UserGId.create(command.userId);
     let friendUser = await User.fetch(friendCandidateUserGId.id);
 
     if (!friendUser) {
@@ -432,20 +428,20 @@ async function handleRequestFriend({ user, command, sessionId }) {
         return { status: 'ERROR', errorMsg: 'You can\'t add yourself as a friend, sorry.' };
     }
 
-    const existingFriend = await Friend.find({ srcUserId: user.id, dstUserId: friendUser.id });
+    const existingFriend = await Friend.findFirst({ srcUserId: user.id, dstUserId: friendUser.id });
 
     if (existingFriend) {
         return { status: 'ERROR', errorMsg: 'This person is already on your contacts list.' };
     }
 
     await friendsService.createPending(user, friendUser);
-    await friendsService.sendFriendConfirm(friendUser, sessionId);
+    await friendsService.sendFriendConfirm(user, friendUser);
 
     return { status: 'OK' };
 }
 
 async function handleFriendVerdict({ user, command }) {
-    let requestorUserGId = new UserGId(command.userId);
+    let requestorUserGId = UserGId.create(command.userId);
     let friendUser = await User.fetch(requestorUserGId.id);
 
     if (command.allow) {
@@ -535,9 +531,9 @@ function userExists(user) {
 
 async function removeFromConversation(user, conversation) {
     if (conversation.get('type') === 'group') {
-        await conversationsService.removeGroupMember(user.gId);
+        await conversationsService.removeGroupMember(conversation, user.gId);
     } else {
-        await conversationsService.remove1on1Member(user.gId);
+        await conversationsService.remove1on1Member(conversation, user.gId);
     }
 
     // Backend specific cleanup
