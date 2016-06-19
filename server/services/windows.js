@@ -80,7 +80,7 @@ exports.create = async function(user, conversation) {
         await notification.broadcast(user, message);
     }
 
-    return window.id;
+    return window;
 };
 
 exports.findByConversation = async function(user, conversation) {
