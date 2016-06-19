@@ -16,6 +16,15 @@
 
 'use strict';
 
-const Model = require('./model');
+const Model = require('./model'),
+      UserGId = require('./userGId');
 
-module.exports = class ConversationMember extends Model {};
+module.exports = class ConversationMember extends Model {
+    get gId() {
+        if (!this._gId) {
+            this._gId = UserGId.create(this.get('userGId'));
+        }
+
+        return this._gId;
+    }
+};
