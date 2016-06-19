@@ -130,7 +130,6 @@ function convertToMsgs(hits) {
 
 function elasticSearchAvailable() {
     if (!elasticSearchClient) {
-        log.warn('Fetch log request received even elasticsearch is disabled.');
         return false;
     }
 
