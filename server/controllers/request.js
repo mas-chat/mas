@@ -65,8 +65,9 @@ init.on('beforeShutdown', async function() {
     await courier.quit();
 });
 
-exports.process = async function(user, sessionId, command) {
+exports.process = async function(session, command) {
     let { windowId, network } = command;
+    const user = session.user;
 
     if (!userExists(user)) {
         // Account has been deleted very recently
@@ -98,14 +99,14 @@ exports.process = async function(user, sessionId, command) {
     const handler = handlers[command.id];
 
     if (handler) {
-        return await handler({ user, sessionId, window, conversation, backend, command });
+        return await handler({ user, session, window, conversation, backend, command });
     } else {
         log.warn(user, `Reveiced unknown request: ${command.id}`);
         return { status: 'ERROR', errorMsg: 'Unknown request' };
     }
 };
 
-async function handleSend({ command, conversation, user, sessionId, backend }) {
+async function handleSend({ command, conversation, user, session, backend }) {
     let text = command.text;
 
     if (!conversation) {
@@ -117,10 +118,10 @@ async function handleSend({ command, conversation, user, sessionId, backend }) {
     }
 
     const msg = await conversationsService.addMessageUnlessDuplicate(conversation, user.gId, {
-        userId: user.gId.toString(),
+        userGId: user.gId.toString(),
         cat: 'msg',
         body: text
-    }, sessionId);
+    }, session.id);
 
     courier.callNoWait(backend, 'send', {
         userId: user.id,
@@ -140,7 +141,7 @@ async function handleEdit({ command, conversation, user }) {
         return { status: 'ERROR', errorMsg: 'Protocol error: Missing gid.' };
     }
 
-    let success = await conversation.editMessage(user, gid, text);
+    let success = await conversationsService.editMessage(conversation, user, gid, text);
 
     if (success) {
         search.updateMessage(gid, text);
@@ -231,7 +232,7 @@ async function handleClose({ user, conversation }) {
     return { status: 'OK' };
 }
 
-async function handleUpdate({ user, command, window, sessionId }) {
+async function handleUpdate({ user, command, window, session }) {
     let accepted = [ 'row', 'column', 'minimizedNamesList', 'desktop' ];
     let acceptedAlerts = [ 'email', 'notification', 'sound', 'title' ];
 
@@ -273,7 +274,7 @@ async function handleUpdate({ user, command, window, sessionId }) {
             minimizedNamesList: command.minimizedNamesList,
             desktop: command.desktop,
             alerts: Object.keys(newAlerts) === 0 ? undefined : newAlerts
-        }, sessionId);
+        }, session.id);
     }
 
     return { status: 'OK' };
@@ -390,17 +391,10 @@ async function handleAckAlert({ user, command }) {
     return { status: 'OK' };
 }
 
-async function handleLogout({ user, sessionId }) {
-    log.info(user, 'User ended session. SessionId: ' + sessionId);
+async function handleLogout({ user, session }) {
+    log.info(user, 'User ended session. SessionId: ' + session.id);
 
-    setTimeout(async function() {
-        // Give the system some time to deliver the acknowledgment before cleanup
-        let last = await redis.run('deleteSession', user.gId, sessionId);
-
-        if (last) {
-            await friendsService.informStateChange(user, 'logout');
-        }
-    }, 5000);
+    session.state == 'terminating';
 
     return { status: 'OK' };
 }
@@ -441,8 +435,8 @@ async function handleRequestFriend({ user, command }) {
 }
 
 async function handleFriendVerdict({ user, command }) {
-    let requestorUserGId = UserGId.create(command.userId);
-    let friendUser = await User.fetch(requestorUserGId.id);
+    const requestorUserGId = UserGId.create(command.userId);
+    const friendUser = await User.fetch(requestorUserGId.id);
 
     if (command.allow) {
         await friendsService.activateFriends(user, friendUser);
@@ -456,11 +450,11 @@ async function handleRemoveFriend({ user, command }) {
         return { status: 'ERROR', errorMsg: 'Invalid userId.' };
     }
 
-    let friendUserGId = new UserGId(command.userId);
-    let friendUser = await User.fetch(friendUserGId.id);
+    const friendUserGId = UserGId.create(command.userId);
+    const friendUser = await User.fetch(friendUserGId.id);
 
     await friendsService.removeFriends(user, friendUser);
-    await friendsService.sendFriends(user.id);
+    await friendsService.sendFriends(user);
 
     return { status: 'OK' };
 }
@@ -470,8 +464,8 @@ async function handleGetProfile({ user }) {
 }
 
 async function handleUpdateProfile({ user, command }) {
-    let newName = command.name;
-    let newEmail = command.email;
+    const newName = command.name;
+    const newEmail = command.email;
 
     if (newName) {
         await user.set('name', newName);
@@ -495,7 +489,7 @@ async function handleDestroyAccount({ user }) {
         await removeFromConversation(user, conversation);
     }
 
-    let networks = await redis.smembers('networklist');
+    let networks = Object.keys(conf.get('irc:networks'));
 
     for (let network of networks) {
         // Don't remove 'networks::${userId}:${network}' entries as they are needed to

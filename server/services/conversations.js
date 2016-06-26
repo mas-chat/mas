@@ -26,6 +26,7 @@ const assert = require('assert'),
       Window = require('../models/window'),
       Conversation = require('../models/conversation'),
       ConversationMember = require('../models/conversationMember'),
+      ConversationMessage = require('../models/conversationMessage'),
       UserGId = require('../models/userGId'),
       windowsService = require('../services/windows'),
       nicksService = require('../services/nicks');
@@ -137,7 +138,7 @@ exports.addGroupMember = async function(conversation, userGId, role) {
         });
 
         await broadcastAddMessage(conversation, {
-            userId: userGId.toString(),
+            userGId: userGId.toString(),
             cat: 'join',
             body: ''
         });
@@ -198,19 +199,25 @@ exports.addMessage = async function(conversation, msg, excludeSession) {
     return await broadcastAddMessage(conversation, msg, excludeSession);
 };
 
-exports.editMessage = async function(conversation, userGId, gid, text) {
-    let ts = Math.round(Date.now() / 1000);
+exports.editMessage = async function(conversation, user, conversationMessageId, text) {
+    const message = await ConversationMessage.fetch(conversationMessageId);
 
-    let result = await redis.run('editMessage', conversation.id, gid, userGId, text, ts);
-
-    if (!result) {
+    if (!message) {
         return false;
     }
 
-    let msg = JSON.parse(result);
-    msg.id = 'MSG';
+    const userGId = UserGId.create(message.get('userGId'));
 
-    await broadcast(conversation, msg);
+    if (!userGId.equals(user.gId)) {
+        return false;
+    }
+
+    await message.set('body', text);
+    await message.set('updatedTs', new Date());
+    await message.set('status', text === '' ? 'deleted' : 'edited');
+    await message.set('updatedId', await ConversationMessage.currentId());
+
+    await broadcast(conversation, message.convertToNtf());
 
     return true;
 };
@@ -276,21 +283,26 @@ exports.getAllConversations = async function(user) {
     return conversations;
 };
 
-async function broadcastAddMessage(conversation, msg, excludeSession) {
-    msg.gid = await redis.incr('nextGlobalMsgId');
-    msg.ts = Math.round(Date.now() / 1000);
-    msg.id = 'MSG';
+async function broadcastAddMessage(conversation, props, excludeSession) {
+    await scanForEmailNotifications(conversation, props);
 
-    await scanForEmailNotifications(conversation, msg);
+    props.conversationId = conversation.id;
 
-    await redis.lpush(`conversationmsgs:${conversation.id}`, JSON.stringify(msg));
-    await redis.ltrim(`conversationmsgs:${conversation.id}`, 0, MSG_BUFFER_SIZE - 1);
+    const message = await ConversationMessage.create(props);
 
-    await broadcast(conversation, msg, excludeSession);
+    let ids = await ConversationMessage.findIds({ conversationId: conversation.id });
 
-    search.storeMessage(conversation.id, msg);
+    while (ids.length - MSG_BUFFER_SIZE > 0) {
+        const expiredMessage = await ConversationMessage.fetch(ids.shift());
+        await expiredMessage.delete();
+    }
 
-    return msg;
+    const ntf = message.convertToNtf();
+
+    await broadcast(conversation, ntf, excludeSession);
+    search.storeMessage(conversation.id, ntf);
+
+    return ntf;
 }
 
 async function broadcast(conversation, msg, excludeSession) {
@@ -359,7 +371,11 @@ async function remove(conversation) {
         await member.remove();
     }
 
-    await redis.del(`conversationmsgs:${conversation.id}`);
+    const msgs = await ConversationMessage.findAll({ conversationId: conversation.id });
+
+    for (const msg of msgs) {
+        await msg.delete();
+    }
 }
 
 async function removeConversationWindow(conversation, userGId) {
@@ -418,8 +434,14 @@ async function scanForEmailNotifications(conversation, message) {
 
         const user = await User.fetch(userGId.id);
 
-        if (!user || user.get('lastLogout') === 0) {
-            continue; // Mentioned user is deleted or online
+        if (!user) {
+            continue; // Mentioned user is deleted
+        }
+
+        const online = await user.isOnline();
+
+        if (online) {
+            continue; // Mentioned user is online
         }
 
         const window = await Window.findFirst({
@@ -467,7 +489,7 @@ async function removeGroupMember(conversation, member, skipCleanUp, wasKicked, r
     log.info(`User: ${member.get('userGId')} removed from conversation: ${conversation.id}`);
 
     await broadcastAddMessage(conversation, {
-        userId: member.get('userGId'),
+        userGId: member.get('userGId'),
         cat: wasKicked ? 'kick' : 'part',
         body: wasKicked && reason ? reason : ''
     });

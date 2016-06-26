@@ -17,11 +17,11 @@
 'use strict';
 
 const assert = require('assert'),
-    redis = require('../lib/redis').createClient(),
       Window = require('../models/window'),
       Settings = require('../models/settings'),
       Conversation = require('../models/conversation'),
       ConversationMember = require('../models/ConversationMember'),
+      ConversationMessage = require('../models/conversationMessage'),
       notification = require('../lib/notification'),
       log = require('../lib/log'),
       conf = require('../lib/conf');
@@ -66,18 +66,14 @@ exports.create = async function(user, conversation) {
         role: 'u' // Everybody starts as a normal user
     });
 
-    let maxBacklogLines = conf.get('session:max_backlog');
-    let lines = await redis.lrange(`conversationmsgs:${conversation.id}`, 0, maxBacklogLines - 1);
+    const maxBacklogLines = conf.get('session:max_backlog');
+    const messages = await ConversationMessage.find({ conversationId: conversation.id });
 
-    lines = lines || [];
+    for (let message of messages.slice(-1 * maxBacklogLines)) {
+        const ntf = message.convertToNtf();
+        ntf.windowId = window.id
 
-    for (let line of lines) {
-        let message = JSON.parse(line);
-
-        message.id = 'MSG';
-        message.windowId = window.id;
-
-        await notification.broadcast(user, message);
+        await notification.broadcast(user, ntf);
     }
 
     return window;

@@ -58,24 +58,21 @@ exports.sendFriendConfirm = async function(user, sessionId) {
 };
 
 exports.informStateChange = async function(user, eventType) {
+    const ts = Date.now();
+
     let command = {
         id: 'FRIENDS',
         reset: false,
         friends: [ {
-            userId: user.id,
-            online: eventType === 'login'
+            userId: user.gId.toString(),
+            online: eventType === 'login',
+            last: Math.round(ts / 1000)
         } ]
     };
 
-    // null means the user is currently online
-    let ts = null;
-
-    if (eventType !== 'login') {
-        ts = Date.now();
-        command.friends[0].last = Math.round(ts / 1000);
+    if (eventType === 'logout') {
+        await user.set('lastLogout', ts);
     }
-
-    await user.set('lastLogout', ts);
 
     const friendUsers = await getFriendUsers(user);
 
@@ -156,7 +153,7 @@ async function sendFriends(user, sessionId) {
 
     for (let friendUser of friendUsers) {
         const last = friendUser.get('lastLogout');
-        const online = last === null;
+        const online = await friendUser.isOnline();
 
         const friendData = {
             userId: `m${friendUser.id}`,

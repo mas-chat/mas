@@ -24,18 +24,24 @@ const redis = require('../lib/redis').createClient(),
       settingsService = require('../services/settings'),
       Conversation = require('../models/conversation'),
       ConversationMember = require('../models/conversationMember'),
+      ConversationMessage = require('../models/conversationMessage'),
       Window = require('../models/window');
 
 let networks = null;
 
 // TBD: Is courier quit() needed?
 
-exports.init = async function(user, sessionId, maxBacklogLines, cachedUpto, ts) {
-    const messages = [];
-    const seenUserIds = {};
-    const windows = await Window.find({ userId: user.id });
+exports.init = async function(user, session, maxBacklogLines, cachedUpto) {
+    await settingsService.sendSet(user, session);
+    await friendsService.sendFriends(user, session);
+    await friendsService.sendFriendConfirm(user, session);
+    await friendsService.informStateChange(user, 'login');
 
-    await redis.zadd(`sessionlist:${user.gId}`, ts, sessionId);
+    await alerts.sendAlerts(user, session);
+    await sendNetworkList(user, session);
+
+    const messages = [];
+    const windows = await Window.find({ userId: user.id });
 
     for (const window of windows) {
         const conversationId = window.get('conversationId');
@@ -48,8 +54,6 @@ exports.init = async function(user, sessionId, maxBacklogLines, cachedUpto, ts) 
         if (conversation.get('type') === '1on1') {
             oneOnOneMember = members.find(member => member.get('userGId') !== user.gId);
         }
-
-        members.forEach(member => seenUserIds[member.get('userGId')] = true);
 
         messages.push({
             id: 'CREATE',
@@ -83,51 +87,33 @@ exports.init = async function(user, sessionId, maxBacklogLines, cachedUpto, ts) 
             }))
         });
 
-        const lines = await redis.lrange(`conversationmsgs:${conversation.id}`, 0, -1);
+        const lines = await ConversationMessage.find({ conversationId: conversation.id });
         const firstBacklogMessage = lines.length - maxBacklogLines;
 
-        lines.forEach(message => {
-            message = JSON.parse(message);
-
-            const newMsg = message.gid >= firstBacklogMessage && message.gid > cachedUpto;
-            const newEdit = message.status !== null && message.editTs >= cachedUpto
+        lines.forEach((message, index) => {
+            const newMsg = index >= firstBacklogMessage && message.id > cachedUpto;
+            const newEdit = message.get('status') !== 'original' &&
+                message.get('updatedId') >= cachedUpto
 
             if (newMsg || newEdit) {
-                message.id = 'MSG'
-                message.windowId = window.id;
-                delete message.editTs; // editTs is an internal property
+                const ntf = message.convertToNtf();
+                ntf.windowId = window.id;
 
-                messages.push(message);
-                seenUserIds[message.userId] = true;
+                messages.push(ntf);
             }
         });
-
-        await settingsService.sendSet(user, sessionId);
-        await friendsService.sendFriends(user, sessionId);
-        await friendsService.sendFriendConfirm(user, sessionId);
-        await friendsService.informStateChange(user, 'login');
-
-        await alerts.sendAlerts(user, sessionId);
-        await sendNetworkList(user, sessionId);
-
-        // Check if the user was away too long
-        courier.callNoWait('ircparser', 'reconnectifinactive', { userId: user.id });
     }
 
-    const userIdList = Object.keys(seenUserIds);
-    userIdList.push(user.gId); // Always include info about the user itself
+    messages.push({ id: 'INITDONE' });
 
-    await redis.run('introduceNewUserIds', user.gId, sessionId, null, false, ...userIdList);
+    await notification.send(user, session.id, messages);
 
-    messages.push({
-        id: 'INITDONE'
-    });
-
-    await notification.send(user, sessionId, messages);
+    // Check if the user was away too long
+    courier.callNoWait('ircparser', 'reconnectifinactive', { userId: user.id });
 };
 
 async function sendNetworkList(userGId, sessionId) {
-    networks = networks || (await redis.smembers('networklist'));
+    networks = networks || Object.keys(conf.get('irc:networks'));
 
     await notification.send(userGId, sessionId, {
         id: 'NETWORKS',

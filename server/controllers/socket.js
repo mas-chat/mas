@@ -16,7 +16,7 @@
 
 'use strict';
 
-const redis = require('../lib/redis').createClient(),
+const redisModule = require('../lib/redis'),
       socketIo = require('socket.io'),
       uuid = require('uid2'),
       requestController = require('./request'),
@@ -26,7 +26,7 @@ const redis = require('../lib/redis').createClient(),
       User = require('../models/user'),
       UserGId = require('../models/userGId'),
       conf = require('../lib/conf'),
-      notification = require('../lib/notification');
+      userIntroducer = require('../lib/userIntroducer');
 
 let ioServers = [];
 let clientSocketList = [];
@@ -36,15 +36,18 @@ exports.setup = function(server) {
     ioServers.push(io);
 
     io.on('connection', function(socket) {
-        let userGId = null;
-        let user = null;
-        let sessionId = null;
-        let state = 'connected'; // connected, authenticated, disconnected
+        const session = {
+            id: null,
+            user: null,
+            state: 'connected' // connected, authenticated, terminating, disconnected
+        };
+
+        let redisSubscribe = null;
 
         clientSocketList.push(socket);
 
         socket.on('init', async function(data) {
-            if (sessionId) {
+            if (session.id) {
                 socket.emit('terminate', {
                     code: 'MULTIPLE_INITS',
                     reason: 'INIT event can be send only once per socket.io connection.'
@@ -53,10 +56,8 @@ exports.setup = function(server) {
                 return;
             }
 
-            let ts = Math.round(Date.now() / 1000);
-            let secret = data.secret;
-
-            userGId = UserGId.create(data.userId);
+            const secret = data.secret;
+            const userGId = UserGId.create(data.userId);
 
             if (!userGId.valid || !secret) {
                 log.info('Invalid init socket.io message.');
@@ -68,7 +69,8 @@ exports.setup = function(server) {
                 return;
             }
 
-            user = await User.fetch(userGId.id);
+            const user = await User.fetch(userGId.id);
+            const ts = Math.round(Date.now() / 1000);
 
             if (!(user && user.get('secretExpires') > ts &&
                 user.get('secret') === secret && user.get('inUse'))) {
@@ -81,56 +83,78 @@ exports.setup = function(server) {
                 return;
             }
 
-            state = 'authenticated';
-            sessionId = uuid(15);
+            session.user = user;
+            session.state = 'authenticated';
+            session.id = uuid(15);
 
-            let maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
-            let cachedUpto = isInteger(data.cachedUpto) ? data.cachedUpto : 0;
+            const maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
+            const cachedUpto = isInteger(data.cachedUpto) ? data.cachedUpto : 0;
 
             socket.emit('initok', {
-                sessionId: sessionId,
+                sessionId: session.id,
                 maxBacklogMsgs: maxBacklogMsgs
             });
 
-            log.info(user, `New session init: ${sessionId}, client: ${data.clientName}`);
+            log.info(user, `New session init: ${session.id}, client: ${data.clientName}`);
             log.info(user, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
 
-            await sessionService.init(user, sessionId, maxBacklogMsgs, cachedUpto, ts);
+            redisSubscribe = redisModule.createClient();
+            await redisSubscribe.subscribe(user.id, `${user.id}:${session.id}`);
 
-            // Event loop
-            for (;;) {
-                let loopTs = Math.round(Date.now() / 1000);
-                await redis.zadd('sessionlastheartbeat', loopTs, userGId + ':' + sessionId);
+            let processing = false;
+            let queue = [];
 
-                let ntfs = await notification.receive(user, sessionId, 10);
-
-                if (state !== 'authenticated') {
-                    break;
+            async function process(channel, message) {
+                if (processing) {
+                    queue.push(message);
+                    return;
                 }
 
-                for (let ntf of ntfs) {
-                    if (ntf.id !== 'MSG') {
-                        log.info(user,
-                            `Emitted ${ntf.id}. SesId: ${sessionId}, [${JSON.stringify(ntf)}]`);
-                    }
+                processing = true;
 
-                    socket.emit('ntf', ntf);
+                const ntf = JSON.parse(message);
+
+                await userIntroducer.scanAndIntroduce(session, socket, ntf);
+
+                socket.emit('ntf', ntf);
+
+                //if (ntf.id !== 'MSG') {
+                    log.info(user, `Emitted ${ntf.id} (sessionId: ${session.id}) ${message}`);
+                //}
+
+                processing = false;
+
+                if (queue.length > 0) {
+                    process(null, queue.shift());
                 }
             }
+
+            redisSubscribe.on('message', (channel, message) => {
+                if (session.state === 'authenticated') {
+                    process(channel, message);
+                }
+            });
+
+            await userIntroducer.introduce(session, socket, userGId);
+            await sessionService.init(user, session.id, maxBacklogMsgs, cachedUpto);
         });
 
         socket.on('req', async function(data, cb) {
-            if (state !== 'authenticated') {
+            if (session.state !== 'authenticated') {
                 await end('Request arrived before init.');
                 return;
             }
 
-            let resp = await requestController.process(user, sessionId, data);
+            let resp = await requestController.process(session, data);
 
-            await notification.communicateNewUserIds(userGId, sessionId, resp);
+            await userIntroducer.scanAndIntroduce(session, socket, resp);
 
             if (cb) {
                 cb(resp); // Send the response as Socket.io acknowledgment.
+            }
+
+            if (session.state !== 'authenticated') {
+                await end('Request processing requested termination.');
             }
         });
 
@@ -139,22 +163,25 @@ exports.setup = function(server) {
         });
 
         async function end(reason) {
-            if (state !== 'disconnected') {
+            if (session.state !== 'disconnected') {
+                session.state = 'disconnected';
+
                 clientSocketList.splice(clientSocketList.indexOf(socket), 1);
+
                 socket.disconnect(true);
 
-                state = 'disconnected';
+                if (redisSubscribe) {
+                    await redisSubscribe.unsubscribe();
+                    const sessions = await redisSubscribe.pubsub('NUMSUB', session.user.id);
+                    await redisSubscribe.quit();
 
-                let sessionIdExplained = sessionId || '<not assigned>';
-                log.info(`Session ${sessionIdExplained} ended. Reason: ${reason}`);
-
-                if (sessionId) {
-                    let last = await redis.run('deleteSession', userGId, sessionId);
-
-                    if (last) {
-                        await friendsService.informStateChange(user, 'logout');
+                    if (sessions[1] === 0) {
+                        await friendsService.informStateChange(session.user, 'logout');
                     }
                 }
+
+                const sessionIdExplained = session.id || '<not assigned>';
+                log.info(`Session ${sessionIdExplained} ended. Reason: ${reason}`);
             }
         }
     });
