@@ -20,17 +20,13 @@ const _ = require('lodash'),
       CronJob = require('cron').CronJob,
       redis = require('./redis').createClient(),
       log = require('./log'),
-      conf = require('./conf'),
       mailer = require('./mailer'),
-      UserGId = require('../models/userGId'),
       User = require('../models/user'),
-      friends = require('../services/friends');
+      UserGId = require('../models/userGId');
 
 let jobs = [];
 
 exports.init = function() {
-    // Once in an hour
-    jobs.push(new CronJob('0 0 */1 * * *', deleteStaleSessions, null, true));
     // Once in 15 minutes
     jobs.push(new CronJob('0 */10 * * * *', deliverEmails, null, true));
 };
@@ -41,28 +37,6 @@ exports.quit = function() {
     }
 };
 
-// Cleans stale sessions that might exist because of server crash
-async function deleteStaleSessions() {
-    log.info('Running deleteStaleSessions job');
-
-    let ts = Math.round(Date.now() / 1000) - conf.get('session:idle_timeout');
-    let list = await redis.zrangebyscore('sessionlastheartbeat', '-inf', ts);
-
-    for (let item of list) {
-        let fields = item.split(':');
-        let userGIdString = fields[0];
-        let sessionId = fields[1];
-        const user = await User.fetch(new UserGId(userGIdString).id);
-
-        let last = await redis.run('deleteSession', userGIdString, sessionId);
-        log.info(user, 'Removed stale session. SessionId: ' + sessionId);
-
-        if (last) {
-            await friends.informStateChange(user, 'logout');
-        }
-    }
-}
-
 // Sends email notifications to offline users
 async function deliverEmails() {
     log.info('Running deliverEmails job');
@@ -71,10 +45,10 @@ async function deliverEmails() {
         return ntf.groupName ? `Group: ${ntf.groupName}` : `1-on-1: ${ntf.senderName}`;
     }
 
-    let userIds = await redis.smembers('emailnotifications');
+    let userGIdStrings = await redis.smembers('emailnotifications');
 
-    for (let userId of userIds) {
-        let notificationIds = await redis.lrange(`emailnotificationslist:${userId}`, 0, -1);
+    for (let userGIdString of userGIdStrings) {
+        let notificationIds = await redis.lrange(`emailnotificationslist:${userGIdString}`, 0, -1);
         let notifications = [];
 
         for (let notificationId of notificationIds) {
@@ -87,12 +61,14 @@ async function deliverEmails() {
 
         notifications = _.groupBy(notifications, groupNotifications);
 
-        let user = await redis.hgetall(`user:${userId}`);
+        const userGId = UserGId.create(userGIdString);
+
+        let user = await User.fetch(userGId.id);
 
         // TBD: Better would be to clear pending notifications during login
-        if (parseInt(user.lastlogout) !== 0) {
+        if (!user.isOnline()) {
             mailer.send('emails/build/mentioned.hbs', {
-                name: user.name,
+                name: user.get('name'),
                 notifications: notifications
             }, user.email, `You were just mentioned on MeetAndSpeak`);
         }
@@ -101,7 +77,7 @@ async function deliverEmails() {
             await redis.del(`emailnotification:${notificationId}`);
         }
 
-        await redis.del(`emailnotificationslist:${userId}`);
-        await redis.srem('emailnotifications', userId);
+        await redis.del(`emailnotificationslist:${userGIdString}`);
+        await redis.srem('emailnotifications', userGIdString);
     }
 }
