@@ -33,7 +33,7 @@ store.setSchema(1, {
             extAuthId: 'string',
             inUse: { type: 'boolean', allowNull: false },
             lastIp: 'string',
-            lastLogout: 'timestamp',
+            lastLogout: { type: 'timestamp', allowNull: false },
             name: 'string',
             nick: 'string',
             password: 'string',
