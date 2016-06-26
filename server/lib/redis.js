@@ -52,17 +52,6 @@ exports.loadScripts = async function() {
     redisClient.quit();
 };
 
-exports.initDB = async function() {
-    const redisClient = createClient();
-    const ircNetworks = Object.keys(conf.get('irc:networks'));
-
-    await redisClient.run('initNetworkList', 'MAS', ...ircNetworks);
-
-    log.info(`Activated networks: MAS, ${ircNetworks.join(', ')}`);
-
-    redisClient.quit();
-};
-
 exports.shutdown = function() {
     log.info(`Closing ${activeClients.length} redis connections`);
 
