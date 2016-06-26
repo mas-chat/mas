@@ -20,6 +20,7 @@ const crypto = require('crypto'),
       bcrypt = require('bcrypt'),
       uuid = require('uid2'),
       md5 = require('md5'),
+      redis = require('../lib/redis').createClient(),
       UserGId =  require('./userGId'),
       Model = require('./model'),
       userValidator = require('../validators/user');
@@ -85,6 +86,12 @@ module.exports = class User extends Model {
         }
 
         return this._gId;
+    }
+
+    async isOnline() {
+        const sessions = await redis.pubsub('NUMSUB', this.id)
+
+        return sessions[1] !== 0;
     }
 
     async generateNewSecret() {
