@@ -34,7 +34,7 @@ const shutdownOrder = {
 };
 
 process.on('unhandledRejection', function(reason, p){
-    console.log("Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason);
+    console.log("Unhandled Rejection at: Promise ", p, " reason: ", reason); // eslint-disable-line no-console
 });
 
 exports.configureProcess = function(serverName) {
