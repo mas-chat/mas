@@ -159,6 +159,24 @@ store.setSchema(1, {
                 fields: [ 'conversationId' ]
             }
         }
+    },
+    conversationMessages: {
+        definition: {
+            conversationId: { type: 'int', allowNull: false },
+            userGId: 'string',
+            ts: { type: 'timestamp', allowNull: false },
+            updatedTs: 'timestamp',
+            updatedId: 'int',
+            cat: { type: 'string', allowNull: false },
+            body: 'string',
+            status: 'string'
+        },
+        indices: {
+            conversationId: {
+                uniq: false,
+                fields: [ 'conversationId' ]
+            }
+        }
     }
 }).then(function(result) {
     console.log(result.val ? 'RigidDB schema initialized successfully.' : 'ERROR: Schema creation failed.');
