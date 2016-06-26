@@ -15,90 +15,41 @@
 //
 
 'use strict';
-const assert = require('assert');
-const util = require('util'),
-      _ = require('lodash'),
-      redisModule = require('./redis'),
-      redis = redisModule.createClient();
+
+const assert = require('assert'),
+      util = require('util'),
+      redis = require('./redis').createClient();
 
 exports.send = async function(user, sessionId, ntfs) {
-    await queueNotifications(user, sessionId, null, ntfs);
+    await sendNotifications(user, sessionId, null, ntfs);
 };
 
 exports.broadcast = async function(user, ntfs, excludeSessionId) {
-    await queueNotifications(user, null, excludeSessionId, ntfs);
+    await sendNotifications(user, null, excludeSessionId, ntfs);
 };
 
-exports.receive = async function(user, sessionId, timeout) {
-    let command;
-    let commands = [];
-
-    let client = redisModule.createClient({ autoClose: false });
-    let result = await client.brpop(`outbox:${user.gId}:${sessionId}`, timeout);
-
-    if (result) {
-        commands.push(result[1]);
-    }
-
-    // Retrieve other ntfs if there are any
-    while ((command = await client.rpop(`outbox:${user.gId}:${sessionId}`)) !== null) {
-        commands.push(command);
-    }
-
-    await client.quit();
-
-    return commands.map(value => JSON.parse(value));
-};
-
-exports.communicateNewUserIds = async function(user, sessionId, msg) {
-    // TBD: Refactor to a separate module
-    await handleNewUserIds(user, sessionId, null, [ msg ]);
-};
-
-async function queueNotifications(user, sessionId, excludeSessionId, ntfs) {
+async function sendNotifications(user, sessionId, excludeSessionId, ntfs) {
     assert(ntfs);
 
     if (!util.isArray(ntfs)) {
         ntfs = [ ntfs ];
     }
 
-    await handleNewUserIds(user, sessionId, excludeSessionId, ntfs);
+    ntfs = ntfs.map(ntf => typeof(ntf) === 'string' ? ntf : JSON.stringify(ntf));
 
-    ntfs = ntfs.map(function(value) {
-        return typeof(value) === 'string' ? value : JSON.stringify(value);
-    });
+    for (const ntf of ntfs) {
+        if (sessionId) {
+            redis.publish(`${user.id}:${sessionId}`, ntf);
+        } else if (!excludeSessionId) {
+            redis.publish(`${user.id}`, ntf);
+        } else {
+            const subcriptions = await redis.pubsub('CHANNELS', `${user.id}:*`);
 
-    await redis.run('queueOutbox', user.gId, sessionId, excludeSessionId, ...ntfs);
-}
-
-async function handleNewUserIds(user, sessionId, excludeSessionId, ntfs) {
-    let allUserIds = [];
-
-    ntfs.forEach(function(command) {
-        allUserIds = allUserIds.concat(scanUserIds(command));
-    });
-
-    allUserIds = _.uniq(allUserIds);
-    await redis.run(
-        'introduceNewUserIds', user.gId, sessionId, excludeSessionId, false, ...allUserIds);
-}
-
-function scanUserIds(obj) {
-    let res = [];
-
-    if (typeof(obj) === 'string') {
-        obj = JSON.parse(obj);
-    }
-
-    for (let key in obj) {
-        let value = obj[key];
-
-        if (typeof value === 'object') {
-            res = res.concat(scanUserIds(value));
-        } else if (key === 'userId' && value) {
-            res.push(value);
+            for (const subscription of subcriptions) {
+                if (subscription !== `${user.id}:${excludeSessionId}`) {
+                    redis.publish(subscription, ntf);
+                }
+            }
         }
     }
-
-    return res;
 }
