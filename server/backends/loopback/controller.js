@@ -44,7 +44,6 @@ init.on('afterShutdown', function*() {
 
 exports.init = async function() {
     await redisModule.loadScripts();
-    await redisModule.initDB();
     await createInitialGroups();
 
     courier.on('send', processSend);

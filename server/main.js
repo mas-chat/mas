@@ -65,7 +65,6 @@ exports.init = async function(httpServer, httpsServer, setHttpHandlers) {
     routes.register(app);
 
     await redisModule.loadScripts();
-    await redisModule.initDB();
 
     scheduler.init();
 
