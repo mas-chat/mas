@@ -80,18 +80,26 @@ module.exports = class Model {
             new this(this.collection, ids[index], val));
     }
 
-    static async find(props, { onlyFirst = false } = {}) {
+    static async findIds(props) {
         if (!props || Object.keys(props) === 0) {
             return null;
         }
 
         const { err, val } = await db.find(this.collection, props);
 
-        if (!val || (onlyFirst && val.length === 0)) {
+        assert(!err);
+
+        return val.sort((a, b) => a - b);
+    }
+
+    static async find(props, { onlyFirst = false } = {}) {
+        const ids = await this.findIds(props);
+
+        if (onlyFirst && ids.length === 0) {
             return null;
         }
 
-        return await onlyFirst ? this.fetch(val[0]) : this.fetchMany(val);
+        return await onlyFirst ? this.fetch(ids[0]) : this.fetchMany(ids);
     }
 
     static async findFirst(props) {
@@ -122,10 +130,24 @@ module.exports = class Model {
         return record;
     }
 
+    static async currentId() {
+        const { err, val } = await db.currentId(this.collection);
+
+        assert (!err);
+
+        return val;
+    }
+
     get(prop) {
         assert(!this.deleted);
 
         return this._props[prop];
+    }
+
+    getAll() {
+        assert(!this.deleted);
+
+        return Object.assign({}, this._props);
     }
 
     async set(props, value) {
