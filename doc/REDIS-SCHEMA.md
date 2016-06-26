@@ -70,42 +70,42 @@ index:conversation (hash)
 conversationmembers:<conversationId> (hash)
    <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user)
    ...
+
+outbox:<userId>:<sessionId> (list)
+   msg1, msg2
+
+sessionlastheartbeat (zset)
+   userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...
+
+sessionlist:<userId> (zset)
+   sessionId1, timeStamp1, sessionId2, timeStamp2 ...
+
+sessionknownuserids:<userId>:<sessionId> set
+   <userId1>, <userId2>, ...
+
+conversationlist:<userId> (set)
+   <conversationId1>, <conversationId2>, ...
+
+conversationmsgs:<conversationId> (list) [oldest message on the right]
+
+ networklist (set)
+   <network1>, <network2> ...
 ```
 
 MAS Redis structures
 ====================
 
 ```
- sessionlist:<userId> (zset)
-   sessionId1, timeStamp1, sessionId2, timeStamp2 ...
-
- sessionknownuserids:<userId>:<sessionId> set
-   <userId1>, <userId2>, ...
-
- sessionlastheartbeat (zset)
-   userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...
-
- outbox:<userId>:<sessionId> (list)
-   msg1, msg2
-
  networks:<userId>:<network> (hash)
    state (string) (e.g. 'connected', 'connecting', 'disconnected')
    currentnick (text)
    retryCount (int)
-
- networklist (set)
-   <network1>, <network2> ...
 
  index:currentnick (hash)
    <network>:<nick> (string, userId)
 
  1on1conversationhistory:<userId> (list)
    <conversationId1>, <conversationId2>
-
- conversationlist:<userId> (set)
-   <conversationId1>, <conversationId2>, ...
-
- conversationmsgs:<conversationId> (list) [oldest message on the right]
 
  passwordresettoken:<token> (string with expiry time)
    <userId>
@@ -175,9 +175,7 @@ Global IDs
 ==========
 
 ```
- nextGlobalUserId (string) (integer, counter)
  nextGlobalNoteId (string) (integer, counter)
- nextGlobalMsgId (string) (integer, counter)
  nextGlobalConversationId (string) (integer, counter)
  nextGlobalAnnouncementId (string) (integer, counter)
 ```
