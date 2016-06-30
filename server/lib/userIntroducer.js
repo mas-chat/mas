@@ -18,10 +18,11 @@
 
 const UserGId = require('../models/UserGId'),
       log = require('./log'),
+      conf = require('./conf'),
       User = require('../models/user'),
       redis = require('./redis').createClient();
 
-let networks = null;
+const networks = [ 'MAS', ...Object.keys(conf.get('irc:networks')) ];
 
 exports.introduce = async function(session, socket, userGId) {
     await introduceUsers(session, socket, [ userGId ]);
@@ -33,10 +34,6 @@ exports.scanAndIntroduce = async function(session, socket, msg) {
 
 async function introduceUsers(session, socket, userGIds) {
     session.knownUserGIds = session.knownUserGIds || {};
-
-    if (!networks) {
-        networks = await redis.smembers('networklist');
-    }
 
     const newUsers = {};
 

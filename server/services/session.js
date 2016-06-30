@@ -16,10 +16,10 @@
 
 'use strict';
 
-const redis = require('../lib/redis').createClient(),
-      notification = require('../lib/notification'),
+const notification = require('../lib/notification'),
       alerts = require('../lib/alert'),
       courier = require('../lib/courier').create(),
+      conf = require('../lib/conf'),
       friendsService = require('../services/friends'),
       settingsService = require('../services/settings'),
       Conversation = require('../models/conversation'),
@@ -27,7 +27,7 @@ const redis = require('../lib/redis').createClient(),
       ConversationMessage = require('../models/conversationMessage'),
       Window = require('../models/window');
 
-let networks = null;
+const networks = [ 'MAS', ...Object.keys(conf.get('irc:networks')) ];
 
 // TBD: Is courier quit() needed?
 
@@ -113,8 +113,6 @@ exports.init = async function(user, session, maxBacklogLines, cachedUpto) {
 };
 
 async function sendNetworkList(userGId, sessionId) {
-    networks = networks || Object.keys(conf.get('irc:networks'));
-
     await notification.send(userGId, sessionId, {
         id: 'NETWORKS',
         networks: networks
