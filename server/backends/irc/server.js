@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --harmony_async_await
 //
 //   Copyright 2009-2016 Ilkka Oksanen <iao@iki.fi>
 //
@@ -14,13 +14,6 @@
 //   express or implied.  See the License for the specific language
 //   governing permissions and limitations under the License.
 //
-
-require("babel-register")({
-    plugins: [
-        'syntax-async-functions',
-        'transform-async-to-generator'
-    ]
-});
 
 require('../../lib/dropPriviledges').drop();
 

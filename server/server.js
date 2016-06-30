@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --harmony_async_await
 //
 //   Copyright 2009-2014 Ilkka Oksanen <iao@iki.fi>
 //
@@ -16,13 +16,6 @@
 //
 
 'use strict';
-
-require("babel-register")({
-    plugins: [
-        'syntax-async-functions',
-        'transform-async-to-generator'
-    ]
-});
 
 const fs = require('fs'),
       http = require('http'),

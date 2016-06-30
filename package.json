@@ -4,10 +4,6 @@
   "private": true,
   "description": "MAS Web App",
   "dependencies": {
-    "babel-core": "~6.9.0",
-    "babel-plugin-syntax-async-functions": "^6.5.0",
-    "babel-plugin-transform-async-to-generator": "^6.5.0",
-    "babel-register": "^6.5.2",
     "bcrypt": "~0.8.1",
     "bluebird": "~3.4.0",
     "carrier": "~0.3.0",
