@@ -16,9 +16,9 @@
 
 'use strict';
 
-exports.transaction = function(tr) {
-
-}
+// exports.transaction = function(tr) {
+//
+// }
 
 // transaction.start(tr => {
 //     user.set('foo', 42, tr);
