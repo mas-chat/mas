@@ -57,8 +57,7 @@ module.exports = class User extends Model {
             secretExpires: null
         };
 
-        return await Model.create.call(this, data);
-       // return await super.create(data);
+        return await super.create(data);
     }
 
     get config() {

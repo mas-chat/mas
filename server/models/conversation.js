@@ -29,7 +29,6 @@ module.exports = class Conversation extends Model {
             password: props.password || null
         };
 
-        return await Model.create.call(this, data);
-   //   return await super.create(data);
+        return await super.create(data);
     }
 };

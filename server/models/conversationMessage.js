@@ -31,8 +31,7 @@ module.exports = class ConversationMessage extends Model {
             status: 'original'
         };
 
-        return await Model.create.call(this, data);
-   //   return await super.create(data);
+        return await super.create(data);
     }
 
     convertToNtf() {

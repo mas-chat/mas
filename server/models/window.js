@@ -33,7 +33,6 @@ module.exports = class Window extends Model {
             column: 0
         };
 
-        return await Model.create.call(this, data);
-   //   return await super.create(data);
+        return await super.create(data);
     }
 };
