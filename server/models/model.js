@@ -52,7 +52,7 @@ module.exports = class Model {
     }
 
     get valid() {
-        assert(!this.deleted);
+        assert(!this.deleted, 'Tried to validate deleted model');
         return Object.keys(this.errors).length === 0;
     }
 
@@ -87,7 +87,7 @@ module.exports = class Model {
 
         const { err, val } = await db.find(this.collection, props);
 
-        assert(!err);
+        assert(!err, `Model findIds failed: ${err}, ${JSON.stringify(props)}`);
 
         return val.sort((a, b) => a - b);
     }
@@ -133,25 +133,25 @@ module.exports = class Model {
     static async currentId() {
         const { err, val } = await db.currentId(this.collection);
 
-        assert (!err);
+        assert (!err, 'Failed to read currentId');
 
         return val;
     }
 
     get(prop) {
-        assert(!this.deleted);
+        assert(!this.deleted, 'Tried to read deleted model');
 
         return this._props[prop];
     }
 
     getAll() {
-        assert(!this.deleted);
+        assert(!this.deleted, 'Tried to read deleted model');
 
         return Object.assign({}, this._props);
     }
 
     async set(props, value) {
-        assert(!this.deleted);
+        assert(!this.deleted, 'Tried to change to deleted model');
 
         props = convertToObject(props, value);
 
@@ -179,7 +179,7 @@ module.exports = class Model {
     }
 
     async setProperty(props, value) {
-        assert(!this.deleted);
+        assert(!this.deleted, 'Tried to change deleted model');
 
         props = convertToObject(props, value);
 
@@ -193,7 +193,7 @@ module.exports = class Model {
     }
 
     async delete() {
-        assert(!this.deleted);
+        assert(!this.deleted, 'Tried to delete deleted model');
 
         const { val } = await db.delete(this.collection, this.id);
         this.deleted = true;
