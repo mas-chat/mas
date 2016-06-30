@@ -62,6 +62,7 @@ exports.init = async function(httpServer, httpsServer, setHttpHandlers) {
 
     handlebarsHelpers.registerHelpers(hbs);
 
+    log.info('Registering website routes');
     routes.register(app);
 
     await redisModule.loadScripts();
