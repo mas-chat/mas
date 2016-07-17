@@ -16,55 +16,35 @@
 
 'use strict';
 
-const redis = require('../lib/redis').createClient(),
+const NetworkInfo = require('../models/networkInfo'),
       User = require('../models/user');
 
-// User's nick in MAS network is stored 'nick' property in user:<userId> hash. User's nicks in
-// other networks are stored in 'currentnick' property in networks:<userId>:<network> hash.
-// These two locations have their own indices. In the future, nick in MAS network could be
-// be stored also in networks:<userId>:MAS?
+// User's master nick is stored in 'nick' property in user model. User's nicks in
+// networks are stored in 'nick' property in networkInfo model. Currently master nick
+// always equals to MAS nick and can differ in IRC network
 
-exports.getCurrentNick = async function(userGId, network) {
-    if (network === 'MAS') {
-        const user = await User.fetch(userGId.id);
-        return await user.get('nick');
-    } else {
-        return await redis.hget(`networks:${userGId}:${network}`, 'currentnick');
+exports.getCurrentNick = async function(user, network) {
+    const nwInfo = await NetworkInfo.findFirst({ userId: user.id, network: network });
+
+    return nwInfo ? nwInfo.get('nick') : null;
+};
+
+exports.updateCurrentNick = async function(user, network, nick) {
+    const nwInfo = await NetworkInfo.findFirst({ userId: user.id, network: network });
+
+    if (nwInfo) {
+        await nwInfo.set('nick', nick);
     }
 };
 
-exports.updateCurrentNick = async function(userGId, network, nick) {
-    await removeCurrentNickFromIndex(userGId, network);
+exports.getUserFromNick = async function(nick, network) {
+    const nwInfo = await NetworkInfo.find({ nick: nick, network: network });
 
-    await redis.hset(`networks:${userGId}:${network}`, 'currentnick', nick);
-    await redis.hset('index:currentnick', network + ':' + nick.toLowerCase(), userGId);
-};
+    if (nwInfo) {
+        const user = await User.fetch(nwInfo.get('userId'));
 
-exports.removeCurrentNick = async function(userGId, network) {
-    await removeCurrentNickFromIndex(userGId, network);
-
-    // Don't remove or modify currentnick of networks:<userId>:<network> here as the now stale
-    // nick is still needed for USERS command when old discussions are shown.
-};
-
-exports.getUserIdFromNick = async function(nick, network) {
-    if (network === 'MAS') {
-        let userId = await redis.hget('index:user', nick);
-
-        if (userId) {
-            return (await redis.hget(`user:${userId}`, 'deleted')) === 'true' ? null : userId;
-        } else {
-            return null;
-        }
-    } else {
-        return await redis.hget('index:currentnick', network + ':' + nick.toLowerCase());
+        return user.get('deleted') ? null : user;
     }
+
+    return null;
 };
-
-async function removeCurrentNickFromIndex(userGId, network) {
-    let oldNick = await redis.hget(`networks:${userGId}:${network}`, 'currentnick');
-
-    if (oldNick) {
-        await redis.hdel('index:currentnick', network + ':' + oldNick.toLowerCase());
-    }
-}
