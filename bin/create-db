@@ -177,6 +177,29 @@ store.setSchema(1, {
                 fields: [ 'conversationId' ]
             }
         }
+    },
+    networkInfos: {
+        definition: {
+            userId: { type: 'int', allowNull: false },
+            network: { type: 'string', allowNull: false },
+            state: { type: 'string', allowNull: false }, // connected, connecting, disconnected
+            nick: 'string',
+            retryCount: 'int'
+        },
+        indices: {
+            userId: {
+                uniq: false,
+                fields: [ 'userId' ]
+            },
+            userIdNetwork: {
+                uniq: true,
+                fields: [ 'userId', 'network' ]
+            },
+            nick: {
+                uniq: true,
+                fields: [ 'network', { name: 'nick', caseInsensitive: true } ]
+            }
+        }
     }
 }).then(function(result) {
     console.log(result.val ? 'RigidDB schema initialized successfully.' : 'ERROR: Schema creation failed.');
