@@ -401,7 +401,7 @@ async function scanForEmailNotifications(conversation, message) {
         return;
     }
 
-    let userGIds = [];
+    let users = [];
 
     if (conversation.get('type') === 'group') {
         let mentions = message.body.match(/(?:^| )@\S+(?=$| )/g);
@@ -411,31 +411,29 @@ async function scanForEmailNotifications(conversation, message) {
         }
 
         for (let mention of mentions) {
-            let userGIdString = await nicksService.getUserIdFromNick(
+            let user = await nicksService.getUserFromNick(
                 mention.substring(1), conversation.get('network'));
 
-            if (userGIdString) {
-                userGIds.push(UserGId.create(userGIdString));
+            if (user) {
+                users.push(user);
             }
         }
 
-        if (userGIds.length === 0) {
+        if (users.length === 0) {
             return;
         }
     } else {
         const peerMember = await getPeerMember(conversation, UserGId.create(message.userId))
-        userGIds = [ peerMember.gId ];
+        const user = await User.fetch(peerMember.gId.id);
+
+        if (user) {
+            users.push(user);
+        }
     }
 
-    for (const userGId of userGIds) {
-        if (userGId.type !== 'mas') {
+    for (const user of users) {
+        if (user.get('deleted')) {
             continue;
-        }
-
-        const user = await User.fetch(userGId.id);
-
-        if (!user) {
-            continue; // Mentioned user is deleted
         }
 
         const online = await user.isOnline();
@@ -445,7 +443,7 @@ async function scanForEmailNotifications(conversation, message) {
         }
 
         const window = await Window.findFirst({
-            userId: userGId.id,
+            userId: user.id,
             conversationId: conversation.id
         });
 
