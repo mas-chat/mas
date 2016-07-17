@@ -136,7 +136,7 @@ async function processUpdatePassword({ conversationId, password }) {
 async function processUpdateTopic({ userId, conversationId, topic }) {
     const conversation = await Conversation.fetch(conversationId);
     const user = await User.fetch(userId);
-    const nick = await nicksService.getCurrentNick(user.gId, conversation.get('network'));
+    const nick = await nicksService.getCurrentNick(user, 'MAS');
 
     await conversationsService.setTopic(conversation, topic, nick);
 
