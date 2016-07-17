@@ -983,6 +983,7 @@ async function handlePrivmsg(userId, msg, command) {
 }
 
 async function updateNick(userId, network, oldNick, newNick) {
+    // TODO: In case MAS user, do the update here. updateNick only handles IRC users!
     let targetUserId = await redis.run('updateNick', userId, network, oldNick, newNick);
 
     if (targetUserId) {
