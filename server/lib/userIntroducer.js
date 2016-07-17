@@ -20,6 +20,7 @@ const UserGId = require('../models/UserGId'),
       log = require('./log'),
       conf = require('./conf'),
       User = require('../models/user'),
+      nicksService = require('../services/nicks'),
       redis = require('./redis').createClient();
 
 const networks = [ 'MAS', ...Object.keys(conf.get('irc:networks')) ];
@@ -50,11 +51,8 @@ async function introduceUsers(session, socket, userGIds) {
                 entry.gravatar = user.get('emailMD5');
 
                 for (const network of networks) {
-                    const nick = await redis.hget(`networks:${userGId}:${network}`, 'currentnick');
-                    entry.nick[network] = nick;
+                    entry.nick[network] = await nicksService.getCurrentNick(user, network);
                 }
-
-                entry.nick.MAS = user.get('nick');
             } else {
                 entry.name = 'IRC User';
                 entry.gravatar = '';
