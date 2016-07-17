@@ -492,7 +492,7 @@ async function handleDestroyAccount({ user }) {
     let networks = Object.keys(conf.get('irc:networks'));
 
     for (let network of networks) {
-        // Don't remove 'networks::${userId}:${network}' entries as they are needed to
+        // Don't remove networkInfo entries as they are needed to
         // keep discussion logs parseable. Those logs contain userIds, not nicks.
 
         await redis.del(`ircchannelsubscriptions:${user.gId}:${network}`);
