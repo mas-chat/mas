@@ -88,22 +88,22 @@ conversationlist:<userId> (set)
 
 conversationmsgs:<conversationId> (list) [oldest message on the right]
 
- networklist (set)
+networklist (set)
    <network1>, <network2> ...
+
+networks:<userId>:<network> (hash)
+   state (string) (e.g. 'connected', 'connecting', 'disconnected')
+   currentnick (text)
+   retryCount (int)
+
+index:currentnick (hash)
+   <network>:<nick> (string, userId)
 ```
 
 MAS Redis structures
 ====================
 
 ```
- networks:<userId>:<network> (hash)
-   state (string) (e.g. 'connected', 'connecting', 'disconnected')
-   currentnick (text)
-   retryCount (int)
-
- index:currentnick (hash)
-   <network>:<nick> (string, userId)
-
  1on1conversationhistory:<userId> (list)
    <conversationId1>, <conversationId2>
 
