@@ -27,6 +27,7 @@ const redisModule = require('../../lib/redis'),
       log = require('../../lib/log'),
       courier = require('../../lib/courier').createEndPoint('loopbackparser'),
       Conversation = require('../../models/conversation'),
+      NetworkInfo = require('../../models/NetworkInfo'),
       User = require('../../models/user'),
       UserGId = require('../../models/userGId'),
       windowsService = require('../../services/windows'),
@@ -79,6 +80,8 @@ async function processSend({ userId, conversationId }) {
 async function processCreate({ userId, name, password }) {
     const user = await User.fetch(userId);
 
+    await ensureNetworkInfoExists(user);
+
     if (!name) {
         return { status: 'ERROR_NAME_MISSING', errorMsg: 'Name can\'t be empty.' };
     }
@@ -110,6 +113,8 @@ async function processCreate({ userId, name, password }) {
 async function processJoin({ userId, name, password }) {
     const user = await User.fetch(userId);
     const conversation = await Conversation.findFirst({ type: 'group', network: 'MAS', name });
+
+    await ensureNetworkInfoExists(user);
 
     if (!conversation) {
         return { status: 'NOT_FOUND', errorMsg: 'Group doesn\'t exist.' };
@@ -164,6 +169,16 @@ async function createInitialGroups() {
             password: null
         });
     }
+}
+
+async function ensureNetworkInfoExists(user) {
+    await NetworkInfo.create({
+        userId: user.id,
+        network: 'MAS',
+        state: 'connected',
+        nick: user.get('nick'),
+        retryCount: 0
+    });
 }
 
 function userExists(user) {
