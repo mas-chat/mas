@@ -32,7 +32,7 @@
     "koa-send": "~3.2.0",
     "koa-static": "~2.0.0",
     "less-middleware": "~2.1.0",
-    "lodash": "~4.13.0",
+    "lodash": "~4.14.0",
     "md5": "^2.0.0",
     "mkdirp": "~0.5.0",
     "nconf": "~0.8.0",
