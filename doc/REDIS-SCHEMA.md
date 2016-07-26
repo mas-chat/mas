@@ -1,3 +1,83 @@
+
+MAS Redis structures
+====================
+
+```
+ 1on1conversationhistory:<userId> (list)
+   <conversationId1>, <conversationId2>
+
+ passwordresettoken:<token> (string with expiry time)
+   <userId>
+
+ emailconfirmationtoken:<token> (string with expiry time)
+   <userId>
+
+ alert:<id> (hash)
+   message (text)
+   expires (unix time)
+   dismissible (bool)
+   report (bool)
+
+ alertlist (set)
+   <id1>, <id2> ...
+
+ activealerts:<userId> (set)
+   <id3>, <id4> ...
+
+ emailnotifications (set)
+   <userId1>, <userId2> ...
+
+ emailnotificationslist:<userId> (list)
+   <ntfId1>, <ntfId2>, ...
+
+ emailnotification:<ntfId> (hash)
+   type
+   senderName
+   senderNick
+   groupName
+   message
+```
+
+ IRC backend
+ ===========
+
+```
+ inbox:ircparser (list)
+
+ inbox:connectionmanager (list)
+
+ ircuser:<userId>
+   nick (string)
+   network (string)
+
+ index:ircuser (hash)
+   <network>:<nick> (string, userId)
+
+ namesbuffer:<userId>:<conversationId> (hash, expiry 1 min)
+   name1, name2 ...
+
+ ircnamesreporter:<conversationId> (string with expiry time, userId)
+
+ ircchannelsubscriptions:<userId>:<network> (hash)
+   <channelName> (string, password)
+
+```
+
+ Loopback backend
+ ================
+
+```
+ inbox:loopbackparser (list)
+```
+
+Global IDs
+==========
+
+```
+ nextGlobalNoteId (string) (integer, counter)
+ nextGlobalAnnouncementId (string) (integer, counter)
+```
+
 Deleted
 ======
 
@@ -98,84 +178,4 @@ networks:<userId>:<network> (hash)
 
 index:currentnick (hash)
    <network>:<nick> (string, userId)
-```
-
-MAS Redis structures
-====================
-
-```
- 1on1conversationhistory:<userId> (list)
-   <conversationId1>, <conversationId2>
-
- passwordresettoken:<token> (string with expiry time)
-   <userId>
-
- emailconfirmationtoken:<token> (string with expiry time)
-   <userId>
-
- alert:<id> (hash)
-   message (text)
-   expires (unix time)
-   dismissible (bool)
-   report (bool)
-
- alertlist (set)
-   <id1>, <id2> ...
-
- activealerts:<userId> (set)
-   <id3>, <id4> ...
-
- emailnotifications (set)
-   <userId1>, <userId2> ...
-
- emailnotificationslist:<userId> (list)
-   <ntfId1>, <ntfId2>, ...
-
- emailnotification:<ntfId> (hash)
-   type
-   senderName
-   senderNick
-   groupName
-   message
-```
-
- IRC backend
- ===========
-
-```
- inbox:ircparser (list)
-
- inbox:connectionmanager (list)
-
- ircuser:<userId>
-   nick (string)
-   network (string)
-
- index:ircuser (hash)
-   <network>:<nick> (string, userId)
-
- namesbuffer:<userId>:<conversationId> (hash, expiry 1 min)
-   name1, name2 ...
-
- ircnamesreporter:<conversationId> (string with expiry time, userId)
-
- ircchannelsubscriptions:<userId>:<network> (hash)
-   <channelName> (string, password)
-
-```
-
- Loopback backend
- ================
-
-```
- inbox:loopbackparser (list)
-```
-
-Global IDs
-==========
-
-```
- nextGlobalNoteId (string) (integer, counter)
- nextGlobalConversationId (string) (integer, counter)
- nextGlobalAnnouncementId (string) (integer, counter)
 ```
