@@ -54,8 +54,9 @@ exports.init = async function(httpServer, httpsServer, setHttpHandlers) {
     app.use(passport.initialize());
 
     app.use(hbs.middleware({
-        defaultLayout: 'layouts/main',
-        viewPath: path.join(__dirname, 'views')
+        layoutsPath: path.join(__dirname, 'views/layouts'),
+        viewPath: path.join(__dirname, 'views'),
+        defaultLayout: 'main'
     }));
 
     app.use(userSession.auth);
