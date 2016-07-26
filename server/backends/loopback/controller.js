@@ -16,8 +16,6 @@
 
 'use strict';
 
-require('../../lib/dropPriviledges').drop();
-
 const init = require('../../lib/init');
 
 init.configureProcess('loopback');
@@ -43,7 +41,9 @@ init.on('afterShutdown', function*() {
     log.quit();
 });
 
-exports.init = async function() {
+start();
+
+async function start() {
     await redisModule.loadScripts();
     await createInitialGroups();
 

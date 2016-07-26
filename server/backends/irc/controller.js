@@ -18,6 +18,7 @@
 'use strict';
 
 const init = require('../../lib/init');
+
 init.configureProcess('irc');
 
 const assert = require('assert'),

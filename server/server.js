@@ -20,7 +20,6 @@
 const fs = require('fs'),
       http = require('http'),
       https = require('https'),
-      dropPriviledges = require('./lib/dropPriviledges'),
       init = require('./lib/init'),
       conf = require('./lib/conf'),
       log = require('./lib/log');
@@ -84,7 +83,5 @@ function httpListenDone() {
 }
 
 function listensDone() {
-    dropPriviledges.drop();
-
     require('./main').init(httpServer, httpsServer, setHTTPHandlers);
 }

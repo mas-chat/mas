@@ -15,6 +15,4 @@
 //   governing permissions and limitations under the License.
 //
 
-require('../../lib/dropPriviledges').drop();
-
 require('./controller.js');

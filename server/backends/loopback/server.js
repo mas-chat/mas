@@ -15,4 +15,4 @@
 //   governing permissions and limitations under the License.
 //
 
-require('./controller.js').init();
+require('./controller.js');
