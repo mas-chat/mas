@@ -17,17 +17,20 @@
 'use strict';
 
 const redis = require('../../lib/redis').createClient(),
+      UserGId = require('../../models/userGId'),
       nicksService = require('../../services/nicks');
 
-exports.getUserId = function*(nick, network) {
-    let masUserId = yield nicksService.getUserIdFromNick(nick, network);
+exports.getUserGId = async function(nick, network) {
+    let masUserId = await nicksService.getUserFromNick(nick, network);
 
     if (masUserId) {
-        return masUserId;
+        return masUserId.gId;
     }
 
     // UserId for IRC user is created on the fly if the nick in the network hasn't an ID
     // already. This method therefore never returns null.
 
-    return yield redis.run('getOrCreateIrcUserId', nick, network);
+    const gidString = await redis.run('getOrCreateIrcUserId', nick, network);
+
+    return UserGId.create(gidString);
 };

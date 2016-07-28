@@ -22,13 +22,19 @@ const init = require('../../lib/init');
 init.configureProcess('irc');
 
 const assert = require('assert'),
+      conf = require('../../lib/conf'),
       log = require('../../lib/log'),
       redisModule = require('../../lib/redis'),
       redis = redisModule.createClient(),
       courier = require('../../lib/courier').createEndPoint('ircparser'),
-      conversationFactory = require('../../models/conversation'),
-      window = require('../../services/windows'),
-      nicks = require('../../models/nick'),
+      User = require('../../models/user'),
+      Conversation = require('../../models/conversation'),
+      ConversationMember = require('../../models/conversationMember'),
+      NetworkInfo = require('../../models/NetworkInfo'),
+      UserGId = require('../../models/userGId'),
+      conversationsService = require('../../services/conversations'),
+      windowsService = require('../../services/windows'),
+      nicksService = require('../../services/nicks'),
       ircUser = require('./ircUser'),
       ircScheduler = require('./scheduler');
 
@@ -84,14 +90,13 @@ init.on('beforeShutdown', async function() {
     await courier.quit();
 });
 
-init.on('afterShutdown', async function() {
+init.on('afterShutdown', function() {
     redisModule.shutdown();
     log.quit();
 });
 
 (async function() {
     await redisModule.loadScripts();
-    await redisModule.initDB();
     ircScheduler.init();
 
     courier.on('send', processSend);
@@ -112,35 +117,32 @@ init.on('afterShutdown', async function() {
 
 // Upper layer messages
 
-async function processSend(params) {
-    assert(params.conversationId);
+async function processSend({ conversationId, userId, text = '' }) {
+    assert(conversationId);
 
-    let conversation = await conversationFactory.get(params.conversationId);
+    const conversation = await Conversation.fetch(conversationId);
+    const user = await User.fetch(userId);
 
     if (!conversation) {
         return;
     }
 
-    let target = conversation.name;
+    let target = conversation.get('name');
 
-    if (conversation.type === '1on1') {
-        let targetUserId = await conversation.getPeerUserId(params.userId);
-        target = await redis.hget(`ircuser:${targetUserId}`, 'nick');
+    if (conversation.get('type') === '1on1') {
+        const peerUserGId = await conversationsService.getPeerMember(conversation, user.gId);
+        target = await redis.hget(`ircuser:${peerUserGId}`, 'nick');
     }
 
-    let text = params.text || '';
     text = text.replace(/\n/g, ' ');
 
     if (target) {
-        sendPrivmsg(params.userId, conversation.network, target, text);
+        sendPrivmsg(user, conversation.get('network'), target, text);
     }
 }
 
-async function processTextCommand(params) {
-    let conversation = await conversationFactory.get(params.conversationId);
-    let command = params.command;
-    let commandParams = params.commandParams;
-    let network = conversation.network;
+async function processTextCommand({ conversationId, userId, command, commandParams }) {
+    const conversation = await Conversation.findFirst(conversationId);
     let data = false;
 
     switch (command) {
@@ -160,15 +162,20 @@ async function processTextCommand(params) {
         data = `${command} ${commandParams}`;
     }
 
-    courier.callNoWait(
-        'connectionmanager', 'write', { userId: params.userId, network: network, line: data });
+    courier.callNoWait('connectionmanager', 'write', {
+        userId: userId,
+        network: conversation.get('network'),
+        line: data
+    });
 
     return { status: 'OK' };
 }
 
-async function processJoin(params) {
-    let state = await redis.hget(`networks:${params.userId}:${params.network}`, 'state');
-    let channelName = params.name;
+async function processJoin({ userId, network, name, password }) {
+    const user = await User.fetch(userId);
+    const networkInfo = await findOrCreateNetworkInfo(user, network);
+
+    let channelName = name;
     let hasChannelPrefixRegex = /^[&#!+]/;
     let illegalNameRegEx = /\s|\cG|,/; // See RFC2812, section 1.3
 
@@ -177,92 +184,96 @@ async function processJoin(params) {
     }
 
     if (!hasChannelPrefixRegex.test(channelName)) {
-        channelName = '#' + channelName;
+        channelName = `#${channelName}`;
     }
 
-    await redis.hset(`ircchannelsubscriptions:${params.userId}:${params.network}`,
-        channelName.toLowerCase(), params.password);
-
-    if (state === 'connected') {
-        sendJoin(params.userId, params.network, channelName, params.password);
-    } else if (state !== 'connecting') {
-        await connect(params.userId, params.network);
+    await redis.hset(`ircchannelsubscriptions:${user.id}:${network}`,
+        channelName.toLowerCase(), password);
+    if (networkInfo.get('state') === 'connected') {
+        sendJoin(user, network, channelName, password);
+    } else if (networkInfo.get('state') !== 'connecting') {
+        await connect(user, network);
     }
 
     return { status: 'OK' };
 }
 
-async function processClose(params) {
-    let state = await redis.hget(`networks:${params.userId}:${params.network}`, 'state');
+async function processClose({ userId, network, name, conversationType }) {
+    const user = await User.fetch(userId);
+    const networkInfo = await findOrCreateNetworkInfo(user, network);
 
-    await redis.hdel(`ircchannelsubscriptions:${params.userId}:${params.network}`,
-       params.name.toLowerCase());
+    await redis.hdel(`ircchannelsubscriptions:${user.id}:${network}`, name.toLowerCase());
 
-    if (state === 'connected' && params.conversationType === 'group') {
-        sendIRCPart(params.userId, params.network, params.name);
+    if (networkInfo.get('state') === 'connected' && conversationType === 'group') {
+        sendIRCPart(user, network, name);
     }
 
-    await disconnectIfIdle(params.userId, params.network);
+    await disconnectIfIdle(user, network);
 }
 
-async function processUpdatePassword(params) {
-    let conversation = await conversationFactory.get(params.conversationId);
-    let network = conversation.network;
-    let state = await redis.hget(`networks:${params.userId}:${network}`, 'state');
+async function processUpdatePassword({ userId, network, conversationId, password }) {
+    const user = await User.fetch(userId);
+    const conversation = await Conversation.findFirst(conversationId);
+    const networkInfo = await findOrCreateNetworkInfo(user, network);
+
     let modeline = 'MODE ' + conversation.name + ' ';
 
-    if (params.password === '') {
+    if (password === '') {
         modeline += '-k foobar'; // IRC protocol is odd, -k requires dummy parameter
     } else {
-        modeline += '+k ' + params.password;
+        modeline += '+k ' + password;
     }
 
-    if (state !== 'connected') {
+    if (networkInfo.get('state') !== 'connected') {
         return {
             status: 'ERROR',
             errorMsg: 'Can\'t change the password. You are not connected to the IRC network'
         };
     }
 
-    courier.callNoWait(
-        'connectionmanager', 'write', { userId: params.userId, network: network, line: modeline });
+    courier.callNoWait('connectionmanager', 'write', {
+        userId: user.id,
+        network: network,
+        line: modeline
+    });
 
     return { status: 'OK' };
 }
 
-async function processUpdateTopic(params) {
-    let conversation = await conversationFactory.get(params.conversationId);
-    let state = await redis.hget(`networks:${params.userId}:${conversation.network}`, 'state');
+async function processUpdateTopic({ userId, conversationId, network, topic }) {
+    const user = await User.fetch(userId);
+    const conversation = await Conversation.findFirst(conversationId);
+    const networkInfo = await findOrCreateNetworkInfo(user, network);
 
-    if (state !== 'connected') {
+    if (networkInfo.get('state') !== 'connected') {
         return {
             status: 'ERROR',
             errorMsg: 'Can\'t change the topic. You are not connected to the IRC network'
         };
     } else {
         courier.callNoWait('connectionmanager', 'write', {
-            userId: params.userId,
-            network: conversation.network,
-            line: 'TOPIC ' + conversation.name + ' :' + params.topic
+            userId: userId,
+            network: conversation.get('network'),
+            line: `TOPIC ${conversation.get('name')} :${topic}`
         });
 
         return { status: 'OK' };
     }
 }
 
-async function processReconnectIfInactive(params) {
-    let userId = params.userId;
-    let networks = await redis.smembers('networklist');
+async function processReconnectIfInactive({ userId }) {
+    const user = await User.fetch(userId);
+    const networks = Object.keys(conf.get('irc:networks'));
 
     for (let network of networks) {
-        let state = await redis.hget(`networks:${userId}:${network}`, 'state');
+        const networkInfo = await findOrCreateNetworkInfo(user, network);
 
-        if (state === 'idledisconnected') {
-            await addSystemMessage(userId, network, 'info',
+        if (networkInfo.get('state') === 'idledisconnected') {
+            await addSystemMessage(user, network, 'info',
                 'You were disconnected from IRC because you haven\'t used MAS for a long time. ' +
                 'Welcome back! Reconnecting...');
 
-            await connect(userId, network);
+            await connect(user, network);
         }
     }
 }
@@ -271,35 +282,36 @@ async function processReconnectIfInactive(params) {
 
 // Restarted
 async function processRestarted() {
-    await iterateUsersAndNetworks(async function(userId, network) {
-        let channels = await redis.hgetall(`ircchannelsubscriptions:${userId}:${network}`);
-        let state = await redis.hget(`networks:${userId}:${network}`, 'state');
+    await iterateUsersAndNetworks(async function(user, network) {
+        const channels = await redis.hgetall(`ircchannelsubscriptions:${user.id}:${network}`);
+        const networkInfo = await NetworkInfo.findFirst({
+            userId: user.id,
+            network: network
+        });
 
-        if (channels && state !== 'idledisconnected') {
-            log.info(userId, 'Scheduling connect() to IRC network: ' + network);
+        if (channels && networkInfo.get('state') !== 'idledisconnected') {
+            log.info(user, `Scheduling connect() to IRC network: ${network}`);
 
-            await addSystemMessage(userId, network, 'info',
+            await addSystemMessage(user, network, 'info',
                 'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
                 ' server enabled. Next connect will be slow.');
 
-            await connect(userId, network);
+            await connect(user, network);
         }
     });
 }
 
 async function iterateUsersAndNetworks(callback) {
-    let allUsers = await redis.smembers('userlist');
-    let networks = await redis.smembers('networklist');
+    const networks = Object.keys(conf.get('irc:networks'));
+    const allUsers = await User.fetchAll();
 
     if (networks.length === 0) {
-        log.error('No networks.');
+        log.error('No IRC networks configured.');
     }
 
-    for (let userId of allUsers) {
+    for (let user of allUsers) {
         for (let network of networks) {
-            if (network !== 'MAS') {
-                await callback(userId, network);
-            }
+            await callback(user, network);
         }
     }
 }
@@ -328,37 +340,40 @@ async function processData(params) {
 }
 
 // No connection
-async function processNoConnection(params) {
-    await addSystemMessage(params.userId, params.network, 'error',
-        'Can\'t send. Not connected to IRC currently.');
+async function processNoConnection({ userId, network }) {
+    const user = await User.fetch(userId);
+
+    await addSystemMessage(user, network, 'error', 'Can\'t send. Not connected to IRC currently.');
 }
 
 // Connected
-async function processConnected(params) {
-    let user = await redis.hgetall(`user:${params.userId}`);
-    let network = params.network;
+async function processConnected({ userId, network }) {
+    const user = await User.fetch(userId);
 
-    log.info(params.userId, 'Connected to IRC server');
+    log.info(user, 'Connected to IRC server');
 
     let commands = [
-        'NICK ' + user.nick,
-        'USER ' + user.nick + ' 8 * :Real Name (Ralph v1.0)'
+        `NICK ${user.get('nick')}`,
+        `USER ${user.get('nick')} 8 * :${user.get('name')} (MAS v2.0)`
     ];
 
-    courier.callNoWait(
-        'connectionmanager', 'write', { userId: params.userId, network: network, line: commands });
+    courier.callNoWait('connectionmanager', 'write', {
+        userId: user.id,
+        network: network,
+        line: commands
+    });
 }
 
 // Disconnected
-async function processDisconnected(params) {
-    let userId = params.userId;
-    let network = params.network;
-    let previousState = await redis.hget(`networks:${userId}:${network}`, 'state');
+async function processDisconnected({ userId, network, reason }) {
+    const user = await User.fetch(userId);
+    const networkInfo = await findOrCreateNetworkInfo(user, network);
+    const previousState = networkInfo.get('state');
 
-    await redis.hset(`networks:${userId}:${network}`, 'state',
-        previousState === 'idleclosing' ? 'idledisconnected' : 'disconnected');
+    await networkInfo.set('state',
+        previousState === 'idleclosing' ? 'idledisconnected' : 'disconnected')
 
-    await nicks.removeCurrentNick(userId, network);
+    await nicksService.updateCurrentNick(user, network, null);
 
     if (previousState === 'closing' || previousState === 'idleclosing') {
         // We wanted to close the connection, don't reconnect
@@ -366,8 +381,9 @@ async function processDisconnected(params) {
     }
 
     let delay = 30 * 1000; // 30s
-    let msg = `Lost connection to IRC server (${params.reason}). Scheduling a reconnect attempt...`;
-    let count = await redis.hincrby(`networks:${userId}:${network}`, 'retryCount', 1);
+    let msg = `Lost connection to IRC server (${reason}). Scheduling a reconnect attempt...`;
+
+    const count = await networkInfo.set('retryCount',  networkInfo.get('retryCount') + 1);
 
     // Set the backoff timer
     if (count > 3 && count < 8) {
@@ -379,21 +395,22 @@ async function processDisconnected(params) {
             'IRC network if you do not wish to retry.';
     }
 
-    await addSystemMessage(userId, network, 'error', msg);
-    await connect(params.userId, params.network, true, delay);
+    await addSystemMessage(user, network, 'error', msg);
+    await connect(user, network, true, delay);
 }
 
-async function parseIrcMessage(params) {
-    let line = params.line.trim(),
-        parts = line.split(' '),
-        msg = {
-            params: [],
-            numericReply: false,
-            network: params.network,
-            serverName: null,
-            nick: null,
-            userNameAndHost: null
-        };
+async function parseIrcMessage({ userId, line, network }) {
+    line = line.trim();
+
+    const parts = line.split(' ');
+    const msg = {
+        params: [],
+        numericReply: false,
+        network: network,
+        serverName: null,
+        nick: null,
+        userNameAndHost: null
+    };
 
     // See rfc2812
 
@@ -443,49 +460,53 @@ async function parseIrcMessage(params) {
     }
 
     if (handler) {
-        await handler(params.userId, msg, msg.command);
+        const user = await User.fetch(userId);
+        await handler(user, msg, msg.command);
     }
 }
 
-async function addSystemMessage(userId, network, cat, body) {
-    let conversation = await conversationFactory.findOrCreate1on1(userId, 'iSERVER', network);
+async function addSystemMessage(user, network, cat, body) {
+    const serverUserGId = UserGId.create({ type: 'irc', id: 0 });
 
-    await conversation.addMessage({
-        userId: 'iSERVER',
+    let conversation = await conversationsService.findOrCreate1on1(user, serverUserGId, network);
+
+    await conversationsService.addMessage(conversation, {
+        userGId: 'i0',
         cat: cat,
         body: body
     });
 }
 
-async function connect(userId, network, skipRetryCountReset, delay) {
-    let nick = await redis.hget(`user:${userId}`, 'nick');
-    await nicks.updateCurrentNick(userId, network, nick);
+async function connect(user, network, skipRetryCountReset, delay) {
+    const networkInfo = await findOrCreateNetworkInfo(user, network);
+    await nicksService.updateCurrentNick(user, network, user.get('nick'));
 
-    await redis.hset(`networks:${userId}:${network}`, 'state', 'connecting');
+    await networkInfo.set('state', 'connecting');
 
     if (!skipRetryCountReset) {
-        await resetRetryCount(userId, network);
+        await networkInfo.set('retryCount', 0);
     }
 
     let delayText = delay ? ` in ${Math.round(delay / 1000 / 60)} minutes` : '';
-    await addSystemMessage(userId, network, 'info', `Connecting to IRC server${delayText}...`);
 
-    ircMessageBuffer[userId + network] = [];
+    await addSystemMessage(user, network, 'info', `Connecting to IRC server${delayText}...`);
 
-    courier.callNoWait(
-        'connectionmanager', 'connect', {
-            userId: userId,
-            nick: nick,
-            network: network,
-            delay: delay ? delay : 0
-        });
+    ircMessageBuffer[user.id + network] = [];
+
+    courier.callNoWait('connectionmanager', 'connect', {
+        userId: user.id,
+        nick: user.get('nick'),
+        network: network,
+        delay: delay ? delay : 0
+    });
 }
 
-async function disconnect(userId, network) {
-    await redis.hset(`networks:${userId}:${network}`, 'state', 'closing');
+async function disconnect(user, network) {
+    const networkInfo = await findOrCreateNetworkInfo(user, network);
+    await networkInfo.set('state', 'closing');
 
     courier.callNoWait('connectionmanager', 'disconnect', {
-        userId: userId,
+        userId: user.id,
         network: network,
         reason: 'Session ended.'
     });
@@ -494,107 +515,120 @@ async function disconnect(userId, network) {
 async function handleNoop() {
 }
 
-async function handleServerText(userId, msg, code) {
+async function handleServerText(user, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
     let text = msg.params.join(' ');
     // 371, 372 and 375 = MOTD and INFO lines
     let cat = code === '372' || code === '375' || code === '371' ? 'banner' : 'server';
 
     if (text) {
-        await addSystemMessage(userId, msg.network, cat, text);
+        await addSystemMessage(user, msg.network, cat, text);
     }
 }
 
-async function handle401(userId, msg) {
+async function handle401(user, msg) {
     // :irc.localhost 401 ilkka dadaa :No such nick/channel
-    let targetUserId = await ircUser.getUserId(msg.params[0], msg.network);
-    let conversation = await conversationFactory.findOrCreate1on1(
-        userId, targetUserId, msg.network);
+    let targetUserGId = await ircUser.getUserGId(msg.params[0], msg.network);
+    let conversation = await conversationsService.findOrCreate1on1(
+        user, targetUserGId, msg.network);
 
-    await conversation.addMessage({
-        userId: 'iSERVER',
+    await conversation.addMessage(conversation, {
+        userGId: 'i0',
         cat: 'error',
         body: `${msg.params[0]} is not in IRC.`
     });
 }
 
-async function handle043(userId, msg) {
+async function handle043(user, msg) {
     // :*.pl 043 AnDy 0PNEAKPLG :nickname collision, forcing nick change to your unique ID.
     let newNick = msg.params[0];
     let oldNick = msg.target;
 
-    await updateNick(userId, msg.network, oldNick, newNick);
-    await tryDifferentNick(userId, msg.network);
+    await updateNick(user, msg.network, oldNick, newNick);
+    await tryDifferentNick(user, msg.network);
 }
 
-async function handle311(userId, msg) {
+async function handle311(user, msg) {
     // :irc.localhost 311 ilkka_ Mika7 ~Mika7 127.0.0.1 * :Real Name (Ralph v1.0)
     let nick = msg.params[0];
-    let user = msg.params[1];
+    let username = msg.params[1];
     let host = msg.params[2];
     let realName = msg.params[4];
 
-    await addSystemMessage(userId, msg.network, 'server',
-        `--- ${nick} is [${user}@${host}] (${realName})`);
+    await addSystemMessage(user, msg.network, 'server',
+        `--- ${nick} is [${username}@${host}] (${realName})`);
 }
 
-async function handle312(userId, msg) {
+async function handle312(user, msg) {
     // :irc.localhost 312 ilkka_ Mika7 irc.localhost :Darwin ircd default configuration
     let server = msg.params[1];
     let serverInfo = msg.params[2];
 
-    await addSystemMessage(userId, msg.network, 'server',
+    await addSystemMessage(user, msg.network, 'server',
         `--- using server ${server} [${serverInfo}]`);
 }
 
-async function handle317(userId, msg) {
+async function handle317(user, msg) {
     // irc.localhost 317 ilkka_ Mika7 44082 1428703143 :seconds idle, signon time
     let idleTime = msg.params[1];
     let signonTime = new Date(parseInt(msg.params[2]) * 1000).toUTCString();
 
-    await addSystemMessage(userId, msg.network, 'server',
+    await addSystemMessage(user, msg.network, 'server',
         `--- has been idle ${idleTime} seconds. Signed on ${signonTime}`);
 }
 
-async function handle319(userId, msg) {
+async function handle319(user, msg) {
     // :irc.localhost 319 ilkka_ Mika7 :#portaali @#hemmot @#ilves #ceeassa
     let channels = msg.params[1];
 
-    await addSystemMessage(userId, msg.network, 'server', `--- on channels ${channels}`);
+    await addSystemMessage(user, msg.network, 'server', `--- on channels ${channels}`);
 }
 
-async function handle332(userId, msg) {
+async function handle332(user, msg) {
     // :portaali.org 332 ilkka #portaali :Cool topic
-    let channel = msg.params[0];
-    let topic = msg.params[1];
-    let conversation = await conversationFactory.findGroup(channel, msg.network);
+    const channel = msg.params[0];
+    const topic = msg.params[1];
+    const conversation = await Conversation.findFirst({
+        type: 'group',
+        name: channel,
+        network: msg.network
+    });
 
     if (conversation) {
-        await conversation.setTopic(topic, msg.target);
+        await conversationsService.setTopic(conversation, topic, msg.target);
     }
 }
 
-async function handle353(userId, msg) {
+async function handle353(user, msg) {
     // :own.freenode.net 353 drwillie @ #evergreenproject :drwillie ilkkaoks
-    let channel = msg.params[1];
-    let conversation = await conversationFactory.findGroup(channel, msg.network);
+    const channel = msg.params[1];
+    const conversation = await Conversation.findFirst({
+        type: 'group',
+        name: channel,
+        network: msg.network
+    });
+
     let names = msg.params[2].split(' ');
 
     if (conversation) {
-        await bufferNames(names, userId, msg.network, conversation.conversationId);
+        await bufferNames(names, user, msg.network, conversation);
     }
 }
 
-async function handle366(userId, msg) {
+async function handle366(user, msg) {
     // :pratchett.freenode.net 366 il3kkaoksWEB #testi1 :End of /NAMES list.
-    let channel = msg.params[0];
-    let conversation = await conversationFactory.findGroup(channel, msg.network);
+    const channel = msg.params[0];
+    const conversation = await Conversation.findFirst({
+        type: 'group',
+        name: channel,
+        network: msg.network
+    });
 
     if (!conversation) {
         return;
     }
 
-    let key = `namesbuffer:${userId}:${conversation.conversationId}`;
+    let key = `namesbuffer:${user.id}:${conversation.id}`;
     let namesHash = await redis.hgetall(key);
 
     if (Object.keys(namesHash).length > 0) {
@@ -606,76 +640,83 @@ async function handle366(userId, msg) {
         // incremental JOINS messages (preferably from the original reporter.) This leaves some
         // theoretical error edge cases (left as homework) that maybe are worth of fixing.
         let noActiveReporter = await redis.setnx(
-            `ircnamesreporter:${conversation.conversationId}`, userId);
+            `ircnamesreporter:${conversation.id}`, user.id);
 
         if (noActiveReporter) {
-            await redis.expire(`ircnamesreporter:${conversation.conversationId}`, 15); // 15s
-            await conversation.setGroupMembers(namesHash);
+            await redis.expire(`ircnamesreporter:${conversation.id}`, 15); // 15s
+            await conversationsService.setGroupMembers(conversation, namesHash);
         }
     }
 
     await redis.del(key);
 }
 
-async function handle376(userId, msg) {
-    let state = await redis.hget(`networks:${userId}:${msg.network}`, 'state');
+async function handle376(user, msg) {
+    const networkInfo = await findOrCreateNetworkInfo(user, msg.network);
 
-    await addSystemMessage(userId, msg.network, 'server', msg.params.join(' '));
+    await addSystemMessage(user, msg.network, 'server', msg.params.join(' '));
 
-    if (state !== 'connected') {
-        await redis.hset(`networks:${userId}:${msg.network}`, 'state', 'connected');
-        await resetRetryCount(userId, msg.network);
+    if (networkInfo.get('state') !== 'connected') {
+        await networkInfo.set({
+            state: 'connected',
+            retryCount: 0
+        })
 
-        await addSystemMessage(userId, msg.network, 'info', 'Connected to IRC server.');
-        await addSystemMessage(userId, msg.network, 'info',
+        await addSystemMessage(user, msg.network, 'info', 'Connected to IRC server.');
+        await addSystemMessage(user, msg.network, 'info',
             'You can close this window at any time. It\'ll reappear when needed.');
 
         // Tell the client nick we got
-        await redis.run('introduceNewUserIds', userId, null, null, true, userId);
+        // korvaa jollain await redis.run('introduceNewUserIds', userId, null, null, true, userId);
 
         if (msg.network === 'Flowdock') {
             // TBD: The odd case of Flowdock, temporary
-            sendPrivmsg(userId, 'Flowdock', 'NickServ', 'identify xx@example.com password');
+            sendPrivmsg(user, 'Flowdock', 'NickServ', 'identify xx@example.com password');
             return;
         }
 
         let channelsToJoin = await redis.hgetall(
-            `ircchannelsubscriptions:${userId}:${msg.network}`);
+            `ircchannelsubscriptions:${user.id}:${msg.network}`);
 
         if (!channelsToJoin) {
-            log.info(userId, 'Connected, but no channels/1on1s to join. Disconnecting');
-            await disconnect(userId, msg.network);
+            log.info(user, 'Connected, but no channels/1on1s to join. Disconnecting');
+            await disconnect(user, msg.network);
             return;
         }
 
         Object.keys(channelsToJoin).forEach(function(channel) {
-            sendJoin(userId, msg.network, channel, channelsToJoin[channel]);
+            sendJoin(user, msg.network, channel, channelsToJoin[channel]);
         });
     }
 }
 
-async function handle433(userId, msg) {
+async function handle433(user, msg) {
     // :mas.example.org 433 * ilkka :Nickname is already in use.
-    await tryDifferentNick(userId, msg.network);
+    await tryDifferentNick(user, msg.network);
 }
 
-async function handle482(userId, msg) {
+async function handle482(user, msg) {
     // irc.localhost 482 ilkka #test2 :You're not channel operator
     let channel = msg.params[0];
 
     await addSystemMessage(
-        userId, msg.network, 'error', 'You\'re not channel operator on ' + channel);
+        user, msg.network, 'error', 'You\'re not channel operator on ' + channel);
 }
 
-async function handleJoin(userId, msg) {
+async function handleJoin(user, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
     let channel = msg.params[0];
     let network = msg.network;
-    let targetUserId = await ircUser.getUserId(msg.nick, network);
-    let conversation = await conversationFactory.findGroup(channel, network);
-    let subscriptionsKey = `ircchannelsubscriptions:${userId}:${network}`;
+    let targetUser = await nicksService.getUserFromNick(msg.nick, network);
 
-    if (userId === targetUserId) {
+    let conversation = await Conversation.findFirst({
+        type: 'group',
+        name: channel,
+        network
+    });
+
+    if (targetUser && targetUser.id === user.id) {
+        let subscriptionsKey = `ircchannelsubscriptions:${user.id}:${network}`;
         let password = await redis.hget(subscriptionsKey, channel.toLowerCase());
 
         if (password === null) {
@@ -688,22 +729,22 @@ async function handleJoin(userId, msg) {
         }
 
         if (!conversation) {
-            conversation = await conversationFactory.create({
-                owner: msg.userId,
+            conversation = await Conversation.create({
+                owner: user.id,
                 type: 'group',
                 name: channel,
                 password: password,
-                network: network
+                network
             });
 
-            log.info(userId, 'First mas user joined channel: ' + network + ':' + channel);
+            log.info(user, `First mas user joined channel: ${network}:${channel}`);
         }
 
-        let windowId = await window.findByConversation(userId, conversation);
+        let window = await windowsService.findByConversation(user, conversation);
 
-        if (!windowId) {
-            await window.create(userId, conversation.conversationId);
-            await conversation.sendFullAddMembers(userId);
+        if (!window) {
+            await windowsService.create(user, conversation);
+            await conversationsService.sendFullAddMembers(conversation, user);
         }
 
         if (password) {
@@ -711,126 +752,135 @@ async function handleJoin(userId, msg) {
             // the channel. Update conversation password as it's possible that all other
             // mas users were locked out during a server downtime and conversation.password is
             // out of date.
-            await conversation.setPassword(password);
+            await conversation.set('password', password);
         }
     }
 
     if (conversation) {
-        await conversation.addGroupMember(targetUserId, 'u');
+        const userGId = await ircUser.getUserGId(msg.nick, msg.network);
+        await conversationsService.addGroupMember(conversation, userGId, 'u');
     }
 }
 
-async function handleJoinReject(userId, msg) {
+async function handleJoinReject(user, msg) {
     let channel = msg.params[0];
     let reason = msg.params[1];
-    let conversation = await conversationFactory.findGroup(channel, msg.network);
 
-    await addSystemMessage(userId, msg.network,
-        'error', 'Failed to join ' + channel + '. Reason: ' + reason);
+    const conversation = await Conversation.findFirst({
+        type: 'group',
+        name: channel,
+        network: msg.network
+    });
 
-    await redis.hdel(`ircchannelsubscriptions:${userId}:${msg.network}`, channel.toLowerCase());
+    await addSystemMessage(user, msg.network,
+       'error', `Failed to join ${channel}. Reason: ${reason}`);
+
+    await redis.hdel(`ircchannelsubscriptions:${user.id}:${msg.network}`, channel.toLowerCase());
 
     if (conversation) {
-        await conversation.removeGroupMember(userId, false, false);
+        await conversationsService.removeGroupMember(conversation, user.gId, false, false);
     }
 
-    await disconnectIfIdle(userId, msg.network);
+    await disconnectIfIdle(user, msg.network);
 }
 
-async function handleQuit(userId, msg) {
+async function handleQuit(user, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com QUIT :"leaving"
     // let reason = msg.params[0];
-    let targetUserId = await ircUser.getUserId(msg.nick, msg.network);
-    let conversationIds = await window.getAllConversationIds(userId);
+    const conversations = await conversationsService.getAllConversations(user);
 
-    for (let conversationId of conversationIds) {
+    for (let conversation of conversations) {
         // TBD: Send a real quit message instead of part
-        let conversation = await conversationFactory.get(conversationId);
-
-        if (!conversation) {
-            // TBD: Temporary, should be assert
-            log.warn(userId, 'Conversation doesn\'t exist even it should.');
-            continue;
-        }
-
-        if (conversation.network === msg.network && conversation.type === 'group') {
+        if (conversation.get('network') === msg.network && conversation.get('type') === 'group') {
             // No need to check if the targetUser is on this channel,
             // removeGroupMember() is clever enough
-            await conversation.removeGroupMember(targetUserId);
+            const userGId = await ircUser.getUserGId(msg.nick, msg.network);
+            await conversationsService.removeGroupMember(conversation, userGId);
         }
     }
 }
 
-async function handleNick(userId, msg) {
+async function handleNick(user, msg) {
     // :ilkkao!~ilkkao@localhost NICK :foobar
     let newNick = msg.params[0];
     let oldNick = msg.nick;
 
-    await updateNick(userId, msg.network, oldNick, newNick);
+    await updateNick(user, msg.network, oldNick, newNick);
 }
 
-async function handleError(userId, msg) {
+async function handleError(user, msg) {
     let reason = msg.params[0];
 
     await addSystemMessage(
-        userId, msg.network, 'error', 'Connection lost. Server reason: ' + reason);
+        user, msg.network, 'error', 'Connection lost. Server reason: ' + reason);
 
     if (reason.includes('Too many host connections')) {
-        log.warn(userId, 'Too many connections to: ' + msg.network);
+        log.warn(user, 'Too many connections to: ' + msg.network);
 
-        await addSystemMessage(userId, msg.network, 'error',
+        await addSystemMessage(user, msg.network, 'error',
             msg.network + ' IRC network doesn\'t allow more connections. ' +
             'Close all windows related to this IRC network and rejoin another day to try again.');
 
         // Disable auto-reconnect
-        await redis.hset(`networks:${userId}:${msg.network}`, 'state', 'closing');
+        await redis.hset(`networks:${user.id}:${msg.network}`, 'state', 'closing');
     }
 }
 
-async function handleInvite(userId, msg) {
+async function handleInvite(user, msg) {
     // :ilkkao!~ilkkao@127.0.0.1 INVITE buppe :#test2
     let channel = msg.params[1];
 
     await addSystemMessage(
-        userId, msg.network, 'info', msg.nick + ' has invited you to channel ' + channel);
+        user, msg.network, 'info', msg.nick + ' has invited you to channel ' + channel);
 }
 
-async function handleKick(userId, msg) {
+async function handleKick(user, msg) {
     // :ilkkao!~ilkkao@127.0.0.1 KICK #portaali AnDy :no reason
     let channel = msg.params[0];
     let targetNick = msg.params[1];
     let reason = msg.params[2];
 
-    let conversation = await conversationFactory.findGroup(channel, msg.network);
-    let targetUserId = await ircUser.getUserId(targetNick, msg.network);
+    const conversation = await Conversation.findFirst({
+        type: 'group',
+        name: channel,
+        network: msg.network
+    });
+
+    let targetUserGId = await ircUser.getUserGId(targetNick, msg.network);
 
     if (conversation) {
-        await conversation.removeGroupMember(targetUserId, false, true, reason);
+        await conversationsService.removeGroupMember(
+            conversation, targetUserGId, false, true, reason);
     }
 
-    if (targetUserId === userId) {
+    if (targetUserGId.equals(user.gId)) {
         // I was kicked
-        await addSystemMessage(userId, msg.network,
-            'error', 'You have been kicked from ' + channel + ', Reason: ' + reason);
+        await addSystemMessage(user, msg.network,
+            'error', `You have been kicked from ${channel}, Reason: ${reason}`);
 
-        await disconnectIfIdle(userId, msg.network);
+        await disconnectIfIdle(user, msg.network);
     }
 }
 
-async function handlePart(userId, msg) {
+async function handlePart(user, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com PART #portaali :
     let channel = msg.params[0];
     let reason = msg.params[1];
 
-    let conversation = await conversationFactory.findGroup(channel, msg.network);
-    let targetUserId = await ircUser.getUserId(msg.nick, msg.network);
+    const conversation = await Conversation.findFirst({
+        type: 'group',
+        name: channel,
+        network: msg.network
+    });
+
+    let targetUserGId = await ircUser.getUserGId(msg.nick, msg.network);
 
     if (conversation) {
-        await conversation.removeGroupMember(targetUserId, false, false, reason);
+        await conversation.removeGroupMember(targetUserGId, false, false, reason);
     }
 }
 
-async function handleMode(userId, msg) {
+async function handleMode(user, msg) {
     // :ilkka9!~ilkka9@localhost.myrootshell.com MODE #sunnuntai +k foobar3
     let target = msg.params[0];
 
@@ -839,13 +889,17 @@ async function handleMode(userId, msg) {
         return;
     }
 
-    let conversation = await conversationFactory.findGroup(target, msg.network);
+    const conversation = await Conversation.findFirst({
+        type: 'group',
+        name: target,
+        network: msg.network
+    });
 
     if (!conversation) {
         return;
     }
 
-    await conversation.addMessageUnlessDuplicate(userId, {
+    await conversationsService.addMessageUnlessDuplicate(conversation, user, {
         cat: 'info',
         body: 'Mode change: ' + msg.params.join(' ') + ' by ' +
             (msg.nick ? msg.nick : msg.serverName)
@@ -859,23 +913,23 @@ async function handleMode(userId, msg) {
         let modes = command.substring(1).split('');
 
         if (!(oper === '+' || oper === '-' )) {
-            log.warn(userId, 'Received broken MODE command');
+            log.warn(user, 'Received broken MODE command');
             continue;
         }
 
         for (let mode of modes) {
             let param;
             let newClass = null;
-            let targetUserId = null;
+            let targetUserGId = null;
 
             if (mode.match(/[klbeIOovq]/)) {
                 param = modeParams.shift();
 
                 if (!param) {
-                    log.warn(userId, 'Received broken MODE command, parameter missing');
+                    log.warn(user, 'Received broken MODE command, parameter missing');
                     continue;
                 } else if (mode.match(/[ov]/)) {
-                    targetUserId = await ircUser.getUserId(param, msg.network);
+                    targetUserGId = await ircUser.getUserId(param, msg.network);
                 }
             }
 
@@ -886,7 +940,8 @@ async function handleMode(userId, msg) {
                 // Lost oper status
                 newClass = USER;
             } else if (mode === 'v') {
-                let oldClass = await conversation.getMemberRole(targetUserId);
+                let oldClass =
+                    await conversationsService.getMemberRole(conversation, targetUserGId);
 
                 if (oldClass !== OPER) {
                     if (oper === '+') {
@@ -901,42 +956,46 @@ async function handleMode(userId, msg) {
                 let newPassword = oper === '+' ? param : '';
 
                 await conversation.setPassword(newPassword);
-                await redis.hset(`ircchannelsubscriptions:${userId}:${msg.network}`,
+                await redis.hset(`ircchannelsubscriptions:${user.id}:${msg.network}`,
                     target.toLowerCase(), newPassword);
             }
 
             if (newClass) {
-                await conversation.setMemberRole(targetUserId, newClass);
+                await conversationsService.setMemberRole(conversation, targetUserGId, newClass);
             }
         }
     }
 }
 
-async function handleTopic(userId, msg) {
+async function handleTopic(user, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com TOPIC #portaali :My new topic
     let channel = msg.params[0];
     let topic = msg.params[1];
-    let conversation = await conversationFactory.findGroup(channel, msg.network);
+    const conversation = await Conversation.findFirst({
+        type: 'group',
+        name: channel,
+        network: msg.network
+    });
 
     if (conversation) {
-        await conversation.setTopic(topic, msg.nick);
+        await conversationsService.setTopic(conversation, topic, msg.nick);
     }
 }
 
-async function handlePrivmsg(userId, msg, command) {
+async function handlePrivmsg(user, msg, command) {
     // :ilkkao!~ilkkao@127.0.0.1 NOTICE buppe :foo
     let conversation;
-    let sourceUserId;
+    let sourceUserGId;
     let target = msg.params[0];
     let text = msg.params[1];
     let cat = 'msg';
-    let currentNick = await nicks.getCurrentNick(userId, msg.network);
+    let currentNick = await nicksService.getCurrentNick(user, msg.network);
 
     if (msg.nick) {
-        sourceUserId = await ircUser.getUserId(msg.nick, msg.network);
+        sourceUserGId = await ircUser.getUserGId(msg.nick, msg.network);
     } else {
         // Message is from the server if the nick is missing
-        sourceUserId = 'iSERVER';
+        sourceUserGId = UserGId.create({ type: 'irc', id: 0 });
     }
 
     if (text.includes('\u0001') && command === 'PRIVMSG') {
@@ -954,7 +1013,7 @@ async function handlePrivmsg(userId, msg, command) {
 
         if (reply) {
             courier.callNoWait('connectionmanager', 'write', {
-                userId: userId,
+                userId: user.id,
                 network: msg.network,
                 line: 'NOTICE ' + msg.nick + ' :' + reply
             });
@@ -964,51 +1023,56 @@ async function handlePrivmsg(userId, msg, command) {
 
     if (target.toLowerCase() === currentNick.toLowerCase()) {
         // Message is for the user only
-        conversation = await conversationFactory.findOrCreate1on1(
-            userId, sourceUserId, msg.network);
+        conversation = await conversationsService.findOrCreate1on1(
+            user, sourceUserGId, msg.network);
     } else {
-        conversation = await conversationFactory.findGroup(target, msg.network);
+        conversation = await Conversation.findFirst({
+            type: 'group',
+            name: target,
+            network: msg.network
+        });
 
         if (conversation === null) {
             // :verne.freenode.net NOTICE * :*** Got Ident response
-            await addSystemMessage(userId, msg.network, 'info', text);
+            await addSystemMessage(user, msg.network, 'info', text);
             return;
         }
     }
 
-    await conversation.addMessageUnlessDuplicate(userId, {
-        userId: sourceUserId,
+    await conversationsService.addMessageUnlessDuplicate(conversation, user, {
+        userGId: sourceUserGId.toString(),
         cat: cat,
         body: text
     });
 }
 
-async function updateNick(userId, network, oldNick, newNick) {
+async function updateNick(user, network, oldNick, newNick) {
     // TODO: In case MAS user, do the update here. updateNick only handles IRC users!
-    let targetUserId = await redis.run('updateNick', userId, network, oldNick, newNick);
+    let targetUserGIdString = await redis.run('updateNick', user.id, network, oldNick, newNick);
 
-    if (targetUserId) {
-        log.info(userId, 'I\'m first and handle ' + oldNick + ' -> ' + newNick + ' nick change.');
+    if (targetUserGIdString) {
+        log.info(user, `I\'m first and handle ${oldNick} -> ${newNick} nick change.`);
 
         // We haven't heard about this change before
-        let conversations = await conversationFactory.getAllIncludingUser(targetUserId);
+        let conversations = await ConversationMember.find({ userGId: targetUserGIdString });
 
         for (let conversation of conversations) {
             if (conversation.network === network) {
-                await conversation.addMessageUnlessDuplicate(userId, {
+                await conversation.addMessageUnlessDuplicate(conversation, user, {
                     cat: 'info',
-                    body: oldNick + ' is now known as ' + newNick
+                    body: `${oldNick} is now known as ${newNick}`
                 });
 
-                await conversation.sendUsers(targetUserId);
+                // wrong? taytyy lahettaa kaikille
+                await conversationsService.sendFullAddMembers(conversation, user);
             }
         }
     }
 }
 
-async function tryDifferentNick(userId, network) {
-    let nick = await redis.hget(`user:${userId}`, 'nick');
-    let currentNick = await nicks.getCurrentNick(userId, network);
+async function tryDifferentNick(user, network) {
+    let nick = user.get('nick');
+    let currentNick = await nicksService.getCurrentNick(user, network);
 
     if (nick !== currentNick.substring(0, nick.length)) {
         // Current nick is unique ID, let's try to change it to something unique immediately
@@ -1024,48 +1088,47 @@ async function tryDifferentNick(userId, network) {
         currentNick = currentNick + (Math.floor((Math.random() * 10)));
     }
 
-    await nicks.updateCurrentNick(userId, network, currentNick);
+    await nicksService.updateCurrentNick(user, network, currentNick);
 
     courier.callNoWait('connectionmanager', 'write', {
-        userId: userId,
+        userId: user.id,
         network: network,
-        line: 'NICK ' + currentNick
+        line: `NICK ${currentNick}`
     });
 }
 
 // TBD: Add a timer (every 15min?) to send one NAMES to every irc channel to make sure memberslist
 // is in sync?
 
-async function disconnectIfIdle(userId, network) {
-    let windows = await window.getWindowForNetwork(userId, network);
+async function disconnectIfIdle(user, network) {
+    let windows = await windowsService.getWindowForNetwork(user, network);
     let onlyServer1on1Left = false;
 
     if (windows.length === 1) {
         // There's only one window left, is it IRC server 1on1?
         // If yes, we can disconnect from the server
-        let lastConversationId = await window.getConversationId(userId, windowIds[0]);
-        let lastConversation = await conversationFactory.get(lastConversationId);
+        let lastConversation = await Conversation.fetch(windows[0].get('conversationId'));
 
-        if (lastConversation.type === '1on1') {
-            let peeruserId = await lastConversation.getPeerUserId(userId);
+        if (lastConversation.get('type') === '1on1') {
+            let peeruserId = await conversationsService.getPeerMember(lastConversation, user.gId);
 
-            if (peeruserId === 'iSERVER') {
+            if (peeruserId.toString() === 'i0') {
                 onlyServer1on1Left = true;
             }
         }
     }
 
-    if (windowIds.length === 0 || onlyServer1on1Left) {
-        await disconnect(userId, network);
+    if (windows.length === 0 || onlyServer1on1Left) {
+        await disconnect(user, network);
     }
 
     if (onlyServer1on1Left) {
-        await addSystemMessage(userId, network,
+        await addSystemMessage(user, network,
            'info', 'No open windows left for this network. Disconnected.');
     }
 }
 
-async function bufferNames(names, userId, network, conversationId) {
+async function bufferNames(names, user, network, conversation) {
     let namesHash = {};
 
     for (let nick of names) {
@@ -1084,11 +1147,12 @@ async function bufferNames(names, userId, network, conversationId) {
             nick = nick.substring(1);
         }
 
-        let memberUserId = await ircUser.getUserId(nick, network);
-        namesHash[memberUserId] = userClass;
+        let memberUserGId = await ircUser.getUserGId(nick, network);
+        namesHash[memberUserGId.toString()] = userClass;
     }
 
-    let key = 'namesbuffer:' + userId + ':' + conversationId;
+    let key = 'namesbuffer:' + user.id + ':' + conversation.id;
+
     await redis.hmset(key, namesHash);
     await redis.expire(key, 60); // 1 minute. Does cleanup if we never get End of NAMES list reply.
 }
@@ -1117,36 +1181,49 @@ function parseCTCPMessage(text) {
     return { type: 'UNKNOWN' };
 }
 
-async function resetRetryCount(userId, network) {
-    await redis.hset(`networks:${userId}:${network}`, 'retryCount', 0);
-}
-
 function isChannel(text) {
     return [ '&', '#', '+', '!' ].some(function(element) {
         return element === text.charAt(0);
     });
 }
 
-function sendPrivmsg(userId, network, target, text) {
+function sendPrivmsg(user, network, target, text) {
     courier.callNoWait('connectionmanager', 'write', {
-        userId: userId,
+        userId: user.id,
         network: network,
-        line: 'PRIVMSG ' + target + ' :' + text
+        line: `PRIVMSG ${target} :${text}`
     });
 }
 
-function sendJoin(userId, network, channel, password) {
+function sendJoin(user, network, channel, password) {
     courier.callNoWait('connectionmanager', 'write', {
-        userId: userId,
+        userId: user.id,
         network: network,
-        line: 'JOIN ' + channel + ' ' + password
+        line: `JOIN ${channel} ${password}`
     });
 }
 
-function sendIRCPart(userId, network, channel) {
+function sendIRCPart(user, network, channel) {
     courier.callNoWait('connectionmanager', 'write', {
-        userId: userId,
+        userId: user.id,
         network: network,
-        line: 'PART ' + channel
+        line: `PART ${channel}`
     });
+}
+
+async function findOrCreateNetworkInfo(user, network) {
+    let networkInfo = await NetworkInfo.findFirst({
+        userId: user.id,
+        network: network
+    });
+
+    if (!networkInfo) {
+        networkInfo = await NetworkInfo.create({
+            userId: user.id,
+            network: network,
+            nick: user.get('nick'),
+        });
+    }
+
+    return networkInfo;
 }
