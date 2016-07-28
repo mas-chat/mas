@@ -41,9 +41,10 @@ exports.create = async function(user, conversation) {
 
     if (conversation.get('type') === '1on1') {
         const members = await ConversationMember.find({ conversationId: conversation.id });
-        peerMember = members.find(member => member.get('userGId') !== user.gId);
+        peerMember = members.find(member => member.get('userGId') !== user.gIdString);
     }
 
+    // TODO: Copy paste code
     await notification.broadcast(user, {
         id: 'CREATE',
         windowId: window.id,
