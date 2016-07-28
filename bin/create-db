@@ -182,7 +182,7 @@ store.setSchema(1, {
         definition: {
             userId: { type: 'int', allowNull: false },
             network: { type: 'string', allowNull: false },
-            state: { type: 'string', allowNull: false }, // connected, connecting, disconnected
+            state: { type: 'string', allowNull: false }, // disconnected, connecting, connected, closing, idleclosing, idledisconnected
             nick: 'string',
             retryCount: 'int'
         },
