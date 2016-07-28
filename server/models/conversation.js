@@ -24,7 +24,7 @@ module.exports = class Conversation extends Model {
             type: props.type,
             network: props.network,
             name: props.name,
-            owner: props.name || null,
+            owner: props.owner || null,
             topic: props.topic || null,
             password: props.password || null
         };
