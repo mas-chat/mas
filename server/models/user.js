@@ -87,6 +87,14 @@ module.exports = class User extends Model {
         return this._gId;
     }
 
+    get gIdString() {
+        if (!this._gIdString) {
+            this._gIdString = this.gId.toString();
+        }
+
+        return this._gIdString;
+    }
+
     async isOnline() {
         const sessions = await redis.pubsub('NUMSUB', this.id)
 
