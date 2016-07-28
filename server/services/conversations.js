@@ -49,7 +49,7 @@ exports.findOrCreate1on1 = async function(user, peerUserGId, network) {
 
     if (!conversation) {
         conversation = await Conversation.create({
-            owner: user.gId,
+            owner: user.id,
             type: '1on1',
             name,
             network
@@ -57,13 +57,13 @@ exports.findOrCreate1on1 = async function(user, peerUserGId, network) {
 
         await ConversationMember.create({
             conversationId: conversation.id,
-            userGId: user.gId,
+            userGId: user.gIdString,
             role: 'u'
         });
 
         await ConversationMember.create({
             conversationId: conversation.id,
-            userGId: peerUserGId,
+            userGId: peerUserGId.toString(),
             role: 'u'
         });
 
@@ -99,26 +99,28 @@ exports.setMemberRole = async function(conversation, userGId, role) {
     }
 };
 
-exports.setGroupMembers = async function(conversation, newMembers) {
+exports.setGroupMembers = async function(conversation, newMembersHash) {
     let oldMembers = await ConversationMember.find({ conversationId: conversation.id });
 
     for (let oldMember of oldMembers) {
-        if (!newMembers.some(newMember => newMember.gId.equals(oldMember.gId))) {
+        if (!Object.keys(newMembersHash).some(newMember => newMember === oldMember.gId.toString())) {
             await removeGroupMember(conversation, oldMember, true);
         }
     }
 
-    for (let newMember of newMembers) {
-        if (!oldMembers.some(oldMembers => oldMembers.gId.equals(newMember.gId))) {
+    for (let newMember of Object.keys(newMembersHash)) {
+        if (!oldMembers.some(oldMembers => oldMembers.gId.toString === newMember)) {
             await ConversationMember.create({
                 conversationId: conversation.id,
-                userId: newMember.gId.toString(),
-                role: newMember.role
+                userGId: newMember,
+                role: newMembersHash[newMember]
             });
         }
 
-        if (newMember.gId.isMASUser()) {
-            const user = await User.fetch(newMember.gId.id);
+        const newMemberGId = UserGId.create(newMember);
+
+        if (newMemberGId.isMASUser) {
+            const user = await User.fetch(newMemberGId.id);
             await sendFullAddMembers(conversation, user);
         }
     }
@@ -176,7 +178,7 @@ exports.isMember = async function(conversation, user) {
     return members.some(member => member.get('userGId') === user.gId);
 };
 
-exports.addMessageUnlessDuplicate = async function(conversation, userGId, msg, excludeSession) {
+exports.addMessageUnlessDuplicate = async function(conversation, user, msg, excludeSession) {
     // A special filter for IRC backend.
 
     // To support Flowdock network where MAS user's message can come from the IRC server
@@ -185,7 +187,7 @@ exports.addMessageUnlessDuplicate = async function(conversation, userGId, msg, e
     // works because IRC server doesn't echo messages back to their senders. If that wasn't
     // the case, lua reporter logic would fail. (If a reporter sees a new identical message
     // it's not considered as duplicate. Somebody is just repeating their line.)
-    let duplicate = await redis.run('duplicateMsgFilter', userGId, conversation.id,
+    let duplicate = await redis.run('duplicateMsgFilter', user.gIdString, conversation.id,
         msg.userId, msg.body);
 
     if (!duplicate) {
@@ -225,14 +227,6 @@ exports.editMessage = async function(conversation, user, conversationMessageId, 
 exports.sendFullAddMembers = async function(conversation, user) {
     return await sendFullAddMembers(conversation, user);
 }
-
-exports.sendUsers = async function(conversation, userGId) {
-    const members = await ConversationMember.find({ conversationId: conversation.id });
-
-    for (let member of members) {
-        await redis.run('introduceNewUserIds', member.get('userGId'), null, null, true, userGId);
-    }
-};
 
 exports.setTopic = async function(conversation, topic, nickName) {
     const changes = await conversation.set({ topic });
@@ -289,7 +283,6 @@ async function broadcastAddMessage(conversation, props, excludeSession) {
     props.conversationId = conversation.id;
 
     const message = await ConversationMessage.create(props);
-
     let ids = await ConversationMessage.findIds({ conversationId: conversation.id });
 
     while (ids.length - MSG_BUFFER_SIZE > 0) {
@@ -316,7 +309,6 @@ async function broadcast(conversation, msg, excludeSession) {
         }
 
         const user = await User.fetch(userGId.id);
-
         let window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
 
         if (!window && msg.id === 'MSG' && conversation.get('type') === '1on1') {
@@ -423,7 +415,7 @@ async function scanForEmailNotifications(conversation, message) {
             return;
         }
     } else {
-        const peerMember = await getPeerMember(conversation, UserGId.create(message.userId))
+        const peerMember = await getPeerMember(conversation, UserGId.create(message.userGId))
         const user = await User.fetch(peerMember.gId.id);
 
         if (user) {
