@@ -117,7 +117,7 @@ async function handleSend({ command, conversation, user, session, backend }) {
         return { status: 'ERROR', errorMsg: 'Message too long. Maximum length is 500 characters.' };
     }
 
-    const msg = await conversationsService.addMessageUnlessDuplicate(conversation, user.gId, {
+    const msg = await conversationsService.addMessageUnlessDuplicate(conversation, user, {
         userGId: user.gId.toString(),
         cat: 'msg',
         body: text
@@ -175,7 +175,7 @@ async function handleCommand({ command, conversation, user, backend }) {
 
         // 1on1s between MAS users are forced through loopback backend as multiple 1on1s between
         // same people via different networks isn't useful feature, just confusing.
-        const network = targetUserGId.isMASUser() ? 'MAS' : params.network;
+        const network = targetUserGId.isMASUser ? 'MAS' : params.network;
 
         return await start1on1(user, targetUserGId, network);
     } else {
