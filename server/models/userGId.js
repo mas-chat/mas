@@ -48,11 +48,11 @@ module.exports = class UserGId {
         return !!(this.id >= 0 && TYPES[this.type])
     }
 
-    isMASUser() {
+    get isMASUser() {
         return this.type === 'mas';
     }
 
-    isIrcUser() {
+    get isIrcUser() {
         return this.type === 'irc';
     }
 
