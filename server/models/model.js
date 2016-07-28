@@ -80,6 +80,12 @@ module.exports = class Model {
             new this(this.collection, ids[index], val));
     }
 
+    static async fetchAll() {
+        const { err, val } = await db.list(this.collection);
+
+        return err ? [] : await this.fetchMany(val);
+    }
+
     static async findIds(props) {
         if (!props || Object.keys(props) === 0) {
             return null;
@@ -120,6 +126,7 @@ module.exports = class Model {
             if (err === 'notUnique') {
                 record.errors = explainIndexErrors(indices, record.config.indexErrorDescriptions);
             } else if (err) {
+                console.log(`DB ERROR: ${err}`); // Temporary
                 throw new Error(`DB ERROR: ${err}`);
             } else {
                 record.id = val || null;
