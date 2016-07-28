@@ -21,30 +21,36 @@ const UserGId = require('../models/UserGId'),
       conf = require('./conf'),
       User = require('../models/user'),
       nicksService = require('../services/nicks'),
-      redis = require('./redis').createClient();
+      redis = require('./redis').createClient(),
+      notification = require('../lib/notification');
 
 const networks = [ 'MAS', ...Object.keys(conf.get('irc:networks')) ];
 
-exports.introduce = async function(session, socket, userGId) {
-    await introduceUsers(session, socket, [ userGId ]);
+exports.introduce = async function(user, userGId, session) {
+    await introduceUsers(user, [ userGId ], session, null);
 }
 
-exports.scanAndIntroduce = async function(session, socket, msg) {
-    await introduceUsers(session, socket, scanUserGIds(msg));
+exports.scanAndIntroduce = async function(user, msg, session, socket) {
+    await introduceUsers(user, scanUserGIds(msg), session, socket);
 };
 
-async function introduceUsers(session, socket, userGIds) {
-    session.knownUserGIds = session.knownUserGIds || {};
+async function introduceUsers(user, userGIds, session, socket) {
+    if (session) {
+        // If no session is given, broadcast userGids without remembering them
+        session.knownUserGIds = session.knownUserGIds || {};
+    }
 
     const newUsers = {};
 
     for (const userGId of userGIds) {
-        if (!session.knownUserGIds[userGId.toString()]) {
-            session.knownUserGIds[userGId.toString()] = true;
+        if (!session || !session.knownUserGIds[userGId.toString()]) {
+            if (session) {
+                session.knownUserGIds[userGId.toString()] = true;
+            }
 
             const entry = { nick: {} };
 
-            if (userGId.isMASUser()) {
+            if (userGId.isMASUser) {
                 const user = await User.fetch(userGId.id);
 
                 entry.name = user.get('name');
@@ -57,7 +63,11 @@ async function introduceUsers(session, socket, userGIds) {
                 entry.name = 'IRC User';
                 entry.gravatar = '';
 
-                const nick = await redis.hget(`ircuser:${userGId}`, 'nick');
+                let nick = await redis.hget(`ircuser:${userGId}`, 'nick');
+
+                if (userGId.id === 0) {
+                   nick = 'server';
+                }
 
                 for (const network of networks) {
                     entry.nick[network] = nick // This is a shortcut, ircUserId is scoped by network
@@ -74,9 +84,15 @@ async function introduceUsers(session, socket, userGIds) {
             mapping: newUsers
         };
 
-        log.info(session.user, `Emitted USERS (sessionId: ${session.id}) ${JSON.stringify(ntf)}`);
+        log.info(user, `Emitted USERS ${JSON.stringify(ntf)}`);
 
-        socket.emit('ntf', ntf);
+        if (socket) {
+            socket.emit('ntf', ntf);
+        } else if (session) {
+            await notification.send(user, session.id, ntf);
+        } else {
+            await notification.broadcast(user, ntf);
+        }
     }
 }
 

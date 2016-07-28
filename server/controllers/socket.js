@@ -114,7 +114,7 @@ exports.setup = function(server) {
 
                 const ntf = JSON.parse(message);
 
-                await userIntroducer.scanAndIntroduce(session, socket, ntf);
+                await userIntroducer.scanAndIntroduce(user, ntf, session, socket);
 
                 socket.emit('ntf', ntf);
 
@@ -135,8 +135,8 @@ exports.setup = function(server) {
                 }
             });
 
-            await userIntroducer.introduce(session, socket, userGId);
-            await sessionService.init(user, session.id, maxBacklogMsgs, cachedUpto);
+            await userIntroducer.introduce(user, userGId, session);
+            await sessionService.init(user, session, maxBacklogMsgs, cachedUpto);
         });
 
         socket.on('req', async function(data, cb) {
@@ -147,7 +147,7 @@ exports.setup = function(server) {
 
             let resp = await requestController.process(session, data);
 
-            await userIntroducer.scanAndIntroduce(session, socket, resp);
+            await userIntroducer.scanAndIntroduce(session.user, resp, session);
 
             if (cb) {
                 cb(resp); // Send the response as Socket.io acknowledgment.

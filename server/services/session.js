@@ -32,13 +32,13 @@ const networks = [ 'MAS', ...Object.keys(conf.get('irc:networks')) ];
 // TBD: Is courier quit() needed?
 
 exports.init = async function(user, session, maxBacklogLines, cachedUpto) {
-    await settingsService.sendSet(user, session);
-    await friendsService.sendFriends(user, session);
-    await friendsService.sendFriendConfirm(user, session);
+    await settingsService.sendSet(user, session.id);
+    await friendsService.sendFriends(user, session.id);
+    await friendsService.sendFriendConfirm(user, session.id);
     await friendsService.informStateChange(user, 'login');
 
-    await alerts.sendAlerts(user, session);
-    await sendNetworkList(user, session);
+    await alerts.sendAlerts(user, session.id);
+    await sendNetworkList(user, session.id);
 
     const messages = [];
     const windows = await Window.find({ userId: user.id });
@@ -48,20 +48,20 @@ exports.init = async function(user, session, maxBacklogLines, cachedUpto) {
         const conversation = await Conversation.fetch(conversationId);
         const members = await ConversationMember.find({ conversationId });
 
-        const role = members.find(member => member.get('userGId') === user.gId.toString()).get('role');
+        const role = members.find(member => member.get('userGId') === user.gIdString).get('role');
         let oneOnOneMember = undefined;
 
         if (conversation.get('type') === '1on1') {
-            oneOnOneMember = members.find(member => member.get('userGId') !== user.gId);
+            oneOnOneMember = members.find(member => member.get('userGId') !== user.gIdString);
         }
 
         messages.push({
             id: 'CREATE',
             windowId: window.id,
-            network: conversation.get('network'),
             name: conversation.get('name'),
-            userId: oneOnOneMember && oneOnOneMember.get('userId'),
+            userId: oneOnOneMember && oneOnOneMember.get('userGId'),
             type: conversation.get('type'),
+            network: conversation.get('network'),
             password: conversation.get('password'),
             topic: conversation.get('topic'),
             alerts: {
@@ -70,11 +70,11 @@ exports.init = async function(user, session, maxBacklogLines, cachedUpto) {
                 sound: window.get('soundAlert'),
                 title: window.get('titleAlert')
             },
-            role: role,
-            column: window.get('column'),
             row: window.get('row'),
+            column: window.get('column'),
+            minimizedNamesList: window.get('minimizedNamesList'),
             desktop: window.get('desktop'),
-            minimizedNamesList: window.get('minimizedNamesList')
+            role: role
         });
 
         messages.push({
