@@ -30,7 +30,8 @@ const redisModule = require('../../lib/redis'),
       UserGId = require('../../models/userGId'),
       windowsService = require('../../services/windows'),
       nicksService = require('../../services/nicks'),
-      conversationsService = require('../../services/conversations');
+      conversationsService = require('../../services/conversations'),
+      userIntroducer = require('../../lib/userIntroducer');
 
 init.on('beforeShutdown', function*() {
     yield courier.quit();
@@ -156,12 +157,12 @@ async function joinGroup(conversation, user, role) {
 
 async function createInitialGroups() {
     let groups = conf.get('loopback:initial_groups').split(',');
-    let admin = conf.get('common:admin');
+    let adminUserId = parseInt(conf.get('common:admin'));
 
     for (let name of groups) {
         // Create fails if the group already exists
         await Conversation.create({
-            owner: admin,
+            owner: adminUserId,
             type: 'group',
             name: name,
             network: 'MAS',
@@ -172,13 +173,17 @@ async function createInitialGroups() {
 }
 
 async function ensureNetworkInfoExists(user) {
-    await NetworkInfo.create({
+    const networkInfo = await NetworkInfo.create({
         userId: user.id,
         network: 'MAS',
         state: 'connected',
         nick: user.get('nick'),
-        retryCount: 0
     });
+
+    if (networkInfo.valid) {
+        // NetworkInfo didn't exist and was created
+        await userIntroducer.introduce(user, user.gId);
+    }
 }
 
 function userExists(user) {
