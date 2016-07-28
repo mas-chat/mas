@@ -388,7 +388,7 @@ export default Store.extend({
         }
 
         let ircServer1on1 = data.window.get('type') === '1on1' &&
-            data.window.get('userId') === 'iSERVER';
+            data.window.get('userId') === 'i0';
 
         if (ircServer1on1 && !command) {
             dispatch('ADD_ERROR', {

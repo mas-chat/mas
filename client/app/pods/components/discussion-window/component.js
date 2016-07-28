@@ -78,7 +78,7 @@ export default Ember.Component.extend({
     }),
 
     ircServerWindow: Ember.computed('content.userId', function() {
-        return this.get('content.userId') === 'iSERVER' ? 'irc-server-window' : '';
+        return this.get('content.userId') === 'i0' ? 'irc-server-window' : '';
     }),
 
     isGroup: Ember.computed('content.type', function() {
@@ -88,7 +88,7 @@ export default Ember.Component.extend({
     type: Ember.computed('content.type', function() {
         if (this.get('content.type') === 'group') {
             return 'group';
-        } else if (this.get('content.userId') === 'iSERVER') {
+        } else if (this.get('content.userId') === 'i0') {
             return 'server-1on1';
         } else {
             return 'private-1on1';

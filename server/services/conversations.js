@@ -397,7 +397,7 @@ async function removeConversationWindow(conversation, userGId) {
 }
 
 async function scanForEmailNotifications(conversation, message) {
-    if (message.userId === 'iSERVER') {
+    if (message.userGId === 'i0') {
         return;
     }
 

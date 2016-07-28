@@ -148,7 +148,7 @@ export default BaseModel.extend({
         let network = this.get('network');
         let name = this.get('name');
 
-        if (type === '1on1' && userId === 'iSERVER') {
+        if (type === '1on1' && userId === 'i0') {
             title = `${network} Server Messages`;
         } else if (type === '1on1') {
             let ircNetwork = network === 'MAS' ? '' : `${network} `;

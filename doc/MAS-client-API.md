@@ -253,7 +253,7 @@ Create new window. Window identifier is either ```userId``` or ```name```.
 
 ```userId``` is null if ```type``` is ```group```
 
-If the ```type``` is ```1on1``` and the ```userId``` is ```iSERVER``` then the window is an 1on1 with IRC network server. These are normal 1on1s except the user can only send messages starting with `/` character. Other messages are silently ignored.
+If the ```type``` is ```1on1``` and the ```userId``` is ```i0``` then the window is an 1on1 with IRC network server. These are normal 1on1s except the user can only send messages starting with `/` character. Other messages are silently ignored.
 
 ### USERS
 
