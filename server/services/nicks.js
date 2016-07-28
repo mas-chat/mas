@@ -38,12 +38,12 @@ exports.updateCurrentNick = async function(user, network, nick) {
 };
 
 exports.getUserFromNick = async function(nick, network) {
-    const nwInfo = await NetworkInfo.find({ nick: nick, network: network });
+    const nwInfo = await NetworkInfo.findFirst({ nick: nick, network: network });
 
     if (nwInfo) {
         const user = await User.fetch(nwInfo.get('userId'));
 
-        return user.get('deleted') ? null : user;
+        return !user || user.get('deleted') ? null : user;
     }
 
     return null;
