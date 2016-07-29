@@ -36,7 +36,8 @@ const assert = require('assert'),
       windowsService = require('../../services/windows'),
       nicksService = require('../../services/nicks'),
       ircUser = require('./ircUser'),
-      ircScheduler = require('./scheduler');
+      ircScheduler = require('./scheduler'),
+      userIntroducer = require('../../lib/userIntroducer');
 
 const OPER = '@';
 const VOICE = '+';
@@ -630,6 +631,7 @@ async function handle366(user, msg) {
 
     let key = `namesbuffer:${user.id}:${conversation.id}`;
     let namesHash = await redis.hgetall(key);
+    await redis.del(key);
 
     if (Object.keys(namesHash).length > 0) {
         // During the server boot-up or reconnect after a network outage it's very possible that
@@ -638,7 +640,7 @@ async function handle366(user, msg) {
         // data structure, which leads to incorrect bookkeeping. Ircnamesreporter check makes sure
         // only one 266 reply is parsed from a burst. For rest of the changes we rely on getting
         // incremental JOINS messages (preferably from the original reporter.) This leaves some
-        // theoretical error edge cases (left as homework) that maybe are worth of fixing.
+        // theoretical error edge cases (left as homework) that maybe are worth fixing.
         let noActiveReporter = await redis.setnx(
             `ircnamesreporter:${conversation.id}`, user.id);
 
@@ -647,8 +649,6 @@ async function handle366(user, msg) {
             await conversationsService.setGroupMembers(conversation, namesHash);
         }
     }
-
-    await redis.del(key);
 }
 
 async function handle376(user, msg) {
@@ -1047,24 +1047,56 @@ async function handlePrivmsg(user, msg, command) {
 }
 
 async function updateNick(user, network, oldNick, newNick) {
-    // TODO: In case MAS user, do the update here. updateNick only handles IRC users!
-    let targetUserGIdString = await redis.run('updateNick', user.id, network, oldNick, newNick);
+    let changed = false;
+    let targetUserGId = null;
+    const nickUser = await nicksService.getUserFromNick(oldNick, network);
 
-    if (targetUserGIdString) {
-        log.info(user, `I\'m first and handle ${oldNick} -> ${newNick} nick change.`);
+    if (nickUser) {
+        const networkInfo = NetworkInfo.findFirst({ userId: nickUser.id, network: networks });
 
-        // We haven't heard about this change before
-        let conversations = await ConversationMember.find({ userGId: targetUserGIdString });
+        await networkInfo.set('nick', newNick);
+        changed = true;
+        targetUserGId = user.gId;
+    } else {
+         const targetUserGIdString = await redis.run(
+            'updateNick', user.id, network, oldNick, newNick);
 
-        for (let conversation of conversations) {
-            if (conversation.network === network) {
-                await conversation.addMessageUnlessDuplicate(conversation, user, {
-                    cat: 'info',
-                    body: `${oldNick} is now known as ${newNick}`
-                });
+        if (targetUserGIdString) {
+            changed = true;
+            targetUserGId = UserGId.create(targetUserGIdString);
+        }
+    }
 
-                // wrong? taytyy lahettaa kaikille
-                await conversationsService.sendFullAddMembers(conversation, user);
+    if (!changed) {
+        return;
+    }
+
+    // We haven't heard about this change before
+    log.info(user, `I\'m first and announcing ${oldNick} -> ${newNick} nick change.`);
+
+    const conversationMembers = await ConversationMember.find({ userGId: targetUserGId.toString() });
+
+    // Iterate through the conversations that the nick changer is part of
+    for (let conversationMember of conversationMembers) {
+        const conversation = await Conversation.fetch(conversationMember.get('conversationId'));
+
+        if (conversation.get('network') === network) {
+g            await conversationsService.addMessageUnlessDuplicate(conversation, user, {
+                cat: 'info',
+                body: `${oldNick} is now known as ${newNick}`
+            });
+
+            // Send updated USERS notification to all conversation members
+            const channelMembers = await ConversationMember.find(
+                { conversationId: conversation.id });
+
+            for (const channelMember of channelMembers) {
+                const channelMemberGId = UserGId.create(channelMember.get('userGId'));
+
+                if (channelMemberGId.isMASUser) {
+                    const channelUser = await User.fetch(channelMemberGId.id);
+                    await userIntroducer.introduce(channelUser, targetUserGId);
+                }
             }
         }
     }
