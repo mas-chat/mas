@@ -88,14 +88,14 @@ exports.getPeerMember = async function(conversation, userGId) {
 
 exports.getMemberRole = async function(conversation, userGId) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
-    const member = members.find(member => member.gid.equals(userGId));
+    const member = members.find(member => UserGId.create(member.get('userGId')).equals(userGId));
 
     return member ? member.get('role') : null;
 };
 
 exports.setMemberRole = async function(conversation, userGId, role) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
-    const member = members.find(member => member.gid.equals(userGId));
+    const member = members.find(member => UserGId.create(member.get('userGId')).equals(userGId));
 
     if (member) {
         await member.set({ role });
