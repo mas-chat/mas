@@ -131,8 +131,8 @@ async function processSend({ conversationId, userId, text = '' }) {
     let target = conversation.get('name');
 
     if (conversation.get('type') === '1on1') {
-        const peerUserGId = await conversationsService.getPeerMember(conversation, user.gId);
-        target = await redis.hget(`ircuser:${peerUserGId}`, 'nick');
+        const peerMember = await conversationsService.getPeerMember(conversation, user.gId);
+        target = await redis.hget(`ircuser:${peerMember.get('userGId')}`, 'nick');
     }
 
     text = text.replace(/\n/g, ' ');
