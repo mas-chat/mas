@@ -930,7 +930,7 @@ async function handleMode(user, msg) {
                     log.warn(user, 'Received broken MODE command, parameter missing');
                     continue;
                 } else if (mode.match(/[ov]/)) {
-                    targetUserGId = await ircUser.getUserId(param, msg.network);
+                    targetUserGId = await ircUser.getUserGId(param, msg.network);
                 }
             }
 
