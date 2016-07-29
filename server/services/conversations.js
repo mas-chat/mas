@@ -116,7 +116,9 @@ exports.setGroupMembers = async function(conversation, newMembersHash) {
                 role: newMembersHash[newMember]
             });
         }
+    }
 
+    for (let newMember of Object.keys(newMembersHash)) {
         const newMemberGId = UserGId.create(newMember);
 
         if (newMemberGId.isMASUser) {
