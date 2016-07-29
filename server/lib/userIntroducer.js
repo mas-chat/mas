@@ -36,7 +36,7 @@ exports.scanAndIntroduce = async function(user, msg, session, socket) {
 
 async function introduceUsers(user, userGIds, session, socket) {
     if (session) {
-        // If no session is given, broadcast userGids without remembering them
+        // If no session is given, force broadcast userGids without remembering them
         session.knownUserGIds = session.knownUserGIds || {};
     }
 
@@ -57,7 +57,14 @@ async function introduceUsers(user, userGIds, session, socket) {
                 entry.gravatar = user.get('emailMD5');
 
                 for (const network of networks) {
-                    entry.nick[network] = await nicksService.getCurrentNick(user, network);
+                    const currentNick = await nicksService.getCurrentNick(user, network);
+
+                    // Fallback to default nick. This solves the situation where the user joins
+                    // a new IRC network during the session. In that case his own userGId is in
+                    // knownUserGIds table but with null nick for that IRC network. Fallback works
+                    // because if the user's nick changes for any reason from the default, that is
+                    // communicated separately to the client.
+                    entry.nick[network] = currentNick || user.get('nick');
                 }
             } else {
                 entry.name = 'IRC User';
