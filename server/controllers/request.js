@@ -118,7 +118,7 @@ async function handleSend({ command, conversation, user, session, backend }) {
     }
 
     const msg = await conversationsService.addMessageUnlessDuplicate(conversation, user, {
-        userGId: user.gId.toString(),
+        userGId: user.gIdString,
         cat: 'msg',
         body: text
     }, session.id);
