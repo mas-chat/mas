@@ -395,7 +395,7 @@ async function removeConversationWindow(conversation, userGId) {
 }
 
 async function scanForEmailNotifications(conversation, message) {
-    if (message.userGId === 'i0') {
+    if (!message.userGId || message.userGId === 'i0') {
         return;
     }
 
@@ -422,10 +422,14 @@ async function scanForEmailNotifications(conversation, message) {
         }
     } else {
         const peerMember = await getPeerMember(conversation, UserGId.create(message.userGId))
-        const user = await User.fetch(peerMember.gId.id);
+        const peerMemberGId = UserGId.create(peerMember.get('userGId'));
 
-        if (user) {
-            users.push(user);
+        if (peerMemberGId.isMASUser) {
+            const user = await User.fetch(peerMemberGId.id);
+
+            if (user) {
+                users.push(user);
+            }
         }
     }
 
