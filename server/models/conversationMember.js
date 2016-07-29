@@ -27,4 +27,12 @@ module.exports = class ConversationMember extends Model {
 
         return this._gId;
     }
+
+    get gIdString() {
+        if (!this._gIdString) {
+            this._gIdString = this.gId.toString();
+        }
+
+        return this._gIdString;
+    }
 };

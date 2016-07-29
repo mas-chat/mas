@@ -103,13 +103,13 @@ exports.setGroupMembers = async function(conversation, newMembersHash) {
     let oldMembers = await ConversationMember.find({ conversationId: conversation.id });
 
     for (let oldMember of oldMembers) {
-        if (!Object.keys(newMembersHash).some(newMember => newMember === oldMember.gId.toString())) {
+        if (!Object.keys(newMembersHash).some(newMember => newMember === oldMember.gIdString)) {
             await removeGroupMember(conversation, oldMember, true);
         }
     }
 
     for (let newMember of Object.keys(newMembersHash)) {
-        if (!oldMembers.some(oldMembers => oldMembers.gId.toString === newMember)) {
+        if (!oldMembers.some(oldMembers => oldMembers.gIdString === newMember)) {
             await ConversationMember.create({
                 conversationId: conversation.id,
                 userGId: newMember,
