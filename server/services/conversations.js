@@ -82,6 +82,10 @@ exports.delete = async function(conversation) {
     return await remove(conversation);
 };
 
+exports.getPeerMember = async function(conversation, userGId) {
+    return await getPeerMember(conversation, userGId);
+}
+
 exports.getMemberRole = async function(conversation, userGId) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
     const member = members.find(member => member.gid.equals(userGId));
