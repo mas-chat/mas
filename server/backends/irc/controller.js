@@ -876,7 +876,8 @@ async function handlePart(user, msg) {
     let targetUserGId = await ircUser.getUserGId(msg.nick, msg.network);
 
     if (conversation) {
-        await conversation.removeGroupMember(targetUserGId, false, false, reason);
+        await conversationsService.removeGroupMember(
+            conversation, targetUserGId, false, false, reason);
     }
 }
 
