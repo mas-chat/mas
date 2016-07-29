@@ -142,7 +142,7 @@ async function processSend({ conversationId, userId, text = '' }) {
 }
 
 async function processTextCommand({ conversationId, userId, command, commandParams }) {
-    const conversation = await Conversation.findFirst(conversationId);
+    const conversation = await Conversation.fetch(conversationId);
     let data = false;
 
     switch (command) {
