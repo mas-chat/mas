@@ -1081,7 +1081,7 @@ async function updateNick(user, network, oldNick, newNick) {
         const conversation = await Conversation.fetch(conversationMember.get('conversationId'));
 
         if (conversation.get('network') === network) {
-g            await conversationsService.addMessageUnlessDuplicate(conversation, user, {
+            await conversationsService.addMessageUnlessDuplicate(conversation, user, {
                 cat: 'info',
                 body: `${oldNick} is now known as ${newNick}`
             });
@@ -1133,7 +1133,7 @@ async function tryDifferentNick(user, network) {
 // is in sync?
 
 async function disconnectIfIdle(user, network) {
-    let windows = await windowsService.getWindowForNetwork(user, network);
+    let windows = await windowsService.getWindowsForNetwork(user, network);
     let onlyServer1on1Left = false;
 
     if (windows.length === 1) {
