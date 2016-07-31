@@ -214,7 +214,7 @@ async function processClose({ userId, network, name, conversationType }) {
 
 async function processUpdatePassword({ userId, network, conversationId, password }) {
     const user = await User.fetch(userId);
-    const conversation = await Conversation.findFirst(conversationId);
+    const conversation = await Conversation.fetch(conversationId);
     const networkInfo = await findOrCreateNetworkInfo(user, network);
 
     let modeline = 'MODE ' + conversation.name + ' ';
@@ -243,7 +243,7 @@ async function processUpdatePassword({ userId, network, conversationId, password
 
 async function processUpdateTopic({ userId, conversationId, network, topic }) {
     const user = await User.fetch(userId);
-    const conversation = await Conversation.findFirst(conversationId);
+    const conversation = await Conversation.fetch(conversationId);
     const networkInfo = await findOrCreateNetworkInfo(user, network);
 
     if (networkInfo.get('state') !== 'connected') {
