@@ -157,6 +157,10 @@ store.setSchema(1, {
             conversationId: {
                 uniq: false,
                 fields: [ 'conversationId' ]
+            },
+            userGIdconversationId: {
+                uniq: true,
+                fields: [ 'userGId', 'conversationId' ]
             }
         }
     },
