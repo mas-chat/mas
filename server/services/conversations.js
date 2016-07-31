@@ -508,10 +508,7 @@ async function removeGroupMember(conversation, member, skipCleanUp, wasKicked, r
 
     // Delete conversation if no mas users are left
     const members = await ConversationMember.find({ conversationId: conversation.id });
-
-    const masUserExists = members.some(member => {
-        return UserGId.create(member.get('userGId')).type === 'mas'
-    });
+    const masUserExists = members.some(member => UserGId.create(member.get('userGId')).isMASUser);
 
     if (!masUserExists && !skipCleanUp) {
         log.info(`Last member parted, removing conversation, id: ${conversation.id}`);
