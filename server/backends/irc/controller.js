@@ -285,10 +285,7 @@ async function processReconnectIfInactive({ userId }) {
 async function processRestarted() {
     await iterateUsersAndNetworks(async function(user, network) {
         const channels = await redis.hgetall(`ircchannelsubscriptions:${user.id}:${network}`);
-        const networkInfo = await NetworkInfo.findFirst({
-            userId: user.id,
-            network: network
-        });
+        const networkInfo = await findOrCreateNetworkInfo(user, network);
 
         if (channels && networkInfo.get('state') !== 'idledisconnected') {
             log.info(user, `Scheduling connect() to IRC network: ${network}`);
@@ -1255,7 +1252,11 @@ async function findOrCreateNetworkInfo(user, network) {
             userId: user.id,
             network: network,
             nick: user.get('nick'),
+            state: 'disconnected',
+            retryCount: 0
         });
+
+        assert(networkInfo.valid);
     }
 
     return networkInfo;
