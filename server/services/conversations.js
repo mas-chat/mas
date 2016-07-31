@@ -61,7 +61,7 @@ exports.findOrCreate1on1 = async function(user, peerUserGId, network) {
         conversation = await Conversation.create({
             owner: user.id,
             type: '1on1',
-            name,
+            name: null,
             network
         });
 
