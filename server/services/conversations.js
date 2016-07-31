@@ -361,19 +361,19 @@ async function broadcastAddMembers(conversation, userGId, role) {
 }
 
 async function remove(conversation) {
-    await conversation.delete();
-
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     for (const member of members) {
-        await member.remove();
+        await member.delete();
     }
 
-    const msgs = await ConversationMessage.findAll({ conversationId: conversation.id });
+    const msgs = await ConversationMessage.find({ conversationId: conversation.id });
 
     for (const msg of msgs) {
         await msg.delete();
     }
+
+    await conversation.delete();
 }
 
 async function removeConversationWindow(conversation, userGId) {
