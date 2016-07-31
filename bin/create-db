@@ -128,7 +128,7 @@ store.setSchema(1, {
             type: { type: 'string', allowNull: false },
             network: { type: 'string', allowNull: false },
             name: 'string',
-            owner: 'int',
+            owner: { type: 'int', allowNull: false },
             topic: 'string',
             password: 'string'
         },
