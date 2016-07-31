@@ -36,13 +36,23 @@ let MSG_BUFFER_SIZE = 200; // TBD: This should come from session:max_backlog set
 exports.findOrCreate1on1 = async function(user, peerUserGId, network) {
     assert(user && peerUserGId && network);
 
-    const name = [ user.gId, peerUserGId ].sort().join('-');
+    let conversation = null;
+    const userMembers = await ConversationMember.find({ userGId: user.gIdString });
+    const peerMembers = await ConversationMember.find({ userGId: peerUserGId.toString() });
 
-    let conversation = await Conversation.findFirst({
-        type: '1on1',
-        network,
-        name
-    });
+    // Figure out 1on1 conversations where both users are members
+    const commonMembers = userMembers.filter(
+        member => peerMembers.find(
+            peer => peer.get('conversationId') === member.get('conversationId')));
+
+    for (const commonMember of commonMembers) {
+        const candidateConversation = await Conversation.fetch(commonMember.get('conversationId'));
+
+        if (candidateConversation.get('type') === '1on1') {
+            conversation = candidateConversation;
+            break;
+        }
+    }
 
     // TBD: Make sure peerUserId is either valid MAS user or that user doesn't have too many
     // 1on1 conversations.
