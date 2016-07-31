@@ -134,7 +134,7 @@ store.setSchema(1, {
         },
         indices: {
             networkName: {
-                uniq: true,
+                uniq: false,
                 fields: [
                     'type',
                     'network',
