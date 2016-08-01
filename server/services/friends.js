@@ -45,7 +45,7 @@ exports.sendFriendConfirm = async function(user, sessionId) {
                     type: 'mas'
                 });
 
-                return { userId: friendUserGId.toString() }
+                return { userId: friendUserGId.toString() };
             })
         };
 
@@ -99,12 +99,12 @@ exports.activateFriends = async function(user, friendUser) {
     const srcFriend = await Friend.findFirst({
         srcUserId: user.id,
         dstUserId: friendUser.id
-    })
+    });
 
     const dstFriend = await Friend.findFirst({
         srcUserId: friendUser.id,
         dstUserId: user.id
-    })
+    });
 
     await srcFriend.set({ state: 'active' });
     await dstFriend.set({ state: 'active' });
@@ -112,22 +112,22 @@ exports.activateFriends = async function(user, friendUser) {
     // Inform both parties
     await sendFriends(user);
     await sendFriends(friendUser);
-}
+};
 
 exports.removeFriends = async function(user, friendUser) {
     const srcFriend = await Friend.findFirst({
         srcUserId: user.id,
         dstUserId: friendUser.id
-    })
+    });
 
     const dstFriend = await Friend.findFirst({
         srcUserId: friendUser.id,
         dstUserId: user.id
-    })
+    });
 
     await srcFriend.delete();
     await dstFriend.delete();
-}
+};
 
 exports.removeUser = async function(user) {
     const [ friendAsSrc, friendAsDst ] = await Promise.all([
