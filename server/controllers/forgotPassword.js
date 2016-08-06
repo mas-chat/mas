@@ -16,21 +16,20 @@
 
 'use strict';
 
-const uuid = require('uid2'),
-      redis = require('../lib/redis').createClient(),
-      User = require('../models/user'),
-      log = require('../lib/log'),
-      mailer = require('../lib/mailer'),
-      conf = require('../lib/conf');
+const uuid = require('uid2');
+const redis = require('../lib/redis').createClient();
+const User = require('../models/user');
+const log = require('../lib/log');
+const mailer = require('../lib/mailer');
+const conf = require('../lib/conf');
 
-exports.create = async function() {
-    let email = this.request.body.email;
-
-    let userRecord = await User.findFirst({ email: email.trim() });
+exports.create = async function create() {
+    const email = this.request.body.email;
+    const userRecord = await User.findFirst({ email: email.trim() });
 
     if (userRecord) {
-        let token = uuid(30);
-        let link = `${conf.getComputed('site_url')}/reset-password/${token}`;
+        const token = uuid(30);
+        const link = `${conf.getComputed('site_url')}/reset-password/${token}`;
 
         mailer.send('emails/build/resetPassword.hbs', {
             name: userRecord.get('name'),

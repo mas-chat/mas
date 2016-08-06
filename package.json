@@ -59,7 +59,9 @@
   "devDependencies": {
     "babel-eslint": "^6.0.4",
     "chai": "~3.5.0",
-    "eslint": "~3.1.0",
+    "eslint": "^3.2.2",
+    "eslint-config-airbnb-base": "^5.0.1",
+    "eslint-plugin-import": "^1.12.0",
     "gulp": "~3.9.0",
     "gulp-concat": "~2.6.0",
     "gulp-inline-css": "~3.1.0",
@@ -80,7 +82,8 @@
   "scripts": {
     "test": "npm run eslint && ./bin/bootstrap && ./bin/run-tests saucelabs",
     "dev": "pm2 start --no-daemon --no-autorestart pm2/apps.json",
-    "eslint": "eslint gulpfile.js server/**/*.js bin/create-alert client/app/**/*.js test/browser/**/*.js",
+    "lint-server": "eslint --env node gulpfile.js server/**/*.js bin/create-alert",
+    "lint-client": "eslint --env brorser client/app/**/*.js test/browser/**/*.js",
     "test-server": "mocha server/test/**/*test.js",
     "build-pages": "gulp build-pages"
   },
