@@ -16,13 +16,13 @@
 
 'use strict';
 
-const fs = require('fs'),
-      path = require('path'),
-      mkdirp = require('mkdirp'),
-      parse = require('co-busboy'),
-      uuid = require('uid2'),
-      conf = require('../lib/conf'),
-      log = require('../lib/log');
+const fs = require('fs');
+const path = require('path');
+const mkdirp = require('mkdirp');
+const parse = require('co-busboy');
+const uuid = require('uid2');
+const conf = require('../lib/conf');
+const log = require('../lib/log');
 
 let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
@@ -31,20 +31,21 @@ if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
-module.exports = async function() {
+module.exports = async function upload() {
     if (!this.request.is('multipart/*') || !this.mas.user) {
         // The body isn't multipart, so busboy can't parse it
         return;
     }
 
-    let userId = this.mas.user.id;
-    let parts = parse(this);
+    const userId = this.mas.user.id;
+    const parts = parse(this);
+    const urls = [];
+
     let part;
-    let urls = [];
 
     function createMetaDataFileHandler(err) {
         if (err) {
-            log.warn(userId, 'Upload metadata write failed, reason: ' + err);
+            log.warn(userId, `Upload metadata write failed, reason: ${err}`);
         }
     }
 
@@ -55,10 +56,10 @@ module.exports = async function() {
             // value: part[1]
         } else {
             // Otherwise, it's a stream
-            let name = uuid(20);
-            let firstTwo = name.substring(0, 2);
+            const name = uuid(20);
+            const firstTwo = name.substring(0, 2);
 
-            let targetDirectory = path.join(dataDirectory, firstTwo);
+            const targetDirectory = path.join(dataDirectory, firstTwo);
 
             try {
                 mkdirp.sync(targetDirectory);
@@ -68,18 +69,18 @@ module.exports = async function() {
                 }
             }
 
-            let extension = path.extname(part.filename);
+            const extension = path.extname(part.filename);
             part.pipe(fs.createWriteStream(path.join(targetDirectory, name + extension)));
 
-            let metaData = {
-                userId: userId,
+            const metaData = {
+                userId,
                 ts: Math.round(Date.now() / 1000)
             };
 
-            fs.writeFile(path.join(targetDirectory, name + '.json'), JSON.stringify(metaData),
+            fs.writeFile(path.join(targetDirectory, `${name}.json`), JSON.stringify(metaData),
                 createMetaDataFileHandler);
 
-            urls.push(conf.getComputed('site_url') + '/files/' + name + extension);
+            urls.push(`${conf.getComputed('site_url')}/files/${name}${extension}`);
         }
     }
 

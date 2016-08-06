@@ -16,9 +16,9 @@
 
 'use strict';
 
-const path = require('path'),
-      send = require('koa-send'),
-      conf = require('../lib/conf');
+const path = require('path');
+const send = require('koa-send');
+const conf = require('../lib/conf');
 
 const oneYearInSeconds = 60 * 60 * 24 * 365;
 let dataDirectory = path.normalize(conf.get('files:upload_directory'));
@@ -28,9 +28,9 @@ if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
-module.exports = async function() {
-    let file = this.params.file;
-    let filePath = path.join(file.substring(0, 2), file);
+module.exports = async function userFiles() {
+    const file = this.params.file;
+    const filePath = path.join(file.substring(0, 2), file);
 
     await send(this, filePath, { root: dataDirectory });
 
