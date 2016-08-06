@@ -16,26 +16,26 @@
 
 'use strict';
 
-const log = require('../lib/log'),
-      uid2 = require('uid2'),
-      redis = require('../lib/redis').createClient(),
-      init = require('../lib/init'),
-      notification = require('../lib/notification'),
-      search = require('../lib/search'),
-      conf = require('../lib/conf'),
-      courier = require('../lib/courier').create(),
-      mailer = require('../lib/mailer'),
-      conversationsService = require('../services/conversations'),
-      windowsService = require('../services/windows'),
-      friendsService = require('../services/friends'),
-      nicksService = require('../services/nicks'),
-      Conversation = require('../models/conversation'),
-      User = require('../models/user'),
-      Friend = require('../models/friend'),
-      Window = require('../models/window'),
-      Settings = require('../models/settings'),
-      UserGId = require('../models/userGId'),
-      ircUser = require('../backends/irc/ircUser');
+const log = require('../lib/log');
+const uid2 = require('uid2');
+const redis = require('../lib/redis').createClient();
+const init = require('../lib/init');
+const notification = require('../lib/notification');
+const search = require('../lib/search');
+const conf = require('../lib/conf');
+const courier = require('../lib/courier').create();
+const mailer = require('../lib/mailer');
+const conversationsService = require('../services/conversations');
+const windowsService = require('../services/windows');
+const friendsService = require('../services/friends');
+const nicksService = require('../services/nicks');
+const Conversation = require('../models/conversation');
+const User = require('../models/user');
+const Friend = require('../models/friend');
+const Window = require('../models/window');
+const Settings = require('../models/settings');
+const UserGId = require('../models/userGId');
+const ircUser = require('../backends/irc/ircUser');
 
 const handlers = {
     SEND: handleSend,
@@ -61,12 +61,12 @@ const handlers = {
     FETCH: handleFetch
 };
 
-init.on('beforeShutdown', async function() {
+init.on('beforeShutdown', async function beforeShutdown() {
     await courier.quit();
 });
 
-exports.process = async function(session, command) {
-    let { windowId, network } = command;
+exports.process = async function process(session, command) {
+    const { windowId, network } = command;
     const user = session.user;
 
     if (!userExists(user)) {
@@ -100,14 +100,14 @@ exports.process = async function(session, command) {
 
     if (handler) {
         return await handler({ user, session, window, conversation, backend, command });
-    } else {
-        log.warn(user, `Reveiced unknown request: ${command.id}`);
-        return { status: 'ERROR', errorMsg: 'Unknown request' };
     }
+
+    log.warn(user, `Reveiced unknown request: ${command.id}`);
+    return { status: 'ERROR', errorMsg: 'Unknown request' };
 };
 
 async function handleSend({ command, conversation, user, session, backend }) {
-    let text = command.text;
+    const text = command.text;
 
     if (!conversation) {
         return { status: 'ERROR', errorMsg: 'Protocol error: Invalid windowId.' };
@@ -126,7 +126,7 @@ async function handleSend({ command, conversation, user, session, backend }) {
     courier.callNoWait(backend, 'send', {
         userId: user.id,
         conversationId: conversation.id,
-        text: text
+        text
     });
 
     return { status: 'OK', gid: msg.gid, ts: msg.ts };
@@ -141,14 +141,14 @@ async function handleEdit({ command, conversation, user }) {
         return { status: 'ERROR', errorMsg: 'Protocol error: Missing gid.' };
     }
 
-    let success = await conversationsService.editMessage(conversation, user, gid, text);
+    const success = await conversationsService.editMessage(conversation, user, gid, text);
 
     if (success) {
         search.updateMessage(gid, text);
         return { status: 'OK' };
-    } else {
-        return { status: 'ERROR', errorMsg: 'Editing failed.' };
     }
+
+    return { status: 'ERROR', errorMsg: 'Editing failed.' };
 }
 
 async function handleCommand({ command, conversation, user, backend }) {
@@ -178,14 +178,14 @@ async function handleCommand({ command, conversation, user, backend }) {
         const network = targetUserGId.isMASUser ? 'MAS' : params.network;
 
         return await start1on1(user, targetUserGId, network);
-    } else {
-        return await courier.call(backend, 'textCommand', {
-            userId: user.id,
-            conversationId: conversation.id,
-            command: name,
-            commandParams: params
-        });
     }
+
+    return await courier.call(backend, 'textCommand', {
+        userId: user.id,
+        conversationId: conversation.id,
+        command: name,
+        commandParams: params
+    });
 }
 
 async function handleCreate({ command, user }) {
@@ -201,14 +201,14 @@ async function handleJoin({ user, command, backend }) {
         return { status: 'PARAMETER_MISSING', errorMsg: 'Name or network missing.' };
     }
 
-    let conversation = await Conversation.findFirst({
+    const conversation = await Conversation.findFirst({
         type: 'group',
         network: command.network,
         name: command.name
     });
 
     if (conversation) {
-        let isMember = await conversationsService.isMember(conversation, user);
+        const isMember = await conversationsService.isMember(conversation, user);
 
         if (isMember) {
             return { status: 'ALREADY_JOINED', errorMsg: 'You have already joined the group.' };
@@ -233,33 +233,33 @@ async function handleClose({ user, conversation }) {
 }
 
 async function handleUpdate({ user, command, window, session }) {
-    let accepted = [ 'row', 'column', 'minimizedNamesList', 'desktop' ];
-    let acceptedAlerts = [ 'email', 'notification', 'sound', 'title' ];
+    const accepted = [ 'row', 'column', 'minimizedNamesList', 'desktop' ];
+    const acceptedAlerts = [ 'email', 'notification', 'sound', 'title' ];
 
     if (!window) {
         log.warn(user, `Client tried to update non-existent window, command: ${command}`);
         return { status: 'ERROR' };
     }
 
+    const newAlerts = {};
     let update = false;
-    let newAlerts = {};
 
-    for (let prop of accepted) {
-        let value = command[prop];
+    for (const prop of accepted) {
+        const value = command[prop];
 
-        if (typeof(value) !== 'undefined') {
-            update = !!await window.set({ [ prop ]: value });
+        if (typeof value !== 'undefined') {
+            update = !!await window.set({ [prop]: value });
         }
     }
 
     if (command.alerts) {
-        for (let alertsKey of acceptedAlerts) {
-            let alertsValue = command.alerts[alertsKey];
+        for (const alertsKey of acceptedAlerts) {
+            const alertsValue = command.alerts[alertsKey];
 
-            if (typeof(alertsValue) !== 'undefined') {
+            if (typeof alertsValue !== 'undefined') {
                 update = true;
                 newAlerts[alertsKey] = alertsValue;
-                await window.set({ [ `${alertsKey}Alert` ]: alertsValue });
+                await window.set({ [`${alertsKey}Alert`]: alertsValue });
             }
         }
     }
@@ -281,7 +281,7 @@ async function handleUpdate({ user, command, window, session }) {
 }
 
 async function handleUpdatePassword({ user, command, conversation, backend }) {
-    let password = command.password;
+    const password = command.password;
 
     // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
 
@@ -296,7 +296,7 @@ async function handleUpdatePassword({ user, command, conversation, backend }) {
     return await courier.call(backend, 'updatePassword', {
         userId: user.id,
         conversationId: conversation.id,
-        password: password
+        password
     });
 }
 
@@ -313,15 +313,15 @@ async function handleUpdateTopic({ user, command, conversation, backend }) {
 }
 
 async function handleSet({ user, command }) {
-    let properties = command.settings || {};
-    let keys = Object.keys(properties);
+    const properties = command.settings || {};
+    const keys = Object.keys(properties);
 
     if (keys.length === 0) {
         return { status: 'OK' };
     }
 
-    for (let prop of keys) {
-        let value = properties[prop];
+    for (const prop of keys) {
+        const value = properties[prop];
 
         switch (prop) {
             case 'activeDesktop':
@@ -346,7 +346,7 @@ async function handleSet({ user, command }) {
 }
 
 async function handleChat({ user, command }) {
-    let targetUserGId = UserGId.create(command.userId);
+    const targetUserGId = UserGId.create(command.userId);
     let network = 'MAS';
 
     if (targetUserGId.type === 'irc') {
@@ -369,32 +369,32 @@ async function start1on1(user, targetUserGId, network) {
         }
     }
 
-    let conversation = await conversationsService.findOrCreate1on1(user, targetUserGId, network);
-    let existingWindow = await windowsService.findByConversation(user, conversation);
+    const conversation = await conversationsService.findOrCreate1on1(user, targetUserGId, network);
+    const existingWindow = await windowsService.findByConversation(user, conversation);
 
     if (existingWindow) {
         return {
             status: 'ERROR',
             errorMsg: '1on1 chat window with this person is already open.'
         };
-    } else {
-        await windowsService.create(user, conversation);
     }
+
+    await windowsService.create(user, conversation);
 
     return { status: 'OK' };
 }
 
 async function handleAckAlert({ user, command }) {
-    let alertId = command.alertId;
+    const alertId = command.alertId;
     await redis.srem(`activealerts:${user.gId}`, alertId);
 
     return { status: 'OK' };
 }
 
 async function handleLogout({ user, session }) {
-    log.info(user, 'User ended session. SessionId: ' + session.id);
+    log.info(user, `User ended session. SessionId: ${session.id}`);
 
-    session.state == 'terminating';
+    session.state = 'terminating';
 
     return { status: 'OK' };
 }
@@ -406,15 +406,15 @@ async function handleFetch({ command, conversation }) {
         return { status: 'ERROR', errorMsg: 'Invalid end parameter.' };
     }
 
-    let messages = await search.getMessageRange(
+    const messages = await search.getMessageRange(
         conversation.id, command.start, command.end, command.limit, 50);
 
     return { status: 'OK', msgs: messages };
 }
 
 async function handleRequestFriend({ user, command }) {
-    let friendCandidateUserGId = UserGId.create(command.userId);
-    let friendUser = await User.fetch(friendCandidateUserGId.id);
+    const friendCandidateUserGId = UserGId.create(command.userId);
+    const friendUser = await User.fetch(friendCandidateUserGId.id);
 
     if (!friendUser) {
         return { status: 'ERROR', errorMsg: 'Unknown userId.' };
@@ -483,15 +483,15 @@ async function handleUpdateProfile({ user, command }) {
 async function handleDestroyAccount({ user }) {
     await user.set('deleted', true);
 
-    let conversations = await conversationsService.getAllConversations(user);
+    const conversations = await conversationsService.getAllConversations(user);
 
     for (const conversation of conversations) {
         await removeFromConversation(user, conversation);
     }
 
-    let networks = Object.keys(conf.get('irc:networks'));
+    const networks = Object.keys(conf.get('irc:networks'));
 
-    for (let network of networks) {
+    for (const network of networks) {
         // Don't remove networkInfo entries as they are needed to
         // keep discussion logs parseable. Those logs contain userIds, not nicks.
 
@@ -509,14 +509,14 @@ async function handleSendConfirmEmail({ user }) {
 }
 
 async function sendEmailConfirmationEmail(user, email) {
-    let emailConfirmationToken = uid2(25);
+    const emailConfirmationToken = uid2(25);
 
     await redis.setex(`emailconfirmationtoken:${emailConfirmationToken}`, 60 * 60 * 24, user.gId);
 
     mailer.send('emails/build/confirmEmail.hbs', {
         name: user.get('name'),
-        url: conf.getComputed('site_url') + '/confirm-email/' + emailConfirmationToken
-    }, email || user.get('email'), `Please confirm your email address`);
+        url: `${conf.getComputed('site_url')}/confirm-email/${emailConfirmationToken}`
+    }, email || user.get('email'), 'Please confirm your email address');
 }
 
 function userExists(user) {
@@ -533,9 +533,9 @@ async function removeFromConversation(user, conversation) {
     // Backend specific cleanup
     courier.callNoWait(
         conversation.get('network') === 'MAS' ? 'loopbackparser' : 'ircparser', 'close', {
-        userId: user.id,
-        network: conversation.get('network'),
-        name: conversation.get('name'),
-        conversationType: conversation.get('type')
-    });
+            userId: user.id,
+            network: conversation.get('network'),
+            name: conversation.get('name'),
+            conversationType: conversation.get('type')
+        });
 }

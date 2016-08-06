@@ -16,26 +16,26 @@
 
 'use strict';
 
-const redisModule = require('../lib/redis'),
-      socketIo = require('socket.io'),
-      uuid = require('uid2'),
-      requestController = require('./request'),
-      log = require('../lib/log'),
-      friendsService = require('../services/friends'),
-      sessionService = require('../services/session'),
-      User = require('../models/user'),
-      UserGId = require('../models/userGId'),
-      conf = require('../lib/conf'),
-      userIntroducer = require('../lib/userIntroducer');
+const redisModule = require('../lib/redis');
+const socketIo = require('socket.io');
+const uuid = require('uid2');
+const requestController = require('./request');
+const log = require('../lib/log');
+const friendsService = require('../services/friends');
+const sessionService = require('../services/session');
+const User = require('../models/user');
+const UserGId = require('../models/userGId');
+const conf = require('../lib/conf');
+const userIntroducer = require('../lib/userIntroducer');
 
-let ioServers = [];
-let clientSocketList = [];
+const ioServers = [];
+const clientSocketList = [];
 
-exports.setup = function(server) {
-    let io = socketIo(server);
+exports.setup = function setup(server) {
+    const io = socketIo(server);
     ioServers.push(io);
 
-    io.on('connection', function(socket) {
+    io.on('connection', socket => {
         const session = {
             id: null,
             user: null,
@@ -46,7 +46,7 @@ exports.setup = function(server) {
 
         clientSocketList.push(socket);
 
-        socket.on('init', async function(data) {
+        socket.on('init', async function init(data) {
             if (session.id) {
                 socket.emit('terminate', {
                     code: 'MULTIPLE_INITS',
@@ -92,7 +92,7 @@ exports.setup = function(server) {
 
             socket.emit('initok', {
                 sessionId: session.id,
-                maxBacklogMsgs: maxBacklogMsgs
+                maxBacklogMsgs
             });
 
             log.info(user, `New session init: ${session.id}, client: ${data.clientName}`);
@@ -102,7 +102,7 @@ exports.setup = function(server) {
             await redisSubscribe.subscribe(user.id, `${user.id}:${session.id}`);
 
             let processing = false;
-            let queue = [];
+            const queue = [];
 
             async function process(channel, message) {
                 if (processing) {
@@ -118,9 +118,9 @@ exports.setup = function(server) {
 
                 socket.emit('ntf', ntf);
 
-                //if (ntf.id !== 'MSG') {
-                    log.info(user, `Emitted ${ntf.id} (sessionId: ${session.id}) ${message}`);
-                //}
+                // TODO: if (ntf.id !== 'MSG') {
+                log.info(user, `Emitted ${ntf.id} (sessionId: ${session.id}) ${message}`);
+                // }
 
                 processing = false;
 
@@ -139,13 +139,13 @@ exports.setup = function(server) {
             await sessionService.init(user, session, maxBacklogMsgs, cachedUpto);
         });
 
-        socket.on('req', async function(data, cb) {
+        socket.on('req', async function req(data, cb) {
             if (session.state !== 'authenticated') {
                 await end('Request arrived before init.');
                 return;
             }
 
-            let resp = await requestController.process(session, data);
+            const resp = await requestController.process(session, data);
 
             await userIntroducer.scanAndIntroduce(session.user, resp, session);
 
@@ -158,7 +158,7 @@ exports.setup = function(server) {
             }
         });
 
-        socket.on('disconnect', async function() {
+        socket.on('disconnect', async function disconnect() {
             await end('Socket.io disconnect.');
         });
 
@@ -187,8 +187,8 @@ exports.setup = function(server) {
     });
 };
 
-exports.shutdown = async function() {
-    for (let server of ioServers) {
+exports.shutdown = async function shutdown() {
+    for (const server of ioServers) {
         server.close();
     }
 
@@ -196,15 +196,15 @@ exports.shutdown = async function() {
 };
 
 function checkBacklogParameterBounds(value) {
-    let minAllowedBacklog = conf.get('session:min_backlog');
-    let maxAllowedBacklog = conf.get('session:max_backlog');
+    const minAllowedBacklog = conf.get('session:min_backlog');
+    const maxAllowedBacklog = conf.get('session:max_backlog');
 
     if (!isInteger(value)) {
-        value = maxAllowedBacklog;
+        return maxAllowedBacklog;
     } else if (value < minAllowedBacklog) {
-        value = minAllowedBacklog;
+        return minAllowedBacklog;
     } else if (value > maxAllowedBacklog) {
-        value = maxAllowedBacklog;
+        return maxAllowedBacklog;
     }
 
     return value;
@@ -213,7 +213,7 @@ function checkBacklogParameterBounds(value) {
 function terminateClientConnections() {
     log.info(`Closing all ${clientSocketList.length} socket.io connections`);
 
-    for (let socket of clientSocketList) {
+    for (const socket of clientSocketList) {
         socket.disconnect(true);
     }
 }

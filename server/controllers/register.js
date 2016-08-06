@@ -16,19 +16,20 @@
 
 'use strict';
 
-const Promise = require('bluebird'),
-      forms = require('forms'),
-      fields = forms.fields,
-      widgets = forms.widgets,
-      validators = forms.validators,
-      httpStatus = require('statuses'),
-      redis = require('../lib/redis').createClient(),
-      authOptions = require('../lib/authOptions'),
-      cookie = require('../lib/cookie'),
-      User = require('../models/user'),
-      Settings = require('../models/settings');
+const Promise = require('bluebird');
+const forms = require('forms');
+const httpStatus = require('statuses');
+const redis = require('../lib/redis').createClient();
+const authOptions = require('../lib/authOptions');
+const cookie = require('../lib/cookie');
+const User = require('../models/user');
+const Settings = require('../models/settings');
 
-let formFields = {
+const fields = forms.fields;
+const widgets = forms.widgets;
+const validators = forms.validators;
+
+const formFields = {
     name: fields.string({
         required: true,
         label: 'Your name',
@@ -106,7 +107,7 @@ let formFields = {
     })
 };
 
-let registrationForm = forms.create({
+const registrationForm = forms.create({
     name: formFields.name,
     email: formFields.email,
     password: formFields.password,
@@ -115,7 +116,7 @@ let registrationForm = forms.create({
     tos: formFields.tos
 });
 
-let registrationFormExt = forms.create({
+const registrationFormExt = forms.create({
     name: formFields.name,
     email: formFields.email,
     nick: formFields.nick,
@@ -123,28 +124,27 @@ let registrationFormExt = forms.create({
     registrationType: formFields.registrationType
 });
 
-let registrationFormReset = forms.create({
+const registrationFormReset = forms.create({
     password: formFields.password,
     confirm: formFields.confirm,
     token: formFields.token
 });
 
 function decodeForm(req, inputForm) {
-    return new Promise(function(resolve) {
-        inputForm.handle(req, {
-            success: resolve,
-            error: resolve,
-            empty: resolve
-        });
-    });
+    return new Promise(resolve => inputForm.handle(req, {
+        success: resolve,
+        error: resolve,
+        empty: resolve
+    }));
 }
 
-exports.index = function*() {
-    let extAuth = this.query.ext === 'true';
-    let form, template;
+exports.index = function *index() {
+    const extAuth = this.query.ext === 'true';
+    let form;
+    let template;
 
     if (extAuth) {
-        let newUser = this.mas.user;
+        const newUser = this.mas.user;
 
         if (!newUser) {
             this.status = httpStatus('bad request');
@@ -171,16 +171,16 @@ exports.index = function*() {
     });
 };
 
-exports.indexReset = function*() {
-    let token = this.params.token;
-    let userId = yield redis.get(`passwordresettoken:${token}`);
+exports.indexReset = function *indexReset() {
+    const token = this.params.token;
+    const userId = yield redis.get(`passwordresettoken:${token}`);
 
     if (!userId) {
         this.body = 'Expired or invalid password reset link.';
         return;
     }
 
-    let form = registrationFormReset.bind({ token: token });
+    const form = registrationFormReset.bind({ token });
 
     yield this.render('register-reset', {
         page: 'register',
@@ -189,8 +189,8 @@ exports.indexReset = function*() {
     });
 };
 
-exports.create = function*() {
-    let form = yield decodeForm(this.req, registrationForm);
+exports.create = function *create() {
+    const form = yield decodeForm(this.req, registrationForm);
 
     if (!form.isValid()) {
         yield this.render('register', {
@@ -215,9 +215,9 @@ exports.create = function*() {
             yield cookie.createSession(newUser, this);
             this.response.redirect('/app');
         } else {
-            for (let field in newUser.errors) {
+            Object.keys(newUser.errors).forEach(field => {
                 form.fields[field].error = newUser.errors[field];
-            }
+            });
 
             yield this.render('register', {
                 page: 'register',
@@ -229,8 +229,8 @@ exports.create = function*() {
     }
 };
 
-exports.createExt = function*() {
-    let form = yield decodeForm(this.req, registrationFormExt);
+exports.createExt = function *createExt() {
+    const form = yield decodeForm(this.req, registrationFormExt);
 
     function *renderForm(ctx) {
         yield ctx.render('register-ext', {
@@ -245,7 +245,7 @@ exports.createExt = function*() {
         return;
     }
 
-    let userRecord = this.mas.user;
+    const userRecord = this.mas.user;
 
     if (userRecord.get('email') === form.data.email) {
         // If the user didn't change his email address, we trust what Google/Yahoo gave us.
@@ -262,9 +262,9 @@ exports.createExt = function*() {
         yield renderForm(this);
         return;
     } else if (!userRecord.valid) {
-        for (let field in userRecord.errors) {
+        Object.keys(userRecord.errors).forEach(field => {
             form.fields[field].error = userRecord.errors[field];
-        }
+        });
 
         yield renderForm(this);
         return;
@@ -275,10 +275,10 @@ exports.createExt = function*() {
     this.response.redirect('/app');
 };
 
-exports.createReset = function*() {
-    let form = yield decodeForm(this.req, registrationFormReset);
+exports.createReset = function *createReset() {
+    const form = yield decodeForm(this.req, registrationFormReset);
 
-    let userId = yield redis.get(`passwordresettoken:${form.data.token}`);
+    const userId = yield redis.get(`passwordresettoken:${form.data.token}`);
 
     function *renderForm(ctx) {
         yield ctx.render('register-reset', {
@@ -310,9 +310,9 @@ exports.createReset = function*() {
     yield userRecord.changePassword(form.data.password);
 
     if (!userRecord.valid) {
-        for (let field in userRecord.errors) {
+        Object.keys(userRecord.errors).forEach(field => {
             form.fields[field].error = userRecord.errors[field];
-        }
+        });
 
         yield renderForm(this);
         return;

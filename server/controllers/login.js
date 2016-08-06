@@ -16,14 +16,14 @@
 
 'use strict';
 
-const passport = require('../lib/passport'),
-      log = require('../lib/log'),
-      cookie = require('../lib/cookie');
+const passport = require('../lib/passport');
+const log = require('../lib/log');
+const cookie = require('../lib/cookie');
 
-exports.localLogin = function*(next) {
-    let that = this;
+exports.localLogin = function *localLogin(next) {
+    const that = this;
 
-    yield passport.authenticate('local', function*(err, user) {
+    yield passport.authenticate('local', function *authenticate(err, user) {
         let success = false;
         let msg;
 
@@ -42,23 +42,23 @@ exports.localLogin = function*(next) {
     }).call(this, next);
 };
 
-exports.googleLogin = function*(next) {
+exports.googleLogin = function *googleLogin(next) {
     yield auth(this, next, 'google');
 };
 
-exports.yahooLogin = function*(next) {
+exports.yahooLogin = function *yahooLogin(next) {
     yield auth(this, next, 'yahoo');
 };
 
-exports.cloudronLogin = function*(next) {
+exports.cloudronLogin = function *cloudronLogin(next) {
     yield auth(this, next, 'cloudron');
 };
 
 function *auth(ctx, next, provider) {
-    yield passport.authenticate(provider, function*(err, user) {
+    yield passport.authenticate(provider, function *authenticate(err, user) {
         if (err) {
-            ctx.body = 'External login failed, reason: ' + err;
-            log.warn('Invalid external login attempt, reason: ' + err);
+            ctx.body = `External login failed, reason: ${err}`;
+            log.warn(`Invalid external login attempt, reason: ${err}`);
             return;
         } else if (!user) {
             ctx.body = 'No account found. Login failed.';
@@ -70,7 +70,7 @@ function *auth(ctx, next, provider) {
         yield cookie.createSession(user, ctx);
 
         if (user.get('inUse')) {
-            //TODOyield updateIpAddress(ctx, userId);
+            // TODO: yield updateIpAddress(ctx, userId);
             ctx.redirect('/app/');
         } else {
             ctx.redirect('/register?ext=true');
