@@ -59,7 +59,6 @@
   "devDependencies": {
     "babel-eslint": "^6.0.4",
     "chai": "~3.5.0",
-    "co-mocha": "~1.1.2",
     "eslint": "~3.1.0",
     "gulp": "~3.9.0",
     "gulp-concat": "~2.6.0",
