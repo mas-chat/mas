@@ -17,12 +17,13 @@
 
 'use strict';
 
-const fs = require('fs'),
-      http = require('http'),
-      https = require('https'),
-      init = require('./lib/init'),
-      conf = require('./lib/conf'),
-      log = require('./lib/log');
+const fs = require('fs');
+const http = require('http');
+const https = require('https');
+const init = require('./lib/init');
+const conf = require('./lib/conf');
+const log = require('./lib/log');
+const main = require('./main');
 
 init.configureProcess('frontend');
 
@@ -32,18 +33,18 @@ const httpsPort = conf.get('frontend:https_port');
 let httpHandler = initialHandler;
 let httpsHandler = initialHandler;
 
-let httpServer = http.Server(httpHandlerSelector);
+const httpServer = http.Server(httpHandlerSelector); // eslint-disable-line new-cap
 let httpsServer = null;
 
 httpServer.listen(httpPort, httpListenDone);
 log.info(`MAS frontend http server listening, http://localhost:${httpPort}/`);
 
 if (conf.get('frontend:https')) {
-    let caCerts = [];
-    let caCertFileList = conf.get('frontend:https_ca');
+    const caCerts = [];
+    const caCertFileList = conf.get('frontend:https_ca');
 
     if (caCertFileList) {
-        for (let file of caCertFileList.split(',')) {
+        for (const file of caCertFileList.split(',')) {
             caCerts.push(fs.readFileSync(file));
         }
     }
@@ -83,5 +84,5 @@ function httpListenDone() {
 }
 
 function listensDone() {
-    require('./main').init(httpServer, httpsServer, setHTTPHandlers);
+    main.init(httpServer, httpsServer, setHTTPHandlers);
 }

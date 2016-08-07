@@ -1,12 +1,12 @@
+/* globals describe, it, beforeEach */
+
 'use strict';
 
-require('co-mocha');
-
-const proxyquire =  require('proxyquire'),
-      sinon = require('sinon'),
-      chai = require('chai'),
-      sinonChai = require('sinon-chai'),
-      expect = require('chai').expect;
+const proxyquire = require('proxyquire');
+const sinon = require('sinon');
+const chai = require('chai');
+const sinonChai = require('sinon-chai');
+const expect = require('chai').expect;
 
 chai.use(sinonChai);
 
@@ -14,24 +14,24 @@ let Model;
 let Customer;
 let rigiddbStub;
 
-describe('Model', function() {
-    beforeEach(function() {
+describe('Model', () => {
+    beforeEach(() => {
         rigiddbStub = sinon.stub();
-        Model = proxyquire('../../models/model', { 'rigiddb': rigiddbStub });
-        Customer = class Customer extends Model {};
+        Model = proxyquire('../../models/model', { rigiddb: rigiddbStub });
+        Customer = class Customers extends Model {};
     });
 
-    it('create() succeeds', function*() {
-        rigiddbStub.prototype.create = function*(db, props) {
+    it('create() succeeds', async () => {
+        rigiddbStub.prototype.create = function create(db, props) {
             expect(db).to.equal('customers');
             expect(props).to.deep.equal({
                 name: 'Ilkka'
             });
 
-            return { val: 1, err: false }
+            return { val: 1, err: false };
         };
 
-        const customerObj = yield Customer.create({ name: 'Ilkka' });
+        const customerObj = await Customer.create({ name: 'Ilkka' });
 
         expect(customerObj).to.deep.equal({
             collection: 'customers',
@@ -41,8 +41,8 @@ describe('Model', function() {
         });
     });
 
-    it('create() fails, index error, no descriptions', function*() {
-        rigiddbStub.prototype.create = function*(db, props) {
+    it('create() fails, index error, no descriptions', async () => {
+        rigiddbStub.prototype.create = function create(db, props) {
             expect(db).to.equal('customers');
             expect(props).to.deep.equal({
                 name: 'Ilkka'
@@ -51,7 +51,7 @@ describe('Model', function() {
             return { err: 'notUnique', val: false, indices: [ 'first', 'third' ] };
         };
 
-        const customerObj = yield Customer.create({ name: 'Ilkka' });
+        const customerObj = await Customer.create({ name: 'Ilkka' });
 
         expect(customerObj).to.deep.equal({
             collection: 'customers',
@@ -64,8 +64,8 @@ describe('Model', function() {
         });
     });
 
-    it('create() fails, index error, descriptions are set', function*() {
-        Customer = class Customer extends Model {
+    it('create() fails, index error, descriptions are set', async () => {
+        Customer = class extends Model {
             get config() {
                 return {
                     indexErrorDescriptions: {
@@ -76,11 +76,11 @@ describe('Model', function() {
             }
         };
 
-        rigiddbStub.prototype.create = function*(db, props) {
-            return { err: 'notUnique', val: false, indices: [ 'first', 'third' ] }
+        rigiddbStub.prototype.create = function create() {
+            return { err: 'notUnique', val: false, indices: [ 'first', 'third' ] };
         };
 
-        const customerObj = yield Customer.create({
+        const customerObj = await Customer.create({
             name: 'Ilkka'
         });
 
@@ -95,25 +95,25 @@ describe('Model', function() {
         });
     });
 
-    it('set() succeeds', function*() {
-        rigiddbStub.prototype.create = function*(db, props) {
-            return { val: 1, err: false }
+    it('set() succeeds', async () => {
+        rigiddbStub.prototype.create = function create() {
+            return { val: 1, err: false };
         };
 
-        rigiddbStub.prototype.update = function*(db, id, props) {
+        rigiddbStub.prototype.update = function update(db, id, props) {
             expect(db).to.equal('customers');
             expect(id).to.equal(1);
             expect(props).to.deep.equal({
                 name: 'Tyrion'
             });
 
-            return { val: true, err: false }
+            return { val: true, err: false };
         };
 
-        const customerObj = yield Customer.create({ name: 'Ilkka' });
-        let res = yield customerObj.set({ name: 'Tyrion' });
+        const customerObj = await Customer.create({ name: 'Ilkka' });
+        const res = await customerObj.set({ name: 'Tyrion' });
 
-        expect(res).to.deep.equal({ name: 'Tyrion' })
+        expect(res).to.deep.equal({ name: 'Tyrion' });
 
         expect(customerObj).to.deep.equal({
             collection: 'customers',
@@ -123,17 +123,17 @@ describe('Model', function() {
         });
     });
 
-    it('set() fails, index error, no descriptions', function*() {
-        rigiddbStub.prototype.create = function*(db, props) {
-            return { val: 1, err: false }
+    it('set() fails, index error, no descriptions', async () => {
+        rigiddbStub.prototype.create = function create() {
+            return { val: 1, err: false };
         };
 
-        rigiddbStub.prototype.update = function*(db, id, props) {
-            return { val: false, err: 'notUnique', indices: [ 'name' ] }
+        rigiddbStub.prototype.update = function update() {
+            return { val: false, err: 'notUnique', indices: [ 'name' ] };
         };
 
-        const customerObj = yield Customer.create({ name: 'Ilkka' });
-        let res = yield customerObj.set({ name: 'Tyrion' });
+        const customerObj = await Customer.create({ name: 'Ilkka' });
+        await customerObj.set({ name: 'Tyrion' });
 
         expect(customerObj).to.deep.equal({
             collection: 'customers',
@@ -145,8 +145,8 @@ describe('Model', function() {
         });
     });
 
-    it('setProperty() fails, forbidden property', function*() {
-        Customer = class Customer extends Model {
+    it('setProperty() fails, forbidden property', async () => {
+        Customer = class extends Model {
             get config() {
                 return {
                     allowedProps: [ 'age' ]
@@ -154,43 +154,43 @@ describe('Model', function() {
             }
         };
 
-        rigiddbStub.prototype.create = function*(db, props) {
-            return { val: 1, err: false }
+        rigiddbStub.prototype.create = function create() {
+            return { val: 1, err: false };
         };
 
-        rigiddbStub.prototype.update = function*(db, id, props) {
-            return { val: false, err: 'notUnique', indices: [ 'name' ] }
+        rigiddbStub.prototype.update = function update() {
+            return { val: false, err: 'notUnique', indices: [ 'name' ] };
         };
 
-        const customerObj = yield Customer.create({ name: 'Ilkka' });
+        const customerObj = await Customer.create({ name: 'Ilkka' });
         const callback = sinon.spy();
 
         try {
-            yield customerObj.setProperty({ name: 'Tyrion' });
-        } catch(e) {
+            await customerObj.setProperty({ name: 'Tyrion' });
+        } catch (e) {
             expect(e.message).to.equal('Tried to set invalid user model property name');
             callback();
         }
 
-        expect(callback).to.have.been.called;
+        expect(callback).to.have.been.called();
     });
 
-    it('findFirst() succeeds', function*() {
-        rigiddbStub.prototype.find = function*(db, props) {
+    it('findFirst() succeeds', async () => {
+        rigiddbStub.prototype.find = function find(db, props) {
             expect(db).to.equal('customers');
             expect(props).to.deep.equal({ name: 'Ilkka' });
 
             return { val: [ 42 ], err: false };
         };
 
-        rigiddbStub.prototype.get = function*(db, id) {
+        rigiddbStub.prototype.get = function get(db, id) {
             expect(db).to.equal('customers');
             expect(id).equal(42);
 
             return { val: { name: 'Ilkka', age: 36 }, err: false };
         };
 
-        const customerObj = yield Customer.findFirst({ name: 'Ilkka');
+        const customerObj = await Customer.findFirst({ name: 'Ilkka' });
 
         expect(customerObj).to.deep.equal({
             collection: 'customers',
@@ -201,27 +201,27 @@ describe('Model', function() {
     });
 
 
-    it('find() succeeds', function*() {
-        rigiddbStub.prototype.find = function*(db, props) {
+    it('find() succeeds', async () => {
+        rigiddbStub.prototype.find = function find(db, props) {
             expect(db).to.equal('customers');
             expect(props).to.deep.equal({ name: 'Ilkka' });
 
             return { val: [ 42, 43 ], err: false };
         };
 
-        let expectedId = 42
+        let expectedId = 42;
         let age = 34;
 
-        rigiddbStub.prototype.get = function*(db, id) {
+        rigiddbStub.prototype.get = function get(db, id) {
             expect(db).to.equal('customers');
             expect(id).equal(expectedId++);
 
             return { val: { name: 'Ilkka', age: age++ }, err: false };
         };
 
-        const customerObjs = yield Customer.find({ name: 'Ilkka' });
+        const customerObjs = await Customer.find({ name: 'Ilkka' });
 
-        expect(customerObjs).to.deep.equal([{
+        expect(customerObjs).to.deep.equal([ {
             collection: 'customers',
             _props: { name: 'Ilkka', age: 34 },
             errors: {},
@@ -231,6 +231,6 @@ describe('Model', function() {
             _props: { name: 'Ilkka', age: 35 },
             errors: {},
             id: 43
-        }]);
+        } ]);
     });
 });

@@ -90,7 +90,7 @@ exports.register = function register(app) {
 
     // Ember CLI Live Reload redirect hack
     if (conf.get('common:dev_mode') === true) {
-        app.get('/ember-cli-live-reload.js', function *redirect() {
+        app.get('/ember-cli-live-reload.js', function *redirect() { // eslint-disable-line require-yield, max-len
             this.redirect('http://localhost:4200/ember-cli-live-reload.js');
         });
     }

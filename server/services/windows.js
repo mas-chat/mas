@@ -20,14 +20,14 @@ const assert = require('assert');
 const Window = require('../models/window');
 const Settings = require('../models/settings');
 const Conversation = require('../models/conversation');
-const ConversationMember = require('../models/ConversationMember');
+const ConversationMember = require('../models/conversationMember');
 const ConversationMessage = require('../models/conversationMessage');
 const notification = require('../lib/notification');
 const log = require('../lib/log');
 const conf = require('../lib/conf');
 
-exports.create = async function(user, conversation) {
-    let peerMember = undefined;
+exports.create = async function create(user, conversation) {
+    let peerMember = null;
 
     assert(conversation);
 
@@ -70,9 +70,9 @@ exports.create = async function(user, conversation) {
     const maxBacklogLines = conf.get('session:max_backlog');
     const messages = await ConversationMessage.find({ conversationId: conversation.id });
 
-    for (let message of messages.slice(-1 * maxBacklogLines)) {
+    for (const message of messages.slice(-1 * maxBacklogLines)) {
         const ntf = message.convertToNtf();
-        ntf.windowId = window.id
+        ntf.windowId = window.id;
 
         await notification.broadcast(user, ntf);
     }
@@ -80,22 +80,22 @@ exports.create = async function(user, conversation) {
     return window;
 };
 
-exports.findByConversation = async function(user, conversation) {
+exports.findByConversation = async function findByConversation(user, conversation) {
     return await Window.findFirst({ userId: user.id, conversationId: conversation.id });
 };
 
-exports.isValidDesktop = async function(user, desktop) {
+exports.isValidDesktop = async function isValidDesktop(user, desktop) {
     const windows = await Window.find({ userId: user.id });
 
     return windows.some(window => window.get('desktop') === desktop);
 };
 
-exports.getWindowsForNetwork = async function(user, network) {
+exports.getWindowsForNetwork = async function getWindowsForNetwork(user, network) {
     const windows = await Window.find({ userId: user.id });
-    let matchingWindows = [];
+    const matchingWindows = [];
 
     for (const window of windows) {
-        let conversation = await Conversation.fetch(window.get('conversationId'));
+        const conversation = await Conversation.fetch(window.get('conversationId'));
 
         if (!conversation) {
             log.warn(user, `Conversation missing, id: ${conversation.id}`);

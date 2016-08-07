@@ -16,13 +16,12 @@
 
 'use strict';
 
-const Settings = require('../models/settings'),
-      notification = require('../lib/notification');
+const Settings = require('../models/settings');
+const notification = require('../lib/notification');
 
-exports.sendSet = async function(user, sessionId) {
-    let settingsRecord = await Settings.findOrCreate(user.id);
-
-    let command = {
+exports.sendSet = async function sendSet(user, sessionId) {
+    const settingsRecord = await Settings.findOrCreate(user.id);
+    const command = {
         id: 'SET',
         settings: {
             activeDesktop: settingsRecord.get('activeDesktop'),

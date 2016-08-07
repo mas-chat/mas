@@ -16,21 +16,20 @@
 
 'use strict';
 
-/* globals $ */
+/* globals $, window */
 
-$(function() {
+$(() => {
     $('input[name="username"]').focus();
 
-    $('#login-form').submit(function() {
+    $('#login-form').submit(() => {
         $('.login-error').empty();
 
-        $('input').keypress(function() {
+        $('input').keypress(() => {
             $('.login-error').empty();
         });
 
         $.post('/login',
-            $('#login-form').serialize(),
-            function(data) {
+            $('#login-form').serialize(), data => {
                 if (data.success === true) {
                     window.location.pathname = '/app/';
                 } else {

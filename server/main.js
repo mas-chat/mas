@@ -21,7 +21,7 @@ const koa = require('koa');
 const hbs = require('koa-hbs');
 const error = require('koa-error');
 const compress = require('koa-compress');
-const // logger = require('koa-logger');
+// const logger = require('koa-logger');
 const handlebarsHelpers = require('./lib/handlebarsHelpers');
 const log = require('./lib/log');
 const redisModule = require('./lib/redis');
@@ -36,14 +36,14 @@ const conf = require('./lib/conf');
 
 const app = koa();
 
-exports.init = async function(httpServer, httpsServer, setHttpHandlers) {
+exports.init = async function initServer(httpServer, httpsServer, setHttpHandlers) {
     // Development only
     if (app.env === 'development') {
         app.use(error());
         // app.use(logger());
     }
 
-    app.use(function*(next) {
+    app.use(function *xFrameOptionsMiddleware(next) {
         this.set('X-Frame-Options', 'DENY');
         yield next;
     });
@@ -78,7 +78,7 @@ exports.init = async function(httpServer, httpsServer, setHttpHandlers) {
         const forceSSLApp = koa();
 
         // To keep things simple, force SSL is always activated if https is enabled
-        forceSSLApp.use(function*() {
+        forceSSLApp.use(function *forceSSLAppMiddleware() { // eslint-disable-line require-yield
             this.response.status = 301;
             this.response.redirect(conf.getComputed('site_url') + this.request.url);
         });
@@ -94,12 +94,12 @@ exports.init = async function(httpServer, httpsServer, setHttpHandlers) {
         demoContent.enable();
     }
 
-    init.on('beforeShutdown', async function() {
+    init.on('beforeShutdown', async () => {
         await socketController.shutdown();
         scheduler.quit();
     });
 
-    init.on('afterShutdown', async function() {
+    init.on('afterShutdown', async () => {
         redisModule.shutdown();
         httpServer.close();
         log.quit();

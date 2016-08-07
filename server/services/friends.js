@@ -26,8 +26,8 @@ const EPOCH_DATE = new Date(1);
 
 // TBD: Instead of FRIENDS and FRIENDSUPDATE, use ADDFRIENDS
 
-exports.sendFriends = async function sendFriends(user, sessionId) {
-    sendFriends(user, sessionId);
+exports.sendFriends = function sendFriends(user, sessionId) {
+    sendFriendsNtf(user, sessionId);
 };
 
 exports.sendFriendConfirm = async function sendFriendConfirm(user, sessionId) {
@@ -110,8 +110,8 @@ exports.activateFriends = async function activeFriends(user, friendUser) {
     await dstFriend.set({ state: 'active' });
 
     // Inform both parties
-    await sendFriends(user);
-    await sendFriends(friendUser);
+    await sendFriendsNtf(user);
+    await sendFriendsNtf(friendUser);
 };
 
 exports.removeFriends = async function removeFriends(user, friendUser) {
@@ -137,12 +137,12 @@ exports.removeUser = async function removeUser(user) {
 
     const friends = friendAsSrc.concat(friendAsDst);
 
-    for (let friend of friends) {
+    for (const friend of friends) {
         await friend.delete();
     }
 };
 
-async function sendFriends(user, sessionId) {
+async function sendFriendsNtf(user, sessionId) {
     const command = {
         id: 'FRIENDS',
         reset: true,
@@ -151,7 +151,7 @@ async function sendFriends(user, sessionId) {
 
     const friendUsers = await getFriendUsers(user);
 
-    for (let friendUser of friendUsers) {
+    for (const friendUser of friendUsers) {
         const last = friendUser.get('lastLogout');
         const online = await friendUser.isOnline();
 

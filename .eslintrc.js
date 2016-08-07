@@ -11,7 +11,9 @@ module.exports = {
         "no-param-reassign": ["error", { "props": false }],
         "array-bracket-spacing": ["error", "always"],
         "no-underscore-dangle": ["off"],
-        "radix": ["error", "as-needed"]
+        "radix": ["error", "as-needed"],
+        "import/no-extraneous-dependencies": ["error", {"devDependencies": true, "optionalDependencies": false}],
+        "no-continue": ["off"]
     },
     "parserOptions": {
         "ecmaVersion": 6,

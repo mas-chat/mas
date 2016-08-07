@@ -93,22 +93,24 @@ exports.delete = async function deleteCoversation(conversation) {
 };
 
 exports.getPeerMember = async function getPeerMember(conversation, userGId) {
-    return await getPeerMember(conversation, userGId);
+    return await get1on1PeerMember(conversation, userGId);
 };
 
 exports.getMemberRole = async function getMemberRole(conversation, userGId) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
-    const member = members.find(member => UserGId.create(member.get('userGId')).equals(userGId));
+    const targetMember = members.find(member =>
+        UserGId.create(member.get('userGId')).equals(userGId));
 
-    return member ? member.get('role') : null;
+    return targetMember ? targetMember.get('role') : null;
 };
 
 exports.setMemberRole = async function setMemberRole(conversation, userGId, role) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
-    const member = members.find(member => UserGId.create(member.get('userGId')).equals(userGId));
+    const targetMember = members.find(member =>
+        UserGId.create(member.get('userGId')).equals(userGId));
 
-    if (member) {
-        await member.set({ role });
+    if (targetMember) {
+        await targetMember.set({ role });
         await broadcastAddMembers(conversation, userGId, role);
     }
 };
@@ -118,12 +120,12 @@ exports.setGroupMembers = async function setGroupMembers(conversation, newMember
 
     for (const oldMember of oldMembers) {
         if (!Object.keys(newMembersHash).some(newMember => newMember === oldMember.gIdString)) {
-            await removeGroupMember(conversation, oldMember, true);
+            await deleteGroupMember(conversation, oldMember, true);
         }
     }
 
     for (const newMember of Object.keys(newMembersHash)) {
-        if (!oldMembers.some(oldMembers => oldMembers.gIdString === newMember)) {
+        if (!oldMembers.some(oldMember => oldMember.gIdString === newMember)) {
             await ConversationMember.create({
                 conversationId: conversation.id,
                 userGId: newMember,
@@ -137,7 +139,7 @@ exports.setGroupMembers = async function setGroupMembers(conversation, newMember
 
         if (newMemberGId.isMASUser) {
             const user = await User.fetch(newMemberGId.id);
-            await sendFullAddMembers(conversation, user);
+            await sendCompleteAddMembers(conversation, user);
         }
     }
 };
@@ -146,9 +148,9 @@ exports.addGroupMember = async function addGroupMember(conversation, userGId, ro
     assert(role === 'u' || role === '+' || role === '@' || role === '*');
 
     const members = await ConversationMember.find({ conversationId: conversation.id });
-    const member = members.find(member => member.get('userGId') === userGId.toString());
+    const targetMember = members.find(member => member.get('userGId') === userGId.toString());
 
-    if (!member) {
+    if (!targetMember) {
         await ConversationMember.create({
             conversationId: conversation.id,
             userGId: userGId.toString(),
@@ -163,20 +165,20 @@ exports.addGroupMember = async function addGroupMember(conversation, userGId, ro
 
         await broadcastAddMembers(conversation, userGId, role);
     } else {
-        await member.set({ role });
+        await targetMember.set({ role });
     }
 };
 
 exports.removeGroupMember = async function removeGroupMember(
     conversation, userGId, skipCleanUp, wasKicked, reason) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
-    const member = members.find(member => member.get('userGId') === userGId.toString());
+    const targetMember = members.find(member => member.get('userGId') === userGId.toString());
 
-    if (!member) {
+    if (!targetMember) {
         return;
     }
 
-    await removeGroupMember(conversation, member, skipCleanUp, wasKicked, reason);
+    await deleteGroupMember(conversation, targetMember, skipCleanUp, wasKicked, reason);
 };
 
 exports.remove1on1Member = async function remove1on1Member(conversation, userGId) {
@@ -243,7 +245,7 @@ exports.editMessage = async function editMessage(conversation, user, conversatio
 };
 
 exports.sendFullAddMembers = async function sendFullAddMembers(conversation, user) {
-    return await sendFullAddMembers(conversation, user);
+    return await sendCompleteAddMembers(conversation, user);
 };
 
 exports.setTopic = async function setTopic(conversation, topic, nickName) {
@@ -344,7 +346,7 @@ async function broadcast(conversation, msg, excludeSession) {
     }
 }
 
-async function sendFullAddMembers(conversation, user) {
+async function sendCompleteAddMembers(conversation, user) {
     const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
@@ -433,7 +435,7 @@ async function scanForEmailNotifications(conversation, message) {
             return;
         }
     } else {
-        const peerMember = await getPeerMember(conversation, UserGId.create(message.userGId));
+        const peerMember = await get1on1PeerMember(conversation, UserGId.create(message.userGId));
         const peerMemberGId = UserGId.create(peerMember.get('userGId'));
 
         if (peerMemberGId.isMASUser) {
@@ -486,13 +488,13 @@ async function scanForEmailNotifications(conversation, message) {
     }
 }
 
-async function getPeerMember(conversation, userGId) {
+async function get1on1PeerMember(conversation, userGId) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     return members.find(member => !member.gId.equals(userGId));
 }
 
-async function removeGroupMember(conversation, member, skipCleanUp, wasKicked, reason) {
+async function deleteGroupMember(conversation, member, skipCleanUp, wasKicked, reason) {
     assert(conversation.get('type') === 'group');
 
     if (!member) {
@@ -521,7 +523,8 @@ async function removeGroupMember(conversation, member, skipCleanUp, wasKicked, r
 
     // Delete conversation if no mas users are left
     const members = await ConversationMember.find({ conversationId: conversation.id });
-    const masUserExists = members.some(member => UserGId.create(member.get('userGId')).isMASUser);
+    const masUserExists = members.some(remainingMember =>
+        UserGId.create(remainingMember.get('userGId')).isMASUser);
 
     if (!masUserExists && !skipCleanUp) {
         log.info(`Last member parted, removing conversation, id: ${conversation.id}`);
