@@ -62,13 +62,11 @@ function logEntry(type, user, msg, callback) {
         });
     }
 
-    if (msg === undefined) {
-        msg = user;
-    } else {
+    if (msg) {
         entry.userId = user.id;
     }
 
-    logger.log(type, msg, entry, callback);
+    logger.log(type, msg || user, entry, callback);
 }
 
 function configTransports() {
@@ -84,8 +82,8 @@ function configTransports() {
         const fileName = path.join(logDirectory, `${process.title}.log`);
 
         if (!fs.existsSync(logDirectory)) {
-            const msg = 'ERROR: '.red + `Log directory ${logDirectory} doesn\'t exist.`;
-            console.error(msg); // eslint-disable-line no-console
+            console.error( // eslint-disable-line no-console
+                `${'ERROR:'.red} Log directory ${logDirectory} doesn\'t exist.`);
             process.exit(1);
         }
 

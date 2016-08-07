@@ -32,11 +32,11 @@ const rlh = redisLuaHelper({
 const activeClients = [];
 
 exports.createClient = function createClient(options) {
-    return createClient(options);
+    return createRedisClient(options);
 };
 
 exports.loadScripts = async function loadScripts() {
-    const redisClient = createClient();
+    const redisClient = createRedisClient();
     const scripts = await Promise.promisify(rlh.loadDir, { context: rlh })();
 
     for (const scriptName of scripts) {
@@ -58,7 +58,7 @@ exports.shutdown = function shutdown() {
     activeClients.forEach(client => client.quit());
 };
 
-function createClient({ autoClose = true } = {}) {
+function createRedisClient({ autoClose = true } = {}) {
     let client;
 
     if (conf.get('redis:connection_type') === 'socket') {
@@ -70,7 +70,7 @@ function createClient({ autoClose = true } = {}) {
 
     client.__quit = client.quit;
 
-    client.run = async function run(scriptName, ...params) {
+    client.run = function run(scriptName, ...params) {
         try {
             return client.evalsha(rlh.shasum(scriptName), 0, ...params);
         } catch (e) {
@@ -80,7 +80,7 @@ function createClient({ autoClose = true } = {}) {
         return null;
     };
 
-    client.quit = async function quit() {
+    client.quit = function quit() {
         const index = activeClients.indexOf(client);
 
         if (index > -1) {

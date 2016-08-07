@@ -31,13 +31,10 @@ exports.broadcast = async function broadcast(user, ntfs, excludeSessionId) {
 async function sendNotifications(user, sessionId, excludeSessionId, ntfs) {
     assert(ntfs);
 
-    if (!util.isArray(ntfs)) {
-        ntfs = [ ntfs ];
-    }
+    const ntfsArray = (util.isArray(ntfs) ? ntfs : [ ntfs ])
+        .map(ntf => (typeof ntf === 'string' ? ntf : JSON.stringify(ntf)));
 
-    ntfs = ntfs.map(ntf => { return typeof ntf === 'string' ? ntf : JSON.stringify(ntf); });
-
-    for (const ntf of ntfs) {
+    for (const ntf of ntfsArray) {
         if (sessionId) {
             redis.publish(`${user.id}:${sessionId}`, ntf);
         } else if (!excludeSessionId) {

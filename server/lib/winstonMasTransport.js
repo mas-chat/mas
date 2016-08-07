@@ -34,10 +34,9 @@ MasConsoleLogger.prototype.log = function log(level, msg, meta, callback) {
     const processParts = process.title.split('-');
     const processName = processParts[1];
     const processExtension = processParts[2];
-
+    const userIdColumn = meta.userId || 'N/A';
     let processColumn;
     let levelColumn;
-    let userIdColumn = meta.userId || 'N/A';
 
     switch (processName) {
         case 'irc':
@@ -67,12 +66,10 @@ MasConsoleLogger.prototype.log = function log(level, msg, meta, callback) {
             levelColumn = 'UNKN'.red;
     }
 
+    const date = new Date().toISOString();
+
     process.stdout.write(
-        new Date().toISOString().yellow + ' ' +
-        processColumn + ' - ' +
-        levelColumn + ' - ' +
-        userIdColumn + ' - ' +
-        msg + '\n');
+        `${date.yellow} ${processColumn}-${levelColumn}-${userIdColumn}: ${msg}\n`);
 
     callback(null, true);
 };

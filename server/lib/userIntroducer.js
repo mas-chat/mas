@@ -16,7 +16,7 @@
 
 'use strict';
 
-const UserGId = require('../models/UserGId');
+const UserGId = require('../models/userGId');
 const log = require('./log');
 const conf = require('./conf');
 const User = require('../models/user');
@@ -51,20 +51,20 @@ async function introduceUsers(user, userGIds, session, socket) {
             const entry = { nick: {} };
 
             if (userGId.isMASUser) {
-                const user = await User.fetch(userGId.id);
+                const foundUser = await User.fetch(userGId.id);
 
-                entry.name = user.get('name');
-                entry.gravatar = user.get('emailMD5');
+                entry.name = foundUser.get('name');
+                entry.gravatar = foundUser.get('emailMD5');
 
                 for (const network of networks) {
-                    const currentNick = await nicksService.getCurrentNick(user, network);
+                    const currentNick = await nicksService.getCurrentNick(foundUser, network);
 
                     // Fallback to default nick. This solves the situation where the user joins
                     // a new IRC network during the session. In that case his own userGId is in
                     // knownUserGIds table but with null nick for that IRC network. Fallback works
                     // because if the user's nick changes for any reason from the default, that is
                     // communicated separately to the client.
-                    entry.nick[network] = currentNick || user.get('nick');
+                    entry.nick[network] = currentNick || foundUser.get('nick');
                 }
             } else {
                 entry.name = 'IRC User';

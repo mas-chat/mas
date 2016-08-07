@@ -35,7 +35,7 @@ if (configFileOption && configFileOption.charAt(0) === path.sep) {
 }
 
 if (!fs.existsSync(configFile)) {
-    const msg = 'ERROR: '.red + `Config file ${configFile} missing.`;
+    const msg = `${'ERROR:'.red} Config file ${configFile} missing.`;
     console.error(msg); // eslint-disable-line no-console
     process.exit(1);
 }
@@ -46,7 +46,7 @@ nconf.argv().add('file', {
 });
 
 exports.get = function get(key) {
-    return get(key);
+    return getValue(key);
 };
 
 exports.getComputed = function getComputed(key) {
@@ -54,7 +54,7 @@ exports.getComputed = function getComputed(key) {
 
     switch (key) {
         case 'site_url':
-            ret = get('site:site_url');
+            ret = getValue('site:site_url');
 
             if (ret.endsWith('/')) {
                 ret = ret.substring(0, ret.length - 1);
@@ -62,13 +62,13 @@ exports.getComputed = function getComputed(key) {
             break;
 
         default:
-            assert(0);
+            assert(false, 'Unknown conf key');
     }
 
     return ret;
 };
 
-function get(key) {
+function getValue(key) {
     const value = nconf.get(key);
 
     if (value === undefined) {

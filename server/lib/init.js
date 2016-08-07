@@ -34,7 +34,8 @@ const shutdownOrder = {
 };
 
 process.on('unhandledRejection', (reason, p) => {
-    console.log('Unhandled Rejection at: Promise ', p, ' reason: ', reason); // eslint-disable-line no-console
+    console.log( // eslint-disable-line no-console
+        'Unhandled Rejection at: Promise ', p, ` reason: ${reason}`);
 });
 
 exports.configureProcess = function configureProcess(serverName) {
@@ -42,13 +43,13 @@ exports.configureProcess = function configureProcess(serverName) {
 
     process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
     process.title = processName;
-    process.on('SIGINT', shutdown);
-    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', execShutdown);
+    process.on('SIGTERM', execShutdown);
 
     process.on('message', msg => {
         // Message from PM2
         if (msg === 'shutdown') {
-            shutdown();
+            execShutdown();
         }
     });
 };
@@ -60,10 +61,10 @@ exports.on = function on(state, callback) {
 };
 
 exports.shutdown = function shutdown() {
-    shutdown();
+    execShutdown();
 };
 
-async function shutdown() {
+async function execShutdown() {
     if (shutdownInProgress) {
         return;
     }
