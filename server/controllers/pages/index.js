@@ -18,7 +18,7 @@
 
 const authOptions = require('../../lib/authOptions');
 
-module.exports = function*() {
+module.exports = function *index() {
     const path = this.request.path;
 
     if (path === '/' || path === '/index.html') {
@@ -35,7 +35,7 @@ module.exports = function*() {
         const page = path.replace(/\/(.*)\.html/, '$1');
 
         yield this.render(page, {
-            page: page,
+            page,
             title: page
         });
     }

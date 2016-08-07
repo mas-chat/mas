@@ -187,7 +187,7 @@ exports.setup = function setup(server) {
     });
 };
 
-exports.shutdown = async function shutdown() {
+exports.shutdown = function shutdown() {
     for (const server of ioServers) {
         server.close();
     }

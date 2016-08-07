@@ -61,7 +61,7 @@ const handlers = {
     FETCH: handleFetch
 };
 
-init.on('beforeShutdown', async function beforeShutdown() {
+init.on('beforeShutdown', async () => {
     await courier.quit();
 });
 
@@ -391,7 +391,7 @@ async function handleAckAlert({ user, command }) {
     return { status: 'OK' };
 }
 
-async function handleLogout({ user, session }) {
+function handleLogout({ user, session }) {
     log.info(user, `User ended session. SessionId: ${session.id}`);
 
     session.state = 'terminating';
@@ -459,7 +459,7 @@ async function handleRemoveFriend({ user, command }) {
     return { status: 'OK' };
 }
 
-async function handleGetProfile({ user }) {
+function handleGetProfile({ user }) {
     return { name: user.get('name'), email: user.get('email'), nick: user.get('nick') };
 }
 

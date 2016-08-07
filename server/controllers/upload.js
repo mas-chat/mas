@@ -49,7 +49,7 @@ module.exports = async function upload() {
         }
     }
 
-    while ((part = await parts)) {
+    while ((part = await parts)) { // eslint-disable-line no-cond-assign
         if (part.length) {
             // TDB: Handle if field
             // key: part[0]
