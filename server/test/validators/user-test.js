@@ -1,8 +1,9 @@
+/* globals describe, it */
+
 'use strict';
 
-const chai = require("chai"),
-      expect = require('chai').expect,
-      userValidator = require('../../validators/user.js');
+const expect = require('chai').expect;
+const userValidator = require('../../validators/user.js');
 
 describe('UserValidator', () => {
     it('name, email, and password fails', () => {
@@ -16,7 +17,7 @@ describe('UserValidator', () => {
             valid: false,
             errors: {
                 email: 'Please enter a valid email address.',
-                name: 'Please enter at least 6 characters.',
+                name: 'Please enter at least 6 characters.'
             }
         });
     });
