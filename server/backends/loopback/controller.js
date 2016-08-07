@@ -20,24 +20,23 @@ const init = require('../../lib/init');
 
 init.configureProcess('loopback');
 
-const redisModule = require('../../lib/redis'),
-      conf = require('../../lib/conf'),
-      log = require('../../lib/log'),
-      courier = require('../../lib/courier').createEndPoint('loopbackparser'),
-      Conversation = require('../../models/conversation'),
-      NetworkInfo = require('../../models/NetworkInfo'),
-      User = require('../../models/user'),
-      UserGId = require('../../models/userGId'),
-      windowsService = require('../../services/windows'),
-      nicksService = require('../../services/nicks'),
-      conversationsService = require('../../services/conversations'),
-      userIntroducer = require('../../lib/userIntroducer');
+const redisModule = require('../../lib/redis');
+const conf = require('../../lib/conf');
+const log = require('../../lib/log');
+const courier = require('../../lib/courier').createEndPoint('loopbackparser');
+const Conversation = require('../../models/conversation');
+const NetworkInfo = require('../../models/networkInfo');
+const User = require('../../models/user');
+const windowsService = require('../../services/windows');
+const nicksService = require('../../services/nicks');
+const conversationsService = require('../../services/conversations');
+const userIntroducer = require('../../lib/userIntroducer');
 
-init.on('beforeShutdown', function*() {
+init.on('beforeShutdown', function *beforeShutdown() {
     yield courier.quit();
 });
 
-init.on('afterShutdown', function*() {
+init.on('afterShutdown', function *afterShutdown() {
     redisModule.shutdown();
     log.quit();
 });
@@ -57,7 +56,7 @@ async function start() {
     courier.on('close', courier.noop); // TBD: Should we do something?
 
     await courier.listen();
-};
+}
 
 function processText() {
     return { status: 'ERROR', errorMsg: 'Unknown command in this context. Try /help' };
@@ -76,6 +75,8 @@ async function processSend({ userId, conversationId }) {
                 errorMsg: 'This MAS user\'s account is deleted. Please close this conversation.' };
         }
     }
+
+    return { status: 'OK' };
 }
 
 async function processCreate({ userId, name, password }) {
@@ -92,10 +93,10 @@ async function processCreate({ userId, name, password }) {
     const conversation = await Conversation.create({
         owner: userId,
         type: 'group',
-        name: name,
+        name,
         network: 'MAS',
         topic: 'Welcome!',
-        password: password,
+        password,
         apikey: ''
     });
 
@@ -156,15 +157,15 @@ async function joinGroup(conversation, user, role) {
 }
 
 async function createInitialGroups() {
-    let groups = conf.get('loopback:initial_groups').split(',');
-    let adminUserId = parseInt(conf.get('common:admin'));
+    const groups = conf.get('loopback:initial_groups').split(',');
+    const adminUserId = parseInt(conf.get('common:admin'));
 
-    for (let name of groups) {
+    for (const name of groups) {
         // Create fails if the group already exists
         await Conversation.create({
             owner: adminUserId,
             type: 'group',
-            name: name,
+            name,
             network: 'MAS',
             topic: 'Welcome!',
             password: null
@@ -177,7 +178,7 @@ async function ensureNetworkInfoExists(user) {
         userId: user.id,
         network: 'MAS',
         state: 'connected',
-        nick: user.get('nick'),
+        nick: user.get('nick')
     });
 
     if (networkInfo.valid) {
