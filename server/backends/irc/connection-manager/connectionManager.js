@@ -40,7 +40,7 @@ let identServer;
 
 const LAG_POLL_INTERVAL = 60 * 1000; // 60s
 
-init.on('beforeShutdown', async function beforeShutdown() {
+init.on('beforeShutdown', async () => {
     if (conf.get('irc:identd')) {
         identServer.close();
     }
@@ -72,8 +72,8 @@ function handleIdentConnection(socket) {
 
     carrier.carry(socket, line => {
         const ports = line.split(',');
-        const localPort = parseInt(ports[0], 10);
-        const remotePort = parseInt(ports[1], 10);
+        const localPort = parseInt(ports[0]);
+        const remotePort = parseInt(ports[1]);
         const prefix = `${localPort}, ${remotePort}`;
 
         if (Number.isInteger(localPort) && Number.isInteger(remotePort)) {
@@ -133,7 +133,7 @@ courier.on('write', params => {
     write({ userId: params.userId, network: params.network, reportError: true }, params.line);
 });
 
-(async function() {
+(async function main() {
     // Start IDENT server
     if (conf.get('irc:identd')) {
         identServer = net.createServer(handleIdentConnection);
@@ -143,7 +143,7 @@ courier.on('write', params => {
     await courier.clearInbox('ircparser');
     courier.callNoWait('ircparser', 'restarted');
     await courier.listen();
-})();
+}());
 
 function connect(userId, nick, network) {
     if (sockets[`${userId}:${network}`]) {
@@ -186,10 +186,9 @@ function connect(userId, nick, network) {
         // IRC protocol doesn't have character set concept, we need to guess. Algorithm is simple,
         // if the received binary data is valid utf8 then do no conversion. Else assume that the
         // character set is iso-8859-15 and convert it to utf8.
-        data = isUtf8(data) ? data.toString() : iconv.decode(data, 'iso-8859-15');
-        data = buffer + data;
+        const chunk = buffer + (isUtf8(data) ? data.toString() : iconv.decode(data, 'iso-8859-15'));
+        const lines = chunk.split(/\r\n/);
 
-        const lines = data.split(/\r\n/);
         buffer = lines.pop(); // Save the potential partial line to buffer
 
         lines.forEach(line => {
@@ -227,11 +226,9 @@ function write(options, data) {
         return;
     }
 
-    if (typeof data === 'string') {
-        data = [ data ];
-    }
+    const chunk = typeof data === 'string' ? [ data ] : data;
 
-    data.forEach(line => socket.write(`${line}\r\n`));
+    chunk.forEach(line => socket.write(`${line}\r\n`));
 
     socket.last = Date.now();
 }

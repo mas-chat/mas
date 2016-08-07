@@ -29,7 +29,7 @@ const courier = require('../../lib/courier').createEndPoint('ircparser');
 const User = require('../../models/user');
 const Conversation = require('../../models/conversation');
 const ConversationMember = require('../../models/conversationMember');
-const NetworkInfo = require('../../models/NetworkInfo');
+const NetworkInfo = require('../../models/networkInfo');
 const UserGId = require('../../models/userGId');
 const conversationsService = require('../../services/conversations');
 const windowsService = require('../../services/windows');
@@ -87,7 +87,7 @@ const handlers = {
     ERROR: handleError
 };
 
-init.on('beforeShutdown', async function beforeShutdown() {
+init.on('beforeShutdown', async () => {
     await ircScheduler.quit();
     await courier.quit();
 });
@@ -97,7 +97,7 @@ init.on('afterShutdown', () => {
     log.quit();
 });
 
-(async function() {
+(async function main() {
     await redisModule.loadScripts();
     ircScheduler.init();
 
@@ -115,7 +115,7 @@ init.on('afterShutdown', () => {
     courier.on('reconnectifinactive', processReconnectIfInactive);
 
     await courier.listen();
-})();
+}());
 
 // Upper layer messages
 
@@ -136,10 +136,8 @@ async function processSend({ conversationId, userId, text = '' }) {
         target = await redis.hget(`ircuser:${peerMember.get('userGId')}`, 'nick');
     }
 
-    text = text.replace(/\n/g, ' ');
-
     if (target) {
-        sendPrivmsg(user, conversation.get('network'), target, text);
+        sendPrivmsg(user, conversation.get('network'), target, text.replace(/\n/g, ' '));
     }
 }
 
@@ -157,6 +155,9 @@ async function processTextCommand({ conversationId, userId, command, commandPara
             break;
         case 'topic':
             data = `TOPIC ${conversation.name} :${commandParams}`;
+            break;
+        default:
+            log.warn(`Unknown text command: ${command}`);
             break;
     }
 
@@ -390,9 +391,7 @@ async function processDisconnected({ userId, network, reason }) {
 }
 
 async function parseIrcMessage({ userId, line, network }) {
-    line = line.trim();
-
-    const parts = line.split(' ');
+    const parts = line.trim().split(' ');
     const msg = {
         params: [],
         numericReply: false,
@@ -496,7 +495,7 @@ async function disconnect(user, network) {
     });
 }
 
-async function handleNoop() {
+async function handleNoop() { // eslint-disable-line no-empty-function
 }
 
 async function handleServerText(user, msg, code) {
@@ -799,8 +798,7 @@ async function handleError(user, msg) {
         log.warn(user, `Too many connections to: ${msg.network}`);
 
         await addSystemMessage(user, msg.network, 'error',
-            msg.network + ' IRC network doesn\'t allow more connections. ' +
-            'Close all windows related to this IRC network and rejoin another day to try again.');
+            `${msg.network} IRC network doesn\'t allow more connections. Close all windows related to this IRC network and rejoin another day to try again.`); // eslint-disable-line max-len
 
         // Disable auto-reconnect
         await redis.hset(`networks:${user.id}:${msg.network}`, 'state', 'closing');
@@ -883,8 +881,7 @@ async function handleMode(user, msg) {
 
     await conversationsService.addMessageUnlessDuplicate(conversation, user, {
         cat: 'info',
-        body: 'Mode change: ' + msg.params.join(' ') + ' by ' +
-            (msg.nick ? msg.nick : msg.serverName)
+        body: `Mode change: ${msg.params.join(' ')} by ${msg.nick ? msg.nick : msg.serverName}`
     });
 
     const modeParams = msg.params.slice(1);
@@ -1091,16 +1088,16 @@ async function tryDifferentNick(user, network) {
 
     if (nick !== currentNick.substring(0, nick.length)) {
         // Current nick is unique ID, let's try to change it to something unique immediately
-        currentNick = nick + (100 + Math.floor((Math.random() * 900)));
+        currentNick = nick + (100 + Math.floor(Math.random() * 900));
     } else if (currentNick === nick) {
         // Second best choice
-        currentNick = nick + '_';
-    } else if (currentNick === nick + '_') {
+        currentNick = `${nick}_`;
+    } else if (currentNick === `${nick}_`) {
         // Third best choice
-        currentNick = nick + (Math.floor((Math.random() * 10)));
+        currentNick = nick + Math.floor(Math.random() * 10);
     } else {
         // If all else fails, keep adding random numbers
-        currentNick = currentNick + (Math.floor((Math.random() * 10)));
+        currentNick += Math.floor(Math.random() * 10);
     }
 
     await nicksService.updateCurrentNick(user, network, currentNick);
@@ -1156,6 +1153,9 @@ async function bufferNames(names, user, network, conversation) {
             case '+':
                 userClass = VOICE;
                 break;
+            default:
+                assert(false, 'Unsupported IRC channel user role');
+                break;
         }
 
         if (userClass === OPER || userClass === VOICE) {
@@ -1177,7 +1177,7 @@ function parseCTCPMessage(text) {
     const regex = /\u0001(.*?)\u0001/g;
     let matches;
 
-    while ((matches = regex.exec(text))) {
+    while ((matches = regex.exec(text)) !== null) { // eslint-disable-line no-cond-assign
         const msg = matches[1];
         let dataType;
         let payload = '';
@@ -1203,7 +1203,7 @@ function isChannel(text) {
 function sendPrivmsg(user, network, target, text) {
     courier.callNoWait('connectionmanager', 'write', {
         userId: user.id,
-        network: network,
+        network,
         line: `PRIVMSG ${target} :${text}`
     });
 }

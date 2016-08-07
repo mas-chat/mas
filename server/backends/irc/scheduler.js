@@ -35,37 +35,34 @@ exports.quit = async function quit() {
     await courier.quit();
 };
 
-function disconnectInactiveIRCUsers() {
+async function disconnectInactiveIRCUsers() {
     log.info('Running disconnectInactiveIRCUsers job');
 
     const inactivityTimeout = conf.get('irc:inactivity_timeout') * 24 * 60 * 60;
     const minAllowedLogoutTime = Math.round(Date.now() / 1000) - inactivityTimeout;
+    const users = await redis.smembers('userlist'); // TBD: Doesn't scale too far
+    const networks = await redis.smembers('networklist');
 
-    (async function() {
-        const users = await redis.smembers('userlist'); // TBD: Doesn't scale too far
-        const networks = await redis.smembers('networklist');
+    for (const userId of users) {
+        const lastLogout = parseInt(await redis.hget(`user:${userId}`, 'lastlogout'));
 
-        for (const userId of users) {
-            const lastLogout = parseInt(await redis.hget(`user:${userId}`, 'lastlogout'));
+        if (lastLogout !== 0 && lastLogout < minAllowedLogoutTime) {
+            for (const network of networks) {
+                const state = await redis.hget(`networks:${userId}:${network}`, 'state');
 
-            if (lastLogout !== 0 && lastLogout < minAllowedLogoutTime) {
-                for (const network of networks) {
-                    const state = await redis.hget(`networks:${userId}:${network}`, 'state');
+                if (state === 'connected') {
+                    await redis.hset(`networks:${userId}:${network}`, 'state', 'idleclosing');
 
-                    if (state === 'connected') {
-                        await redis.hset(`networks:${userId}:${network}`, 'state', 'idleclosing');
+                    courier.callNoWait('connectionmanager', 'disconnect', {
+                        userId,
+                        network,
+                        reason: 'Inactive user.'
+                    });
 
-                        courier.callNoWait('connectionmanager', 'disconnect', {
-                            userId,
-                            network,
-                            reason: 'Inactive user.'
-                        });
-
-                        log.info(userId, 'Disconnected inactive user. UserId: ' + userId +
-                            ', network: ' + network);
-                    }
+                    log.info(userId,
+                        `Disconnected inactive user. UserId: ${userId}, network: ${network}`);
                 }
             }
         }
-    })();
+    }
 }

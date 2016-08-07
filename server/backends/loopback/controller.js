@@ -32,11 +32,11 @@ const nicksService = require('../../services/nicks');
 const conversationsService = require('../../services/conversations');
 const userIntroducer = require('../../lib/userIntroducer');
 
-init.on('beforeShutdown', function *beforeShutdown() {
-    yield courier.quit();
+init.on('beforeShutdown', async () => {
+    await courier.quit();
 });
 
-init.on('afterShutdown', function *afterShutdown() {
+init.on('afterShutdown', () => {
     redisModule.shutdown();
     log.quit();
 });
@@ -63,14 +63,15 @@ function processText() {
 }
 
 async function processSend({ userId, conversationId }) {
+    const user = await User.fetch(userId);
     const conversation = await Conversation.fetch(conversationId);
 
     if (conversation.get('type') === '1on1') {
         const targetMember = await conversationsService.getPeerMember(conversation, user);
         const targetUser = await User.fetch(targetMember.id);
-        const userExists = await userExists(targetUser);
+        const validUser = await userExists(targetUser);
 
-        if (!userExists) {
+        if (!validUser) {
             return { status: 'ERROR',
                 errorMsg: 'This MAS user\'s account is deleted. Please close this conversation.' };
         }
