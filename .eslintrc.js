@@ -9,7 +9,9 @@ module.exports = {
         "comma-dangle": ["error", "never"],
         "no-use-before-define": ["error", { "functions": false, "classes": true }],
         "no-param-reassign": ["error", { "props": false }],
-        "array-bracket-spacing": ["error", "always"]
+        "array-bracket-spacing": ["error", "always"],
+        "no-underscore-dangle": ["off"],
+        "radix": ["error", "as-needed"]
     },
     "parserOptions": {
         "ecmaVersion": 6,
