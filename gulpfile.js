@@ -1,16 +1,16 @@
 'use strict';
 
-const path = require('path'),
-      argv = require('yargs').argv,
-      gulp = require('gulp'),
-      util = require('gulp-util'),
-      concat = require('gulp-concat'),
-      uglify = require('gulp-uglify'),
-      less = require('gulp-less'),
-      minifyCSS = require('gulp-minify-css'),
-      rev = require('gulp-rev'),
-      rimraf = require('rimraf'),
-      inlineCss = require('gulp-inline-css');
+const path = require('path');
+const argv = require('yargs').argv;
+const gulp = require('gulp');
+const util = require('gulp-util');
+const concat = require('gulp-concat');
+const uglify = require('gulp-uglify');
+const less = require('gulp-less');
+const minifyCSS = require('gulp-minify-css');
+const rev = require('gulp-rev');
+const rimraf = require('rimraf');
+const inlineCss = require('gulp-inline-css');
 
 const paths = {
     pagesLibs: [
@@ -22,19 +22,17 @@ const paths = {
 };
 
 function appendPath(libs) {
-    return libs.map(function(elem) { return 'bower_components/' + elem; });
+    return libs.map(elem => `bower_components/${elem}`);
 }
 
 paths.pagesLibs = appendPath(paths.pagesLibs);
 
-gulp.task('libs-pages', function() {
-    return gulp.src(paths.pagesLibs)
-        .pipe(concat('pages-libs.js'))
-        .pipe(argv.prod ? uglify() : util.noop())
-        .pipe(gulp.dest('./server/public/dist/'));
-});
+gulp.task('libs-pages', () => gulp.src(paths.pagesLibs)
+    .pipe(concat('pages-libs.js'))
+    .pipe(argv.prod ? uglify() : util.noop())
+    .pipe(gulp.dest('./server/public/dist/')));
 
-gulp.task('less-pages', function() {
+gulp.task('less-pages', () => {
     gulp.src('./server/pages/stylesheets/pages.less')
         .pipe(less({
             paths: [ path.join(__dirname, 'bower_components') ]
@@ -43,13 +41,13 @@ gulp.task('less-pages', function() {
         .pipe(gulp.dest('./server/public/dist/'));
 });
 
-gulp.task('fonts', function() {
+gulp.task('fonts', () => {
     gulp.src([ './bower_components/bootstrap/dist/fonts/*',
         './bower_components/font-awesome/fonts/*' ])
         .pipe(gulp.dest('./server/public/dist/fonts'));
 });
 
-gulp.task('emails', function() {
+gulp.task('emails', () => {
     gulp.src('./server/emails/*.hbs')
         .pipe(inlineCss({
             applyStyleTags: true,
@@ -60,11 +58,11 @@ gulp.task('emails', function() {
         .pipe(gulp.dest('./server/emails/build/'));
 });
 
-gulp.task('clean-assets', function(cb) {
+gulp.task('clean-assets', cb => {
     rimraf('./server/public/dist', cb);
 });
 
-gulp.task('build-pages', [ 'libs-pages', 'less-pages', 'fonts', 'emails' ], function() {
+gulp.task('build-pages', [ 'libs-pages', 'less-pages', 'fonts', 'emails' ], () => {
     if (argv.prod) {
         gulp.src('./server/public/dist/**/*')
             .pipe(rev())
