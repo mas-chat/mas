@@ -17,39 +17,40 @@
 
 'use strict';
 
-let readlineSync = require('readline-sync'),
-    log = require('../server/lib/log'),
-    redisModule = require('../server/lib/redis'),
-    redis = redisModule.createClient(),
-    notification = require('../server/lib/notification');
+const readlineSync = require('readline-sync');
+const log = require('../server/lib/log');
+const redisModule = require('../server/lib/redis');
+const notification = require('../server/lib/notification');
 
-let message = readlineSync.question('Message: ');
-let expiresInHours = readlineSync.question('Expires in (hours): ');
-let dismissible = yesOrNo('Can be dismissed?');
+const redis = redisModule.createClient();
 
-let now = Math.round(Date.now() / 1000);
-let ts = now + expiresInHours * 60 * 60;
+const message = readlineSync.question('Message: ');
+const expiresInHours = readlineSync.question('Expires in (hours): ');
+const dismissible = yesOrNo('Can be dismissed?');
+
+const now = Math.round(Date.now() / 1000);
+const ts = now + (expiresInHours * 60 * 60);
 
 (async function() {
     await redisModule.loadScripts();
 
-    let alertId = await redis.incr('nextGlobalAlertId');
+    const alertId = await redis.incr('nextGlobalAlertId');
 
-    let alert = {
-        message: message,
+    const alert = {
+        message,
         expires: ts,
-        dismissible: dismissible,
+        dismissible,
         report: true
     };
 
     await redis.hmset(`alert:${alertId}`, alert);
     await redis.sadd('alertlist', alertId);
 
-    let allIds = await redis.smembers('alertlist');
+    const allIds = await redis.smembers('alertlist');
 
     // Delete expired alerts
-    for (let oldAlertId of allIds) {
-        let oldAlert = await redis.hgetall(`alert:${oldAlertId}`);
+    for (const oldAlertId of allIds) {
+        const oldAlert = await redis.hgetall(`alert:${oldAlertId}`);
 
         if (now > oldAlert.expires) {
             redis.del('`alert:${oldAlertId})`');
@@ -60,14 +61,14 @@ let ts = now + expiresInHours * 60 * 60;
     // Deliver the alert
     console.log('Delivering the alert to all logged in users...'); // eslint-disable-line no-console
 
-    let allUsers = await redis.smembers('userlist');
+    const allUsers = await redis.smembers('userlist');
 
     // Convert object to MAS notification
     alert.id = 'ALERT';
     alert.alertId = alertId;
     delete alert.expires;
 
-    for (let userId of allUsers) {
+    for (const userId of allUsers) {
         await redis.sadd(`activealerts:${userId}`, alertId);
         await notification.broadcast(userId, alert);
     }
@@ -82,7 +83,7 @@ function yesOrNo(label) {
     let result = null;
 
     while (result === null) {
-        let response = readlineSync.question(label + ' [yes/no]: ');
+        const response = readlineSync.question(`${label} [yes/no]: `);
 
         if (response === 'yes') {
             result = true;
