@@ -18,17 +18,17 @@
 
 const user = require('../models/user');
 
-exports.auth = function*(next) {
-    let cookie = this.cookies.get('auth') || '';
-    let ts = new Date();
+exports.auth = function *auth(next) {
+    const cookie = this.cookies.get('auth') || '';
+    const ts = new Date();
 
     this.mas = this.mas || {};
     this.mas.user = null;
 
-    let [ userId, secret ] = cookie.split('-');
+    const [ userId, secret ] = cookie.split('-');
 
     if (userId && secret) {
-        let userRecord = yield user.fetch(parseInt(userId));
+        const userRecord = yield user.fetch(parseInt(userId));
 
         if (userRecord && userRecord.get('secretExpires') > ts &&
             userRecord.get('secret') === secret) {

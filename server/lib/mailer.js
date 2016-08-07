@@ -16,25 +16,25 @@
 
 'use strict';
 
-const fs = require('fs'),
-      path = require('path'),
-      nodemailer = require('nodemailer'),
-      mailgun = require('nodemailer-mailgun-transport'),
-      htmlToText = require('nodemailer-html-to-text').htmlToText,
-      smtpTransport = require('nodemailer-smtp-transport'),
-      handlebars = require('handlebars'),
-      conf = require('../lib/conf'),
-      log = require('../lib/log');
+const fs = require('fs');
+const path = require('path');
+const nodemailer = require('nodemailer');
+const mailgun = require('nodemailer-mailgun-transport');
+const htmlToText = require('nodemailer-html-to-text').htmlToText;
+const smtpTransport = require('nodemailer-smtp-transport');
+const handlebars = require('handlebars');
+const conf = require('../lib/conf');
+const log = require('../lib/log');
 
-let templateCache = {};
+const templateCache = {};
 let transporter;
 let fromAddress;
 let senderAddress;
 
 setupTransporter();
 
-exports.send = function(templateName, data, address, subject) {
-    let templatePath = path.join(__dirname, '..', templateName);
+exports.send = function send(templateName, data, address, subject) {
+    const templatePath = path.join(__dirname, '..', templateName);
     let template = templateCache[templatePath];
 
     if (!template) {
@@ -45,12 +45,12 @@ exports.send = function(templateName, data, address, subject) {
     log.info(`Sending email to: ${address}`);
 
     transporter.sendMail({
-        from: 'MAS admin <' + fromAddress + '>',
+        from: `MAS admin <${fromAddress}>`,
         sender: senderAddress,
         to: address,
-        subject: subject,
+        subject,
         html: template(data)
-    }, function(error, info) {
+    }, (error, info) => {
         if (error) {
             log.warn(`Failed to send email: ${error}`);
         } else {
@@ -61,7 +61,7 @@ exports.send = function(templateName, data, address, subject) {
 
 function setupTransporter() {
     if (conf.get('mailgun:enabled') === true) {
-        let mailgunAuth = {
+        const mailgunAuth = {
             auth: {
                 api_key: conf.get('mailgun:api_key'), // eslint-disable-line camelcase
                 domain: conf.get('mailgun:domain')
@@ -72,7 +72,7 @@ function setupTransporter() {
         fromAddress = conf.get('mailgun:from');
         senderAddress = conf.get('mailgun:sender');
     } else if (conf.get('smtp:enabled') === true) {
-        let smtpOptions = {
+        const smtpOptions = {
             host: conf.get('smtp:server'),
             port: conf.get('smtp:port')
         };

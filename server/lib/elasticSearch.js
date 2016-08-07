@@ -16,16 +16,16 @@
 
 'use strict';
 
-const elasticsearch = require('elasticsearch'),
-      log = require('../lib/log'),
-      conf = require('../lib/conf');
+const elasticsearch = require('elasticsearch');
+const log = require('../lib/log');
+const conf = require('../lib/conf');
 
 let elasticSearchClient = null;
 
 if (conf.get('elasticsearch:enabled')) {
-    let elasticsearchUrl = conf.get('elasticsearch:host') + ':' + conf.get('elasticsearch:port');
+    const elasticsearchUrl = `${conf.get('elasticsearch:host')}:${conf.get('elasticsearch:port')}`;
 
-    log.info('Connecting to elasticsearch: ' + elasticsearchUrl);
+    log.info(`Connecting to elasticsearch: ${elasticsearchUrl}`);
 
     elasticSearchClient = new elasticsearch.Client({
         host: elasticsearchUrl,
@@ -35,6 +35,6 @@ if (conf.get('elasticsearch:enabled')) {
     });
 }
 
-exports.getClient = function() {
+exports.getClient = function getClient() {
     return elasticSearchClient;
 };

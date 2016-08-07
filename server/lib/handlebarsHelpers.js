@@ -16,8 +16,8 @@
 
 'use strict';
 
-const fs = require('fs'),
-      path = require('path');
+const fs = require('fs');
+const path = require('path');
 
 let manifest;
 const PREFIX = '/dist/';
@@ -29,16 +29,14 @@ try {
     manifest = false;
 }
 
-exports.registerHelpers = function(hbs) {
-    hbs.registerHelper('getPageJSFile', function() {
-        return this.page + '.js';
-    });
+exports.registerHelpers = function registerHelpers(hbs) {
+    hbs.registerHelper('getPageJSFile', () => `${this.page}.js`);
 
-    hbs.registerHelper('asset', function(file) {
+    hbs.registerHelper('asset', file => {
         if (manifest) {
             return PREFIX + manifest[file];
-        } else {
-            return PREFIX + file;
         }
+
+        return PREFIX + file;
     });
 };

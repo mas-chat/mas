@@ -16,34 +16,34 @@
 
 'use strict';
 
-const path = require('path'),
-      redis = require('ioredis'),
-      Promise = require('bluebird'),
-      redisLuaHelper = require('redis-lua-helper'),
-      log = require('./log'),
-      conf = require('./conf');
+const path = require('path');
+const redis = require('ioredis');
+const Promise = require('bluebird');
+const redisLuaHelper = require('redis-lua-helper');
+const log = require('./log');
+const conf = require('./conf');
 
-let rlh = redisLuaHelper({
+const rlh = redisLuaHelper({
     root: path.join(__dirname, '..', 'lua'),
     macro: '#include',
     extension: 'lua'
 });
 
-let activeClients = [];
+const activeClients = [];
 
-exports.createClient = function(options) {
+exports.createClient = function createClient(options) {
     return createClient(options);
 };
 
-exports.loadScripts = async function() {
-    let redisClient = createClient();
-    let scripts = await Promise.promisify(rlh.loadDir, { context: rlh })();
+exports.loadScripts = async function loadScripts() {
+    const redisClient = createClient();
+    const scripts = await Promise.promisify(rlh.loadDir, { context: rlh })();
 
-    for (let scriptName of scripts) {
+    for (const scriptName of scripts) {
         try {
             await redisClient.script('load', rlh.code(scriptName));
         } catch (e) {
-            log.error('Lua script loading failed: ' + scriptName + ', ' + e);
+            log.error(`Lua script loading failed: ${scriptName}, ${e}`);
         }
     }
 
@@ -52,12 +52,10 @@ exports.loadScripts = async function() {
     redisClient.quit();
 };
 
-exports.shutdown = function() {
+exports.shutdown = function shutdown() {
     log.info(`Closing ${activeClients.length} redis connections`);
 
-    for (let client of activeClients) {
-        client.quit();
-    }
+    activeClients.forEach(client => client.quit());
 };
 
 function createClient({ autoClose = true } = {}) {
@@ -72,16 +70,18 @@ function createClient({ autoClose = true } = {}) {
 
     client.__quit = client.quit;
 
-    client.run = async function(scriptName, ...params) {
+    client.run = async function run(scriptName, ...params) {
         try {
             return client.evalsha(rlh.shasum(scriptName), 0, ...params);
         } catch (e) {
             log.warn(`Lua script failed: ${scriptName}, ${e}`);
         }
+
+        return null;
     };
 
-    client.quit = async function() {
-        let index = activeClients.indexOf(client);
+    client.quit = async function quit() {
+        const index = activeClients.indexOf(client);
 
         if (index > -1) {
             activeClients.splice(index, 1);

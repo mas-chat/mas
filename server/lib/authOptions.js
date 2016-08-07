@@ -18,15 +18,15 @@
 
 const conf = require('./conf');
 
-let password = conf.get('passwordauth:enabled');
-let google = conf.get('googleauth:enabled');
-let yahoo = conf.get('yahooauth:enabled');
-let cloudron = conf.get('cloudronauth:enabled');
+const password = conf.get('passwordauth:enabled');
+const google = conf.get('googleauth:enabled');
+const yahoo = conf.get('yahooauth:enabled');
+const cloudron = conf.get('cloudronauth:enabled');
 
 module.exports = {
-    password: password,
-    google: google,
-    yahoo: yahoo,
-    cloudron: cloudron,
+    password,
+    google,
+    yahoo,
+    cloudron,
     ext: google || yahoo || cloudron
 };

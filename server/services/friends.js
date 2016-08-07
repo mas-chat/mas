@@ -16,21 +16,21 @@
 
 'use strict';
 
-const Promise = require('bluebird'),
-      UserGId = require('../models/userGId'),
-      User = require('../models/user'),
-      Friend = require('../models/friend'),
-      notification = require('../lib/notification');
+const Promise = require('bluebird');
+const UserGId = require('../models/userGId');
+const User = require('../models/user');
+const Friend = require('../models/friend');
+const notification = require('../lib/notification');
 
 const EPOCH_DATE = new Date(1);
 
 // TBD: Instead of FRIENDS and FRIENDSUPDATE, use ADDFRIENDS
 
-exports.sendFriends = async function(user, sessionId) {
+exports.sendFriends = async function sendFriends(user, sessionId) {
     sendFriends(user, sessionId);
 };
 
-exports.sendFriendConfirm = async function(user, sessionId) {
+exports.sendFriendConfirm = async function sendFriendConfirm(user, sessionId) {
     const friendAsDst = await Friend.find({ srcUserId: user.id });
     const friendUsers = friendAsDst.filter(friend => friend.get('state') === 'pending');
 
@@ -57,10 +57,10 @@ exports.sendFriendConfirm = async function(user, sessionId) {
     }
 };
 
-exports.informStateChange = async function(user, eventType) {
+exports.informStateChange = async function informStateChange(user, eventType) {
     const ts = Date.now();
 
-    let command = {
+    const command = {
         id: 'FRIENDS',
         reset: false,
         friends: [ {
@@ -76,12 +76,12 @@ exports.informStateChange = async function(user, eventType) {
 
     const friendUsers = await getFriendUsers(user);
 
-    for (let friendUser of friendUsers) {
+    for (const friendUser of friendUsers) {
         await notification.broadcast(friendUser, command);
     }
 };
 
-exports.createPending = async function(user, friendUser) {
+exports.createPending = async function createPending(user, friendUser) {
     await Friend.create({
         srcUserId: user.id,
         dstUserId: friendUser.id,
@@ -95,7 +95,7 @@ exports.createPending = async function(user, friendUser) {
     });
 };
 
-exports.activateFriends = async function(user, friendUser) {
+exports.activateFriends = async function activeFriends(user, friendUser) {
     const srcFriend = await Friend.findFirst({
         srcUserId: user.id,
         dstUserId: friendUser.id
@@ -114,7 +114,7 @@ exports.activateFriends = async function(user, friendUser) {
     await sendFriends(friendUser);
 };
 
-exports.removeFriends = async function(user, friendUser) {
+exports.removeFriends = async function removeFriends(user, friendUser) {
     const srcFriend = await Friend.findFirst({
         srcUserId: user.id,
         dstUserId: friendUser.id
@@ -129,7 +129,7 @@ exports.removeFriends = async function(user, friendUser) {
     await dstFriend.delete();
 };
 
-exports.removeUser = async function(user) {
+exports.removeUser = async function removeUser(user) {
     const [ friendAsSrc, friendAsDst ] = await Promise.all([
         Friend.find({ srcUserId: user.id }),
         Friend.find({ dstUserId: user.id })
@@ -157,7 +157,7 @@ async function sendFriends(user, sessionId) {
 
         const friendData = {
             userId: `m${friendUser.id}`,
-            online: online
+            online
         };
 
         if (!online) {

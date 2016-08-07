@@ -16,15 +16,15 @@
 
 'use strict';
 
-const assert = require('assert'),
-      semver = require('semver'),
-      _ = require('lodash'),
-      conf = require('./conf'),
-      log = require('./log');
+const assert = require('assert');
+const semver = require('semver');
+const _ = require('lodash');
+const conf = require('./conf');
+const log = require('./log');
 
 checkNodeVersion();
 
-let stateChangeCallbacks = [];
+const stateChangeCallbacks = [];
 let shutdownInProgress = false;
 
 const shutdownOrder = {
@@ -33,19 +33,19 @@ const shutdownOrder = {
     afterShutdown: 3
 };
 
-process.on('unhandledRejection', function(reason, p){
-    console.log("Unhandled Rejection at: Promise ", p, " reason: ", reason); // eslint-disable-line no-console
+process.on('unhandledRejection', (reason, p) => {
+    console.log('Unhandled Rejection at: Promise ', p, ' reason: ', reason); // eslint-disable-line no-console
 });
 
-exports.configureProcess = function(serverName) {
-    let processName = 'mas-' + serverName + '-' + conf.get('common:env');
+exports.configureProcess = function configureProcess(serverName) {
+    const processName = `mas-${serverName}-${conf.get('common:env')}`;
 
     process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
     process.title = processName;
     process.on('SIGINT', shutdown);
     process.on('SIGTERM', shutdown);
 
-    process.on('message', function(msg) {
+    process.on('message', msg => {
         // Message from PM2
         if (msg === 'shutdown') {
             shutdown();
@@ -53,13 +53,13 @@ exports.configureProcess = function(serverName) {
     });
 };
 
-exports.on = function(state, callback) {
+exports.on = function on(state, callback) {
     assert(shutdownOrder[state]);
 
-    stateChangeCallbacks.push({ state: state, cb: callback });
+    stateChangeCallbacks.push({ state, cb: callback });
 };
 
-exports.shutdown = function() {
+exports.shutdown = function shutdown() {
     shutdown();
 };
 
@@ -72,11 +72,9 @@ async function shutdown() {
 
     log.info('Shutdown sequence started.');
 
-    let entries = _.sortBy(stateChangeCallbacks, function(entry) {
-        return shutdownOrder[entry.state];
-    });
+    const entries = _.sortBy(stateChangeCallbacks, entry => shutdownOrder[entry.state]);
 
-    for (let entry of entries) {
+    for (const entry of entries) {
         await entry.cb();
 
         console.log('Shutdown complete.'); // eslint-disable-line no-console
@@ -86,7 +84,7 @@ async function shutdown() {
 
 function checkNodeVersion() {
     if (semver.lt(process.version, 'v4.0.0')) {
-        let msg = 'ERROR: Installed Node.js version must be at least v5.0.0';
+        const msg = 'ERROR: Installed Node.js version must be at least v5.0.0';
         console.log(msg); // eslint-disable-line no-console
         process.exit(1);
     }

@@ -16,15 +16,15 @@
 
 'use strict';
 
-const path = require('path'),
-      assert = require('assert'),
-      fs = require('fs'),
-      nconf = require('nconf'),
-      argv = require('yargs').argv;
+const path = require('path');
+const assert = require('assert');
+const fs = require('fs');
+const nconf = require('nconf');
+const argv = require('yargs').argv;
 
 require('colors');
 
-let configFileOption = argv.configFile;
+const configFileOption = argv.configFile;
 let configFile;
 
 if (configFileOption && configFileOption.charAt(0) === path.sep) {
@@ -45,11 +45,11 @@ nconf.argv().add('file', {
     format: nconf.formats.ini
 });
 
-exports.get = function(key) {
+exports.get = function get(key) {
     return get(key);
 };
 
-exports.getComputed = function(key) {
+exports.getComputed = function getComputed(key) {
     let ret = '';
 
     switch (key) {
@@ -69,7 +69,7 @@ exports.getComputed = function(key) {
 };
 
 function get(key) {
-    let value = nconf.get(key);
+    const value = nconf.get(key);
 
     if (value === undefined) {
         // TODO: Add config validator, allows very early exit

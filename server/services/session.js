@@ -16,22 +16,22 @@
 
 'use strict';
 
-const notification = require('../lib/notification'),
-      alerts = require('../lib/alert'),
-      courier = require('../lib/courier').create(),
-      conf = require('../lib/conf'),
-      friendsService = require('../services/friends'),
-      settingsService = require('../services/settings'),
-      Conversation = require('../models/conversation'),
-      ConversationMember = require('../models/conversationMember'),
-      ConversationMessage = require('../models/conversationMessage'),
-      Window = require('../models/window');
+const notification = require('../lib/notification');
+const alerts = require('../lib/alert');
+const courier = require('../lib/courier').create();
+const conf = require('../lib/conf');
+const friendsService = require('../services/friends');
+const settingsService = require('../services/settings');
+const Conversation = require('../models/conversation');
+const ConversationMember = require('../models/conversationMember');
+const ConversationMessage = require('../models/conversationMessage');
+const Window = require('../models/window');
 
 const networks = [ 'MAS', ...Object.keys(conf.get('irc:networks')) ];
 
 // TBD: Is courier quit() needed?
 
-exports.init = async function(user, session, maxBacklogLines, cachedUpto) {
+exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
     await settingsService.sendSet(user, session.id);
     await friendsService.sendFriends(user, session.id);
     await friendsService.sendFriendConfirm(user, session.id);
@@ -49,7 +49,7 @@ exports.init = async function(user, session, maxBacklogLines, cachedUpto) {
         const members = await ConversationMember.find({ conversationId });
 
         const role = members.find(member => member.get('userGId') === user.gIdString).get('role');
-        let oneOnOneMember = undefined;
+        let oneOnOneMember = null;
 
         if (conversation.get('type') === '1on1') {
             oneOnOneMember = members.find(member => member.get('userGId') !== user.gIdString);
@@ -74,7 +74,7 @@ exports.init = async function(user, session, maxBacklogLines, cachedUpto) {
             column: window.get('column'),
             minimizedNamesList: window.get('minimizedNamesList'),
             desktop: window.get('desktop'),
-            role: role
+            role
         });
 
         messages.push({
@@ -93,7 +93,7 @@ exports.init = async function(user, session, maxBacklogLines, cachedUpto) {
         lines.forEach((message, index) => {
             const newMsg = index >= firstBacklogMessage && message.id > cachedUpto;
             const newEdit = message.get('status') !== 'original' &&
-                message.get('updatedId') >= cachedUpto
+                message.get('updatedId') >= cachedUpto;
 
             if (newMsg || newEdit) {
                 const ntf = message.convertToNtf();
@@ -115,6 +115,6 @@ exports.init = async function(user, session, maxBacklogLines, cachedUpto) {
 async function sendNetworkList(userGId, sessionId) {
     await notification.send(userGId, sessionId, {
         id: 'NETWORKS',
-        networks: networks
+        networks
     });
 }

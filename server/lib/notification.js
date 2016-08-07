@@ -16,15 +16,15 @@
 
 'use strict';
 
-const assert = require('assert'),
-      util = require('util'),
-      redis = require('./redis').createClient();
+const assert = require('assert');
+const util = require('util');
+const redis = require('./redis').createClient();
 
-exports.send = async function(user, sessionId, ntfs) {
+exports.send = async function send(user, sessionId, ntfs) {
     await sendNotifications(user, sessionId, null, ntfs);
 };
 
-exports.broadcast = async function(user, ntfs, excludeSessionId) {
+exports.broadcast = async function broadcast(user, ntfs, excludeSessionId) {
     await sendNotifications(user, null, excludeSessionId, ntfs);
 };
 
@@ -35,7 +35,7 @@ async function sendNotifications(user, sessionId, excludeSessionId, ntfs) {
         ntfs = [ ntfs ];
     }
 
-    ntfs = ntfs.map(ntf => typeof(ntf) === 'string' ? ntf : JSON.stringify(ntf));
+    ntfs = ntfs.map(ntf => { return typeof ntf === 'string' ? ntf : JSON.stringify(ntf); });
 
     for (const ntf of ntfs) {
         if (sessionId) {

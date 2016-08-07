@@ -16,15 +16,15 @@
 
 'use strict';
 
-const assert = require('assert'),
-      Window = require('../models/window'),
-      Settings = require('../models/settings'),
-      Conversation = require('../models/conversation'),
-      ConversationMember = require('../models/ConversationMember'),
-      ConversationMessage = require('../models/conversationMessage'),
-      notification = require('../lib/notification'),
-      log = require('../lib/log'),
-      conf = require('../lib/conf');
+const assert = require('assert');
+const Window = require('../models/window');
+const Settings = require('../models/settings');
+const Conversation = require('../models/conversation');
+const ConversationMember = require('../models/ConversationMember');
+const ConversationMessage = require('../models/conversationMessage');
+const notification = require('../lib/notification');
+const log = require('../lib/log');
+const conf = require('../lib/conf');
 
 exports.create = async function(user, conversation) {
     let peerMember = undefined;

@@ -16,43 +16,43 @@
 
 'use strict';
 
-const jwt = require('jwt-simple'),
-      passport = require('koa-passport'),
-      LocalStrategy = require('passport-local').Strategy,
-      GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
-      YahooStrategy = require('passport-yahoo').Strategy,
-      CloudronStrategy = require('passport-cloudron'),
-      User = require('../models/user'),
-      conf = require('./conf');
+const jwt = require('jwt-simple');
+const passport = require('koa-passport');
+const LocalStrategy = require('passport-local').Strategy;
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+const YahooStrategy = require('passport-yahoo').Strategy;
+const CloudronStrategy = require('passport-cloudron');
+const User = require('../models/user');
+const conf = require('./conf');
 
-exports.initialize = function() {
+exports.initialize = function initialize() {
     setup();
     return passport.initialize();
 };
 
-exports.authenticate = function(type, cb) {
+exports.authenticate = function authenticate(type, cb) {
     return passport.authenticate(type, cb);
 };
 
 function setup() {
     if (conf.get('googleauth:enabled') === true) {
-        let google = new GoogleStrategy({
+        const google = new GoogleStrategy({
             clientID: conf.get('googleauth:client_id'),
             clientSecret: conf.get('googleauth:client_secret'),
-            callbackURL: conf.getComputed('site_url') + '/auth/google/oauth2callback'
-        }, function(accessToken, refreshToken, params, profile, done) {
-            let openIdId = jwt.decode(params.id_token, null, true).openid_id;
-            authExt(openIdId, 'google:' + profile.id, profile, done);
+            callbackURL: `${conf.getComputed('site_url')}/auth/google/oauth2callback`
+        }, (accessToken, refreshToken, params, profile, done) => {
+            const openIdId = jwt.decode(params.id_token, null, true).openid_id;
+            authExt(openIdId, `google:${profile.id}`, profile, done);
         });
 
         passport.use(google);
     }
 
     if (conf.get('yahooauth:enabled') === true) {
-        let yahoo = new YahooStrategy({
-            returnURL: conf.getComputed('site_url') + '/auth/yahoo/callback',
+        const yahoo = new YahooStrategy({
+            returnURL: `${conf.getComputed('site_url')}/auth/yahoo/callback`,
             realm: conf.getComputed('site_url')
-        }, function(openIdId, profile, done) {
+        }, (openIdId, profile, done) => {
             authExt(openIdId, null, profile, done);
         });
 
@@ -60,9 +60,9 @@ function setup() {
     }
 
     if (conf.get('cloudronauth:enabled') === true) {
-        let cloudron = new CloudronStrategy({
-            callbackURL: conf.getComputed('site_url') + '/auth/cloudron/callback'
-        }, function(token, tokenSecret, profile, done) {
+        const cloudron = new CloudronStrategy({
+            callbackURL: `${conf.getComputed('site_url')}/auth/cloudron/callback`
+        }, (token, tokenSecret, profile, done) => {
             authExt(profile.id, null, {
                 displayName: profile.username,
                 emails: [ { value: profile.email } ]
@@ -72,7 +72,7 @@ function setup() {
         passport.use(cloudron);
     }
 
-    let local = new LocalStrategy(authLocal);
+    const local = new LocalStrategy(authLocal);
     passport.use(local);
 }
 
@@ -82,7 +82,7 @@ async function authLocal(username, password, done) {
     }
 
     const user = await User.findFirst({
-        [ username.includes('@') ? 'email' : 'nick' ]: username
+        [username.includes('@') ? 'email' : 'nick']: username
     });
 
     if (!user || user.get('deleted')) {

@@ -16,11 +16,11 @@
 
 'use strict';
 
-const Promise = require('bluebird'),
-      elasticSearchClient = Promise.promisifyAll(require('./elasticSearch').getClient()),
-      log = require('./log');
+const Promise = require('bluebird');
+const elasticSearchClient = Promise.promisifyAll(require('./elasticSearch').getClient());
+const log = require('./log');
 
-exports.storeMessage = function(conversationId, msg) {
+exports.storeMessage = function storeMessage(conversationId, msg) {
     if (!elasticSearchAvailable()) {
         return false;
     }
@@ -34,18 +34,18 @@ exports.storeMessage = function(conversationId, msg) {
             body: msg.body,
             cat: msg.cat,
             userId: msg.userId,
-            conversationId: conversationId
+            conversationId
         }
-    }, function(error) {
+    }, error => {
         if (error) {
-            log.warn(msg.userId, 'Elasticsearch error. Failed to index messsage:' + error);
+            log.warn(msg.userId, `Elasticsearch error. Failed to index messsage: ${error}`);
         }
     });
 
     return true;
 };
 
-exports.updateMessage = function(gid, msg) {
+exports.updateMessage = function updateMessage(gid, msg) {
     if (!elasticSearchAvailable()) {
         return false;
     }
@@ -59,16 +59,16 @@ exports.updateMessage = function(gid, msg) {
                 body: msg
             }
         }
-    }, function(error) {
+    }, error => {
         if (error) {
-            log.warn(msg.userId, 'Elasticsearch error. Failed to index messsage:' + error);
+            log.warn(msg.userId, `Elasticsearch error. Failed to index messsage: ${error}`);
         }
     });
 
     return true;
 };
 
-exports.getMessageRange = async function(conversationId, start, end, amount) {
+exports.getMessageRange = async function getMessageRange(conversationId, start, end, amount) {
     if (!elasticSearchAvailable()) {
         return [];
     }
@@ -76,7 +76,7 @@ exports.getMessageRange = async function(conversationId, start, end, amount) {
     // TBD: If there are multiple messages at the boundary start/end ts, part of them can be lost.
     // Theoretical problem mostly. Solution is not lte.
 
-    let range = {
+    const range = {
         ts: {
             lt: end * 1000
         }
@@ -86,7 +86,7 @@ exports.getMessageRange = async function(conversationId, start, end, amount) {
         range.ts.gte = start * 1000;
     }
 
-    let response = await elasticSearchClient.search({
+    const response = await elasticSearchClient.search({
         index: 'messages',
         body: {
             size: amount || 1000,
@@ -101,10 +101,10 @@ exports.getMessageRange = async function(conversationId, start, end, amount) {
                         and: [
                             {
                                 term: {
-                                    conversationId: conversationId
+                                    conversationId
                                 }
                             }, {
-                                range: range
+                                range
                             }
                         ]
                     }
@@ -117,15 +117,13 @@ exports.getMessageRange = async function(conversationId, start, end, amount) {
 };
 
 function convertToMsgs(hits) {
-    return hits.map(function(hit) {
-        return {
-            gid: hit._id,
-            ts: Math.floor(hit._source.ts / 1000),
-            body: hit._source.body,
-            cat: hit._source.cat,
-            userId: hit._source.userId
-        };
-    });
+    return hits.map(hit => ({
+        gid: hit._id,
+        ts: Math.floor(hit._source.ts / 1000),
+        body: hit._source.body,
+        cat: hit._source.cat,
+        userId: hit._source.userId
+    }));
 }
 
 function elasticSearchAvailable() {

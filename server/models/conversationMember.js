@@ -16,8 +16,8 @@
 
 'use strict';
 
-const Model = require('./model'),
-      UserGId = require('./userGId');
+const Model = require('./model');
+const UserGId = require('./userGId');
 
 module.exports = class ConversationMember extends Model {
     get gId() {

@@ -16,29 +16,28 @@
 
 'use strict';
 
-const util = require('util'),
-      winston = require('winston');
+const util = require('util');
+const winston = require('winston');
 
 require('colors');
 
-let MasConsoleLogger = function(options) {
+function MasConsoleLogger(options) {
     winston.Transport.call(this, options);
 
     this.name = 'masConsoleLogger';
     this.level = options.level || 'info';
-};
+}
 
 util.inherits(MasConsoleLogger, winston.Transport);
 
-MasConsoleLogger.prototype.log = function(level, msg, meta, callback) {
-    let processParts = process.title.split('-');
-    let processName = processParts[1];
-    let processExtension = processParts[2];
-    let userId = meta.userId;
+MasConsoleLogger.prototype.log = function log(level, msg, meta, callback) {
+    const processParts = process.title.split('-');
+    const processName = processParts[1];
+    const processExtension = processParts[2];
 
     let processColumn;
     let levelColumn;
-    let userIdColumn;
+    let userIdColumn = meta.userId || 'N/A';
 
     switch (processName) {
         case 'irc':
@@ -68,8 +67,6 @@ MasConsoleLogger.prototype.log = function(level, msg, meta, callback) {
             levelColumn = 'UNKN'.red;
     }
 
-    userIdColumn = userId ? userId : 'N/A';
-
     process.stdout.write(
         new Date().toISOString().yellow + ' ' +
         processColumn + ' - ' +
@@ -80,8 +77,8 @@ MasConsoleLogger.prototype.log = function(level, msg, meta, callback) {
     callback(null, true);
 };
 
-MasConsoleLogger.prototype.logException = function(msg, meta, callback) {
-    let that = this;
+MasConsoleLogger.prototype.logException = function logException(msg, meta, callback) {
+    const that = this;
 
     function onLogged() {
         that.removeListener('error', onError);
@@ -95,11 +92,9 @@ MasConsoleLogger.prototype.logException = function(msg, meta, callback) {
 
     this.once('logged', onLogged);
     this.once('error', onError);
-    this.log('error', msg, meta, function() { });
+    this.log('error', msg, meta, () => {});
 
-    meta.stack.forEach(function(line) {
-        console.log(line.red); // eslint-disable-line no-console
-    });
+    meta.stack.forEach(line => console.log(line.red)); // eslint-disable-line no-console
 };
 
 module.exports = MasConsoleLogger;

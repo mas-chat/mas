@@ -16,29 +16,29 @@
 
 'use strict';
 
-const NetworkInfo = require('../models/networkInfo'),
-      User = require('../models/user');
+const NetworkInfo = require('../models/networkInfo');
+const User = require('../models/user');
 
 // User's master nick is stored in 'nick' property in user model. User's nicks in
 // networks are stored in 'nick' property in networkInfo model. Currently master nick
 // always equals to MAS nick and can differ in IRC network
 
-exports.getCurrentNick = async function(user, network) {
-    const nwInfo = await NetworkInfo.findFirst({ userId: user.id, network: network });
+exports.getCurrentNick = async function getCurrentNick(user, network) {
+    const nwInfo = await NetworkInfo.findFirst({ userId: user.id, network });
 
     return nwInfo ? nwInfo.get('nick') : null;
 };
 
-exports.updateCurrentNick = async function(user, network, nick) {
-    const nwInfo = await NetworkInfo.findFirst({ userId: user.id, network: network });
+exports.updateCurrentNick = async function updateCurrentNick(user, network, nick) {
+    const nwInfo = await NetworkInfo.findFirst({ userId: user.id, network });
 
     if (nwInfo) {
         await nwInfo.set('nick', nick);
     }
 };
 
-exports.getUserFromNick = async function(nick, network) {
-    const nwInfo = await NetworkInfo.findFirst({ nick: nick, network: network });
+exports.getUserFromNick = async function getUserFromNick(nick, network) {
+    const nwInfo = await NetworkInfo.findFirst({ nick, network });
 
     if (nwInfo) {
         const user = await User.fetch(nwInfo.get('userId'));

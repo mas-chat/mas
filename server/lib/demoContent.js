@@ -16,39 +16,39 @@
 
 'use strict';
 
-const faker = require('faker'),
-      redis = require('./redis').createClient(),
-      log = require('./log'),
-      conf = require('./conf'),
-      masWindow = require('../services/windows'),
-      conversationFactory = require('../models/conversation');
+const faker = require('faker');
+const redis = require('./redis').createClient();
+const log = require('./log');
+const conf = require('./conf');
+const masWindow = require('../services/windows');
+const conversationFactory = require('../models/conversation');
 
-exports.enable = function() {
-    setInterval(async function() {
-        let demoUserEmail = conf.get('frontend:demo_user_email');
-        let demoUserId = await redis.hget('index:user', demoUserEmail);
-        let sentenceLength = Math.floor((Math.random() * 30 ) + 1);
+exports.enable = function enable() {
+    setInterval(async function interval() {
+        const demoUserEmail = conf.get('frontend:demo_user_email');
+        const demoUserId = await redis.hget('index:user', demoUserEmail);
+        const sentenceLength = Math.floor((Math.random() * 30) + 1);
 
         if (!demoUserId) {
             log.error('Demo user doesn\'t exist.');
             return;
         }
 
-        let windowId = await redis.srandmember(`windowlist:${demoUserId}`);
+        const windowId = await redis.srandmember(`windowlist:${demoUserId}`);
 
         if (windowId) {
             // User has at least one window
-            let conversationId = await masWindow.getConversationId(demoUserId, windowId);
-            let conversation = await conversationFactory.get(conversationId);
+            const conversationId = await masWindow.getConversationId(demoUserId, windowId);
+            const conversation = await conversationFactory.get(conversationId);
             let url = '';
 
-            if (!(Math.floor(Math.random() * 10 ))) {
-                let randomImgFileName = Math.floor(Math.random() * 1000000);
-                url = 'http://placeimg.com/640/480/nature/' + randomImgFileName + '.jpg';
+            if (!(Math.floor(Math.random() * 10))) {
+                const randomImgFileName = Math.floor(Math.random() * 1000000);
+                url = `http://placeimg.com/640/480/nature/${randomImgFileName}.jpg`;
             }
 
             await conversation.addMessage({
-                body: faker.lorem.sentence(sentenceLength) + ' ' + url,
+                body: `${faker.lorem.sentence(sentenceLength)} ${url}`,
                 userId: 'mDEMO',
                 cat: 'msg'
             });

@@ -16,45 +16,45 @@
 
 'use strict';
 
-const path = require('path'),
-      fs = require('fs'),
-      winston = require('winston'),
-      MasTransport = require('./winstonMasTransport'),
-      DailyRotateFile = require('winston-daily-rotate-file'),
-      init = require('./init'),
-      conf = require('./conf');
+const path = require('path');
+const fs = require('fs');
+const winston = require('winston');
+const MasTransport = require('./winstonMasTransport');
+const DailyRotateFile = require('winston-daily-rotate-file');
+const init = require('./init');
+const conf = require('./conf');
 
 require('colors');
 require('winston-loggly');
 
 let logger = null;
 
-exports.info = function(user, msg) {
-    logEntry('info', user, msg, function() {});
+exports.info = function info(user, msg) {
+    logEntry('info', user, msg, () => {});
 };
 
-exports.warn = function(user, msg) {
-    logEntry('warn', user, msg, function() {
+exports.warn = function warn(user, msg) {
+    logEntry('warn', user, msg, () => {
         if (conf.get('common:dev_mode')) {
             init.shutdown();
         }
     });
 };
 
-exports.error = function(user, msg) {
-    logEntry('error', user, msg, function() {
+exports.error = function error(user, msg) {
+    logEntry('error', user, msg, () => {
         init.shutdown();
     });
 };
 
-exports.quit = function() {
+exports.quit = function quit() {
     if (logger) {
         logger.clear();
     }
 };
 
 function logEntry(type, user, msg, callback) {
-    let entry = {};
+    const entry = {};
 
     if (logger === null) {
         logger = new (winston.Logger)({
@@ -72,7 +72,7 @@ function logEntry(type, user, msg, callback) {
 }
 
 function configTransports() {
-    let transports = [];
+    const transports = [];
 
     if (conf.get('log:file')) {
         let logDirectory = path.normalize(conf.get('log:directory'));
@@ -81,7 +81,7 @@ function configTransports() {
             logDirectory = path.join(__dirname, '..', '..', logDirectory);
         }
 
-        let fileName = path.join(logDirectory, process.title + '.log');
+        const fileName = path.join(logDirectory, `${process.title}.log`);
 
         if (!fs.existsSync(logDirectory)) {
             const msg = 'ERROR: '.red + `Log directory ${logDirectory} doesn\'t exist.`;
@@ -93,13 +93,13 @@ function configTransports() {
             fs.unlinkSync(fileName);
         }
 
-        let fileTransportOptions = {
+        const fileTransportOptions = {
             filename: fileName,
             colorize: false,
             handleExceptions: true
         };
 
-        let fileTransport = conf.get('log:rotate_daily') ?
+        const fileTransport = conf.get('log:rotate_daily') ?
             new DailyRotateFile(fileTransportOptions) :
             new (winston.transports.File)(fileTransportOptions);
 
@@ -107,7 +107,7 @@ function configTransports() {
     }
 
     if (conf.get('log:console')) {
-        let consoleTransport = new (MasTransport)({
+        const consoleTransport = new (MasTransport)({
             handleExceptions: true
         });
 
@@ -115,7 +115,7 @@ function configTransports() {
     }
 
     if (conf.get('loggly:enabled')) {
-        let logglyTransport = new (winston.transports.Loggly)({
+        const logglyTransport = new (winston.transports.Loggly)({
             subdomain: conf.get('loggly:subdomain'),
             inputToken: conf.get('loggly:token'),
             json: true

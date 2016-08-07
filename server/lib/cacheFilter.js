@@ -16,7 +16,7 @@
 
 'use strict';
 
-module.exports = function*(next) {
+module.exports = function* cacheFilter(next) {
     yield next;
 
     // Set cache times for the client app

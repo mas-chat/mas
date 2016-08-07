@@ -20,12 +20,10 @@ const Model = require('./model');
 
 module.exports = class Setting extends Model {
     static async findOrCreate(userId) {
-        let record = await this.findFirst({ userId: userId });
+        let record = await this.findFirst({ userId });
 
         if (!record) {
-            record = await this.create({
-                userId: userId
-            });
+            record = await this.create({ userId });
         }
 
         return record;

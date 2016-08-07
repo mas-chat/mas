@@ -16,23 +16,23 @@
 
 'use strict';
 
-const path = require('path'),
-      router = require('koa-router'),
-      serve = require('koa-static'),
-      mount = require('koa-mount'),
-      bodyParser = require('koa-bodyparser'),
-      conf = require('../lib/conf'),
-      passport = require('../lib/passport'),
-      cacheFilter = require('../lib/cacheFilter'),
-      registerController = require('../controllers/register'),
-      loginController = require('../controllers/login'),
-      pagesController = require('../controllers/pages'),
-      uploadController = require('../controllers/upload'),
-      userFilesController = require('../controllers/userFiles'),
-      forgotPasswordController = require('../controllers/forgotPassword'),
-      confirmEmailController = require('../controllers/confirmEmail');
+const path = require('path');
+const router = require('koa-router');
+const serve = require('koa-static');
+const mount = require('koa-mount');
+const bodyParser = require('koa-bodyparser');
+const conf = require('../lib/conf');
+const passport = require('../lib/passport');
+const cacheFilter = require('../lib/cacheFilter');
+const registerController = require('../controllers/register');
+const loginController = require('../controllers/login');
+const pagesController = require('../controllers/pages');
+const uploadController = require('../controllers/upload');
+const userFilesController = require('../controllers/userFiles');
+const forgotPasswordController = require('../controllers/forgotPassword');
+const confirmEmailController = require('../controllers/confirmEmail');
 
-exports.register = function(app) {
+exports.register = function register(app) {
     app.use(cacheFilter);
 
     app.use(router(app));
@@ -90,7 +90,7 @@ exports.register = function(app) {
 
     // Ember CLI Live Reload redirect hack
     if (conf.get('common:dev_mode') === true) {
-        app.get('/ember-cli-live-reload.js', function*() {
+        app.get('/ember-cli-live-reload.js', function *redirect() {
             this.redirect('http://localhost:4200/ember-cli-live-reload.js');
         });
     }

@@ -44,7 +44,7 @@ module.exports = class ConversationMessage extends Model {
             cat: this.get('cat'),
             body: this.get('body') || '',
             status: this.get('status')
-        }
+        };
 
         const updatedTs = this.get('updatedTs');
 

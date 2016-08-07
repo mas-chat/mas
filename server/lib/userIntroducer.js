@@ -16,21 +16,21 @@
 
 'use strict';
 
-const UserGId = require('../models/UserGId'),
-      log = require('./log'),
-      conf = require('./conf'),
-      User = require('../models/user'),
-      nicksService = require('../services/nicks'),
-      redis = require('./redis').createClient(),
-      notification = require('../lib/notification');
+const UserGId = require('../models/UserGId');
+const log = require('./log');
+const conf = require('./conf');
+const User = require('../models/user');
+const nicksService = require('../services/nicks');
+const redis = require('./redis').createClient();
+const notification = require('../lib/notification');
 
 const networks = [ 'MAS', ...Object.keys(conf.get('irc:networks')) ];
 
-exports.introduce = async function(user, userGId, session) {
+exports.introduce = async function introduce(user, userGId, session) {
     await introduceUsers(user, [ userGId ], session, null);
-}
+};
 
-exports.scanAndIntroduce = async function(user, msg, session, socket) {
+exports.scanAndIntroduce = async function scanAndIntroduce(user, msg, session, socket) {
     await introduceUsers(user, scanUserGIds(msg), session, socket);
 };
 
@@ -73,11 +73,11 @@ async function introduceUsers(user, userGIds, session, socket) {
                 let nick = await redis.hget(`ircuser:${userGId}`, 'nick');
 
                 if (userGId.id === 0) {
-                   nick = 'server';
+                    nick = 'server';
                 }
 
                 for (const network of networks) {
-                    entry.nick[network] = nick // This is a shortcut, ircUserId is scoped by network
+                    entry.nick[network] = nick; // shortcut, ircUserId is scoped by network
                 }
             }
 
@@ -110,17 +110,17 @@ function scanUserGIds(msg) {
 }
 
 function scan(msg) {
-    let res = {};
+    const res = {};
 
-    for (const key in msg) {
-        let value = msg[key];
+    Object.keys(msg).forEach(key => {
+        const value = msg[key];
 
         if (typeof value === 'object') {
             Object.assign(res, scan(value));
         } else if (key === 'userId' && value) {
             res[value] = true;
         }
-    }
+    });
 
     return res;
 }

@@ -16,23 +16,23 @@
 
 'use strict';
 
-const _ = require('lodash'),
-      CronJob = require('cron').CronJob,
-      redis = require('./redis').createClient(),
-      log = require('./log'),
-      mailer = require('./mailer'),
-      User = require('../models/user'),
-      UserGId = require('../models/userGId');
+const _ = require('lodash');
+const CronJob = require('cron').CronJob;
+const redis = require('./redis').createClient();
+const log = require('./log');
+const mailer = require('./mailer');
+const User = require('../models/user');
+const UserGId = require('../models/userGId');
 
-let jobs = [];
+const jobs = [];
 
-exports.init = function() {
+exports.init = function init() {
     // Once in 15 minutes
     jobs.push(new CronJob('0 */10 * * * *', deliverEmails, null, true));
 };
 
-exports.quit = function() {
-    for (let job of jobs) {
+exports.quit = function quit() {
+    for (const job of jobs) {
         job.stop();
     }
 };
@@ -45,14 +45,15 @@ async function deliverEmails() {
         return ntf.groupName ? `Group: ${ntf.groupName}` : `1-on-1: ${ntf.senderName}`;
     }
 
-    let userGIdStrings = await redis.smembers('emailnotifications');
+    const userGIdStrings = await redis.smembers('emailnotifications');
 
-    for (let userGIdString of userGIdStrings) {
-        let notificationIds = await redis.lrange(`emailnotificationslist:${userGIdString}`, 0, -1);
+    for (const userGIdString of userGIdStrings) {
+        const notificationIds = await redis.lrange(
+            `emailnotificationslist:${userGIdString}`, 0, -1);
         let notifications = [];
 
-        for (let notificationId of notificationIds) {
-            let notification = await redis.hgetall(`emailnotification:${notificationId}`);
+        for (const notificationId of notificationIds) {
+            const notification = await redis.hgetall(`emailnotification:${notificationId}`);
 
             if (notification) {
                 notifications.push(notification);
@@ -63,17 +64,17 @@ async function deliverEmails() {
 
         const userGId = UserGId.create(userGIdString);
 
-        let user = await User.fetch(userGId.id);
+        const user = await User.fetch(userGId.id);
 
         // TBD: Better would be to clear pending notifications during login
         if (!user.isOnline()) {
             mailer.send('emails/build/mentioned.hbs', {
                 name: user.get('name'),
-                notifications: notifications
-            }, user.email, `You were just mentioned on MeetAndSpeak`);
+                notifications
+            }, user.email, 'You were just mentioned on MeetAndSpeak');
         }
 
-        for (let notificationId of notificationIds) {
+        for (const notificationId of notificationIds) {
             await redis.del(`emailnotification:${notificationId}`);
         }
 

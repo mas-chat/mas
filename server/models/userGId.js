@@ -25,12 +25,12 @@ module.exports = class UserGId {
     static create(params = {}) {
         let options = {};
 
-        if (typeof(params) === 'string') {
+        if (typeof params === 'string') {
             options = {
                 id: parseInt(params.substring(1)),
                 type: Object.keys(TYPES).find(validType => TYPES[validType] === params[0])
             };
-        } else if (typeof(params) === 'object') {
+        } else if (typeof params === 'object') {
             options = params;
         }
 
@@ -45,7 +45,7 @@ module.exports = class UserGId {
     }
 
     get valid() {
-        return !!(this.id >= 0 && TYPES[this.type])
+        return !!(this.id >= 0 && TYPES[this.type]);
     }
 
     get isMASUser() {

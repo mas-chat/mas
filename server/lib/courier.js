@@ -16,23 +16,24 @@
 
 'use strict';
 
-const assert = require('assert'),
-      Promise = require('bluebird'),
-      uid2 = require('uid2'),
-      redisModule = require('./redis'),
-      rcvRedis = redisModule.createClient(),
-      sendRedis = redisModule.createClient(),
-      log = require('./log');
+const assert = require('assert');
+const Promise = require('bluebird');
+const uid2 = require('uid2');
+const redisModule = require('./redis');
+const log = require('./log');
+
+const rcvRedis = redisModule.createClient();
+const sendRedis = redisModule.createClient();
 
 let processing = false;
 let resolveQuit = null;
 
-exports.create = function() {
+exports.create = function create() {
     // Can only send messages and receive replies. Doesn't have a well known endpoint name.
     return new Courier();
 };
 
-exports.createEndPoint = function(name) {
+exports.createEndPoint = function createEndPoint(name) {
     return new Courier(name);
 };
 
@@ -44,20 +45,20 @@ function Courier(name) {
     log.info('Courier: New instance created.');
 }
 
-Courier.prototype.listen = async function() {
+Courier.prototype.listen = async function listen() {
     assert(this.isEndpoint);
 
     for (;;) {
-        let result = (await rcvRedis.brpop(`inbox:${this.name}`, 0))[1];
+        const result = (await rcvRedis.brpop(`inbox:${this.name}`, 0))[1];
 
         processing = true;
 
-        let msg = JSON.parse(result);
-        let handler = this.handlers[msg.__type];
+        const msg = JSON.parse(result);
+        const handler = this.handlers[msg.__type];
 
         log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}] DATA: ${result}`);
 
-        assert(handler, this.name + ': Missing message handler for: ' + msg.__type);
+        assert(handler, `${this.name}: Missing message handler for: ${msg.__type}`);
 
         await this._reply(msg, await handler(msg));
 
@@ -70,15 +71,15 @@ Courier.prototype.listen = async function() {
     }
 };
 
-Courier.prototype.call = async function(dest, type, params) {
+Courier.prototype.call = async function call(dest, type, params) {
     if (resolveQuit) {
         log.warn('Not delivering message, shutdown is in progress.');
         return null;
     }
 
-    let uid = Date.now() + uid2(10);
-    let data = this._convertToString(type, params, uid);
-    let reqRedis = redisModule.createClient();
+    const uid = Date.now() + uid2(10);
+    const data = this._convertToString(type, params, uid);
+    const reqRedis = redisModule.createClient();
 
     await reqRedis.lpush(`inbox:${dest}`, data);
 
@@ -86,7 +87,7 @@ Courier.prototype.call = async function(dest, type, params) {
     await reqRedis.quit();
 
     if (resp === null) {
-        log.warn('Courier: No reply received from ' + dest);
+        log.warn(`Courier: No reply received from ${dest}`);
     }
 
     resp = resp ? JSON.parse(resp[1]) : {};
@@ -95,14 +96,14 @@ Courier.prototype.call = async function(dest, type, params) {
     return resp;
 };
 
-Courier.prototype.callNoWait = async function(dest, type, params, ttl) {
+Courier.prototype.callNoWait = async function callNoWait(dest, type, params, ttl) {
     if (resolveQuit) {
         log.warn('Not delivering message, shutdown is in progress.');
         return;
     }
 
-    let data = this._convertToString(type, params);
-    let key = `inbox:${dest}`;
+    const data = this._convertToString(type, params);
+    const key = `inbox:${dest}`;
 
     await sendRedis.lpush(key, data);
 
@@ -111,22 +112,22 @@ Courier.prototype.callNoWait = async function(dest, type, params, ttl) {
     }
 };
 
-Courier.prototype.clearInbox = async function(name) {
+Courier.prototype.clearInbox = async function clearInbox(name) {
     await sendRedis.del(`inbox:${name}`);
 };
 
-Courier.prototype.on = function(type, callback) {
+Courier.prototype.on = function on(type, callback) {
     this.handlers[type] = callback;
 };
 
-Courier.prototype.noop = function() {
+Courier.prototype.noop = function noop() {
     return null;
 };
 
-Courier.prototype.quit = function() {
+Courier.prototype.quit = function quit() {
     log.info('Closing courier instance.');
 
-    return new Promise(function(resolve) {
+    return new Promise(resolve => {
         if (!processing) {
             resolve();
         } else {
@@ -135,7 +136,7 @@ Courier.prototype.quit = function() {
     });
 };
 
-Courier.prototype._reply = function(msg, resp) {
+Courier.prototype._reply = function _reply(msg, resp) {
     if (!msg.__uid) {
         // Not a request.
         return;
@@ -148,8 +149,8 @@ Courier.prototype._reply = function(msg, resp) {
     this.callNoWait(`${msg.__sender}:${msg.__uid}`, null, resp, 60);
 };
 
-Courier.prototype._convertToString = function(type, params, uid) {
-    let msg = params || {};
+Courier.prototype._convertToString = function _convertToString(type, params, uid) {
+    const msg = params || {};
 
     msg.__sender = this.name;
 

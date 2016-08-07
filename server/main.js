@@ -16,23 +16,23 @@
 
 'use strict';
 
-const path = require('path'),
-      koa = require('koa'),
-      hbs = require('koa-hbs'),
-      error = require('koa-error'),
-      compress = require('koa-compress'),
-      // logger = require('koa-logger'),
-      handlebarsHelpers = require('./lib/handlebarsHelpers'),
-      log = require('./lib/log'),
-      redisModule = require('./lib/redis'),
-      passport = require('./lib/passport'),
-      userSession = require('./lib/userSession'),
-      routes = require('./routes/routes'),
-      init = require('./lib/init'),
-      scheduler = require('./lib/scheduler'),
-      demoContent = require('./lib/demoContent'),
-      socketController = require('./controllers/socket'),
-      conf = require('./lib/conf');
+const path = require('path');
+const koa = require('koa');
+const hbs = require('koa-hbs');
+const error = require('koa-error');
+const compress = require('koa-compress');
+const // logger = require('koa-logger');
+const handlebarsHelpers = require('./lib/handlebarsHelpers');
+const log = require('./lib/log');
+const redisModule = require('./lib/redis');
+const passport = require('./lib/passport');
+const userSession = require('./lib/userSession');
+const routes = require('./routes/routes');
+const init = require('./lib/init');
+const scheduler = require('./lib/scheduler');
+const demoContent = require('./lib/demoContent');
+const socketController = require('./controllers/socket');
+const conf = require('./lib/conf');
 
 const app = koa();
 

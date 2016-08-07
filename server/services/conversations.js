@@ -16,24 +16,24 @@
 
 'use strict';
 
-const assert = require('assert'),
-      uuid = require('uid2'),
-      redis = require('../lib/redis').createClient(),
-      log = require('../lib/log'),
-      search = require('../lib/search'),
-      notification = require('../lib/notification'),
-      User = require('../models/user'),
-      Window = require('../models/window'),
-      Conversation = require('../models/conversation'),
-      ConversationMember = require('../models/conversationMember'),
-      ConversationMessage = require('../models/conversationMessage'),
-      UserGId = require('../models/userGId'),
-      windowsService = require('../services/windows'),
-      nicksService = require('../services/nicks');
+const assert = require('assert');
+const uuid = require('uid2');
+const redis = require('../lib/redis').createClient();
+const log = require('../lib/log');
+const search = require('../lib/search');
+const notification = require('../lib/notification');
+const User = require('../models/user');
+const Window = require('../models/window');
+const Conversation = require('../models/conversation');
+const ConversationMember = require('../models/conversationMember');
+const ConversationMessage = require('../models/conversationMessage');
+const UserGId = require('../models/userGId');
+const windowsService = require('../services/windows');
+const nicksService = require('../services/nicks');
 
-let MSG_BUFFER_SIZE = 200; // TBD: This should come from session:max_backlog setting
+const MSG_BUFFER_SIZE = 200; // TBD: This should come from session:max_backlog setting
 
-exports.findOrCreate1on1 = async function(user, peerUserGId, network) {
+exports.findOrCreate1on1 = async function findOrCreate1on1(user, peerUserGId, network) {
     assert(user && peerUserGId && network);
 
     let conversation = null;
@@ -88,22 +88,22 @@ exports.findOrCreate1on1 = async function(user, peerUserGId, network) {
     return conversation;
 };
 
-exports.delete = async function(conversation) {
+exports.delete = async function deleteCoversation(conversation) {
     return await remove(conversation);
 };
 
-exports.getPeerMember = async function(conversation, userGId) {
+exports.getPeerMember = async function getPeerMember(conversation, userGId) {
     return await getPeerMember(conversation, userGId);
-}
+};
 
-exports.getMemberRole = async function(conversation, userGId) {
+exports.getMemberRole = async function getMemberRole(conversation, userGId) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
     const member = members.find(member => UserGId.create(member.get('userGId')).equals(userGId));
 
     return member ? member.get('role') : null;
 };
 
-exports.setMemberRole = async function(conversation, userGId, role) {
+exports.setMemberRole = async function setMemberRole(conversation, userGId, role) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
     const member = members.find(member => UserGId.create(member.get('userGId')).equals(userGId));
 
@@ -113,16 +113,16 @@ exports.setMemberRole = async function(conversation, userGId, role) {
     }
 };
 
-exports.setGroupMembers = async function(conversation, newMembersHash) {
-    let oldMembers = await ConversationMember.find({ conversationId: conversation.id });
+exports.setGroupMembers = async function setGroupMembers(conversation, newMembersHash) {
+    const oldMembers = await ConversationMember.find({ conversationId: conversation.id });
 
-    for (let oldMember of oldMembers) {
+    for (const oldMember of oldMembers) {
         if (!Object.keys(newMembersHash).some(newMember => newMember === oldMember.gIdString)) {
             await removeGroupMember(conversation, oldMember, true);
         }
     }
 
-    for (let newMember of Object.keys(newMembersHash)) {
+    for (const newMember of Object.keys(newMembersHash)) {
         if (!oldMembers.some(oldMembers => oldMembers.gIdString === newMember)) {
             await ConversationMember.create({
                 conversationId: conversation.id,
@@ -132,7 +132,7 @@ exports.setGroupMembers = async function(conversation, newMembersHash) {
         }
     }
 
-    for (let newMember of Object.keys(newMembersHash)) {
+    for (const newMember of Object.keys(newMembersHash)) {
         const newMemberGId = UserGId.create(newMember);
 
         if (newMemberGId.isMASUser) {
@@ -142,7 +142,7 @@ exports.setGroupMembers = async function(conversation, newMembersHash) {
     }
 };
 
-exports.addGroupMember = async function(conversation, userGId, role) {
+exports.addGroupMember = async function addGroupMember(conversation, userGId, role) {
     assert(role === 'u' || role === '+' || role === '@' || role === '*');
 
     const members = await ConversationMember.find({ conversationId: conversation.id });
@@ -152,7 +152,7 @@ exports.addGroupMember = async function(conversation, userGId, role) {
         await ConversationMember.create({
             conversationId: conversation.id,
             userGId: userGId.toString(),
-            role: role
+            role
         });
 
         await broadcastAddMessage(conversation, {
@@ -163,11 +163,12 @@ exports.addGroupMember = async function(conversation, userGId, role) {
 
         await broadcastAddMembers(conversation, userGId, role);
     } else {
-        await member.set({ role: role });
+        await member.set({ role });
     }
 };
 
-exports.removeGroupMember = async function(conversation, userGId, skipCleanUp, wasKicked, reason) {
+exports.removeGroupMember = async function removeGroupMember(
+    conversation, userGId, skipCleanUp, wasKicked, reason) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
     const member = members.find(member => member.get('userGId') === userGId.toString());
 
@@ -178,7 +179,7 @@ exports.removeGroupMember = async function(conversation, userGId, skipCleanUp, w
     await removeGroupMember(conversation, member, skipCleanUp, wasKicked, reason);
 };
 
-exports.remove1on1Member = async function(conversation, userGId) {
+exports.remove1on1Member = async function remove1on1Member(conversation, userGId) {
     // Never let window to exist alone without linked conversation
     await removeConversationWindow(conversation, userGId);
 
@@ -189,12 +190,13 @@ exports.remove1on1Member = async function(conversation, userGId) {
     // dead 1on1s start to pile eventually on Redis.
 };
 
-exports.isMember = async function(conversation, user) {
+exports.isMember = async function isMember(conversation, user) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
     return members.some(member => member.get('userGId') === user.gId);
 };
 
-exports.addMessageUnlessDuplicate = async function(conversation, user, msg, excludeSession) {
+exports.addMessageUnlessDuplicate = async function addMessageUnlessDuplicate(
+    conversation, user, msg, excludeSession) {
     // A special filter for IRC backend.
 
     // To support Flowdock network where MAS user's message can come from the IRC server
@@ -203,7 +205,7 @@ exports.addMessageUnlessDuplicate = async function(conversation, user, msg, excl
     // works because IRC server doesn't echo messages back to their senders. If that wasn't
     // the case, lua reporter logic would fail. (If a reporter sees a new identical message
     // it's not considered as duplicate. Somebody is just repeating their line.)
-    let duplicate = await redis.run('duplicateMsgFilter', user.gIdString, conversation.id,
+    const duplicate = await redis.run('duplicateMsgFilter', user.gIdString, conversation.id,
         msg.userId, msg.body);
 
     if (!duplicate) {
@@ -213,11 +215,11 @@ exports.addMessageUnlessDuplicate = async function(conversation, user, msg, excl
     return {};
 };
 
-exports.addMessage = async function(conversation, msg, excludeSession) {
+exports.addMessage = async function addMessage(conversation, msg, excludeSession) {
     return await broadcastAddMessage(conversation, msg, excludeSession);
 };
 
-exports.editMessage = async function(conversation, user, conversationMessageId, text) {
+exports.editMessage = async function editMessage(conversation, user, conversationMessageId, text) {
     const message = await ConversationMessage.fetch(conversationMessageId);
 
     if (!message) {
@@ -240,11 +242,11 @@ exports.editMessage = async function(conversation, user, conversationMessageId, 
     return true;
 };
 
-exports.sendFullAddMembers = async function(conversation, user) {
+exports.sendFullAddMembers = async function sendFullAddMembers(conversation, user) {
     return await sendFullAddMembers(conversation, user);
-}
+};
 
-exports.setTopic = async function(conversation, topic, nickName) {
+exports.setTopic = async function setTopic(conversation, topic, nickName) {
     const changes = await conversation.set({ topic });
 
     if (changes === 0) {
@@ -259,7 +261,7 @@ exports.setTopic = async function(conversation, topic, nickName) {
     });
 };
 
-exports.setPassword = async function(conversation, password) {
+exports.setPassword = async function setPassword(conversation, password) {
     const changes = await conversation.set({ password });
 
     if (changes === 0) {
@@ -271,7 +273,7 @@ exports.setPassword = async function(conversation, password) {
         password
     });
 
-    let text = password === '' ?
+    const text = password === '' ?
         'Password protection has been removed from this channel.' :
         `The password for this channel has been changed to ${password}.`;
 
@@ -281,9 +283,9 @@ exports.setPassword = async function(conversation, password) {
     });
 };
 
-exports.getAllConversations = async function(user) {
+exports.getAllConversations = async function getAllConversations(user) {
     const windows = await Window.find({ userId: user.id });
-    let conversations = [];
+    const conversations = [];
 
     for (const window of windows) {
         const conversation = await Conversation.fetch(window.get('conversationId'));
@@ -299,7 +301,7 @@ async function broadcastAddMessage(conversation, props, excludeSession) {
     props.conversationId = conversation.id;
 
     const message = await ConversationMessage.create(props);
-    let ids = await ConversationMessage.findIds({ conversationId: conversation.id });
+    const ids = await ConversationMessage.findIds({ conversationId: conversation.id });
 
     while (ids.length - MSG_BUFFER_SIZE > 0) {
         const expiredMessage = await ConversationMessage.fetch(ids.shift());
@@ -318,7 +320,7 @@ async function broadcast(conversation, msg, excludeSession) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     for (const member of members) {
-        let userGId = UserGId.create(member.get('userGId'));
+        const userGId = UserGId.create(member.get('userGId'));
 
         if (!userGId.isMASUser) {
             continue;
@@ -346,7 +348,7 @@ async function sendFullAddMembers(conversation, user) {
     const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
-    let membersList = members.map(member => ({
+    const membersList = members.map(member => ({
         userId: member.get('userGId'),
         role: member.get('role')
     }));
@@ -365,7 +367,7 @@ async function broadcastAddMembers(conversation, userGId, role) {
         reset: false,
         members: [ {
             userId: userGId.toString(),
-            role: role
+            role
         } ]
     });
 }
@@ -409,17 +411,17 @@ async function scanForEmailNotifications(conversation, message) {
         return;
     }
 
-    let users = [];
+    const users = [];
 
     if (conversation.get('type') === 'group') {
-        let mentions = message.body.match(/(?:^| )@\S+(?=$| )/g);
+        const mentions = message.body.match(/(?:^| )@\S+(?=$| )/g);
 
         if (!mentions) {
             return;
         }
 
-        for (let mention of mentions) {
-            let user = await nicksService.getUserFromNick(
+        for (const mention of mentions) {
+            const user = await nicksService.getUserFromNick(
                 mention.substring(1), conversation.get('network'));
 
             if (user) {
@@ -431,7 +433,7 @@ async function scanForEmailNotifications(conversation, message) {
             return;
         }
     } else {
-        const peerMember = await getPeerMember(conversation, UserGId.create(message.userGId))
+        const peerMember = await getPeerMember(conversation, UserGId.create(message.userGId));
         const peerMemberGId = UserGId.create(peerMember.get('userGId'));
 
         if (peerMemberGId.isMASUser) {
@@ -464,9 +466,10 @@ async function scanForEmailNotifications(conversation, message) {
         }
 
         if (window.get('emailAlert')) {
-            let nickName = await nicksService.getCurrentNick(message.userId, conversation.get('network'));
-            let name = user.get('name') || nickName;
-            let notificationId = uuid(20);
+            const nickName = await nicksService.getCurrentNick(
+                message.userId, conversation.get('network'));
+            const name = user.get('name') || nickName;
+            const notificationId = uuid(20);
 
             // TBD: Needs to be transaction, add lua script
             await redis.sadd('emailnotifications', user.gId);

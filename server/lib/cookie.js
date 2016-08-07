@@ -16,8 +16,8 @@
 
 'use strict';
 
-exports.createSession = async function(user, ctx) {
-    let ts = new Date();
+exports.createSession = async function createSession(user, ctx) {
+    const ts = new Date();
     let secret = user.get('secret');
     let secretExpires = user.get('secretExpires');
 

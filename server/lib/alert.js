@@ -16,15 +16,15 @@
 
 'use strict';
 
-const notification = require('../lib/notification'),
-      redis = require('../lib/redis').createClient();
+const notification = require('../lib/notification');
+const redis = require('../lib/redis').createClient();
 
-exports.sendAlerts = async function(userId, sessionId) {
-    let now = Math.round(Date.now() / 1000);
-    let alertIds = await redis.smembers(`activealerts:${userId}`);
+exports.sendAlerts = async function sendAlerts(userId, sessionId) {
+    const now = Math.round(Date.now() / 1000);
+    const alertIds = await redis.smembers(`activealerts:${userId}`);
 
-    for (let alertId of alertIds) {
-        let alert = await redis.hgetall(`alert:${alertId}`);
+    for (const alertId of alertIds) {
+        const alert = await redis.hgetall(`alert:${alertId}`);
 
         if (alert && now < alert.expires) {
             alert.id = 'ALERT';

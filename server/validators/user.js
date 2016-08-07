@@ -16,12 +16,12 @@
 
 'use strict';
 
-let validator = new UserValidator();
+const validator = new UserValidator();
 
-exports.validate = function(props) {
-    let errors = {};
+exports.validate = function validate(props) {
+    const errors = {};
 
-    for (const prop in props) {
+    props.forEach(prop => {
         const validate = validator[prop];
 
         if (validate) {
@@ -31,22 +31,22 @@ exports.validate = function(props) {
                 errors[prop] = error;
             }
         }
-    }
+    });
 
-    return { valid: Object.keys(errors).length === 0, errors: errors };
-}
+    return { valid: Object.keys(errors).length === 0, errors };
+};
 
 function UserValidator() {}
 
-UserValidator.prototype.name = function(name) {
+UserValidator.prototype.name = function name(name) {
     if (!name || name.length < 6) {
         return { valid: false, error: 'Please enter at least 6 characters.' };
     }
 
     return { valid: true };
-}
+};
 
-UserValidator.prototype.email = function(email) {
+UserValidator.prototype.email = function email(email) {
     const parts = email.split('@');
 
     if (!email || parts.length !== 2 || parts[0].length === 0 || !parts[1].includes('.') ||
@@ -55,19 +55,19 @@ UserValidator.prototype.email = function(email) {
     }
 
     return { valid: true };
-}
+};
 
-UserValidator.prototype.nick = function(nick) {
+UserValidator.prototype.nick = function nick(nick) {
     if (!nick) {
         return { valid: false, error: 'Please enter a nick' };
     } else if (nick.length < 3 || nick.length > 15) {
         return { valid: false, error: 'Nick has to be 3-15 characters long.' };
     } else if (/[0-9]/.test(nick.charAt(0))) {
         return { valid: false, error: 'Nick can\'t start with digit' };
-    } else if (!(/^[A-Z\`a-z0-9[\]\\_\^{|}]+$/.test(nick))) {
-        let valid = [ 'a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}' ];
-        return { valid: false, error: 'Illegal characters, allowed are ' + valid.join(', ') };
+    } else if (!(/^[A-Z`a-z0-9[\]\\_\^{|}]+$/.test(nick))) {
+        const valid = [ 'a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}' ];
+        return { valid: false, error: `Illegal characters, allowed are ${valid.join(', ')}` };
     }
 
     return { valid: true };
-}
+};
