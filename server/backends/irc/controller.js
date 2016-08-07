@@ -21,33 +21,34 @@ const init = require('../../lib/init');
 
 init.configureProcess('irc');
 
-const assert = require('assert'),
-      conf = require('../../lib/conf'),
-      log = require('../../lib/log'),
-      redisModule = require('../../lib/redis'),
-      redis = redisModule.createClient(),
-      courier = require('../../lib/courier').createEndPoint('ircparser'),
-      User = require('../../models/user'),
-      Conversation = require('../../models/conversation'),
-      ConversationMember = require('../../models/conversationMember'),
-      NetworkInfo = require('../../models/NetworkInfo'),
-      UserGId = require('../../models/userGId'),
-      conversationsService = require('../../services/conversations'),
-      windowsService = require('../../services/windows'),
-      nicksService = require('../../services/nicks'),
-      ircUser = require('./ircUser'),
-      ircScheduler = require('./scheduler'),
-      userIntroducer = require('../../lib/userIntroducer');
+const assert = require('assert');
+const conf = require('../../lib/conf');
+const log = require('../../lib/log');
+const redisModule = require('../../lib/redis');
+const courier = require('../../lib/courier').createEndPoint('ircparser');
+const User = require('../../models/user');
+const Conversation = require('../../models/conversation');
+const ConversationMember = require('../../models/conversationMember');
+const NetworkInfo = require('../../models/NetworkInfo');
+const UserGId = require('../../models/userGId');
+const conversationsService = require('../../services/conversations');
+const windowsService = require('../../services/windows');
+const nicksService = require('../../services/nicks');
+const ircUser = require('./ircUser');
+const ircScheduler = require('./scheduler');
+const userIntroducer = require('../../lib/userIntroducer');
+
+const redis = redisModule.createClient();
 
 const OPER = '@';
 const VOICE = '+';
 const USER = 'u';
 
-let ircMessageBuffer = {};
+const ircMessageBuffer = {};
 
 // Process different IRC commands
 
-let handlers = {
+const handlers = {
     '043': handle043,
     311: handle311,
     312: handle312,
@@ -86,12 +87,12 @@ let handlers = {
     ERROR: handleError
 };
 
-init.on('beforeShutdown', async function() {
+init.on('beforeShutdown', async function beforeShutdown() {
     await ircScheduler.quit();
     await courier.quit();
 });
 
-init.on('afterShutdown', function() {
+init.on('afterShutdown', () => {
     redisModule.shutdown();
     log.quit();
 });
@@ -164,7 +165,7 @@ async function processTextCommand({ conversationId, userId, command, commandPara
     }
 
     courier.callNoWait('connectionmanager', 'write', {
-        userId: userId,
+        userId,
         network: conversation.get('network'),
         line: data
     });
@@ -175,10 +176,9 @@ async function processTextCommand({ conversationId, userId, command, commandPara
 async function processJoin({ userId, network, name, password }) {
     const user = await User.fetch(userId);
     const networkInfo = await findOrCreateNetworkInfo(user, network);
-
+    const hasChannelPrefixRegex = /^[&#!+]/;
+    const illegalNameRegEx = /\s|\cG|,/; // See RFC2812, section 1.3
     let channelName = name;
-    let hasChannelPrefixRegex = /^[&#!+]/;
-    let illegalNameRegEx = /\s|\cG|,/; // See RFC2812, section 1.3
 
     if (!channelName || channelName === '' || illegalNameRegEx.test(channelName)) {
         return { status: 'ERROR', errorMsg: 'Illegal or missing channel name.' };
@@ -217,12 +217,12 @@ async function processUpdatePassword({ userId, network, conversationId, password
     const conversation = await Conversation.fetch(conversationId);
     const networkInfo = await findOrCreateNetworkInfo(user, network);
 
-    let modeline = 'MODE ' + conversation.name + ' ';
+    let modeline = `MODE ${conversation.name} `;
 
     if (password === '') {
         modeline += '-k foobar'; // IRC protocol is odd, -k requires dummy parameter
     } else {
-        modeline += '+k ' + password;
+        modeline += `+k ${password}`;
     }
 
     if (networkInfo.get('state') !== 'connected') {
@@ -232,11 +232,7 @@ async function processUpdatePassword({ userId, network, conversationId, password
         };
     }
 
-    courier.callNoWait('connectionmanager', 'write', {
-        userId: user.id,
-        network: network,
-        line: modeline
-    });
+    courier.callNoWait('connectionmanager', 'write', { userId: user.id, network, line: modeline });
 
     return { status: 'OK' };
 }
@@ -251,22 +247,22 @@ async function processUpdateTopic({ userId, conversationId, network, topic }) {
             status: 'ERROR',
             errorMsg: 'Can\'t change the topic. You are not connected to the IRC network'
         };
-    } else {
-        courier.callNoWait('connectionmanager', 'write', {
-            userId: userId,
-            network: conversation.get('network'),
-            line: `TOPIC ${conversation.get('name')} :${topic}`
-        });
-
-        return { status: 'OK' };
     }
+
+    courier.callNoWait('connectionmanager', 'write', {
+        userId,
+        network: conversation.get('network'),
+        line: `TOPIC ${conversation.get('name')} :${topic}`
+    });
+
+    return { status: 'OK' };
 }
 
 async function processReconnectIfInactive({ userId }) {
     const user = await User.fetch(userId);
     const networks = Object.keys(conf.get('irc:networks'));
 
-    for (let network of networks) {
+    for (const network of networks) {
         const networkInfo = await findOrCreateNetworkInfo(user, network);
 
         if (networkInfo.get('state') === 'idledisconnected') {
@@ -283,7 +279,7 @@ async function processReconnectIfInactive({ userId }) {
 
 // Restarted
 async function processRestarted() {
-    await iterateUsersAndNetworks(async function(user, network) {
+    await iterateUsersAndNetworks(async function iterate(user, network) {
         const channels = await redis.hgetall(`ircchannelsubscriptions:${user.id}:${network}`);
         const networkInfo = await findOrCreateNetworkInfo(user, network);
 
@@ -307,8 +303,8 @@ async function iterateUsersAndNetworks(callback) {
         log.error('No IRC networks configured.');
     }
 
-    for (let user of allUsers) {
-        for (let network of networks) {
+    for (const user of allUsers) {
+        for (const network of networks) {
             await callback(user, network);
         }
     }
@@ -316,7 +312,7 @@ async function iterateUsersAndNetworks(callback) {
 
 // Data
 async function processData(params) {
-    let key = params.userId + params.network;
+    const key = params.userId + params.network;
 
     if (!ircMessageBuffer[key]) {
         ircMessageBuffer[key] = [];
@@ -350,16 +346,12 @@ async function processConnected({ userId, network }) {
 
     log.info(user, 'Connected to IRC server');
 
-    let commands = [
+    const commands = [
         `NICK ${user.get('nick')}`,
         `USER ${user.get('nick')} 8 * :${user.get('name')} (MAS v2.0)`
     ];
 
-    courier.callNoWait('connectionmanager', 'write', {
-        userId: user.id,
-        network: network,
-        line: commands
-    });
+    courier.callNoWait('connectionmanager', 'write', { userId: user.id, network, line: commands });
 }
 
 // Disconnected
@@ -369,7 +361,7 @@ async function processDisconnected({ userId, network, reason }) {
     const previousState = networkInfo.get('state');
 
     await networkInfo.set('state',
-        previousState === 'idleclosing' ? 'idledisconnected' : 'disconnected')
+        previousState === 'idleclosing' ? 'idledisconnected' : 'disconnected');
 
     await nicksService.updateCurrentNick(user, network, null);
 
@@ -381,7 +373,7 @@ async function processDisconnected({ userId, network, reason }) {
     let delay = 30 * 1000; // 30s
     let msg = `Lost connection to IRC server (${reason}). Scheduling a reconnect attempt...`;
 
-    const count = await networkInfo.set('retryCount',  networkInfo.get('retryCount') + 1);
+    const count = await networkInfo.set('retryCount', networkInfo.get('retryCount') + 1);
 
     // Set the backoff timer
     if (count > 3 && count < 8) {
@@ -404,7 +396,7 @@ async function parseIrcMessage({ userId, line, network }) {
     const msg = {
         params: [],
         numericReply: false,
-        network: network,
+        network,
         serverName: null,
         nick: null,
         userNameAndHost: null
@@ -414,10 +406,9 @@ async function parseIrcMessage({ userId, line, network }) {
 
     if ((line.charAt(0) === ':')) {
         // Prefix exists
-        let prefix = parts.shift();
-
-        let nickEnds = prefix.indexOf('!');
-        let identEnds = prefix.indexOf('@');
+        const prefix = parts.shift();
+        const nickEnds = prefix.indexOf('!');
+        const identEnds = prefix.indexOf('@');
 
         if (nickEnds === -1 && identEnds === -1) {
             msg.serverName = prefix.substring(1);
@@ -465,14 +456,9 @@ async function parseIrcMessage({ userId, line, network }) {
 
 async function addSystemMessage(user, network, cat, body) {
     const serverUserGId = UserGId.create({ type: 'irc', id: 0 });
+    const conversation = await conversationsService.findOrCreate1on1(user, serverUserGId, network);
 
-    let conversation = await conversationsService.findOrCreate1on1(user, serverUserGId, network);
-
-    await conversationsService.addMessage(conversation, {
-        userGId: 'i0',
-        cat: cat,
-        body: body
-    });
+    await conversationsService.addMessage(conversation, { userGId: 'i0', cat, body });
 }
 
 async function connect(user, network, skipRetryCountReset, delay) {
@@ -485,7 +471,7 @@ async function connect(user, network, skipRetryCountReset, delay) {
         await networkInfo.set('retryCount', 0);
     }
 
-    let delayText = delay ? ` in ${Math.round(delay / 1000 / 60)} minutes` : '';
+    const delayText = delay ? ` in ${Math.round(delay / 1000 / 60)} minutes` : '';
 
     await addSystemMessage(user, network, 'info', `Connecting to IRC server${delayText}...`);
 
@@ -494,8 +480,8 @@ async function connect(user, network, skipRetryCountReset, delay) {
     courier.callNoWait('connectionmanager', 'connect', {
         userId: user.id,
         nick: user.get('nick'),
-        network: network,
-        delay: delay ? delay : 0
+        network,
+        delay: delay || 0
     });
 }
 
@@ -505,7 +491,7 @@ async function disconnect(user, network) {
 
     courier.callNoWait('connectionmanager', 'disconnect', {
         userId: user.id,
-        network: network,
+        network,
         reason: 'Session ended.'
     });
 }
@@ -515,9 +501,9 @@ async function handleNoop() {
 
 async function handleServerText(user, msg, code) {
     // :mas.example.org 001 toyni :Welcome to the MAS IRC toyni
-    let text = msg.params.join(' ');
+    const text = msg.params.join(' ');
     // 371, 372 and 375 = MOTD and INFO lines
-    let cat = code === '372' || code === '375' || code === '371' ? 'banner' : 'server';
+    const cat = code === '372' || code === '375' || code === '371' ? 'banner' : 'server';
 
     if (text) {
         await addSystemMessage(user, msg.network, cat, text);
@@ -526,8 +512,8 @@ async function handleServerText(user, msg, code) {
 
 async function handle401(user, msg) {
     // :irc.localhost 401 ilkka dadaa :No such nick/channel
-    let targetUserGId = await ircUser.getUserGId(msg.params[0], msg.network);
-    let conversation = await conversationsService.findOrCreate1on1(
+    const targetUserGId = await ircUser.getUserGId(msg.params[0], msg.network);
+    const conversation = await conversationsService.findOrCreate1on1(
         user, targetUserGId, msg.network);
 
     await conversation.addMessage(conversation, {
@@ -539,8 +525,8 @@ async function handle401(user, msg) {
 
 async function handle043(user, msg) {
     // :*.pl 043 AnDy 0PNEAKPLG :nickname collision, forcing nick change to your unique ID.
-    let newNick = msg.params[0];
-    let oldNick = msg.target;
+    const newNick = msg.params[0];
+    const oldNick = msg.target;
 
     await updateNick(user, msg.network, oldNick, newNick);
     await tryDifferentNick(user, msg.network);
@@ -548,10 +534,10 @@ async function handle043(user, msg) {
 
 async function handle311(user, msg) {
     // :irc.localhost 311 ilkka_ Mika7 ~Mika7 127.0.0.1 * :Real Name (Ralph v1.0)
-    let nick = msg.params[0];
-    let username = msg.params[1];
-    let host = msg.params[2];
-    let realName = msg.params[4];
+    const nick = msg.params[0];
+    const username = msg.params[1];
+    const host = msg.params[2];
+    const realName = msg.params[4];
 
     await addSystemMessage(user, msg.network, 'server',
         `--- ${nick} is [${username}@${host}] (${realName})`);
@@ -559,8 +545,8 @@ async function handle311(user, msg) {
 
 async function handle312(user, msg) {
     // :irc.localhost 312 ilkka_ Mika7 irc.localhost :Darwin ircd default configuration
-    let server = msg.params[1];
-    let serverInfo = msg.params[2];
+    const server = msg.params[1];
+    const serverInfo = msg.params[2];
 
     await addSystemMessage(user, msg.network, 'server',
         `--- using server ${server} [${serverInfo}]`);
@@ -568,8 +554,8 @@ async function handle312(user, msg) {
 
 async function handle317(user, msg) {
     // irc.localhost 317 ilkka_ Mika7 44082 1428703143 :seconds idle, signon time
-    let idleTime = msg.params[1];
-    let signonTime = new Date(parseInt(msg.params[2]) * 1000).toUTCString();
+    const idleTime = msg.params[1];
+    const signonTime = new Date(parseInt(msg.params[2]) * 1000).toUTCString();
 
     await addSystemMessage(user, msg.network, 'server',
         `--- has been idle ${idleTime} seconds. Signed on ${signonTime}`);
@@ -577,7 +563,7 @@ async function handle317(user, msg) {
 
 async function handle319(user, msg) {
     // :irc.localhost 319 ilkka_ Mika7 :#portaali @#hemmot @#ilves #ceeassa
-    let channels = msg.params[1];
+    const channels = msg.params[1];
 
     await addSystemMessage(user, msg.network, 'server', `--- on channels ${channels}`);
 }
@@ -600,13 +586,12 @@ async function handle332(user, msg) {
 async function handle353(user, msg) {
     // :own.freenode.net 353 drwillie @ #evergreenproject :drwillie ilkkaoks
     const channel = msg.params[1];
+    const names = msg.params[2].split(' ');
     const conversation = await Conversation.findFirst({
         type: 'group',
         name: channel,
         network: msg.network
     });
-
-    let names = msg.params[2].split(' ');
 
     if (conversation) {
         await bufferNames(names, user, msg.network, conversation);
@@ -626,8 +611,9 @@ async function handle366(user, msg) {
         return;
     }
 
-    let key = `namesbuffer:${user.id}:${conversation.id}`;
-    let namesHash = await redis.hgetall(key);
+    const key = `namesbuffer:${user.id}:${conversation.id}`;
+    const namesHash = await redis.hgetall(key);
+
     await redis.del(key);
 
     if (Object.keys(namesHash).length > 0) {
@@ -638,7 +624,7 @@ async function handle366(user, msg) {
         // only one 266 reply is parsed from a burst. For rest of the changes we rely on getting
         // incremental JOINS messages (preferably from the original reporter.) This leaves some
         // theoretical error edge cases (left as homework) that maybe are worth fixing.
-        let noActiveReporter = await redis.setnx(
+        const noActiveReporter = await redis.setnx(
             `ircnamesreporter:${conversation.id}`, user.id);
 
         if (noActiveReporter) {
@@ -657,7 +643,7 @@ async function handle376(user, msg) {
         await networkInfo.set({
             state: 'connected',
             retryCount: 0
-        })
+        });
 
         await addSystemMessage(user, msg.network, 'info', 'Connected to IRC server.');
         await addSystemMessage(user, msg.network, 'info',
@@ -672,7 +658,7 @@ async function handle376(user, msg) {
             return;
         }
 
-        let channelsToJoin = await redis.hgetall(
+        const channelsToJoin = await redis.hgetall(
             `ircchannelsubscriptions:${user.id}:${msg.network}`);
 
         if (!channelsToJoin) {
@@ -681,7 +667,7 @@ async function handle376(user, msg) {
             return;
         }
 
-        Object.keys(channelsToJoin).forEach(function(channel) {
+        Object.keys(channelsToJoin).forEach(channel => {
             sendJoin(user, msg.network, channel, channelsToJoin[channel]);
         });
     }
@@ -694,18 +680,17 @@ async function handle433(user, msg) {
 
 async function handle482(user, msg) {
     // irc.localhost 482 ilkka #test2 :You're not channel operator
-    let channel = msg.params[0];
+    const channel = msg.params[0];
 
     await addSystemMessage(
-        user, msg.network, 'error', 'You\'re not channel operator on ' + channel);
+        user, msg.network, 'error', `You're not channel operator on ${channel}`);
 }
 
 async function handleJoin(user, msg) {
     // :neo!i=ilkkao@iao.iki.fi JOIN :#testi4
-    let channel = msg.params[0];
-    let network = msg.network;
-    let targetUser = await nicksService.getUserFromNick(msg.nick, network);
-
+    const channel = msg.params[0];
+    const network = msg.network;
+    const targetUser = await nicksService.getUserFromNick(msg.nick, network);
     let conversation = await Conversation.findFirst({
         type: 'group',
         name: channel,
@@ -713,7 +698,7 @@ async function handleJoin(user, msg) {
     });
 
     if (targetUser && targetUser.id === user.id) {
-        let subscriptionsKey = `ircchannelsubscriptions:${user.id}:${network}`;
+        const subscriptionsKey = `ircchannelsubscriptions:${user.id}:${network}`;
         let password = await redis.hget(subscriptionsKey, channel.toLowerCase());
 
         if (password === null) {
@@ -730,14 +715,14 @@ async function handleJoin(user, msg) {
                 owner: user.id,
                 type: 'group',
                 name: channel,
-                password: password,
+                password,
                 network
             });
 
             log.info(user, `First mas user joined channel: ${network}:${channel}`);
         }
 
-        let window = await windowsService.findByConversation(user, conversation);
+        const window = await windowsService.findByConversation(user, conversation);
 
         if (!window) {
             await windowsService.create(user, conversation);
@@ -760,9 +745,8 @@ async function handleJoin(user, msg) {
 }
 
 async function handleJoinReject(user, msg) {
-    let channel = msg.params[0];
-    let reason = msg.params[1];
-
+    const channel = msg.params[0];
+    const reason = msg.params[1];
     const conversation = await Conversation.findFirst({
         type: 'group',
         name: channel,
@@ -786,7 +770,7 @@ async function handleQuit(user, msg) {
     // let reason = msg.params[0];
     const conversations = await conversationsService.getAllConversations(user);
 
-    for (let conversation of conversations) {
+    for (const conversation of conversations) {
         // TBD: Send a real quit message instead of part
         if (conversation.get('network') === msg.network && conversation.get('type') === 'group') {
             // No need to check if the targetUser is on this channel,
@@ -799,20 +783,20 @@ async function handleQuit(user, msg) {
 
 async function handleNick(user, msg) {
     // :ilkkao!~ilkkao@localhost NICK :foobar
-    let newNick = msg.params[0];
-    let oldNick = msg.nick;
+    const newNick = msg.params[0];
+    const oldNick = msg.nick;
 
     await updateNick(user, msg.network, oldNick, newNick);
 }
 
 async function handleError(user, msg) {
-    let reason = msg.params[0];
+    const reason = msg.params[0];
 
     await addSystemMessage(
-        user, msg.network, 'error', 'Connection lost. Server reason: ' + reason);
+        user, msg.network, 'error', `Connection lost. Server reason: ${reason}`);
 
     if (reason.includes('Too many host connections')) {
-        log.warn(user, 'Too many connections to: ' + msg.network);
+        log.warn(user, `Too many connections to: ${msg.network}`);
 
         await addSystemMessage(user, msg.network, 'error',
             msg.network + ' IRC network doesn\'t allow more connections. ' +
@@ -825,17 +809,17 @@ async function handleError(user, msg) {
 
 async function handleInvite(user, msg) {
     // :ilkkao!~ilkkao@127.0.0.1 INVITE buppe :#test2
-    let channel = msg.params[1];
+    const channel = msg.params[1];
 
     await addSystemMessage(
-        user, msg.network, 'info', msg.nick + ' has invited you to channel ' + channel);
+        user, msg.network, 'info', `${msg.nick} has invited you to channel ${channel}`);
 }
 
 async function handleKick(user, msg) {
     // :ilkkao!~ilkkao@127.0.0.1 KICK #portaali AnDy :no reason
-    let channel = msg.params[0];
-    let targetNick = msg.params[1];
-    let reason = msg.params[2];
+    const channel = msg.params[0];
+    const targetNick = msg.params[1];
+    const reason = msg.params[2];
 
     const conversation = await Conversation.findFirst({
         type: 'group',
@@ -843,7 +827,7 @@ async function handleKick(user, msg) {
         network: msg.network
     });
 
-    let targetUserGId = await ircUser.getUserGId(targetNick, msg.network);
+    const targetUserGId = await ircUser.getUserGId(targetNick, msg.network);
 
     if (conversation) {
         await conversationsService.removeGroupMember(
@@ -861,8 +845,8 @@ async function handleKick(user, msg) {
 
 async function handlePart(user, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com PART #portaali :
-    let channel = msg.params[0];
-    let reason = msg.params[1];
+    const channel = msg.params[0];
+    const reason = msg.params[1];
 
     const conversation = await Conversation.findFirst({
         type: 'group',
@@ -870,7 +854,7 @@ async function handlePart(user, msg) {
         network: msg.network
     });
 
-    let targetUserGId = await ircUser.getUserGId(msg.nick, msg.network);
+    const targetUserGId = await ircUser.getUserGId(msg.nick, msg.network);
 
     if (conversation) {
         await conversationsService.removeGroupMember(
@@ -880,7 +864,7 @@ async function handlePart(user, msg) {
 
 async function handleMode(user, msg) {
     // :ilkka9!~ilkka9@localhost.myrootshell.com MODE #sunnuntai +k foobar3
-    let target = msg.params[0];
+    const target = msg.params[0];
 
     if (!isChannel(target)) {
         // TDB: Handle user's mode change
@@ -903,19 +887,19 @@ async function handleMode(user, msg) {
             (msg.nick ? msg.nick : msg.serverName)
     });
 
-    let modeParams = msg.params.slice(1);
+    const modeParams = msg.params.slice(1);
 
     while (modeParams.length !== 0) {
-        let command = modeParams.shift();
-        let oper = command.charAt(0);
-        let modes = command.substring(1).split('');
+        const command = modeParams.shift();
+        const oper = command.charAt(0);
+        const modes = command.substring(1).split('');
 
-        if (!(oper === '+' || oper === '-' )) {
+        if (!(oper === '+' || oper === '-')) {
             log.warn(user, 'Received broken MODE command');
             continue;
         }
 
-        for (let mode of modes) {
+        for (const mode of modes) {
             let param;
             let newClass = null;
             let targetUserGId = null;
@@ -938,7 +922,7 @@ async function handleMode(user, msg) {
                 // Lost oper status
                 newClass = USER;
             } else if (mode === 'v') {
-                let oldClass =
+                const oldClass =
                     await conversationsService.getMemberRole(conversation, targetUserGId);
 
                 if (oldClass !== OPER) {
@@ -951,7 +935,7 @@ async function handleMode(user, msg) {
                     }
                 }
             } else if (mode === 'k') {
-                let newPassword = oper === '+' ? param : '';
+                const newPassword = oper === '+' ? param : '';
 
                 await conversation.setPassword(newPassword);
                 await redis.hset(`ircchannelsubscriptions:${user.id}:${msg.network}`,
@@ -967,8 +951,8 @@ async function handleMode(user, msg) {
 
 async function handleTopic(user, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com TOPIC #portaali :My new topic
-    let channel = msg.params[0];
-    let topic = msg.params[1];
+    const channel = msg.params[0];
+    const topic = msg.params[1];
     const conversation = await Conversation.findFirst({
         type: 'group',
         name: channel,
@@ -982,12 +966,12 @@ async function handleTopic(user, msg) {
 
 async function handlePrivmsg(user, msg, command) {
     // :ilkkao!~ilkkao@127.0.0.1 NOTICE buppe :foo
+    const target = msg.params[0];
+    const currentNick = await nicksService.getCurrentNick(user, msg.network);
     let conversation;
     let sourceUserGId;
-    let target = msg.params[0];
     let text = msg.params[1];
     let cat = 'msg';
-    let currentNick = await nicksService.getCurrentNick(user, msg.network);
 
     if (msg.nick) {
         sourceUserGId = await ircUser.getUserGId(msg.nick, msg.network);
@@ -997,7 +981,7 @@ async function handlePrivmsg(user, msg, command) {
     }
 
     if (text.includes('\u0001') && command === 'PRIVMSG') {
-        let ret = parseCTCPMessage(text);
+        const ret = parseCTCPMessage(text);
         let reply = false;
 
         if (ret.type === 'ACTION') {
@@ -1013,7 +997,7 @@ async function handlePrivmsg(user, msg, command) {
             courier.callNoWait('connectionmanager', 'write', {
                 userId: user.id,
                 network: msg.network,
-                line: 'NOTICE ' + msg.nick + ' :' + reply
+                line: `NOTICE ${msg.nick} :${reply}`
             });
             return;
         }
@@ -1039,7 +1023,7 @@ async function handlePrivmsg(user, msg, command) {
 
     await conversationsService.addMessageUnlessDuplicate(conversation, user, {
         userGId: sourceUserGId.toString(),
-        cat: cat,
+        cat,
         body: text
     });
 }
@@ -1050,13 +1034,13 @@ async function updateNick(user, network, oldNick, newNick) {
     const nickUser = await nicksService.getUserFromNick(oldNick, network);
 
     if (nickUser) {
-        const networkInfo = NetworkInfo.findFirst({ userId: nickUser.id, network: networks });
+        const networkInfo = NetworkInfo.findFirst({ userId: nickUser.id, network });
 
         await networkInfo.set('nick', newNick);
         changed = true;
         targetUserGId = user.gId;
     } else {
-         const targetUserGIdString = await redis.run(
+        const targetUserGIdString = await redis.run(
             'updateNick', user.id, network, oldNick, newNick);
 
         if (targetUserGIdString) {
@@ -1072,10 +1056,11 @@ async function updateNick(user, network, oldNick, newNick) {
     // We haven't heard about this change before
     log.info(user, `I\'m first and announcing ${oldNick} -> ${newNick} nick change.`);
 
-    const conversationMembers = await ConversationMember.find({ userGId: targetUserGId.toString() });
+    const conversationMembers = await ConversationMember.find(
+        { userGId: targetUserGId.toString() });
 
     // Iterate through the conversations that the nick changer is part of
-    for (let conversationMember of conversationMembers) {
+    for (const conversationMember of conversationMembers) {
         const conversation = await Conversation.fetch(conversationMember.get('conversationId'));
 
         if (conversation.get('network') === network) {
@@ -1101,7 +1086,7 @@ async function updateNick(user, network, oldNick, newNick) {
 }
 
 async function tryDifferentNick(user, network) {
-    let nick = user.get('nick');
+    const nick = user.get('nick');
     let currentNick = await nicksService.getCurrentNick(user, network);
 
     if (nick !== currentNick.substring(0, nick.length)) {
@@ -1122,7 +1107,7 @@ async function tryDifferentNick(user, network) {
 
     courier.callNoWait('connectionmanager', 'write', {
         userId: user.id,
-        network: network,
+        network,
         line: `NICK ${currentNick}`
     });
 }
@@ -1131,16 +1116,16 @@ async function tryDifferentNick(user, network) {
 // is in sync?
 
 async function disconnectIfIdle(user, network) {
-    let windows = await windowsService.getWindowsForNetwork(user, network);
+    const windows = await windowsService.getWindowsForNetwork(user, network);
     let onlyServer1on1Left = false;
 
     if (windows.length === 1) {
         // There's only one window left, is it IRC server 1on1?
         // If yes, we can disconnect from the server
-        let lastConversation = await Conversation.fetch(windows[0].get('conversationId'));
+        const lastConversation = await Conversation.fetch(windows[0].get('conversationId'));
 
         if (lastConversation.get('type') === '1on1') {
-            let peeruserId = await conversationsService.getPeerMember(lastConversation, user.gId);
+            const peeruserId = await conversationsService.getPeerMember(lastConversation, user.gId);
 
             if (peeruserId.toString() === 'i0') {
                 onlyServer1on1Left = true;
@@ -1159,7 +1144,7 @@ async function disconnectIfIdle(user, network) {
 }
 
 async function bufferNames(names, user, network, conversation) {
-    let namesHash = {};
+    const namesHash = {};
 
     for (let nick of names) {
         let userClass = USER;
@@ -1177,11 +1162,11 @@ async function bufferNames(names, user, network, conversation) {
             nick = nick.substring(1);
         }
 
-        let memberUserGId = await ircUser.getUserGId(nick, network);
+        const memberUserGId = await ircUser.getUserGId(nick, network);
         namesHash[memberUserGId.toString()] = userClass;
     }
 
-    let key = 'namesbuffer:' + user.id + ':' + conversation.id;
+    const key = `namesbuffer:${user.id}:${conversation.id}`;
 
     await redis.hmset(key, namesHash);
     await redis.expire(key, 60); // 1 minute. Does cleanup if we never get End of NAMES list reply.
@@ -1189,11 +1174,11 @@ async function bufferNames(names, user, network, conversation) {
 
 function parseCTCPMessage(text) {
     // Follow http://www.irchelp.org/irchelp/rfc/ctcpspec.html
-    let regex = /\u0001(.*?)\u0001/g;
+    const regex = /\u0001(.*?)\u0001/g;
     let matches;
 
     while ((matches = regex.exec(text))) {
-        let msg = matches[1];
+        const msg = matches[1];
         let dataType;
         let payload = '';
 
@@ -1205,16 +1190,14 @@ function parseCTCPMessage(text) {
         }
 
         // Only one CTCP extended message per PRIVMSG is supported for now
-        return { type: dataType ? dataType : 'UNKNOWN', data: payload };
+        return { type: dataType || 'UNKNOWN', data: payload };
     }
 
     return { type: 'UNKNOWN' };
 }
 
 function isChannel(text) {
-    return [ '&', '#', '+', '!' ].some(function(element) {
-        return element === text.charAt(0);
-    });
+    return [ '&', '#', '+', '!' ].some(element => element === text.charAt(0));
 }
 
 function sendPrivmsg(user, network, target, text) {
@@ -1228,7 +1211,7 @@ function sendPrivmsg(user, network, target, text) {
 function sendJoin(user, network, channel, password) {
     courier.callNoWait('connectionmanager', 'write', {
         userId: user.id,
-        network: network,
+        network,
         line: `JOIN ${channel} ${password}`
     });
 }
@@ -1236,7 +1219,7 @@ function sendJoin(user, network, channel, password) {
 function sendIRCPart(user, network, channel) {
     courier.callNoWait('connectionmanager', 'write', {
         userId: user.id,
-        network: network,
+        network,
         line: `PART ${channel}`
     });
 }
@@ -1244,13 +1227,13 @@ function sendIRCPart(user, network, channel) {
 async function findOrCreateNetworkInfo(user, network) {
     let networkInfo = await NetworkInfo.findFirst({
         userId: user.id,
-        network: network
+        network
     });
 
     if (!networkInfo) {
         networkInfo = await NetworkInfo.create({
             userId: user.id,
-            network: network,
+            network,
             nick: user.get('nick'),
             state: 'disconnected',
             retryCount: 0

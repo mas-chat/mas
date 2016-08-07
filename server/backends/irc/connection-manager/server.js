@@ -15,4 +15,6 @@
 //   governing permissions and limitations under the License.
 //
 
-require('./connectionManager.js')
+'use strict';
+
+require('./connectionManager.js');

@@ -16,12 +16,12 @@
 
 'use strict';
 
-const redis = require('../../lib/redis').createClient(),
-      UserGId = require('../../models/userGId'),
-      nicksService = require('../../services/nicks');
+const redis = require('../../lib/redis').createClient();
+const UserGId = require('../../models/userGId');
+const nicksService = require('../../services/nicks');
 
-exports.getUserGId = async function(nick, network) {
-    let masUserId = await nicksService.getUserFromNick(nick, network);
+exports.getUserGId = async function getUserGId(nick, network) {
+    const masUserId = await nicksService.getUserFromNick(nick, network);
 
     if (masUserId) {
         return masUserId.gId;

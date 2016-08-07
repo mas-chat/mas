@@ -16,23 +16,21 @@
 
 'use strict';
 
-const CronJob = require('cron').CronJob,
-      redis = require('../../lib/redis').createClient(),
-      log = require('../../lib/log'),
-      conf = require('../../lib/conf'),
-      courier = require('../../lib/courier').create();
+const CronJob = require('cron').CronJob;
+const redis = require('../../lib/redis').createClient();
+const log = require('../../lib/log');
+const conf = require('../../lib/conf');
+const courier = require('../../lib/courier').create();
 
-let jobs = [];
+const jobs = [];
 
-exports.init = function() {
+exports.init = function init() {
     // Twice in a day
     jobs.push(new CronJob('0 0 7,19 * * *', disconnectInactiveIRCUsers, null, true));
 };
 
-exports.quit = async function() {
-    for (let job of jobs) {
-        job.stop();
-    }
+exports.quit = async function quit() {
+    jobs.forEach(job => job.stop());
 
     await courier.quit();
 };
@@ -40,26 +38,26 @@ exports.quit = async function() {
 function disconnectInactiveIRCUsers() {
     log.info('Running disconnectInactiveIRCUsers job');
 
-    let inactivityTimeout = conf.get('irc:inactivity_timeout') * 24 * 60 * 60;
-    let minAllowedLogoutTime = Math.round(Date.now() / 1000) - inactivityTimeout;
+    const inactivityTimeout = conf.get('irc:inactivity_timeout') * 24 * 60 * 60;
+    const minAllowedLogoutTime = Math.round(Date.now() / 1000) - inactivityTimeout;
 
     (async function() {
-        let users = await redis.smembers('userlist'); // TBD: Doesn't scale too far
-        let networks = await redis.smembers('networklist');
+        const users = await redis.smembers('userlist'); // TBD: Doesn't scale too far
+        const networks = await redis.smembers('networklist');
 
-        for (let userId of users) {
-            let lastLogout = parseInt(await redis.hget(`user:${userId}`, 'lastlogout'));
+        for (const userId of users) {
+            const lastLogout = parseInt(await redis.hget(`user:${userId}`, 'lastlogout'));
 
             if (lastLogout !== 0 && lastLogout < minAllowedLogoutTime) {
-                for (let network of networks) {
-                    let state = await redis.hget(`networks:${userId}:${network}`, 'state');
+                for (const network of networks) {
+                    const state = await redis.hget(`networks:${userId}:${network}`, 'state');
 
                     if (state === 'connected') {
                         await redis.hset(`networks:${userId}:${network}`, 'state', 'idleclosing');
 
                         courier.callNoWait('connectionmanager', 'disconnect', {
-                            userId: userId,
-                            network: network,
+                            userId,
+                            network,
                             reason: 'Inactive user.'
                         });
 
