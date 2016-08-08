@@ -374,7 +374,9 @@ async function processDisconnected({ userId, network, reason }) {
     let delay = 30 * 1000; // 30s
     let msg = `Lost connection to IRC server (${reason}). Scheduling a reconnect attempt...`;
 
-    const count = await networkInfo.set('retryCount', networkInfo.get('retryCount') + 1);
+    const count = networkInfo.get('retryCount') + 1;
+
+    await networkInfo.set('retryCount', count);
 
     // Set the backoff timer
     if (count > 3 && count < 8) {
