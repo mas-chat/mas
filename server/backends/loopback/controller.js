@@ -53,7 +53,7 @@ async function start() {
     courier.on('updatePassword', processUpdatePassword);
     courier.on('create', processCreate);
     courier.on('join', processJoin);
-    courier.on('close', courier.noop); // TBD: Should we do something?
+    courier.on('close', courier.noop); // TODO: Should we do something?
 
     await courier.listen();
 }
@@ -101,7 +101,7 @@ async function processCreate({ userId, name, password }) {
         apikey: ''
     });
 
-    if (!conversation.valid) { // TBD: Don't assume ERROR_EXISTS is the only possible error
+    if (!conversation.valid) { // TODO: Don't assume ERROR_EXISTS is the only possible error
         return {
             status: 'ERROR_EXISTS',
             errorMsg: 'A group by this name already exists. If you\'d like, you can try to join it.'

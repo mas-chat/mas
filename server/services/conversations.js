@@ -31,7 +31,7 @@ const UserGId = require('../models/userGId');
 const windowsService = require('../services/windows');
 const nicksService = require('../services/nicks');
 
-const MSG_BUFFER_SIZE = 200; // TBD: This should come from session:max_backlog setting
+const MSG_BUFFER_SIZE = 200; // TODO: This should come from session:max_backlog setting
 
 exports.findOrCreate1on1 = async function findOrCreate1on1(user, peerUserGId, network) {
     assert(user && peerUserGId && network);
@@ -54,7 +54,7 @@ exports.findOrCreate1on1 = async function findOrCreate1on1(user, peerUserGId, ne
         }
     }
 
-    // TBD: Make sure peerUserId is either valid MAS user or that user doesn't have too many
+    // TODO: Make sure peerUserId is either valid MAS user or that user doesn't have too many
     // 1on1 conversations.
 
     if (!conversation) {
@@ -187,8 +187,8 @@ exports.remove1on1Member = async function remove1on1Member(conversation, userGId
 
     // No clean-up is currently needed. 1on1 discussions are never deleted. Group discussions
     // are deleted when the last member parts. This makes sense as groups are then totally reseted
-    // when they become empty (TBD: except elasticsearch contains orphan logs). Never deleting
-    // 1on1 conversations makes log searching from elasticsearch possible. TBD: On the other hand
+    // when they become empty (TODO: except elasticsearch contains orphan logs). Never deleting
+    // 1on1 conversations makes log searching from elasticsearch possible. TODO: On the other hand
     // dead 1on1s start to pile eventually on Redis.
 };
 
@@ -473,7 +473,7 @@ async function scanForEmailNotifications(conversation, message) {
             const name = user.get('name') || nickName;
             const notificationId = uuid(20);
 
-            // TBD: Needs to be transaction, add lua script
+            // TODO: Needs to be transaction, add lua script
             await redis.sadd('emailnotifications', user.gId);
             await redis.lpush(`emailnotificationslist:${user.gId}`, notificationId);
 
@@ -498,7 +498,7 @@ async function deleteGroupMember(conversation, member, skipCleanUp, wasKicked, r
     assert(conversation.get('type') === 'group');
 
     if (!member) {
-        return; // TBD: When is this possible?
+        return; // TODO: When is this possible?
     }
 
     log.info(`User: ${member.get('userGId')} removed from conversation: ${conversation.id}`);

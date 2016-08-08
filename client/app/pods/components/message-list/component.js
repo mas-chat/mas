@@ -29,7 +29,7 @@ export default Ember.Component.extend({
             this._endEdit();
 
             this.set('editBody', message.get('body'));
-            message.set('editing', true); // TBD: Mutates store
+            message.set('editing', true); // TODO: Mutates store
 
             this.set('previousEditedMessage', message);
         },
@@ -53,7 +53,7 @@ export default Ember.Component.extend({
         let previousEditedMessage = this.get('previousEditedMessage');
 
         if (previousEditedMessage) {
-            previousEditedMessage.set('editing', false); // TBD: Mutates store
+            previousEditedMessage.set('editing', false); // TODO: Mutates store
             this.set('previousEditedMessage', null);
         }
     }

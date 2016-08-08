@@ -654,7 +654,7 @@ async function handle376(user, msg) {
         // korvaa jollain await redis.run('introduceNewUserIds', userId, null, null, true, userId);
 
         if (msg.network === 'Flowdock') {
-            // TBD: The odd case of Flowdock, temporary
+            // TODO: The odd case of Flowdock, temporary
             sendPrivmsg(user, 'Flowdock', 'NickServ', 'identify xx@example.com password');
             return;
         }
@@ -772,7 +772,7 @@ async function handleQuit(user, msg) {
     const conversations = await conversationsService.getAllConversations(user);
 
     for (const conversation of conversations) {
-        // TBD: Send a real quit message instead of part
+        // TODO: Send a real quit message instead of part
         if (conversation.get('network') === msg.network && conversation.get('type') === 'group') {
             // No need to check if the targetUser is on this channel,
             // removeGroupMember() is clever enough
@@ -1111,7 +1111,7 @@ async function tryDifferentNick(user, network) {
     });
 }
 
-// TBD: Add a timer (every 15min?) to send one NAMES to every irc channel to make sure memberslist
+// TODO: Add a timer (every 15min?) to send one NAMES to every irc channel to make sure memberslist
 // is in sync?
 
 async function disconnectIfIdle(user, network) {

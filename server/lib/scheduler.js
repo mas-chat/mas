@@ -66,7 +66,7 @@ async function deliverEmails() {
 
         const user = await User.fetch(userGId.id);
 
-        // TBD: Better would be to clear pending notifications during login
+        // TODO: Better would be to clear pending notifications during login
         if (!user.isOnline()) {
             mailer.send('emails/build/mentioned.hbs', {
                 name: user.get('name'),

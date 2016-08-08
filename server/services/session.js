@@ -29,7 +29,7 @@ const Window = require('../models/window');
 
 const networks = [ 'MAS', ...Object.keys(conf.get('irc:networks')) ];
 
-// TBD: Is courier quit() needed?
+// TODO: Is courier quit() needed?
 
 exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
     await settingsService.sendSet(user, session.id);

@@ -31,7 +31,7 @@ export default Ember.Component.extend({
                 window: this.get('model')
             });
 
-            // TBD: Handle error cases
+            // TODO: Handle error cases
             this.sendAction('closeModal');
         },
 

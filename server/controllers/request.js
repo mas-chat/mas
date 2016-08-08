@@ -283,7 +283,7 @@ async function handleUpdate({ user, command, window, session }) {
 async function handleUpdatePassword({ user, command, conversation, backend }) {
     const password = command.password;
 
-    // TBD: loopback backend: Validate the new password. No spaces, limit length etc.
+    // TODO: loopback backend: Validate the new password. No spaces, limit length etc.
 
     if (!conversation) {
         return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
@@ -475,7 +475,7 @@ async function handleUpdateProfile({ user, command }) {
         await user.set('email', newEmail);
     }
 
-    // TBD: Check and report validation errors
+    // TODO: Check and report validation errors
 
     return { status: 'OK' };
 }

@@ -23,7 +23,7 @@ const conf = require('../lib/conf');
 const oneYearInSeconds = 60 * 60 * 24 * 365;
 let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
-// TBD: move this to library. Add exists check.
+// TODO: move this to library. Add exists check.
 if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }

@@ -26,7 +26,7 @@ const log = require('../lib/log');
 
 let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
-// TBD: move this to library.
+// TODO: move this to library.
 if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }

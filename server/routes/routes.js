@@ -80,7 +80,7 @@ exports.register = function register(app) {
     // Public assets
     app.get('/files/:file', userFilesController);
 
-    // TBD: Improve caching strategy for the web site
+    // TODO: Improve caching strategy for the web site
     app.use(serve(path.join(__dirname, '..', 'public'), {
         maxage: 1000 * 60 * 10 // 10 minutes
     }));

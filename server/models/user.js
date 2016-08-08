@@ -161,7 +161,7 @@ module.exports = class User extends Model {
                 emailConfirmed: false
             });
 
-            // TBD: await sendEmailConfirmationEmail(this.id, trimmedEmail);
+            // TODO: await sendEmailConfirmationEmail(this.id, trimmedEmail);
         }
     }
 
@@ -196,7 +196,7 @@ module.exports = class User extends Model {
 
             if (encryptedPassword === expectedSha) {
                 // Migrate to bcrypt
-                await this.changePassword(password); // TBD: Can't fail
+                await this.changePassword(password); // TODO: Can't fail
                 return true;
             }
         } else if (encryptionMethod === 'bcrypt') {

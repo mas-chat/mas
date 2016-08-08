@@ -40,7 +40,7 @@ async function disconnectInactiveIRCUsers() {
 
     const inactivityTimeout = conf.get('irc:inactivity_timeout') * 24 * 60 * 60;
     const minAllowedLogoutTime = Math.round(Date.now() / 1000) - inactivityTimeout;
-    const users = await redis.smembers('userlist'); // TBD: Doesn't scale too far
+    const users = await redis.smembers('userlist'); // TODO: Doesn't scale too far
     const networks = await redis.smembers('networklist');
 
     for (const userId of users) {

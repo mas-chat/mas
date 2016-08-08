@@ -133,7 +133,7 @@ module.exports = class Model {
 
             if (err === 'notUnique') {
                 record.errors = explainIndexErrors(indices, record.config.indexErrorDescriptions);
-                // TBD: REmove console.logs
+                // TODO: REmove console.logs
                 console.log(`DB ERROR: ${err}`); // eslint-disable-line no-console
             } else if (err) {
                 console.log(`DB ERROR: ${err}`); // eslint-disable-line no-console

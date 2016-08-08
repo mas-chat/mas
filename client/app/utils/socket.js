@@ -64,7 +64,7 @@ let SocketService = Ember.Object.extend({
             this.set('sessionId', data.sessionId);
             this.set('_windowsStore.maxBacklogMsgs', data.maxBacklogMsgs);
 
-            // TBD: Delete oldest messages for windows that have more messages than
+            // TODO: Delete oldest messages for windows that have more messages than
             // maxBacklogMsgs. They can be stale, when editing becomes possible.
 
             for (let command of this._disconnectedQueue) {

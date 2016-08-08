@@ -24,7 +24,7 @@ const notification = require('../lib/notification');
 
 const EPOCH_DATE = new Date(1);
 
-// TBD: Instead of FRIENDS and FRIENDSUPDATE, use ADDFRIENDS
+// TODO: Instead of FRIENDS and FRIENDSUPDATE, use ADDFRIENDS
 
 exports.sendFriends = function sendFriends(user, sessionId) {
     sendFriendsNtf(user, sessionId);

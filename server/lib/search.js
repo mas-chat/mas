@@ -73,7 +73,7 @@ exports.getMessageRange = async function getMessageRange(conversationId, start, 
         return [];
     }
 
-    // TBD: If there are multiple messages at the boundary start/end ts, part of them can be lost.
+    // TODO: If there are multiple messages at the boundary start/end ts, part of them can be lost.
     // Theoretical problem mostly. Solution is not lte.
 
     const range = {

@@ -99,7 +99,7 @@ export default BaseModel.extend({
         let nick = this.get('nick');
         let mentionedRegEx = this.get('mentionedRegEx');
 
-        // TBD: Network === flowdock check is missing
+        // TODO: Network === flowdock check is missing
         if (this.get('body').indexOf('Show in Flowdock:') > -1) {
             return 'flowdock-ignore';
         } else if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {

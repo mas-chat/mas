@@ -23,7 +23,7 @@ import socket from '../utils/socket';
 export default Store.extend({
     theme: 'default',
     activeDesktop: 1,
-    email: '', // TBD: Remove from here, keep in profile
+    email: '', // TODO: Remove from here, keep in profile
     emailConfirmed: true,
 
     toJSON() {

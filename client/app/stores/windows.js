@@ -30,7 +30,7 @@ export default Store.extend({
     maxBacklogMsgs: 100000,
     cachedUpto: 0,
 
-    // TBD: Re-factor leftovers
+    // TODO: Re-factor leftovers
     userId: null,
     secret: null,
 
@@ -402,7 +402,7 @@ export default Store.extend({
             return;
         }
 
-        // TBD: /me on an empty IRC channel is not shown to the sender.
+        // TODO: /me on an empty IRC channel is not shown to the sender.
 
         if (command) {
             dispatch('SEND_COMMAND', {
@@ -603,7 +603,7 @@ export default Store.extend({
         });
     },
 
-    // TBD: Move these handlers somewhere else
+    // TODO: Move these handlers somewhere else
 
     handleLogout() {
         this._logout({ informServer: true });
