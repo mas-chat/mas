@@ -17,15 +17,16 @@
 
 'use strict';
 
+const init = require('./lib/init');
+
+init.configureProcess('frontend');
+
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
-const init = require('./lib/init');
 const conf = require('./lib/conf');
 const log = require('./lib/log');
 const main = require('./main');
-
-init.configureProcess('frontend');
 
 const httpPort = conf.get('frontend:http_port');
 const httpsPort = conf.get('frontend:https_port');
