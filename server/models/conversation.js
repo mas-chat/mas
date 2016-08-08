@@ -31,4 +31,13 @@ module.exports = class Conversation extends Model {
 
         return await super.create(data);
     }
+
+    get mutableProperties() {
+        return [
+            'name',
+            'owner',
+            'topic',
+            'password'
+        ];
+    }
 };

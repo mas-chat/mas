@@ -16,21 +16,22 @@
 
 'use strict';
 
-const assert = require('assert'),
-      rigiddb = require('rigiddb');
+const assert = require('assert');
+const Rigiddb = require('rigiddb');
 
-const db = new rigiddb('mas', { db: 10 });
+const db = new Rigiddb('mas', { db: 10 });
 
 module.exports = class Model {
     constructor(collection, id = null, initialProps = {}) {
-        if (typeof(id) !== 'number' && id !== null) {
-            throw new Error(`ID must be a number or null.`);
+        if (typeof id !== 'number' && id !== null) {
+            throw new Error('ID must be a number or null.');
         }
 
         if (collection === 'models') {
             throw new Error('An abstract Model class cannot be instantiated.');
         }
 
+        this.deleted = false;
         this.collection = collection;
         this.id = id;
         this.errors = {};
@@ -38,11 +39,21 @@ module.exports = class Model {
         this._props = initialProps;
     }
 
+    get mutableProperties() {
+        return [];
+    }
+
+    static get getters() {
+        return {};
+    }
+
+    static get setters() {
+        return {};
+    }
+
     get config() {
         // Default configuration. Can be overwritten in derived classes.
         return {
-            validator: false,
-            allowedProps: false,
             indexErrorDescriptions: {}
         };
     }
@@ -57,8 +68,7 @@ module.exports = class Model {
     }
 
     static async fetch(id) {
-        let record = new this(this.collection, id);
-
+        const record = new this(this.collection, id);
         const { error, val } = await db.get(record.collection, id);
 
         if (error) {
@@ -70,7 +80,7 @@ module.exports = class Model {
     }
 
     static async fetchMany(ids) {
-        let res = [];
+        const res = [];
 
         for (const id of ids) {
             res.push(await db.get(this.collection, id));
@@ -113,24 +123,24 @@ module.exports = class Model {
     }
 
     static async create(props) {
-        let record = new this(this.collection);
+        const record = new this(this.collection);
+        const { preparedProps, errors } = runSetters(props, this.setters);
 
-        if (record.config.validator) {
-            const { errors } = record.config.validator.validate(props);
-            record.errors = errors || {};
-        }
+        record.errors = errors;
 
         if (record.valid) {
-            const { err, val, indices } = await db.create(record.collection, props);
+            const { err, val, indices } = await db.create(record.collection, preparedProps);
 
             if (err === 'notUnique') {
                 record.errors = explainIndexErrors(indices, record.config.indexErrorDescriptions);
+                // TBD: REmove console.logs
+                console.log(`DB ERROR: ${err}`); // eslint-disable-line no-console
             } else if (err) {
-                console.log(`DB ERROR: ${err}`); // Temporary
+                console.log(`DB ERROR: ${err}`); // eslint-disable-line no-console
                 throw new Error(`DB ERROR: ${err}`);
             } else {
                 record.id = val || null;
-                record._props = props;
+                record._props = preparedProps;
             }
         }
 
@@ -140,7 +150,7 @@ module.exports = class Model {
     static async currentId() {
         const { err, val } = await db.currentId(this.collection);
 
-        assert (!err, 'Failed to read currentId');
+        assert(!err, 'Failed to read currentId');
 
         return val;
     }
@@ -148,55 +158,67 @@ module.exports = class Model {
     get(prop) {
         assert(!this.deleted, 'Tried to read deleted model');
 
-        return this._props[prop];
+        const rawVal = this._props[prop];
+
+        return Model.getters[prop] ? Model.getters[prop](rawVal) : rawVal;
     }
 
     getAll() {
         assert(!this.deleted, 'Tried to read deleted model');
 
-        return Object.assign({}, this._props);
+        const props = {};
+
+        Object.keys(this._props).forEach(prop => {
+            const rawVal = this._props[prop];
+            props[prop] = Model.getters[prop] ? Model.getters[prop](rawVal) : rawVal;
+        });
+
+        return props;
     }
 
     async set(props, value) {
-        assert(!this.deleted, 'Tried to change to deleted model');
+        const objectProps = convertToObject(props, value);
 
-        props = convertToObject(props, value);
+        const allowed = Object.keys(objectProps).every(prop =>
+            this.mutableProperties.includes(prop));
 
-        if (this.validator) {
-            const { valid, errors } = this.config.validator.validate(props);
-
-            if (!valid) {
-                this.errors = errors;
-                return props;
-            }
+        if (!allowed) {
+            throw new Error('Tried to set non-existent or protected property');
         }
 
-        const { err, indices, val } = await db.update(this.collection, this.id, props);
+        return this._set(objectProps);
+    }
+
+    async _set(objectProps) {
+        assert(!this.deleted, 'Tried to mutate deleted model');
+
+        const { errors, preparedProps } = runSetters(objectProps, Model.setters);
+
+        if (!preparedProps) {
+            Object.keys(objectProps).forEach(prop => {
+                if (errors[prop]) {
+                    this.errors[prop] = errors[prop];
+                } else {
+                    delete this.errors[prop];
+                }
+            });
+
+            return false; // One or more setters failed
+        }
+
+        const { err, indices, val } = await db.update(this.collection, this.id, preparedProps);
 
         if (err === 'notUnique') {
-            this.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
+            this.updateErrors(objectProps, explainIndexErrors(indices,
+               this.config.indexErrorDescriptions));
         } else if (err) {
             throw new Error(`DB ERROR: ${err}`);
         } else {
             this.errors = {};
-            Object.assign(this._props, props);
+            Object.assign(this._props, objectProps);
         }
 
         return val;
-    }
-
-    async setProperty(props, value) {
-        assert(!this.deleted, 'Tried to change deleted model');
-
-        props = convertToObject(props, value);
-
-        for (const prop of Object.keys(props)) {
-            if (this.config.allowedProps && !this.config.allowedProps.includes(prop)) {
-                throw new Error(`Tried to set invalid user model property ${prop}`);
-            }
-        }
-
-        return await this.set(props);
     }
 
     async delete() {
@@ -209,20 +231,43 @@ module.exports = class Model {
     }
 };
 
-function convertToObject(props, value) {
-    if (!props) {
-        return false;
-    } else if (typeof(props) === 'string') {
-        props = { [props]: value };
+function runSetters(objectProps, setters) {
+    const preparedProps = {};
+    const errors = {};
+
+    for (const prop of Object.keys(objectProps)) {
+        const value = objectProps[prop];
+
+        if (setters[prop]) {
+            const { valid, value: rawValue, error } = setters[prop](value);
+
+            if (!valid) {
+                errors[prop] = error;
+            }
+
+            preparedProps[prop] = valid ? rawValue : null;
+        } else {
+            preparedProps[prop] = value;
+        }
     }
 
-    return props;
+    return { errors, preparedProps };
+}
+
+function convertToObject(props, value) {
+    if (!props) {
+        return {};
+    }
+
+    return typeof props === 'string' ? { [props]: value } : props;
 }
 
 function explainIndexErrors(indices, descriptions = {}) {
-    let errors = {};
+    const errors = {};
 
-    indices.forEach(index => errors[index] = descriptions[index] || `Bad index.`)
+    indices.forEach(index => {
+        errors[index] = descriptions[index] || 'Bad index.';
+    });
 
     return errors;
 }

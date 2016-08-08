@@ -35,4 +35,17 @@ module.exports = class Window extends Model {
 
         return await super.create(data);
     }
+
+    get mutableProperties() {
+        return [
+            'emailAlert',
+            'notificationAlert',
+            'soundAlert',
+            'titleAlert',
+            'minimizedNamesList',
+            'desktop',
+            'row',
+            'column'
+        ];
+    }
 };

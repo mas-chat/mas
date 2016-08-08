@@ -34,6 +34,15 @@ module.exports = class ConversationMessage extends Model {
         return await super.create(data);
     }
 
+    get mutableProperties() {
+        return [
+            'updatedTs',
+            'updatedId',
+            'body',
+            'status'
+        ];
+    }
+
     convertToNtf() {
         const ntf = {
             id: 'MSG',

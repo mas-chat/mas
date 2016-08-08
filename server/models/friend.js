@@ -18,4 +18,10 @@
 
 const Model = require('./model');
 
-module.exports = class Friend extends Model {};
+module.exports = class Friend extends Model {
+    get mutableProperties() {
+        return [
+            'state'
+        ];
+    }
+};

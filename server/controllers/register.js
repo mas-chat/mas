@@ -255,7 +255,7 @@ exports.createExt = function *createExt() {
     }
 
     if (userRecord.valid) {
-        yield userRecord.setProperty('nick', form.data.nick);
+        yield userRecord.set('nick', form.data.nick);
     }
 
     if (!form.isValid()) {
@@ -270,7 +270,7 @@ exports.createExt = function *createExt() {
         return;
     }
 
-    userRecord.setProperty('inUse', true);
+    userRecord.set('inUse', true);
 
     this.response.redirect('/app');
 };

@@ -20,6 +20,12 @@ const Model = require('./model');
 const UserGId = require('./userGId');
 
 module.exports = class ConversationMember extends Model {
+    get mutableProperties() {
+        return [
+            'role'
+        ];
+    }
+
     get gId() {
         if (!this._gId) {
             this._gId = UserGId.create(this.get('userGId'));

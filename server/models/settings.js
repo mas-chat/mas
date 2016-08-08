@@ -38,4 +38,11 @@ module.exports = class Setting extends Model {
 
         return await super.create(data);
     }
+
+    get mutableProperties() {
+        return [
+            'activeDesktop',
+            'theme'
+        ];
+    }
 };

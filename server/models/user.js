@@ -16,14 +16,13 @@
 
 'use strict';
 
-const crypto = require('crypto'),
-      bcrypt = require('bcrypt'),
-      uuid = require('uid2'),
-      md5 = require('md5'),
-      redis = require('../lib/redis').createClient(),
-      UserGId =  require('./userGId'),
-      Model = require('./model'),
-      userValidator = require('../validators/user');
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
+const uuid = require('uid2');
+const md5 = require('md5');
+const redis = require('../lib/redis').createClient();
+const UserGId = require('./userGId');
+const Model = require('./model');
 
 module.exports = class User extends Model {
     static async create(props) {
@@ -32,7 +31,7 @@ module.exports = class User extends Model {
         const passwordValidation = validatePassword(props.password);
 
         if (!passwordValidation.valid) {
-            let user = new User();
+            const user = new User();
             user.errors = { password: passwordValidation.error };
             return user;
         }
@@ -60,18 +59,58 @@ module.exports = class User extends Model {
         return await super.create(data);
     }
 
+    static get setters() {
+        return {
+            name: function name(realName) {
+                if (!realName || realName.length < 6) {
+                    return { valid: false, error: 'Please enter at least 6 characters.' };
+                }
+
+                return { valid: true, value: realName };
+            },
+            email: function email(emailAddress) {
+                const parts = emailAddress.split('@');
+
+                if (!emailAddress || parts.length !== 2 || parts[0].length === 0 ||
+                    !parts[1].includes('.') ||
+                    parts[1].length < 3) {
+                    return { valid: false, error: 'Please enter a valid email address.' };
+                }
+
+                return { valid: true, value: emailAddress };
+            },
+            nick: function nick(nickName) {
+                if (!nickName) {
+                    return { valid: false, error: 'Please enter a nick' };
+                } else if (nickName.length < 3 || nickName.length > 15) {
+                    return { valid: false, error: 'Nick has to be 3-15 characters long.' };
+                } else if (/[0-9]/.test(nickName.charAt(0))) {
+                    return { valid: false, error: 'Nick can\'t start with digit' };
+                } else if (!(/^[A-Z`a-z0-9[\]\\_\^{|}]+$/.test(nickName))) {
+                    const valid = [ 'a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}' ];
+                    return { valid: false,
+                        error: `Illegal characters, allowed are ${valid.join(', ')}` };
+                }
+
+                return { valid: true, value: nickName };
+            }
+        };
+    }
+
+    get mutableProperties() {
+        return [
+            'extAuthId',
+            'inUse',
+            'lastIp',
+            'lastLogout',
+            'name',
+            'nick',
+            'registrationTime'
+        ];
+    }
+
     get config() {
         return {
-            validator: userValidator,
-            allowedProps: [
-                'extAuthId',
-                'inUse',
-                'lastIp',
-                'lastLogout',
-                'name',
-                'nick',
-                'registrationTime'
-            ],
             indexErrorDescriptions: {
                 nick: 'This nick is already reserved.',
                 email: 'This email address is already reserved.'
@@ -96,7 +135,7 @@ module.exports = class User extends Model {
     }
 
     async isOnline() {
-        const sessions = await redis.pubsub('NUMSUB', this.id)
+        const sessions = await redis.pubsub('NUMSUB', this.id);
 
         return sessions[1] !== 0;
     }
@@ -104,25 +143,25 @@ module.exports = class User extends Model {
     async generateNewSecret() {
         const newSecret = {
             secret: uuid(20),
-            secretExpires: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+            secretExpires: new Date(Date.now() + (14 * 24 * 60 * 60 * 1000))
         };
 
-        await this.set(newSecret)
+        await this._set(newSecret);
 
         return newSecret;
     }
 
     async changeEmail(email) {
-        email = email.trim();
+        const trimmedEmail = email.trim();
 
-        if (this.get('email') !== email) {
-            await this.set({
-                email: email,
-                emailMD5: md5(email.toLowerCase()),
+        if (this.get('email') !== trimmedEmail) {
+            await this._set({
+                email: trimmedEmail,
+                emailMD5: md5(trimmedEmail.toLowerCase()),
                 emailConfirmed: false
             });
 
-            // TBD: await sendEmailConfirmationEmail(this.id, email);
+            // TBD: await sendEmailConfirmationEmail(this.id, trimmedEmail);
         }
     }
 
@@ -131,7 +170,7 @@ module.exports = class User extends Model {
 
         if (!passwordValidation.valid) {
             this.errors = { password: passwordValidation.error };
-            return;
+            return null;
         }
 
         const newPassword = {
@@ -139,7 +178,7 @@ module.exports = class User extends Model {
             passwordType: 'bcrypt'
         };
 
-        await this.set(newPassword);
+        await this._set(newPassword);
 
         return newPassword;
     }
@@ -153,7 +192,7 @@ module.exports = class User extends Model {
         }
 
         if (encryptionMethod === 'sha256') {
-            let expectedSha = crypto.createHash('sha256').update(password, 'utf8').digest('hex');
+            const expectedSha = crypto.createHash('sha256').update(password, 'utf8').digest('hex');
 
             if (encryptedPassword === expectedSha) {
                 // Migrate to bcrypt
@@ -171,11 +210,11 @@ module.exports = class User extends Model {
     }
 
     async disableUser() {
-        return await this.set({
+        return await this._set({
             deleted: true,
             deletionTime: Date.now(),
             email: null,
-            deletedEmail: this._props['email'],
+            deletedEmail: this._props.email,
             emailMD5: null,
             extAuthId: null
         });
@@ -183,7 +222,7 @@ module.exports = class User extends Model {
 };
 
 function trimWhiteSpace(props) {
-    for (let prop in props) {
+    for (const prop of Object.keys(props)) {
         props[prop] = props[prop].trim();
     }
 }
