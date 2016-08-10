@@ -16,7 +16,7 @@
 
 'use strict';
 
-const user = require('../models/user');
+const User = require('../models/user');
 
 exports.auth = function *auth(next) {
     const cookie = this.cookies.get('auth') || '';
@@ -28,11 +28,10 @@ exports.auth = function *auth(next) {
     const [ userId, secret ] = cookie.split('-');
 
     if (userId && secret) {
-        const userRecord = yield user.fetch(parseInt(userId));
+        const user = yield User.fetch(parseInt(userId));
 
-        if (userRecord && userRecord.get('secretExpires') > ts &&
-            userRecord.get('secret') === secret) {
-            this.mas.user = userRecord;
+        if (user && user.get('secretExpires') > ts && user.get('secret') === secret) {
+            this.mas.user = user;
         }
     }
 
