@@ -4,6 +4,7 @@
   "private": true,
   "description": "MAS Web App",
   "dependencies": {
+    "async-to-gen": "^1.0.2",
     "bcrypt": "~0.8.1",
     "bluebird": "~3.4.0",
     "carrier": "~0.3.0",
