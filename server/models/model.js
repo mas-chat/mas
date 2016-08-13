@@ -18,8 +18,13 @@
 
 const assert = require('assert');
 const Rigiddb = require('rigiddb');
+const conf = require('../lib/conf');
 
-const db = new Rigiddb('mas', { db: 10 });
+const db = new Rigiddb('mas', 1, {
+    db: 10,
+    host: conf.get('redis:host'), // TODO: Add Unix socket support
+    port: conf.get('redis:port')
+});
 
 module.exports = class Model {
     constructor(collection, id = null, initialProps = {}) {
