@@ -82,7 +82,6 @@
   },
   "scripts": {
     "test": "npm run eslint && ./bin/bootstrap && ./bin/run-tests saucelabs",
-    "dev": "pm2 start --no-daemon --no-autorestart pm2/apps.json",
     "lint-server": "eslint --env node --ignore-pattern server/public/dist gulpfile.js bin/create-alert server",
     "lint-client": "eslint --env browser client/app test/browser",
     "test-server": "mocha server/test/**/*test.js",

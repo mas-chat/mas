@@ -64,10 +64,10 @@ MacOS/Linux/Windows.
    $ npm install
    ```
 
-4. Install bower, pm2 and ember-cli if you don't have them
+4. Install bower and ember-cli if you don't have them
 
    ```bash
-   $ npm install -g bower ember-cli pm2
+   $ npm install -g bower ember-cli
    ```
 
 5. Build the web site
