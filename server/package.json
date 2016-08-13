@@ -84,8 +84,7 @@
     "test": "npm run eslint && ./bin/bootstrap && ./bin/run-tests saucelabs",
     "lint-server": "eslint --env node --ignore-pattern server/public/dist gulpfile.js bin/create-alert server",
     "lint-client": "eslint --env browser client/app test/browser",
-    "test-server": "mocha server/test/**/*test.js",
-    "build-pages": "gulp build-pages"
+    "test-server": "mocha server/test/**/*test.js"
   },
   "repository": {
     "type": "git",
