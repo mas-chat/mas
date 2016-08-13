@@ -31,17 +31,17 @@ if (configFileOption && configFileOption.charAt(0) === path.sep) {
     // Absolute path
     configFile = path.normalize(configFileOption);
 } else {
-    configFile = path.join(__dirname, '..', '..', configFileOption || 'mas.conf');
+    configFile = path.join(__dirname, '..', configFileOption || 'mas.conf');
 }
 
-if (!fs.existsSync(configFile)) {
-    const msg = `${'ERROR:'.red} Config file ${configFile} missing.`;
-    console.error(msg); // eslint-disable-line no-console
-    process.exit(1);
-}
-
-nconf.argv().add('file', {
+nconf.env({
+    separator: '_',
+    lowerCase: true
+}).argv().file('user_overrides', {
     file: configFile,
+    format: nconf.formats.ini
+}).file('defaults', {
+    file: path.join(__dirname, '..', 'mas.conf.default'),
     format: nconf.formats.ini
 });
 
