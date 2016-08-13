@@ -19,9 +19,9 @@
 
 const ObjectStore = require('rigiddb');
 
-const store = new ObjectStore('mas', { db: 10 });
+const store = new ObjectStore('mas', 1, { db: 10 });
 
-store.setSchema(1, {
+store.setSchema({
     users: {
         definition: {
             deleted: { type: 'boolean', allowNull: false },
