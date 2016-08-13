@@ -84,7 +84,7 @@ password=password-xxxxxxxxxxxxxxxx
 
 [log]
 console=true
-file=true
+file=false
 directory=logs/
 clear_at_startup=false
 rotate_daily=false
