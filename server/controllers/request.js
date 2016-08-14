@@ -248,7 +248,7 @@ async function handleUpdate({ user, command, window, session }) {
         const value = command[prop];
 
         if (typeof value !== 'undefined') {
-            update = !!(await window.set({ [prop]: value })); // TODO: remove outer parenthesis
+            update = !!await window.set({ [prop]: value });
         }
     }
 
