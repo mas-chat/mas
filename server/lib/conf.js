@@ -18,7 +18,6 @@
 
 const path = require('path');
 const assert = require('assert');
-const fs = require('fs');
 const nconf = require('nconf');
 const argv = require('yargs').argv;
 
