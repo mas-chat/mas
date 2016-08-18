@@ -1,1 +1,3 @@
 .git
+server/node_modules
+server/website/node_modules
