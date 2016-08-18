@@ -3,7 +3,7 @@ FROM mhart/alpine-node
 RUN apk add --no-cache make gcc g++ python icu-dev
 
 RUN mkdir /app
-COPY server/* /app
+COPY server/* /app/
 
 WORKDIR /app
 
