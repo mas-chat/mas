@@ -30,8 +30,6 @@ try {
 }
 
 exports.registerHelpers = function registerHelpers(hbs) {
-    hbs.registerHelper('getPageJSFile', () => `${this.page}.js`);
-
     hbs.registerHelper('asset', file => {
         if (manifest) {
             return PREFIX + manifest[file];
