@@ -17,7 +17,7 @@
 'use strict';
 
 const path = require('path');
-const router = require('koa-router');
+const router = require('koa-router')();
 const serve = require('koa-static');
 const mount = require('koa-mount');
 const bodyParser = require('koa-bodyparser');
@@ -26,7 +26,7 @@ const passport = require('../lib/passport');
 const cacheFilter = require('../lib/cacheFilter');
 const registerController = require('../controllers/register');
 const loginController = require('../controllers/login');
-const pagesController = require('../controllers/pages');
+const websiteController = require('../controllers/website');
 const uploadController = require('../controllers/upload');
 const userFilesController = require('../controllers/userFiles');
 const forgotPasswordController = require('../controllers/forgotPassword');
@@ -35,63 +35,63 @@ const confirmEmailController = require('../controllers/confirmEmail');
 exports.register = function register(app) {
     app.use(cacheFilter);
 
-    app.use(router(app));
-
     // Passport authentication routes
     if (conf.get('googleauth:enabled') === true && conf.get('googleauth:openid_realm')) {
-        app.get('/auth/google', passport.authenticate('google', {
+        router.get('/auth/google', passport.authenticate('google', {
             scope: 'email profile',
             openIDRealm: conf.get('googleauth:openid_realm')
         }));
-        app.get('/auth/google/oauth2callback', loginController.googleLogin);
+        router.get('/auth/google/oauth2callback', loginController.googleLogin);
     }
 
     if (conf.get('yahooauth:enabled') === true) {
-        app.get('/auth/yahoo', passport.authenticate('yahoo'));
-        app.get('/auth/yahoo/callback', loginController.yahooLogin);
+        router.get('/auth/yahoo', passport.authenticate('yahoo'));
+        router.get('/auth/yahoo/callback', loginController.yahooLogin);
     }
 
     if (conf.get('cloudronauth:enabled') === true) {
-        app.get('/auth/cloudron', passport.authenticate('cloudron'));
-        app.get('/auth/cloudron/callback', loginController.cloudronLogin);
+        router.get('/auth/cloudron', passport.authenticate('cloudron'));
+        router.get('/auth/cloudron/callback', loginController.cloudronLogin);
     }
 
-    app.post('/login', bodyParser(), loginController.localLogin);
+    router.post('/login', bodyParser(), loginController.localLogin);
 
     // File upload endpoint
-    app.post('/api/v1/upload', uploadController);
+    router.post('/api/v1/upload', uploadController);
 
     // Registration routes
-    app.get('/register', registerController.index);
-    app.post('/register', registerController.create);
-    app.post('/register-ext', registerController.createExt);
-    app.post('/register-reset', registerController.createReset);
+    router.post('/register', bodyParser(), registerController.create);
+    router.post('/register-ext', registerController.createExt);
+    router.post('/register-reset', registerController.createReset);
 
     // Forgot password
-    app.post('/forgot-password', bodyParser(), forgotPasswordController.create);
-    app.get('/reset-password/:token', registerController.indexReset);
+    router.post('/forgot-password', bodyParser(), forgotPasswordController.create);
+    router.get('/reset-password/:token', registerController.indexReset);
 
     // Confirm email
-    app.get('/confirm-email/:token', confirmEmailController.show);
+    router.get('/confirm-email/:token', confirmEmailController.show);
 
     // Web site pages route
-    app.get(/(^\/|.html)$/, pagesController);
+    router.get('/', websiteController);
+    router.get('/:page', websiteController);
 
     // Public assets
-    app.get('/files/:file', userFilesController);
+    router.get('/files/:file', userFilesController);
+
+    app.use(router.routes()).use(router.allowedMethods());
+
+    // Ember CLI Live Reload redirect hack
+    if (conf.get('common:dev_mode') === true) {
+        router.get('/ember-cli-live-reload.js', function *redirect() { // eslint-disable-line require-yield, max-len
+            this.redirect('http://localhost:4200/ember-cli-live-reload.js');
+        });
+    }
 
     // TODO: Improve caching strategy for the web site
-    app.use(serve(path.join(__dirname, '..', 'public'), {
+    app.use(serve(path.join(__dirname, '..', 'website'), {
         maxage: 1000 * 60 * 10 // 10 minutes
     }));
 
     // Ember client assets
     app.use(mount('/app', serve(path.join(__dirname, '../../client/dist'))));
-
-    // Ember CLI Live Reload redirect hack
-    if (conf.get('common:dev_mode') === true) {
-        app.get('/ember-cli-live-reload.js', function *redirect() { // eslint-disable-line require-yield, max-len
-            this.redirect('http://localhost:4200/ember-cli-live-reload.js');
-        });
-    }
 };
