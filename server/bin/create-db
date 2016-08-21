@@ -206,6 +206,13 @@ store.setSchema({
         }
     }
 }).then(function(result) {
-    console.log(result.val ? 'RigidDB schema initialized successfully.' : 'ERROR: Schema creation failed.');
+    const { val, reason } = result;
+
+    if (reason === 'Schema already exists') {
+        console.log('RigidDB schema is up-to-date')
+    } else {
+        console.log(val ? 'RigidDB schema initialized successfully.' : `ERROR: ${reason}`);
+    }
+
     store.quit();
-})
+});

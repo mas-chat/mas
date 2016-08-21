@@ -77,7 +77,7 @@
   },
   "scripts": {
     "prod": "./tools/build-emails.js",
-    "start-frontend": "async-node ./server.js",
+    "start-frontend": "./bin/create-db && async-node ./server.js",
     "test": "npm run eslint && ./bin/bootstrap && ./bin/run-tests saucelabs",
     "lint-server": "eslint --env node --ignore-pattern website/dist --ignore-pattern node_modules .",
     "lint-client": "eslint --env browser client/app test/browser",
