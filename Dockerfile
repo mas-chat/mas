@@ -1,22 +1,17 @@
+FROM node:6
+
+ENV NPM_CONFIG_LOGLEVEL warn
+
 MAINTAINER Ilkka Oksanen <iao@iki.fi>
 
-FROM mhart/alpine-node
+COPY client /app/client/
+WORKDIR /app/client/
+RUN npm install && npm run bower && npm run build  && rm -fr node_modules bower_components
 
-RUN apk add --no-cache make gcc g++ python icu-dev
-
-ADD server client /app
-
-WORKDIR /app/server
-
-RUN npm install
-
-WORKIR /app/server/website
-
-RUN npm install && cd .. && npm run prod && rm -fr website/node_modules
-
-WORKDIR /app/client
-
-RUN npm install && ./node_modules/.bin/bower install && ./node_modules/.bin/ember build  && rm -fr node_modules bower_components
+COPY server /app/server/
+WORKDIR /app/server/
+RUN npm install && npm run prod
+RUN cd website && npm install && npm run prod && rm -fr node_modules
 
 EXPOSE 3200
 

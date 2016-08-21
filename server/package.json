@@ -76,7 +76,7 @@
     "superagent": "~2.1.0"
   },
   "scripts": {
-    "prod": "./tools/build-emails.js && cd website && npm run prod",
+    "prod": "./tools/build-emails.js",
     "start-frontend": "async-node ./server.js",
     "test": "npm run eslint && ./bin/bootstrap && ./bin/run-tests saucelabs",
     "lint-server": "eslint --env node --ignore-pattern website/dist --ignore-pattern node_modules .",
