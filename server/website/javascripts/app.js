@@ -22,10 +22,7 @@ import '../stylesheets/pages.scss';
 
 import Layout from './components/layout';
 import AboutPage from './components/pages/about';
-import FeaturesPage from './components/pages/features';
 import HomePage from './components/pages/home';
-import PricingPage from './components/pages/pricing';
-import SupportPage from './components/pages/support';
 
 render((
     <Router history={browserHistory}>
