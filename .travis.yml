@@ -1,21 +1,14 @@
 language: node_js
 node_js:
-    - "4.1"
+    - "6"
 addons:
   sauce_connect: true
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - g++-4.8
-env:
-  CXX=g++-4.8
-cache:
-  directories:
-    - node_modules
+services:
+  - docker
 sudo: required
 before_install:
-  - npm config set loglevel warn --global
-  - npm install -g gulp ember-cli bower
+  - docker build -t ilkkao/mas-travis .
   - sudo apt-get install ircd-irc2
   - sudo /etc/init.d/ircd-irc2 start
+script:
+  - cd server && npm test

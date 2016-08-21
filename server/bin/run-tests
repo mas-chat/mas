@@ -2,12 +2,22 @@
 
 set -e
 
-function reset_server {
-    pm2 stop pm2/test.json
-    sleep 5
-    redis-cli -p 44144 flushall
-    pm2 start pm2/test.json
-    sleep 3
+function kill_containers
+    docker stop $(docker ps -a -q)
+    docker rm $(docker ps -a -q)
+}
+
+function start_containers {
+    kill_containers
+
+    docker run --rm -p 6379:6379 redis
+    docker run --rm -e IRC.NETWORKS.IRCNET_HOST=localhost -e IRC.NETWORKS.IRCNET_PORT=6667 -e IRC.NETWORKS.IRCNET_SSL=false -e IRC.NETWORKS.IRCNET_RATE_LIMIT=10 -p 3200:3200 ilkkao/mas-travis
+    docker run --rm -e IRC.NETWORKS.IRCNET_HOST=localhost -e IRC.NETWORKS.IRCNET_PORT=6667 -e IRC.NETWORKS.IRCNET_SSL=false -e IRC.NETWORKS.IRCNET_RATE_LIMIT=10 ilkkao/mas-travis npm run start-loopback
+    docker run --rm -e IRC.NETWORKS.IRCNET_HOST=localhost -e IRC.NETWORKS.IRCNET_PORT=6667 -e IRC.NETWORKS.IRCNET_SSL=false -e IRC.NETWORKS.IRCNET_RATE_LIMIT=10 ilkkao/mas-travis npm run start-irc
+    docker run --rm -e IRC.NETWORKS.IRCNET_HOST=localhost -e IRC.NETWORKS.IRCNET_PORT=6667 -e IRC.NETWORKS.IRCNET_SSL=false -e IRC.NETWORKS.IRCNET_RATE_LIMIT=10 ilkkao/mas-travis npm run start-irc-scktmgr
+
+    echo "Waiting 5 seconds for the services to start."
+    sleep 1
 }
 
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
@@ -32,23 +42,17 @@ else
     SINGLE_TEST="--test $2"
 fi
 
-redis-server conf/redis.test.conf
-echo "Waiting 1 second for the redis to start."
-sleep 1
-
-pm2 start pm2/test.json
-sleep 3
+start_containers
 
 if [ "$NIGHTWATCH_ENV" == "local" ]; then
     node ./bin/nightwatch --env local $SINGLE_TEST --configFile=test/mas-test.conf
 else
     # Can't run in parallel until there are multiple redises.
-    node ./bin/nightwatch --env saucelabs-chrome-linux --configFile=test/mas-test.conf
-    reset_server
-    node ./bin/nightwatch --env saucelabs-ie-win --configFile=test/mas-test.conf
-    reset_server
-    node ./bin/nightwatch --env saucelabs-firefox-mac --configFile=test/mas-test.conf
+    node ./server/bin/nightwatch --env saucelabs-chrome-linux
+    start_containers
+    node ./server/bin/nightwatch --env saucelabs-ie-win
+    start_containers
+    node ./server/bin/nightwatch --env saucelabs-firefox-mac
 fi
 
-pm2 stop pm2/test.json
-kill `cat /tmp/redis-mas-test.pid`
+kill_containers
