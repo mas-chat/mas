@@ -2,7 +2,7 @@
 
 set -e
 
-function kill_containers
+function kill_containers {
     docker stop $(docker ps -a -q)
     docker rm $(docker ps -a -q)
 }
