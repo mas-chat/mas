@@ -4,18 +4,17 @@ FROM mhart/alpine-node
 
 RUN apk add --no-cache make gcc g++ python icu-dev
 
-COPY server /app
-COPY client /client
+ADD server client /app
 
-WORKDIR /app
+WORKDIR /app/server
 
 RUN npm install
 
-WORKIR /app/website
+WORKIR /app/server/website
 
 RUN npm install && cd .. && npm run prod && rm -fr website/node_modules
 
-WORKDIR /client
+WORKDIR /app/client
 
 RUN npm install && ./node_modules/.bin/bower install && ./node_modules/.bin/ember build  && rm -fr node_modules bower_components
 
