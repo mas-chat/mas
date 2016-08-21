@@ -1,0 +1,13 @@
+.content {
+    max-width: 250px;
+    margin: 0;
+}
+
+.controls {
+    margin-top: 30px;
+}
+
+.background {
+    background-color: rgba(17, 17, 17, 0.5);
+    backdrop-filter: blur(2px);
+}

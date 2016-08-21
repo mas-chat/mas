@@ -1,0 +1,37 @@
+$fa-font-path: "~font-awesome/fonts";
+
+@import "~font-awesome/scss/font-awesome";
+
+$body-background: #13262f;
+$background: #13262f;
+
+$light: #eee;
+$dark: #ccc;
+
+$primary: #508ca4;
+
+$text: #ddd;
+$link-hover: #333;
+$link-active: #eee;
+
+@import "~bulma";
+
+.nav {
+    background-color: unset;
+}
+
+.label:not(:last-child) {
+    margin-bottom: 0;
+}
+
+.label {
+    margin: 5px 0 5px 0;
+}
+
+.modal-content {
+    color: #333;
+}
+
+.modal-content .button.is-link {
+    color: #333;
+}

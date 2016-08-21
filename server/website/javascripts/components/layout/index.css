@@ -1,0 +1,17 @@
+.menu {
+    left: 0;
+    position: fixed;
+    padding: 10px 30px;
+    width: 100%;
+    max-width: 1200px;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+.icon {
+    padding-right: 35px;
+}
+
+.button {
+    margin-left: 40px;
+}

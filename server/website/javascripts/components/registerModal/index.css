@@ -1,0 +1,33 @@
+.content {
+    max-width: 500px;
+    margin: 0;
+}
+
+.controls {
+    margin-top: 20px;
+}
+
+.background {
+    background-color: rgba(17, 17, 17, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.google {
+    color: #4285f4;
+}
+
+.yahoo {
+    color: #410093
+}
+
+.cloudron {
+    color: #62bdfc;
+}
+
+.yahoo, .cloudron {
+    margin-left: 8px;
+}
+
+.ext {
+    margin-top: 20px;
+}
