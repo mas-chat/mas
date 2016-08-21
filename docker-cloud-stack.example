@@ -1,14 +1,29 @@
 mas-frontend:
-  image: ilkkao/mas
+  image: 'ilkkao/mas:latest'
   target_num_containers: 1
-  environemnt:
+  environment:
     - REDIS_HOST=redis
   ports:
-    - "80:3200"
+    - '80:3200'
 mas-loopback:
-  image: ilkkao/mas
+  image: 'ilkkao/mas:latest'
   target_num_containers: 1
-  environemnt:
+  environment:
     - REDIS_HOST=redis
+  command: npm run start-loopback
+mas-irc:
+  image: 'ilkkao/mas:latest'
+  target_num_containers: 1
+  environment:
+    - REDIS_HOST=redis
+  command: npm run start-irc
+mas-irc-scktmgr:
+  image: 'ilkkao/mas:latest'
+  target_num_containers: 1
+  environment:
+    - REDIS_HOST=redis
+  command: npm run start-irc-scktmgr
+elasticsearch:
+  image: 'elasticsearch:latest'
 redis:
-  image: redis
+  image: 'redis:latest'
