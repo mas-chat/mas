@@ -115,7 +115,7 @@ function scan(msg) {
     Object.keys(msg).forEach(key => {
         const value = msg[key];
 
-        if (typeof value === 'object') {
+        if (typeof value === 'object' && value !== null) {
             Object.assign(res, scan(value));
         } else if (key === 'userId' && value) {
             res[value] = true;
