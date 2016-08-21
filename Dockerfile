@@ -10,4 +10,4 @@ RUN npm install
 
 EXPOSE 3200
 
-CMD ["./node_modules/.bin/async-node", "server.js"]
+CMD ["npm", "run", "start-frontend"]
