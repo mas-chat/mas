@@ -1,6 +1,6 @@
 module.exports = {
     "parser": "babel-eslint",
-    "extends": "airbnb-base",
+    "extends": "airbnb",
     "rules": {
         "keyword-spacing": 2,
         "generator-star-spacing": 0, // Temporary, avoids a bug in eslint babel parser
