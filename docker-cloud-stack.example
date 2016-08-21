@@ -1,0 +1,14 @@
+mas-frontend:
+  image: ilkkao/mas
+  target_num_containers: 1
+  environemnt:
+    - REDIS_HOST=redis
+  ports:
+    - "80:3200"
+mas-loopback:
+  image: ilkkao/mas
+  target_num_containers: 1
+  environemnt:
+    - REDIS_HOST=redis
+redis:
+  image: redis
