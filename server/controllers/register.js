@@ -107,15 +107,6 @@ const formFields = {
     })
 };
 
-const registrationForm = forms.create({
-    name: formFields.name,
-    email: formFields.email,
-    password: formFields.password,
-    confirm: formFields.confirm,
-    nick: formFields.nick,
-    tos: formFields.tos
-});
-
 const registrationFormExt = forms.create({
     name: formFields.name,
     email: formFields.email,
@@ -139,31 +130,24 @@ function decodeForm(req, inputForm) {
 }
 
 exports.index = function *index() {
-    const extAuth = this.query.ext === 'true';
-    let form;
-    let template;
-
-    if (extAuth) {
-        const newUser = this.mas.user;
-
-        if (!newUser) {
-            this.status = httpStatus('bad request');
-            return;
-        }
-
-        template = 'register-ext';
-
-        form = registrationFormExt.bind({
-            name: newUser.get('name'),
-            email: newUser.get('email'),
-            registrationType: 'ext'
-        });
-    } else {
-        template = 'register';
-        form = registrationForm;
+    if (this.query.ext !== 'true') {
+        return;
     }
 
-    yield this.render(template, {
+    const newUser = this.mas.user;
+
+    if (!newUser) {
+        this.status = httpStatus('bad request');
+        return;
+    }
+
+    const form = registrationFormExt.bind({
+        name: newUser.get('name'),
+        email: newUser.get('email'),
+        registrationType: 'ext'
+    });
+
+    yield this.render('register-ext', {
         page: 'register',
         title: 'Register',
         registrationForm: form.toHTML(),
@@ -190,42 +174,18 @@ exports.indexReset = function *indexReset() {
 };
 
 exports.create = function *create() {
-    const form = yield decodeForm(this.req, registrationForm);
+    const details = this.request.body;
+    const newUser = yield User.create(details);
 
-    if (!form.isValid()) {
-        yield this.render('register', {
-            page: 'register',
-            title: 'Register',
-            registrationForm: form.toHTML(),
-            auth: authOptions
+    if (newUser.valid) {
+        yield Settings.create({
+            userId: newUser.id
         });
+
+        yield cookie.createSession(newUser, this);
+        this.body = { success: true, userId: newUser.id, secret: newUser.get('secret') };
     } else {
-        const newUser = yield User.create({
-            name: form.data.name,
-            email: form.data.email,
-            nick: form.data.nick,
-            password: form.data.password
-        });
-
-        if (newUser.valid) {
-            yield Settings.create({
-                userId: newUser.id
-            });
-
-            yield cookie.createSession(newUser, this);
-            this.response.redirect('/app');
-        } else {
-            Object.keys(newUser.errors).forEach(field => {
-                form.fields[field].error = newUser.errors[field];
-            });
-
-            yield this.render('register', {
-                page: 'register',
-                title: 'Register',
-                registrationForm: form.toHTML(),
-                auth: authOptions
-            });
-        }
+        this.body = { success: false, errors: newUser.errors };
     }
 };
 
