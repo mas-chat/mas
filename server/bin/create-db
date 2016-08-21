@@ -17,11 +17,16 @@
 
 'use strict';
 
-const ObjectStore = require('rigiddb');
+const Rigiddb = require('rigiddb');
+const conf = require('../lib/conf');
 
-const store = new ObjectStore('mas', 1, { db: 10 });
+const db = new Rigiddb('mas', 1, {
+    db: 10,
+    host: conf.get('redis:host'),
+    port: conf.get('redis:port')
+});
 
-store.setSchema({
+db.setSchema({
     users: {
         definition: {
             deleted: { type: 'boolean', allowNull: false },
@@ -214,5 +219,5 @@ store.setSchema({
         console.log(val ? 'RigidDB schema initialized successfully.' : `ERROR: ${reason}`);
     }
 
-    store.quit();
+    db.quit();
 });
