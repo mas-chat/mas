@@ -59,7 +59,7 @@ exports.setup = function setup(server) {
             const secret = data.secret;
             const userGId = UserGId.create(data.userId);
 
-            if (!userGId.valid || !secret) {
+            if (!userGId || !secret) {
                 log.info('Invalid init socket.io message.');
                 socket.emit('terminate', {
                     code: 'INVALID_INIT',
