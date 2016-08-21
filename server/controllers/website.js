@@ -21,9 +21,10 @@ const authOptions = require('../lib/authOptions');
 const PAGES = [ 'home', 'about' ];
 
 module.exports = function *index(next) {
-    const page = PAGES.find(availablePage => this.params.page.startsWith(availablePage));
+    const page = this.params.page || 'home';
+    const name = PAGES.find(availablePage => page.startsWith(availablePage));
 
-    if (!page) {
+    if (!name) {
         yield next;
         return;
     }
@@ -34,7 +35,7 @@ module.exports = function *index(next) {
         yield this.render('index', {
             config: JSON.stringify({
                 auth: authOptions,
-                page
+                page: name
             })
         });
     }
