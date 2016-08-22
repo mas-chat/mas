@@ -3,6 +3,8 @@ mas-frontend:
   target_num_containers: 1
   environment:
     - REDIS_HOST=redis
+    - ELASTICSEARCH_ENABLED=true
+    - ELASTICSEARCH_HOST=elasticsearch
   ports:
     - '80:3200'
 mas-loopback:
@@ -10,20 +12,31 @@ mas-loopback:
   target_num_containers: 1
   environment:
     - REDIS_HOST=redis
+    - ELASTICSEARCH_ENABLED=true
+    - ELASTICSEARCH_HOST=elasticsearch
   command: npm run start-loopback
 mas-irc:
   image: 'ilkkao/mas:latest'
   target_num_containers: 1
   environment:
     - REDIS_HOST=redis
+    - ELASTICSEARCH_ENABLED=true
+    - ELASTICSEARCH_HOST=elasticsearch
   command: npm run start-irc
 mas-irc-scktmgr:
   image: 'ilkkao/mas:latest'
   target_num_containers: 1
   environment:
     - REDIS_HOST=redis
+    - ELASTICSEARCH_ENABLED=true
+    - ELASTICSEARCH_HOST=elasticsearch
   command: npm run start-irc-scktmgr
 elasticsearch:
   image: 'elasticsearch:latest'
+  volumes:
+    - /data/elasticsearch:/usr/share/elasticsearch/data
 redis:
   image: 'redis:latest'
+  volumes:
+    - /data/redis:/data
+  command: redis-server --appendonly yes --save 600 1 --save 300 10 --save 60 10000
