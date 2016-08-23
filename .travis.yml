@@ -8,7 +8,5 @@ services:
 sudo: required
 before_install:
   - docker build -t ilkkao/mas-travis .
-  - sudo apt-get install ircd-irc2
-  - sudo /etc/init.d/ircd-irc2 start
 script:
   - cd server && npm test
