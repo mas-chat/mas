@@ -131,19 +131,22 @@ identd=false
 identd_port=113
 inactivity_timeout=10
 
-[irc.networks.IRCNet]
+[irc.networks.ircnet]
+name=IRCnet
 host=localhost
 port=6666
 ssl=false
 rate_limit=10
 
-[irc.networks.FreeNode]
+[irc.networks.freenode]
+name=freenode
 host=irc.freenode.net
 port=6667
 ssl=false
 rate_limit=10
 
-[irc.networks.W3C]
+[irc.networks.w3c]
+name=W3C
 host=irc.w3.org
 port=6665
 ssl=false

@@ -24,7 +24,7 @@ const nicksService = require('../services/nicks');
 const redis = require('./redis').createClient();
 const notification = require('../lib/notification');
 
-const networks = [ 'MAS', ...Object.keys(conf.get('irc:networks')) ];
+const networks = [ 'mas', ...Object.keys(conf.get('irc:networks')) ];
 
 exports.introduce = async function introduce(user, userGId, session) {
     await introduceUsers(user, [ userGId ], session, null);

@@ -91,9 +91,9 @@ exports.process = async function process(session, command) {
     }
 
     if (conversation) {
-        backend = conversation.get('network') === 'MAS' ? 'loopbackparser' : 'ircparser';
+        backend = conversation.get('network') === 'mas' ? 'loopbackparser' : 'ircparser';
     } else if (network) {
-        backend = network === 'MAS' ? 'loopbackparser' : 'ircparser';
+        backend = network === 'mas' ? 'loopbackparser' : 'ircparser';
     }
 
     const handler = handlers[command.id];
@@ -159,13 +159,13 @@ async function handleCommand({ command, conversation, user, backend }) {
     }
 
     if (name === '1on1') {
-        const targetUser = await nicksService.getUserFromNick(params.trim(), 'MAS');
+        const targetUser = await nicksService.getUserFromNick(params.trim(), 'mas');
 
         if (!targetUser) {
             return { status: 'ERROR', errorMsg: 'Unknown MAS nick.' };
         }
 
-        return await start1on1(user, targetUser.id, 'MAS');
+        return await start1on1(user, targetUser.id, 'mas');
     } else if (name === 'ircquery') {
         if (backend === 'loopbackparser') {
             return { status: 'ERROR', errorMsg: 'You can only use /ircquery on IRC window' };
@@ -175,7 +175,7 @@ async function handleCommand({ command, conversation, user, backend }) {
 
         // 1on1s between MAS users are forced through loopback backend as multiple 1on1s between
         // same people via different networks isn't useful feature, just confusing.
-        const network = targetUserGId.isMASUser ? 'MAS' : params.network;
+        const network = targetUserGId.isMASUser ? 'mas' : params.network;
 
         return await start1on1(user, targetUserGId, network);
     }
@@ -201,9 +201,10 @@ async function handleJoin({ user, command, backend }) {
         return { status: 'PARAMETER_MISSING', errorMsg: 'Name or network missing.' };
     }
 
+    const network = command.network.toLowerCase();
     const conversation = await Conversation.findFirst({
         type: 'group',
-        network: command.network,
+        network: network,
         name: command.name
     });
 
@@ -217,9 +218,9 @@ async function handleJoin({ user, command, backend }) {
 
     return await courier.call(backend, 'join', {
         userId: user.id,
-        network: command.network,
         name: command.name,
-        password: command.password || null // Normalize, no password is null
+        password: command.password || null, // Normalize, no password is null
+        network
     });
 }
 
@@ -347,7 +348,7 @@ async function handleSet({ user, command }) {
 
 async function handleChat({ user, command }) {
     const targetUserGId = UserGId.create(command.userId);
-    let network = 'MAS';
+    let network = 'mas';
 
     if (targetUserGId.type === 'irc') {
         network = await redis.hget(`ircuser:${targetUserGId}`, 'network');
@@ -532,7 +533,7 @@ async function removeFromConversation(user, conversation) {
 
     // Backend specific cleanup
     courier.callNoWait(
-        conversation.get('network') === 'MAS' ? 'loopbackparser' : 'ircparser', 'close', {
+        conversation.get('network') === 'mas' ? 'loopbackparser' : 'ircparser', 'close', {
             userId: user.id,
             network: conversation.get('network'),
             name: conversation.get('name'),

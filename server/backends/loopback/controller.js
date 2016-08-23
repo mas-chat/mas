@@ -95,7 +95,7 @@ async function processCreate({ userId, name, password }) {
         owner: userId,
         type: 'group',
         name,
-        network: 'MAS',
+        network: 'mas',
         topic: 'Welcome!',
         password,
         apikey: ''
@@ -115,7 +115,7 @@ async function processCreate({ userId, name, password }) {
 
 async function processJoin({ userId, name, password }) {
     const user = await User.fetch(userId);
-    const conversation = await Conversation.findFirst({ type: 'group', network: 'MAS', name });
+    const conversation = await Conversation.findFirst({ type: 'group', network: 'mas', name });
 
     await ensureNetworkInfoExists(user);
 
@@ -144,7 +144,7 @@ async function processUpdatePassword({ conversationId, password }) {
 async function processUpdateTopic({ userId, conversationId, topic }) {
     const conversation = await Conversation.fetch(conversationId);
     const user = await User.fetch(userId);
-    const nick = await nicksService.getCurrentNick(user, 'MAS');
+    const nick = await nicksService.getCurrentNick(user, 'mas');
 
     await conversationsService.setTopic(conversation, topic, nick);
 
@@ -167,7 +167,7 @@ async function createInitialGroups() {
             owner: adminUserId,
             type: 'group',
             name,
-            network: 'MAS',
+            network: 'mas',
             topic: 'Welcome!',
             password: null
         });
@@ -177,7 +177,7 @@ async function createInitialGroups() {
 async function ensureNetworkInfoExists(user) {
     const networkInfo = await NetworkInfo.create({
         userId: user.id,
-        network: 'MAS',
+        network: 'mas',
         state: 'connected',
         nick: user.get('nick')
     });

@@ -27,7 +27,10 @@ const ConversationMember = require('../models/conversationMember');
 const ConversationMessage = require('../models/conversationMessage');
 const Window = require('../models/window');
 
-const networks = [ 'MAS', ...Object.keys(conf.get('irc:networks')) ];
+const networkNames = [
+    'MAS',
+    ...Object.keys(conf.get('irc:networks')).map(nw => conf.get(`irc:networks:${nw}:name`))
+];
 
 // TODO: Is courier quit() needed?
 
@@ -115,6 +118,6 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
 async function sendNetworkList(userGId, sessionId) {
     await notification.send(userGId, sessionId, {
         id: 'NETWORKS',
-        networks
+        networks: networkNames
     });
 }
