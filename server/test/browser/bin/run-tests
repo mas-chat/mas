@@ -24,7 +24,7 @@ function start_containers {
     sleep 3
 }
 
-ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd ../../.. && pwd )
+ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd ../../../.. && pwd )
 cd $ROOT
 
 if [[ ( $# < 1 ) ]]; then
@@ -39,7 +39,7 @@ fi
 
 ### Nightwatch tests
 
-cd test/browser/
+cd server/test/browser/
 
 NIGHTWATCH_ENV=$1
 
