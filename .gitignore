@@ -7,9 +7,8 @@
 /server/mas.conf
 /node_modules/
 /server/node_modules/
-/test/browser/node_modules/
-/bower_components/
-/server/public/dist/
+/server/test/browser/node_modules/
+/server/website/dist/
 /client/dist/
 /client/tmp/
 /client/bower_components/
