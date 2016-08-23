@@ -6,7 +6,10 @@ addons:
 services:
   - docker
 sudo: required
-before_install:
+install:
+  - cd server && npm install
+  - cd server/website && npm install
+before_script:
   - docker build -t ilkkao/mas-travis .
 script:
   - cd server && npm test
