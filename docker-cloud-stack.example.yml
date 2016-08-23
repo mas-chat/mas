@@ -2,34 +2,34 @@ mas-frontend:
   image: 'ilkkao/mas:latest'
   target_num_containers: 1
   environment:
-    - REDIS_HOST=redis
-    - ELASTICSEARCH_ENABLED=true
-    - ELASTICSEARCH_HOST=elasticsearch
+    - REDIS__HOST=redis
+    - ELASTICSEARCH__ENABLED=true
+    - ELASTICSEARCH__HOST=elasticsearch
   ports:
     - '80:3200'
 mas-loopback:
   image: 'ilkkao/mas:latest'
   target_num_containers: 1
   environment:
-    - REDIS_HOST=redis
-    - ELASTICSEARCH_ENABLED=true
-    - ELASTICSEARCH_HOST=elasticsearch
+    - REDIS__HOST=redis
+    - ELASTICSEARCH__ENABLED=true
+    - ELASTICSEARCH__HOST=elasticsearch
   command: npm run start-loopback
 mas-irc:
   image: 'ilkkao/mas:latest'
   target_num_containers: 1
   environment:
-    - REDIS_HOST=redis
-    - ELASTICSEARCH_ENABLED=true
-    - ELASTICSEARCH_HOST=elasticsearch
+    - REDIS__HOST=redis
+    - ELASTICSEARCH__ENABLED=true
+    - ELASTICSEARCH__HOST=elasticsearch
   command: npm run start-irc
 mas-irc-scktmgr:
   image: 'ilkkao/mas:latest'
   target_num_containers: 1
   environment:
-    - REDIS_HOST=redis
-    - ELASTICSEARCH_ENABLED=true
-    - ELASTICSEARCH_HOST=elasticsearch
+    - REDIS__HOST=redis
+    - ELASTICSEARCH__ENABLED=true
+    - ELASTICSEARCH__HOST=elasticsearch
   command: npm run start-irc-scktmgr
 elasticsearch:
   image: 'elasticsearch:latest'

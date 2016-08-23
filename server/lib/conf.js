@@ -34,7 +34,7 @@ if (configFileOption && configFileOption.charAt(0) === path.sep) {
 }
 
 nconf.env({
-    separator: '_',
+    separator: '__',
     lowerCase: true
 }).argv().file('user_overrides', {
     file: configFile,
