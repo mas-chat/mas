@@ -1,6 +1,6 @@
 'use strict';
 
-const User = require('../../../server/models/user.js');
+const User = require('../../../models/user.js');
 
 exports.command = function(options = {}) {
     let browser = this;
