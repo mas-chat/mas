@@ -45,7 +45,7 @@ module.exports = {
             .setValue('input#join_irc_name', '#test')
             .click('.selectize-input')
             .pause(1000)
-            .setValue('.selectize-input input', [ 'IRCNet', browser.Keys.ENTER ])
+            .setValue('.selectize-input input', [ 'IRCnet', browser.Keys.ENTER ])
             .pause(2000)
             .click('button.modal-proceed')
 

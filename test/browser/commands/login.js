@@ -5,11 +5,12 @@ exports.command = function(nick, password) {
     let browser = this;
 
     browser
-        .url('http://localhost:44199')
+        .url('http://localhost:3200')
         .waitForElementVisible('body', 3000)
-        .setValue('input[name="username"]', nick)
-        .setValue('input[name="password"]', password)
-        .click('#login-form button')
+        .click('#main > div > div > span.nav-item > button')
+        .setValue('#username', nick)
+        .setValue('#password', password)
+        .click('#main > div > div.modal.is-active button.button.is-primary')
         .waitForElementVisible('.fa-wrench', 5000);
 
     return this;

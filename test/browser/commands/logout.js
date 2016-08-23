@@ -9,7 +9,7 @@ exports.command = function() {
         .useXpath()
         .click('//a[text()="Logout"]')
         .useCss()
-        .waitForElementVisible('.fa-weixin.logo', 3000);
+        .waitForElementVisible('.fa-map-signs', 3000);
 
     return this;
 };

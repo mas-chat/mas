@@ -1,13 +1,9 @@
-
 'use strict';
 
-const co = require('co'),
-      User = require('../../../server/models/user.js');
+const User = require('../../../server/models/user.js');
 
-exports.command = function(options) {
+exports.command = function(options = {}) {
     let browser = this;
-
-    options = options || {};
 
     browser
         .perform(function(client, done) {
@@ -15,8 +11,8 @@ exports.command = function(options) {
             let values = {
                 name: 'Joe Random',
                 email: 'user@mas.com',
-                inuse: 'true',
-                password: 'plain:123456',
+                inUse: 'true',
+                password: '123456',
                 nick: 'user1'
             };
 
@@ -24,10 +20,8 @@ exports.command = function(options) {
                 values[key] = options[key];
             });
 
-            co(function*() {
-                let user = User.create(values, {}, []);
-                yield user.generateUserId();
-                yield user.save();
+            (async () => {
+                await User.create(values);
 
                 done();
             })();

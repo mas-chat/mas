@@ -2,22 +2,26 @@
 
 set -e
 
+docker network create mas-test || true
+
 function kill_containers {
-    docker stop $(docker ps -a -q)
-    docker rm $(docker ps -a -q)
+    docker stop $(docker ps -a -q) > /dev/null 2>&1 || true
+    docker rm $(docker ps -a -q) > /dev/null 2>&1 || true
 }
 
 function start_containers {
     kill_containers
 
-    docker run --rm -p 6379:6379 redis
-    docker run --rm -e IRC.NETWORKS.IRCNET_HOST=localhost -e IRC.NETWORKS.IRCNET_PORT=6667 -e IRC.NETWORKS.IRCNET_SSL=false -e IRC.NETWORKS.IRCNET_RATE_LIMIT=10 -p 3200:3200 ilkkao/mas-travis
-    docker run --rm -e IRC.NETWORKS.IRCNET_HOST=localhost -e IRC.NETWORKS.IRCNET_PORT=6667 -e IRC.NETWORKS.IRCNET_SSL=false -e IRC.NETWORKS.IRCNET_RATE_LIMIT=10 ilkkao/mas-travis npm run start-loopback
-    docker run --rm -e IRC.NETWORKS.IRCNET_HOST=localhost -e IRC.NETWORKS.IRCNET_PORT=6667 -e IRC.NETWORKS.IRCNET_SSL=false -e IRC.NETWORKS.IRCNET_RATE_LIMIT=10 ilkkao/mas-travis npm run start-irc
-    docker run --rm -e IRC.NETWORKS.IRCNET_HOST=localhost -e IRC.NETWORKS.IRCNET_PORT=6667 -e IRC.NETWORKS.IRCNET_SSL=false -e IRC.NETWORKS.IRCNET_RATE_LIMIT=10 ilkkao/mas-travis npm run start-irc-scktmgr
+    docker run -d --name redis --network=mas-test -p 6379:6379 redis
+    docker run -d --name ircd --network=mas-test -p 6667:6667 bfirsh/ircd
+    docker run -it --network=mas-test -e REDIS__HOST=redis ilkkao/mas-travis ./bin/create-db
+    docker run -d --network=mas-test -e REDIS__HOST=redis -e IRC__NETWORKS__IRCNET__HOST=ircd -e IRC__NETWORKS__IRCNET__PORT=6667 -e IRC__NETWORKS__IRCNET__SSL='' -e IRC__NETWORKS__IRCNET__RATE_LIMIT=10 -p 3200:3200 ilkkao/mas-travis
+    docker run -d --network=mas-test -e REDIS__HOST=redis -e IRC__NETWORKS__IRCNET__HOST=ircd -e IRC__NETWORKS__IRCNET__PORT=6667 -e IRC__NETWORKS__IRCNET__SSL='' -e IRC__NETWORKS__IRCNET__RATE_LIMIT=10 ilkkao/mas-travis npm run start-loopback
+    docker run -d --network=mas-test -e REDIS__HOST=redis -e IRC__NETWORKS__IRCNET__HOST=ircd -e IRC__NETWORKS__IRCNET__PORT=6667 -e IRC__NETWORKS__IRCNET__SSL='' -e IRC__NETWORKS__IRCNET__RATE_LIMIT=10 ilkkao/mas-travis npm run start-irc
+    docker run -d --network=mas-test -e REDIS__HOST=redis -e IRC__NETWORKS__IRCNET__HOST=ircd -e IRC__NETWORKS__IRCNET__PORT=6667 -e IRC__NETWORKS__IRCNET__SSL='' -e IRC__NETWORKS__IRCNET__RATE_LIMIT=10 ilkkao/mas-travis npm run start-irc-scktmgr
 
-    echo "Waiting 5 seconds for the services to start."
-    sleep 1
+    echo "Waiting 3 seconds for the services to start."
+    sleep 3
 }
 
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
@@ -30,7 +34,8 @@ fi
 
 ### Ember tests
 
-cd client && ember test && cd ..
+# TODO: enable again
+#cd ../client && ember test && cd ../server
 
 ### Nightwatch tests
 
@@ -45,14 +50,14 @@ fi
 start_containers
 
 if [ "$NIGHTWATCH_ENV" == "local" ]; then
-    node ./bin/nightwatch --env local $SINGLE_TEST --configFile=test/mas-test.conf
+    ./node_modules/.bin/async-node ./bin/nightwatch --env local $SINGLE_TEST
 else
-    # Can't run in parallel until there are multiple redises.
-    node ./server/bin/nightwatch --env saucelabs-chrome-linux
+    # Can't run in parallel until there are multiple Redis instances.
+    ./node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-chrome-linux
     start_containers
-    node ./server/bin/nightwatch --env saucelabs-ie-win
+    ./node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-ie-win
     start_containers
-    node ./server/bin/nightwatch --env saucelabs-firefox-mac
+    ./node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-firefox-mac
 fi
 
 kill_containers

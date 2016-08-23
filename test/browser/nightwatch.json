@@ -13,13 +13,14 @@
         "port": 4444,
         "cli_args": {
             "webdriver.chrome.driver": "",
-            "webdriver.ie.driver": ""
+            "webdriver.ie.driver": "",
+            "webdriver.gecko.driver": ""
         }
     },
 
     "test_settings": {
         "default": {
-            "launch_url": "http://localhost:44199",
+            "launch_url": "http://localhost:3200",
             "silent": true,
             "screenshots": {
                 "enabled": false,
@@ -35,6 +36,7 @@
             "selenium_port": 4444,
             "selenium_host": "localhost",
             "desiredCapabilities": {
+                "marionette": true,
                 "browserName": "firefox"
             }
         },

@@ -6,9 +6,9 @@ let utils = require('../../utils');
 module.exports = {
     'Load front page': function(browser) {
         browser
-            .url('http://localhost:44199')
+            .url('http://localhost:3200')
             .waitForElementVisible('body')
-            .assert.containsText('.login', 'Log In')
+            .assert.containsText('button', 'Login')
             .end();
     },
 
