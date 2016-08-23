@@ -1,0 +1,11 @@
+{
+  "name": "mas-tests",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Ilkka Oksanen <iao@iki.fi> (http://iao.fi)",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "irc": "^0.5.0",
+    "superagent": "^2.2.0"
+  }
+}
