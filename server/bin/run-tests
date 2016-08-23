@@ -50,14 +50,14 @@ fi
 start_containers
 
 if [ "$NIGHTWATCH_ENV" == "local" ]; then
-    ./node_modules/.bin/async-node ./bin/nightwatch --env local $SINGLE_TEST
+    async-node ./bin/nightwatch --env local $SINGLE_TEST
 else
     # Can't run in parallel until there are multiple Redis instances.
-    ./node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-chrome-linux
+    async-node ./bin/nightwatch --env saucelabs-chrome-linux
     start_containers
-    ./node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-ie-win
+    async-node ./bin/nightwatch --env saucelabs-ie-win
     start_containers
-    ./node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-firefox-mac
+    async-node ./bin/nightwatch --env saucelabs-firefox-mac
 fi
 
 kill_containers
