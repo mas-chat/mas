@@ -20,8 +20,8 @@ function start_containers {
     docker run -d --network=mas-test -e REDIS__HOST=redis -e IRC__NETWORKS__IRCNET__HOST=ircd -e IRC__NETWORKS__IRCNET__PORT=6667 -e IRC__NETWORKS__IRCNET__SSL='' -e IRC__NETWORKS__IRCNET__RATE_LIMIT=10 ilkkao/mas-travis npm run start-irc
     docker run -d --network=mas-test -e REDIS__HOST=redis -e IRC__NETWORKS__IRCNET__HOST=ircd -e IRC__NETWORKS__IRCNET__PORT=6667 -e IRC__NETWORKS__IRCNET__SSL='' -e IRC__NETWORKS__IRCNET__RATE_LIMIT=10 ilkkao/mas-travis npm run start-irc-scktmgr
 
-    echo "Waiting 3 seconds for the services to start."
-    sleep 3
+    echo "Waiting 10 seconds for the services to start."
+    sleep 10
 }
 
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd ../../../.. && pwd )
