@@ -1146,7 +1146,7 @@ async function bufferNames(names, user, network, conversation) {
     const namesHash = {};
 
     for (let nick of names) {
-        let userClass = USER;
+        let userClass;
 
         switch (nick.charAt(0)) {
             case '@':
@@ -1156,7 +1156,7 @@ async function bufferNames(names, user, network, conversation) {
                 userClass = VOICE;
                 break;
             default:
-                assert(false, 'Unsupported IRC channel user role');
+                userClass = USER;
                 break;
         }
 
