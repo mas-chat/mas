@@ -57,11 +57,12 @@ if [ "$NIGHTWATCH_ENV" == "local" ]; then
     ../../node_modules/.bin/async-node ./bin/nightwatch --env local $SINGLE_TEST
 else
     # Can't run in parallel until there are multiple Redis instances.
-    ../../node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-chrome-linux
+    # Browser test don't fail the build. They just dictate how the SauceLabs badge looks like
+    ../../node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-chrome-linux || true
     start_containers
-    ../../node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-ie-win
+    ../../node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-ie-win || true
     start_containers
-    ../../node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-firefox-mac
+    ../../node_modules/.bin/async-node ./bin/nightwatch --env saucelabs-firefox-mac || true
 fi
 
 kill_containers
