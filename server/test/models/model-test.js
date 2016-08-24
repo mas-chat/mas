@@ -18,7 +18,11 @@ describe('Model', () => {
     beforeEach(() => {
         rigiddbStub = sinon.stub();
         Model = proxyquire('../../models/model', { rigiddb: rigiddbStub });
-        Customer = class Customers extends Model {};
+        Customer = class Customer extends Model {
+            get mutableProperties() {
+                return [ 'name' ];
+            }
+        };
     });
 
     it('create() succeeds', async () => {
@@ -36,6 +40,7 @@ describe('Model', () => {
         expect(customerObj).to.deep.equal({
             collection: 'customers',
             _props: { name: 'Ilkka' },
+            deleted: false,
             errors: {},
             id: 1
         });
@@ -56,16 +61,17 @@ describe('Model', () => {
         expect(customerObj).to.deep.equal({
             collection: 'customers',
             _props: {},
+            deleted: false,
             errors: {
-                first: 'Bad index.',
-                third: 'Bad index.'
+                first: 'INDEX ERROR: Value already exists.',
+                third: 'INDEX ERROR: Value already exists.'
             },
             id: null
         });
     });
 
     it('create() fails, index error, descriptions are set', async () => {
-        Customer = class extends Model {
+        Customer = class Customer extends Model {
             get config() {
                 return {
                     indexErrorDescriptions: {
@@ -87,6 +93,7 @@ describe('Model', () => {
         expect(customerObj).to.deep.equal({
             collection: 'customers',
             _props: {},
+            deleted: false,
             errors: {
                 first: 'This is already reserved.',
                 third: 'This is already used.'
@@ -107,17 +114,18 @@ describe('Model', () => {
                 name: 'Tyrion'
             });
 
-            return { val: true, err: false };
+            return { val: 1, err: false };
         };
 
         const customerObj = await Customer.create({ name: 'Ilkka' });
         const res = await customerObj.set({ name: 'Tyrion' });
 
-        expect(res).to.deep.equal({ name: 'Tyrion' });
+        expect(res).to.deep.equal(1);
 
         expect(customerObj).to.deep.equal({
             collection: 'customers',
             _props: { name: 'Tyrion' },
+            deleted: false,
             errors: {},
             id: 1
         });
@@ -138,19 +146,18 @@ describe('Model', () => {
         expect(customerObj).to.deep.equal({
             collection: 'customers',
             _props: { name: 'Ilkka' },
+            deleted: false,
             errors: {
-                name: 'Bad index.'
+                name: 'INDEX ERROR: Value already exists.'
             },
             id: 1
         });
     });
 
-    it('setProperty() fails, forbidden property', async () => {
-        Customer = class extends Model {
-            get config() {
-                return {
-                    allowedProps: [ 'age' ]
-                };
+    it('set() fails, forbidden property', async () => {
+        Customer = class Customer extends Model {
+            get mutableProperties() {
+                return [ 'age' ];
             }
         };
 
@@ -166,13 +173,13 @@ describe('Model', () => {
         const callback = sinon.spy();
 
         try {
-            await customerObj.setProperty({ name: 'Tyrion' });
+            await customerObj.set({ name: 'Tyrion' });
         } catch (e) {
-            expect(e.message).to.equal('Tried to set invalid user model property name');
+            expect(e.message).to.equal('Tried to set non-existent or protected property');
             callback();
         }
 
-        expect(callback).to.have.been.called();
+        expect(callback).to.have.been.called;
     });
 
     it('findFirst() succeeds', async () => {
@@ -195,6 +202,7 @@ describe('Model', () => {
         expect(customerObj).to.deep.equal({
             collection: 'customers',
             _props: { name: 'Ilkka', age: 36 },
+            deleted: false,
             errors: {},
             id: 42
         });
@@ -224,11 +232,13 @@ describe('Model', () => {
         expect(customerObjs).to.deep.equal([ {
             collection: 'customers',
             _props: { name: 'Ilkka', age: 34 },
+            deleted: false,
             errors: {},
             id: 42
         }, {
             collection: 'customers',
             _props: { name: 'Ilkka', age: 35 },
+            deleted: false,
             errors: {},
             id: 43
         } ]);

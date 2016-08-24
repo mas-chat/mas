@@ -214,8 +214,7 @@ module.exports = class Model {
         const { err, indices, val } = await db.update(this.collection, this.id, preparedProps);
 
         if (err === 'notUnique') {
-            this.updateErrors(objectProps, explainIndexErrors(indices,
-               this.config.indexErrorDescriptions));
+            this.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
         } else if (err) {
             throw new Error(`DB ERROR: ${err}`);
         } else {
@@ -271,7 +270,7 @@ function explainIndexErrors(indices, descriptions = {}) {
     const errors = {};
 
     indices.forEach(index => {
-        errors[index] = descriptions[index] || 'Bad index.';
+        errors[index] = descriptions[index] || 'INDEX ERROR: Value already exists.';
     });
 
     return errors;
