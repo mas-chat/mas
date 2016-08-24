@@ -34,12 +34,7 @@ if [[ ( $# < 1 ) ]]; then
     exit 1
 fi
 
-### Ember tests
-
-# TODO: enable again
-#cd ../client && ember test && cd ../server
-
-### Nightwatch tests
+### Run Nightwatch browser tests
 
 cd server/test/browser/
 

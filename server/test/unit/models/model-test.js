@@ -17,7 +17,7 @@ let rigiddbStub;
 describe('Model', () => {
     beforeEach(() => {
         rigiddbStub = sinon.stub();
-        Model = proxyquire('../../models/model', { rigiddb: rigiddbStub });
+        Model = proxyquire('../../../models/model', { rigiddb: rigiddbStub });
         Customer = class Customer extends Model {
             get mutableProperties() {
                 return [ 'name' ];

@@ -78,7 +78,7 @@
     "start-loopback": "./bin/create-db && async-node ./backends/loopback/server.js",
     "start-irc": "./bin/create-db && async-node ./backends/irc/server.js",
     "start-irc-scktmgr": "./bin/create-db && async-node ./backends/irc/connection-manager/server.js",
-    "test": "./test/browser/bin/run-tests saucelabs",
+    "test": "mocha --require async-to-gen/register --recursive test/unit && ./test/browser/bin/run-tests saucelabs",
     "lint-server": "eslint --env node --ignore-pattern website/dist --ignore-pattern node_modules .",
     "lint-client": "eslint --env browser client/app test/browser",
     "test-server": "mocha server/test/**/*test.js"
