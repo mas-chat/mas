@@ -1,0 +1,4 @@
+frontend: cd server && npm run start-frontend
+loopback: cd server && npm run start-loopback
+irc: cd server && npm run start-irc
+ircscktmgr: cd server && npm run start-irc-scktmgr
