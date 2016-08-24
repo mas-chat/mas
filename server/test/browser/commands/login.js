@@ -5,7 +5,7 @@ exports.command = function(nick, password) {
     let browser = this;
 
     browser
-        .url('http://localhost:3200')
+        .url('http://localhost:2222')
         .waitForElementVisible('body', 3000)
         .click('#main > div > div > span.nav-item > button')
         .setValue('#username', nick)

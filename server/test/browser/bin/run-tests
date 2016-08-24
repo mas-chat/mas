@@ -17,7 +17,7 @@ function start_containers {
     docker run -d --name redis --network=mas-test -p 6379:6379 redis
     docker run -d --name ircd --network=mas-test -p 6667:6667 bfirsh/ircd
 
-    docker run -d --network=mas-test -e REDIS__HOST=redis -e IRC__NETWORKS__IRCNET__HOST=ircd -e IRC__NETWORKS__IRCNET__PORT=6667 -e IRC__NETWORKS__IRCNET__SSL='' -e IRC__NETWORKS__IRCNET__RATE_LIMIT=10 -p 3200:3200 ilkkao/mas-travis
+    docker run -d --network=mas-test -e REDIS__HOST=redis -e IRC__NETWORKS__IRCNET__HOST=ircd -e IRC__NETWORKS__IRCNET__PORT=6667 -e IRC__NETWORKS__IRCNET__SSL='' -e IRC__NETWORKS__IRCNET__RATE_LIMIT=10 -p 2222:3200 ilkkao/mas-travis
     docker run -d --network=mas-test -e REDIS__HOST=redis -e IRC__NETWORKS__IRCNET__HOST=ircd -e IRC__NETWORKS__IRCNET__PORT=6667 -e IRC__NETWORKS__IRCNET__SSL='' -e IRC__NETWORKS__IRCNET__RATE_LIMIT=10 ilkkao/mas-travis npm run start-loopback
     docker run -d --network=mas-test -e REDIS__HOST=redis -e IRC__NETWORKS__IRCNET__HOST=ircd -e IRC__NETWORKS__IRCNET__PORT=6667 -e IRC__NETWORKS__IRCNET__SSL='' -e IRC__NETWORKS__IRCNET__RATE_LIMIT=10 ilkkao/mas-travis npm run start-irc
     docker run -d --network=mas-test -e REDIS__HOST=redis -e IRC__NETWORKS__IRCNET__HOST=ircd -e IRC__NETWORKS__IRCNET__PORT=6667 -e IRC__NETWORKS__IRCNET__SSL='' -e IRC__NETWORKS__IRCNET__RATE_LIMIT=10 ilkkao/mas-travis npm run start-irc-scktmgr

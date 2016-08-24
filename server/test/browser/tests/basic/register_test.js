@@ -6,7 +6,7 @@ let utils = require('../../utils');
 module.exports = {
     'Register new user': function(browser) {
         browser
-            .url('http://localhost:3200/')
+            .url('http://localhost:2222/')
             .waitForElementVisible('body')
             .click('#main > div > section > div > a')
             .assert.elementPresent('form')

@@ -20,7 +20,7 @@
 
     "test_settings": {
         "default": {
-            "launch_url": "http://localhost:3200",
+            "launch_url": "http://localhost:2222",
             "silent": true,
             "screenshots": {
                 "enabled": false,
