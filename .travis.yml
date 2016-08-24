@@ -9,7 +9,6 @@ sudo: required
 install:
   - cd server && npm install && cd ..
   - cd server/website && npm install && cd ../..
-before_script:
   - docker build -t ilkkao/mas-travis .
 script:
   - cd server && npm test
