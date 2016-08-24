@@ -5,20 +5,27 @@
 
 #Ignore generated files/directories
 /server/mas.conf
+
 /node_modules/
 /server/node_modules/
 /server/test/browser/node_modules/
+/server/website/node_modules/
+
 /server/website/dist/
+/server/emails/build/
+
 /client/dist/
 /client/tmp/
 /client/bower_components/
 /client/node_modules/
-/server/emails/build/
+
 /npm-debug.log
 /logs/
 /run/
 /data/
 /test/browser/reports/
+
+/private
 
 #Mac files
 .DS_Store
