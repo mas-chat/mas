@@ -1,6 +1,6 @@
 'use strict';
 
-exports.command = (nick, password) => {
+exports.command = function command(nick, password) {
     const browser = this;
 
     browser

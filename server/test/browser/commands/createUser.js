@@ -2,7 +2,7 @@
 
 const User = require('../../../models/user');
 
-exports.command = (options = {}) => {
+exports.command = function command(options = {}) {
     const browser = this;
 
     browser

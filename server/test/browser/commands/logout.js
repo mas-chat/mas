@@ -1,6 +1,6 @@
 'use strict';
 
-exports.command = () => {
+exports.command = function command() {
     const browser = this;
 
     browser
