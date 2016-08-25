@@ -4,7 +4,7 @@
 
 const request = require('superagent');
 
-exports.tearDown = done => {
+exports.tearDown = function tearDown(done) {
     const passedStatus = this.results.failed === 0 && this.results.errors === 0;
     console.log(`Final result: "{ passed: ${passedStatus} }"`);
 
