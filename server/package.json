@@ -45,7 +45,6 @@
     "passport-local": "~1.0.0",
     "passport-yahoo": "~0.3.0",
     "readline-sync": "~1.4.0",
-    "redis": "~2.6.0",
     "redis-lua-helper": "~0.2.0",
     "rigiddb": "~0.10.0",
     "semver": "~5.3.0",
@@ -58,7 +57,6 @@
     "yargs": "~4.8.0"
   },
   "devDependencies": {
-    "babel-eslint": "^6.0.4",
     "chai": "~3.5.0",
     "eslint": "^3.3.1",
     "eslint-config-airbnb": "^10.0.1",
@@ -68,7 +66,6 @@
     "eslint-plugin-react": "^6.1.2",
     "mocha": "~3.0.0",
     "proxyquire": "^1.7.3",
-    "rimraf": "~2.5.0",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0"
   },
