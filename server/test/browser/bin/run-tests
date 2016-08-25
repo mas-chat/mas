@@ -40,8 +40,6 @@ function start_containers {
 
 cd server/test/browser/
 
-PATH=$(npm bin):$PATH
-
 NIGHTWATCH_ENV=$1
 
 if [[ -z "$2" ]]; then
@@ -53,15 +51,15 @@ fi
 start_containers
 
 if [ "$NIGHTWATCH_ENV" == "local" ]; then
-    async-node nightwatch --env local $SINGLE_TEST
+    ./bin/nightwatch --env local $SINGLE_TEST
 else
     # Can't run in parallel until there are multiple Redis instances.
     # Browser test don't fail the build. They just dictate how the SauceLabs badge looks like
-    async-node nightwatch --env saucelabs-chrome-linux || true
+    ./bin/nightwatch --env saucelabs-chrome-linux || true
     start_containers
-    async-node nightwatch --env saucelabs-ie-win || true
+    ./bin/nightwatch --env saucelabs-ie-win || true
     start_containers
-    async-node nightwatch --env saucelabs-firefox-mac || true
+    ./bin/nightwatch --env saucelabs-firefox-mac || true
 fi
 
 kill_containers

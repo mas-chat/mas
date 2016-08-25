@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
+// TODO: Remove this wrapper when async-to-gen is removed
+
 'use strict';
 
-let path = require('path');
-
-process.chdir(path.join(__dirname, '..')); // "/test/browser"
-
+require('async-to-gen/register');
 require('nightwatch/bin/runner.js');
