@@ -10,6 +10,5 @@ install:
   - cd server && npm install && cd ..
   - cd server/website && npm install && cd ../..
   - cd server/test/browser && npm install && cd ../../..
-  - docker build -t ilkkao/mas-travis .
 script:
   - cd server && npm test
