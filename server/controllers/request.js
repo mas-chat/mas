@@ -204,8 +204,8 @@ async function handleJoin({ user, command, backend }) {
     const network = command.network.toLowerCase();
     const conversation = await Conversation.findFirst({
         type: 'group',
-        network: network,
-        name: command.name
+        name: command.name,
+        network
     });
 
     if (conversation) {

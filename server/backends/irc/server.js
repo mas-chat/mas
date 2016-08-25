@@ -17,4 +17,4 @@
 
 'use strict';
 
-require('./controller.js');
+require('./controller');

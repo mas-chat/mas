@@ -17,4 +17,4 @@
 
 'use strict';
 
-require('./connectionManager.js');
+require('./connectionManager');
