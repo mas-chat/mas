@@ -223,7 +223,11 @@ module.exports = class User extends Model {
 
 function trimWhiteSpace(props) {
     for (const prop of Object.keys(props)) {
-        props[prop] = props[prop].trim();
+        const value = props[prop];
+
+        if (typeof value === 'string') {
+            props[prop] = value.trim();
+        }
     }
 }
 
