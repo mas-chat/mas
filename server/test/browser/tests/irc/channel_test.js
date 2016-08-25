@@ -1,32 +1,31 @@
-
 'use strict';
 
-const irc = require('irc'),
-      utils = require('../../utils');
+const irc = require('irc');
+const utils = require('../../utils');
 
 module.exports = {
-    'Basic IRC messaging': function(browser) {
+    'Basic IRC messaging': browser => {
         browser
             .createUser()
-            .perform(function(client, done) {
-                let ircClient = new irc.Client('localhost', 'ircuser', {
+            .perform((client, done) => {
+                const ircClient = new irc.Client('localhost', 'ircuser', {
                     channels: [ '#test' ]
                 });
 
-                ircClient.addListener('join#test', function() {
+                ircClient.addListener('join#test', () => {
                     // Greet everybody who joins
                     ircClient.say('#test', 'whats up!');
                     done();
                 });
 
-                ircClient.addListener('message', function(from, to, message) {
+                ircClient.addListener('message', (from, to, message) => {
                     // Respond pong if somebody says ping
                     if (message === 'ping') {
                         ircClient.say(to, 'pong');
                     }
                 });
 
-                ircClient.addListener('message', function(from, to, message) {
+                ircClient.addListener('message', (from, to, message) => {
                     if (message === 'ping1on1') {
                         ircClient.say(from, 'pong1on1');
                     }

@@ -1,30 +1,23 @@
 'use strict';
 
-const User = require('../../../models/user.js');
+const User = require('../../../models/user');
 
-exports.command = function(options = {}) {
-    let browser = this;
+exports.command = (options = {}) => {
+    const browser = this;
 
     browser
-        .perform(function(client, done) {
+        .perform(async (client, done) => {
             // Defaults
-            let values = {
+            const defaults = {
                 name: 'Joe Random',
                 email: 'user@mas.com',
-                inUse: 'true',
+                inUse: true,
                 password: '123456',
                 nick: 'user1'
             };
 
-            Object.keys(options).forEach(function(key) {
-                values[key] = options[key];
-            });
-
-            (async () => {
-                await User.create(values);
-
-                done();
-            })();
+            await User.create(Object.assign(defaults, options));
+            done();
         });
 
     return this;

@@ -1,8 +1,7 @@
-
 'use strict';
 
-exports.command = function() {
-    let browser = this;
+exports.command = () => {
+    const browser = this;
 
     browser
         .click('.fa-wrench')

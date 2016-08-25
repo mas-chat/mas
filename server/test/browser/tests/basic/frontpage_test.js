@@ -1,10 +1,9 @@
-
 'use strict';
 
-let utils = require('../../utils');
+const utils = require('../../utils');
 
 module.exports = {
-    'Load front page': function(browser) {
+    'Load front page': browser => {
         browser
             .url('http://localhost:2222')
             .waitForElementVisible('body')

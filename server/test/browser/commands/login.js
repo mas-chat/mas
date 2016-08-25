@@ -1,8 +1,7 @@
-
 'use strict';
 
-exports.command = function(nick, password) {
-    let browser = this;
+exports.command = (nick, password) => {
+    const browser = this;
 
     browser
         .url('http://localhost:2222')

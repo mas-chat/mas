@@ -1,10 +1,9 @@
-
 'use strict';
 
-let utils = require('../../utils');
+const utils = require('../../utils');
 
 module.exports = {
-    'Register new user': function(browser) {
+    'Register new user': browser => {
         browser
             .url('http://localhost:2222/')
             .waitForElementVisible('body')
