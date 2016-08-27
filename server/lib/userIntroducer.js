@@ -20,8 +20,8 @@ const UserGId = require('../models/userGId');
 const log = require('./log');
 const conf = require('./conf');
 const User = require('../models/user');
+const IrcUser = require('../models/ircUser');
 const nicksService = require('../services/nicks');
-const redis = require('./redis').createClient();
 const notification = require('../lib/notification');
 
 const networks = [ 'mas', ...Object.keys(conf.get('irc:networks')) ];
@@ -70,10 +70,13 @@ async function introduceUsers(user, userGIds, session, socket) {
                 entry.name = 'IRC User';
                 entry.gravatar = '';
 
-                let nick = await redis.hget(`ircuser:${userGId}`, 'nick');
+                let nick;
 
                 if (userGId.id === 0) {
                     nick = 'server';
+                } else {
+                    const ircUser = await IrcUser.fetch(UserGId.create(userGId).id);
+                    nick = ircUser.get('nick');
                 }
 
                 for (const network of networks) {

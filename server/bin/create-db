@@ -210,6 +210,18 @@ db.setSchema({
                 fields: [ 'network', { name: 'nick', caseInsensitive: true } ]
             }
         }
+    },
+    ircUsers: {
+        definition: {
+            nick: { type: 'string', allowNull: false },
+            network: { type: 'string', allowNull: false }
+        },
+        indices: {
+            nickNetwork: {
+                uniq: true,
+                fields: [ 'network', { name: 'nick', caseInsensitive: true } ]
+            }
+        }
     }
 }).then(function(result) {
     const { val, reason } = result;

@@ -31,11 +31,12 @@ const friendsService = require('../services/friends');
 const nicksService = require('../services/nicks');
 const Conversation = require('../models/conversation');
 const User = require('../models/user');
+const IrcUser = require('../models/ircUser');
 const Friend = require('../models/friend');
 const Window = require('../models/window');
 const Settings = require('../models/settings');
 const UserGId = require('../models/userGId');
-const ircUser = require('../backends/irc/ircUser');
+const ircUserHelper = require('../backends/irc/ircUserHelper');
 
 const handlers = {
     SEND: handleSend,
@@ -171,7 +172,7 @@ async function handleCommand({ command, conversation, user, backend }) {
             return { status: 'ERROR', errorMsg: 'You can only use /ircquery on IRC window' };
         }
 
-        const targetUserGId = await ircUser.getUserGId(params.trim(), params.network);
+        const targetUserGId = await ircUserHelper.getUserGId(params.trim(), params.network);
 
         // 1on1s between MAS users are forced through loopback backend as multiple 1on1s between
         // same people via different networks isn't useful feature, just confusing.
@@ -351,7 +352,8 @@ async function handleChat({ user, command }) {
     let network = 'mas';
 
     if (targetUserGId.type === 'irc') {
-        network = await redis.hget(`ircuser:${targetUserGId}`, 'network');
+        const ircUser = await IrcUser.fetch(targetUserGId.id);
+        network = ircUser.get('network');
     }
 
     return await start1on1(user, targetUserGId, network);

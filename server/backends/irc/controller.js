@@ -27,6 +27,7 @@ const log = require('../../lib/log');
 const redisModule = require('../../lib/redis');
 const courier = require('../../lib/courier').createEndPoint('ircparser');
 const User = require('../../models/user');
+const IrcUser = require('../../models/ircUser');
 const Conversation = require('../../models/conversation');
 const ConversationMember = require('../../models/conversationMember');
 const NetworkInfo = require('../../models/networkInfo');
@@ -34,7 +35,7 @@ const UserGId = require('../../models/userGId');
 const conversationsService = require('../../services/conversations');
 const windowsService = require('../../services/windows');
 const nicksService = require('../../services/nicks');
-const ircUser = require('./ircUser');
+const ircUserHelper = require('./ircUserHelper');
 const ircScheduler = require('./scheduler');
 const userIntroducer = require('../../lib/userIntroducer');
 
@@ -133,7 +134,10 @@ async function processSend({ conversationId, userId, text = '' }) {
 
     if (conversation.get('type') === '1on1') {
         const peerMember = await conversationsService.getPeerMember(conversation, user.gId);
-        target = await redis.hget(`ircuser:${peerMember.get('userGId')}`, 'nick');
+        const targetUserGId = UserGId.create(peerMember.get('userGId'));
+        const ircUser = await IrcUser.fetch(targetUserGId.id);
+
+        target = ircUser.get('nick');
     }
 
     if (target) {
@@ -513,7 +517,7 @@ async function handleServerText(user, msg, code) {
 
 async function handle401(user, msg) {
     // :irc.localhost 401 ilkka dadaa :No such nick/channel
-    const targetUserGId = await ircUser.getUserGId(msg.params[0], msg.network);
+    const targetUserGId = await ircUserHelper.getUserGId(msg.params[0], msg.network);
     const conversation = await conversationsService.findOrCreate1on1(
         user, targetUserGId, msg.network);
 
@@ -740,7 +744,7 @@ async function handleJoin(user, msg) {
     }
 
     if (conversation) {
-        const userGId = await ircUser.getUserGId(msg.nick, msg.network);
+        const userGId = await ircUserHelper.getUserGId(msg.nick, msg.network);
         await conversationsService.addGroupMember(conversation, userGId, 'u');
     }
 }
@@ -776,7 +780,7 @@ async function handleQuit(user, msg) {
         if (conversation.get('network') === msg.network && conversation.get('type') === 'group') {
             // No need to check if the targetUser is on this channel,
             // removeGroupMember() is clever enough
-            const userGId = await ircUser.getUserGId(msg.nick, msg.network);
+            const userGId = await ircUserHelper.getUserGId(msg.nick, msg.network);
             await conversationsService.removeGroupMember(conversation, userGId);
         }
     }
@@ -827,7 +831,7 @@ async function handleKick(user, msg) {
         network: msg.network
     });
 
-    const targetUserGId = await ircUser.getUserGId(targetNick, msg.network);
+    const targetUserGId = await ircUserHelper.getUserGId(targetNick, msg.network);
 
     if (conversation) {
         await conversationsService.removeGroupMember(
@@ -854,7 +858,7 @@ async function handlePart(user, msg) {
         network: msg.network
     });
 
-    const targetUserGId = await ircUser.getUserGId(msg.nick, msg.network);
+    const targetUserGId = await ircUserHelper.getUserGId(msg.nick, msg.network);
 
     if (conversation) {
         await conversationsService.removeGroupMember(
@@ -910,7 +914,7 @@ async function handleMode(user, msg) {
                     log.warn(user, 'Received broken MODE command, parameter missing');
                     continue;
                 } else if (mode.match(/[ov]/)) {
-                    targetUserGId = await ircUser.getUserGId(param, msg.network);
+                    targetUserGId = await ircUserHelper.getUserGId(param, msg.network);
                 }
             }
 
@@ -973,7 +977,7 @@ async function handlePrivmsg(user, msg, command) {
     let cat = 'msg';
 
     if (msg.nick) {
-        sourceUserGId = await ircUser.getUserGId(msg.nick, msg.network);
+        sourceUserGId = await ircUserHelper.getUserGId(msg.nick, msg.network);
     } else {
         // Message is from the server if the nick is missing
         sourceUserGId = UserGId.create({ type: 'irc', id: 0 });
@@ -1039,12 +1043,12 @@ async function updateNick(user, network, oldNick, newNick) {
         changed = true;
         targetUserGId = user.gId;
     } else {
-        const targetUserGIdString = await redis.run(
-            'updateNick', user.id, network, oldNick, newNick);
+        const ircUser = await IrcUser.findFirst({ nick: oldNick, network });
+        const updatedProps = await ircUser.set({ nick: newNick });
 
-        if (targetUserGIdString) {
+        if (updatedProps === 1) {
             changed = true;
-            targetUserGId = UserGId.create(targetUserGIdString);
+            targetUserGId = ircUser.gId;
         }
     }
 
@@ -1164,7 +1168,7 @@ async function bufferNames(names, user, network, conversation) {
             nick = nick.substring(1);
         }
 
-        const memberUserGId = await ircUser.getUserGId(nick, network);
+        const memberUserGId = await ircUserHelper.getUserGId(nick, network);
         namesHash[memberUserGId.toString()] = userClass;
     }
 

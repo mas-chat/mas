@@ -178,6 +178,8 @@ exports.create = function *create() {
     const newUser = yield User.create(details);
 
     if (newUser.valid) {
+        yield newUser.set('inUse', true);
+
         yield Settings.create({
             userId: newUser.id
         });

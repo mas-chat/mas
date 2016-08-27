@@ -40,7 +40,7 @@ exports.updateCurrentNick = async function updateCurrentNick(user, network, nick
 exports.getUserFromNick = async function getUserFromNick(nick, network) {
     const nwInfo = await NetworkInfo.findFirst({ nick, network });
 
-    if (nwInfo) {
+    if (nwInfo && nwInfo.get('state') === 'connected') {
         const user = await User.fetch(nwInfo.get('userId'));
 
         return !user || user.get('deleted') ? null : user;

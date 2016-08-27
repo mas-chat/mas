@@ -46,13 +46,6 @@ MAS Redis structures
 
  inbox:connectionmanager (list)
 
- ircuser:<userId>
-   nick (string)
-   network (string)
-
- index:ircuser (hash)
-   <network>:<nick> (string, userId)
-
  namesbuffer:<userId>:<conversationId> (hash, expiry 1 min)
    name1, name2 ...
 
@@ -60,7 +53,6 @@ MAS Redis structures
 
  ircchannelsubscriptions:<userId>:<network> (hash)
    <channelName> (string, password)
-
 ```
 
  Loopback backend
@@ -178,4 +170,8 @@ networks:<userId>:<network> (hash)
 
 index:currentnick (hash)
    <network>:<nick> (string, userId)
+
+ ircuser:<userId>
+   nick (string)
+   network (string)
 ```
