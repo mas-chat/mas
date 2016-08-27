@@ -37,6 +37,7 @@ db.setSchema({
             emailMD5: 'string',
             extAuthId: 'string',
             inUse: { type: 'boolean', allowNull: false },
+            canUseIRC: { type: 'boolean', allowNull: false },
             lastIp: 'string',
             lastLogout: { type: 'timestamp', allowNull: false },
             name: 'string',
