@@ -1,11 +1,17 @@
 import React, { Component } from 'react';
 import { HOC } from 'formsy-react';
 
+let idCounter = 0;
+
 class RegisterModalPassword extends Component {
     constructor(props) {
         super(props);
 
         this.changeValue = this.changeValue.bind(this);
+    }
+
+    componentWillMount() {
+        this.setState({ id: `checkbox-${idCounter++}` });
     }
 
     changeValue(event) {
@@ -17,6 +23,7 @@ class RegisterModalPassword extends Component {
         const errorMessage = this.props.getErrorMessage();
         const inputClass = `input ${error ? 'is-danger' : 'is-success'}`;
         const value = this.props.getValue();
+        const id = this.state.id;
         let icon = null;
 
         if (error && value) {
@@ -27,9 +34,9 @@ class RegisterModalPassword extends Component {
 
         return (
             <span>
-                <label className="label">{this.props.label}</label>
+                <label htmlFor={id} className="label">{this.props.label}</label>
                 <p className="control has-icon has-icon-right">
-                    <input className={inputClass} type="password" value={value} onChange={this.changeValue} />
+                    <input id={id} className={inputClass} type="password" value={value} onChange={this.changeValue} />
                     {icon}
                     {this.props.showErrorMessage ? <span className="help is-danger">{errorMessage}</span> : null}
                 </p>
@@ -40,7 +47,11 @@ class RegisterModalPassword extends Component {
 
 RegisterModalPassword.propTypes = {
     showErrorMessage: React.PropTypes.bool,
-    label: React.PropTypes.string.isRequired
+    label: React.PropTypes.string.isRequired,
+    getErrorMessage: React.PropTypes.func, // formsy
+    getValue: React.PropTypes.func, // formsy
+    setValue: React.PropTypes.func, // formsy
+    showError: React.PropTypes.func // formsy
 };
 
 export default HOC(RegisterModalPassword); // eslint-disable-line new-cap

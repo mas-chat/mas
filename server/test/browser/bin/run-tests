@@ -10,6 +10,11 @@ if [[ ( $# < 1 ) ]]; then
     exit 1
 fi
 
+cd server
+echo "Running eslint for /server"
+npm run lint-server
+cd ..
+
 # TODO: Replace manual docker setup in this script with docker-compose.yml file
 docker build -t ilkkao/mas-browser-tests .
 docker network create mas-test || true

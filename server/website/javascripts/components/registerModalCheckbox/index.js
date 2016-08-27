@@ -4,6 +4,7 @@ import classNames from 'classnames/bind';
 import styles from './index.css';
 
 const cx = classNames.bind(styles);
+let idCounter = 0;
 
 class RegisterModalCheckbox extends Component {
     constructor(props) {
@@ -12,18 +13,23 @@ class RegisterModalCheckbox extends Component {
         this.changeValue = this.changeValue.bind(this);
     }
 
+    componentWillMount() {
+        this.setState({ id: `checkbox-${idCounter++}` });
+    }
+
     changeValue(event) {
         this.props.setValue(event.currentTarget.value);
     }
 
     render() {
         const value = this.props.getValue();
+        const id = this.state.id;
 
         return (
             <span>
                 <p className={`${cx('wrapper')} control`}>
-                    <label className="checkbox">
-                        <input className={cx('checkbox')} type="checkbox" value={value} onChange={this.changeValue} />
+                    <label htmlFor={id} className="checkbox">
+                        <input id={id} className={cx('checkbox')} type="checkbox" value={value} onChange={this.changeValue} />
                         {this.props.label}
                     </label>
                 </p>
@@ -33,7 +39,9 @@ class RegisterModalCheckbox extends Component {
 }
 
 RegisterModalCheckbox.propTypes = {
-    label: React.PropTypes.string.isRequired
+    label: React.PropTypes.string.isRequired,
+    getValue: React.PropTypes.func, // formsy
+    setValue: React.PropTypes.func // formsy
 };
 
 export default HOC(RegisterModalCheckbox); // eslint-disable-line new-cap

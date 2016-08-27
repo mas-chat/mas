@@ -21,7 +21,7 @@ const RigidDB = require('rigiddb');
 
 const store = new RigidDB('mas', 1, { db: 10 });
 
- (async () => {
-     await store.debugPrint('users');
-     store.quit();
-}());
+(async () => {
+    await store.debugPrint('users');
+    store.quit();
+})();

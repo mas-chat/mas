@@ -2,6 +2,9 @@
 
 'use strict';
 
+// TODO: Remove and convert to models/user-test.js
+/* eslint-disable */
+
 const expect = require('chai').expect;
 //const userValidator = require('../../validators/user.js');
 

@@ -35,7 +35,7 @@ class LoginModal extends Component {
         });
     }
 
-    handleLogin(model) {
+    handleLogin() {
         fetch('/login', {
             method: 'POST',
             headers: {
