@@ -28,6 +28,7 @@ const redisModule = require('../../lib/redis');
 const courier = require('../../lib/courier').createEndPoint('ircparser');
 const User = require('../../models/user');
 const IrcUser = require('../../models/ircUser');
+const IrcSubscription = require('../../models/ircSubscription');
 const Conversation = require('../../models/conversation');
 const ConversationMember = require('../../models/conversationMember');
 const NetworkInfo = require('../../models/networkInfo');
@@ -193,8 +194,13 @@ async function processJoin({ userId, network, name, password }) {
         channelName = `#${channelName}`;
     }
 
-    await redis.hset(`ircchannelsubscriptions:${user.id}:${network}`,
-        channelName.toLowerCase(), password);
+    await IrcSubscription.create({
+        userId: user.id,
+        network,
+        channel: channelName,
+        password
+    });
+
     if (networkInfo.get('state') === 'connected') {
         sendJoin(user, network, channelName, password);
     } else if (networkInfo.get('state') !== 'connecting') {
@@ -208,7 +214,13 @@ async function processClose({ userId, network, name, conversationType }) {
     const user = await User.fetch(userId);
     const networkInfo = await findOrCreateNetworkInfo(user, network);
 
-    await redis.hdel(`ircchannelsubscriptions:${user.id}:${network}`, name.toLowerCase());
+    const subscription = await IrcSubscription.findFirst({
+        userId: user.id,
+        network,
+        channel: name
+    });
+
+    subscription.delete();
 
     if (networkInfo.get('state') === 'connected' && conversationType === 'group') {
         sendIRCPart(user, network, name);
@@ -285,10 +297,14 @@ async function processReconnectIfInactive({ userId }) {
 // Restarted
 async function processRestarted() {
     await iterateUsersAndNetworks(async function iterate(user, network) {
-        const channels = await redis.hgetall(`ircchannelsubscriptions:${user.id}:${network}`);
+        const subscriptions = await IrcSubscription.find({
+            userId: user.id,
+            network
+        });
+
         const networkInfo = await findOrCreateNetworkInfo(user, network);
 
-        if (channels && networkInfo.get('state') !== 'idledisconnected') {
+        if (subscriptions && networkInfo.get('state') !== 'idledisconnected') {
             log.info(user, `Scheduling connect() to IRC network: ${network}`);
 
             await addSystemMessage(user, network, 'info',
@@ -663,17 +679,19 @@ async function handle376(user, msg) {
             return;
         }
 
-        const channelsToJoin = await redis.hgetall(
-            `ircchannelsubscriptions:${user.id}:${msg.network}`);
+        const subscriptions = await IrcSubscription.find({
+            userId: user.id,
+            network: msg.network
+        });
 
-        if (!channelsToJoin) {
+        if (!subscriptions) {
             log.info(user, 'Connected, but no channels/1on1s to join. Disconnecting');
             await disconnect(user, msg.network);
             return;
         }
 
-        Object.keys(channelsToJoin).forEach(channel => {
-            sendJoin(user, msg.network, channel, channelsToJoin[channel]);
+        subscriptions.forEach(subscription => {
+            sendJoin(user, msg.network, subscription.get('channel'), subscription.get('password'));
         });
     }
 }
@@ -703,16 +721,25 @@ async function handleJoin(user, msg) {
     });
 
     if (targetUser && targetUser.id === user.id) {
-        const subscriptionsKey = `ircchannelsubscriptions:${user.id}:${network}`;
-        let password = await redis.hget(subscriptionsKey, channel.toLowerCase());
+        const subscription = await IrcSubscription.findFirst({
+            userId: user.id,
+            network,
+            channel
+        });
 
-        if (password === null) {
-            // ircchannelsubscriptions entry is missing. This means IRC server has added the user
+        const password = subscription.get('password');
+
+        if (!subscription === null) {
+            // IrcSubscription entry is missing. This means IRC server has added the user
             // to a channel without any action from the user. Flowdock at least does this.
             // ircchannelsubscriptions must be updated as it's used to rejoin channels after a
             // server restart.
-            password = '';
-            await redis.hset(subscriptionsKey, channel.toLowerCase(), password);
+            await IrcSubscription.create({
+                userId: user.id,
+                network,
+                channel,
+                password: null
+            });
         }
 
         if (!conversation) {
@@ -761,7 +788,13 @@ async function handleJoinReject(user, msg) {
     await addSystemMessage(user, msg.network,
        'error', `Failed to join ${channel}. Reason: ${reason}`);
 
-    await redis.hdel(`ircchannelsubscriptions:${user.id}:${msg.network}`, channel.toLowerCase());
+    const subscription = await IrcSubscription.findFirst({
+        userId: user.id,
+        network: msg.network,
+        channel
+    });
+
+    await subscription.delete();
 
     if (conversation) {
         await conversationsService.removeGroupMember(conversation, user.gId, false, false);
@@ -938,11 +971,17 @@ async function handleMode(user, msg) {
                     }
                 }
             } else if (mode === 'k') {
-                const newPassword = oper === '+' ? param : '';
+                const newPassword = oper === '+' ? param : null;
 
                 await conversation.setPassword(newPassword);
-                await redis.hset(`ircchannelsubscriptions:${user.id}:${msg.network}`,
-                    target.toLowerCase(), newPassword);
+
+                const subscription = await IrcSubscription.findFirst({
+                    userId: user.id,
+                    network: msg.network,
+                    channel: target
+                });
+
+                subscription.set('password', newPassword);
             }
 
             if (newClass) {

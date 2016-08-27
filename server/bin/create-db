@@ -222,6 +222,23 @@ db.setSchema({
                 fields: [ 'network', { name: 'nick', caseInsensitive: true } ]
             }
         }
+    },
+    ircSubscriotions: {
+        definition: {
+            userId: { type: 'int', allowNull: false },
+            network: { type: 'string', allowNull: false },
+            channel: { type: 'string', allowNull: false }
+        },
+        indices: {
+            userIdNetwork: {
+                uniq: false,
+                fields: [ 'userId', 'network' ]
+            },
+            userIdNetworkChannel: {
+                uniq: true,
+                fields: [ 'userId', 'network', { name: 'channel', caseInsensitive: true } ]
+            }
+        }
     }
 }).then(function(result) {
     const { val, reason } = result;

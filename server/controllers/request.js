@@ -35,6 +35,7 @@ const IrcUser = require('../models/ircUser');
 const Friend = require('../models/friend');
 const Window = require('../models/window');
 const Settings = require('../models/settings');
+const IrcSubscription = require('../models/ircSubscription');
 const UserGId = require('../models/userGId');
 const ircUserHelper = require('../backends/irc/ircUserHelper');
 
@@ -498,7 +499,8 @@ async function handleDestroyAccount({ user }) {
         // Don't remove networkInfo entries as they are needed to
         // keep discussion logs parseable. Those logs contain userIds, not nicks.
 
-        await redis.del(`ircchannelsubscriptions:${user.gId}:${network}`);
+        const subscriptions = await IrcSubscription.fetch({ userId: user.id, network });
+        subscriptions.forEach(subscription => subscription.delete());
     }
 
     await friendsService.removeUser(user);
