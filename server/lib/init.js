@@ -35,7 +35,7 @@ const shutdownOrder = {
 
 process.on('unhandledRejection', (reason, p) => {
     log.info(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
-    throw(reason);
+    throw reason;
 });
 
 exports.configureProcess = function configureProcess(serverName) {
