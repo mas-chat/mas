@@ -161,7 +161,7 @@ module.exports = class Model {
     }
 
     get(prop) {
-        assert(!this.deleted, 'Tried to read deleted model');
+        assert(!this.deleted, `Tried to read property ${prop} from deleted model`);
 
         const rawVal = this._props[prop];
 
@@ -216,7 +216,7 @@ module.exports = class Model {
         if (err === 'notUnique') {
             this.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
         } else if (err) {
-            throw new Error(`DB ERROR: ${err}`);
+            throw new Error(`DB ERROR: ${err}, props: ${JSON.stringify(objectProps)}`);
         } else {
             this.errors = {};
             Object.assign(this._props, objectProps);
