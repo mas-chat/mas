@@ -529,12 +529,6 @@ function userExists(user) {
 }
 
 async function removeFromConversation(user, conversation) {
-    if (conversation.get('type') === 'group') {
-        await conversationsService.removeGroupMember(conversation, user.gId);
-    } else {
-        await conversationsService.remove1on1Member(conversation, user.gId);
-    }
-
     // Backend specific cleanup
     courier.callNoWait(
         conversation.get('network') === 'mas' ? 'loopbackparser' : 'ircparser', 'close', {
@@ -543,4 +537,10 @@ async function removeFromConversation(user, conversation) {
             name: conversation.get('name'),
             conversationType: conversation.get('type')
         });
+
+    if (conversation.get('type') === 'group') {
+        await conversationsService.removeGroupMember(conversation, user.gId);
+    } else {
+        await conversationsService.remove1on1Member(conversation, user.gId);
+    }
 }
