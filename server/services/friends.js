@@ -58,20 +58,18 @@ exports.sendFriendConfirm = async function sendFriendConfirm(user, sessionId) {
 };
 
 exports.informStateChange = async function informStateChange(user, eventType) {
-    const ts = Date.now();
-
     const command = {
         id: 'FRIENDS',
         reset: false,
         friends: [ {
             userId: user.gId.toString(),
             online: eventType === 'login',
-            last: Math.round(ts / 1000)
+            last: Math.round(Date.now() / 1000)
         } ]
     };
 
     if (eventType === 'logout') {
-        await user.set('lastLogout', ts);
+        await user.set('lastLogout', new Date());
     }
 
     const friendUsers = await getFriendUsers(user);
