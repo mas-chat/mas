@@ -26,7 +26,9 @@ module.exports = class Conversation extends Model {
             name: props.name,
             owner: props.owner || null,
             topic: props.topic || null,
-            password: props.password || null
+            password: props.password || null,
+            team: props.team || null,
+            secret: props.secret || false
         };
 
         return await super.create(data);

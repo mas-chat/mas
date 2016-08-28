@@ -136,7 +136,9 @@ db.setSchema({
             name: 'string',
             owner: { type: 'int', allowNull: false },
             topic: 'string',
-            password: 'string'
+            password: 'string',
+            team: 'string',
+            secret: 'boolean'
         },
         indices: {
             networkName: {
@@ -146,6 +148,10 @@ db.setSchema({
                     'network',
                     { name: 'name', caseInsensitive: true }
                 ]
+            },
+            team: {
+                uniq: false,
+                fields: [ 'team' ]
             }
         }
     },
