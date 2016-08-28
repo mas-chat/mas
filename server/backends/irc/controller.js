@@ -162,7 +162,6 @@ async function processTextCommand({ conversationId, userId, command, commandPara
             data = `TOPIC ${conversation.name} :${commandParams}`;
             break;
         default:
-            log.warn(`Unknown text command: ${command}`);
             break;
     }
 
