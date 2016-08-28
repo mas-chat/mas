@@ -223,11 +223,12 @@ db.setSchema({
             }
         }
     },
-    ircSubscriotions: {
+    ircSubscriptions: {
         definition: {
             userId: { type: 'int', allowNull: false },
             network: { type: 'string', allowNull: false },
-            channel: { type: 'string', allowNull: false }
+            channel: { type: 'string', allowNull: false },
+            password: 'string'
         },
         indices: {
             userIdNetwork: {
