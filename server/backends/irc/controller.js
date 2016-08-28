@@ -972,7 +972,7 @@ async function handleMode(user, msg) {
             } else if (mode === 'k') {
                 const newPassword = oper === '+' ? param : null;
 
-                await conversation.setPassword(newPassword);
+                await conversation.set('password', newPassword);
 
                 const subscription = await IrcSubscription.findFirst({
                     userId: user.id,
@@ -980,7 +980,7 @@ async function handleMode(user, msg) {
                     channel: target
                 });
 
-                subscription.set('password', newPassword);
+                await subscription.set('password', newPassword);
             }
 
             if (newClass) {
