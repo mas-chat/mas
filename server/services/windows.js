@@ -33,6 +33,8 @@ exports.create = async function create(user, conversation) {
 
     const settings = await Settings.findFirst({ userId: user.id });
 
+    assert(settings, `User ${user.id} doesn't have settings.`);
+
     const window = await Window.create({
         userId: user.id,
         conversationId: conversation.id,
