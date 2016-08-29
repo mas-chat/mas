@@ -303,7 +303,7 @@ async function processRestarted() {
 
         const networkInfo = await findOrCreateNetworkInfo(user, network);
 
-        if (subscriptions && networkInfo.get('state') !== 'idledisconnected') {
+        if (subscriptions.length > 0 && networkInfo.get('state') !== 'idledisconnected') {
             log.info(user, `Scheduling connect() to IRC network: ${network}`);
 
             await addSystemMessage(user, network, 'info',
