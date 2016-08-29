@@ -134,7 +134,7 @@ db.setSchema({
             type: { type: 'string', allowNull: false },
             network: { type: 'string', allowNull: false },
             name: 'string',
-            owner: { type: 'int', allowNull: false },
+            owner: { type: 'int' },
             topic: 'string',
             password: 'string',
             team: 'string',
