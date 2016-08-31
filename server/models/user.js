@@ -44,7 +44,7 @@ module.exports = class User extends Model {
             emailConfirmed: false,
             emailMD5: md5(props.email.toLowerCase()),
             extAuthId: null,
-            inUse: false,
+            inUse: props.inUse || false,
             canUseIRC: false,
             lastIp: null,
             lastLogout: new Date(0),
