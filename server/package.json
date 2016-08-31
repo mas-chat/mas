@@ -13,7 +13,7 @@
     "cron": "~1.1.0",
     "elasticsearch": "~11.0.0",
     "faker": "~3.1.0",
-    "forms": "~1.1.1",
+    "forms": "~1.2.0",
     "handlebars": "~4.0.0",
     "iconv-lite": "~0.4.0",
     "ioredis": "~2.3.0",
