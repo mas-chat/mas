@@ -36,7 +36,7 @@ class RegisterModalInput extends Component {
             <span>
                 <label htmlFor={id} className="label">{this.props.label}</label>
                 <p className="control has-icon has-icon-right">
-                    <input id={id} className={inputClass} type="text" value={value} onChange={this.changeValue} ref={(e) => ((this.props.focus && e) ? e.focus() : false)} />
+                    <input id={id} className={inputClass} type="text" value={value} autoComplete={this.props.autocomplete} onChange={this.changeValue} ref={(e) => ((this.props.focus && e) ? e.focus() : false)} />
                     {icon}
                     {this.props.showErrorMessage ? <span className="help is-danger">{errorMessage}</span> : null}
                 </p>
@@ -49,6 +49,7 @@ RegisterModalInput.propTypes = {
     focus: React.PropTypes.bool,
     showErrorMessage: React.PropTypes.bool.isRequired,
     label: React.PropTypes.string.isRequired,
+    autocomplete: React.PropTypes.string,
     getErrorMessage: React.PropTypes.func, // formsy
     getValue: React.PropTypes.func, // formsy
     setValue: React.PropTypes.func, // formsy

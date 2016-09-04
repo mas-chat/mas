@@ -36,7 +36,7 @@ class RegisterModalPassword extends Component {
             <span>
                 <label htmlFor={id} className="label">{this.props.label}</label>
                 <p className="control has-icon has-icon-right">
-                    <input id={id} className={inputClass} type="password" value={value} onChange={this.changeValue} />
+                    <input id={id} className={inputClass} type="password" value={value} autoComplete={this.props.autocomplete} onChange={this.changeValue} />
                     {icon}
                     {this.props.showErrorMessage ? <span className="help is-danger">{errorMessage}</span> : null}
                 </p>
@@ -48,6 +48,7 @@ class RegisterModalPassword extends Component {
 RegisterModalPassword.propTypes = {
     showErrorMessage: React.PropTypes.bool,
     label: React.PropTypes.string.isRequired,
+    autocomplete: React.PropTypes.string,
     getErrorMessage: React.PropTypes.func, // formsy
     getValue: React.PropTypes.func, // formsy
     setValue: React.PropTypes.func, // formsy
