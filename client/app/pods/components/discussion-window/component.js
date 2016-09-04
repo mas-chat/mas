@@ -301,6 +301,7 @@ export default Ember.Component.extend({
         let selectedUserId;
 
         let membersEl = this.$('.window-members')[0];
+        const network = this.get('content.network');
 
         if (membersEl) {
             Ps.initialize(membersEl);
@@ -335,7 +336,8 @@ export default Ember.Component.extend({
 
                 if (action === 'chat') {
                     dispatch('START_CHAT', {
-                        userId: selectedUserId
+                        userId: selectedUserId,
+                        network: network
                     });
                 } else {
                     dispatch('REQUEST_FRIEND', {

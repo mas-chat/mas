@@ -334,7 +334,8 @@ export default Store.extend({
     handleStartChat(data) {
         socket.send({
             id: 'CHAT',
-            userId: data.userId
+            userId: data.userId,
+            network: data.network
         }, resp  => {
             if (resp.status !== 'OK') {
                 dispatch('OPEN_MODAL', {
@@ -393,8 +394,9 @@ export default Store.extend({
         if (ircServer1on1 && !command) {
             dispatch('ADD_ERROR', {
                 body: 'Only commands allowed, e.g. /whois john',
-                window: window
+                window: data.window
             });
+            return;
         }
 
         if (command === 'help') {

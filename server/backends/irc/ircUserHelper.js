@@ -33,19 +33,17 @@ exports.getUserGId = async function getUserGId(nick, network) {
 
     return UserGId.create({
         type: 'irc',
-        id: new Buffer(`${network}!${nick}`).toString('base64').replace(/=+$/, '')
+        id: new Buffer(nick).toString('base64').replace(/=+$/, '')
     });
 };
 
-exports.getIRCUserGIdNickAndNetwork = function getIRCUserGIdNickAndNetwork(userGId) {
+exports.getIRCUserGIdNick = function getIRCUserGIdNick(userGId) {
     assert(userGId.type === 'irc');
 
-    const decodedGId = new Buffer(userGId.id, 'base64').toString('ascii');
-    const separatorPos = decodedGId.indexOf('!');
+    if (userGId.toString() === 'i0') {
+        return 'IRC server';
+    }
 
-    return {
-        network: decodedGId.substring(0, separatorPos),
-        nick: decodedGId.substring(separatorPos + 1)
-    };
+    return new Buffer(userGId.id, 'base64').toString('ascii');
 };
 

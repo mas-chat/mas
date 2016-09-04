@@ -349,11 +349,7 @@ async function handleSet({ user, command }) {
 
 async function handleChat({ user, command }) {
     const targetUserGId = UserGId.create(command.userId);
-    let network = 'mas';
-
-    if (targetUserGId.type === 'irc') {
-        network = ircUserHelper.getIRCUserGIdNickAndNetwork(targetUserGId).network;
-    }
+    const network = command.network;
 
     return await start1on1(user, targetUserGId, network);
 }

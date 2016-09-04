@@ -26,7 +26,8 @@ export default Ember.Component.extend({
     actions: {
         startChat(userId) {
             dispatch('START_CHAT', {
-                userId: userId
+                userId: userId,
+                network: 'mas'
             });
         },
 

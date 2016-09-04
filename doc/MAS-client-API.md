@@ -598,7 +598,7 @@ Ask server to start a 1on1 conversation with another user. The server will follo
 {
   "id": "CHAT",
 
-  "windowId": 8,
+  "network": "mas",
   "userId": "m43432"
 }
 ```

@@ -56,7 +56,7 @@ module.exports = class UserGId {
         if (this.type === 'mas') {
             return parseInt(this.id) === this.id && this.id > 0;
         } else if (this.type === 'irc') {
-            return this.id.length > 0;
+            return this.id === 0 || this.id.length > 0;
         }
 
         return false;

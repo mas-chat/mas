@@ -70,7 +70,7 @@ async function introduceUsers(user, userGIds, session, socket) {
                 entry.name = 'IRC User';
                 entry.gravatar = '';
 
-                const nick = ircUserHelper.getIRCUserGIdNickAndNetwork(userGId).nick;
+                const nick = ircUserHelper.getIRCUserGIdNick(userGId);
 
                 for (const network of networks) {
                     entry.nick[network] = nick; // shortcut, ircUserId is scoped by network

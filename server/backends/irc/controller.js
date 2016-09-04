@@ -134,7 +134,7 @@ async function processSend({ conversationId, userId, text = '' }) {
         const peerMember = await conversationsService.getPeerMember(conversation, user.gId);
         const targetUserGId = UserGId.create(peerMember.get('userGId'));
 
-        target = ircUserHelper.getIRCUserGIdNickAndNetwork(targetUserGId).nick;
+        target = ircUserHelper.getIRCUserGIdNick(targetUserGId);
     } else {
         target = conversation.get('name');
     }
@@ -471,7 +471,7 @@ async function parseIrcMessage({ userId, line, network }) {
 }
 
 async function addSystemMessage(user, network, cat, body) {
-    const serverUserGId = await ircUserHelper.getUserGId('IRC server', network);
+    const serverUserGId = UserGId.create({ type: 'irc', id: 0 });
     const conversation = await conversationsService.findOrCreate1on1(user, serverUserGId, network);
 
     await conversationsService.addMessage(conversation, { userGId: 'i0', cat, body });
@@ -532,7 +532,7 @@ async function handle401(user, msg) {
     const conversation = await conversationsService.findOrCreate1on1(
         user, targetUserGId, msg.network);
 
-    await conversation.addMessage(conversation, {
+    await conversationsService.addMessage(conversation, {
         userGId: 'i0',
         cat: 'error',
         body: `${msg.params[0]} is not in IRC.`
@@ -1005,12 +1005,16 @@ async function handlePrivmsg(user, msg, command) {
     const target = msg.params[0];
     const currentNick = await nicksService.getCurrentNick(user, msg.network);
     let conversation;
+    let sourceUserGId;
     let text = msg.params[1];
     let cat = 'msg';
 
-    // Message is from the server if the nick is missing
-    const realNick = msg.nick || '!IRC-server';
-    const sourceUserGId = await ircUserHelper.getUserGId(realNick, msg.network);
+    if (msg.nick) {
+        sourceUserGId = await ircUserHelper.getUserGId(msg.nick, msg.network);
+    } else {
+        // Message is from the server if the nick is missing
+        sourceUserGId = UserGId.create({ type: 'irc', id: 0 });
+    }
 
     if (text.includes('\u0001') && command === 'PRIVMSG') {
         const ret = parseCTCPMessage(text);
