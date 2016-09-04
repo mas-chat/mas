@@ -16,7 +16,8 @@
 
 'use strict';
 
-const IrcUser = require('../../models/ircUser');
+const assert = require('assert');
+const UserGId = require('../../models/userGId');
 const nicksService = require('../../services/nicks');
 
 exports.getUserGId = async function getUserGId(nick, network) {
@@ -28,12 +29,23 @@ exports.getUserGId = async function getUserGId(nick, network) {
 
     // UserId for IRC user is created on the fly if the nick in the network hasn't an ID
     // already. This method therefore never returns null.
+    assert(network !== 'mas', 'MAS channel has an unknown MAS user');
 
-    let ircUser = await IrcUser.findFirst({ nick, network });
-
-    if (!ircUser) {
-        ircUser = await IrcUser.create({ nick, network });
-    }
-
-    return ircUser.gId;
+    return UserGId.create({
+        type: 'irc',
+        id: new Buffer(`${network}!${nick}`).toString('base64').replace(/=+$/, '')
+    });
 };
+
+exports.getIRCUserGIdNickAndNetwork = function getIRCUserGIdNickAndNetwork(userGId) {
+    assert(userGId.type === 'irc');
+
+    const decodedGId = new Buffer(userGId.id, 'base64').toString('ascii');
+    const separatorPos = decodedGId.indexOf('!');
+
+    return {
+        network: decodedGId.substring(0, separatorPos),
+        nick: decodedGId.substring(separatorPos + 1)
+    };
+};
+

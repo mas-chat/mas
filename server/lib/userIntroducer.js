@@ -20,9 +20,9 @@ const UserGId = require('../models/userGId');
 const log = require('./log');
 const conf = require('./conf');
 const User = require('../models/user');
-const IrcUser = require('../models/ircUser');
 const nicksService = require('../services/nicks');
 const notification = require('../lib/notification');
+const ircUserHelper = require('../backends/irc/ircUserHelper');
 
 const networks = [ 'mas', ...Object.keys(conf.get('irc:networks')) ];
 
@@ -70,14 +70,7 @@ async function introduceUsers(user, userGIds, session, socket) {
                 entry.name = 'IRC User';
                 entry.gravatar = '';
 
-                let nick;
-
-                if (userGId.id === 0) {
-                    nick = 'server';
-                } else {
-                    const ircUser = await IrcUser.fetch(UserGId.create(userGId).id);
-                    nick = ircUser.get('nick');
-                }
+                const nick = ircUserHelper.getIRCUserGIdNickAndNetwork(userGId).nick;
 
                 for (const network of networks) {
                     entry.nick[network] = nick; // shortcut, ircUserId is scoped by network

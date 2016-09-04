@@ -22,6 +22,7 @@ const UserGId = require('./userGId');
 module.exports = class ConversationMember extends Model {
     get mutableProperties() {
         return [
+            'userGId',
             'role'
         ];
     }

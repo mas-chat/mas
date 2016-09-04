@@ -217,18 +217,6 @@ db.setSchema({
             }
         }
     },
-    ircUsers: {
-        definition: {
-            nick: { type: 'string', allowNull: false },
-            network: { type: 'string', allowNull: false }
-        },
-        indices: {
-            nickNetwork: {
-                uniq: true,
-                fields: [ 'network', { name: 'nick', caseInsensitive: true } ]
-            }
-        }
-    },
     ircSubscriptions: {
         definition: {
             userId: { type: 'int', allowNull: false },

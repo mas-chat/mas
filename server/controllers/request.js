@@ -31,7 +31,6 @@ const friendsService = require('../services/friends');
 const nicksService = require('../services/nicks');
 const Conversation = require('../models/conversation');
 const User = require('../models/user');
-const IrcUser = require('../models/ircUser');
 const Friend = require('../models/friend');
 const Window = require('../models/window');
 const Settings = require('../models/settings');
@@ -353,8 +352,7 @@ async function handleChat({ user, command }) {
     let network = 'mas';
 
     if (targetUserGId.type === 'irc') {
-        const ircUser = await IrcUser.fetch(targetUserGId.id);
-        network = ircUser.get('network');
+        network = ircUserHelper.getIRCUserGIdNickAndNetwork(targetUserGId).network;
     }
 
     return await start1on1(user, targetUserGId, network);

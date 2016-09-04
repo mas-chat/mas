@@ -23,15 +23,23 @@ const TYPES = {
 
 module.exports = class UserGId {
     static create(params = {}) {
-        let options = {};
+        let options = params;
 
         if (typeof params === 'string') {
-            options = {
-                id: parseInt(params.substring(1)),
-                type: Object.keys(TYPES).find(validType => TYPES[validType] === params[0])
-            };
-        } else if (typeof params === 'object') {
-            options = params;
+            const type = Object.keys(TYPES).find(validType => TYPES[validType] === params[0]);
+            let id;
+
+            if (!type) {
+                return null;
+            }
+
+            if (type === 'mas') {
+                id = parseInt(params.substring(1));
+            } else if (type === 'irc') {
+                id = params.substring(1);
+            }
+
+            options = { id, type };
         }
 
         const userGId = new this(options);
@@ -45,7 +53,13 @@ module.exports = class UserGId {
     }
 
     get valid() {
-        return !!(this.id >= 0 && TYPES[this.type]);
+        if (this.type === 'mas') {
+            return parseInt(this.id) === this.id && this.id > 0;
+        } else if (this.type === 'irc') {
+            return this.id.length > 0;
+        }
+
+        return false;
     }
 
     get isMASUser() {

@@ -120,7 +120,7 @@ exports.setGroupMembers = async function setGroupMembers(conversation, newMember
 
     for (const oldMember of oldMembers) {
         if (!Object.keys(newMembersHash).some(newMember => newMember === oldMember.gIdString)) {
-            await deleteGroupMember(conversation, oldMember, true);
+            await deleteConversationMember(conversation, oldMember, { skipCleanUp: true });
         }
     }
 
@@ -144,7 +144,7 @@ exports.setGroupMembers = async function setGroupMembers(conversation, newMember
     }
 };
 
-exports.addGroupMember = async function addGroupMember(conversation, userGId, role) {
+exports.addGroupMember = async function addGroupMember(conversation, userGId, role, options = {}) {
     assert(role === 'u' || role === '+' || role === '@' || role === '*');
 
     const members = await ConversationMember.find({ conversationId: conversation.id });
@@ -157,11 +157,13 @@ exports.addGroupMember = async function addGroupMember(conversation, userGId, ro
             role
         });
 
-        await broadcastAddMessage(conversation, {
-            userGId: userGId.toString(),
-            cat: 'join',
-            body: ''
-        });
+        if (!options.silent) {
+            await broadcastAddMessage(conversation, {
+                userGId: userGId.toString(),
+                cat: 'join',
+                body: ''
+            });
+        }
 
         await broadcastAddMembers(conversation, userGId, role);
     } else {
@@ -169,16 +171,11 @@ exports.addGroupMember = async function addGroupMember(conversation, userGId, ro
     }
 };
 
-exports.removeGroupMember = async function removeGroupMember(
-    conversation, userGId, skipCleanUp, wasKicked, reason) {
+exports.removeGroupMember = async function removeGroupMember(conversation, userGId, options = {}) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
     const targetMember = members.find(member => member.get('userGId') === userGId.toString());
 
-    if (!targetMember) {
-        return;
-    }
-
-    await deleteGroupMember(conversation, targetMember, skipCleanUp, wasKicked, reason);
+    await deleteConversationMember(conversation, targetMember, options);
 };
 
 exports.remove1on1Member = async function remove1on1Member(conversation, userGId) {
@@ -494,20 +491,20 @@ async function get1on1PeerMember(conversation, userGId) {
     return members.find(member => !member.gId.equals(userGId));
 }
 
-async function deleteGroupMember(conversation, member, skipCleanUp, wasKicked, reason) {
-    assert(conversation.get('type') === 'group');
-
+async function deleteConversationMember(conversation, member, options) {
     if (!member) {
         return; // TODO: When is this possible?
     }
 
     log.info(`User: ${member.get('userGId')} removed from conversation: ${conversation.id}`);
 
-    await broadcastAddMessage(conversation, {
-        userGId: member.get('userGId'),
-        cat: wasKicked ? 'kick' : 'part',
-        body: wasKicked && reason ? reason : ''
-    });
+    if (!options.silent && conversation.get('type') === 'group') {
+        await broadcastAddMessage(conversation, {
+            userGId: member.get('userGId'),
+            cat: options.wasKicked ? 'kick' : 'part',
+            body: options.wasKicked && options.reason ? options.reason : ''
+        });
+    }
 
     await broadcast(conversation, {
         id: 'DELMEMBERS',
@@ -526,7 +523,7 @@ async function deleteGroupMember(conversation, member, skipCleanUp, wasKicked, r
     const masUserExists = members.some(remainingMember =>
         UserGId.create(remainingMember.get('userGId')).isMASUser);
 
-    if (!masUserExists && !skipCleanUp) {
+    if (!masUserExists && !options.skipCleanUp) {
         log.info(`Last member parted, removing conversation, id: ${conversation.id}`);
         await remove(conversation);
     }
