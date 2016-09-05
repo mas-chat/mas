@@ -1,4 +1,5 @@
 const path = require('path');
+const DashboardPlugin = require('webpack-dashboard/plugin');
 
 const prefix = path.resolve(__dirname);
 
@@ -27,5 +28,8 @@ module.exports = {
             test: /\.(ttf|eot|svg|woff|woff2)$/,
             loader: 'url?limit=10000'
         } ]
-    }
+    },
+    plugins: [
+        new DashboardPlugin()
+    ]
 };
