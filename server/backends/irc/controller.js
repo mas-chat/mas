@@ -207,18 +207,21 @@ async function processJoin({ userId, network, name, password }) {
 
 async function processClose({ userId, network, name, conversationType }) {
     const user = await User.fetch(userId);
-    const networkInfo = await findOrCreateNetworkInfo(user, network);
 
-    const subscription = await IrcSubscription.findFirst({
-        userId: user.id,
-        network,
-        channel: name
-    });
+    if (conversationType === 'group') {
+        const subscription = await IrcSubscription.findFirst({
+            userId: user.id,
+            network,
+            channel: name
+        });
 
-    subscription.delete();
+        subscription.delete();
 
-    if (networkInfo.get('state') === 'connected' && conversationType === 'group') {
-        sendIRCPart(user, network, name);
+        const networkInfo = await findOrCreateNetworkInfo(user, network);
+
+        if (networkInfo.get('state') === 'connected') {
+            sendIRCPart(user, network, name);
+        }
     }
 
     await disconnectIfIdle(user, network);
