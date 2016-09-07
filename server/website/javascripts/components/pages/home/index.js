@@ -24,22 +24,22 @@ class HomePage extends Component {
         const registerModal = this.state.registerModalOpen ? <RegisterModal onHide={this.toggleRegisterModal} /> : null;
 
         return (
-            <section className={cx('container')}>
+            <main className={cx('m-container')}>
                 <div className="container has-text-centered">
-                    <h1 className="title">
+                    <h1 className={cx('m-title', 'title')}>
                         MAS
                     </h1>
-                    <h2 className="subtitle">
-                        A modern open source chat tool
+                    <h2 className={cx('m-subtitle', 'subtitle')}>
+                        A modern open source chat tool for teams
                     </h2>
-                    <a onClick={this.toggleRegisterModal} className="button is-primary">
+                    <a onClick={this.toggleRegisterModal} className="button is-primary is-large is-outlined">
                         <span>
                             Register
                         </span>
                     </a>
                 </div>
                 {registerModal}
-            </section>
+            </main>
         );
     }
 }

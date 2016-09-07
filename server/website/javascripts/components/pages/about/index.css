@@ -1,0 +1,21 @@
+.m-main {
+    padding-top: 150px;
+    max-width: 960px;
+}
+
+.m-main:last-child {
+    margin-bottom: 100px;
+}
+
+.m-title {
+    color: #5cadff;
+    padding: 40px 0px 30px 0;
+}
+
+.m-block {
+    color: #bbb;
+}
+
+:global(a):hover {
+    color: #ddd;
+}

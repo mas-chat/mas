@@ -1,3 +1,5 @@
+/* global config */
+
 import React, { Component } from 'react';
 import 'whatwg-fetch';
 import Cookies from 'js-cookie';
@@ -56,57 +58,68 @@ class RegisterModal extends Component {
     }
 
     render() {
-        // TODO: support configurations where some auth methods are disabled
+        const RegisterButtonGoogle = config.auth.google ? (
+            <a href="/auth/google" className={cx('m-google', 'button is-medium')}>
+                <span className="icon is-medium">
+                    <i className="fa fa-google" title="Google account" />
+                </span>
+            </a>
+        ) : null;
+
+        const RegisterButtonYahoo = config.auth.yahoo ? (
+            <a href="/auth/yahoo" className={cx('m-yahoo', 'button is-medium')}>
+                <span className="icon is-medium">
+                    <i className="fa fa-yahoo" title="Yahoo account" />
+                </span>
+            </a>
+        ) : null;
+
+        const RegisterButtonCloudron = config.auth.cloudron ? (
+            <a href="/auth/cloudron" className={cx('m-cloudron', 'button is-medium')}>
+                <span className="icon is-medium">
+                    <i className="fa fa-cloud" title="Cloudron.io account" />
+                </span>
+            </a>
+        ) : null;
+
+        const ExtRegister = (config.auth.google || config.auth.yahoo || config.auth.cloudron) ? (
+            <nav className={cx('m-ext', 'level')}>
+                <div className="level-left">
+                    <div className="level-item">
+                        Register with an existing account:
+                    </div>
+                </div>
+                <div className="level-right">
+                    <div className="level-item">
+                        {RegisterButtonGoogle}
+                        {RegisterButtonYahoo}
+                        {RegisterButtonCloudron}
+                    </div>
+                </div>
+            </nav>
+        ) : null;
+
         return (
             <div className="modal is-active">
-                <div className={`${cx('background')} modal-background`} />
+                <div onClick={this.props.onHide} className={cx('m-background', 'modal-background')} />
                 <div className="modal-container">
-                    <div className={`${cx('content')} modal-content`}>
+                    <div className={cx('m-content', 'modal-content')}>
                         <section className="section">
                             <Formsy.Form onValidSubmit={this.register} onValid={this.enableButton} onInvalid={this.disableButton}>
                                 <h4 className="title is-4 has-text-centered">Register</h4>
 
-                                <RegisterModalInput showErrorMessage={this.state.showErrors} name="name" validations="minLength:6" validationError="Please enter at least 6 characters" label="Your name" autocomplete="name" required />
+                                <RegisterModalInput showErrorMessage={this.state.showErrors} autoFocus name="name" validations="minLength:6" validationError="Please enter at least 6 characters" label="Your name" autocomplete="name" required />
                                 <RegisterModalInput showErrorMessage={this.state.showErrors} name="email" validations="isEmail" validationError="This is not a valid email" label="Email address" autocomplete="email" required />
                                 <RegisterModalPassword showErrorMessage={this.state.showErrors} name="password" validations="minLength:6" validationError="This is not a valid password" label="Password" autocomplete="new-password" required />
                                 <RegisterModalPassword name="passwordAgain" validations="minLength:6" validationError="This is not a valid password" label="Password (again)" autocomplete="new-password" required />
                                 <RegisterModalInput showErrorMessage={this.state.showErrors} name="nick" validations="minLength:3" validationError="This is not a valid nick" label="Nickname" autocomplete="nickname" required />
                                 <RegisterModalCheckbox name="tos" validationError="You must agree TOS" label="I agree MAS Terms of Service" required />
 
-                                <p className={`${cx('controls')} control`}>
+                                <p className={cx('m-controls', 'control')}>
                                     <button type="submit" className="button is-primary" disabled={!this.state.validDetails}>Register</button>
-                                    <button type="button" onClick={this.props.onHide} className="button is-link">Cancel</button>
                                 </p>
                             </Formsy.Form>
-
-                            <nav className={`${cx('ext')} level`}>
-                                <div className="level-left">
-                                    <div className="level-item">
-                                        Register with an existing account:
-                                    </div>
-                                </div>
-                                <div className="level-right">
-                                    <div className="level-item">
-                                        <a href="/auth/google" className={`${cx('google')} button is-medium`}>
-                                            <span className="icon is-medium">
-                                                <i className="fa fa-google" title="Google account" />
-                                            </span>
-                                        </a>
-
-                                        <a href="/auth/yahoo" className={`${cx('yahoo')} button is-medium`}>
-                                            <span className="icon is-medium">
-                                                <i className="fa fa-yahoo" title="Yahoo account" />
-                                            </span>
-                                        </a>
-
-                                        <a href="/auth/cloudron" className={`${cx('cloudron')} button is-medium`}>
-                                            <span className="icon is-medium">
-                                                <i className="fa fa-cloud" title="Cloudron.io account" />
-                                            </span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </nav>
+                            {ExtRegister}
                         </section>
                     </div>
                 </div>

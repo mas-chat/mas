@@ -1,6 +1,6 @@
-.menu {
+.m-menu {
     left: 0;
-    position: fixed;
+    position: absolute;
     padding: 10px 30px;
     width: 100%;
     max-width: 1200px;
@@ -8,10 +8,42 @@
     transform: translate(-50%, 0);
 }
 
-.icon {
+.m-home {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    color: #dbdbdb;
+}
+
+.m-home:hover {
+    color: #ececec;
+}
+
+.m-menu-item {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    color: #dbdbdb;
+}
+
+.m-menu-item:hover {
+    color: #5cadff;
+}
+
+.m-menu-item-active {
+    color: #5cadff;
+}
+
+.m-menu-item-active:hover {
+    color: #5cadff;
+}
+
+.m-icon {
     padding-right: 35px;
 }
 
-.button {
+.m-button {
     margin-left: 40px;
 }

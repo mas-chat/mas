@@ -34,19 +34,19 @@ class Layout extends Component {
     render() {
         const { children } = this.props;
 
-        const navBar = pages.map(page => <Link key={page} className="nav-item" activeClassName="is-active" to={page}>{page}</Link>);
+        const navBar = pages.map(page => <Link key={page} className={cx('m-menu-item')} activeClassName={cx('m-menu-item-active')} to={page}>{page}</Link>);
 
         const loginModal = this.state.loginModalOpen ? <LoginModal onHide={this.toggleLoginModal} /> : null;
 
         return (
             <div className="container">
-                <div className={`nav ${cx('menu')}`}>
+                <div className={cx('m-menu', 'nav')}>
                     <div className="nav-left">
-                        <Link className="nav-item is-active" to="home">
-                            <div className={`icon ${cx('icon')}`}>
+                        <Link className={cx('m-home')} to="home">
+                            <div className={cx('m-icon', 'icon')}>
                                 <i className="fa fa-map-signs" />
                             </div>
-                            Foyer
+                            MeetAndSpeak
                         </Link>
                     </div>
                     <div className={`nav-right nav-menu ${this.state.menuOpen ? 'is-active' : ''}`}>
@@ -59,9 +59,9 @@ class Layout extends Component {
                     </span>
 
                     <span className="nav-item">
-                        <button onClick={this.toggleLoginModal} className={`button is-primary ${cx('button')}`}>
+                        <button onClick={this.toggleLoginModal} className={cx('m-button', 'button is-primary is-outlined')}>
                             <span>
-                                Login
+                                Sign In
                             </span>
                         </button>
                     </span>
