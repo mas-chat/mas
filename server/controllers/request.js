@@ -67,7 +67,8 @@ init.on('beforeShutdown', async () => {
 });
 
 exports.process = async function process(session, command) {
-    const { windowId, network } = command;
+    const { windowId } = command;
+    const network = (typeof command.network === 'string') ? command.network.toLowerCase() : null;
     const user = session.user;
 
     if (!userExists(user)) {
