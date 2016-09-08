@@ -5,9 +5,9 @@ const DashboardPlugin = require('webpack-dashboard/plugin');
 const prefix = path.resolve(__dirname);
 const nodeEnv = process.env.NODE_ENV;
 
-const isProduction = nodeEnv === 'production'
+const isProduction = nodeEnv === 'production';
 
-console.log(`Production mode: ${isProduction}`);
+console.log(`Production mode: ${isProduction}`); // eslint-disable-line no-console
 
 const config = {
     entry: `${prefix}/javascripts/app.js`,
@@ -38,14 +38,14 @@ const config = {
     plugins: [
         new webpack.DefinePlugin({
             'process.env': {
-                NODE_ENV: JSON.stringify(nodeEnv),
+                NODE_ENV: JSON.stringify(nodeEnv)
             }
         })
     ]
 };
 
-if (!isProduction){
-    config.plugins.push(new DashboardPlugin())
+if (!isProduction) {
+    config.plugins.push(new DashboardPlugin());
 }
 
 module.exports = config;
