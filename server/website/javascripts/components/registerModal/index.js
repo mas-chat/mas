@@ -111,7 +111,7 @@ class RegisterModal extends Component {
                                 <RegisterModalInput showErrorMessage={this.state.showErrors} autoFocus name="name" validations="minLength:6" validationError="Please enter at least 6 characters" label="Your name" autocomplete="name" required />
                                 <RegisterModalInput showErrorMessage={this.state.showErrors} name="email" validations="isEmail" validationError="This is not a valid email" label="Email address" autocomplete="email" required />
                                 <RegisterModalPassword showErrorMessage={this.state.showErrors} name="password" validations="minLength:6" validationError="This is not a valid password" label="Password" autocomplete="new-password" required />
-                                <RegisterModalPassword name="passwordAgain" validations="minLength:6" validationError="This is not a valid password" label="Password (again)" autocomplete="new-password" required />
+                                <RegisterModalPassword name="passwordAgain" validations="equalsField:password" validationError="This is not a valid password" label="Password (again)" autocomplete="new-password" required />
                                 <RegisterModalInput showErrorMessage={this.state.showErrors} name="nick" validations="minLength:3" validationError="This is not a valid nick" label="Nickname" autocomplete="nickname" required />
                                 <RegisterModalCheckbox name="tos" validationError="You must agree TOS" label="I agree MAS Terms of Service" required />
 
