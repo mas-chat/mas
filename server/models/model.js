@@ -137,7 +137,7 @@ module.exports = class Model {
             const { err, val, indices } = await db.create(record.collection, preparedProps);
 
             if (err === 'notUnique') {
-                record.errors = explainIndexErrors(indices, record.config.indexErrorDescriptions);
+                record.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
                 // TODO: REmove console.logs
                 console.log(`DB ERROR: ${err}`); // eslint-disable-line no-console
             } else if (err) {
@@ -185,7 +185,7 @@ module.exports = class Model {
         const objectProps = convertToObject(props, value);
 
         const allowed = Object.keys(objectProps).every(prop =>
-            this.mutableProperties.includes(prop));
+            this.constructor.mutableProperties.includes(prop));
 
         if (!allowed) {
             throw new Error('Tried to set non-existent or protected property');
@@ -214,7 +214,8 @@ module.exports = class Model {
         const { err, indices, val } = await db.update(this.collection, this.id, preparedProps);
 
         if (err === 'notUnique') {
-            this.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
+            this.errors = explainIndexErrors(
+                indices, this.constructor.config.indexErrorDescriptions);
         } else if (err) {
             throw new Error(`DB ERROR: ${err}, props: ${JSON.stringify(objectProps)}`);
         } else {
