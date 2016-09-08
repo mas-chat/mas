@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prod": "webpack -p",
+    "prod": "NODE_ENV=production webpack -p",
     "dev": "webpack-dashboard -- webpack --watch"
   },
   "author": "Ilkka Oksanen <iao@iki.fi> (http://iao.fi)",
@@ -26,13 +26,13 @@
     "babel-preset-es2015": "^6.13.2",
     "babel-preset-react": "^6.11.1",
     "bulma": "^0.1.2",
-    "css-loader": "^0.23.1",
+    "css-loader": "^0.25.0",
     "file-loader": "^0.9.0",
     "node-sass": "^3.8.0",
     "sass-loader": "^4.0.0",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
-    "webpack": "^2.1.0-beta.20",
+    "webpack": "^2.1.0-beta.22",
     "webpack-dashboard": "^0.1.8"
   }
 }

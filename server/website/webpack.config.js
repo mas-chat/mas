@@ -1,9 +1,15 @@
 const path = require('path');
+const webpack = require('webpack');
 const DashboardPlugin = require('webpack-dashboard/plugin');
 
 const prefix = path.resolve(__dirname);
+const nodeEnv = process.env.NODE_ENV;
 
-module.exports = {
+const isProduction = nodeEnv === 'production'
+
+console.log(`Production mode: ${isProduction}`);
+
+const config = {
     entry: `${prefix}/javascripts/app.js`,
     output: {
         path: `${prefix}/dist`,
@@ -30,6 +36,16 @@ module.exports = {
         } ]
     },
     plugins: [
-        new DashboardPlugin()
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: JSON.stringify(nodeEnv),
+            }
+        })
     ]
 };
+
+if (!isProduction){
+    config.plugins.push(new DashboardPlugin())
+}
+
+module.exports = config;
