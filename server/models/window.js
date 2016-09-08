@@ -36,7 +36,7 @@ module.exports = class Window extends Model {
         return await super.create(data);
     }
 
-    get mutableProperties() {
+    static get mutableProperties() {
         return [
             'emailAlert',
             'notificationAlert',

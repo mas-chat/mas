@@ -98,7 +98,7 @@ module.exports = class User extends Model {
         };
     }
 
-    get mutableProperties() {
+    static get mutableProperties() {
         return [
             'extAuthId',
             'inUse',
@@ -110,7 +110,7 @@ module.exports = class User extends Model {
         ];
     }
 
-    get config() {
+    static get config() {
         return {
             indexErrorDescriptions: {
                 nick: 'This nick is already reserved.',

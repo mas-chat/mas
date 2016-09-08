@@ -31,7 +31,7 @@ module.exports = class NetworkInfo extends Model {
         return await super.create(data);
     }
 
-    get mutableProperties() {
+    static get mutableProperties() {
         return [
             'nick',
             'state',

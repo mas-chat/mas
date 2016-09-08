@@ -19,7 +19,7 @@
 const Model = require('./model');
 
 module.exports = class IrcSubscription extends Model {
-    get mutableProperties() {
+    static get mutableProperties() {
         return [
             'password'
         ];

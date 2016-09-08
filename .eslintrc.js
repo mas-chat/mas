@@ -11,9 +11,11 @@ module.exports = {
         "no-param-reassign": ["error", { "props": false }],
         "array-bracket-spacing": ["error", "always"],
         "no-underscore-dangle": ["off"],
+        "no-plusplus": ["off"],
         "radix": ["error", "as-needed"],
         "import/no-extraneous-dependencies": ["error", {"devDependencies": true, "optionalDependencies": false}],
-        "no-continue": ["off"]
+        "no-continue": ["off"],
+        "jsx-a11y/no-static-element-interactions": ["off"] // Consider
     },
     "parserOptions": {
         "ecmaVersion": 6,

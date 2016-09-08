@@ -19,7 +19,7 @@ describe('Model', () => {
         rigiddbStub = sinon.stub();
         Model = proxyquire('../../../models/model', { rigiddb: rigiddbStub });
         Customer = class Customer extends Model { // eslint-disable-line no-shadow
-            get mutableProperties() {
+            static get mutableProperties() {
                 return [ 'name' ];
             }
         };
@@ -72,7 +72,7 @@ describe('Model', () => {
 
     it('create() fails, index error, descriptions are set', async () => {
         Customer = class Customer extends Model { // eslint-disable-line no-shadow
-            get config() {
+            static get config() {
                 return {
                     indexErrorDescriptions: {
                         first: 'This is already reserved.',
@@ -156,7 +156,7 @@ describe('Model', () => {
 
     it('set() fails, forbidden property', async () => {
         Customer = class Customer extends Model { // eslint-disable-line no-shadow
-            get mutableProperties() {
+            static get mutableProperties() {
                 return [ 'age' ];
             }
         };

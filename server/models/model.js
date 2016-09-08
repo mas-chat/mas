@@ -44,7 +44,7 @@ module.exports = class Model {
         this._props = initialProps;
     }
 
-    get mutableProperties() {
+    static get mutableProperties() {
         return [];
     }
 
@@ -56,7 +56,7 @@ module.exports = class Model {
         return {};
     }
 
-    get config() {
+    static get config() {
         // Default configuration. Can be overwritten in derived classes.
         return {
             indexErrorDescriptions: {}
