@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/ilkkao/mas.png?label=ready&title=Ready)](https://waffle.io/ilkkao/mas)
 MAS server and desktop web app
 ==============================
 
