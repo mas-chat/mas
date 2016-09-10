@@ -25,6 +25,7 @@ export default Store.extend({
     activeDesktop: 1,
     email: '', // TODO: Remove from here, keep in profile
     emailConfirmed: true,
+    canUseIRC: false,
 
     toJSON() {
         return {

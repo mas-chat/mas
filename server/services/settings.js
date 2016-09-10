@@ -27,7 +27,8 @@ exports.sendSet = async function sendSet(user, sessionId) {
             activeDesktop: settingsRecord.get('activeDesktop'),
             theme: settingsRecord.get('theme'),
             email: user.get('email'),
-            emailConfirmed: user.get('emailConfirmed')
+            emailConfirmed: user.get('emailConfirmed'),
+            canUseIRC: user.get('canUseIRC')
         }
     };
 

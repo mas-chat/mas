@@ -25,6 +25,7 @@ export default Ember.Component.extend(KeyboardShortcuts, {
 
     draggedWindow: false,
     friends: Ember.computed.alias('stores.friends.friends'),
+    canUseIRC: Ember.computed.alias('stores.settings.canUseIRC'),
 
     actions: {
         openModal(modal) {

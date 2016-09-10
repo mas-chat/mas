@@ -101,7 +101,7 @@ exports.process = async function process(session, command) {
     const handler = handlers[command.id];
 
     if (handler) {
-        return await handler({ user, session, window, conversation, backend, command });
+        return await handler({ user, session, window, conversation, backend, command, network });
     }
 
     log.warn(user, `Reveiced unknown request: ${command.id}`);
@@ -198,12 +198,19 @@ async function handleCreate({ command, user }) {
     });
 }
 
-async function handleJoin({ user, command, backend }) {
+async function handleJoin({ user, command, backend, network }) {
     if (!command.name || !command.network) {
         return { status: 'PARAMETER_MISSING', errorMsg: 'Name or network missing.' };
     }
 
-    const network = command.network.toLowerCase();
+    if (network !== 'mas') {
+        const settings = await Settings.findFirst({ userId: user.id });
+
+        if (!setting.get('canUseIRC')) {
+            return { status: 'NOT_ALLOWED', errorMsg: 'User does not have IRC rights.' };
+        }
+    }
+
     const conversation = await Conversation.findFirst({
         type: 'group',
         name: command.name,
