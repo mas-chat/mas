@@ -206,7 +206,7 @@ async function handleJoin({ user, command, backend, network }) {
     if (network !== 'mas') {
         const settings = await Settings.findFirst({ userId: user.id });
 
-        if (!setting.get('canUseIRC')) {
+        if (!settings.get('canUseIRC')) {
             return { status: 'NOT_ALLOWED', errorMsg: 'User does not have IRC rights.' };
         }
     }

@@ -17,10 +17,13 @@
 import Ember from 'ember';
 import config from './config/environment';
 
-let Router = Ember.Router.extend({
-    location: config.locationType
+const Router = Ember.Router.extend({
+    location: config.locationType,
+    rootURL: config.rootURL
 });
 
-export default Router.map(function() {
+Router.map(function() {
     this.route('index', { path: '/app/' });
 });
+
+export default Router;

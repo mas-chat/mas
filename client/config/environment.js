@@ -4,7 +4,7 @@ module.exports = function(environment) {
         modulePrefix: 'mas',
         podModulePrefix: 'mas/pods',
         environment: environment,
-        baseURL: '/',
+        rootURL: '/',
         locationType: 'auto',
         EmberENV: {
             FEATURES: {
@@ -16,15 +16,6 @@ module.exports = function(environment) {
         APP: {
             // Here you can pass flags/options to your application instance
             // when it is created
-        },
-        contentSecurityPolicy: {
-            'default-src': "'none'",
-            'script-src': "'self' 'unsafe-eval'",
-            'font-src': "'self' http://fonts.gstatic.com",
-            'connect-src': "'self'", // ajax/websocket
-            'img-src': "'self'",
-            'style-src': "'self' 'unsafe-inline' http://fonts.googleapis.com",
-            'media-src': "'self'"
         }
     };
 
