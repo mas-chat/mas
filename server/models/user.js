@@ -105,6 +105,7 @@ module.exports = class User extends Model {
             'lastIp',
             'lastLogout',
             'name',
+            'email',
             'nick',
             'registrationTime'
         ];
