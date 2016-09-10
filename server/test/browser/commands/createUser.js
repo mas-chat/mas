@@ -12,6 +12,7 @@ exports.command = function command(options = {}) {
                 name: 'Joe Random',
                 email: 'user@mas.com',
                 inUse: true,
+                canUseIRC: true,
                 password: '123456',
                 nick: 'user1'
             };
