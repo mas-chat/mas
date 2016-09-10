@@ -635,7 +635,7 @@ async function handle366(user, msg) {
 
     await redis.del(key);
 
-    if (Object.keys(namesHash).length > 0) {
+    if (namesHash && Object.keys(namesHash).length > 0) {
         // During the server boot-up or reconnect after a network outage it's very possible that
         // 366 replies get reordered if more than one mas user joins a same channel. Then an
         // older 366 reply (with fewer names on the list) is used to the reset the group members
