@@ -487,7 +487,7 @@ async function handleUpdateProfile({ user, command }) {
 }
 
 async function handleDestroyAccount({ user }) {
-    await user.set('deleted', true);
+    await user.delete();
 
     const conversations = await conversationsService.getAllConversations(user);
 

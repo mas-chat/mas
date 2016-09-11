@@ -212,7 +212,7 @@ module.exports = class User extends Model {
         return false;
     }
 
-    async disableUser() {
+    async delete() {
         return await this._set({
             deleted: true,
             deletionTime: Date.now(),
