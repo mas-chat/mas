@@ -17,7 +17,7 @@
 'use strict';
 
 const path = require('path');
-const redis = require('ioredis');
+const Redis = require('ioredis');
 const Promise = require('bluebird');
 const redisLuaHelper = require('redis-lua-helper');
 const log = require('./log');
@@ -59,14 +59,14 @@ exports.shutdown = function shutdown() {
 };
 
 function createRedisClient({ autoClose = true } = {}) {
-    let client;
-
-    if (conf.get('redis:connection_type') === 'socket') {
-        client = redis.createClient(conf.get('redis:port'), conf.get('redis:host'),
-            { auth_pass: conf.get('redis:password') || null });
-    } else {
-        client = redis.createClient(conf.get('redis:unix_socket_path'));
-    }
+    const connType = conf.get('redis:connection_type');
+    const client = new Redis({
+        port: conf.get('redis:port'),
+        host: conf.get('redis:host'),
+        password: conf.get('redis:password') || null,
+        path: connType === 'socket' ? null : conf.get('redis:unix_socket_path'),
+        retryStrategy: times => Math.min(times * 500, 2000)
+    });
 
     client.__quit = client.quit;
 
