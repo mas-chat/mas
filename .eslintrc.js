@@ -15,7 +15,8 @@ module.exports = {
         "radix": ["error", "as-needed"],
         "import/no-extraneous-dependencies": ["error", {"devDependencies": true, "optionalDependencies": false}],
         "no-continue": ["off"],
-        "jsx-a11y/no-static-element-interactions": ["off"] // Consider
+        "jsx-a11y/no-static-element-interactions": ["off"], // Consider
+        "arrow-parens": ["off"]
     },
     "parserOptions": {
         "ecmaVersion": 6,
