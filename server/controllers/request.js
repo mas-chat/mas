@@ -203,12 +203,8 @@ async function handleJoin({ user, command, backend, network }) {
         return { status: 'PARAMETER_MISSING', errorMsg: 'Name or network missing.' };
     }
 
-    if (network !== 'mas') {
-        const settings = await Settings.findFirst({ userId: user.id });
-
-        if (!settings.get('canUseIRC')) {
-            return { status: 'NOT_ALLOWED', errorMsg: 'User does not have IRC rights.' };
-        }
+    if (network !== 'mas' && !user.get('canUseIRC')) {
+        return { status: 'NOT_ALLOWED', errorMsg: 'User does not have IRC rights.' };
     }
 
     const conversation = await Conversation.findFirst({
