@@ -48,7 +48,7 @@
             "access_key": "${SAUCE_ACCESS_KEY}",
             "desiredCapabilities": {
                 "browserName": "firefox",
-                "version": "47.0",
+                "version": "48.0",
                 "platform": "OS X 10.11",
                 "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
                 "build": "travis-build-${TRAVIS_JOB_NUMBER}"
