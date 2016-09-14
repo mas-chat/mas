@@ -89,10 +89,11 @@ directory=logs/
 clear_at_startup=false
 rotate_daily=false
 
-[loggly]
+[papertrail]
 enabled=false
-subdomain=example
-token=nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
+host=logs.papertrailapp.com
+port=12345
+level=info
 
 [session]
 max_parallel=8

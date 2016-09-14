@@ -25,7 +25,7 @@ const init = require('./init');
 const conf = require('./conf');
 
 require('colors');
-require('winston-loggly');
+require('winston-papertrail');
 
 let logger = null;
 
@@ -112,14 +112,15 @@ function configTransports() {
         transports.push(consoleTransport);
     }
 
-    if (conf.get('loggly:enabled')) {
-        const logglyTransport = new (winston.transports.Loggly)({
-            subdomain: conf.get('loggly:subdomain'),
-            inputToken: conf.get('loggly:token'),
-            json: true
+    if (conf.get('papertrail:enabled')) {
+        const papertrailTransport = new winston.transports.Papertrail({
+            host: conf.get('papertrail:host'),
+            port: conf.get('papertrail:port'),
+            level: conf.get('papertrail:level'),
+            logFormat: (level, message) => `[${level}] ${message}`
         });
 
-        transports.push(logglyTransport);
+        transports.push(papertrailTransport);
     }
 
     return transports;
