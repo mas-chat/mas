@@ -118,9 +118,9 @@ exports.setup = function setup(server) {
 
                 socket.emit('ntf', ntf);
 
-                // TODO: if (ntf.id !== 'MSG') {
-                log.info(user, `Emitted ${ntf.id} (sessionId: ${session.id}) ${message}`);
-                // }
+                if (ntf.id !== 'MSG') {
+                    log.info(user, `Emitted ${ntf.id} (sessionId: ${session.id}) ${message}`);
+                }
 
                 processing = false;
 
