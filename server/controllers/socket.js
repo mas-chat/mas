@@ -145,7 +145,14 @@ exports.setup = function setup(server) {
                 return;
             }
 
-            const resp = await requestController.process(session, data);
+            let resp;
+
+            try {
+                resp = await requestController.process(session, data);
+            } catch (e) {
+                resp = { status: 'INTERNAL_ERROR', errorMsg: 'Internal error.' };
+                log.warn(session.user, `Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
+            }
 
             await userIntroducer.scanAndIntroduce(session.user, resp, session);
 

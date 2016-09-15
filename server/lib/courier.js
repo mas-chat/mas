@@ -60,7 +60,11 @@ Courier.prototype.listen = async function listen() {
 
         assert(handler, `${this.name}: Missing message handler for: ${msg.__type}`);
 
-        await this._reply(msg, await handler(msg));
+        try {
+            await this._reply(msg, await handler(msg));
+        } catch (e) {
+            log.warn(`Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
+        }
 
         if (resolveQuit) {
             resolveQuit();
