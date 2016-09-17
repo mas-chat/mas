@@ -38,6 +38,8 @@ db.setSchema({
             extAuthId: 'string',
             inUse: { type: 'boolean', allowNull: false },
             canUseIRC: { type: 'boolean', allowNull: false },
+            planLevel: { type: 'int', allowNull: false },
+            discount: 'int',
             lastIp: 'string',
             lastLogout: { type: 'timestamp', allowNull: false },
             name: 'string',

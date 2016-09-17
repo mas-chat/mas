@@ -48,6 +48,8 @@ module.exports = class User extends Model {
             canUseIRC: props.canUseIRC || false,
             lastIp: null,
             lastLogout: new Date(0),
+            planLevel: props.planLevel || 50,
+            discount: props.discount || 0,
             name: props.name,
             nick: props.nick,
             password: bcrypt.hashSync(props.password, bcrypt.genSaltSync(10)),
