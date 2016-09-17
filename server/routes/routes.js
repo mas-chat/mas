@@ -21,6 +21,7 @@ const router = require('koa-router')();
 const serve = require('koa-static');
 const mount = require('koa-mount');
 const bodyParser = require('koa-bodyparser');
+const koaBody = require('koa-body');
 const conf = require('../lib/conf');
 const passport = require('../lib/passport');
 const cacheFilter = require('../lib/cacheFilter');
@@ -57,7 +58,7 @@ exports.register = function register(app) {
     router.post('/login', bodyParser(), loginController.localLogin);
 
     // File upload endpoint
-    router.post('/api/v1/upload', uploadController);
+    router.post('/api/v1/upload', koaBody({ multipart: true }), uploadController);
 
     // Registration routes
     router.post('/register', bodyParser(), registerController.create);

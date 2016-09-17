@@ -16,14 +16,14 @@
 
 'use strict';
 
-const fs = require('fs');
+const promisify = require('promisify-node');
 const path = require('path');
 const mkdirp = require('mkdirp');
-const parse = require('co-busboy');
 const uuid = require('uid2');
 const conf = require('../lib/conf');
 const log = require('../lib/log');
 
+const fs = promisify('fs');
 let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
 // TODO: move this to library.
@@ -31,59 +31,48 @@ if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
-module.exports = async function upload() {
-    if (!this.request.is('multipart/*') || !this.mas.user) {
-        // The body isn't multipart, so busboy can't parse it
+module.exports = function *upload() {
+    const userId = this.mas.user.id;
+
+    if (!this.request.body || !this.request.body.files || !this.request.body.files.file) {
+        this.status = 400;
         return;
     }
 
-    const userId = this.mas.user.id;
-    const parts = parse(this);
-    const urls = [];
+    const file = this.request.body.files.file;
+    const name = uuid(20);
+    const firstTwo = name.substring(0, 2);
+    const targetDirectory = path.join(dataDirectory, firstTwo);
+    const extension = path.extname(file.name);
 
-    let part;
+    // TODO: Check maximum size
 
-    function createMetaDataFileHandler(err) {
-        if (err) {
-            log.warn(userId, `Upload metadata write failed, reason: ${err}`);
+    try {
+        mkdirp.sync(targetDirectory);
+    } catch (e) {
+        if (e.code !== 'EEXIST') {
+            throw e;
         }
     }
 
-    while ((part = await parts)) { // eslint-disable-line no-cond-assign
-        if (part.length) {
-            // TDB: Handle if field
-            // key: part[0]
-            // value: part[1]
-        } else {
-            // Otherwise, it's a stream
-            const name = uuid(20);
-            const firstTwo = name.substring(0, 2);
+    try {
+        yield fs.rename(file.path, path.join(targetDirectory, name + extension));
+    } catch (e) {
+        log.warn(userId, `Upload rename failed, reason: ${e}`);
+        this.status = 400;
+        return;
+    }
 
-            const targetDirectory = path.join(dataDirectory, firstTwo);
+    const metaData = { userId, ts: Math.round(Date.now() / 1000) };
 
-            try {
-                mkdirp.sync(targetDirectory);
-            } catch (e) {
-                if (e.code !== 'EEXIST') {
-                    throw e;
-                }
-            }
-
-            const extension = path.extname(part.filename);
-            part.pipe(fs.createWriteStream(path.join(targetDirectory, name + extension)));
-
-            const metaData = {
-                userId,
-                ts: Math.round(Date.now() / 1000)
-            };
-
-            fs.writeFile(path.join(targetDirectory, `${name}.json`), JSON.stringify(metaData),
-                createMetaDataFileHandler);
-
-            urls.push(`${conf.getComputed('site_url')}/files/${name}${extension}`);
-        }
+    try {
+        yield fs.writeFile(path.join(targetDirectory, `${name}.json`), JSON.stringify(metaData));
+    } catch (e) {
+        log.warn(userId, `Upload meta data creation failed, reason: ${e}`);
+        this.status = 400;
+        return;
     }
 
     this.status = 200;
-    this.body = { url: urls };
+    this.body = { url: [ `${conf.getComputed('site_url')}/files/${name}${extension}` ] };
 };
