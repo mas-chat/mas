@@ -28,7 +28,7 @@ exports.auth = function *auth(next) {
     const [ userId, secret ] = cookie.split('-');
 
     if (userId && secret) {
-        const user = yield User.fetch(parseInt(userId));
+        const user = yield User.fetch(parseInt(userId.substring(1)));
 
         if (user && user.get('secretExpires') > ts && user.get('secret') === secret) {
             this.mas.user = user;
