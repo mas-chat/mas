@@ -1073,8 +1073,7 @@ async function updateNick(user, network, oldNick, newNick) {
     const nickUser = await nicksService.getUserFromNick(oldNick, network);
 
     if (nickUser) {
-        const networkInfo = NetworkInfo.findFirst({ userId: nickUser.id, network });
-
+        const networkInfo = await findOrCreateNetworkInfo(nickUser, network);
         const updatedProps = await networkInfo.set('nick', newNick);
 
         if (updatedProps === 1) {
