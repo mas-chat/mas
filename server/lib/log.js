@@ -117,6 +117,8 @@ function configTransports() {
             host: conf.get('papertrail:host'),
             port: conf.get('papertrail:port'),
             level: conf.get('papertrail:level'),
+            hostname: 'mas',
+            program: process.title,
             logFormat: (level, message) => `[${level}] ${message}`
         });
 
