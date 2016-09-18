@@ -777,28 +777,34 @@ async function handleJoin(user, msg) {
 async function handleJoinReject(user, msg) {
     const channel = msg.params[0];
     const reason = msg.params[1];
-    const conversation = await Conversation.findFirst({
-        type: 'group',
-        name: channel,
-        network: msg.network
-    });
 
-    await addSystemMessage(user, msg.network,
-       'error', `Failed to join ${channel}. Reason: ${reason}`);
+    if (isChannel(channel)) {
+        const conversation = await Conversation.findFirst({
+            type: 'group',
+            name: channel,
+            network: msg.network
+        });
 
-    const subscription = await IrcSubscription.findFirst({
-        userId: user.id,
-        network: msg.network,
-        channel
-    });
+        await addSystemMessage(user, msg.network,
+            'error', `Failed to join ${channel}. Reason: ${reason}`);
 
-    await subscription.delete();
+        const subscription = await IrcSubscription.findFirst({
+            userId: user.id,
+            network: msg.network,
+            channel
+        });
 
-    if (conversation) {
-        await conversationsService.removeGroupMember(conversation, user.gId);
+        await subscription.delete();
+
+        if (conversation) {
+            await conversationsService.removeGroupMember(conversation, user.gId);
+        }
+
+        await disconnectIfIdle(user, msg.network);
+    } else {
+        // Nick is unavailable
+        await tryDifferentNick(user, msg.network);
     }
-
-    await disconnectIfIdle(user, msg.network);
 }
 
 async function handleQuit(user, msg) {
