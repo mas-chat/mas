@@ -330,13 +330,8 @@ async function broadcast(conversation, msg, excludeSession) {
         const user = await User.fetch(userGId.id);
         let window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
 
-        if (!window && msg.id === 'MSG' && conversation.get('type') === '1on1') {
-            // The case where one of the 1on1 members has closed his window
+        if (!window) {
             window = await windowsService.create(user, conversation);
-        } else if (!window) {
-            log.warn(user,
-                `User is a member of conversation ${conversation.id}, but the window is missing`);
-            continue;
         }
 
         msg.windowId = window.id;
@@ -351,7 +346,12 @@ async function sendCompleteAddMembers(conversation, user) {
         return;
     }
 
-    const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
+    let window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
+
+    if (!window) {
+        window = await windowsService.create(user, conversation);
+    }
+
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     const membersList = members.map(member => ({
