@@ -35,7 +35,7 @@ exports.authenticate = function authenticate(type, cb) {
 };
 
 function setup() {
-    if (conf.get('googleauth:enabled') === true) {
+    if (conf.get('googleauth:enabled')) {
         const google = new GoogleStrategy({
             clientID: conf.get('googleauth:client_id'),
             clientSecret: conf.get('googleauth:client_secret'),
@@ -48,7 +48,7 @@ function setup() {
         passport.use(google);
     }
 
-    if (conf.get('yahooauth:enabled') === true) {
+    if (conf.get('yahooauth:enabled')) {
         const yahoo = new YahooStrategy({
             returnURL: `${conf.getComputed('site_url')}/auth/yahoo/callback`,
             realm: conf.getComputed('site_url')
@@ -59,7 +59,7 @@ function setup() {
         passport.use(yahoo);
     }
 
-    if (conf.get('cloudronauth:enabled') === true) {
+    if (conf.get('cloudronauth:enabled')) {
         const cloudron = new CloudronStrategy({
             callbackURL: `${conf.getComputed('site_url')}/auth/cloudron/callback`
         }, (token, tokenSecret, profile, done) => {

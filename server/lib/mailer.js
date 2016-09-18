@@ -60,7 +60,7 @@ exports.send = function send(templateName, data, address, subject) {
 };
 
 function setupTransporter() {
-    if (conf.get('mailgun:enabled') === true) {
+    if (conf.get('mailgun:enabled')) {
         const mailgunAuth = {
             auth: {
                 api_key: conf.get('mailgun:api_key'), // eslint-disable-line camelcase
@@ -71,7 +71,7 @@ function setupTransporter() {
         transporter = nodemailer.createTransport(mailgun(mailgunAuth));
         fromAddress = conf.get('mailgun:from');
         senderAddress = conf.get('mailgun:sender');
-    } else if (conf.get('smtp:enabled') === true) {
+    } else if (conf.get('smtp:enabled')) {
         const smtpOptions = {
             host: conf.get('smtp:server'),
             port: conf.get('smtp:port')

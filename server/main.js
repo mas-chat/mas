@@ -90,7 +90,7 @@ exports.init = async function initServer(httpServer, httpsServer, setHttpHandler
         setHttpHandlers(app.callback(), null);
     }
 
-    if (conf.get('frontend:demo_mode') === true) {
+    if (conf.get('frontend:demo_mode')) {
         demoContent.enable();
     }
 

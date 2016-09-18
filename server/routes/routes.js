@@ -37,7 +37,7 @@ exports.register = function register(app) {
     app.use(cacheFilter);
 
     // Passport authentication routes
-    if (conf.get('googleauth:enabled') === true && conf.get('googleauth:openid_realm')) {
+    if (conf.get('googleauth:enabled') && conf.get('googleauth:openid_realm')) {
         router.get('/auth/google', passport.authenticate('google', {
             scope: 'email profile',
             openIDRealm: conf.get('googleauth:openid_realm')
@@ -45,12 +45,12 @@ exports.register = function register(app) {
         router.get('/auth/google/oauth2callback', loginController.googleLogin);
     }
 
-    if (conf.get('yahooauth:enabled') === true) {
+    if (conf.get('yahooauth:enabled')) {
         router.get('/auth/yahoo', passport.authenticate('yahoo'));
         router.get('/auth/yahoo/callback', loginController.yahooLogin);
     }
 
-    if (conf.get('cloudronauth:enabled') === true) {
+    if (conf.get('cloudronauth:enabled')) {
         router.get('/auth/cloudron', passport.authenticate('cloudron'));
         router.get('/auth/cloudron/callback', loginController.cloudronLogin);
     }
@@ -82,7 +82,7 @@ exports.register = function register(app) {
     app.use(router.routes()).use(router.allowedMethods());
 
     // Ember CLI Live Reload redirect hack
-    if (conf.get('common:dev_mode') === true) {
+    if (conf.get('common:dev_mode')) {
         router.get('/ember-cli-live-reload.js', function *redirect() { // eslint-disable-line require-yield, max-len
             this.redirect('http://localhost:4200/ember-cli-live-reload.js');
         });
