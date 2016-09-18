@@ -38,7 +38,11 @@ exports.localLogin = function *localLogin(next) {
             success = true;
         }
 
-        that.body = { success, msg, userId: user.id, secret: user.get('secret') };
+        if (success) {
+            that.body = { success: true, msg, userId: user.id, secret: user.get('secret') };
+        } else {
+            that.body = { success: false, msg };
+        }
     }).call(this, next);
 };
 
