@@ -1116,7 +1116,7 @@ async function updateNick(user, network, oldNick, newNick) {
             conversation, conversationMember.gId, { silent: true });
 
         await conversationsService.addGroupMember(
-            conversation, await ircUserHelper.getUserGId(newNick, network), role, { silent: true });
+            conversation, (await ircUserHelper.getUserGId(newNick, network)), role, { silent: true });
     }
 }
 
