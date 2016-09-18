@@ -406,7 +406,7 @@ async function removeConversationWindow(conversation, userGId) {
 }
 
 async function scanForEmailNotifications(conversation, message) {
-    if (!message.userGId || message.userGId === 'i0') {
+    if (!message.userId || message.userId === 'i0') {
         return;
     }
 
