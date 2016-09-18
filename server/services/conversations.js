@@ -145,7 +145,9 @@ exports.setGroupMembers = async function setGroupMembers(conversation, newMember
 };
 
 exports.addGroupMember = async function addGroupMember(conversation, userGId, role, options = {}) {
-    assert(role === 'u' || role === '+' || role === '@' || role === '*');
+    if (!(role === 'u' || role === '+' || role === '@' || role === '*')) {
+        log.warn(`Unknown role ${role}, userGId: ${userGId}`);
+    }
 
     const members = await ConversationMember.find({ conversationId: conversation.id });
     const targetMember = members.find(member => member.get('userGId') === userGId.toString());
@@ -344,6 +346,11 @@ async function broadcast(conversation, msg, excludeSession) {
 }
 
 async function sendCompleteAddMembers(conversation, user) {
+    if (!conversation) {
+        log.warn('conversation missing.');
+        return;
+    }
+
     const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
