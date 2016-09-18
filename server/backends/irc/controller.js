@@ -720,26 +720,26 @@ async function handleJoin(user, msg) {
 
     if (targetUser) {
         // MAS user joined channel
-        const subscription = await IrcSubscription.findFirst({
+        let subscription = await IrcSubscription.findFirst({
             userId: targetUser.id,
             network,
             channel
         });
 
-        const password = subscription.get('password');
-
-        if (!subscription === null) {
+        if (!subscription) {
             // IrcSubscription entry is missing. This means IRC server has added the user
             // to a channel without any action from the user. Flowdock at least does this.
             // ircchannelsubscriptions must be updated as it's used to rejoin channels after a
             // server restart.
-            await IrcSubscription.create({
+            subscription = await IrcSubscription.create({
                 userId: targetUser.id,
                 network,
                 channel,
                 password: null
             });
         }
+
+        const password = subscription.get('password');
 
         if (!conversation) {
             conversation = await Conversation.create({
@@ -769,10 +769,8 @@ async function handleJoin(user, msg) {
         }
     }
 
-    if (conversation) {
-        const userGId = await ircUserHelper.getUserGId(msg.nick, msg.network);
-        await conversationsService.addGroupMember(conversation, userGId, 'u');
-    }
+    const userGId = await ircUserHelper.getUserGId(msg.nick, msg.network);
+    await conversationsService.addGroupMember(conversation, userGId, 'u');
 }
 
 async function handleJoinReject(user, msg) {
