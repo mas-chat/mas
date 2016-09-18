@@ -217,9 +217,9 @@ module.exports = class User extends Model {
     async delete() {
         return await this._set({
             deleted: true,
-            deletionTime: Date.now(),
+            deletionTime: new Date(),
             email: null,
-            deletedEmail: this._props.email,
+            deletedEmail: this.get('email'),
             emailMD5: null,
             extAuthId: null
         });
