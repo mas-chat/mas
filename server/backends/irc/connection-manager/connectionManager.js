@@ -155,12 +155,16 @@ function connect(userId, nick, network) {
     const host = conf.get(`irc:networks:${network}:host`);
     const options = { host, port };
     let socket;
+    let ssl = false;
 
     if (conf.get(`irc:networks:${network}:ssl`)) {
+        ssl = true;
         socket = tls.connect(port, host, {});
     } else {
         socket = net.connect(options);
     }
+
+    log.info(userId, `Connecting to IRC server, SSL: ${ssl}, host: ${host}, port: ${port}`);
 
     socket.nick = nick;
     socket.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
