@@ -718,9 +718,10 @@ async function handleJoin(user, msg) {
         network
     });
 
-    if (targetUser && targetUser.id === user.id) {
+    if (targetUser) {
+        // MAS user joined channel
         const subscription = await IrcSubscription.findFirst({
-            userId: user.id,
+            userId: targetUser.id,
             network,
             channel
         });
@@ -733,7 +734,7 @@ async function handleJoin(user, msg) {
             // ircchannelsubscriptions must be updated as it's used to rejoin channels after a
             // server restart.
             await IrcSubscription.create({
-                userId: user.id,
+                userId: targetUser.id,
                 network,
                 channel,
                 password: null
@@ -742,21 +743,21 @@ async function handleJoin(user, msg) {
 
         if (!conversation) {
             conversation = await Conversation.create({
-                owner: user.id,
+                owner: targetUser.id,
                 type: 'group',
                 name: channel,
                 password,
                 network
             });
 
-            log.info(user, `First mas user joined channel: ${network}:${channel}`);
+            log.info(targetUser, `First mas user joined channel: ${network}:${channel}`);
         }
 
-        const window = await windowsService.findByConversation(user, conversation);
+        const window = await windowsService.findByConversation(targetUser, conversation);
 
         if (!window) {
-            await windowsService.create(user, conversation);
-            await conversationsService.sendFullAddMembers(conversation, user);
+            await windowsService.create(targetUser, conversation);
+            await conversationsService.sendFullAddMembers(conversation, targetUser);
         }
 
         if (password) {
