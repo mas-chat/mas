@@ -13,6 +13,4 @@ WORKDIR /app/server/
 RUN npm install --production && npm run prod
 RUN cd website && npm install && npm run prod && rm -fr node_modules
 
-EXPOSE 3200
-
 CMD ["npm", "run", "start-frontend"]
