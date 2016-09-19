@@ -16,7 +16,6 @@
 
 'use strict';
 
-const faker = require('faker');
 const redis = require('./redis').createClient();
 const log = require('./log');
 const conf = require('./conf');
@@ -48,8 +47,8 @@ exports.enable = function enable() {
             }
 
             await conversation.addMessage({
-                body: `${faker.lorem.sentence(sentenceLength)} ${url}`,
-                userId: 'mDEMO',
+                body: `Lorem ipsum dolor sit amet, consectetur adipiscing elit ${url}`,
+                userId: 'm0',
                 cat: 'msg'
             });
         }
