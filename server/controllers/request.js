@@ -497,7 +497,7 @@ async function handleDestroyAccount({ user }) {
         // Don't remove networkInfo entries as they are needed to
         // keep discussion logs parseable. Those logs contain userIds, not nicks.
 
-        const subscriptions = await IrcSubscription.fetch({ userId: user.id, network });
+        const subscriptions = await IrcSubscription.find({ userId: user.id, network });
         subscriptions.forEach(subscription => subscription.delete());
     }
 
