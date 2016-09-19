@@ -20,6 +20,7 @@ const notification = require('../lib/notification');
 const alerts = require('../lib/alert');
 const courier = require('../lib/courier').create();
 const conf = require('../lib/conf');
+const log = require('../lib/log');
 const friendsService = require('../services/friends');
 const settingsService = require('../services/settings');
 const Conversation = require('../models/conversation');
@@ -49,6 +50,12 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
     for (const window of windows) {
         const conversationId = window.get('conversationId');
         const conversation = await Conversation.fetch(conversationId);
+
+        if (!conversation) {
+            log.warn(user, `Found Window object without linked conversation, id: ${window.id}`);
+            continue;
+        }
+
         const members = await ConversationMember.find({ conversationId });
 
         const role = members.find(member => member.get('userGId') === user.gIdString).get('role');
