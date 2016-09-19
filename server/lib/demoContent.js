@@ -26,7 +26,6 @@ exports.enable = function enable() {
     setInterval(async function interval() {
         const demoUserEmail = conf.get('frontend:demo_user_email');
         const demoUserId = await redis.hget('index:user', demoUserEmail);
-        const sentenceLength = Math.floor((Math.random() * 30) + 1);
 
         if (!demoUserId) {
             log.error('Demo user doesn\'t exist.');
