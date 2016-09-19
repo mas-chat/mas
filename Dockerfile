@@ -10,7 +10,7 @@ RUN npm install && npm run bower && npm run build  && rm -fr node_modules bower_
 
 COPY server /app/server/
 WORKDIR /app/server/
-RUN npm install && npm run prod
+RUN npm install --production && npm run prod
 RUN cd website && npm install && npm run prod && rm -fr node_modules
 
 EXPOSE 3200
