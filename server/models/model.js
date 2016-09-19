@@ -74,9 +74,9 @@ module.exports = class Model {
 
     static async fetch(id) {
         const record = new this(this.collection, id);
-        const { error, val } = await db.get(record.collection, id);
+        const { err, val } = await db.get(record.collection, id);
 
-        if (error) {
+        if (err) {
             return null;
         }
 
