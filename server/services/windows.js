@@ -26,7 +26,48 @@ const notification = require('../lib/notification');
 const log = require('../lib/log');
 const conf = require('../lib/conf');
 
+exports.findOrCreate = async function findOrCreate(user, conversation) {
+    let window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
+
+    if (!window) {
+        window = await createWindow(user, conversation);
+    }
+
+    return window;
+}
+
 exports.create = async function create(user, conversation) {
+    return await createWindow(user, conversation);
+};
+
+exports.findByConversation = async function findByConversation(user, conversation) {
+    return await Window.findFirst({ userId: user.id, conversationId: conversation.id });
+};
+
+exports.isValidDesktop = async function isValidDesktop(user, desktop) {
+    const windows = await Window.find({ userId: user.id });
+
+    return windows.some(window => window.get('desktop') === desktop);
+};
+
+exports.getWindowsForNetwork = async function getWindowsForNetwork(user, network) {
+    const windows = await Window.find({ userId: user.id });
+    const matchingWindows = [];
+
+    for (const window of windows) {
+        const conversation = await Conversation.fetch(window.get('conversationId'));
+
+        if (!conversation) {
+            log.warn(user, `Conversation missing, id: ${conversation.id}`);
+        } else if (conversation.get('network') === network) {
+            matchingWindows.push(window);
+        }
+    }
+
+    return matchingWindows;
+};
+
+async function createWindow(user, conversation) {
     let peerMember = null;
 
     assert(conversation);
@@ -82,29 +123,3 @@ exports.create = async function create(user, conversation) {
     return window;
 };
 
-exports.findByConversation = async function findByConversation(user, conversation) {
-    return await Window.findFirst({ userId: user.id, conversationId: conversation.id });
-};
-
-exports.isValidDesktop = async function isValidDesktop(user, desktop) {
-    const windows = await Window.find({ userId: user.id });
-
-    return windows.some(window => window.get('desktop') === desktop);
-};
-
-exports.getWindowsForNetwork = async function getWindowsForNetwork(user, network) {
-    const windows = await Window.find({ userId: user.id });
-    const matchingWindows = [];
-
-    for (const window of windows) {
-        const conversation = await Conversation.fetch(window.get('conversationId'));
-
-        if (!conversation) {
-            log.warn(user, `Conversation missing, id: ${conversation.id}`);
-        } else if (conversation.get('network') === network) {
-            matchingWindows.push(window);
-        }
-    }
-
-    return matchingWindows;
-};

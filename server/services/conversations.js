@@ -328,11 +328,7 @@ async function broadcast(conversation, msg, excludeSession) {
         }
 
         const user = await User.fetch(userGId.id);
-        let window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
-
-        if (!window) {
-            window = await windowsService.create(user, conversation);
-        }
+        const window = await windowsService.findOrCreate(user, conversation);
 
         msg.windowId = window.id;
 
@@ -346,12 +342,7 @@ async function sendCompleteAddMembers(conversation, user) {
         return;
     }
 
-    let window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
-
-    if (!window) {
-        window = await windowsService.create(user, conversation);
-    }
-
+    const window = await windowsService.findOrCreate(user, conversation);
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     const membersList = members.map(member => ({
