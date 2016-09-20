@@ -58,7 +58,7 @@ module.exports = function *upload() {
     try {
         fs.createReadStream(file.path).pipe(
             fs.createWriteStream(path.join(targetDirectory, name + extension)));
-        yield fs.unlink(file.path);
+        // TODO: Remove file here when copy is await promisedCopy(...)
     } catch (e) {
         log.warn(userId, `Upload rename failed, reason: ${e}`);
         this.status = 400;
