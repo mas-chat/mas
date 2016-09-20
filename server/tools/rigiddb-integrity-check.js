@@ -1,5 +1,6 @@
 'use strict';
 
+const readlineSync = require('readline-sync');
 const RigidDB = require('rigiddb');
 const User = require('../models/user');
 const Conversation = require('../models/conversation');
@@ -24,6 +25,12 @@ process.on('unhandledRejection', (reason, p) => {
     log(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
     throw reason;
 });
+
+log('');
+log('*** Last line of defence, only needed in special cases ***');
+log('');
+
+const fix = readlineSync.question('Fix issues in addition to reporting them [yes/NO]? ') === 'yes';
 
 async function main() {
     const { val: userIds } = await store.list('users');
@@ -66,7 +73,7 @@ async function checkConversations() {
         const ownerUserId = conversation.get('owner');
 
         if (ownerUserId && !activeUserIds.find(activeUserId => activeUserId === ownerUserId)) {
-            log(`Conversation has deleted user as an owner: ${JSON.stringify(conversation._props)}`);
+            log(`!!! Conversation has deleted user as an owner: ${JSON.stringify(conversation._props)}`);
         }
     }
 }
@@ -83,12 +90,22 @@ async function checkWindows() {
         const conversationId = window.get('conversationId');
 
         if (!activeUserIds.find(activeUserId => activeUserId === userId)) {
-            log('Found window that belongs to deleted user');
+            log('!!! Found window that belongs to deleted user');
+
+            if (fix) {
+                log('Fixing by deleting');
+                await window.delete();
+            }
         }
 
         if (!conversations.find(
             existingConversationId => existingConversationId === conversationId)) {
-            log('Found window without conversation');
+            log('!!! Found window without conversation');
+
+            if (fix) {
+                log('Fixing by deleting');
+                await window.delete();
+            }
         }
     }
 }
@@ -101,20 +118,34 @@ async function checkConversationMembers() {
 
     for (const conversationMemberId of conversationMemberIds) {
         const conversationMember = await ConversationMember.fetch(conversationMemberId);
+
+        if (!conversationMember) {
+            // Active user, has parted already
+            continue;
+        }
+
         const userGId = UserGId.create(conversationMember.get('userGId'));
         const conversationId = conversationMember.get('conversationId');
 
         if (userGId.type === 'mas') {
             if (!activeUserIds.find(activeUserId => activeUserId === userGId.id)) {
-                log('Found conversationMember that is a deleted user. Fixing');
+                log('!!! Found conversationMember that is a deleted user.');
 
-                await conversationMember.delete();
+                if (fix) {
+                    log('Fixing');
+                    await conversationMember.delete();
+                }
             }
         }
 
         if (!conversations.find(
             existingConversationId => existingConversationId === conversationId)) {
-            log('Found conversationMember that points to non-existent conversation');
+            log('!!! Found conversationMember that points to non-existent conversation');
+
+            if (fix) {
+                log('Fixing by deleting');
+                await conversationMember.delete();
+            }
         }
     }
 }
@@ -126,8 +157,12 @@ async function checkSettings() {
         const settings = await Settings.findFirst({ userId });
 
         if (!settings) {
-            log(`User ${userId} doesn't have settings. Fixing`);
-            await Settings.create({ userId });
+            log(`!!! User ${userId} doesn't have settings.`);
+
+            if (fix) {
+                log('Fixing by creating');
+                await Settings.create({ userId });
+            }
         }
     }
 
@@ -143,7 +178,12 @@ async function checkSettings() {
         const userId = settings.get('userId');
 
         if (!activeUserIds.find(activeUserId => activeUserId === userId)) {
-            log('Found settings that belongs to deleted user');
+            log('!!! Found settings that belongs to deleted user');
+
+            if (fix) {
+                log('Fixing by deleting');
+                await settings.delete();
+            }
         }
     }
 }
@@ -168,18 +208,22 @@ async function checkFriends() {
         dstFriends.push(dstUserId);
 
         if (!activeUserIds.find(activeUserId => activeUserId === srcUserId)) {
-            log('Found friendUserId that belongs to deleted user');
+            log('!!! Found friendUserId that belongs to deleted user');
         }
 
         if (!activeUserIds.find(activeUserId => activeUserId === dstUserId)) {
-            log('Found friendUserId that belongs to deleted user');
+            log('!!! Found friendUserId that belongs to deleted user');
         }
 
         const counterFried = await Friend.findFirst({ srcUserId: dstUserId, dstUserId: srcUserId });
 
         if (!counterFried) {
-            log(`Friendship ${JSON.stringify(friend._props)} doesn't have counter friend object. Fixing by deleting.`);
-            await friend.delete();
+            log(`!!! Friendship ${JSON.stringify(friend._props)} doesn't have counter friend object.`);
+
+            if (fix) {
+                log('Fixing by deleting.');
+                await friend.delete();
+            }
         }
     }
 }
@@ -193,13 +237,24 @@ async function checkConversationMessages() {
 
     for (const conversationMessageId of conversationMessageIds) {
         const conversationMessage = await ConversationMessage.fetch(conversationMessageId);
+
+        if (!conversationMessage) {
+            // Active group, old message was just deleted
+            continue;
+        }
+
         const conversationId = conversationMessage.get('conversationId');
         const userGIdString = conversationMessage.get('userGId');
 
         if (!conversations.find(
             existingConversationId => existingConversationId === conversationId)) {
-            log(`Found conversationMessage ${JSON.stringify(conversationMessage._props)} that points to non-existent conversation. Fixing by deleting.`);
-            await conversationMessage.delete();
+            log(`!!! Found conversationMessage ${JSON.stringify(conversationMessage._props)} that points to non-existent conversation.`);
+
+            if (fix) {
+                log('Fixing by deleting.');
+                await conversationMessage.delete();
+            }
+
             continue;
         }
 
@@ -208,14 +263,12 @@ async function checkConversationMessages() {
 
             if (userGId.type === 'mas') {
                 if (!allUserIds.find(userId => userId === userGId.id)) {
-                    log(`Found message ${JSON.stringify(conversationMessage._props)} that belongs to non-existent user. Fixing by deleting.`);
-                    await conversationMessage.delete();
-                }
-            } else {
-                const decoded = new Buffer(userGId.id, 'base64').toString('ascii');
+                    log(`!!! Found message ${JSON.stringify(conversationMessage._props)} that belongs to non-existent user.`);
 
-                if (decoded.indexOf('!') === -1) {
-                    log(`Found corrupted IRC userGId: ${userGId.id}, decoded: ${decoded}`);
+                    if (fix) {
+                        log('Fixing by deleting.');
+                        await conversationMessage.delete();
+                    }
                 }
             }
         }
@@ -231,7 +284,7 @@ async function checkNetworkInfos() {
         const networkInfo = await NetworkInfo.fetch(networkInfoId);
 
         if (!allUserIds.find(userId => userId === networkInfo.get('userId'))) {
-            log('Found networkInfo that belongs to non-existent user.');
+            log('!!! Found networkInfo that belongs to non-existent user.');
         }
     }
 }
