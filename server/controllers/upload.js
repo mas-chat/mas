@@ -56,7 +56,9 @@ module.exports = function *upload() {
     }
 
     try {
-        yield fs.rename(file.path, path.join(targetDirectory, name + extension));
+        fs.createReadStream(file.path).pipe(
+            fs.createWriteStream(path.join(targetDirectory, name + extension)));
+        yield fs.unlink(file.path);
     } catch (e) {
         log.warn(userId, `Upload rename failed, reason: ${e}`);
         this.status = 400;
