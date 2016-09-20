@@ -74,16 +74,16 @@ exports.setup = function setup(server) {
 
             if (!(user && user.get('secretExpires') > ts &&
                 user.get('secret') === secret && user.get('inUse'))) {
-
-                if (user) {
-                    log.info(user, 'Init message with incorrect or expired secret.');
-                }
-
                 socket.emit('terminate', {
                     code: 'INVALID_SECRET',
                     reason: 'Invalid or expired secret.'
                 });
                 await end('Invalid secret.');
+
+                if (user) {
+                    log.info(user, 'Init message with incorrect or expired secret.');
+                }
+
                 return;
             }
 

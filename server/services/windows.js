@@ -34,7 +34,7 @@ exports.findOrCreate = async function findOrCreate(user, conversation) {
     }
 
     return window;
-}
+};
 
 exports.create = async function create(user, conversation) {
     return await createWindow(user, conversation);
@@ -121,5 +121,4 @@ async function createWindow(user, conversation) {
     }
 
     return window;
-};
-
+}
