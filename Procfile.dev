@@ -2,3 +2,4 @@ frontend: cd server && npm run start-frontend
 loopback: cd server && npm run start-loopback
 irc: cd server && npm run start-irc
 ircscktmgr: cd server && npm run start-irc-scktmgr
+redis: mkdir -p tmp && redis-server --appendonly yes --save 600 1
