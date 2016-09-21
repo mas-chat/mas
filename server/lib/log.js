@@ -27,7 +27,9 @@ const conf = require('./conf');
 require('colors');
 require('winston-papertrail');
 
-let logger = null;
+let logger = new (winston.Logger)({
+    transports: configTransports()
+});
 
 exports.info = function info(user, msg) {
     logEntry('info', user, msg, () => {});
@@ -54,19 +56,7 @@ exports.quit = function quit() {
 };
 
 function logEntry(type, user, msg, callback) {
-    const entry = {};
-
-    if (logger === null) {
-        logger = new (winston.Logger)({
-            transports: configTransports()
-        });
-    }
-
-    if (msg) {
-        entry.userId = user.id;
-    }
-
-    logger.log(type, msg || user, entry, callback);
+    logger.log(type, msg ? `[u: ${user}] ${msg}` : user, null, callback);
 }
 
 function configTransports() {
