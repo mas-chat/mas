@@ -5,8 +5,6 @@ MAS is a web group chat application with a sleek windowed UI.
 
 ![Screenshot](http://i.imgur.com/dlagvoY.gif)
 
-**NOTE: The project is currently under a big refactor. Code in master branch probably doesn't even start.**
-
 *NOTE:* Redis database format will change before 1.0 release. Supported migration tool is not guaranteed. After 1.0 release, mas becomes suitable for the general use.
 
 For more info, see
@@ -46,57 +44,34 @@ Client: [![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat&pat
 
 MacOS/Linux/Windows.
 
-## Quick start
+## Development setup
 
-1. Install Redis and latest release of node.js (5.x)
+1. Install Redis and latest release of node.js (6.x)
 
    On Mac to get redis and node.js you can install [Homebrew](http://brew.sh/) and then do ```brew install node redis```
 
-2. Create the configuration file. You don't need to edit it, default options should work.
+2. Build different components and install required npm modules using the dev script
 
    ```bash
-   $ cp mas.conf.example mas.conf
+   $ ./dev.sh build
    ```
 
-3. Install the required node modules
+3. Launch the server components and redis using forego toll (make sure you have forego installed)
 
    ```bash
-   $ npm install
+   $ ./dev.sh start
    ```
 
-4. Install bower and ember-cli if you don't have them
+4. Browse to ```http://localhost:3200/``` and register an account.
+
+## Production setup
+
+First add your [default configuration values](https://github.com/ilkkao/mas/blob/master/server/mas.conf.default) overrides
+to the `docker-compose.yml` file. Then
 
    ```bash
-   $ npm install -g bower ember-cli
+   $ docker-compose up
    ```
-
-5. Build the web site
-
-   ```bash
-   $ npm run build-pages
-   ```
-
-6. Build the client web app
-
-   ```bash
-   $ cd client
-   $ npm install
-   $ bower install
-   $ ember build
-   ```
-7. Launch redis in one terminal
-
-  ```bash
-  $ redis-server
-  ```
-
-8. Launch the server components
-
-   ```bash
-   $ pm2 start apps.json
-   ```
-
-9. Browse to ```http://localhost:3200/``` and register an account.
 
 ## Code Climate
 

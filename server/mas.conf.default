@@ -10,7 +10,8 @@
 ; |____/ \___/|_| |_|  \__| |_| |_| |_|\___/ \__,_|_|_|  \__, |  \__|_| |_|_|___/ |_| |_|_|\___|
 ;                                                        |___/
 ;
-; Instead override any of the values here in a separate 'mas.conf' file.
+; Instead override any of the values here in a separate 'mas.conf' file or with environment
+; variables.
 
 ; GENERAL OPTIONS
 
