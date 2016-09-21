@@ -27,7 +27,7 @@ const conf = require('./conf');
 require('colors');
 require('winston-papertrail');
 
-let logger = new (winston.Logger)({
+const logger = new (winston.Logger)({
     transports: configTransports()
 });
 
