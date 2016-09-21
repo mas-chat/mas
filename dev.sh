@@ -8,10 +8,10 @@ cd $ROOT
 
 case "$1" in
     start)
-        forego start -f Procfile.dev -e conf/env.dev
+        ./server/node_modules/.bin/nf --procfile Procfile.dev --env conf/env.dev start
         ;;
 
-    install)
+    build)
         cd client
         npm install
         npm run bower
@@ -38,6 +38,6 @@ case "$1" in
         echo "Redis reset done."
         ;;
     *)
-        echo $"Usage: $0 {start|install|resetdb}"
+        echo $"Usage: $0 {start|build|clean|resetdb}"
         exit 1
 esac

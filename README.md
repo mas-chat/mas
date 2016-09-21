@@ -48,7 +48,11 @@ MacOS/Linux/Windows.
 
 1. Install Redis and latest release of node.js (6.x)
 
-   On Mac to get redis and node.js you can install [Homebrew](http://brew.sh/) and then do ```brew install node redis```
+   On Mac you can do this by installing first [Homebrew](http://brew.sh/) and then
+
+   ```bash
+   $ brew install node redis
+   ```
 
 2. Build different components and install required npm modules using the dev script
 
@@ -56,7 +60,7 @@ MacOS/Linux/Windows.
    $ ./dev.sh build
    ```
 
-3. Launch the server components and redis using forego toll (make sure you have forego installed)
+3. Launch the server components and redis in foreground
 
    ```bash
    $ ./dev.sh start
