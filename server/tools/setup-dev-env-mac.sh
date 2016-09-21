@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd )
-REDIS_PORT=6379
 
 cd $ROOT
-
-echo 'Making sure Redis is running...'
-redis-server ./conf/redis.conf --port $REDIS_PORT
 
 echo 'Making sure Elasticsearch is running...'
 elasticsearch -d
