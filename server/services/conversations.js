@@ -515,14 +515,4 @@ async function deleteConversationMember(conversation, member, options) {
     await removeConversationWindow(conversation, UserGId.create(member.get('userGId')));
 
     await member.delete();
-
-    // Delete conversation if no mas users are left
-    const members = await ConversationMember.find({ conversationId: conversation.id });
-    const masUserExists = members.some(remainingMember =>
-        UserGId.create(remainingMember.get('userGId')).isMASUser);
-
-    if (!masUserExists && !options.skipCleanUp) {
-        log.info(`Last member parted, removing conversation, id: ${conversation.id}`);
-        await remove(conversation);
-    }
 }
