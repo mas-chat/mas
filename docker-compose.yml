@@ -1,35 +1,55 @@
-mas-frontend:
-  image: 'ilkkao/mas:latest'
-  environment:
-    - LOG__CONSOLE=true
-  ports:
-    - '80:3200'
-    - '443:3201'
-  volumes:
-    - /data:/data
-mas-loopback:
-  image: 'ilkkao/mas:latest'
-  environment:
-    - LOG__CONSOLE=true
-  command: npm run start-loopback
-mas-irc:
-  image: 'ilkkao/mas:latest'
-  environment:
-    - LOG__CONSOLE=true
-  command: npm run start-irc
-  ports:
-    - '113:113'
-mas-irc-scktmgr:
-  image: 'ilkkao/mas:latest'
-  environment:
-    - LOG__CONSOLE=true
-  command: npm run start-irc-scktmgr
-elasticsearch:
-  image: 'elasticsearch:latest'
-  volumes:
-    - /data/elasticsearch:/usr/share/elasticsearch/data
-redis:
-  image: 'redis:latest'
-  volumes:
-    - /data/redis:/data
-  command: redis-server --appendonly yes --save 600 1 --save 300 10 --save 60 10000
+version: '2'
+services:
+  mas-frontend:
+    image: 'ilkkao/mas:latest'
+    depends_on:
+      - elasticsearch
+      - redis
+    environment:
+      - LOG__CONSOLE=true
+    ports:
+      - '80:3200'
+      - '443:3201'
+    volumes:
+      - /data:/data
+  mas-loopback:
+    image: 'ilkkao/mas:latest'
+    depends_on:
+      - elasticsearch
+      - redis
+    environment:
+      - LOG__CONSOLE=true
+    command: npm run start-loopback
+    volumes:
+      - /data:/data
+  mas-irc:
+    image: 'ilkkao/mas:latest'
+    depends_on:
+      - elasticsearch
+      - redis
+    environment:
+      - LOG__CONSOLE=true
+    command: npm run start-irc
+    volumes:
+      - /data:/data
+  mas-irc-scktmgr:
+    image: 'ilkkao/mas:latest'
+    depends_on:
+      - elasticsearch
+      - redis
+    environment:
+      - LOG__CONSOLE=true
+    command: npm run start-irc-scktmgr
+    volumes:
+      - /data:/data
+    ports:
+      - '113:113'
+  elasticsearch:
+    image: 'elasticsearch:latest'
+    volumes:
+      - /data/elasticsearch:/usr/share/elasticsearch/data
+  redis:
+    image: 'redis:latest'
+    volumes:
+      - /data/redis:/data
+    command: redis-server --appendonly yes --save 600 1 --save 300 10 --save 60 10000
