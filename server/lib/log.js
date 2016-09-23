@@ -56,7 +56,8 @@ exports.quit = function quit() {
 };
 
 function logEntry(type, user, msg, callback) {
-    logger.log(type, msg ? `[u: ${user}] ${msg}` : user, null, callback);
+    // msg is an optional parameter
+    logger.log(type, (user && msg) ? `[u: ${user.id}] ${msg}` : user, null, callback);
 }
 
 function configTransports() {
