@@ -938,7 +938,7 @@ async function handleMode(user, msg) {
         const modes = command.substring(1).split('');
 
         if (!(oper === '+' || oper === '-')) {
-            log.warn(user, 'Received broken MODE command');
+            log.warn(user, `Received broken MODE command ${msg}`);
             continue;
         }
 
@@ -951,7 +951,7 @@ async function handleMode(user, msg) {
                 param = modeParams.shift();
 
                 if (!param) {
-                    log.warn(user, 'Received broken MODE command, parameter missing');
+                    log.warn(user, `Received broken MODE command, parameter for ${mode} missing`);
                     continue;
                 } else if (mode.match(/[ov]/)) {
                     targetUserGId = await ircUserHelper.getUserGId(param, msg.network);
