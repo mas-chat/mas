@@ -46,10 +46,10 @@ exports.findOrCreate1on1 = async function findOrCreate1on1(user, peerUserGId, ne
             peer => peer.get('conversationId') === member.get('conversationId')));
 
     for (const commonMember of commonMembers) {
-        const candidateConversation = await Conversation.fetch(commonMember.get('conversationId'));
+        const candidate = await Conversation.fetch(commonMember.get('conversationId'));
 
-        if (candidateConversation.get('type') === '1on1') {
-            conversation = candidateConversation;
+        if (candidate.get('type') === '1on1' && candidate.get('network') === network) {
+            conversation = candidate;
             break;
         }
     }
