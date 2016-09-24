@@ -180,7 +180,9 @@ export default BaseModel.extend({
             windowName = windowName.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
         } else {
             let userId = this.get('userId');
-            windowName = this.get('_usersStore.users').getByIndex(userId).get('nick')[network];
+            let peerUser = this.get('_usersStore.users').getByIndex(userId);
+
+            windowName = peerUser ? peerUser.get('nick')[network] : '1on1';
         }
         return windowName;
     }),
