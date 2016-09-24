@@ -56,8 +56,11 @@ exports.quit = function quit() {
 };
 
 function logEntry(type, user, msg, callback) {
-    // msg is an optional parameter
-    logger.log(type, (user && msg) ? `[u: ${user.id}] ${msg}` : user, null, callback);
+    // user is an optional parameter
+    const parsedMessage = user && msg ?
+      `[u: ${user.id}] ${msg}` : user;
+
+    logger.log(type, parsedMessage, callback);
 }
 
 function configTransports() {
