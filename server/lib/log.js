@@ -82,7 +82,14 @@ function configTransports() {
         }
 
         if (conf.get('log:clear_at_startup') && fs.existsSync(fileName)) {
-            fs.unlinkSync(fileName);
+            try {
+                fs.unlinkSync(fileName);
+            } catch (e) {
+                // Race condition is possible
+                if (e.code !== 'ENOENT') {
+                    throw e;
+                }
+            }
         }
 
         const fileTransportOptions = {
