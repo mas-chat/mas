@@ -294,7 +294,7 @@ async function processReconnectIfInactive({ userId }) {
 
 // Restarted
 async function processRestarted() {
-    await iterateUsersAndNetworks(async function iterate(user, network) {
+    await iterateUsersAndNetworks(async (user, network) => {
         const subscriptions = await IrcSubscription.find({
             userId: user.id,
             network

@@ -23,7 +23,7 @@ const masWindow = require('../services/windows');
 const conversationFactory = require('../models/conversation');
 
 exports.enable = function enable() {
-    setInterval(async function interval() {
+    setInterval(async () => {
         const demoUserEmail = conf.get('frontend:demo_user_email');
         const demoUserId = await redis.hget('index:user', demoUserEmail);
 

@@ -46,7 +46,7 @@ exports.setup = function setup(server) {
 
         clientSocketList.push(socket);
 
-        socket.on('init', async function init(data) {
+        socket.on('init', async data => {
             if (session.id) {
                 socket.emit('terminate', {
                     code: 'MULTIPLE_INITS',
@@ -143,7 +143,7 @@ exports.setup = function setup(server) {
             await sessionService.init(user, session, maxBacklogMsgs, cachedUpto);
         });
 
-        socket.on('req', async function req(data, cb) {
+        socket.on('req', async (data, cb) => {
             if (session.state !== 'authenticated') {
                 await end('Request arrived before init.');
                 return;
@@ -169,7 +169,7 @@ exports.setup = function setup(server) {
             }
         });
 
-        socket.on('disconnect', async function disconnect() {
+        socket.on('disconnect', async () => {
             await end('Socket.io disconnect.');
         });
 

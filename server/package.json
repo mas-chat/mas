@@ -57,9 +57,8 @@
     "yargs": "~5.0.0"
   },
   "devDependencies": {
-    "babel-eslint": "^6.1.2",
     "chai": "~3.5.0",
-    "eslint": "^3.3.1",
+    "eslint": "~3.6.0",
     "eslint-config-airbnb": "^11.0.0",
     "eslint-config-airbnb-base": "^7.0.0",
     "eslint-plugin-import": "^1.13.0",

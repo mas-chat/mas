@@ -1,5 +1,4 @@
 module.exports = {
-    "parser": "babel-eslint",
     "extends": "airbnb",
     "rules": {
         "keyword-spacing": 2,
@@ -19,7 +18,7 @@ module.exports = {
         "arrow-parens": ["off"]
     },
     "parserOptions": {
-        "ecmaVersion": 6,
+        "ecmaVersion": 2017,
         "sourceType": "script"
     }
 }
