@@ -53,8 +53,6 @@ exports.send = function send(templateName, data, address, subject) {
     }, (error, info) => {
         if (error) {
             log.warn(`Failed to send email: ${error}`);
-        } else {
-            log.info(`Email sent: ${info.response}`);
         }
     });
 };
