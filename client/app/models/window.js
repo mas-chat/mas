@@ -152,7 +152,9 @@ export default BaseModel.extend({
             title = `${network} Server Messages`;
         } else if (type === '1on1') {
             let ircNetwork = network === 'MAS' ? '' : `${network} `;
-            let target = this.get('_usersStore.users').getByIndex(userId).get('nick')[network];
+            let peerUser = this.get('_usersStore.users').getByIndex(userId);
+
+            let target = peerUser ? peerUser.get('nick')[network] : 'person';
             title = `Private ${ircNetwork} conversation with ${target}`;
         } else if (network === 'MAS') {
             title = `Group: ${name.charAt(0).toUpperCase()}${name.substr(1)}`;
