@@ -721,6 +721,7 @@ async function handleJoin(user, msg) {
     if (!conversation) {
         log.warn(user,
             `Conversation not found when handling JOIN, name: ${channel}, network: ${network}`);
+        return;
     }
 
     if (targetUser) {
