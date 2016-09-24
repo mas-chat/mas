@@ -1110,18 +1110,26 @@ async function updateNick(user, network, oldNick, newNick) {
     // Iterate through the conversations that the nick changer is part of
     for (const conversationMember of conversationMembers) {
         const conversation = await Conversation.fetch(conversationMember.get('conversationId'));
-        const role = conversationMember.get('role');
 
-        await conversationsService.addMessageUnlessDuplicate(conversation, user, {
-            cat: 'info',
-            body: `${oldNick} is now known as ${newNick}`
-        });
+        if (conversation.get('network') !== network) {
+            continue;
+        }
+
+        // Some 1on1 are closed (no window), don't activate them
+        if (conversation.get('type') !== '1on1') {
+            await conversationsService.addMessageUnlessDuplicate(conversation, user, {
+                cat: 'info',
+                body: `${oldNick} is now known as ${newNick}`
+            });
+        }
 
         await conversationsService.removeGroupMember(
             conversation, conversationMember.gId, { silent: true });
 
-        await conversationsService.addGroupMember(conversation,
-            (await ircUserHelper.getUserGId(newNick, network)), role, { silent: true });
+        await conversationsService.addGroupMember(
+            conversation,
+            (await ircUserHelper.getUserGId(newNick, network)),
+            conversationMember.get('role'), { silent: true });
     }
 }
 
