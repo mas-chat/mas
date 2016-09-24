@@ -72,7 +72,7 @@
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "prod": "./tools/build-emails.js",
+    "prod": "./bin/build-emails.js",
     "start-frontend": "./bin/create-db && async-node ./server.js",
     "start-loopback": "./bin/create-db && async-node ./backends/loopback/server.js",
     "start-irc": "./bin/create-db && async-node ./backends/irc/server.js",
