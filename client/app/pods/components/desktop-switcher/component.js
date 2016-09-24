@@ -24,9 +24,5 @@ export default Ember.Component.extend({
     activeDesktop: Ember.computed.alias('stores.settings.activeDesktop'),
     draggedWindow: false,
 
-    desktops: Ember.computed.alias('stores.windows.desktops'),
-
-    debugDesktop: function() {
-        console.log('Houston, it works.')
-    }.observes('activeDesktop')
+    desktops: Ember.computed.alias('stores.windows.desktops')
 });
