@@ -19,8 +19,8 @@
 let playing = false;
 
 let notification = new Howl({
-    src: [ '/sounds/staple_gun.mp3', '/sounds/staple_gun.ogg' ],
-    volume: 0.5,
+    src: [ '/app/assets/sounds/staple_gun.mp3', '/app/assets/sounds/staple_gun.mp3' ],
+    volume: 0.6,
 
     onplay() {
         playing = true;
