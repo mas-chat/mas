@@ -15,7 +15,7 @@
     "bootstrap-datepicker": "~1.5.0",
     "bootswatch": "~3.3.1",
     "capture-video-frame": "~0.1.0",
-    "ember": "~2.9.0-beta.2",
+    "ember": "canary",
     "ember-cli-shims": "0.1.1",
     "emojify.js": "~1.1.0",
     "font-awesome": "~4.6.0",
@@ -35,5 +35,8 @@
     "mousetrap": "~1.6.0",
     "ember-mocha": "~0.8.0",
     "perfect-scrollbar": "~0.6.8"
+  },
+  "resolutions": {
+    "ember": "canary"
   }
 }
