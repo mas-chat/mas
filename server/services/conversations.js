@@ -297,8 +297,6 @@ exports.getAllConversations = async function getAllConversations(user) {
 };
 
 async function broadcastAddMessage(conversation, props, excludeSession) {
-    await scanForEmailNotifications(conversation, props);
-
     props.conversationId = conversation.id;
 
     const message = await ConversationMessage.create(props);
@@ -310,6 +308,8 @@ async function broadcastAddMessage(conversation, props, excludeSession) {
     }
 
     const ntf = message.convertToNtf();
+
+    await scanForEmailNotifications(conversation, message);
 
     await broadcast(conversation, ntf, excludeSession);
     search.storeMessage(conversation.id, ntf);
@@ -404,14 +404,15 @@ async function removeConversationWindow(conversation, userGId) {
 }
 
 async function scanForEmailNotifications(conversation, message) {
-    if (!message.userId || message.userId === 'i0') {
+    if (!message.get('userGId') || message.get('userGId') === 'i0') {
         return;
     }
 
     const users = [];
+    const srcUserGId = UserGId.create(message.get('userGId'));
 
     if (conversation.get('type') === 'group') {
-        const mentions = message.body.match(/(?:^| )@\S+(?=$| )/g);
+        const mentions = message.get('body').match(/(?:^| )@\S+(?=$| )/g);
 
         if (!mentions) {
             return;
@@ -430,7 +431,7 @@ async function scanForEmailNotifications(conversation, message) {
             return;
         }
     } else {
-        const peerMember = await get1on1PeerMember(conversation, UserGId.create(message.userGId));
+        const peerMember = await get1on1PeerMember(conversation, srcUserGId);
         const peerMemberGId = UserGId.create(peerMember.get('userGId'));
 
         if (peerMemberGId.isMASUser) {
@@ -463,8 +464,13 @@ async function scanForEmailNotifications(conversation, message) {
         }
 
         if (window.get('emailAlert')) {
-            const nickName = await nicksService.getCurrentNick(
-                message.userId, conversation.get('network'));
+            let nickName = 'IRCUSER'; // TODO, fetch real IRC nick
+
+            if (srcUserGId.isMASUser) {
+                const srcUser = await User.fetch(srcUserGId.id);
+                nickName = await nicksService.getCurrentNick(srcUser, conversation.get('network'));
+            }
+
             const name = user.get('name') || nickName;
             const notificationId = uuid(20);
 
@@ -477,7 +483,7 @@ async function scanForEmailNotifications(conversation, message) {
                 senderName: name,
                 senderNick: nickName,
                 groupName: conversation.get('name'),
-                message: message.body
+                message: message.get('body')
             });
         }
     }

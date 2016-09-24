@@ -63,15 +63,14 @@ async function deliverEmails() {
         notifications = _.groupBy(notifications, groupNotifications);
 
         const userGId = UserGId.create(userGIdString);
-
         const user = await User.fetch(userGId.id);
 
         // TODO: Better would be to clear pending notifications during login
-        if (!user.isOnline()) {
+        if (!(await user.isOnline())) {
             mailer.send('emails/build/mentioned.hbs', {
                 name: user.get('name'),
                 notifications
-            }, user.email, 'You were just mentioned on MeetAndSpeak');
+            }, user.get('email'), 'You were just mentioned on MeetAndSpeak');
         }
 
         for (const notificationId of notificationIds) {
