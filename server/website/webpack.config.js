@@ -40,6 +40,9 @@ const config = {
             'process.env': {
                 NODE_ENV: JSON.stringify(nodeEnv)
             }
+        }),
+        new webpack.ProvidePlugin({
+            Promise: 'bluebird'
         })
     ]
 };
