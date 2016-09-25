@@ -474,7 +474,7 @@ async function handleUpdateProfile({ user, command }) {
     }
 
     if (newEmail) {
-        await user.set('email', newEmail);
+        await user.changeEmail(newEmail);
     }
 
     // TODO: Check and report validation errors
