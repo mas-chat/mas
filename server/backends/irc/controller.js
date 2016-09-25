@@ -841,9 +841,6 @@ async function handleError(user, msg) {
 
         await addSystemMessage(user, msg.network, 'error',
             `${msg.network} IRC network doesn\'t allow more connections. Close all windows related to this IRC network and rejoin another day to try again.`); // eslint-disable-line max-len
-
-        // Disable auto-reconnect
-        await redis.hset(`networks:${user.id}:${msg.network}`, 'state', 'closing');
     }
 }
 
