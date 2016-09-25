@@ -55,15 +55,15 @@
             }
         },
 
-        "saucelabs-chrome-linux": {
+        "saucelabs-chrome-win": {
             "selenium_port": 80,
             "selenium_host": "ondemand.saucelabs.com",
             "username": "mas-ci",
             "access_key": "${SAUCE_ACCESS_KEY}",
             "desiredCapabilities": {
                 "browserName": "chrome",
-                "version": "48",
-                "platform": "Linux",
+                "version": "53",
+                "platform": "Windows 10",
                 "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
                 "build": "travis-build-${TRAVIS_JOB_NUMBER}"
             }
