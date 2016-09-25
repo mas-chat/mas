@@ -17,12 +17,18 @@
 'use strict';
 
 const assert = require('assert');
+const uuid = require('uid2');
+const redis = require('../lib/redis').createClient();
+const User = require('../models/user');
 const Window = require('../models/window');
 const Settings = require('../models/settings');
 const Conversation = require('../models/conversation');
 const ConversationMember = require('../models/conversationMember');
 const ConversationMessage = require('../models/conversationMessage');
 const notification = require('../lib/notification');
+const nicksService = require('../services/nicks');
+const conversaionsService = require('../services/conversations');
+const UserGId = require('../models/userGId');
 const log = require('../lib/log');
 const conf = require('../lib/conf');
 
@@ -38,6 +44,21 @@ exports.findOrCreate = async function findOrCreate(user, conversation) {
 
 exports.create = async function create(user, conversation) {
     return await createWindow(user, conversation);
+};
+
+exports.remove = async function remove(user, conversation) {
+    const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
+
+    if (window) {
+        log.info(user, `Removing window, id: ${window.id}`);
+
+        await notification.broadcast(user, {
+            id: 'CLOSE',
+            windowId: window.id
+        });
+
+        await window.delete();
+    }
 };
 
 exports.findByConversation = async function findByConversation(user, conversation) {
@@ -65,6 +86,93 @@ exports.getWindowsForNetwork = async function getWindowsForNetwork(user, network
     }
 
     return matchingWindows;
+};
+
+exports.scanMentions = async function scanMentions(conversation, message) {
+    if (!message.get('userGId') || message.get('userGId') === 'i0' ||
+        !message.get('body')) {
+        return;
+    }
+
+    const users = [];
+    const srcUserGId = UserGId.create(message.get('userGId'));
+
+    if (conversation.get('type') === 'group') {
+        const mentions = message.get('body').match(/(?:^| )@\S+(?=$| )/g);
+
+        if (!mentions) {
+            return;
+        }
+
+        for (const mention of mentions) {
+            const user = await nicksService.getUserFromNick(
+                mention.substring(1), conversation.get('network'));
+
+            if (user) {
+                users.push(user);
+            }
+        }
+
+        if (users.length === 0) {
+            return;
+        }
+    } else {
+        const peerMember = await conversaionsService.getPeerMember(conversation, srcUserGId);
+        const peerMemberGId = UserGId.create(peerMember.get('userGId'));
+
+        if (peerMemberGId.isMASUser) {
+            const user = await User.fetch(peerMemberGId.id);
+
+            if (user) {
+                users.push(user);
+            }
+        }
+    }
+
+    for (const user of users) {
+        if (user.get('deleted')) {
+            continue;
+        }
+
+        const online = await user.isOnline();
+
+        if (online) {
+            continue; // Mentioned user is online
+        }
+
+        const window = await Window.findFirst({
+            userId: user.id,
+            conversationId: conversation.id
+        });
+
+        if (!window) {
+            continue; // Mentioned user is not on this group
+        }
+
+        if (window.get('emailAlert')) {
+            let nickName = 'IRCUSER'; // TODO, fetch real IRC nick
+
+            if (srcUserGId.isMASUser) {
+                const srcUser = await User.fetch(srcUserGId.id);
+                nickName = await nicksService.getCurrentNick(srcUser, conversation.get('network'));
+            }
+
+            const name = user.get('name') || nickName;
+            const notificationId = uuid(20);
+
+            // TODO: Needs to be transaction, add lua script
+            await redis.sadd('emailnotifications', user.gId);
+            await redis.lpush(`emailnotificationslist:${user.gId}`, notificationId);
+
+            await redis.hmset(`emailnotification:${notificationId}`, {
+                type: conversation.get('type'),
+                senderName: name,
+                senderNick: nickName,
+                groupName: conversation.get('name'),
+                message: message.get('body')
+            });
+        }
+    }
 };
 
 async function createWindow(user, conversation) {

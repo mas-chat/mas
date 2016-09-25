@@ -17,19 +17,16 @@
 'use strict';
 
 const assert = require('assert');
-const uuid = require('uid2');
 const redis = require('../lib/redis').createClient();
 const log = require('../lib/log');
 const search = require('../lib/search');
 const notification = require('../lib/notification');
 const User = require('../models/user');
-const Window = require('../models/window');
 const Conversation = require('../models/conversation');
 const ConversationMember = require('../models/conversationMember');
 const ConversationMessage = require('../models/conversationMessage');
 const UserGId = require('../models/userGId');
 const windowsService = require('../services/windows');
-const nicksService = require('../services/nicks');
 
 const MSG_BUFFER_SIZE = 200; // TODO: This should come from session:max_backlog setting
 
@@ -92,8 +89,22 @@ exports.delete = async function deleteCoversation(conversation) {
     return await remove(conversation);
 };
 
+exports.getAll = async function getAll(user) {
+    const conversations = [];
+    const members = await ConversationMember.find({ userGId: user.gIdString });
+
+    for (const member of members) {
+        const conversation = await Conversation.fetch(member.get('conversationId'));
+        conversations.push(conversation);
+    }
+
+    return conversations;
+};
+
 exports.getPeerMember = async function getPeerMember(conversation, userGId) {
-    return await get1on1PeerMember(conversation, userGId);
+    const members = await ConversationMember.find({ conversationId: conversation.id });
+
+    return members.find(member => !member.gId.equals(userGId));
 };
 
 exports.getMemberRole = async function getMemberRole(conversation, userGId) {
@@ -136,14 +147,7 @@ exports.setGroupMembers = async function setGroupMembers(conversation, newMember
         }
     }
 
-    for (const newMember of Object.keys(newMembersHash)) {
-        const newMemberGId = UserGId.create(newMember);
-
-        if (newMemberGId.isMASUser) {
-            const user = await User.fetch(newMemberGId.id);
-            await sendCompleteAddMembers(conversation, user);
-        }
-    }
+    await broadcastFullAddMembers(conversation);
 };
 
 exports.addGroupMember = async function addGroupMember(conversation, userGId, role, options = {}) {
@@ -185,14 +189,6 @@ exports.removeGroupMember = async function removeGroupMember(conversation, userG
     if (targetMember) {
         await deleteConversationMember(conversation, targetMember, options);
     }
-};
-
-exports.remove1on1Member = async function remove1on1Member(conversation, userGId) {
-    await removeConversationWindow(conversation, userGId);
-
-    // No clean-up is currently needed. 1on1 conversations are never deleted. Never deleting
-    // 1on1 conversations makes log searching from elasticsearch possible. TODO: On the other hand
-    // dead 1on1s start to pile up eventually on Redis.
 };
 
 exports.addMessageUnlessDuplicate = async function addMessageUnlessDuplicate(
@@ -283,18 +279,6 @@ exports.setPassword = async function setPassword(conversation, password) {
     });
 };
 
-exports.getAllConversations = async function getAllConversations(user) {
-    const windows = await Window.find({ userId: user.id });
-    const conversations = [];
-
-    for (const window of windows) {
-        const conversation = await Conversation.fetch(window.get('conversationId'));
-        conversations.push(conversation);
-    }
-
-    return conversations;
-};
-
 async function broadcastAddMessage(conversation, props, excludeSession) {
     props.conversationId = conversation.id;
 
@@ -308,7 +292,7 @@ async function broadcastAddMessage(conversation, props, excludeSession) {
 
     const ntf = message.convertToNtf();
 
-    await scanForEmailNotifications(conversation, message);
+    await windowsService.scanMentions(conversation, message);
 
     await broadcast(conversation, ntf, excludeSession);
     search.storeMessage(conversation.id, ntf);
@@ -316,7 +300,32 @@ async function broadcastAddMessage(conversation, props, excludeSession) {
     return ntf;
 }
 
-async function broadcast(conversation, msg, excludeSession) {
+async function broadcastAddMembers(conversation, userGId, role) {
+    await broadcast(conversation, {
+        id: 'ADDMEMBERS',
+        reset: false,
+        members: [ {
+            userId: userGId.toString(),
+            role
+        } ]
+    });
+}
+
+async function broadcastFullAddMembers(conversation) {
+    const ntf = await createFullAddMemberNtf(conversation);
+    await broadcast(conversation, ntf);
+}
+
+async function sendCompleteAddMembers(conversation, user) {
+    const ntf = await createFullAddMemberNtf(conversation);
+    const window = await windowsService.findOrCreate(user, conversation);
+
+    ntf.windowId = window.id;
+
+    await notification.broadcast(user, ntf);
+}
+
+async function broadcast(conversation, ntf, excludeSession) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     for (const member of members) {
@@ -329,19 +338,13 @@ async function broadcast(conversation, msg, excludeSession) {
         const user = await User.fetch(userGId.id);
         const window = await windowsService.findOrCreate(user, conversation);
 
-        msg.windowId = window.id;
+        ntf.windowId = window.id;
 
-        await notification.broadcast(user, msg, excludeSession);
+        await notification.broadcast(user, ntf, excludeSession);
     }
 }
 
-async function sendCompleteAddMembers(conversation, user) {
-    if (!conversation) {
-        log.warn('conversation missing.');
-        return;
-    }
-
-    const window = await windowsService.findOrCreate(user, conversation);
+async function createFullAddMemberNtf(conversation) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     const membersList = members.map(member => ({
@@ -349,23 +352,11 @@ async function sendCompleteAddMembers(conversation, user) {
         role: member.get('role')
     }));
 
-    await notification.broadcast(user, {
+    return {
         id: 'ADDMEMBERS',
-        windowId: window.id,
         reset: true,
         members: membersList
-    });
-}
-
-async function broadcastAddMembers(conversation, userGId, role) {
-    await broadcast(conversation, {
-        id: 'ADDMEMBERS',
-        reset: false,
-        members: [ {
-            userId: userGId.toString(),
-            role
-        } ]
-    });
+    };
 }
 
 async function remove(conversation) {
@@ -384,117 +375,6 @@ async function remove(conversation) {
     await conversation.delete();
 }
 
-async function removeConversationWindow(conversation, userGId) {
-    if (userGId.type === 'mas') {
-        const user = await User.fetch(userGId.id);
-        const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
-
-        if (window) {
-            log.info(user, `Removing window, id: ${window.id}`);
-
-            await notification.broadcast(user, {
-                id: 'CLOSE',
-                windowId: window.id
-            });
-
-            await window.delete();
-        }
-    }
-}
-
-async function scanForEmailNotifications(conversation, message) {
-    if (!message.get('userGId') || message.get('userGId') === 'i0' ||
-        !message.get('body')) {
-        return;
-    }
-
-    const users = [];
-    const srcUserGId = UserGId.create(message.get('userGId'));
-
-    if (conversation.get('type') === 'group') {
-        const mentions = message.get('body').match(/(?:^| )@\S+(?=$| )/g);
-
-        if (!mentions) {
-            return;
-        }
-
-        for (const mention of mentions) {
-            const user = await nicksService.getUserFromNick(
-                mention.substring(1), conversation.get('network'));
-
-            if (user) {
-                users.push(user);
-            }
-        }
-
-        if (users.length === 0) {
-            return;
-        }
-    } else {
-        const peerMember = await get1on1PeerMember(conversation, srcUserGId);
-        const peerMemberGId = UserGId.create(peerMember.get('userGId'));
-
-        if (peerMemberGId.isMASUser) {
-            const user = await User.fetch(peerMemberGId.id);
-
-            if (user) {
-                users.push(user);
-            }
-        }
-    }
-
-    for (const user of users) {
-        if (user.get('deleted')) {
-            continue;
-        }
-
-        const online = await user.isOnline();
-
-        if (online) {
-            continue; // Mentioned user is online
-        }
-
-        const window = await Window.findFirst({
-            userId: user.id,
-            conversationId: conversation.id
-        });
-
-        if (!window) {
-            continue; // Mentioned user is not on this group
-        }
-
-        if (window.get('emailAlert')) {
-            let nickName = 'IRCUSER'; // TODO, fetch real IRC nick
-
-            if (srcUserGId.isMASUser) {
-                const srcUser = await User.fetch(srcUserGId.id);
-                nickName = await nicksService.getCurrentNick(srcUser, conversation.get('network'));
-            }
-
-            const name = user.get('name') || nickName;
-            const notificationId = uuid(20);
-
-            // TODO: Needs to be transaction, add lua script
-            await redis.sadd('emailnotifications', user.gId);
-            await redis.lpush(`emailnotificationslist:${user.gId}`, notificationId);
-
-            await redis.hmset(`emailnotification:${notificationId}`, {
-                type: conversation.get('type'),
-                senderName: name,
-                senderNick: nickName,
-                groupName: conversation.get('name'),
-                message: message.get('body')
-            });
-        }
-    }
-}
-
-async function get1on1PeerMember(conversation, userGId) {
-    const members = await ConversationMember.find({ conversationId: conversation.id });
-
-    return members.find(member => !member.gId.equals(userGId));
-}
-
 async function deleteConversationMember(conversation, member, options) {
     log.info(`User: ${member.get('userGId')} removed from conversation: ${conversation.id}`);
 
@@ -506,15 +386,22 @@ async function deleteConversationMember(conversation, member, options) {
         });
     }
 
-    await broadcast(conversation, {
-        id: 'DELMEMBERS',
-        members: [ {
-            userId: member.get('userGId')
-        } ]
-    });
+    if (!options.skipCleanUp) {
+        await broadcast(conversation, {
+            id: 'DELMEMBERS',
+            members: [ {
+                userId: member.get('userGId')
+            } ]
+        });
+    }
 
-    // Never let window to exist alone without linked conversation
-    await removeConversationWindow(conversation, UserGId.create(member.get('userGId')));
+    const userGId = UserGId.create(member.get('userGId'));
+
+    if (userGId.isMASUser) {
+        // Never let window to exist alone without linked conversation
+        const user = await User.fetch(userGId.id);
+        await windowsService.remove(user, conversation);
+    }
 
     await member.delete();
 }

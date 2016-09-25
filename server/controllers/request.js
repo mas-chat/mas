@@ -539,6 +539,7 @@ async function removeFromConversation(user, conversation) {
     if (conversation.get('type') === 'group') {
         await conversationsService.removeGroupMember(conversation, user.gId);
     } else {
-        await conversationsService.remove1on1Member(conversation, user.gId);
+        // 1on1 members are never removed, only the window is removed
+        await windowsService.remove(user, conversation);
     }
 }
