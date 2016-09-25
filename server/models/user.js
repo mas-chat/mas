@@ -108,6 +108,7 @@ module.exports = class User extends Model {
             'lastLogout',
             'name',
             'email',
+            'emailConfirmed',
             'nick',
             'canUseIRC',
             'registrationTime'
