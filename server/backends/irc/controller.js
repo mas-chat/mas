@@ -984,7 +984,7 @@ async function handleMode(user, msg) {
             }
 
             if (newClass) {
-                await conversationsService.setMemberRole(conversation, targetUserGId, newClass);
+                await conversationsService.updateMemberRole(conversation, targetUserGId, newClass);
             }
         }
     }

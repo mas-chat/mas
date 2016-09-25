@@ -97,17 +97,19 @@ exports.getPeerMember = async function getPeerMember(conversation, userGId) {
 };
 
 exports.getMemberRole = async function getMemberRole(conversation, userGId) {
-    const members = await ConversationMember.find({ conversationId: conversation.id });
-    const targetMember = members.find(member =>
-        UserGId.create(member.get('userGId')).equals(userGId));
+    const targetMember = await ConversationMember.findFirst({
+        conversationId: conversation.id,
+        userGId: userGId.toString()
+    });
 
     return targetMember ? targetMember.get('role') : null;
 };
 
-exports.setMemberRole = async function setMemberRole(conversation, userGId, role) {
-    const members = await ConversationMember.find({ conversationId: conversation.id });
-    const targetMember = members.find(member =>
-        UserGId.create(member.get('userGId')).equals(userGId));
+exports.updateMemberRole = async function updateMemberRole(conversation, userGId, role) {
+    const targetMember = await ConversationMember.findFirst({
+        conversationId: conversation.id,
+        userGId: userGId.toString()
+    });
 
     if (targetMember) {
         await targetMember.set({ role });
