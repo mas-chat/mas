@@ -214,9 +214,9 @@ async function handleJoin({ user, command, backend, network }) {
     });
 
     if (conversation) {
-        const isMember = await conversationsService.isMember(conversation, user);
+        const existingRole = await conversationsService.getMemberRole(conversation, user.gIdString);
 
-        if (isMember) {
+        if (existingRole) {
             return { status: 'ALREADY_JOINED', errorMsg: 'You have already joined the group.' };
         }
     }

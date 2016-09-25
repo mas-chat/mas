@@ -193,11 +193,6 @@ exports.remove1on1Member = async function remove1on1Member(conversation, userGId
     // dead 1on1s start to pile up eventually on Redis.
 };
 
-exports.isMember = async function isMember(conversation, user) {
-    const members = await ConversationMember.find({ conversationId: conversation.id });
-    return members.some(member => member.get('userGId') === user.gId);
-};
-
 exports.addMessageUnlessDuplicate = async function addMessageUnlessDuplicate(
     conversation, user, msg, excludeSession) {
     // A special filter for IRC backend.
