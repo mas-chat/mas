@@ -19,7 +19,7 @@
 /client/bower_components/
 /client/node_modules/
 
-/npm-debug.log
+npm-debug.log
 /logs/
 /run/
 /data/
