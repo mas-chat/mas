@@ -809,7 +809,7 @@ async function handleJoinReject(user, msg) {
 async function handleQuit(user, msg) {
     // :ilkka!ilkkao@localhost.myrootshell.com QUIT :"leaving"
     // let reason = msg.params[0];
-    const conversations = await conversationsService.getAllConversations(user);
+    const conversations = await conversationsService.getAll(user);
 
     for (const conversation of conversations) {
         // TODO: Send a real quit message instead of part
