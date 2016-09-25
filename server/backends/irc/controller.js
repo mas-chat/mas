@@ -511,7 +511,7 @@ async function disconnect(user, network) {
     courier.callNoWait('connectionmanager', 'disconnect', {
         userId: user.id,
         network,
-        reason: 'Session ended.'
+        reason: 'No open discussions left.'
     });
 }
 
@@ -1167,9 +1167,9 @@ async function disconnectIfIdle(user, network) {
         const lastConversation = await Conversation.fetch(windows[0].get('conversationId'));
 
         if (lastConversation.get('type') === '1on1') {
-            const peeruserId = await conversationsService.getPeerMember(lastConversation, user.gId);
+            const peerMember = await conversationsService.getPeerMember(lastConversation, user.gId);
 
-            if (peeruserId.toString() === 'i0') {
+            if (peerMember.gIdString === 'i0') {
                 onlyServer1on1Left = true;
             }
         }
