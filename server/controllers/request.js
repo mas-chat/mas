@@ -514,7 +514,7 @@ async function handleSendConfirmEmail({ user }) {
 async function sendEmailConfirmationEmail(user, email) {
     const emailConfirmationToken = uid2(25);
 
-    await redis.setex(`emailconfirmationtoken:${emailConfirmationToken}`, 60 * 60 * 24, user.gId);
+    await redis.setex(`emailconfirmationtoken:${emailConfirmationToken}`, 60 * 60 * 24, user.id);
 
     mailer.send('emails/build/confirmEmail.hbs', {
         name: user.get('name'),
