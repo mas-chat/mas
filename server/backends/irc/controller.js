@@ -99,7 +99,7 @@ init.on('afterShutdown', () => {
 
 (async function main() {
     await redisModule.loadScripts();
-    ircScheduler.init();
+    ircScheduler.init(disconnect);
 
     courier.on('send', processSend);
     courier.on('textCommand', processTextCommand);
@@ -504,9 +504,9 @@ async function connect(user, network, skipRetryCountReset, delay) {
     });
 }
 
-async function disconnect(user, network) {
+async function disconnect(user, network, nextState) {
     const networkInfo = await findOrCreateNetworkInfo(user, network);
-    await networkInfo.set('state', 'closing');
+    await networkInfo.set('state', nextState || 'closing');
 
     courier.callNoWait('connectionmanager', 'disconnect', {
         userId: user.id,
