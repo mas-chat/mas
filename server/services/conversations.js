@@ -145,9 +145,8 @@ exports.setGroupMembers = async function setGroupMembers(conversation, newMember
 };
 
 exports.addGroupMember = async function addGroupMember(conversation, userGId, role, options = {}) {
-    if (!(role === 'u' || role === '+' || role === '@' || role === '*')) {
-        log.warn(`Unknown role ${role}, userGId: ${userGId}`);
-    }
+    assert(role === 'u' || role === '+' || role === '@' || role === '*',
+        `Unknown role ${role}, userGId: ${userGId}`);
 
     const members = await ConversationMember.find({ conversationId: conversation.id });
     const targetMember = members.find(member => member.get('userGId') === userGId.toString());

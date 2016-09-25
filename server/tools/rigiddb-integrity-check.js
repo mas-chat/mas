@@ -75,6 +75,26 @@ async function checkConversations() {
         if (ownerUserId && !activeUserIds.find(activeUserId => activeUserId === ownerUserId)) {
             log(`!!! Conversation has deleted user as an owner: ${JSON.stringify(conversation._props)}`);
         }
+
+        if (conversation.get('type') === '1on1') {
+            const members = await ConversationMember.find({ conversationId: conversation.id });
+
+            if (members.length !== 2) {
+                log(`!!! 1on1 conversation has invalid amount of members: ${members.length}`);
+                members.forEach(member => {
+                    log(`    - ${member.get('userGId')}`);
+                });
+
+                if (fix) {
+                    await members[0].delete();
+                    await conversation.delete();
+                }
+            } else if (members[0].get('userGId') === members[1].get('userGId')) {
+                log('!!! 1on1 conversation where user is talking with himself');
+            } else if (members[0].get('userGId')[0] === 'i' && members[1].get('userGId')[0] === 'i') {
+                log('!!! 1on1 conversation where two irc users are talking');
+            }
+        }
     }
 }
 
@@ -124,8 +144,18 @@ async function checkConversationMembers() {
             continue;
         }
 
+        const role = conversationMember.get('role');
+
         const userGId = UserGId.create(conversationMember.get('userGId'));
         const conversationId = conversationMember.get('conversationId');
+
+        if (!(role === 'u' || role === '+' || role === '@' || role === '*')) {
+            log(`!!! Unknown role ${role}, userGId: ${userGId}`);
+
+            if (fix) {
+                await conversationMember.set('role', 'u');
+            }
+        }
 
         if (userGId.type === 'mas') {
             if (!activeUserIds.find(activeUserId => activeUserId === userGId.id)) {
