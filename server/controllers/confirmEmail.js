@@ -18,7 +18,7 @@
 
 const redis = require('../lib/redis').createClient();
 const User = require('../models/user');
-const settings = require('../models/settings');
+const settingsService = require('../services/settings');
 
 exports.show = async function show() {
     const userId = await redis.get(`emailconfirmationtoken:${this.params.token}`);
@@ -31,7 +31,7 @@ exports.show = async function show() {
     const user = await User.fetch(parseInt(userId));
     await user.set('emailConfirmed', true);
 
-    await settings.sendSet(userId);
+    await settingsService.sendSet(user);
 
     await this.render('confirmed-email', {
         page: 'confirmed-email',
