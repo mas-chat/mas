@@ -17,18 +17,20 @@
 'use strict';
 
 const redis = require('../lib/redis').createClient();
+const User = require('../models/user');
 const settings = require('../models/settings');
 
 exports.show = async function show() {
-    const token = this.params.token;
-    const userId = await redis.get(`emailconfirmationtoken:${token}`);
+    const userId = await redis.get(`emailconfirmationtoken:${this.params.token}`);
 
     if (!userId) {
         this.body = 'Expired or invalid email confirmation link.';
         return;
     }
 
-    await redis.hset(`user:${userId}`, 'emailConfirmed', 'true');
+    const user = await User.fetch(parseInt(userId));
+    await user.set('emailConfirmed', true);
+
     await settings.sendSet(userId);
 
     await this.render('confirmed-email', {
