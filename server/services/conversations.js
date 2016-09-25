@@ -148,8 +148,10 @@ exports.addGroupMember = async function addGroupMember(conversation, userGId, ro
     assert(role === 'u' || role === '+' || role === '@' || role === '*',
         `Unknown role ${role}, userGId: ${userGId}`);
 
-    const members = await ConversationMember.find({ conversationId: conversation.id });
-    const targetMember = members.find(member => member.get('userGId') === userGId.toString());
+    const targetMember = await ConversationMember.findFirst({
+        conversationId: conversation.id,
+        userGId: userGId.toString()
+    });
 
     if (!targetMember) {
         await ConversationMember.create({
@@ -173,21 +175,22 @@ exports.addGroupMember = async function addGroupMember(conversation, userGId, ro
 };
 
 exports.removeGroupMember = async function removeGroupMember(conversation, userGId, options = {}) {
-    const members = await ConversationMember.find({ conversationId: conversation.id });
-    const targetMember = members.find(member => member.get('userGId') === userGId.toString());
+    const targetMember = await ConversationMember.findFirst({
+        conversationId: conversation.id,
+        userGId: userGId.toString()
+    });
 
-    await deleteConversationMember(conversation, targetMember, options);
+    if (targetMember) {
+        await deleteConversationMember(conversation, targetMember, options);
+    }
 };
 
 exports.remove1on1Member = async function remove1on1Member(conversation, userGId) {
-    // Never let window to exist alone without linked conversation
     await removeConversationWindow(conversation, userGId);
 
-    // No clean-up is currently needed. 1on1 discussions are never deleted. Group discussions
-    // are deleted when the last member parts. This makes sense as groups are then totally reseted
-    // when they become empty (TODO: except elasticsearch contains orphan logs). Never deleting
+    // No clean-up is currently needed. 1on1 conversations are never deleted. Never deleting
     // 1on1 conversations makes log searching from elasticsearch possible. TODO: On the other hand
-    // dead 1on1s start to pile eventually on Redis.
+    // dead 1on1s start to pile up eventually on Redis.
 };
 
 exports.isMember = async function isMember(conversation, user) {
@@ -496,10 +499,6 @@ async function get1on1PeerMember(conversation, userGId) {
 }
 
 async function deleteConversationMember(conversation, member, options) {
-    if (!member) {
-        return; // TODO: When is this possible?
-    }
-
     log.info(`User: ${member.get('userGId')} removed from conversation: ${conversation.id}`);
 
     if (!options.silent && conversation.get('type') === 'group') {
