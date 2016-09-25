@@ -718,12 +718,6 @@ async function handleJoin(user, msg) {
         network
     });
 
-    if (!conversation) {
-        log.warn(user,
-            `Conversation not found when handling JOIN, name: ${channel}, network: ${network}`);
-        return;
-    }
-
     if (targetUser) {
         // MAS user joined channel
         let subscription = await IrcSubscription.findFirst({
