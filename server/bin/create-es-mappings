@@ -17,16 +17,13 @@
 
 'use strict';
 
-const Promise = require('bluebird'),
-      elasticsearch = require('elasticsearch'),
+const elasticsearch = require('elasticsearch'),
       argv = require('yargs').argv;
 
 let client = new elasticsearch.Client({
     host: 'localhost:9200',
 //    log: 'trace'
 });
-
-client.indices = Promise.promisifyAll(client.indices);
 
 (async function() {
     if (argv.deleteIndices) {
