@@ -25,9 +25,6 @@ module.exports = function(defaults) {
         },
         vendorFiles: {
             'handlebars.js': null // Hopefully temporary hack, see ember 1.10 release blog post.
-        },
-        'ember-cli-selectize': {
-            theme: 'bootstrap3'
         }
     });
 

@@ -46,6 +46,10 @@ export default Ember.Component.extend({
             reason => this.set('errorMsg', reason)); // Reject
         },
 
+        changeNetwork() {
+            this.set('selectedNetwork', this.$('select').val());
+        },
+
         closeModal() {
             this.sendAction('closeModal');
         }

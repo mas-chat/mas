@@ -11,7 +11,12 @@
         </div>
         <div class="form-group">
             <label>IRC network</label>
-            {{ember-selectize content=ircNetworks value=selectedNetwork optionValuePath="content" optionLabelPath="content" placeholder="Select an IRC network" }}
+            <select id="join_irc_network" class="form-control" {{action "changeNetwork" on='change'}}>
+                <option value="" disabled selected>Select an IRC network</option>
+                {{#each ircNetworks as |network|}}
+                    <option value={{network}}>{{network}}</option>
+                {{/each}}
+            </select>
         </div>
     </form>
 {{/modal-dialog}}
