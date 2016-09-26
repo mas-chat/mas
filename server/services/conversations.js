@@ -51,9 +51,6 @@ exports.findOrCreate1on1 = async function findOrCreate1on1(user, peerUserGId, ne
         }
     }
 
-    // TODO: Make sure peerUserId is either valid MAS user or that user doesn't have too many
-    // 1on1 conversations.
-
     if (!conversation) {
         conversation = await Conversation.create({
             owner: user.id,
