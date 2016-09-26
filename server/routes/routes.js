@@ -77,7 +77,7 @@ exports.register = function register(app) {
     router.get('/:page', websiteController);
 
     // Public assets
-    router.get('/files/:file', userFilesController);
+    router.get('/files/:uuid/:slug*', userFilesController);
 
     app.use(router.routes()).use(router.allowedMethods());
 

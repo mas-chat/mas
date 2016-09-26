@@ -36,6 +36,7 @@ admin_email=admin@example.com
 [files]
 upload_directory=data/uploads/
 cache_directory=data/cache/
+autorotate_jpegs=false
 
 [passwordauth]
 enabled=true

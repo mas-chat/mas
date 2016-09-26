@@ -16,6 +16,7 @@
 
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const send = require('koa-send');
 const conf = require('../lib/conf');
@@ -23,16 +24,31 @@ const conf = require('../lib/conf');
 const oneYearInSeconds = 60 * 60 * 24 * 365;
 let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
-// TODO: move this to library. Add exists check.
+// TODO: make this computed config property. Add exists check.
 if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
-module.exports = async function userFiles() {
-    const file = this.params.file;
-    const filePath = path.join(file.substring(0, 2), file);
+module.exports = function *userFiles() {
+    const uuid = this.params.uuid.substring(0, 20);
+    const subDirectory = uuid.substring(0, 2);
+    const metaData = yield readMetaDataFile(path.join(dataDirectory, subDirectory, `${uuid}.json`));
 
-    await send(this, filePath, { root: dataDirectory });
+    yield send(this, path.join(subDirectory, uuid + path.extname(metaData.originalFileName)), {
+        root: dataDirectory
+    });
 
     this.set('Cache-Control', `public, max-age=${oneYearInSeconds}`);
 };
+
+function readMetaDataFile(file) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(file, (err, data) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(JSON.parse(data));
+            }
+        });
+    });
+}

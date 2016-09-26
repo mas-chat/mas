@@ -1,5 +1,8 @@
 FROM node:6
 
+RUN apt-get update
+RUN apt-get install exiftran
+
 ENV NPM_CONFIG_LOGLEVEL warn
 
 MAINTAINER Ilkka Oksanen <iao@iki.fi>

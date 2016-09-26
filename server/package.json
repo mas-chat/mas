@@ -43,7 +43,6 @@
     "passport-google-oauth": "~1.0.0",
     "passport-local": "~1.0.0",
     "passport-yahoo": "~0.3.0",
-    "promisify-node": "~0.4.0",
     "readline-sync": "~1.4.0",
     "redis-lua-helper": "~0.2.0",
     "rigiddb": "~0.10.0",
