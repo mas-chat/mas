@@ -74,6 +74,7 @@ First add your [default configuration values](https://github.com/ilkkao/mas/blob
 to the `docker-compose.yml` file. Then
 
    ```bash
+   $ mkdir /data
    $ docker-compose up
    ```
 
