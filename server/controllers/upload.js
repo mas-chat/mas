@@ -89,7 +89,7 @@ function ensureUploadDirExists(targetDirectory) {
 }
 
 function autoRotateJPEGFile(fileName, extension) {
-    if (!(extension === '.jpg' || extension === '.jpeg')) {
+    if (extension.match(/\.(jpeg|jpg)$/i) === null) {
         return Promise.resolve();
     }
 
