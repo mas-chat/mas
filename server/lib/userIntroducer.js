@@ -53,18 +53,28 @@ async function introduceUsers(user, userGIds, session, socket) {
             if (userGId.isMASUser) {
                 const foundUser = await User.fetch(userGId.id);
 
-                entry.name = foundUser.get('name');
-                entry.gravatar = foundUser.get('emailMD5');
+                if (!foundUser) {
+                    log.warn(`User missing: ${userGId.id}`);
+                    entry.name = 'UNKNOWN';
+                    entry.gravatar = '';
 
-                for (const network of networks) {
-                    const currentNick = await nicksService.getCurrentNick(foundUser, network);
+                    for (const network of networks) {
+                        entry.nick[network] = 'UNKNOWN';
+                    }
+                } else {
+                    entry.name = foundUser.get('name');
+                    entry.gravatar = foundUser.get('emailMD5');
 
-                    // Fallback to default nick. This solves the situation where the user joins
-                    // a new IRC network during the session. In that case his own userGId is in
-                    // knownUserGIds table but with null nick for that IRC network. Fallback works
-                    // because if the user's nick changes for any reason from the default, that is
-                    // communicated separately to the client.
-                    entry.nick[network] = currentNick || foundUser.get('nick');
+                    for (const network of networks) {
+                        const currentNick = await nicksService.getCurrentNick(foundUser, network);
+
+                        // Fallback to default nick. This solves the situation where the user joins
+                        // a new IRC network during the session. In that case his own userGId is in
+                        // knownUserGIds table but with null nick for that IRC network. Fallback
+                        // works because if the user's nick changes for any reason from the default,
+                        // that is communicated separately to the client.
+                        entry.nick[network] = currentNick || foundUser.get('nick');
+                    }
                 }
             } else {
                 entry.name = 'IRC User';
