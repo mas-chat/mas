@@ -64,7 +64,7 @@ function *upload(user, fileObject) {
     const targetDirectory = path.join(dataDirectory, hashDirectory);
 
     if (fileObject.size > 10000000) { // 10MB
-        throw 'E_TOO_LARGE';
+        throw new Error('E_TOO_LARGE');
     }
 
     if (conf.get('files:autorotate_jpegs')) {
