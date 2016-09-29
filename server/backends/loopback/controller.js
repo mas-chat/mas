@@ -62,7 +62,7 @@ function processText() {
     return { status: 'ERROR', errorMsg: 'Unknown command in this context. Try /help' };
 }
 
-async function processSend({ userId, conversationId }) {
+async function processSend({ userId, sessionId, conversationId, text }) {
     const user = await User.fetch(userId);
     const conversation = await Conversation.fetch(conversationId);
 
@@ -77,7 +77,11 @@ async function processSend({ userId, conversationId }) {
         }
     }
 
-    return { status: 'OK' };
+    return await conversationsService.addMessage(conversation, user, {
+        userGId: user.gIdString,
+        cat: 'msg',
+        body: text
+    }, sessionId);
 }
 
 async function processCreate({ userId, name, password }) {
