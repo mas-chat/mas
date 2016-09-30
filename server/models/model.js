@@ -138,11 +138,8 @@ module.exports = class Model {
 
             if (err === 'notUnique') {
                 record.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
-                // TODO: REmove console.logs
-                console.log(`DB ERROR: ${err}`); // eslint-disable-line no-console
             } else if (err) {
-                console.log(`DB ERROR: ${err}`); // eslint-disable-line no-console
-                throw new Error(`DB ERROR: ${err}`);
+                throw new Error(`DB ERROR: ${err}, props: ${JSON.stringify(props)}`);
             } else {
                 record.id = val || null;
                 record._props = preparedProps;
