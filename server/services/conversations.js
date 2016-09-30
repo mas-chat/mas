@@ -72,10 +72,10 @@ exports.findOrCreate1on1 = async function findOrCreate1on1(user, peerUserGId, ne
         });
 
         // Update 1on1 conversation histories
-        await redis.sadd(`1on1conversationhistory:${user.gid}`, conversation.id);
+        await redis.sadd(`1on1conversationhistory:${user.gIdString}`, conversation.id);
 
         if (peerUserGId.type === 'mas') {
-            await redis.sadd(`1on1conversationhistory:${peerUserGId}`, conversation.id);
+            await redis.sadd(`1on1conversationhistory:${peerUserGId.toString()}`, conversation.id);
         }
     }
 
