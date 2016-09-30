@@ -66,8 +66,6 @@ exports.init = async function initServer(httpServer, httpsServer, setHttpHandler
     log.info('Registering website routes');
     routes.register(app);
 
-    await redisModule.loadScripts();
-
     scheduler.init();
 
     // Socket.io server (socketController) must be created after last app.use()

@@ -44,7 +44,6 @@ init.on('afterShutdown', () => {
 start();
 
 async function start() {
-    await redisModule.loadScripts();
     await createInitialGroups();
 
     courier.on('send', processSend);

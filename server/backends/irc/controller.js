@@ -98,7 +98,6 @@ init.on('afterShutdown', () => {
 });
 
 (async function main() {
-    await redisModule.loadScripts();
     ircScheduler.init(disconnect);
 
     courier.on('send', processSend);

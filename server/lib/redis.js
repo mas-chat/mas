@@ -16,40 +16,14 @@
 
 'use strict';
 
-const path = require('path');
 const Redis = require('ioredis');
-const Promise = require('bluebird');
-const redisLuaHelper = require('redis-lua-helper');
 const log = require('./log');
 const conf = require('./conf');
-
-const rlh = redisLuaHelper({
-    root: path.join(__dirname, '..', 'lua'),
-    macro: '#include',
-    extension: 'lua'
-});
 
 const activeClients = [];
 
 exports.createClient = function createClient(options) {
     return createRedisClient(options);
-};
-
-exports.loadScripts = async function loadScripts() {
-    const redisClient = createRedisClient();
-    const scripts = await Promise.promisify(rlh.loadDir, { context: rlh })();
-
-    for (const scriptName of scripts) {
-        try {
-            await redisClient.script('load', rlh.code(scriptName));
-        } catch (e) {
-            log.error(`Lua script loading failed: ${scriptName}, ${e}`);
-        }
-    }
-
-    log.info(`Loaded ${scripts.length} Redis Lua scripts.`);
-
-    redisClient.quit();
 };
 
 exports.shutdown = function shutdown() {
@@ -69,16 +43,6 @@ function createRedisClient({ autoClose = true } = {}) {
     });
 
     client.__quit = client.quit;
-
-    client.run = function run(scriptName, ...params) {
-        try {
-            return client.evalsha(rlh.shasum(scriptName), 0, ...params);
-        } catch (e) {
-            log.warn(`Lua script failed: ${scriptName}, ${e}`);
-        }
-
-        return null;
-    };
 
     client.quit = function quit() {
         const index = activeClients.indexOf(client);

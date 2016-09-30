@@ -32,8 +32,6 @@ const now = Math.round(Date.now() / 1000);
 const ts = now + (expiresInHours * 60 * 60);
 
 (async function main() {
-    await redisModule.loadScripts();
-
     const alertId = await redis.incr('nextGlobalAlertId');
 
     const alert = {
