@@ -139,6 +139,10 @@ async function processSend({ conversationId, userId, text = '' }) {
         target = conversation.get('name');
     }
 
+    // See addMessageUnlessDuplicate() for the rest of duplication detection logic
+    const key = `ircduplicates:${conversation.id}:${msgFingerPrint(text)}:${user.gIdString}`;
+    await redis.setex(key, 45, user.id);
+
     sendPrivmsg(user, conversation.get('network'), target, text.replace(/\n/g, ' '));
 }
 
@@ -921,7 +925,7 @@ async function handleMode(user, msg) {
         return;
     }
 
-    await conversationsService.addMessageUnlessDuplicate(conversation, user, {
+    await addMessageUnlessDuplicate(conversation, user, {
         cat: 'info',
         body: `Mode change: ${msg.params.join(' ')} by ${msg.nick ? msg.nick : msg.serverName}`
     });
@@ -1066,7 +1070,7 @@ async function handlePrivmsg(user, msg, command) {
         }
     }
 
-    await conversationsService.addMessageUnlessDuplicate(conversation, user, {
+    await addMessageUnlessDuplicate(conversation, user, {
         userGId: sourceUserGId.toString(),
         cat,
         body: text
@@ -1112,7 +1116,7 @@ async function updateNick(user, network, oldNick, newNick) {
 
         // Some 1on1 are closed (no window), don't activate them
         if (conversation.get('type') !== '1on1') {
-            await conversationsService.addMessageUnlessDuplicate(conversation, user, {
+            await addMessageUnlessDuplicate(conversation, user, {
                 cat: 'info',
                 body: `${oldNick} is now known as ${newNick}`
             });
@@ -1153,6 +1157,30 @@ async function tryDifferentNick(user, network) {
         network,
         line: `NICK ${currentNick}`
     });
+}
+
+async function addMessageUnlessDuplicate(conversation, user, msg) {
+    // To support Flowdock network where MAS user's message can come from the IRC server
+    // (before all incoming messages from MAS users were ignored as delivery had happened
+    // already locally) the overall logic is little complicated. The code below now
+    // works because IRC server doesn't echo messages back to their senders. If that wasn't
+    // the case, the logic would fail. (If a reporter sees a new identical message
+    // it's not considered as duplicate. Somebody is just repeating their line.)
+    const key = `ircduplicates:${conversation.id}:${msgFingerPrint(msg.body)}:${msg.userGId}`;
+    const reporter = user.id;
+
+    const [ setexResult, getResult ] = await redis.multi().setnx(key, reporter).get(key).exec();
+
+    console.log(setexResult)
+    console.log(getResult)
+
+    if (setexResult[1] === 1) { // the key was set
+        await redis.expire(key, 45);
+    } else if (parseInt(getResult[1]) !== user.id) {
+        return; // duplicate;
+    }
+
+    await conversationsService.addMessage(conversation, msg);
 }
 
 // TODO: Add a timer (every 15min?) to send one NAMES to every irc channel to make sure memberslist
@@ -1289,4 +1317,8 @@ async function findOrCreateNetworkInfo(user, network) {
     }
 
     return networkInfo;
+}
+
+function msgFingerPrint(body) {
+    return body.trim().substring(0, 100).replace(/[\n\r]/g, ' ');
 }
