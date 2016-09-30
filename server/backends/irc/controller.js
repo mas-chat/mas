@@ -1170,9 +1170,6 @@ async function addMessageUnlessDuplicate(conversation, user, msg) {
 
     const [ setexResult, getResult ] = await redis.multi().setnx(key, reporter).get(key).exec();
 
-    console.log(setexResult)
-    console.log(getResult)
-
     if (setexResult[1] === 1) { // the key was set
         await redis.expire(key, 45);
     } else if (parseInt(getResult[1]) !== user.id) {
