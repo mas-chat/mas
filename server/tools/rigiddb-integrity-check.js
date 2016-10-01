@@ -11,6 +11,7 @@ const Friend = require('../models/friend');
 const Settings = require('../models/settings');
 const UserGId = require('../models/userGId');
 const NetworkInfo = require('../models/networkInfo');
+const IRCSubscription = require('../models/ircSubscription');
 
 const REVISION = 1;
 
@@ -55,6 +56,7 @@ async function main() {
     await checkFriends();
     await checkConversationMessages();
     await checkNetworkInfos();
+    await checkIRCSubscriptions();
 
     log('Done.');
     await store.quit();
@@ -148,6 +150,14 @@ async function checkConversationMembers() {
 
         const userGId = UserGId.create(conversationMember.get('userGId'));
         const conversationId = conversationMember.get('conversationId');
+
+        if (!(role === 'u' || role === '+' || role === '@' || role === '*')) {
+            log(`!!! Unknown role ${role}, userGId: ${userGId}`);
+
+            if (fix) {
+                await conversationMember.set('role', 'u');
+            }
+        }
 
         if (!(role === 'u' || role === '+' || role === '@' || role === '*')) {
             log(`!!! Unknown role ${role}, userGId: ${userGId}`);
@@ -310,14 +320,44 @@ async function checkNetworkInfos() {
 
     const { val: networkInfoIds } = await store.list('networkInfos');
 
+    const validNetworks = [ 'mas', 'ircnet', 'freenode', 'w3c' ];
+
     for (const networkInfoId of networkInfoIds) {
         const networkInfo = await NetworkInfo.fetch(networkInfoId);
+
+        if (!validNetworks.includes(networkInfo.get('network'))) {
+            log(`!!! Invalid network ${networkInfo.get('network')} found`);
+
+            if (fix) {
+                await networkInfo.delete();
+                continue;
+            }
+        }
 
         if (!allUserIds.find(userId => userId === networkInfo.get('userId'))) {
             log('!!! Found networkInfo that belongs to non-existent user.');
         }
     }
 }
+
+async function checkIRCSubscriptions() {
+    log('Checking ircSubscription objects are valid...');
+
+    const { val: ircSubscriptionIds } = await store.list('ircSubscriptions');
+
+    const validNetworks = [ 'mas', 'ircnet', 'freenode', 'w3c' ];
+
+    for (const ircSubscriptionId of ircSubscriptionIds) {
+        const subscription = await IRCSubscription.fetch(ircSubscriptionId);
+
+        console.log(subscription.getAll());
+
+        if (!validNetworks.includes(subscription.get('network'))) {
+            log(`!!! Invalid network ${subscription.get('network')} found`);
+        }
+    }
+}
+
 
 function log(msg) {
     console.log(msg); // eslint-disable-line no-console
