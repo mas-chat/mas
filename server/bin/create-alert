@@ -18,9 +18,10 @@
 'use strict';
 
 const readlineSync = require('readline-sync');
-const log = require('../server/lib/log');
-const redisModule = require('../server/lib/redis');
-const notification = require('../server/lib/notification');
+const log = require('../lib/log');
+const redisModule = require('../lib/redis');
+const User = require('../models/user');
+const notification = require('../lib/notification');
 
 const redis = redisModule.createClient();
 
@@ -59,16 +60,16 @@ const ts = now + (expiresInHours * 60 * 60);
     // Deliver the alert
     console.log('Delivering the alert to all logged in users...'); // eslint-disable-line no-console
 
-    const allUsers = await redis.smembers('userlist');
+    const allUsers = await User.fetchAll();
 
     // Convert object to MAS notification
     alert.id = 'ALERT';
     alert.alertId = alertId;
     delete alert.expires;
 
-    for (const userId of allUsers) {
-        await redis.sadd(`activealerts:${userId}`, alertId);
-        await notification.broadcast(userId, alert);
+    for (const user of allUsers) {
+        await redis.sadd(`activealerts:${user.id}`, alertId);
+        await notification.broadcast(user, alert);
     }
 
     redisModule.shutdown();
