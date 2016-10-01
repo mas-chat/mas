@@ -34,7 +34,7 @@ const shutdownOrder = {
 };
 
 process.on('unhandledRejection', (reason, p) => {
-    log.info(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
+    log.warn(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
     throw reason;
 });
 
@@ -43,6 +43,9 @@ exports.configureProcess = function configureProcess(serverName) {
 
     process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
     process.title = processName;
+
+    log.warn(`${serverName} starting...`);
+
     process.on('SIGINT', execShutdown);
     process.on('SIGTERM', execShutdown);
 
