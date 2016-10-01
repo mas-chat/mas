@@ -298,21 +298,26 @@ async function processReconnectIfInactive({ userId }) {
 // Restarted
 async function processRestarted() {
     await iterateUsersAndNetworks(async (user, network) => {
-        const subscriptions = await IrcSubscription.find({
-            userId: user.id,
-            network
-        });
+        // Try makes sure problems with one user don't affect others
+        try {
+            const subscriptions = await IrcSubscription.find({
+                userId: user.id,
+                network
+            });
 
-        const networkInfo = await findOrCreateNetworkInfo(user, network);
+            const networkInfo = await findOrCreateNetworkInfo(user, network);
 
-        if (subscriptions.length > 0 && networkInfo.get('state') !== 'idledisconnected') {
-            log.info(user, `Scheduling connect() to IRC network: ${network}`);
+            if (subscriptions.length > 0 && networkInfo.get('state') !== 'idledisconnected') {
+                log.info(user, `Scheduling connect() to IRC network: ${network}`);
 
-            await addSystemMessage(user, network, 'info',
-                'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
-                ' server enabled. Next connect will be slow.');
+                await addSystemMessage(user, network, 'info',
+                    'MAS Server restarted. Global rate limiting to avoid flooding IRC ' +
+                    ' server enabled. Next connect will be slow.');
 
-            await connect(user, network);
+                await connect(user, network);
+            }
+        } catch(e) {
+            log.warn(user, `Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
         }
     });
 }
