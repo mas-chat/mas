@@ -1,4 +1,4 @@
-FROM node:6
+FROM node:6.7
 
 RUN apt-get update
 RUN apt-get install exiftran
