@@ -1,6 +1,6 @@
 'use strict';
 
-const readlineSync = require('readline-sync');
+const readline = require('readline');
 const RigidDB = require('rigiddb');
 const User = require('../models/user');
 const Conversation = require('../models/conversation');
@@ -19,21 +19,25 @@ const store = new RigidDB('mas', REVISION, { db: 10 });
 const allUserIds = [];
 const activeUserIds = [];
 const conversations = [];
+let fix = false;
 
-main();
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 
 process.on('unhandledRejection', (reason, p) => {
     log(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
     throw reason;
 });
 
-log('');
-log('*** Last line of defence, only needed in special cases ***');
-log('');
+(async function main() {
+    log('');
+    log('*** Last line of defence, only needed in special cases ***');
+    log('');
 
-const fix = readlineSync.question('Fix issues in addition to reporting them [yes/NO]? ') === 'yes';
+    fix = question('Fix issues in addition to reporting them [yes/NO]? ') === 'yes';
 
-async function main() {
     const { val: userIds } = await store.list('users');
 
     log(`${userIds.length} users found.`);
@@ -60,6 +64,10 @@ async function main() {
 
     log('Done.');
     await store.quit();
+}());
+
+async function question(label) {
+    return new Promise(resolve => rl.question(label, answer => resolve(answer)));
 }
 
 async function checkConversations() {

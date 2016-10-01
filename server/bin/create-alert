@@ -17,22 +17,27 @@
 
 'use strict';
 
-const readlineSync = require('readline-sync');
+const readline = require('readline');
 const log = require('../lib/log');
 const redisModule = require('../lib/redis');
 const User = require('../models/user');
 const notification = require('../lib/notification');
 
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
 const redis = redisModule.createClient();
 
-const message = readlineSync.question('Message: ');
-const expiresInHours = readlineSync.question('Expires in (hours): ');
-const dismissible = yesOrNo('Can be dismissed?');
-
-const now = Math.round(Date.now() / 1000);
-const ts = now + (expiresInHours * 60 * 60);
-
 (async function main() {
+    const message = await question('Message: ');
+    const expiresInHours = await question('Expires in (hours): ');
+    const dismissible = await yesOrNo('Can be dismissed?');
+
+    const now = Math.round(Date.now() / 1000);
+    const ts = now + (expiresInHours * 60 * 60);
+
     const alertId = await redis.incr('nextGlobalAlertId');
 
     const alert = {
@@ -76,13 +81,19 @@ const ts = now + (expiresInHours * 60 * 60);
     log.quit();
 
     console.log('Done. All OK.'); // eslint-disable-line no-console
+
+    rl.close();
 }());
 
-function yesOrNo(label) {
+async function question(label) {
+    return new Promise(resolve => rl.question(label, answer => resolve(answer)));
+}
+
+async function yesOrNo(label) {
     let result = null;
 
     while (result === null) {
-        const response = readlineSync.question(`${label} [yes/no]: `);
+        const response = await question(`${label} [yes/no]: `);
 
         if (response === 'yes') {
             result = true;
