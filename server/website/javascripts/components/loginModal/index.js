@@ -162,7 +162,7 @@ class LoginModal extends Component {
         const forgotPasswordDonePanel = (
             <section className="section">
                 <h4 className="title is-5 has-text-centered">Done</h4>
-                <p>Password reset email sent! See your spam folder if you don't see it in couple minutes.</p>
+                <p>Password reset email sent! See your spam folder if you don&apos;t see it in couple minutes.</p>
                 <p className={cx('m-controls', 'control')}>
                     <button onClick={this.switchToLogin} className="button is-primary is-fullwidth">Ok</button>
                 </p>
