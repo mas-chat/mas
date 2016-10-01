@@ -180,9 +180,12 @@ async function createWindow(user, conversation) {
 
     assert(conversation);
 
-    const settings = await Settings.findFirst({ userId: user.id });
+    let settings = await Settings.findFirst({ userId: user.id });
 
-    assert(settings, `User ${user.id} doesn't have settings.`);
+    if (!settings) {
+        log.warn(user, 'User doesn\'t have settings. Fixing.');
+        settings = await Settings.create({ userId: user.id });
+    }
 
     const window = await Window.create({
         userId: user.id,
