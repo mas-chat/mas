@@ -316,7 +316,7 @@ async function processRestarted() {
 
                 await connect(user, network);
             }
-        } catch(e) {
+        } catch (e) {
             log.warn(user, `Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
         }
     });
