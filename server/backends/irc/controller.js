@@ -615,7 +615,13 @@ async function handle332(user, msg) {
 async function handle353(user, msg) {
     // :own.freenode.net 353 drwillie @ #evergreenproject :drwillie ilkkaoks
     const channel = msg.params[1];
-    const names = msg.params[2].split(' ');
+    const namesPart = msg.params[2];
+
+    if (namesPart === '') {
+        // Some servers send empty 353 RPL_NAMREPLY
+        return;
+    }
+
     const conversation = await Conversation.findFirst({
         type: 'group',
         name: channel,
@@ -623,7 +629,7 @@ async function handle353(user, msg) {
     });
 
     if (conversation) {
-        await bufferNames(names, user, msg.network, conversation);
+        await bufferNames(namesPart.split(' '), user, msg.network, conversation);
     }
 }
 

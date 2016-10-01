@@ -350,8 +350,6 @@ async function checkIRCSubscriptions() {
     for (const ircSubscriptionId of ircSubscriptionIds) {
         const subscription = await IRCSubscription.fetch(ircSubscriptionId);
 
-        console.log(subscription.getAll());
-
         if (!validNetworks.includes(subscription.get('network'))) {
             log(`!!! Invalid network ${subscription.get('network')} found`);
         }
