@@ -166,8 +166,7 @@ exports.addGroupMember = async function addGroupMember(conversation, userGId, ro
         if (!options.silent) {
             await broadcastAddMessage(conversation, {
                 userGId: userGId.toString(),
-                cat: 'join',
-                body: ''
+                cat: 'join'
             });
         }
 
@@ -188,8 +187,9 @@ exports.removeGroupMember = async function removeGroupMember(conversation, userG
     }
 };
 
-exports.addMessage = async function addMessage(conversation, msg, excludeSession) {
-    return await broadcastAddMessage(conversation, msg, excludeSession);
+exports.addMessage = async function addMessage(conversation, { userGId = null, cat, body = '' },
+    excludeSession) {
+    return await broadcastAddMessage(conversation, { userGId, cat, body }, excludeSession);
 };
 
 exports.editMessage = async function editMessage(conversation, user, conversationMessageId, text) {
@@ -256,10 +256,15 @@ exports.setPassword = async function setPassword(conversation, password) {
     });
 };
 
-async function broadcastAddMessage(conversation, props, excludeSession) {
-    props.conversationId = conversation.id;
+async function broadcastAddMessage(conversation, { userGId = null, cat, body = '' },
+    excludeSession) {
+    const message = await ConversationMessage.create({
+        userGId,
+        cat,
+        body,
+        conversationId: conversation.id
+    });
 
-    const message = await ConversationMessage.create(props);
     const ids = await ConversationMessage.findIds({ conversationId: conversation.id });
 
     while (ids.length - MSG_BUFFER_SIZE > 0) {

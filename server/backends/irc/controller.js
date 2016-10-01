@@ -358,7 +358,6 @@ async function processData(params) {
 // No connection
 async function processNoConnection({ userId, network }) {
     const user = await User.fetch(userId);
-    const networkInfo = await findOrCreateNetworkInfo(user, network);
 
     log.warn(user, 'Disconnected user tried to send IRC command');
 
@@ -1157,14 +1156,14 @@ async function tryDifferentNick(user, network) {
     });
 }
 
-async function addMessageUnlessDuplicate(conversation, user, msg) {
+async function addMessageUnlessDuplicate(conversation, user, { userGId = null, cat, body = '' }) {
     // To support Flowdock network where MAS user's message can come from the IRC server
     // (before all incoming messages from MAS users were ignored as delivery had happened
     // already locally) the overall logic is little complicated. The code below now
     // works because IRC server doesn't echo messages back to their senders. If that wasn't
     // the case, the logic would fail. (If a reporter sees a new identical message
     // it's not considered as duplicate. Somebody is just repeating their line.)
-    const key = `ircduplicates:${conversation.id}:${msgFingerPrint(msg.body)}:${msg.userGId}`;
+    const key = `ircduplicates:${conversation.id}:${msgFingerPrint(body)}:${userGId}`;
     const reporter = user.id;
 
     const [ setexResult, getResult ] = await redis.multi().setnx(key, reporter).get(key).exec();
@@ -1175,7 +1174,7 @@ async function addMessageUnlessDuplicate(conversation, user, msg) {
         return; // duplicate;
     }
 
-    await conversationsService.addMessage(conversation, msg);
+    await conversationsService.addMessage(conversation, { userGId, cat, body });
 }
 
 // TODO: Add a timer (every 15min?) to send one NAMES to every irc channel to make sure memberslist
