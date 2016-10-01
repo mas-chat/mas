@@ -5,6 +5,7 @@ services:
     depends_on:
       - elasticsearch
       - redis
+    restart: always
     environment:
       - FILES__UPLOAD_DIRECTORY=/data/uploads/
       - FILES__CACHE_DIRECTORY=/data/cache/
@@ -24,6 +25,7 @@ services:
     depends_on:
       - elasticsearch
       - redis
+    restart: always
     environment:
       - FILES__UPLOAD_DIRECTORY=/data/uploads/
       - FILES__CACHE_DIRECTORY=/data/cache/
@@ -41,6 +43,7 @@ services:
     depends_on:
       - elasticsearch
       - redis
+    restart: always
     environment:
       - FILES__UPLOAD_DIRECTORY=/data/uploads/
       - FILES__CACHE_DIRECTORY=/data/cache/
