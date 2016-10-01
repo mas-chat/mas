@@ -360,8 +360,7 @@ async function processNoConnection({ userId, network }) {
     const user = await User.fetch(userId);
     const networkInfo = await findOrCreateNetworkInfo(user, network);
 
-    // Make sure networkInfo is up-to-date
-    await networkInfo.set('state', 'disconnected');
+    log.warn(user, 'Disconnected user tried to send IRC command');
 
     await addSystemMessage(user, network, 'error', 'Can\'t send. Not connected to IRC currently.');
 }
