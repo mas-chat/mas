@@ -14,9 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals moment, $, isMobile */
+/* globals moment, $ */
 
 import Ember from 'ember';
+import isMobile from 'npm:ismobilejs';
 import Store from 'emflux/store';
 import { dispatch, getStore } from 'emflux/dispatcher';
 import Window from '../models/window';

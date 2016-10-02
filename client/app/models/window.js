@@ -14,9 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals moment, isMobile */
+/* globals moment */
 
 import Ember from 'ember';
+import isMobile from 'npm:ismobilejs'
 import BaseModel from './base';
 import Message from './message';
 import IndexArray from '../utils/index-array';

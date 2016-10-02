@@ -14,9 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals $, titlenotifier, isMobile */
+/* globals $, titlenotifier */
 
 import Ember from 'ember';
+import isMobile from 'npm:ismobilejs';
 import { dispatch } from 'emflux/dispatcher';
 import { play } from '../../../utils/sound';
 import { calcMsgHistorySize } from '../../../utils/msg-history-sizer';

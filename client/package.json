@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "howler": "~2.0.0",
+    "ismobilejs": "~0.4.0",
     "urijs": "~1.18.2"
   }
 }

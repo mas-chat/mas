@@ -14,8 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* global isMobile */
-
+import isMobile from 'npm:ismobilejs';
 import Store from 'emflux/store';
 import { dispatch } from 'emflux/dispatcher';
 import socket from '../utils/socket';
