@@ -51,7 +51,7 @@ module.exports = function(defaults) {
     app.import('bower_components/velocity/velocity.js');
 
     // Copy only the relevant files:
-    let fontsFontAwesome = pickFiles('bower_components/font-awesome/fonts', {
+    let fontsFontAwesome = pickFiles('node_modules/font-awesome/fonts', {
         srcDir: '/',
         destDir: '/assets/fonts'
     });
