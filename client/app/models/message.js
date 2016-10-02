@@ -14,14 +14,18 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals marked */
-
 import Ember from 'ember';
+import marked from 'npm:marked';
 import emojione from 'npm:emojione';
 import moment from 'npm:moment';
 import URI from 'npm:urijs';
 import BaseModel from './base';
 import { getStore } from 'emflux/dispatcher';
+
+marked.setOptions({
+    breaks: true,
+    tables: false
+});
 
 export default BaseModel.extend({
     gid: 0,

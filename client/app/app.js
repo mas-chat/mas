@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals titlenotifier, marked */
+/* globals titlenotifier */
 
 import Ember from 'ember';
 import Resolver from './resolver';
@@ -37,9 +37,4 @@ document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
         titlenotifier.reset();
     }
-});
-
-marked.setOptions({
-    breaks: true,
-    tables: false
 });
