@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals titlenotifier */
-
 import Ember from 'ember';
 import Resolver from './resolver';
 import loadInitializers from 'ember-load-initializers';
@@ -32,9 +30,3 @@ let App = Ember.Application.extend({
 loadInitializers(App, config.modulePrefix);
 
 export default App;
-
-document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-        titlenotifier.reset();
-    }
-});

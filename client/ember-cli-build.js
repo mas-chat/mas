@@ -44,7 +44,6 @@ module.exports = function(defaults) {
 
     app.import('bower_components/bootstrap/dist/js/bootstrap.js');
     app.import('bower_components/bootstrap-datepicker/js/bootstrap-datepicker.js');
-    app.import('bower_components/TitleNotifier.js/src/title_notifier.js');
     app.import('bower_components/jquery.atwho/dist/js/jquery.atwho.js');
     app.import('bower_components/Caret.js/dist/jquery.caret.min.js');
     app.import('bower_components/magnific-popup/dist/jquery.magnific-popup.js');

@@ -14,14 +14,28 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals $, titlenotifier */
+/* globals $ */
 
 import Ember from 'ember';
 import Ps from 'npm:perfect-scrollbar';
+import Favico from 'npm:favico.js';
 import isMobile from 'npm:ismobilejs';
 import { dispatch } from 'emflux/dispatcher';
 import { play } from '../../../utils/sound';
 import { calcMsgHistorySize } from '../../../utils/msg-history-sizer';
+
+let faviconCounter = 0;
+
+const favicon = new Favico({
+    animation:'slide'
+});
+
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        faviconCounter = 0;
+        favicon.reset();
+    }
+});
 
 export default Ember.Component.extend({
     stores: Ember.inject.service(),
@@ -150,7 +164,7 @@ export default Ember.Component.extend({
         if (document.hidden && importantMessage) {
             // Browser title notification
             if (this.get('content.alerts.title')) {
-                titlenotifier.add();
+                favicon.badge(++faviconCounter);
             }
 
             // Sound notification

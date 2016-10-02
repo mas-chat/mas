@@ -9,7 +9,6 @@
   "license": "Apache",
   "name": "mas",
   "dependencies": {
-    "TitleNotifier.js": "*",
     "bootstrap": "~3.3.1",
     "bootstrap-contextmenu": "~0.3.1",
     "bootstrap-datepicker": "~1.6.0",
