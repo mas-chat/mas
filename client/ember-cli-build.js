@@ -58,7 +58,6 @@ module.exports = function(defaults) {
     app.import('bower_components/magnific-popup/dist/jquery.magnific-popup.js');
     app.import('bower_components/bootstrap-contextmenu/bootstrap-contextmenu.js');
     app.import('bower_components/velocity/velocity.js');
-    app.import('bower_components/socket.io-client/socket.io.js');
     app.import('bower_components/perfect-scrollbar/js/perfect-scrollbar.js');
 
     // Copy only the relevant files:

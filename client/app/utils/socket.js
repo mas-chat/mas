@@ -14,9 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals $, io */
+/* globals $ */
 
 import Ember from 'ember';
+import io from 'npm:socket.io-client';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import { dispatch, getStore } from 'emflux/dispatcher';
 
