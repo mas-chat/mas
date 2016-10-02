@@ -33,9 +33,15 @@ case "$1" in
         ;;
 
     resetdb)
-        redis-cli FLUSHALL
-        ./server/bin/create-db
-        echo "Redis reset done."
+        echo -n "!!! Are you absolutely sure this is a development environment? [yes/NO] "
+        read ANSWER
+        if [ "$ANSWER" = "yes" ]; then
+            redis-cli FLUSHALL
+            ./server/bin/create-db
+            echo "Redis reset done."
+        else
+            echo "Cancelled."
+        fi
         ;;
     *)
         echo $"Usage: $0 {start|build|clean|resetdb}"
