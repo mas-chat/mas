@@ -77,6 +77,9 @@ export default Ember.Component.extend({
         this.$('.btn-capture').removeClass('disabled');
 
         this.$('#webcam-viewfinder video').attr('src', window.URL.createObjectURL(stream));
+
+        const el = this.$('#webcam-viewfinder video')[0];
+        el.onloadedmetadata = () => el.play();
     },
 
     _getStreamError() {

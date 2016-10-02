@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals getUserMedia */
-
 import Ember from 'ember';
 
 export default Ember.Service.extend({
@@ -28,32 +26,27 @@ export default Ember.Service.extend({
     getStream(successCb, failureCb) {
         let stream = this.get('stream');
 
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            failureCb();
+        }
+
         if (stream) {
             successCb(stream);
             return;
         }
 
-        let options = {
+        navigator.mediaDevices.getUserMedia({
             audio: false,
-            video: true,
-
-            // the element (by id) you wish to use for
-            // displaying the stream from a camera
-            el: 'webcam-viewfinder',
-
-            extern: null,
-            append: true,
-
-            width: 800,
-            height: 600,
-
-            mode: 'callback'
-        };
-
-        getUserMedia(options, Ember.run.bind(this, function(newStream) {
+            video: {
+                width: 800,
+                height: 600
+            }
+        })
+        .then(Ember.run.bind(this, function(newStream) {
             this.set('stream', newStream);
             successCb(newStream);
-        }), failureCb);
+        }))
+        .catch(failureCb);
     },
 
     closeStream() {
