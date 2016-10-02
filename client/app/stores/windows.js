@@ -618,7 +618,7 @@ export default Store.extend({
         socket.send({
             id: 'DESTROY_ACCOUNT'
         }, () => {
-            $.removeCookie('auth', { path: '/' });
+            Cookies.remove('auth', { path: '/' });
             window.location = '/';
         });
     },
@@ -634,7 +634,7 @@ export default Store.extend({
     },
 
     _logout({ informServer = false } = {}) {
-        $.removeCookie('auth', { path: '/' });
+        Cookies.remove('auth', { path: '/' });
 
         if (typeof Storage !== 'undefined') {
             window.localStorage.removeItem('data');

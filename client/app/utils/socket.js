@@ -18,6 +18,7 @@
 
 import Ember from 'ember';
 import io from 'npm:socket.io-client';
+import Cookies from 'npm:js-cookie';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import { dispatch, getStore } from 'emflux/dispatcher';
 
@@ -171,7 +172,7 @@ let SocketService = Ember.Object.extend({
     },
 
     _logout() {
-        $.removeCookie('auth', { path: '/' });
+        Cookies.remove('auth', { path: '/' });
         window.location = '/';
     }
 });
