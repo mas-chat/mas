@@ -16,7 +16,8 @@ module.exports = function(defaults) {
             paths: [
                 'bower_components/bootstrap/less',
                 'bower_components/bootswatch/superhero',
-                'bower_components'
+                'bower_components',
+                'node_modules'
             ]
         },
         autoprefixer: {
