@@ -18,6 +18,7 @@
 
 import Ember from 'ember';
 import moment from 'npm:moment';
+import Cookies from 'npm:js-cookie';
 import isMobile from 'npm:ismobilejs';
 import Store from 'emflux/store';
 import { dispatch, getStore } from 'emflux/dispatcher';
@@ -41,7 +42,7 @@ export default Store.extend({
     init() {
         this._super();
 
-        let [ userId, secret ] = ($.cookie('auth') || '').split('-');
+        let [ userId, secret ] = (Cookies.get('auth') || '').split('-');
 
         if (!userId || !secret) {
             Ember.Logger.info(`Authentication cookie not found. Exiting.`);
