@@ -49,11 +49,6 @@ module.exports = function(defaults) {
 
     app.import('bower_components/bootstrap-datepicker/js/bootstrap-datepicker.js');
 
-    app.import('bower_components/uri.js/src/IPv6.js');
-    app.import('bower_components/uri.js/src/punycode.js');
-    app.import('bower_components/uri.js/src/SecondLevelDomains.js');
-    app.import('bower_components/uri.js/src/URI.js');
-
     //app.import('bower_components/jquery/dist/jquery.js');
     app.import('bower_components/jquery-cookie/jquery.cookie.js');
     app.import('bower_components/TitleNotifier.js/src/title_notifier.js');

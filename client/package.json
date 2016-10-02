@@ -46,6 +46,7 @@
     "loader.js": "^4.0.1"
   },
   "dependencies": {
-    "howler": "~2.0.0"
+    "howler": "~2.0.0",
+    "urijs": "~1.18.2"
   }
 }
