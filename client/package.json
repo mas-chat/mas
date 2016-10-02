@@ -48,6 +48,7 @@
   "dependencies": {
     "howler": "~2.0.0",
     "ismobilejs": "~0.4.0",
+    "moment": "~2.15.1",
     "socket.io-client": "~1.4.8",
     "urijs": "~1.18.2"
   }

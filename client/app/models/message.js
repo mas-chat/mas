@@ -14,9 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals moment, emojify, marked */
+/* globals emojify, marked */
 
 import Ember from 'ember';
+import moment from 'npm:moment';
 import URI from 'npm:urijs';
 import BaseModel from './base';
 import { getStore } from 'emflux/dispatcher';

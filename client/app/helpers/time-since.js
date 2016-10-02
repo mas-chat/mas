@@ -14,9 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
-/* global moment */
-
 import Ember from 'ember';
+import moment from 'npm:moment';
 
 export default Ember.Helper.extend({
     compute(params) {

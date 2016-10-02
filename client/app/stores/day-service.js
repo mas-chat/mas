@@ -14,9 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
-/* global moment */
-
 import Ember from 'ember';
+import moment from 'npm:moment';
 import Store from 'emflux/store';
 
 export default Store.extend({

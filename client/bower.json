@@ -25,7 +25,6 @@
     "jquery-cookie": "~1.4.0",
     "jquery.atwho": "~1.5.0",
     "magnific-popup": "~1.1.0",
-    "momentjs": "~2.15.0",
     "velocity": "~1.3.0",
     "mousetrap": "~1.6.0",
     "ember-mocha": "~0.8.0",

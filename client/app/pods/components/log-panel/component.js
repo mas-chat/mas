@@ -14,9 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals moment, $ */
+/* globals $ */
 
 import Ember from 'ember';
+import moment from 'npm:moment';
 import { dispatch } from 'emflux/dispatcher';
 
 export default Ember.Component.extend({

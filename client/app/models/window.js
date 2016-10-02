@@ -14,9 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals moment */
-
 import Ember from 'ember';
+import moment from 'npm:moment';
 import isMobile from 'npm:ismobilejs'
 import BaseModel from './base';
 import Message from './message';
