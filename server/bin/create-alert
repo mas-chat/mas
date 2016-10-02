@@ -56,14 +56,14 @@ const redis = redisModule.createClient();
     for (const oldAlertId of allIds) {
         const oldAlert = await redis.hgetall(`alert:${oldAlertId}`);
 
-        if (now > oldAlert.expires) {
+        if (now > parseInt(oldAlert.expires)) {
             redis.del('`alert:${oldAlertId})`');
             redis.srem('alertlist', oldAlertId);
         }
     }
 
     // Deliver the alert
-    console.log('Delivering the alert to all logged in users...'); // eslint-disable-line no-console
+    console.log('Delivering the alert to all users...'); // eslint-disable-line no-console
 
     const allUsers = await User.fetchAll();
 

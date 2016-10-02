@@ -26,7 +26,7 @@ exports.sendAlerts = async function sendAlerts(user, sessionId) {
     for (const alertId of alertIds) {
         const alert = await redis.hgetall(`alert:${alertId}`);
 
-        if (alert && now < alert.expires) {
+        if (alert && now < parseInt(alert.expires)) {
             alert.id = 'ALERT';
             alert.alertId = alertId;
 

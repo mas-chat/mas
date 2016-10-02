@@ -388,7 +388,7 @@ async function start1on1(user, targetUserGId, network) {
 
 async function handleAckAlert({ user, command }) {
     const alertId = command.alertId;
-    await redis.srem(`activealerts:${user.gId}`, alertId);
+    await redis.srem(`activealerts:${user.id}`, alertId);
 
     return { status: 'OK' };
 }
