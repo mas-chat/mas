@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals titlenotifier, emojify, marked */
+/* globals titlenotifier, marked */
 
 import Ember from 'ember';
 import Resolver from './resolver';
@@ -37,11 +37,6 @@ document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
         titlenotifier.reset();
     }
-});
-
-emojify.setConfig({
-    img_dir: '/app/assets/images/emoji', // eslint-disable-line camelcase
-    ignore_emoticons: true // eslint-disable-line camelcase
 });
 
 marked.setOptions({

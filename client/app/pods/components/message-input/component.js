@@ -14,11 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-/* global emojify */
-
 import Ember from 'ember';
+import emojione from 'npm:emojione';
 
-let emojisList = emojify.emojiNames.map((value, i) => ({ id: i, name: value }));
+let emojisList = Object.keys(emojione.emojioneList).sort().map((value, i) => ({ id: i, name: value }));
 
 export default Ember.TextArea.extend({
     participants: null,
@@ -55,8 +54,12 @@ export default Ember.TextArea.extend({
     didInsertElement() {
         this.$().atwho({
             at: ':',
-            displayTpl: '<li><img src="/app/assets/images/emoji/${name}.png"> ${name}</li>',
-            insertTpl: ':${name}:',
+            displayTpl: data => {
+                const emoji = emojione.emojioneList[data.name];
+                const unicode = emoji.unicode[emoji.unicode.length - 1];
+                return `<li><img src="/app/assets/images/emoji/${unicode}.png"> ${data.name}</li>`;
+            },
+            insertTpl: '${name}',
             data: emojisList,
             highlightFirst: false,
             limit: 20

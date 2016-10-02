@@ -14,9 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals emojify, marked */
+/* globals marked */
 
 import Ember from 'ember';
+import emojione from 'npm:emojione';
 import moment from 'npm:moment';
 import URI from 'npm:urijs';
 import BaseModel from './base';
@@ -249,9 +250,12 @@ export default BaseModel.extend({
         text = text.replace(/(^| |>)(@\S+)(?=( |$))/g,
             (match, p1, p2) => this._renderMention(p1, p2));
 
-        text = text.replace(/:(.+?):/g, (match, p1) => {
-            if (emojify.emojiNames.indexOf(p1) !== -1) {
-                return this._renderEmoji(match, `/app/assets/images/emoji/${p1}.png`);
+        text = text.replace(/:.+?:/g, match => {
+            const emoji = emojione.emojioneList[match];
+
+            if (emoji) {
+                const unicode = emoji.unicode[emoji.unicode.length - 1];
+                return this._renderEmoji(match, `/app/assets/images/emoji/${unicode}.png`);
             } else {
                 return match;
             }
@@ -274,7 +278,7 @@ export default BaseModel.extend({
     },
 
     _renderEmoji(name, src) {
-        return `<img align="absmiddle" alt="${name}" class="emoji" src="${src}"/>`;
+        return `<img align="absmiddle" alt="${name}" title="${name}" class="emoji" src="${src}"/>`;
     },
 
     _renderMention(beforeCharacter, nick) {

@@ -50,7 +50,6 @@ module.exports = function(defaults) {
     app.import('bower_components/jquery.atwho/dist/js/jquery.atwho.js');
     app.import('bower_components/getusermedia/dist/getUserMedia.noFallback.js');
     app.import('bower_components/Caret.js/dist/jquery.caret.min.js');
-    app.import('bower_components/emojify.js/dist/js/emojify.js');
     app.import('bower_components/magnific-popup/dist/jquery.magnific-popup.js');
     app.import('bower_components/bootstrap-contextmenu/bootstrap-contextmenu.js');
     app.import('bower_components/velocity/velocity.js');
@@ -67,7 +66,7 @@ module.exports = function(defaults) {
         destDir: '/assets/fonts'
     });
 
-    let emojify = pickFiles('bower_components/emojify.js/dist/images/basic', {
+    let emojify = pickFiles('node_modules/emojione/assets/png', {
         srcDir: '/',
         destDir: '/assets/images/emoji'
     });
