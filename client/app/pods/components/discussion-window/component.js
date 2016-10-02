@@ -17,6 +17,7 @@
 /* globals $, titlenotifier */
 
 import Ember from 'ember';
+import Ps from 'npm:perfect-scrollbar';
 import isMobile from 'npm:ismobilejs';
 import { dispatch } from 'emflux/dispatcher';
 import { play } from '../../../utils/sound';
