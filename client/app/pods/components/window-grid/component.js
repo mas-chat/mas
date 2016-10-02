@@ -42,7 +42,7 @@ export default Ember.Component.extend({
     }),
 
     mustRelayoutAfterRender: Ember.observer(
-        'stores.windows.alerts.[]', 'stores.settings.emailConfirmed', function() {
+        'stores.alerts.alerts.[]', 'stores.settings.emailConfirmed', function() {
         Ember.run.scheduleOnce('afterRender', this, function() {
             this._layoutWindows(false);
         });

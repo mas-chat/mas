@@ -66,10 +66,9 @@ export default Store.extend({
                 dismissible: true,
                 report: false,
                 postponeLabel: false,
-                ackLabel: 'Okay'
+                ackLabel: 'Okay',
+                resultCallback: () => this.set('emailConfirmed', true)
             });
-
-            this.set('emailConfirmed', true);
         });
     },
 
