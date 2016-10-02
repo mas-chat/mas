@@ -14,11 +14,11 @@
 //   governing permissions and limitations under the License.
 //
 
-/* global Howl */
+import Howler from 'npm:howler';
 
 let playing = false;
 
-let notification = new Howl({
+let notification = new Howler.Howl({
     src: [ '/app/assets/sounds/staple_gun.mp3', '/app/assets/sounds/staple_gun.mp3' ],
     volume: 0.6,
 
