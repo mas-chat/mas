@@ -14,9 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
-/* global captureVideoFrame */
-
 import Ember from 'ember';
+import captureVideoFrame from 'npm:capture-video-frame';
 import { dispatch } from 'emflux/dispatcher';
 
 export default Ember.Component.extend({
@@ -47,7 +46,7 @@ export default Ember.Component.extend({
             this.$('#webcam-snapshot').show();
 
             let video = this.$('#webcam-viewfinder video')[0];
-            let { blob, dataUri } = captureVideoFrame(video, 'jpeg');
+            let { blob, dataUri } = captureVideoFrame.captureVideoFrame(video, 'jpeg');
 
             this.$('#webcam-snapshot').attr('src', dataUri);
             this.set('shot', blob);
