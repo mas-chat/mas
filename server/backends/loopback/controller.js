@@ -161,15 +161,22 @@ async function createInitialGroups() {
     const adminUserId = parseInt(conf.get('common:admin'));
 
     for (const name of groups) {
-        // Create fails if the group already exists
-        await Conversation.create({
-            owner: adminUserId,
+        const existingGroup = await Conversation.findFirst({
             type: 'group',
-            name,
             network: 'mas',
-            topic: 'Welcome!',
-            password: null
+            name
         });
+
+        if (!existingGroup) {
+            await Conversation.create({
+                owner: adminUserId,
+                type: 'group',
+                name,
+                network: 'mas',
+                topic: 'Welcome!',
+                password: null
+            });
+        }
     }
 }
 

@@ -74,7 +74,7 @@ async function execShutdown() {
 
     shutdownInProgress = true;
 
-    log.info('Shutdown sequence started.');
+    log.warn('Shutdown sequence started.');
 
     const entries = _.sortBy(stateChangeCallbacks, entry => shutdownOrder[entry.state]);
 
