@@ -36,7 +36,7 @@ process.on('unhandledRejection', (reason, p) => {
     log('*** Last line of defence, only needed in special cases ***');
     log('');
 
-    fix = question('Fix issues in addition to reporting them [yes/NO]? ') === 'yes';
+    fix = await question('Fix issues in addition to reporting them [yes/NO]? ') === 'yes';
 
     const { val: userIds } = await store.list('users');
 
@@ -69,6 +69,8 @@ process.on('unhandledRejection', (reason, p) => {
 async function question(label) {
     return new Promise(resolve => rl.question(label, answer => resolve(answer)));
 }
+
+const uniqGroups = {};
 
 async function checkConversations() {
     const { val: conversationIds } = await store.list('conversations');
@@ -104,6 +106,18 @@ async function checkConversations() {
             } else if (members[0].get('userGId')[0] === 'i' && members[1].get('userGId')[0] === 'i') {
                 log('!!! 1on1 conversation where two irc users are talking');
             }
+        } else {
+            const key = `${conversation.get('network')}:${conversation.get('name')}`;
+
+            if (uniqGroups[key]) {
+                log(`!!! Duplicate group ${key}, id: ${conversation.id} found`);
+
+                if (fix) {
+                    await conversation.delete();
+                }
+            }
+
+            uniqGroups[key] = true;
         }
     }
 }
