@@ -102,10 +102,10 @@ function autoRotateJPEGFile(fileName, extension) {
 
         exiftrans.on('close', code => {
             if (code !== 0) {
-                reject(`JPEG autorotation using exiftrans failed, exit code: ${code}`);
-            } else {
-                resolve();
+                log.warn(`JPG exiftrans autorotate failed, exit code: ${code}, file: ${fileName}`);
             }
+
+            resolve();
         });
     });
 }
