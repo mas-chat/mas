@@ -246,11 +246,22 @@ export default Store.extend({
     },
 
     handleSendText(data) {
+        let sent = false;
+
+        setTimeout(() => {
+            if (!sent) {
+                data.window.set('notDelivered', true);
+            }
+        }, 2500);
+
         socket.send({
             id: 'SEND',
             text: data.text,
             windowId: data.window.get('windowId')
         }, resp => {
+            sent = true;
+            data.window.set('notDelivered', false);
+
             if (resp.status !== 'OK') {
                 dispatch('OPEN_MODAL', {
                     name: 'info-modal',

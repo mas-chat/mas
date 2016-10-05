@@ -57,6 +57,7 @@ export default Ember.Component.extend({
     scrollLock: false,
     fetchingMore: false,
     noOlderMessages: false,
+    notDelivered: false,
 
     linesAmount: null,
     deletedLine: false,

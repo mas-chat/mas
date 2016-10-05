@@ -44,14 +44,14 @@ let SocketService = Ember.Object.extend({
     sessionId: 0,
 
     _connected: false,
-    _disconnectedQueue: null,
+    _sendQueue: null,
     _disconnectedTimer: null,
 
     _windowsStore: null,
 
     init() {
         this._super();
-        this._disconnectedQueue = Ember.A([]);
+        this._sendQueue = Ember.A([]);
     },
 
     start() {
@@ -69,11 +69,7 @@ let SocketService = Ember.Object.extend({
             // TODO: Delete oldest messages for windows that have more messages than
             // maxBacklogMsgs. They can be stale, when editing becomes possible.
 
-            for (let command of this._disconnectedQueue) {
-                this._emitReq(command.command, command.callback);
-            }
-
-            this._disconnectedQueue.clear();
+            this._emitReq(); // In case there are items in sendQueue from previous session
         }));
 
         ioSocket.on('terminate', Ember.run.bind(this, function() {
@@ -129,15 +125,13 @@ let SocketService = Ember.Object.extend({
     },
 
     send(command, callback) {
-        if (this.get('_connected')) {
-            this._emitReq(command, callback);
-        } else {
-            Ember.Logger.info(`No Socket.io Connection, buffering: ${command.id}`);
+        this._sendQueue.push({
+            request: command,
+            callback: callback
+        });
 
-            this._disconnectedQueue.push({
-                command: command,
-                callback: callback
-            });
+        if (this._sendQueue.length === 1 && this.get('_connected')) {
+            this._emitReq();
         }
     },
 
@@ -160,15 +154,24 @@ let SocketService = Ember.Object.extend({
         Ember.Logger.info(`→ INIT: cachedUpto: ${cachedUpto}, maxBacklogMsgs: ${maxBacklogMsgs}`);
     },
 
-    _emitReq(command, callback) {
-        ioSocket.emit('req', command, function(data) {
-            if (callback) {
+    _emitReq() {
+        if (this._sendQueue.length === 0) {
+            return;
+        }
+
+        const req = this._sendQueue[0];
+
+        ioSocket.emit('req', req.request, data => {
+            if (req.callback) {
                 Ember.Logger.info('← RESP');
-                callback(data);
+                req.callback(data);
             }
+
+            this._sendQueue.shift();
+            this._emitReq();
         });
 
-        Ember.Logger.info('→ REQ: ' + command.id);
+        Ember.Logger.info('→ REQ: ' + req.request.id);
     },
 
     _logout() {

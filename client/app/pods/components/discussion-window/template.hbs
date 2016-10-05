@@ -78,6 +78,11 @@
 
 <div class="window-toolbar flex-row {{hiddenIfLogMode}}">
     <div class="window-add-text-container flex-1">
+        {{#if content.notDelivered}}
+            <div class="connection-error">
+                <i class="fa fa-exclamation-circle" aria-hidden="true"></i> Message not delivered. Trying to resume connection…
+            </div>
+        {{/if}}
         {{message-input placeholder="Write here…" rows=1 maxlength="500" class="form-control" participants=participants sendMessage="processLine"}}
         {{#if scrollLock}}
             {{#if content.newMessagesCount}}
