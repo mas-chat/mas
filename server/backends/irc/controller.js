@@ -946,7 +946,7 @@ async function handleMode(user, msg) {
         const modes = command.substring(1).split('');
 
         if (!(oper === '+' || oper === '-')) {
-            log.warn(user, `Received broken MODE command ${msg}`);
+            log.warn(user, `Received broken MODE command: ${command}`);
             continue;
         }
 
