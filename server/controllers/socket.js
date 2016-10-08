@@ -37,17 +37,21 @@ exports.setup = function setup(server) {
 
     io.on('connection', socket => {
         const session = {
-            id: null,
+            id: uuid(15),
             user: null,
             state: 'connected' // connected, authenticated, terminating, disconnected
         };
+
+        log.info(`Socket.io session created, id: ${session.id}`);
 
         let redisSubscribe = null;
 
         clientSocketList.push(socket);
 
         socket.on('init', async data => {
-            if (session.id) {
+            log.info(`socket.io init message received, session: ${session.id}`);
+
+            if (session.state === 'authenticated') {
                 socket.emit('terminate', {
                     code: 'MULTIPLE_INITS',
                     reason: 'INIT event can be send only once per socket.io connection.'
@@ -89,7 +93,6 @@ exports.setup = function setup(server) {
 
             session.user = user;
             session.state = 'authenticated';
-            session.id = uuid(15);
 
             const maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
             const cachedUpto = isInteger(data.cachedUpto) ? data.cachedUpto : 0;
