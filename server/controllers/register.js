@@ -262,7 +262,7 @@ exports.createReset = function *createReset() {
 
   //  yield redis.del(`passwordresettoken:${form.data.token}`);
 
-    const userRecord = yield User.fetch(userId);
+    const userRecord = yield User.fetch(parseInt(userId));
 
     if (!userRecord) {
         this.status = httpStatus('bad request');
