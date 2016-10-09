@@ -12,6 +12,7 @@ case "$1" in
         ;;
 
     build)
+        set -x
         cd client
         npm install
         npm run bower
@@ -22,13 +23,16 @@ case "$1" in
         cd website
         npm install
         npm run prod
+        set +x
         echo "Install done."
         ;;
 
     clean)
+        set -x
         rm -fr client/node_modules client/bower_components client/tmp client/dist
         rm -fr server/node_modules
         rm -fr server/website/node_modules server/website/dist
+        set +x
         echo "Clean done."
         ;;
 
