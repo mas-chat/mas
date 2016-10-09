@@ -23,7 +23,7 @@ body {
 
 .window .window-inner {
     background-color: #333;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .window-inner .line a, .window-inner .line a:active, .window-inner .line a:hover {
@@ -69,7 +69,7 @@ body {
 }
 
 .window .line.service {
-    color: #b0a2a2
+    color: #b0a2a2;
     background-color: #333;
     margin: 5px 5px 5px 50px;
     border: none;
@@ -94,6 +94,7 @@ body {
 .window-inner .nick-mention {
     background-color: #6d7ddf;
     padding: 1px 3px;
+    border: none;
     border-radius: 2px;
     color: #dddddd;
 }
