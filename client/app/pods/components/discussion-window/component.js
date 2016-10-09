@@ -40,7 +40,7 @@ document.addEventListener('visibilitychange', function() {
 export default Ember.Component.extend({
     stores: Ember.inject.service(),
 
-    classNames: [ 'window', 'flex-grow-column' ],
+    classNames: [ 'window' ],
 
     classNameBindings: [
         'animating:velocity-animating:',

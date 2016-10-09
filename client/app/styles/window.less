@@ -5,14 +5,35 @@
 @window-brand-color-1on1: green;
 
 .window {
-    font-size: 14px;
-    color: #333333;
     position: absolute;
-    padding: @grid-margin @grid-margin*1.2 @grid-margin @grid-margin*1.2;
     z-index: 0;
+    padding: @grid-margin @grid-margin*1.2 @grid-margin @grid-margin*1.2;
+    height: 100%;
 
     // Initial value, overwritten by velocity animation
     visibility: hidden;
+
+    &.irc-server-window {
+        .window-title {
+            background-color: rgb(32, 147, 185);
+        }
+    }
+
+    &.private-1on1 {
+        .window-title {
+            background-color: @window-brand-color-1on1;
+        }
+
+        .window-content {
+            background-color: #f7fff7;
+        }
+    }
+
+    &.group {
+        .window-title {
+            background-color: @window-brand-color-group;
+        }
+    }
 
     &.expanded {
         z-index: 10;
@@ -25,6 +46,13 @@
     &.moving {
         opacity: 0.3;
     }
+}
+
+.window-inner {
+    font-size: 14px;
+    color: #333333;
+    height: 100%;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 
     .window-content {
         background-color: @window-bg-color;
@@ -33,67 +61,6 @@
     .window-title {
         padding: 4px 8px;
         color: whitesmoke;
-    }
-
-    &.irc-server-window {
-        .window-title {
-            background-color: rgb(32, 147, 185);
-            border-left: 1px solid rgb(32, 147, 185);
-            border-right: 1px solid rgb(32, 147, 185);
-            border-top: 1px solid rgb(32, 147, 185);
-        }
-
-        .window-content {
-            border-left: 1px solid rgb(32, 147, 185);
-            border-right: 1px solid rgb(32, 147, 185);
-        }
-
-        .window-toolbar {
-            border-left: 1px solid rgb(32, 147, 185);
-            border-right: 1px solid rgb(32, 147, 185);
-            border-bottom: 1px solid rgb(32, 147, 185);
-        }
-    }
-
-    &.private-1on1 {
-        .window-title {
-            background-color: @window-brand-color-1on1;
-            border-left: 1px solid @window-brand-color-1on1;
-            border-right: 1px solid @window-brand-color-1on1;
-            border-top: 1px solid @window-brand-color-1on1;
-        }
-
-        .window-content {
-            border-left: 1px solid @window-brand-color-1on1;
-            border-right: 1px solid @window-brand-color-1on1;
-            background-color: #f7fff7;
-        }
-
-        .window-toolbar {
-            border-left: 1px solid @window-brand-color-1on1;
-            border-right: 1px solid @window-brand-color-1on1;
-            border-bottom: 1px solid @window-brand-color-1on1;
-        }
-    }
-
-    &.group {
-        .window-title {
-            border-left: 1px solid @window-brand-color-group;
-            border-right: 1px solid @window-brand-color-group;
-            border-top: 1px solid @window-brand-color-group;
-            background-color: @window-brand-color-group;
-        }
-
-        .window-content {
-            border-right: 1px solid @window-brand-color-group;
-            border-left: 1px solid @window-brand-color-group;
-        }
-
-        .window-toolbar {
-            border-left: 1px solid @window-brand-color-group;
-            border-right: 1px solid @window-brand-color-group;
-            border-bottom: 1px solid @window-brand-color-group;
-        }
     }
 
     .window-title-buttons {
@@ -177,7 +144,7 @@
 
     .nick {
         font-weight: bold;
-        color: #A13F5A;
+        color: #104d73;
         padding-right: 4px;
         &:after {
             content: ":";
@@ -294,7 +261,7 @@
             display: none;
         }
 
-        background-color: #fcfcfc;
+        background-color: #fafafa;
         padding: 4px 10px;
         margin: 5px 5px 5px 42px;
         overflow-x: hidden;
