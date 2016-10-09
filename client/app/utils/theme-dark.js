@@ -23,7 +23,15 @@ body {
 
 .window .window-inner {
     background-color: #333;
-    font-size: 13px;
+    font-size: 12px;
+}
+
+.window-inner .line a, .window-inner .line a:active, .window-inner .line a:hover {
+    color: #1eb7cb;
+}
+
+.window-inner .line.service {
+    border: none;
 }
 
 .window .window-content, .window.private-1on1 .window-content {
@@ -44,7 +52,7 @@ body {
 }
 
 .window .nick {
-    color: #888;
+    color: #d2d1d1;
 }
 
 .window .nick::before {
@@ -66,6 +74,7 @@ body {
 
 .window .line.service {
     background-color: #333;
+    margin: 5px 5px 5px 50px;
 }
 
 .window .window-toolbar {
@@ -74,6 +83,10 @@ body {
 
 .window .window-toolbar .btn, .window .window-buttons.flex-row {
     background-color: black;
+}
+
+.window textarea::placeholder {
+    color: #d6d6da;
 }
 
 .window .window-members .gravatar {
