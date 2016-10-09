@@ -32,7 +32,7 @@ const ioServers = [];
 const clientSocketList = [];
 
 exports.setup = function setup(server) {
-    const io = socketIo(server);
+    const io = socketIo(server, { pingInterval: 10000, pingTimeout: 15000 });
     ioServers.push(io);
 
     io.on('connection', socket => {
