@@ -17,13 +17,13 @@
 export const darkTheme = `
 
 body {
-    font-family: monospace;
+    font-family: 'Inconsolata', monospace;
     background-color: #333;
 }
 
-.window {
+.window .window-inner {
     background-color: #333;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .window .window-content, .window.private-1on1 .window-content {
@@ -39,8 +39,12 @@ body {
 }
 
 .window .line.day-divider .body {
-    background-color: #1D2F1E;
+    background-color: #26252d;
     color: #AFAFAF;
+}
+
+.window .nick {
+    color: #888;
 }
 
 .window .nick::before {
@@ -60,12 +64,16 @@ body {
     color: #CDCDCE;
 }
 
+.window .line.service {
+    background-color: #333;
+}
+
 .window .window-toolbar {
     border-top: 1px solid #A5A5A5;
 }
 
 .window .window-toolbar .btn, .window .window-buttons.flex-row {
-    background-color: #222;
+    background-color: black;
 }
 
 .window .window-members .gravatar {
