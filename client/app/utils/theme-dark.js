@@ -30,10 +30,6 @@ body {
     color: #1eb7cb;
 }
 
-.window-inner .line.service {
-    border: none;
-}
-
 .window .window-content, .window.private-1on1 .window-content {
     background-color: black;
 }
@@ -73,8 +69,10 @@ body {
 }
 
 .window .line.service {
+    color: #b0a2a2
     background-color: #333;
     margin: 5px 5px 5px 50px;
+    border: none;
 }
 
 .window .window-toolbar {
@@ -91,6 +89,17 @@ body {
 
 .window .window-members .gravatar {
     opacity: 0.3;
+}
+
+.window-inner .nick-mention {
+    background-color: #6d7ddf;
+    padding: 1px 3px;
+    border-radius: 2px;
+    color: #dddddd;
+}
+
+.window .line.mention {
+    background-color: #273065;
 }
 
 .sidebar {
