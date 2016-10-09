@@ -175,10 +175,6 @@ export default BaseModel.extend({
         let type = this.get('type');
 
         if (type === 'group') {
-            if (network === 'Flowdock') {
-                windowName = windowName.replace(/.+\//, ''); // Remove organization prefix
-            }
-
             windowName = windowName.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
         } else {
             let userId = this.get('userId');

@@ -685,13 +685,7 @@ async function handle376(user, msg) {
             'You can close this window at any time. It\'ll reappear when needed.');
 
         // Tell the client nick we got
-        // korvaa jollain await redis.run('introduceNewUserIds', userId, null, null, true, userId);
-
-        if (msg.network === 'Flowdock') {
-            // TODO: The odd case of Flowdock, temporary
-            sendPrivmsg(user, 'Flowdock', 'NickServ', 'identify xx@example.com password');
-            return;
-        }
+        // TODO: replace: await redis.run('introduceNewUserIds', userId, null, null, true, userId);
 
         const subscriptions = await IrcSubscription.find({
             userId: user.id,
@@ -744,9 +738,8 @@ async function handleJoin(user, msg) {
 
         if (!subscription) {
             // IrcSubscription entry is missing. This means IRC server has added the user
-            // to a channel without any action from the user. Flowdock at least does this.
-            // ircchannelsubscriptions must be updated as it's used to rejoin channels after a
-            // server restart.
+            // to a channel without any action from the user. ircchannelsubscriptions must be
+            // updated as it's used to rejoin channels after a server restart.
             subscription = await IrcSubscription.create({
                 userId: targetUser.id,
                 network,
@@ -1168,11 +1161,8 @@ async function tryDifferentNick(user, network) {
 }
 
 async function addMessageUnlessDuplicate(conversation, user, { userGId = null, cat, body = '' }) {
-    // To support Flowdock network where MAS user's message can come from the IRC server
-    // (before all incoming messages from MAS users were ignored as delivery had happened
-    // already locally) the overall logic is little complicated. The code below now
-    // works because IRC server doesn't echo messages back to their senders. If that wasn't
-    // the case, the logic would fail. (If a reporter sees a new identical message
+    // The code below works because IRC server doesn't echo messages back to their senders.
+    // If that wasn't the case, the logic would fail. (If a reporter sees a new identical message
     // it's not considered as duplicate. Somebody is just repeating their line.)
     const key = `ircduplicates:${conversation.id}:${msgFingerPrint(body)}:${userGId}`;
     const reporter = user.id;

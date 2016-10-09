@@ -106,10 +106,7 @@ export default BaseModel.extend({
         let nick = this.get('nick');
         let mentionedRegEx = this.get('mentionedRegEx');
 
-        // TODO: Network === flowdock check is missing
-        if (this.get('body').indexOf('Show in Flowdock:') > -1) {
-            return 'flowdock-ignore';
-        } else if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {
+        if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {
             return 'mention';
         } else if (userId == this.get('_windowsStore.userId') && cat === 'msg') {
             return 'mymsg';
@@ -117,7 +114,7 @@ export default BaseModel.extend({
             return 'service';
         }
 
-        return nick === 'Flowdock' ? 'flowdock' : cat;
+        return cat;
     }),
 
     decoratedTs: Ember.computed('ts', function() {
@@ -244,11 +241,6 @@ export default BaseModel.extend({
 
     _parseCustomFormatting(text) {
         let network = this.get('network');
-
-        if (network === 'Flowdock') {
-            text = text.replace(/^\[(.*?)\] &lt;&lt; (.*)/,
-                (match, p1, p2) => `[${p1.substring(0, 9)}] ${p2}`);
-        }
 
         // Find @ character 1) after space, 2) in the beginning of string, 3) after HTML tag (>)
         text = text.replace(/(^| |>)(@\S+)(?=( |$))/g,
