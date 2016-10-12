@@ -60,7 +60,6 @@ const handlers = {
     366: handle366,
     376: handle376,
     401: handle401,
-    433: handle433,
     482: handle482,
 
     474: handleJoinReject, // ERR_BANNEDFROMCHAN
@@ -69,8 +68,11 @@ const handlers = {
     471: handleJoinReject, // ERR_CHANNELISFULL
     403: handleJoinReject, // ERR_NOSUCHCHANNEL
     405: handleJoinReject, // ERR_TOOMANYCHANNELS
-    407: handleJoinReject, // ERR_TOOMANYTARGETS
-    437: handleJoinReject, // ERR_UNAVAILRESOURCE
+
+    437: handleResourceUnavailable, // ERR_UNAVAILRESOURCE
+
+    433: handleNickUnavailable, // ERR_NICKNAMEINUSE
+    436: handleNickUnavailable, // ERR_NICKCOLLISION
 
     // All other numeric replies are processed by handleServerText()
 
@@ -704,11 +706,6 @@ async function handle376(user, msg) {
     }
 }
 
-async function handle433(user, msg) {
-    // :mas.example.org 433 * ilkka :Nickname is already in use.
-    await tryDifferentNick(user, msg.network);
-}
-
 async function handle482(user, msg) {
     // irc.localhost 482 ilkka #test2 :You're not channel operator
     const channel = msg.params[0];
@@ -786,33 +783,46 @@ async function handleJoinReject(user, msg) {
     const channel = msg.params[0];
     const reason = msg.params[1];
 
-    if (isChannel(channel)) {
-        const conversation = await Conversation.findFirst({
-            type: 'group',
-            name: channel,
-            network: msg.network
-        });
+    const subscription = await IrcSubscription.findFirst({
+        userId: user.id,
+        network: msg.network,
+        channel
+    });
 
-        await addSystemMessage(user, msg.network,
-            'error', `Failed to join ${channel}. Reason: ${reason}`);
-
-        const subscription = await IrcSubscription.findFirst({
-            userId: user.id,
-            network: msg.network,
-            channel
-        });
-
+    if (subscription) {
         await subscription.delete();
-
-        if (conversation) {
-            await conversationsService.removeGroupMember(conversation, user.gId);
-        }
-
-        await disconnectIfIdle(user, msg.network);
-    } else {
-        // Nick is unavailable
-        await tryDifferentNick(user, msg.network);
     }
+
+    const conversation = await Conversation.findFirst({
+        type: 'group',
+        name: channel,
+        network: msg.network
+    });
+
+    if (conversation) {
+        await conversationsService.removeGroupMember(conversation, user.gId);
+    }
+
+    await addSystemMessage(user, msg.network,
+        'error', `Failed to join ${channel}. Reason: ${reason}`);
+
+    await disconnectIfIdle(user, msg.network);
+}
+
+async function handleResourceUnavailable(user, msg) {
+    // irc.localhost 482 ilkka ilkka :Nick/channel is temporarily unavailable"
+    const channelOrNick = msg.params[0];
+    const currentNick = await nicksService.getCurrentNick(user, msg.network);
+
+    if (channelOrNick === currentNick) {
+        await tryDifferentNick(user, msg.network);
+    } else {
+        await handleJoinReject(user, msg);
+    }
+}
+
+async function handleNickUnavailable(user, msg) {
+    await tryDifferentNick(user, msg.network);
 }
 
 async function handleQuit(user, msg) {
