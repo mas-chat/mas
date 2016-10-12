@@ -374,6 +374,7 @@ export default Ember.Component.extend({
 
     _containerDimensions() {
         return {
+            x: this.$().offset().left,
             width: this.$().width(),
             height: this.$().height()
         };
@@ -389,7 +390,7 @@ export default Ember.Component.extend({
         let windowY = 0;
         let masWindow;
 
-        if (this._containerDimensions().width < x) {
+        if (x < this._containerDimensions().x - 10) {
             return outOfBoundsCursor;
         }
 
