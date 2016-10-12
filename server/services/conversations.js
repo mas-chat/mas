@@ -170,7 +170,7 @@ exports.addGroupMember = async function addGroupMember(conversation, userGId, ro
             });
         }
 
-        await broadcastAddMembers(conversation, userGId, role);
+        await broadcastAddMembers(conversation, userGId, role, options);
     } else {
         await targetMember.set({ role });
     }
@@ -282,7 +282,7 @@ async function broadcastAddMessage(conversation, { userGId = null, cat, body = '
     return ntf;
 }
 
-async function broadcastAddMembers(conversation, userGId, role) {
+async function broadcastAddMembers(conversation, userGId, role, options) {
     await broadcast(conversation, {
         id: 'ADDMEMBERS',
         reset: false,
@@ -290,7 +290,7 @@ async function broadcastAddMembers(conversation, userGId, role) {
             userId: userGId.toString(),
             role
         } ]
-    });
+    }, null, options);
 }
 
 async function broadcastFullAddMembers(conversation) {
@@ -307,7 +307,7 @@ async function sendCompleteAddMembers(conversation, user) {
     await notification.broadcast(user, ntf);
 }
 
-async function broadcast(conversation, ntf, excludeSession) {
+async function broadcast(conversation, ntf, excludeSession, options = {}) {
     const members = await ConversationMember.find({ conversationId: conversation.id });
 
     for (const member of members) {
@@ -318,7 +318,19 @@ async function broadcast(conversation, ntf, excludeSession) {
         }
 
         const user = await User.fetch(userGId.id);
-        const window = await windowsService.findOrCreate(user, conversation);
+        let window;
+
+        if (options.silent) {
+            // Don't create 1on1 window if it doesn't exist. This is to prevent nick
+            // changes from opening old 1on1s
+            window = await windowsService.find(user, conversation);
+
+            if (!window) {
+                continue;
+            }
+        } else {
+            window = await windowsService.findOrCreate(user, conversation);
+        }
 
         ntf.windowId = window.id;
 
@@ -374,12 +386,12 @@ async function deleteConversationMember(conversation, member, options) {
             members: [ {
                 userId: member.get('userGId')
             } ]
-        });
+        }, null, options);
     }
 
     const userGId = UserGId.create(member.get('userGId'));
 
-    if (userGId.isMASUser) {
+    if (!options.silent && userGId.isMASUser) {
         // Never let window to exist alone without linked conversation
         const user = await User.fetch(userGId.id);
         await windowsService.remove(user, conversation);

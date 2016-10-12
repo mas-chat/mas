@@ -26,6 +26,7 @@ const conf = require('../../lib/conf');
 const log = require('../../lib/log');
 const redisModule = require('../../lib/redis');
 const courier = require('../../lib/courier').createEndPoint('ircparser');
+const userIntroducer = require('../../lib/userIntroducer');
 const User = require('../../models/user');
 const IrcSubscription = require('../../models/ircSubscription');
 const Conversation = require('../../models/conversation');
@@ -687,7 +688,7 @@ async function handle376(user, msg) {
             'You can close this window at any time. It\'ll reappear when needed.');
 
         // Tell the client nick we got
-        // TODO: replace: await redis.run('introduceNewUserIds', userId, null, null, true, userId);
+        await userIntroducer.introduce(user, user.gId);
 
         const subscriptions = await IrcSubscription.find({
             userId: user.id,
@@ -793,6 +794,10 @@ async function handleJoinReject(user, msg) {
         await subscription.delete();
     }
 
+    await addSystemMessage(user, msg.network, 'error', subscription ?
+        `Failed to join ${channel}, reason: ${reason}` :
+        `${reason}: ${channel}`);
+
     const conversation = await Conversation.findFirst({
         type: 'group',
         name: channel,
@@ -802,9 +807,6 @@ async function handleJoinReject(user, msg) {
     if (conversation) {
         await conversationsService.removeGroupMember(conversation, user.gId);
     }
-
-    await addSystemMessage(user, msg.network,
-        'error', `Failed to join ${channel}. Reason: ${reason}`);
 
     await disconnectIfIdle(user, msg.network);
 }
@@ -1117,6 +1119,8 @@ async function updateNick(user, network, oldNick, newNick) {
     const conversationMembers = await ConversationMember.find(
         { userGId: targetUserGId.toString() });
 
+    const informedUserIds = {};
+
     // Iterate through the conversations that the nick changer is part of
     for (const conversationMember of conversationMembers) {
         const conversation = await Conversation.fetch(conversationMember.get('conversationId'));
@@ -1133,13 +1137,33 @@ async function updateNick(user, network, oldNick, newNick) {
             });
         }
 
-        await conversationsService.removeGroupMember(
-            conversation, conversationMember.gId, { silent: true });
+        if (targetUserGId.isMASUser) {
+            const members = await ConversationMember.find({ conversationId: conversation.id });
 
-        await conversationsService.addGroupMember(
-            conversation,
-            (await ircUserHelper.getUserGId(newNick, network)),
-            conversationMember.get('role'), { silent: true });
+            members.forEach(member => {
+                const userGId = UserGId.create(member.get('userGId'));
+
+                if (userGId.isMASUser) {
+                    informedUserIds[userGId.id] = true;
+                }
+            });
+        } else {
+            await conversationsService.removeGroupMember(
+                conversation, conversationMember.gId, { silent: true });
+
+            await conversationsService.addGroupMember(
+                conversation,
+                (await ircUserHelper.getUserGId(newNick, network)),
+                conversationMember.get('role'), { silent: true });
+        }
+    }
+
+    if (targetUserGId.isMASUser) {
+        for (const informedUserId of Object.keys(informedUserIds)) {
+            const informedUser = await User.fetch(parseInt(informedUserId));
+
+            await userIntroducer.introduce(informedUser, targetUserGId);
+        }
     }
 }
 
