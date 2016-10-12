@@ -161,7 +161,7 @@ export default Ember.Component.extend({
 
         let desktop = $(event.target).data('desktop-id');
 
-        if (desktop) {
+        if (typeof desktop !== 'undefined') {
             let desktopId = desktop === 'new' ? Math.floor(new Date() / 1000) : parseInt(desktop);
 
             dispatch('MOVE_WINDOW', {
