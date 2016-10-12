@@ -190,7 +190,7 @@ async function createWindow(user, conversation) {
     const window = await Window.create({
         userId: user.id,
         conversationId: conversation.id,
-        desktop: settings.get('currentDesktop')
+        desktop: settings.get('activeDesktop')
     });
 
     if (conversation.get('type') === '1on1') {
