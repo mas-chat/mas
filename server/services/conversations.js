@@ -22,6 +22,7 @@ const log = require('../lib/log');
 const search = require('../lib/search');
 const notification = require('../lib/notification');
 const User = require('../models/user');
+const Window = require('../models/window');
 const Conversation = require('../models/conversation');
 const ConversationMember = require('../models/conversationMember');
 const ConversationMessage = require('../models/conversationMessage');
@@ -323,18 +324,15 @@ async function broadcast(conversation, ntf, excludeSession, options = {}) {
         if (options.silent) {
             // Don't create 1on1 window if it doesn't exist. This is to prevent nick
             // changes from opening old 1on1s
-            window = await windowsService.find(user, conversation);
-
-            if (!window) {
-                continue;
-            }
+            window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
         } else {
             window = await windowsService.findOrCreate(user, conversation);
         }
 
-        ntf.windowId = window.id;
-
-        await notification.broadcast(user, ntf, excludeSession);
+        if (window) {
+            ntf.windowId = window.id;
+            await notification.broadcast(user, ntf, excludeSession);
+        }
     }
 }
 
