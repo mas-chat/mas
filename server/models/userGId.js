@@ -22,16 +22,21 @@ const TYPES = {
 };
 
 module.exports = class UserGId {
-    static create(params = {}) {
-        let options = params;
+    static create(params) {
+        if (!params) {
+            return null;
+        }
+
+        let userGId = null;
 
         if (typeof params === 'string') {
             const type = Object.keys(TYPES).find(validType => TYPES[validType] === params[0]);
-            let id;
 
             if (!type) {
                 return null;
             }
+
+            let id;
 
             if (type === 'mas') {
                 id = parseInt(params.substring(1));
@@ -39,10 +44,10 @@ module.exports = class UserGId {
                 id = params.substring(1);
             }
 
-            options = { id, type };
+            userGId = new this({ id, type });
+        } else {
+            userGId = new this(params);
         }
-
-        const userGId = new this(options);
 
         return userGId.valid ? userGId : null;
     }
