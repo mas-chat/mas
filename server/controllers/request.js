@@ -152,7 +152,7 @@ async function handleEdit({ command, conversation, user }) {
     return { status: 'ERROR', errorMsg: 'Editing failed.' };
 }
 
-async function handleCommand({ command, conversation, user, backend, network }) {
+async function handleCommand({ command, conversation, user, backend }) {
     const { command: name, params } = command;
 
     if (!conversation) {
@@ -172,6 +172,7 @@ async function handleCommand({ command, conversation, user, backend, network }) 
             return { status: 'ERROR', errorMsg: 'You can only use /ircquery on IRC window' };
         }
 
+        const network = conversation.get('network');
         const targetUserGId = await ircUserHelper.getUserGId(params.trim(), network);
 
         // 1on1s between MAS users are forced through loopback backend as multiple 1on1s between
