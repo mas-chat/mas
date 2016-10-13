@@ -359,6 +359,8 @@ async function handleChat({ user, command }) {
 }
 
 async function start1on1(user, targetUserGId, network) {
+    let selectedNetwork = network;
+
     if (!targetUserGId || !targetUserGId.valid) {
         return { status: 'ERROR', errorMsg: 'Malformed request.' };
     } else if (targetUserGId.equals(user.gId)) {
@@ -369,9 +371,13 @@ async function start1on1(user, targetUserGId, network) {
         if (!userExists(targetUser)) {
             return { status: 'ERROR', errorMsg: 'Unknown MAS userId.' };
         }
+
+        selectedNetwork = 'mas';
     }
 
-    const conversation = await conversationsService.findOrCreate1on1(user, targetUserGId, network);
+    const conversation = await conversationsService.findOrCreate1on1(
+        user, targetUserGId, selectedNetwork);
+
     const existingWindow = await windowsService.findByConversation(user, conversation);
 
     if (existingWindow) {
