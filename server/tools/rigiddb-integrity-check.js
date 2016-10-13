@@ -103,7 +103,7 @@ async function checkConversations() {
                 }
             } else if (members[0].get('userGId')[0] === 'm' && members[1].get('userGId')[0] === 'm') {
                 if (conversation.get('network') !== 'mas') {
-                    log(`!! Two MAS users talking via IRC ${members[0].get('userGId')} and ${members[1].get('userGId')}`)
+                    log(`!! Two MAS users talking via IRC ${members[0].get('userGId')} and ${members[1].get('userGId')}`);
 
                     if (fix) {
                         await conversation.delete();

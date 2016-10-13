@@ -28,7 +28,6 @@ const mailer = require('../lib/mailer');
 const conversationsService = require('../services/conversations');
 const windowsService = require('../services/windows');
 const friendsService = require('../services/friends');
-const nicksService = require('../services/nicks');
 const Conversation = require('../models/conversation');
 const User = require('../models/user');
 const Friend = require('../models/friend');
@@ -153,7 +152,7 @@ async function handleEdit({ command, conversation, user }) {
     return { status: 'ERROR', errorMsg: 'Editing failed.' };
 }
 
-async function handleCommand({ command, conversation, user, backend }) {
+async function handleCommand({ command, conversation, user, backend, network }) {
     const { command: name, params } = command;
 
     if (!conversation) {
@@ -173,13 +172,11 @@ async function handleCommand({ command, conversation, user, backend }) {
             return { status: 'ERROR', errorMsg: 'You can only use /ircquery on IRC window' };
         }
 
-        const targetUserGId = await ircUserHelper.getUserGId(params.trim(), params.network);
+        const targetUserGId = await ircUserHelper.getUserGId(params.trim(), network);
 
         // 1on1s between MAS users are forced through loopback backend as multiple 1on1s between
         // same people via different networks isn't useful feature, just confusing.
-        const network = targetUserGId.isMASUser ? 'mas' : params.network;
-
-        return await start1on1(user, targetUserGId, network);
+        return await start1on1(user, targetUserGId, targetUserGId.isMASUser ? 'mas' : network);
     }
 
     return await courier.call(backend, 'textCommand', {

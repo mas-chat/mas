@@ -158,10 +158,10 @@ async function processTextCommand({ conversationId, userId, command, commandPara
         case 'msg':
             return { status: 'ERROR', errorMsg: 'Use /ircquery <nick> to start 1on1 via IRC' };
         case 'me':
-            data = `PRIVMSG ${conversation.name} :\u0001ACTION ${commandParams}\u0001`;
+            data = `PRIVMSG ${conversation.get('name')} :\u0001ACTION ${commandParams}\u0001`;
             break;
         case 'topic':
-            data = `TOPIC ${conversation.name} :${commandParams}`;
+            data = `TOPIC ${conversation.get('name')} :${commandParams}`;
             break;
         default:
             break;
