@@ -821,7 +821,7 @@ async function handleResourceUnavailable(user, msg) {
         if (networkInfo.get('state') !== 'connected') {
             await tryDifferentNick(user, msg.network);
         } else {
-            await addSystemMessage(user, msg.network, 'server', msg.params.join(' '));
+            await addSystemMessage(user, msg.network, 'info', msg.params.join(' '));
         }
     } else {
         await handleJoinReject(user, msg);
@@ -833,6 +833,9 @@ async function handle433(user, msg) {
 
     if (networkInfo.get('state') !== 'connected') {
         await tryDifferentNick(user, msg.network);
+    } else {
+        await addSystemMessage(user, msg.network, 'info',
+           `ERROR: Nick ${msg.params[0]} is already taken.`);
     }
 }
 
