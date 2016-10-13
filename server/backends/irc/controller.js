@@ -72,8 +72,8 @@ const handlers = {
 
     437: handleResourceUnavailable, // ERR_UNAVAILRESOURCE
 
-    433: handleNickUnavailable, // ERR_NICKNAMEINUSE
-    436: handleNickUnavailable, // ERR_NICKCOLLISION
+    433: handle433, // ERR_NICKNAMEINUSE
+    436: handle436, // ERR_NICKCOLLISION
 
     // All other numeric replies are processed by handleServerText()
 
@@ -813,17 +813,30 @@ async function handleJoinReject(user, msg) {
 
 async function handleResourceUnavailable(user, msg) {
     // irc.localhost 482 ilkka ilkka :Nick/channel is temporarily unavailable"
+    const networkInfo = await findOrCreateNetworkInfo(user, msg.network);
     const channelOrNick = msg.params[0];
     const currentNick = await nicksService.getCurrentNick(user, msg.network);
 
     if (channelOrNick === currentNick) {
-        await tryDifferentNick(user, msg.network);
+        if (networkInfo.get('state') !== 'connected') {
+            await tryDifferentNick(user, msg.network);
+        } else {
+            await addSystemMessage(user, msg.network, 'server', msg.params.join(' '));
+        }
     } else {
         await handleJoinReject(user, msg);
     }
 }
 
-async function handleNickUnavailable(user, msg) {
+async function handle433(user, msg) {
+    const networkInfo = await findOrCreateNetworkInfo(user, msg.network);
+
+    if (networkInfo.get('state') !== 'connected') {
+        await tryDifferentNick(user, msg.network);
+    }
+}
+
+async function handle436(user, msg) {
     await tryDifferentNick(user, msg.network);
 }
 
