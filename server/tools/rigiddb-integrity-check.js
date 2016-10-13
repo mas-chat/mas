@@ -101,6 +101,16 @@ async function checkConversations() {
                     await members[0].delete();
                     await conversation.delete();
                 }
+            } else if (members[0].get('userGId')[0] === 'm' && members[1].get('userGId')[0] === 'm') {
+                if (conversation.get('network') !== 'mas') {
+                    log(`!! Two MAS users talking via IRC ${members[0].get('userGId')} and ${members[1].get('userGId')}`)
+
+                    if (fix) {
+                        await conversation.delete();
+                        await members[0].delete();
+                        await members[1].delete();
+                    }
+                }
             } else if (members[0].get('userGId') === members[1].get('userGId')) {
                 log('!!! 1on1 conversation where user is talking with himself');
             } else if (members[0].get('userGId')[0] === 'i' && members[1].get('userGId')[0] === 'i') {
