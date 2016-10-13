@@ -167,7 +167,7 @@ async function handleCommand({ command, conversation, user, backend }) {
             return { status: 'ERROR', errorMsg: 'No MAS user with that nick.' };
         }
 
-        return await start1on1(user, targetUser.id, 'mas');
+        return await start1on1(user, targetUser.gId, 'mas');
     } else if (name === 'ircquery') {
         if (backend === 'loopbackparser') {
             return { status: 'ERROR', errorMsg: 'You can only use /ircquery on IRC window' };
