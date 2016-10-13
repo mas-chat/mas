@@ -161,10 +161,10 @@ async function handleCommand({ command, conversation, user, backend }) {
     }
 
     if (name === '1on1') {
-        const targetUser = await nicksService.getUserFromNick(params.trim(), 'mas');
+        const targetUser = await User.findFirst({ nick: params.trim() });
 
         if (!targetUser) {
-            return { status: 'ERROR', errorMsg: 'Unknown MAS nick.' };
+            return { status: 'ERROR', errorMsg: 'No MAS user with that nick.' };
         }
 
         return await start1on1(user, targetUser.id, 'mas');
