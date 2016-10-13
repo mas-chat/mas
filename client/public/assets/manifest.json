@@ -1,0 +1,14 @@
+{
+    "name": "MAS",
+    "icons": [{
+        "src": "/favicon.ico",
+        "sizes": "32x32",
+        "type": "image/x-icon",
+        "density": 0.75
+    }],
+    "start_url": "/app/",
+    "scope": "/app/",
+    "display": "standalone",
+    "theme_color": "blue",
+    "orientation": "portrait"
+}
