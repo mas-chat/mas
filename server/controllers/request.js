@@ -372,6 +372,7 @@ async function start1on1(user, targetUserGId, network) {
             return { status: 'ERROR', errorMsg: 'Unknown MAS userId.' };
         }
 
+        // Force MAS users to have 1on1s via MAS backend, not IRC
         selectedNetwork = 'mas';
     }
 
