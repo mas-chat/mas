@@ -42,7 +42,7 @@ module.exports = {
             // Join #test IRC channel
             .waitForElementVisible('.modal-dialog')
             .setValue('input#join_irc_name', '#test')
-            .click('#join_irc_network option[value="IRCnet"]')
+            .setValue('select#join_irc_network', 'IRCnet')
             .click('button.modal-proceed')
 
             .waitForElementVisible('.window:not(.irc-server-window')
