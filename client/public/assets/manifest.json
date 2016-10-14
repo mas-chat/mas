@@ -7,7 +7,7 @@
         "density": 0.75
     }],
     "start_url": "/app/",
-    "scope": "/app/",
+    "scope": "/",
     "display": "standalone",
     "theme_color": "blue",
     "orientation": "portrait"
