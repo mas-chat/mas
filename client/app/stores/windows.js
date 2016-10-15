@@ -109,7 +109,7 @@ export default Store.extend({
         this.get('windows').forEach(function(masWindow) {
             let messages = [];
 
-            let sortedMessages = masWindow.get('messages').sortBy('ts').slice(-1 * maxBacklogMsgs);
+            let sortedMessages = masWindow.get('messages').sortBy('gid').slice(-1 * maxBacklogMsgs);
 
             sortedMessages.forEach(function(message) {
                 let messageData = message.getProperties([
@@ -380,7 +380,7 @@ export default Store.extend({
         socket.send({
             id: 'FETCH',
             windowId: data.window.get('windowId'),
-            end: data.window.get('messages').sortBy('ts').get('firstObject').get('ts'),
+            end: data.window.get('messages').sortBy('gid').get('firstObject').get('ts'),
             limit: 1000
         }, resp => {
             // Window messages are roughly sorted. First are old messages received by FETCH.

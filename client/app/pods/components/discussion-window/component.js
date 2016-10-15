@@ -189,7 +189,7 @@ export default Ember.Component.extend({
         // Remove the oldest message if the optimal history is visible
         if (messages.get('length') > calcMsgHistorySize()) {
             // TODO: Do in store
-            this.get('content.messages').removeModel(messages.sortBy('ts')[0]);
+            this.get('content.messages').removeModel(messages.sortBy('gid')[0]);
             this.deletedLine = true;
         }
 

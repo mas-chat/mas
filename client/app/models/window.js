@@ -94,7 +94,7 @@ export default BaseModel.extend({
     }),
 
     sortedMessages: Ember.computed('messages.[]', '_dayServiceStore.dayCounter', function() {
-        let result = this.get('messages').sortBy('ts');
+        let result = this.get('messages').sortBy('gid');
 
         let addDayDivider = (array, dateString, index) => {
             array.splice(index, 0, Message.create({
