@@ -40,8 +40,11 @@ case "$1" in
         echo -n "!!! Are you absolutely sure this is a development environment? [yes/NO] "
         read ANSWER
         if [ "$ANSWER" = "yes" ]; then
+            mkdir -p tmp
+            redis-server --daemonize yes --dir tmp/
             redis-cli FLUSHALL
             ./server/bin/create-db
+            redis-cli SHUTDOWN SAVE
             echo "Redis reset done."
         else
             echo "Cancelled."
