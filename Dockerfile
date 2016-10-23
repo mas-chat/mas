@@ -15,7 +15,7 @@ RUN /root/.yarn/bin/yarn && /root/.yarn/bin/yarn run bower && /root/.yarn/bin/ya
 
 COPY server /app/server/
 WORKDIR /app/server/
-RUN /root/.yarn/bin/yarn --production && /root/.yarn/bin/yarn run prod
+RUN /root/.yarn/bin/yarn && /root/.yarn/bin/yarn run prod
 RUN cd website && /root/.yarn/bin/yarn && /root/.yarn/bin/yarn run prod && rm -fr node_modules
 
 CMD ["npm", "run", "start-frontend"]
