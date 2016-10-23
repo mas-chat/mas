@@ -6,9 +6,13 @@ addons:
 services:
   - docker
 sudo: required
+cache:
+  directories:
+  - $HOME/.yarn-cache
 install:
-  - cd server && npm install && cd ..
-  - cd server/website && npm install && cd ../..
-  - cd server/test/browser && npm install && cd ../../..
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - cd server && yarn && cd ..
+  - cd server/website && yarn && cd ../..
+  - cd server/test/browser && yarn && cd ../../..
 script:
   - cd server && npm test

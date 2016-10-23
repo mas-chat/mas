@@ -14,14 +14,14 @@ case "$1" in
     build)
         set -x
         cd client
-        npm install
+        yarn
         npm run bower
         npm run build
         cd ../server
-        npm install
+        yarn
         npm run prod
         cd website
-        npm install
+        yarn
         npm run prod
         set +x
         echo "Install done."
