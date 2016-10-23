@@ -20,6 +20,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "bower": "^1.7.9",
     "broccoli-asset-rev": "^2.4.2",
     "broccoli-merge-trees": "^1.1.0",
     "broccoli-static-compiler": "^0.2.1",
