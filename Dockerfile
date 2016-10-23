@@ -8,6 +8,7 @@ ENV NPM_CONFIG_LOGLEVEL warn
 MAINTAINER Ilkka Oksanen <iao@iki.fi>
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash
+ENV PATH $HOME/.yarn/bin:$PATH
 
 COPY client /app/client/
 WORKDIR /app/client/
