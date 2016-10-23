@@ -877,7 +877,7 @@ async function handleError(user, msg) {
         log.warn(user, `Too many connections to: ${msg.network}`);
 
         await addSystemMessage(user, msg.network, 'error',
-            `${msg.network} IRC network doesn\'t allow more connections. Close all windows related to this IRC network and rejoin another day to try again.`); // eslint-disable-line max-len
+            `${msg.network} IRC network doesn't allow more connections. Close all windows related to this IRC network and rejoin another day to try again.`); // eslint-disable-line max-len
     }
 }
 
@@ -1130,7 +1130,7 @@ async function updateNick(user, network, oldNick, newNick) {
     }
 
     // We haven't heard about this change before
-    log.info(user, `I\'m first and announcing ${oldNick} -> ${newNick} nick change.`);
+    log.info(user, `I'm first and announcing ${oldNick} -> ${newNick} nick change.`);
 
     const conversationMembers = await ConversationMember.find(
         { userGId: targetUserGId.toString() });
