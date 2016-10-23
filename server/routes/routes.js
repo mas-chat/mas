@@ -89,7 +89,7 @@ exports.register = function register(app) {
     }
 
     app.use(serve(path.join(__dirname, '..', 'website'), {
-        maxage: 1000 * 60 * 60  * 24 * 365// 1 year
+        maxage: 1000 * 60 * 60 * 24 * 365 // 1 year
     }));
 
     // Ember client assets
