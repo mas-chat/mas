@@ -11,6 +11,7 @@ cache:
   - $HOME/.yarn-cache
 install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - PATH="$HOME/.yarn/bin:$PATH"
   - cd server && yarn && cd ..
   - cd server/website && yarn && cd ../..
   - cd server/test/browser && yarn && cd ../../..
