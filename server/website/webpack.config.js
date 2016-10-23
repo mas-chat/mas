@@ -17,22 +17,24 @@ const config = {
         filename: 'app.js'
     },
     module: {
-        loaders: [ {
+        rules: [ {
             test: /\.js$/,
             exclude: /(node_modules|bower_components)/,
-            loader: 'babel',
-            query: {
-                presets: [ 'es2015' ]
-            }
+            use: [ {
+                loader: 'babel',
+                query: {
+                    presets: [ 'es2015' ]
+                }
+            } ]
         }, {
             test: /\.scss$/,
-            loaders: [ 'style', 'css', 'sass' ]
+            use: [ 'style', 'css', 'postcss', 'sass' ]
         }, {
             test: /\.css$/,
-            loader: 'style!css?modules'
+            use: [ 'style', 'css?modules', 'postcss' ]
         }, {
             test: /\.(ttf|eot|svg|woff|woff2)$/,
-            loader: 'url?limit=10000'
+            use: 'url?limit=10000'
         } ]
     },
     plugins: [
