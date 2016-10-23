@@ -36,6 +36,7 @@
     "style-loader": "~0.13.1",
     "url-loader": "~0.5.7",
     "webpack": "~2.1.0-beta.22",
-    "webpack-dashboard": "~0.2.0"
+    "webpack-dashboard": "~0.2.0",
+    "webpack-manifest-plugin": "~1.1.0"
   }
 }

@@ -8,21 +8,22 @@ cd $ROOT
 
 case "$1" in
     start)
-        ./server/node_modules/.bin/nf --procfile Procfile.dev --env conf/env.dev start
+        cd server
+        yarn run dev
         ;;
 
     build)
         set -x
         cd client
         yarn
-        npm run bower
-        npm run build
+        yarn run bower
+        yarn run build
         cd ../server
         yarn
-        npm run prod
+        yarn run prod
         cd website
         yarn
-        npm run prod
+        yarn run prod
         set +x
         echo "Install done."
         ;;

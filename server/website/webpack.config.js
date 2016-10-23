@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const DashboardPlugin = require('webpack-dashboard/plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
 
 const prefix = path.resolve(__dirname);
 const nodeEnv = process.env.NODE_ENV;
@@ -14,7 +15,7 @@ const config = {
     output: {
         path: `${prefix}/dist`,
         publicPath: '/dist/',
-        filename: 'app.js'
+        filename: isProduction ? 'app-[hash].js' : 'app.js'
     },
     module: {
         rules: [ {
@@ -45,7 +46,8 @@ const config = {
         }),
         new webpack.ProvidePlugin({
             Promise: 'bluebird'
-        })
+        }),
+        new ManifestPlugin()
     ]
 };
 

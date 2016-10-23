@@ -16,7 +16,12 @@
 
 'use strict';
 
+const path = require('path');
+const fs = require('fs');
 const authOptions = require('../lib/authOptions');
+
+const manifest = JSON.parse(fs.readFileSync(
+    path.join(__dirname, '..', 'website', 'dist', 'manifest.json')));
 
 const PAGES = [ 'home', 'about' ];
 
@@ -36,7 +41,8 @@ module.exports = function *index(next) {
             config: JSON.stringify({
                 auth: authOptions,
                 page: name
-            })
+            }),
+            appJSFile: manifest['main.js']
         });
     }
 };
