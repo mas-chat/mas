@@ -88,9 +88,8 @@ exports.register = function register(app) {
         });
     }
 
-    // TODO: Improve caching strategy for the web site
     app.use(serve(path.join(__dirname, '..', 'website'), {
-        maxage: 1000 * 60 * 10 // 10 minutes
+        maxage: 1000 * 60 * 60  * 24 * 365// 1 year
     }));
 
     // Ember client assets
