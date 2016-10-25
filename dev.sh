@@ -17,7 +17,7 @@ case "$1" in
         cd client
         yarn
         yarn run bower
-        yarn run build
+        yarn run build-dev
         cd ../server
         yarn
         yarn run prod

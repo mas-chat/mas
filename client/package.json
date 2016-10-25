@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "ember build --prod",
+    "build-dev": "ember build",
     "start": "ember server",
     "bower": "bower --allow-root install",
     "test": "ember test"

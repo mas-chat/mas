@@ -23,7 +23,7 @@ export default Ember.Object.extend({
         for (let prop of Object.keys(props)) {
             let value = props[prop];
 
-            if (value !== null && typeof(value) === 'object' && !value.__ember_meta__) {
+            if (value !== null && typeof(value) === 'object' && !(value.constructor && value.constructor.isClass)) {
                 this.get(prop).setProperties(value)
                 delete props[prop];
             }
