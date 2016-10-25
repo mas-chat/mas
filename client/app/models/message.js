@@ -282,6 +282,6 @@ export default BaseModel.extend({
     },
 
     _escapeHTMLStartTag(text) {
-        return text.replace(/<]/g, '&lt;');
+        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
     }
 });
