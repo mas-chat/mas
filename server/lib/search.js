@@ -97,7 +97,7 @@ exports.getMessageRange = async function getMessageRange(conversationId, start, 
                 }
             },
             query: {
-                filtered: {
+                bool: {
                     filter: {
                         and: [
                             {
