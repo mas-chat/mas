@@ -39,7 +39,7 @@ exports.storeMessage = function storeMessage(conversationId, msg) {
     }, error => {
         if (error) {
             // TODO: Temporary
-            // log.warn(msg.userId, `Elasticsearch error. Failed to index messsage: ${error}`);
+            log.warn(`Elasticsearch error. Failed to index messsage: ${error}`);
         }
     });
 

@@ -10,7 +10,7 @@
     "carrier": "~0.3.0",
     "colors": "~1.1.0",
     "cron": "~1.1.0",
-    "elasticsearch": "~11.0.0",
+    "elasticsearch": "^12.0.1",
     "forms": "~1.2.0",
     "handlebars": "~4.0.0",
     "iconv-lite": "~0.4.0",

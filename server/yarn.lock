@@ -832,14 +832,13 @@ ee-first@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
 
-elasticsearch@~11.0.0:
-  version "11.0.1"
-  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-11.0.1.tgz#d180684c6bde7ecfa0fa24e62fa1c872eeae08e7"
+elasticsearch:
+  version "12.0.1"
+  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-12.0.1.tgz#107a5525f04f15a4f7838351384d90a778252687"
   dependencies:
     chalk "^1.0.0"
     forever-agent "^0.6.0"
-    lodash "^3.10.0"
-    lodash-compat "^3.0.0"
+    lodash "^4.12.0"
     promise "^7.1.1"
 
 engine.io-client@1.7.0:
@@ -2052,10 +2051,6 @@ load-json-file@^1.0.0:
     pinkie-promise "^2.0.0"
     strip-bom "^2.0.0"
 
-lodash-compat@^3.0.0:
-  version "3.10.2"
-  resolved "https://registry.yarnpkg.com/lodash-compat/-/lodash-compat-3.10.2.tgz#c6940128a9d30f8e902cd2cf99fd0cba4ecfc183"
-
 lodash._baseassign@^3.0.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/lodash._baseassign/-/lodash._baseassign-3.2.0.tgz#8c38a099500f215ad09e59f1722fd0c52bfe0a4e"
@@ -2131,11 +2126,7 @@ lodash.unescape@^4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/lodash.unescape/-/lodash.unescape-4.0.1.tgz#bf2249886ce514cda112fae9218cdc065211fc9c"
 
-lodash@^3.10.0:
-  version "3.10.1"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
-
-lodash@^4.0.0, lodash@^4.1.0, lodash@^4.14.0, lodash@^4.3.0, lodash@^4.8.2, lodash@~4.16.0, lodash@4:
+lodash@^4.0.0, lodash@^4.1.0, lodash@^4.12.0, lodash@^4.14.0, lodash@^4.3.0, lodash@^4.8.2, lodash@~4.16.0, lodash@4:
   version "4.16.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.16.4.tgz#01ce306b9bad1319f2a5528674f88297aeb70127"
 
