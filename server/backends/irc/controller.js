@@ -976,7 +976,7 @@ async function handleMode(user, msg) {
             let newClass = null;
             let targetUserGId = null;
 
-            if (mode.match(/[klbeIOovq]/)) {
+            if (mode.match(/[klbeIORovq]/)) {
                 param = modeParams.shift();
 
                 if (!param) {
