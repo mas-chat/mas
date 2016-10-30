@@ -22,7 +22,7 @@ const redis = require('../lib/redis').createClient();
 const authOptions = require('../lib/authOptions');
 const cookie = require('../lib/cookie');
 const User = require('../models/user');
-const Settings = require('../models/settings');
+const usersService = require('../services/users');
 
 const fields = forms.fields;
 const widgets = forms.widgets;
@@ -174,14 +174,10 @@ exports.indexReset = function *indexReset() {
 
 exports.create = function *create() {
     const details = this.request.body;
-    const newUser = yield User.create(details);
+    const newUser = yield usersService.addUser(details);
 
     if (newUser.valid) {
         yield newUser.set('inUse', true);
-
-        yield Settings.create({
-            userId: newUser.id
-        });
 
         yield cookie.createSession(newUser, this);
         this.body = { success: true, userId: newUser.id, secret: newUser.get('secret') };

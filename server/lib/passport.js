@@ -23,6 +23,8 @@ const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const YahooStrategy = require('passport-yahoo').Strategy;
 const CloudronStrategy = require('passport-cloudron');
 const User = require('../models/user');
+const usersService = require('../services/users');
+
 const conf = require('./conf');
 
 exports.initialize = function initialize() {
@@ -118,7 +120,7 @@ async function authExt(openidId, oauthId, profile, done) {
     }
 
     if (!user) {
-        user = User.create({
+        user = await usersService.addUser({
             name: profile.displayName,
             email: profile.emails[0].value,
             extAuthId: oauthId || openidId,

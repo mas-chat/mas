@@ -22,7 +22,6 @@ const conf = require('./conf');
 const User = require('../models/user');
 const nicksService = require('../services/nicks');
 const notification = require('../lib/notification');
-const ircUserHelper = require('../backends/irc/ircUserHelper');
 
 const networks = [ 'mas', ...Object.keys(conf.get('irc:networks')) ];
 
@@ -66,7 +65,7 @@ async function introduceUsers(user, userGIds, session, socket) {
                     entry.gravatar = foundUser.get('emailMD5');
 
                     for (const network of networks) {
-                        const currentNick = await nicksService.getCurrentNick(foundUser, network);
+                        const currentNick = await nicksService.getNick(foundUser.gId, network);
 
                         // Fallback to default nick. This solves the situation where the user joins
                         // a new IRC network during the session. In that case his own userGId is in
@@ -80,10 +79,8 @@ async function introduceUsers(user, userGIds, session, socket) {
                 entry.name = 'IRC User';
                 entry.gravatar = '';
 
-                const nick = ircUserHelper.getIRCUserGIdNick(userGId);
-
                 for (const network of networks) {
-                    entry.nick[network] = nick; // shortcut, ircUserId is scoped by network
+                    entry.nick[network] = await nicksService.getNick(userGId, network);
                 }
             }
 

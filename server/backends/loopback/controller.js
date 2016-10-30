@@ -25,12 +25,10 @@ const conf = require('../../lib/conf');
 const log = require('../../lib/log');
 const courier = require('../../lib/courier').createEndPoint('loopbackparser');
 const Conversation = require('../../models/conversation');
-const NetworkInfo = require('../../models/networkInfo');
 const User = require('../../models/user');
 const windowsService = require('../../services/windows');
 const nicksService = require('../../services/nicks');
 const conversationsService = require('../../services/conversations');
-const userIntroducer = require('../../lib/userIntroducer');
 
 init.on('beforeShutdown', async () => {
     await courier.quit();
@@ -82,8 +80,6 @@ async function processSend({ userId, conversationId }) {
 async function processCreate({ userId, name, password }) {
     const user = await User.fetch(userId);
 
-    await ensureNetworkInfoExists(user);
-
     if (!name) {
         return { status: 'ERROR_NAME_MISSING', errorMsg: 'Name can\'t be empty.' };
     }
@@ -116,8 +112,6 @@ async function processJoin({ userId, name, password }) {
     const user = await User.fetch(userId);
     const conversation = await Conversation.findFirst({ type: 'group', network: 'mas', name });
 
-    await ensureNetworkInfoExists(user);
-
     if (!conversation) {
         return { status: 'NOT_FOUND', errorMsg: 'Group doesn\'t exist.' };
     } else if (conversation.get('password') && conversation.get('password') !== password) {
@@ -143,7 +137,7 @@ async function processUpdatePassword({ conversationId, password }) {
 async function processUpdateTopic({ userId, conversationId, topic }) {
     const conversation = await Conversation.fetch(conversationId);
     const user = await User.fetch(userId);
-    const nick = await nicksService.getCurrentNick(user, 'mas');
+    const nick = await nicksService.getNick(user.gId, 'mas');
 
     await conversationsService.setTopic(conversation, topic, nick);
 
@@ -177,20 +171,6 @@ async function createInitialGroups() {
                 password: null
             });
         }
-    }
-}
-
-async function ensureNetworkInfoExists(user) {
-    const networkInfo = await NetworkInfo.create({
-        userId: user.id,
-        network: 'mas',
-        state: 'connected',
-        nick: user.get('nick')
-    });
-
-    if (networkInfo.valid) {
-        // NetworkInfo didn't exist and was created
-        await userIntroducer.introduce(user, user.gId);
     }
 }
 

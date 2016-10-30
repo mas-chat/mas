@@ -16,4 +16,25 @@
 
 'use strict';
 
-// TODO: Send password update mail here!?
+const User = require('../models/user');
+const NetworkInfo = require('../models/networkInfo');
+const Settings = require('../models/settings');
+
+// TODO: Send password update mail here?
+
+exports.addUser = async function addUser(details) {
+    const user = await User.create(details);
+
+    if (user.valid) {
+        await Settings.create({ userId: user.id });
+
+        await NetworkInfo.create({
+            userId: user.id,
+            network: 'mas',
+            state: 'connected',
+            nick: user.get('nick')
+        });
+    }
+
+    return user;
+};

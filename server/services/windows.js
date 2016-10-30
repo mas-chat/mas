@@ -96,6 +96,8 @@ exports.scanMentions = async function scanMentions(conversation, message) {
 
     const users = [];
     const srcUserGId = UserGId.create(message.get('userGId'));
+    const network = conversation.get('network');
+    const nickName = await nicksService.getNick(srcUserGId, network);
 
     if (conversation.get('type') === 'group') {
         const mentions = message.get('body').match(/(?:^| )@\S+(?=$| )/g);
@@ -106,7 +108,7 @@ exports.scanMentions = async function scanMentions(conversation, message) {
 
         for (const mention of mentions) {
             const user = await nicksService.getUserFromNick(
-                mention.substring(1), conversation.get('network'));
+                mention.substring(1), network);
 
             if (user) {
                 users.push(user);
@@ -150,23 +152,15 @@ exports.scanMentions = async function scanMentions(conversation, message) {
         }
 
         if (window.get('emailAlert')) {
-            let nickName = 'IRCUSER'; // TODO, fetch real IRC nick
-
-            if (srcUserGId.isMASUser) {
-                const srcUser = await User.fetch(srcUserGId.id);
-                nickName = await nicksService.getCurrentNick(srcUser, conversation.get('network'));
-            }
-
-            const name = user.get('name') || nickName;
             const notificationId = uuid(20);
 
-            // TODO: Needs to be transaction, add lua script
+            // TODO: Needs to be a transaction, add lua script
             await redis.sadd('emailnotifications', user.gId);
             await redis.lpush(`emailnotificationslist:${user.gId}`, notificationId);
 
             await redis.hmset(`emailnotification:${notificationId}`, {
                 type: conversation.get('type'),
-                senderName: name,
+                senderName: user.get('name'),
                 senderNick: nickName,
                 groupName: conversation.get('name'),
                 message: message.get('body')

@@ -17,19 +17,48 @@
 'use strict';
 
 const NetworkInfo = require('../models/networkInfo');
+const UserGId = require('../models/userGId');
 const User = require('../models/user');
 
 // User's master nick is stored in 'nick' property in user model. User's nicks in
 // networks are stored in 'nick' property in networkInfo model. Currently master nick
 // always equals to MAS nick and can differ in IRC network
 
-exports.getCurrentNick = async function getCurrentNick(user, network) {
-    const nwInfo = await NetworkInfo.findFirst({ userId: user.id, network });
+exports.getNick = async function getNick(userGId, network) {
+    if (userGId.isMASUser) {
+        const nwInfo = await NetworkInfo.findFirst({ userId: userGId.id, network });
+        return nwInfo ? nwInfo.get('nick') : null;
+    } else if (userGId.toString() === 'i0') {
+        return 'IRC server';
+    }
 
-    return nwInfo ? nwInfo.get('nick') : null;
+    return new Buffer(userGId.id, 'base64').toString('ascii');
 };
 
-exports.updateCurrentNick = async function updateCurrentNick(user, network, nick) {
+exports.getUser = async function getUser(nick, network) {
+    return await fetchUser(nick, network);
+};
+
+exports.getUserGId = async function getUserGId(nick, network) {
+    const masUser = await fetchUser(nick, network);
+
+    if (masUser) {
+        return masUser.gId;
+    }
+
+    if (network === 'mas') {
+        return null;
+    }
+
+    // UserId for IRC user is created on the fly. This method therefore never returns null if
+    // network is not mas
+    return UserGId.create({
+        type: 'irc',
+        id: new Buffer(nick).toString('base64').replace(/=+$/, '')
+    });
+};
+
+exports.updateUserNick = async function updateUserNick(user, network, nick) {
     const nwInfo = await NetworkInfo.findFirst({ userId: user.id, network });
 
     if (nwInfo) {
@@ -37,7 +66,7 @@ exports.updateCurrentNick = async function updateCurrentNick(user, network, nick
     }
 };
 
-exports.getUserFromNick = async function getUserFromNick(nick, network) {
+async function fetchUser(nick, network) {
     const nwInfo = await NetworkInfo.findFirst({ nick, network });
 
     if (nwInfo && nwInfo.get('state') === 'connected') {
@@ -47,4 +76,4 @@ exports.getUserFromNick = async function getUserFromNick(nick, network) {
     }
 
     return null;
-};
+}

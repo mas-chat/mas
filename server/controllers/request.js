@@ -28,6 +28,7 @@ const mailer = require('../lib/mailer');
 const conversationsService = require('../services/conversations');
 const windowsService = require('../services/windows');
 const friendsService = require('../services/friends');
+const nicksService = require('../services/nicks');
 const Conversation = require('../models/conversation');
 const User = require('../models/user');
 const Friend = require('../models/friend');
@@ -35,7 +36,6 @@ const Window = require('../models/window');
 const Settings = require('../models/settings');
 const IrcSubscription = require('../models/ircSubscription');
 const UserGId = require('../models/userGId');
-const ircUserHelper = require('../backends/irc/ircUserHelper');
 
 const handlers = {
     SEND: handleSend,
@@ -173,7 +173,7 @@ async function handleCommand({ command, conversation, user, backend }) {
         }
 
         const network = conversation.get('network');
-        const targetUserGId = await ircUserHelper.getUserGId(params.trim(), network);
+        const targetUserGId = await nicksService.getUserGId(params.trim(), network);
 
         // 1on1s between MAS users are forced through loopback backend as multiple 1on1s between
         // same people via different networks isn't useful feature, just confusing.
