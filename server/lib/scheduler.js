@@ -41,10 +41,6 @@ exports.quit = function quit() {
 async function deliverEmails() {
     log.info('Running deliverEmails job');
 
-    function groupNotifications(ntf) {
-        return ntf.groupName ? `Group: ${ntf.groupName}` : `1-on-1: ${ntf.senderName}`;
-    }
-
     const userGIdStrings = await redis.smembers('emailnotifications');
 
     for (const userGIdString of userGIdStrings) {
@@ -60,7 +56,8 @@ async function deliverEmails() {
             }
         }
 
-        notifications = _.groupBy(notifications, groupNotifications);
+        notifications = _.groupBy(notifications,
+            ntf => ntf.groupName ? `Group: ${ntf.groupName}` : `1-on-1: ${ntf.senderName}`);
 
         const userGId = UserGId.create(userGIdString);
         const user = await User.fetch(userGId.id);
