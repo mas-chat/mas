@@ -17,7 +17,6 @@
 'use strict';
 
 const assert = require('assert');
-const Promise = require('bluebird');
 const uid2 = require('uid2');
 const redisModule = require('./redis');
 const log = require('./log');

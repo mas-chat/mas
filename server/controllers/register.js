@@ -16,7 +16,6 @@
 
 'use strict';
 
-const Promise = require('bluebird');
 const forms = require('forms');
 const httpStatus = require('statuses');
 const redis = require('../lib/redis').createClient();

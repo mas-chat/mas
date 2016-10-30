@@ -6,7 +6,6 @@
   "dependencies": {
     "async-to-gen": "^1.0.2",
     "bcrypt": "~0.8.1",
-    "bluebird": "~3.4.0",
     "carrier": "~0.3.0",
     "colors": "~1.1.0",
     "cron": "~1.1.0",

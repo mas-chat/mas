@@ -16,7 +16,6 @@
 
 'use strict';
 
-const Promise = require('bluebird');
 const UserGId = require('../models/userGId');
 const User = require('../models/user');
 const Friend = require('../models/friend');
