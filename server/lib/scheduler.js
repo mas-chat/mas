@@ -57,7 +57,7 @@ async function deliverEmails() {
         }
 
         notifications = _.groupBy(notifications,
-            ntf => ntf.groupName ? `Group: ${ntf.groupName}` : `1-on-1: ${ntf.senderName}`);
+            ntf => (ntf.groupName ? `Group: ${ntf.groupName}` : `1-on-1: ${ntf.senderName}`));
 
         const userGId = UserGId.create(userGIdString);
         const user = await User.fetch(userGId.id);
