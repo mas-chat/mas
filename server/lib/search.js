@@ -76,6 +76,12 @@ exports.getMessageRange = async function getMessageRange(conversationId, start, 
 
     // TODO: If there are multiple messages at the boundary start/end ts, part of them can be lost.
     // Theoretical problem mostly. Solution is not lte.
+    const range = { lt: end * 1000 };
+
+    if (start) {
+        range.gte: start * 1000;
+    }
+
     const response = await elasticSearchClient.search({
         index: 'messages',
         body: {
@@ -89,7 +95,7 @@ exports.getMessageRange = async function getMessageRange(conversationId, start, 
                 bool: {
                     must: [
                         { term: { conversationId } },
-                        { range: { ts: { lt: end * 1000, gte: start ? start * 1000 : false } } }
+                        { range: { ts: range } }
                     ]
                 }
             }
