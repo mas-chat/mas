@@ -16,55 +16,58 @@
 
 'use strict';
 
-const Promise = require('bluebird');
-const elasticSearchClient = Promise.promisifyAll(require('./elasticSearch').getClient());
+const elasticSearch = require('./elasticSearch');
 const log = require('./log');
+const conf = require('./conf');
 
-exports.storeMessage = function storeMessage(conversationId, msg) {
+let elasticSearchClient = null;
+
+exports.storeMessage = async function storeMessage(conversationId, msg) {
     if (!elasticSearchAvailable()) {
         return false;
     }
 
-    elasticSearchClient.create({
-        index: 'messages',
-        type: 'message',
-        id: msg.gid,
-        body: {
-            ts: msg.ts * 1000,
-            body: msg.body,
-            cat: msg.cat,
-            userId: msg.userId,
-            conversationId
-        }
-    }, error => {
-        if (error) {
-            // TODO: Temporary
-            log.warn(`Elasticsearch error. Failed to index messsage: ${error}`);
-        }
-    });
+    try {
+        await elasticSearchClient.create({
+            index: 'messages',
+            type: 'message',
+            id: msg.gid,
+            body: {
+                ts: msg.ts * 1000,
+                body: msg.body,
+                cat: msg.cat,
+                userId: msg.userId,
+                conversationId
+            }
+        });
+    } catch (e) {
+        log.warn(`Elasticsearch error. Failed to index messsage: ${e}`);
+        return false;
+    }
 
     return true;
 };
 
-exports.updateMessage = function updateMessage(gid, msg) {
+exports.updateMessage = async function updateMessage(gid, msg) {
     if (!elasticSearchAvailable()) {
         return false;
     }
 
-    elasticSearchClient.update({
-        index: 'messages',
-        type: 'message',
-        id: gid,
-        body: {
-            doc: {
-                body: msg
+    try {
+        await elasticSearchClient.update({
+            index: 'messages',
+            type: 'message',
+            id: gid,
+            body: {
+                doc: {
+                    body: msg
+                }
             }
-        }
-    }, error => {
-        if (error) {
-            log.warn(msg.userId, `Elasticsearch error. Failed to index messsage: ${error}`);
-        }
-    });
+        });
+    } catch (e) {
+        log.warn(`Elasticsearch error. Failed to index messsage: ${e}`);
+        return false;
+    }
 
     return true;
 };
@@ -79,30 +82,35 @@ exports.getMessageRange = async function getMessageRange(conversationId, start, 
     const range = { lt: end * 1000 };
 
     if (start) {
-        range.gte: start * 1000;
+        range.gte = start * 1000;
     }
 
-    const response = await elasticSearchClient.search({
-        index: 'messages',
-        body: {
-            size: amount || 1000,
-            sort: {
-                ts: {
-                    order: 'desc'
-                }
-            },
-            query: {
-                bool: {
-                    must: [
-                        { term: { conversationId } },
-                        { range: { ts: range } }
-                    ]
+    try {
+        const response = await elasticSearchClient.search({
+            index: 'messages',
+            body: {
+                size: amount || 1000,
+                sort: {
+                    ts: {
+                        order: 'desc'
+                    }
+                },
+                query: {
+                    bool: {
+                        must: [
+                            { term: { conversationId } },
+                            { range: { ts: range } }
+                        ]
+                    }
                 }
             }
-        }
-    });
+        });
 
-    return convertToMsgs(response.hits.hits);
+        return convertToMsgs(response.hits.hits);
+    } catch (e) {
+        log.warn(`Elasticsearch error. Failed to search messsage: ${e}`);
+        return [];
+    }
 };
 
 function convertToMsgs(hits) {
@@ -116,8 +124,10 @@ function convertToMsgs(hits) {
 }
 
 function elasticSearchAvailable() {
-    if (!elasticSearchClient) {
+    if (!conf.get('elasticsearch:enabled')) {
         return false;
+    } else if (!elasticSearchClient) {
+        elasticSearchClient = elasticSearch.getClient();
     }
 
     return true;
