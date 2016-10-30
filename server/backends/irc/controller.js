@@ -815,7 +815,7 @@ async function handleResourceUnavailable(user, msg) {
     // irc.localhost 482 ilkka ilkka :Nick/channel is temporarily unavailable"
     const networkInfo = await findOrCreateNetworkInfo(user, msg.network);
     const channelOrNick = msg.params[0];
-    const currentNick = await nicksService.getNick(user.id, msg.network);
+    const currentNick = await nicksService.getNick(user.gId, msg.network);
 
     if (channelOrNick === currentNick) {
         if (networkInfo.get('state') !== 'connected') {
@@ -1045,7 +1045,7 @@ async function handleTopic(user, msg) {
 async function handlePrivmsg(user, msg, command) {
     // :ilkkao!~ilkkao@127.0.0.1 NOTICE buppe :foo
     const target = msg.params[0];
-    const currentNick = await nicksService.getNick(user.id, msg.network);
+    const currentNick = await nicksService.getNick(user.gId, msg.network);
     let conversation;
     let sourceUserGId;
     let text = msg.params[1];
@@ -1185,7 +1185,7 @@ async function updateNick(user, network, oldNick, newNick) {
 
 async function tryDifferentNick(user, network) {
     const nick = user.get('nick');
-    let currentNick = await nicksService.getNick(user.id, network);
+    let currentNick = await nicksService.getNick(user.gId, network);
 
     if (nick !== currentNick.substring(0, nick.length)) {
         // Current nick is unique ID, let's try to change it to something unique immediately
