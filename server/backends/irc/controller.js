@@ -136,7 +136,7 @@ async function processSend({ conversationId, userId, text = '' }) {
         const peerMember = await conversationsService.getPeerMember(conversation, user.gId);
         const targetUserGId = UserGId.create(peerMember.get('userGId'));
 
-        target = nicksService.getNick(targetUserGId, network);
+        target = await nicksService.getNick(targetUserGId, network);
     } else {
         target = conversation.get('name');
     }
