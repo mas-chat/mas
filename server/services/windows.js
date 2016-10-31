@@ -107,8 +107,7 @@ exports.scanMentions = async function scanMentions(conversation, message) {
         }
 
         for (const mention of mentions) {
-            const user = await nicksService.getUserFromNick(
-                mention.substring(1), network);
+            const user = await nicksService.getUser(mention.substring(1), network);
 
             if (user) {
                 users.push(user);
