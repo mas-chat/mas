@@ -98,7 +98,7 @@ export default Store.extend({
 
     toJSON() {
         let data = {
-            version: 2,
+            version: 3,
             windows: [],
             userId: this.get('userId'),
             cachedUpto: 0
@@ -162,7 +162,7 @@ export default Store.extend({
     },
 
     fromJSON(data) {
-        if (data.version !== 2) {
+        if (data.version !== 3) {
             return;
         }
 

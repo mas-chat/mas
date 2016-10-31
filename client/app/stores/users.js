@@ -26,7 +26,7 @@ export default Store.extend({
 
     toJSON() {
         let data = {
-            version: 2,
+            version: 3,
             users: {}
         };
 
@@ -53,7 +53,7 @@ export default Store.extend({
     },
 
     fromJSON(data) {
-        if (data.version !== 2) {
+        if (data.version !== 3) {
             return;
         }
 
