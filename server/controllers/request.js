@@ -414,7 +414,7 @@ async function handleFetch({ command, conversation }) {
     }
 
     const messages = await search.getMessageRange(
-        conversation.id, command.start, command.end, command.limit, 50);
+        conversation.id, command.start, command.end, command.limit);
 
     return { status: 'OK', msgs: messages };
 }

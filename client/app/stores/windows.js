@@ -384,7 +384,7 @@ export default Store.extend({
             id: 'FETCH',
             windowId: data.window.get('windowId'),
             end: data.window.get('messages').sortBy('gid').get('firstObject').get('ts'),
-            limit: 1000
+            limit: 50
         }, resp => {
             // Window messages are roughly sorted. First are old messages received by FETCH.
             // Then the messages received at startup and at runtime.
