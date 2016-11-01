@@ -218,6 +218,8 @@ export default Store.extend({
             gid: data.gid,
             window: data.window
         });
+
+        this._trimBacklog(data.window.messages);
     },
 
     handleAddMessageServer(data) {
@@ -229,6 +231,7 @@ export default Store.extend({
             this.msgBuffer.push(data);
         } else {
             data.window.messages.upsertModel(data);
+            this._trimBacklog(data.window.messages);
         }
 
         return true;
@@ -661,6 +664,13 @@ export default Store.extend({
             }, exit);
         } else {
             exit();
+        }
+    },
+
+    _trimBacklog(messages) {
+        // Remove the oldest message if the optimal history is visible
+        if (messages.get('length') > calcMsgHistorySize()) {
+            messages.removeModel(messages.sortBy('gid')[0]);
         }
     }
 });

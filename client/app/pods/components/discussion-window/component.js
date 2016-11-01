@@ -22,7 +22,6 @@ import Favico from 'npm:favico.js';
 import isMobile from 'npm:ismobilejs';
 import { dispatch } from 'emflux/dispatcher';
 import { play } from '../../../utils/sound';
-import { calcMsgHistorySize } from '../../../utils/msg-history-sizer';
 
 let faviconCounter = 0;
 
@@ -184,13 +183,6 @@ export default Ember.Component.extend({
 
                 setTimeout(() => ntf.close(), 5000);
             }
-        }
-
-        // Remove the oldest message if the optimal history is visible
-        if (messages.get('length') > calcMsgHistorySize()) {
-            // TODO: Do in store
-            this.get('content.messages').removeModel(messages.sortBy('gid')[0]);
-            this.deletedLine = true;
         }
 
         Ember.run.scheduleOnce('afterRender', this, function() {
@@ -402,6 +394,8 @@ export default Ember.Component.extend({
             // Infinity scrolling adds the old messages to the beginning of the array. The offset
             // check above makes sure that _lineAdded() is not called then (FETCH case).
             this._lineAdded(array);
+        } else if (removeCount > 0) {
+            this.deletedLine = true;
         }
     },
 
@@ -498,7 +492,7 @@ export default Ember.Component.extend({
                 Ember.Logger.info('scrollock on');
             }
 
-            this.deletedLine = false; // A hack
+            this.deletedLine = false;
         };
 
         this.$messagePanel.on('scroll', () => {
