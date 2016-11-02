@@ -40,19 +40,18 @@ export default Store.extend({
     initDone: false,
 
     init() {
-        this._super();
-
         let [ userId, secret ] = (Cookies.get('auth') || '').split('-');
 
         if (!userId || !secret) {
             Ember.Logger.info(`Authentication cookie not found. Exiting.`);
             this._logout({ informServer: false });
         } else {
-            this.set('userId', userId);
-            this.set('secret', secret);
-
+            this.userId = userId;
+            this.secret = secret;
             this.msgBuffer = [];
         }
+
+        this._super();
     },
 
     desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {

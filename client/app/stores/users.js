@@ -27,9 +27,9 @@ export default Store.extend({
     userId: null,
 
     init() {
-        this._super();
+        this.userId = (Cookies.get('auth') || '').split('-')[0];
 
-        this.set('userId', (Cookies.get('auth') || '').split('-')[0]);
+        this._super();
     },
 
     toJSON() {
