@@ -15,6 +15,7 @@
 //
 
 import Store from 'emflux/store';
+import Cookies from 'npm:js-cookie';
 import { getStore } from 'emflux/dispatcher';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import User from '../models/user';
