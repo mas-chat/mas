@@ -162,7 +162,7 @@ export default Store.extend({
     },
 
     fromJSON(data) {
-        if (data.version !== 3) {
+        if (data.userId !== this.get('userId') || data.version !== 3) {
             return;
         }
 

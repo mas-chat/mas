@@ -23,11 +23,19 @@ import IndexArray from '../utils/index-array';
 export default Store.extend({
     users: IndexArray.create({ index: 'userId', factory: User }),
     isDirty: 0,
+    userId: null,
+
+    init() {
+        this._super();
+
+        this.set('userId', (Cookies.get('auth') || '').split('-')[0]);
+    },
 
     toJSON() {
         let data = {
             version: 3,
-            users: {}
+            users: {},
+            userId: this.get('userId'),
         };
 
         // Only persist users of recent messages
@@ -53,7 +61,7 @@ export default Store.extend({
     },
 
     fromJSON(data) {
-        if (data.version !== 3) {
+        if (data.userId !== this.get('userId') || data.version !== 3) {
             return;
         }
 
