@@ -34,14 +34,14 @@ export default Store.extend({
 
     toJSON() {
         let data = {
-            version: 3,
+            version: 4,
             users: {},
             userId: this.get('userId'),
         };
 
         // Only persist users of recent messages
         getStore('windows').get('windows').forEach(function(masWindow) {
-            let sortedMessages = masWindow.get('messages').sortBy('ts')
+            let sortedMessages = masWindow.get('messages').sortBy('gid')
                 .slice(-1 * calcMsgHistorySize());
 
             sortedMessages.forEach(function(message) {
@@ -53,6 +53,9 @@ export default Store.extend({
             });
         });
 
+        // Always save user itself
+        data.users[this.get('userId')] = true;
+
         for (let userId in data.users) {
             let user = this.get('users').getByIndex(userId);
             data.users[userId] = user.getProperties([ 'userId', 'name', 'nick', 'gravatar' ]);
@@ -62,12 +65,12 @@ export default Store.extend({
     },
 
     fromJSON(data) {
-        if (data.userId !== this.get('userId') || data.version !== 3) {
+        if (data.userId !== this.get('userId') || data.version !== 4) {
             return;
         }
 
         for (let userId in data.users) {
-            this.get('users').upsertModel(data[userId]);
+            this.get('users').upsertModel(data.users[userId]);
         }
 
         this.incrementProperty('isDirty');

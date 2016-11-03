@@ -97,7 +97,7 @@ export default Store.extend({
 
     toJSON() {
         let data = {
-            version: 3,
+            version: 4,
             windows: [],
             userId: this.get('userId'),
             cachedUpto: 0
@@ -161,7 +161,10 @@ export default Store.extend({
     },
 
     fromJSON(data) {
-        if (data.userId !== this.get('userId') || data.version !== 3) {
+        return; // TODO: Enable when missing user problem is solved.
+
+        if (data.userId !== this.get('userId') || data.version !== 4) {
+            Ember.Logger.info(`Corrupted windows snapshot.`);
             return;
         }
 
