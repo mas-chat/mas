@@ -1,0 +1,5 @@
+# editorconfig.org
+root = false
+
+[*]
+indent_size = 2
