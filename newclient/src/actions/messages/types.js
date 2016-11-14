@@ -1,0 +1,1 @@
+export const ADD_MESSAGE_SERVER = 'ADD_MESSAGE_SERVER';
