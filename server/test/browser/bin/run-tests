@@ -13,6 +13,8 @@ fi
 cd server
 echo "Running eslint for /server"
 npm run lint-server
+echo "Running eslint for /newclient"
+npm run lint-client
 cd ..
 
 # TODO: Replace manual docker setup in this script with docker-compose.yml file

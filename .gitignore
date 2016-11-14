@@ -19,6 +19,9 @@
 /client/bower_components/
 /client/node_modules/
 
+/newclient/dist
+/newclient/node_modules
+
 npm-debug.log
 /logs/
 /run/

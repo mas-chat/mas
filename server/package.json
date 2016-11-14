@@ -75,7 +75,7 @@
     "start-irc-scktmgr": "./bin/create-db && async-node ./backends/irc/connection-manager/server.js",
     "test": "mocha --require async-to-gen/register --recursive test/unit && ./test/browser/bin/run-tests saucelabs",
     "lint-server": "eslint --env node --ignore-pattern website/dist --ignore-pattern node_modules .",
-    "lint-client": "eslint --env browser client/app test/browser",
+    "lint-client": "eslint --env browser ../newclient/src",
     "test-server": "mocha server/test/**/*test.js"
   },
   "repository": {
