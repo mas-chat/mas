@@ -147,7 +147,7 @@ courier.on('write', params => {
 
 function connect(userId, nick, network) {
     if (sockets[`${userId}:${network}`]) {
-        log.warn(userId, `Impossible happened. Already connected to IRC network: ${network}`);
+        log.warn({ id: userId }, `Impossible happened. Already connected to IRC network: ${network}`);
         return;
     }
 
@@ -164,7 +164,7 @@ function connect(userId, nick, network) {
         socket = net.connect(options);
     }
 
-    log.info(userId, `Connecting to IRC server, SSL: ${ssl}, host: ${host}, port: ${port}`);
+    log.info({ id: userId }, `Connecting to IRC server, SSL: ${ssl}, host: ${host}, port: ${port}`);
 
     socket.nick = nick;
     socket.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
@@ -268,7 +268,7 @@ function handleEnd(userId, network, error) {
     delete sockets[`${userId}:${network}`];
     clearInterval(socket.pingTimer);
 
-    log.info(userId, 'IRC connection closed by the server or network.');
+    log.info({ id: userId }, 'IRC connection closed by the server or network.');
 
     courier.callNoWait('ircparser', 'disconnected', { userId, network, reason });
 }
