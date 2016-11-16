@@ -1185,7 +1185,16 @@ async function updateNick(user, network, oldNick, newNick) {
 
 async function tryDifferentNick(user, network) {
     const nick = user.get('nick');
+
+    // TODO: Temporary logging
+    log.info(user, `tryDifferentNick: ${user.gId} and ${network}`);
+
     let currentNick = await nicksService.getNick(user.gId, network);
+
+    // TODO: Temporary work-a-round until the bug is fixed
+    if (!currentNick) {
+        currentNick = 'masuser';
+    }
 
     if (nick !== currentNick.substring(0, nick.length)) {
         // Current nick is unique ID, let's try to change it to something unique immediately
