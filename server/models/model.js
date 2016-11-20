@@ -129,16 +129,16 @@ module.exports = class Model {
 
     static async create(props, { skipSetters = false } = {}) {
         const record = new this(this.collection);
-        let preparedProps = props;
+        let finalProps = props;
 
         if (!skipSetters) {
-            const { setProps, setErrors } = runSetters(props, this.setters);
-            preparedProps = setProps;
-            record.errors = setErrors;
+            const { errors, preparedProps } = runSetters(props, this.setters);
+            finalProps = preparedProps;
+            record.errors = errors;
         }
 
         if (record.valid) {
-            const { err, val, indices } = await db.create(record.collection, preparedProps);
+            const { err, val, indices } = await db.create(record.collection, finalProps);
 
             if (err === 'notUnique') {
                 record.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
@@ -147,7 +147,7 @@ module.exports = class Model {
                     `DB ERROR: ${err}, c: ${this.collection}, p: ${JSON.stringify(props)}`);
             } else {
                 record.id = val || null;
-                record._props = preparedProps;
+                record._props = finalProps;
             }
         }
 
