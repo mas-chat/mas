@@ -43,7 +43,7 @@ module.exports = class User extends Model {
             deletedEmail: null,
             emailConfirmed: false,
             emailMD5: md5(props.email.toLowerCase()),
-            extAuthId: null,
+            extAuthId: props.extAuthId || null,
             inUse: props.inUse || false,
             canUseIRC: props.canUseIRC || false,
             lastIp: null,
@@ -52,8 +52,8 @@ module.exports = class User extends Model {
             discount: props.discount || 0,
             name: props.name,
             nick: props.nick,
-            password: bcrypt.hashSync(props.password, bcrypt.genSaltSync(10)),
-            passwordType: 'bcrypt',
+            password: props.password ? bcryptPassword(props.password) : null,
+            passwordType: props.password ? 'bcrypt' : null,
             registrationTime: new Date(),
             secret: null,
             secretExpires: null
@@ -243,4 +243,8 @@ function validatePassword(password) {
     }
 
     return { valid: true };
+}
+
+function bcryptPassword(password) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 }

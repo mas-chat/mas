@@ -26,18 +26,19 @@ const log = require('../lib/log');
 exports.addUser = async function addUser(details) {
     const user = await User.create(details);
 
-    if (user.valid) {
-        await Settings.create({ userId: user.id });
-
-        await NetworkInfo.create({
-            userId: user.id,
-            network: 'mas',
-            state: 'connected',
-            nick: user.get('nick')
-        });
-    } else {
-        log.warn(`User creation failed, errors: ${user.errors}`);
+    if (!user.valid) {
+        log.warn(`User creation failed, errors: ${JSON.stringify(user.errors)}`);
+        return null;
     }
+
+    await Settings.create({ userId: user.id });
+
+    await NetworkInfo.create({
+        userId: user.id,
+        network: 'mas',
+        state: 'connected',
+        nick: user.get('nick')
+    });
 
     return user;
 };
