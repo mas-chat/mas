@@ -139,7 +139,8 @@ module.exports = class Model {
             if (err === 'notUnique') {
                 record.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
             } else if (err) {
-                throw new Error(`DB ERROR: ${err}, props: ${JSON.stringify(props)}`);
+                throw new Error(
+                    `DB ERROR: ${err}, c: ${this.collection}, p: ${JSON.stringify(props)}`);
             } else {
                 record.id = val || null;
                 record._props = preparedProps;
@@ -214,7 +215,8 @@ module.exports = class Model {
             this.errors = explainIndexErrors(
                 indices, this.constructor.config.indexErrorDescriptions);
         } else if (err) {
-            throw new Error(`DB ERROR: ${err}, props: ${JSON.stringify(objectProps)}`);
+            throw new Error(
+                `DB ERROR: ${err}, c: ${this.collection}, p: ${JSON.stringify(objectProps)}`);
         } else {
             this.errors = {};
             Object.assign(this._props, objectProps);
