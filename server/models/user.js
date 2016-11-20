@@ -91,7 +91,7 @@ module.exports = class User extends Model {
                     return { valid: false, error: 'Nick has to be 3-15 characters long.' };
                 } else if (/[0-9]/.test(nickName.charAt(0))) {
                     return { valid: false, error: 'Nick can\'t start with digit' };
-                } else if (!(/^[A-Z`a-z0-9[\]\\_\^{|}]+$/.test(nickName))) {
+                } else if (!(/^[A-Z`a-z0-9[\]\\_^{|}]+$/.test(nickName))) {
                     const valid = [ 'a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}' ];
                     return { valid: false,
                         error: `Illegal characters, allowed are ${valid.join(', ')}` };
