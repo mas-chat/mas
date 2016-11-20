@@ -23,8 +23,8 @@ const log = require('../lib/log');
 
 // TODO: Send password update mail here?
 
-exports.addUser = async function addUser(details) {
-    const user = await User.create(details);
+exports.addUser = async function addUser(details, { skipSetters = false } = {}) {
+    const user = await User.create(details, { skipSetters });
 
     if (!user.valid) {
         log.warn(`User creation failed, errors: ${JSON.stringify(user.errors)}`);

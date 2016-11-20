@@ -127,11 +127,15 @@ module.exports = class Model {
         return await this.find(props, { onlyFirst: true });
     }
 
-    static async create(props) {
+    static async create(props, { skipSetters = false } = {}) {
         const record = new this(this.collection);
-        const { preparedProps, errors } = runSetters(props, this.setters);
+        let preparedProps = props;
 
-        record.errors = errors;
+        if (!skipSetters) {
+            const { setProps, setErrors } = runSetters(props, this.setters);
+            preparedProps = setProps;
+            record.errors = setErrors;
+        }
 
         if (record.valid) {
             const { err, val, indices } = await db.create(record.collection, preparedProps);
