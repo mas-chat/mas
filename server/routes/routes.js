@@ -61,6 +61,7 @@ exports.register = function register(app) {
     router.post('/api/v1/upload', koaBody({ multipart: true }), uploadController);
 
     // Registration routes
+    router.get('/register', registerController.index);
     router.post('/register', bodyParser(), registerController.create);
     router.post('/register-ext', registerController.createExt);
     router.post('/register-reset', registerController.createReset);
