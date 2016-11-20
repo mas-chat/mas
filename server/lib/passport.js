@@ -16,6 +16,7 @@
 
 'use strict';
 
+const uuid = require('uid2');
 const jwt = require('jwt-simple');
 const passport = require('koa-passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -127,6 +128,7 @@ async function authExt(openidId, oauthId, profile, done) {
             name: profile.displayName,
             email: profile.emails[0].value,
             extAuthId: oauthId || openidId,
+            password: uuid(24), // record must have a password, create random one that won't be used
             inUse: false // authentication is not yet complete
         });
     }
