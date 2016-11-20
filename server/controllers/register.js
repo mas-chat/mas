@@ -90,7 +90,7 @@ const formFields = {
     }),
     tos: fields.boolean({
         required: validators.required('You must agree MAS TOS'),
-        label: 'I agree MAS Terms of Service',
+        label: 'I agree <a target="_blank" href="/tos">MAS Terms of Service</a>',
         errorAfterField: true,
         widget: widgets.checkbox({
             placeholder: 'foo'
