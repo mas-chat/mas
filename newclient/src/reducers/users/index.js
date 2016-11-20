@@ -2,7 +2,7 @@ import { Map } from 'immutable';
 import * as types from '../../actions/users/types';
 
 const initialState = {
-  users: Map()
+  users: Map() // eslint-disable-line new-cap
 };
 
 export default function users(state = initialState, action) {

@@ -2,7 +2,7 @@ import { Map } from 'immutable';
 import * as types from '../../actions/windows/types';
 
 const initialState = {
-  windows: Map()
+  windows: Map() // eslint-disable-line new-cap
 };
 
 export default function windows(state = initialState, action) {
