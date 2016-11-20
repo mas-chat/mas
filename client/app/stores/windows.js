@@ -376,7 +376,9 @@ export default Store.extend({
             end: data.end
         }, resp => {
             data.window.get('logMessages').clearModels();
-            data.window.get('logMessages').upsertModels(resp.msgs, { window: data.window });
+            data.window.get('logMessages').upsertModels(resp.msgs.reverse(), {
+                window: data.window
+            });
             successCb();
         });
     },
