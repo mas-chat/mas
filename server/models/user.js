@@ -25,15 +25,17 @@ const UserGId = require('./userGId');
 const Model = require('./model');
 
 module.exports = class User extends Model {
-    static async create(props) {
+    static async create(props, { skipSetters = false } = {}) {
         trimWhiteSpace(props);
 
-        const passwordValidation = validatePassword(props.password);
+        if (!skipSetters) {
+            const passwordValidation = validatePassword(props.password);
 
-        if (!passwordValidation.valid) {
-            const user = new User();
-            user.errors = { password: passwordValidation.error };
-            return user;
+            if (!passwordValidation.valid) {
+                const user = new User();
+                user.errors = { password: passwordValidation.error };
+                return user;
+            }
         }
 
         const data = {
@@ -59,7 +61,7 @@ module.exports = class User extends Model {
             secretExpires: null
         };
 
-        return await super.create(data);
+        return await super.create(data, { skipSetters });
     }
 
     static get setters() {
