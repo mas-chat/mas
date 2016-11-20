@@ -206,7 +206,7 @@ exports.createExt = function *createExt() {
 
     if (userRecord.get('email') === form.data.email) {
         // If the user didn't change his email address, we trust what Google/Yahoo gave us.
-        userRecord.set('emailConfirmed', true);
+        yield userRecord.set('emailConfirmed', true);
     } else {
         yield userRecord.updateEmail(form.data.email);
     }
