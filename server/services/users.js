@@ -19,6 +19,7 @@
 const User = require('../models/user');
 const NetworkInfo = require('../models/networkInfo');
 const Settings = require('../models/settings');
+const log = require('../lib/log');
 
 // TODO: Send password update mail here?
 
@@ -34,6 +35,8 @@ exports.addUser = async function addUser(details) {
             state: 'connected',
             nick: user.get('nick')
         });
+    } else {
+        log.warn(`User creation failed, errors: ${user.errors}`);
     }
 
     return user;

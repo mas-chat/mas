@@ -24,6 +24,7 @@ const YahooStrategy = require('passport-yahoo').Strategy;
 const CloudronStrategy = require('passport-cloudron');
 const User = require('../models/user');
 const usersService = require('../services/users');
+const log = require('../lib/log');
 
 const conf = require('./conf');
 
@@ -120,6 +121,8 @@ async function authExt(openidId, oauthId, profile, done) {
     }
 
     if (!user) {
+        log.info('Unknown OAuth user logins, creating a user record automatically');
+
         user = await usersService.addUser({
             name: profile.displayName,
             email: profile.emails[0].value,
