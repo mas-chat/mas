@@ -125,10 +125,16 @@ async function authExt(openidId, oauthId, profile, done) {
 
         user = await usersService.addUser({
             name: profile.displayName,
+            nick: null,
             email: profile.emails[0].value,
             extAuthId: oauthId || openidId,
             inUse: false // authentication is not yet complete
         }, { skipSetters: true });
+
+        if (!user) {
+            done('Email address already in use.', false);
+            return;
+        }
     }
 
     done(null, user);
