@@ -132,7 +132,7 @@ async function authExt(openidId, oauthId, profile, done) {
         }, { skipSetters: true });
 
         if (!user) {
-            done('Email address already in use.', false);
+            done('An account with this email address already exists. Login with password.', false);
             return;
         }
     }
