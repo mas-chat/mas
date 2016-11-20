@@ -115,7 +115,7 @@ exports.getMessageRange = async function getMessageRange(conversationId, start, 
 
 function convertToMsgs(hits) {
     return hits.map(hit => ({
-        gid: hit._id,
+        gid: parseInt(hit._id),
         ts: Math.floor(hit._source.ts / 1000),
         body: hit._source.body,
         cat: hit._source.cat,
