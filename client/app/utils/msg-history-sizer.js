@@ -23,7 +23,7 @@ export function calcMsgHistorySize() {
     const lineHeight = 19;
     const screenHeight = $(window).height();
 
-    let twoScreenfulls = Math.floor(screenHeight / lineHeight * 2);
+    let twoScreenfulls = Math.floor(screenHeight / lineHeight * 1.7);
 
     return Math.min(Math.max(twoScreenfulls, minLines), maxLines);
 }
