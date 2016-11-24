@@ -270,7 +270,10 @@ async function broadcastAddMessage(conversation, { userGId = null, cat, body = '
 
     while (ids.length - MSG_BUFFER_SIZE > 0) {
         const expiredMessage = await ConversationMessage.fetch(ids.shift());
-        await expiredMessage.delete();
+
+        if (expiredMessage) {
+            await expiredMessage.delete();
+        }
     }
 
     const ntf = message.convertToNtf();
