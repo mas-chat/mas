@@ -33,6 +33,8 @@ const userFilesController = require('../controllers/userFiles');
 const forgotPasswordController = require('../controllers/forgotPassword');
 const confirmEmailController = require('../controllers/confirmEmail');
 
+const ONE_YEAR_IN_MS = 1000 * 60 * 60 * 24 * 365;
+
 exports.register = function register(app) {
     app.use(cacheFilter);
 
@@ -90,9 +92,13 @@ exports.register = function register(app) {
     }
 
     app.use(serve(path.join(__dirname, '..', 'website'), {
-        maxage: 1000 * 60 * 60 * 24 * 365 // 1 year
+        maxage: ONE_YEAR_IN_MS
     }));
 
-    // Ember client assets
+    app.use(mount('/sector17/', serve(path.join(__dirname, '../../newclient/dist'), {
+        maxage: ONE_YEAR_IN_MS // TODO: Bad for index.html
+    })));
+
+    // Ember client assets, cacheFilter handles caching
     app.use(mount('/app', serve(path.join(__dirname, '../../client/dist'))));
 };
