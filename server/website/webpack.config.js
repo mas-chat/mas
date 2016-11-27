@@ -20,13 +20,8 @@ const config = {
     module: {
         rules: [ {
             test: /\.js$/,
-            exclude: /(node_modules|bower_components)/,
-            use: [ {
-                loader: 'babel',
-                query: {
-                    presets: [ 'es2015' ]
-                }
-            } ]
+            exclude: /(node_modules)/,
+            use: 'babel'
         }, {
             test: /\.scss$/,
             use: [ 'style', 'css', 'postcss', 'sass' ]
