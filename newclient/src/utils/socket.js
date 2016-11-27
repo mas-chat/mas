@@ -47,7 +47,7 @@ class Socket {
     });
 
     ioSocket.on('terminate', () => {
-      this._logout();
+      console.log('TERMINATE');
     });
 
     ioSocket.on('ntf', notification => {
