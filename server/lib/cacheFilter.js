@@ -28,7 +28,7 @@ module.exports = function* cacheFilter(next) {
     } else if (/\/app\/assets\/\S+-.{32}\.\w+$/.test(this.path)) {
         // Fingerprinted app assets
         cacheTime = 60 * 60 * 24 * 365; // 1 year
-    } else if (/^\/app\/*.+/.test(this.path)) {
+    } else if (/^\/app\/.+/.test(this.path)) {
         // All other app assets (not fingerprinted)
         cacheTime = 60 * 60 * 24 * 2; // 2 days
     }
