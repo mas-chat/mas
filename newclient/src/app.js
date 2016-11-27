@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import { Router, Route, browserHistory } from 'react-router';
 import { Provider } from 'react-redux';
 import configureStore from './store/configureStore';
-import Desktop from './components/desktop';
+import Desktop from './components/Desktop';
 import socket from './utils/socket';
 
 const store = configureStore();
