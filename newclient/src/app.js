@@ -18,7 +18,7 @@ document.body.appendChild(rootElement);
 render(
   <Provider store={store}>
     <Router history={browserHistory}>
-      <Route path="/app_v2" component={Desktop} />
+      <Route path="/sector17" component={Desktop} />
     </Router>
   </Provider>,
   document.getElementById('root')

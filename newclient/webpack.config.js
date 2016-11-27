@@ -14,7 +14,7 @@ const config = {
   entry: `${prefix}/src/app.js`,
   output: {
     path: `${prefix}/dist`,
-    publicPath: '/app_v2/',
+    publicPath: '/sector17/',
     filename: 'app.js'
   },
   module: {
