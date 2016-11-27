@@ -318,15 +318,21 @@ async function checkConversationMessages() {
         const conversationId = conversationMessage.get('conversationId');
         const userGIdString = conversationMessage.get('userGId');
 
-        if (!conversations.find(
-            existingConversationId => existingConversationId === conversationId)) {
-            log(`!!! Found conversationMessage ${JSON.stringify(conversationMessage._props)} that points to non-existent conversation.`);
+        const status = conversationMessage.get('status');
+
+        if (status !== 'original' && status !== 'edited' && status !== 'deleted') {
+            log(`!!! Bad message state: ${status}`);
 
             if (fix) {
-                log('Fixing by deleting.');
-                await conversationMessage.delete();
+                log('Fixing by setting state to \'original\'.');
+                await conversationMessage.set({ status: 'original' });
             }
+        }
 
+        if (!conversations.find(
+            existingConversationId => existingConversationId === conversationId)) {
+            log(`Found conversationMessage ${JSON.stringify(conversationMessage._props)} that points to non-existent conversation. Fixing by deleting.`);
+            await conversationMessage.delete();
             continue;
         }
 
@@ -335,14 +341,33 @@ async function checkConversationMessages() {
 
             if (userGId.type === 'mas') {
                 if (!allUserIds.find(userId => userId === userGId.id)) {
-                    log(`!!! Found message ${JSON.stringify(conversationMessage._props)} that belongs to non-existent user.`);
+                    log(`Found message ${JSON.stringify(conversationMessage._props)} that belongs to non-existent user.`);
 
                     if (fix) {
-                        log('Fixing by deleting.');
+                        log('Fixing by deleting');
                         await conversationMessage.delete();
                     }
                 }
+            } else {
+                const decoded = new Buffer(userGId.id, 'base64').toString('ascii');
+
+                if (decoded.indexOf('!') === -1) {
+                    log(`Found corrupted IRC userGId: ${userGId.id}, decoded: ${decoded}`);
+                }
             }
+        }
+    }
+
+    log('Checking conversations don\'t have too many messages');
+    const { val: conversationIds } = await store.list('conversations');
+
+    for (const conversationId of conversationIds) {
+        const messages = await ConversationMessage.find({ conversationId });
+
+        if (messages.length === 0) {
+            log('!!! Found conversation with zero messages');
+        } else if (messages.length > 200) {
+            log(`!!! Found conversation with >200 messages, amount: ${messages.length}`);
         }
     }
 }
@@ -352,22 +377,40 @@ async function checkNetworkInfos() {
 
     const { val: networkInfoIds } = await store.list('networkInfos');
 
-    const validNetworks = [ 'mas', 'ircnet', 'freenode', 'w3c' ];
-
     for (const networkInfoId of networkInfoIds) {
         const networkInfo = await NetworkInfo.fetch(networkInfoId);
 
-        if (!validNetworks.includes(networkInfo.get('network'))) {
-            log(`!!! Invalid network ${networkInfo.get('network')} found`);
-
-            if (fix) {
-                await networkInfo.delete();
-                continue;
-            }
-        }
-
         if (!allUserIds.find(userId => userId === networkInfo.get('userId'))) {
             log('!!! Found networkInfo that belongs to non-existent user.');
+        }
+    }
+
+    log('Checking that all users have MAS networkInfo...');
+
+    for (const userId of activeUserIds) {
+        const nwInfo = await NetworkInfo.findFirst({ userId, network: 'mas' });
+
+        if (!nwInfo) {
+            log(`!!! User ${userId} doesn't have MAS networkInfo.`);
+
+            if (fix) {
+                log('Fixing by creating');
+
+                const user = await User.fetch(userId);
+
+                await NetworkInfo.create({
+                    userId,
+                    network: 'mas',
+                    nick: user.get('nick'),
+                    state: 'connected'
+                });
+            }
+        } else {
+            const user = await User.fetch(userId);
+
+            if (user.get('nick') !== nwInfo.get('nick') || nwInfo.get('state') !== 'connected') {
+                log(`!! Bad networkInfo for MAS network, state: ${nwInfo.get('state')}, n1: ${user.get('nick')}, n2: ${nwInfo.get('nick')}`);
+            }
         }
     }
 }
@@ -387,7 +430,6 @@ async function checkIRCSubscriptions() {
         }
     }
 }
-
 
 function log(msg) {
     console.log(msg); // eslint-disable-line no-console
