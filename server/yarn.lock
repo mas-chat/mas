@@ -1920,7 +1920,7 @@ koa-mount@~1.3.0:
     debug "*"
     koa-compose "^2.2.0"
 
-koa-passport@~1.3.0:
+koa-passport@^1.3.0:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/koa-passport/-/koa-passport-1.3.1.tgz#52f627e943ae6908708916fe48d6e85f8f139127"
   dependencies:
