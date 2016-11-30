@@ -229,7 +229,15 @@ export default BaseModel.extend({
                 });
             }
 
-            return this._renderLink(urlObj.normalize().toString(), visibleLink);
+            let normalized;
+
+            try {
+                normalized = urlObj.normalize();
+            } catch(e) {
+                normalized = urlObj;
+            }
+
+            return this._renderLink(normalized.toString(), visibleLink);
         });
 
         return { body: text, parts: media };
