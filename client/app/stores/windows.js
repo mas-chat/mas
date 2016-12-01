@@ -226,6 +226,11 @@ export default Store.extend({
 
     handleAddMessageServer(data) {
         data.window = this._getWindow(data.windowId);
+
+        if (!data.window) {
+            return;
+        }
+
         delete window.windowId;
 
         if (!this.get('initDone')) {
