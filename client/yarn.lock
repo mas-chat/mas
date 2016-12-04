@@ -2085,9 +2085,9 @@ engine.io-client@1.7.0:
     xmlhttprequest-ssl "1.5.1"
     yeast "0.1.2"
 
-engine.io-client@1.8.0:
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/engine.io-client/-/engine.io-client-1.8.0.tgz#7b730e4127414087596d9be3c88d2bc5fdb6cf5c"
+engine.io-client@1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/engine.io-client/-/engine.io-client-1.8.1.tgz#71237e9bbce04862675d4d6bfbef351c8b6a35a3"
   dependencies:
     component-emitter "1.2.1"
     component-inherit "0.0.3"
@@ -4927,15 +4927,15 @@ socket.io-client@1.5.0:
     socket.io-parser "2.2.6"
     to-array "0.1.4"
 
-socket.io-client@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/socket.io-client/-/socket.io-client-1.6.0.tgz#5b668f4f771304dfeed179064708386fa6717853"
+socket.io-client@^1.7.1:
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/socket.io-client/-/socket.io-client-1.7.1.tgz#6c23725edff804f3919c1ce4ebb25e591c6e61d7"
   dependencies:
     backo2 "1.0.2"
     component-bind "1.0.0"
     component-emitter "1.2.1"
     debug "2.3.3"
-    engine.io-client "1.8.0"
+    engine.io-client "1.8.1"
     has-binary "0.1.7"
     indexof "0.0.1"
     object-component "0.0.3"
