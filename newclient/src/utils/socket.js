@@ -47,7 +47,7 @@ class Socket {
     });
 
     ioSocket.on('terminate', () => {
-      console.log('TERMINATE');
+      console.log('TERMINATE'); // eslint-disable-line no-console
     });
 
     ioSocket.on('ntf', notification => {
