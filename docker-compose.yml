@@ -76,7 +76,7 @@ services:
     ports:
       - '113:113'
   elasticsearch:
-    image: 'elasticsearch:5.0.1'
+    image: 'elasticsearch:5.1.1'
     volumes:
       - /data/elasticsearch:/usr/share/elasticsearch/data
     ports:
