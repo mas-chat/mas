@@ -31,8 +31,12 @@ case "$1" in
     clean)
         set -x
         rm -fr client/node_modules client/bower_components client/tmp client/dist
+        rm -fr newclient/dist newclient/node_modules
         rm -fr server/node_modules
         rm -fr server/website/node_modules server/website/dist
+        rm -fr server/emails/build
+        rm -fr server/test/browser/node_modules
+        find . -name npm-debug.log | xargs rm
         set +x
         echo "Clean done."
         ;;
