@@ -18,6 +18,8 @@ case "$1" in
         yarn
         yarn run bower
         yarn run build-dev
+        cd ../newclient
+        yarn
         cd ../server
         yarn
         yarn run prod
