@@ -54,7 +54,7 @@ module.exports = class User extends Model {
             discount: props.discount || 0,
             name: props.name,
             nick: props.nick,
-            password: props.password ? bcryptPassword(props.password) : null,
+            password: props.password ? (await bcryptPassword(props.password)) : null,
             passwordType: props.password ? 'bcrypt' : null,
             registrationTime: new Date(),
             secret: null,
@@ -182,7 +182,7 @@ module.exports = class User extends Model {
         }
 
         const newPassword = {
-            password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+            password: await bcrypt.hash(password, bcrypt.genSaltSync(10)),
             passwordType: 'bcrypt'
         };
 
@@ -208,7 +208,7 @@ module.exports = class User extends Model {
                 return true;
             }
         } else if (encryptionMethod === 'bcrypt') {
-            return bcrypt.compareSync(password, encryptedPassword);
+            return bcrypt.compare(password, encryptedPassword);
         } else if (encryptionMethod === 'plain') {
             // Only used in testing
             return encryptedPassword === password;
@@ -247,6 +247,6 @@ function validatePassword(password) {
     return { valid: true };
 }
 
-function bcryptPassword(password) {
-    return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+async function bcryptPassword(password) {
+    return await bcrypt.hash(password, bcrypt.genSaltSync(10));
 }
