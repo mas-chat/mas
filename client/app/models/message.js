@@ -149,13 +149,14 @@ export default BaseModel.extend({
 
         let parts = [];
 
-        body = this._escapeHTMLStartTag(body);
-
         if (cat === 'msg') {
             ({ body, parts } = this._parseLinks(body));
 
+            body = this._escapeHTMLStartTag(body);
             body = marked(body);
             body = this._parseCustomFormatting(body);
+        } else {
+            body = this._escapeHTMLStartTag(body);
         }
 
         body = this._parseWhiteSpace(body);
