@@ -501,9 +501,13 @@ bower-endpoint-parser@0.2.2:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/bower-endpoint-parser/-/bower-endpoint-parser-0.2.2.tgz#00b565adbfab6f2d35addde977e97962acbcb3f6"
 
-bower@^1.3.12, bower@^1.7.9:
+bower@^1.3.12:
   version "1.7.9"
   resolved "https://registry.yarnpkg.com/bower/-/bower-1.7.9.tgz#b7296c2393e0d75edaa6ca39648132dd255812b0"
+
+bower@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/bower/-/bower-1.8.0.tgz#55dbebef0ad9155382d9e9d3e497c1372345b44a"
 
 brace-expansion@^1.0.0:
   version "1.1.6"
@@ -711,7 +715,7 @@ broccoli-less-single@^0.6.0:
     lodash.merge "^3.3.2"
     mkdirp "^0.5.0"
 
-broccoli-merge-trees@^1.0.0, broccoli-merge-trees@^1.1.0, broccoli-merge-trees@^1.1.1, broccoli-merge-trees@^1.1.2, broccoli-merge-trees@^1.1.3:
+broccoli-merge-trees@^1.0.0, broccoli-merge-trees@^1.1.1, broccoli-merge-trees@^1.1.2, broccoli-merge-trees@^1.1.3:
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/broccoli-merge-trees/-/broccoli-merge-trees-1.1.4.tgz#ab9eafd30b0dd8136e882ffd8fb08f3817533ea0"
   dependencies:
@@ -719,6 +723,19 @@ broccoli-merge-trees@^1.0.0, broccoli-merge-trees@^1.1.0, broccoli-merge-trees@^
     can-symlink "^1.0.0"
     fast-ordered-set "^1.0.2"
     fs-tree-diff "^0.5.2"
+    heimdalljs "^0.2.1"
+    heimdalljs-logger "^0.1.7"
+    rimraf "^2.4.3"
+    symlink-or-copy "^1.0.0"
+
+broccoli-merge-trees@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/broccoli-merge-trees/-/broccoli-merge-trees-1.2.1.tgz#16a7494ed56dbe61611f6c2d4817cfbaad2a3055"
+  dependencies:
+    broccoli-plugin "^1.3.0"
+    can-symlink "^1.0.0"
+    fast-ordered-set "^1.0.2"
+    fs-tree-diff "^0.5.4"
     heimdalljs "^0.2.1"
     heimdalljs-logger "^0.1.7"
     rimraf "^2.4.3"
@@ -766,6 +783,15 @@ broccoli-plugin@^1.0.0, broccoli-plugin@^1.2.0, broccoli-plugin@^1.2.1:
     quick-temp "^0.1.3"
     rimraf "^2.3.4"
     symlink-or-copy "^1.0.1"
+
+broccoli-plugin@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/broccoli-plugin/-/broccoli-plugin-1.3.0.tgz#bee704a8e42da08cb58e513aaa436efb7f0ef1ee"
+  dependencies:
+    promise-map-series "^0.2.1"
+    quick-temp "^0.1.3"
+    rimraf "^2.3.4"
+    symlink-or-copy "^1.1.8"
 
 broccoli-slow-trees@^3.0.1:
   version "3.0.1"
@@ -1682,17 +1708,7 @@ ember-cli-autoprefixer@~0.6.0:
     broccoli-autoprefixer "^4.1.0"
     lodash "^4.0.0"
 
-ember-cli-babel@^5.0.0, ember-cli-babel@^5.1.10, ember-cli-babel@^5.1.3, ember-cli-babel@^5.1.6, ember-cli-babel@^5.1.7:
-  version "5.1.10"
-  resolved "https://registry.yarnpkg.com/ember-cli-babel/-/ember-cli-babel-5.1.10.tgz#d403f178aab602e1337c403c5a58c0200a8969aa"
-  dependencies:
-    broccoli-babel-transpiler "^5.6.0"
-    broccoli-funnel "^1.0.0"
-    clone "^1.0.2"
-    ember-cli-version-checker "^1.0.2"
-    resolve "^1.1.2"
-
-ember-cli-babel@^5.2.1:
+ember-cli-babel@^5.0.0, ember-cli-babel@^5.1.10, ember-cli-babel@^5.1.3, ember-cli-babel@^5.1.6, ember-cli-babel@^5.1.7, ember-cli-babel@^5.2.1:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/ember-cli-babel/-/ember-cli-babel-5.2.1.tgz#14a1a7b3ae9e9f1284f7bcdb142eb53bd0b1b5bd"
   dependencies:
@@ -2543,6 +2559,15 @@ fs-tree-diff@^0.5.0, fs-tree-diff@^0.5.2, fs-tree-diff@^0.5.3:
   dependencies:
     fast-ordered-set "^1.0.2"
     heimdalljs-logger "^0.1.7"
+
+fs-tree-diff@^0.5.4:
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/fs-tree-diff/-/fs-tree-diff-0.5.6.tgz#342665749e8dca406800b672268c8f5073f3e623"
+  dependencies:
+    heimdalljs-logger "^0.1.7"
+    object-assign "^4.1.0"
+    path-posix "^1.0.0"
+    symlink-or-copy "^1.1.8"
 
 fs-tree@^1.0.0:
   version "1.0.0"
@@ -3822,9 +3847,9 @@ module-deps@^4.0.8:
     through2 "^2.0.0"
     xtend "^4.0.0"
 
-moment@~2.15.1:
-  version "2.15.2"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.15.2.tgz#1bfdedf6a6e345f322fe956d5df5bd08a8ce84dc"
+moment@^2.17.1:
+  version "2.17.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.17.1.tgz#fed9506063f36b10f066c8b59a144d7faebe1d82"
 
 morgan@^1.5.2:
   version "1.7.0"
@@ -5155,6 +5180,10 @@ supports-color@^3.1.2:
 symlink-or-copy@^1.0.0, symlink-or-copy@^1.0.1:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/symlink-or-copy/-/symlink-or-copy-1.1.6.tgz#b5f6e8e00616210f64e6b3fa114ea0208e268f78"
+
+symlink-or-copy@^1.1.8:
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/symlink-or-copy/-/symlink-or-copy-1.1.8.tgz#cabe61e0010c1c023c173b25ee5108b37f4b4aa3"
 
 sync-exec@^0.6.2:
   version "0.6.2"
