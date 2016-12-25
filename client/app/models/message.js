@@ -151,8 +151,6 @@ export default BaseModel.extend({
 
         if (cat === 'msg') {
             ({ body, parts } = this._parseLinks(body));
-
-            body = this._escapeHTMLStartTag(body);
             body = marked(body);
             body = this._parseCustomFormatting(body);
         } else {
@@ -198,50 +196,77 @@ export default BaseModel.extend({
         }
     }),
 
+    _splitByLinks(text) {
+        const parts = [];
+        let previousEnd = 0;
+
+        URI.withinString(text, (url, start, end, source) => {
+            if (previousEnd !== start) {
+                parts.push({ type: 'txt', data: text.substring(previousEnd, start) });
+            }
+
+            parts.push({ type: 'url', data: url });
+            previousEnd = end;
+        });
+
+        if (previousEnd !== text.length) {
+            parts.push({ type: 'txt', data: text.substring(previousEnd) });
+        }
+
+        return parts;
+    },
+
     _parseLinks(text) {
         let imgSuffixes = [ 'png', 'jpg', 'jpeg', 'gif' ];
         let media = [];
+        let body = '';
 
-        text = URI.withinString(text, url => {
-            let urlObj = new URI(url);
-            let visibleLink;
-            let type = 'generic';
-            let domain = urlObj.domain();
+        const parts = this._splitByLinks(text);
 
-            if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
-                visibleLink = urlObj.filename();
-                type = 'image';
-            } else if ((domain === 'youtube.com' && urlObj.search(true).v) ||
-                domain === 'youtu.be') {
-                visibleLink = urlObj.toString();
-                type = 'youtubelink';
+        for (const part of parts) {
+            if (part.type === 'url') {
+                let urlObj = new URI(part.data);
+                let visibleLink;
+                let type = 'generic';
+                let domain = urlObj.domain();
+
+                if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
+                    visibleLink = urlObj.filename();
+                    type = 'image';
+                } else if ((domain === 'youtube.com' && urlObj.search(true).v) ||
+                    domain === 'youtu.be') {
+                    visibleLink = urlObj.toString();
+                    type = 'youtubelink';
+                } else {
+                    visibleLink = urlObj.readable();
+                }
+
+                if (urlObj.protocol() === '') {
+                    urlObj.protocol('http');
+                }
+
+                if (type === 'image' || type === 'youtubelink') {
+                    media.push({
+                        type: type,
+                        url: urlObj.toString()
+                    });
+                }
+
+                let normalized;
+
+                try {
+                    normalized = urlObj.normalize();
+                } catch(e) {
+                    normalized = urlObj;
+                }
+
+                body += this._renderLink(normalized.toString(), this._escapeHTMLStartTag(visibleLink));
             } else {
-                visibleLink = urlObj.readable();
+                body += this._escapeHTMLStartTag(part.data);
             }
+        }
 
-            if (urlObj.protocol() === '') {
-                urlObj.protocol('http');
-            }
-
-            if (type === 'image' || type === 'youtubelink') {
-                media.push({
-                    type: type,
-                    url: urlObj.toString()
-                });
-            }
-
-            let normalized;
-
-            try {
-                normalized = urlObj.normalize();
-            } catch(e) {
-                normalized = urlObj;
-            }
-
-            return this._renderLink(normalized.toString(), visibleLink);
-        });
-
-        return { body: text, parts: media };
+        return { body: body, parts: media };
     },
 
     _parseWhiteSpace(text) {
