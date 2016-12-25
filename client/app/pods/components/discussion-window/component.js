@@ -503,7 +503,7 @@ export default Ember.Component.extend({
 
     _addLazyImageScrollHandler() {
         this.$messagePanel.on('scroll', () => {
-            this.lazyImageTimer = Ember.run.throttle(this, this._showImages, 250, true);
+            this.lazyImageTimer = Ember.run.throttle(this, this._showImages, 250, false);
         });
     },
 
