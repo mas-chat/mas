@@ -196,6 +196,14 @@ export default BaseModel.extend({
         }
     }),
 
+    videoParams: Ember.computed('bodyParts', function() {
+        let video = this.get('bodyParts').findBy('type', 'youtubelink');
+
+        const start = video.start ? `&start=${video.start}` : '';
+
+        return `showinfo=0&autohide=1${start}`;
+    }),
+
     _splitByLinks(text) {
         const parts = [];
         let previousEnd = 0;
@@ -227,29 +235,35 @@ export default BaseModel.extend({
             if (part.type === 'url') {
                 let urlObj = new URI(part.data);
                 let visibleLink;
-                let type = 'generic';
                 let domain = urlObj.domain();
 
                 if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
                     visibleLink = urlObj.filename();
-                    type = 'image';
+                    media.push({ type: 'image', url: urlObj.toString() });
                 } else if ((domain === 'youtube.com' && urlObj.search(true).v) ||
                     domain === 'youtu.be') {
                     visibleLink = urlObj.toString();
-                    type = 'youtubelink';
+
+                    const startTime = urlObj.search(true).t;
+                    let inSeconds = 0;
+
+                    if (startTime) {
+                        const re = startTime.match(/^(?:(\d{1,2})h)?(?:(\d{1,2})m)?(?:(\d{1,2})s)?$/);
+                        inSeconds = parseInt(re[1] || 0) * 3600 + parseInt(re[2] || 0) * 60 +
+                            parseInt(re[3] || 0);
+                    }
+
+                    media.push({
+                        type: 'youtubelink',
+                        url: urlObj.toString(),
+                        start: inSeconds
+                    });
                 } else {
                     visibleLink = urlObj.readable();
                 }
 
                 if (urlObj.protocol() === '') {
                     urlObj.protocol('http');
-                }
-
-                if (type === 'image' || type === 'youtubelink') {
-                    media.push({
-                        type: type,
-                        url: urlObj.toString()
-                    });
                 }
 
                 let normalized;

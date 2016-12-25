@@ -34,7 +34,7 @@
                     <ul class="user-media" data-gid="{{message.gid}}" data-has-images="{{message.hasImages}}">
                         {{#if message.hasYoutubeVideo}}
                             <li>
-                                <iframe class="youtube-preview" src="https://www.youtube.com/embed/{{message.videoId}}?showinfo=0&autohide=1" allowfullscreen frameborder="0"></iframe>
+                                <iframe class="youtube-preview" src="https://www.youtube.com/embed/{{message.videoId}}?{{message.videoParams}}" allowfullscreen frameborder="0"></iframe>
                             </li>
                         {{/if}}
                         {{#unless message.hideImages}}
