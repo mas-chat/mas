@@ -280,6 +280,9 @@ export default BaseModel.extend({
         text = text.replace(/(^| |>)(@\S+)(?=( |$))/g,
             (match, p1, p2) => this._renderMention(p1, p2));
 
+        // Convert Unicode emojis to :emojis:
+        text = emojione.toShort(text);
+
         text = text.replace(/:.+?:/g, match => {
             const emoji = emojione.emojioneList[match];
 
