@@ -7,13 +7,14 @@ import Desktop from './components/Desktop';
 import DevTools from './components/DevTools';
 import socket from './utils/socket';
 
-const store = configureStore.default();
+const store = configureStore();
 
 socket.configure(store);
 socket.start();
 
 const rootElement = document.createElement('div');
 rootElement.id = 'root';
+
 document.body.appendChild(rootElement);
 
 // TODO: Don't add devtools in production builds
