@@ -1,6 +1,5 @@
 import Cookies from 'js-cookie';
 
-const userIdAndSecret = (Cookies.get('auth') || '').split('-');
+const authCookie = Cookies.get('auth') || '';
 
-export const userId = userIdAndSecret[0];
-export const secret = userIdAndSecret[1];
+export const [ userId, secret ] = authCookie.split('-');
