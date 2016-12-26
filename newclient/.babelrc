@@ -1,3 +1,8 @@
 {
-  "presets": [ "react" ]
+  "presets": [
+    "react"
+  ],
+  "plugins": [
+    [ "react-css-modules", { "generateScopedName": "[path]_[local]_[hash:base64:7]" } ]
+  ]
 }

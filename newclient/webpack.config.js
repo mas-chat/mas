@@ -23,6 +23,12 @@ const config = {
       exclude: /(node_modules)/,
       use: 'babel-loader'
     }, {
+      test: /\.css$/,
+      use: [
+        'style-loader',
+        'css-loader?importLoader=1&modules&localIdentName=[path]_[local]_[hash:base64:7]'
+      ]
+    }, {
       test: /\.(ttf|eot|svg|woff|woff2)$/,
       use: 'url?limit=10000'
     } ]
