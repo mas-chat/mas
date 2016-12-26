@@ -19,7 +19,7 @@
     "redux-devtools-log-monitor": "^1.1.1",
     "redux-logger": "^2.7.4",
     "url-loader": "^0.5.7",
-    "webpack": "2.1.0-beta.26",
+    "webpack": "2.2.0-rc.2",
     "webpack-dashboard": "^0.2.0"
   },
   "dependencies": {
