@@ -1678,9 +1678,9 @@ ioredis@2.2.0:
     redis-commands "^1.2.0"
     redis-parser "^1.3.0"
 
-ioredis@^2.4.2:
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-2.4.2.tgz#3f0e0c7199ddd9c7e8962a51febbe28decf5c761"
+ioredis@^2.4.3:
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-2.4.3.tgz#a0f0aedf0b14825bc5b17efbffa2591b90528be4"
   dependencies:
     bluebird "^3.3.4"
     cluster-key-slot "^1.0.6"
@@ -2175,9 +2175,13 @@ lodash.unescape@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/lodash.unescape/-/lodash.unescape-4.0.1.tgz#bf2249886ce514cda112fae9218cdc065211fc9c"
 
-lodash@4, lodash@^4.0.0, lodash@^4.12.0, lodash@^4.14.0, lodash@^4.17.2, lodash@^4.3.0, lodash@^4.8.2:
+lodash@4, lodash@^4.0.0, lodash@^4.12.0, lodash@^4.14.0, lodash@^4.3.0, lodash@^4.8.2:
   version "4.17.2"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.2.tgz#34a3055babe04ce42467b607d700072c7ff6bf42"
+
+lodash@^4.17.3:
+  version "4.17.3"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.3.tgz#557ed7d2a9438cac5fd5a43043ca60cb455e01f7"
 
 lolex@1.3.2:
   version "1.3.2"
