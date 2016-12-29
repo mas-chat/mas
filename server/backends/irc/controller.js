@@ -233,18 +233,10 @@ async function processClose({ userId, network, name, conversationType }) {
     await disconnectIfIdle(user, network);
 }
 
-async function processUpdatePassword({ userId, network, conversationId, password }) {
+async function processUpdatePassword({ userId, conversationId, password }) {
     const user = await User.fetch(userId);
     const conversation = await Conversation.fetch(conversationId);
-    const networkInfo = await findOrCreateNetworkInfo(user, network);
-
-    let modeline = `MODE ${conversation.name} `;
-
-    if (password === '') {
-        modeline += '-k foobar'; // IRC protocol is odd, -k requires dummy parameter
-    } else {
-        modeline += `+k ${password}`;
-    }
+    const networkInfo = await findOrCreateNetworkInfo(user, conversation.get('network'));
 
     if (networkInfo.get('state') !== 'connected') {
         return {
@@ -253,15 +245,19 @@ async function processUpdatePassword({ userId, network, conversationId, password
         };
     }
 
-    courier.callNoWait('connectionmanager', 'write', { userId: user.id, network, line: modeline });
+    courier.callNoWait('connectionmanager', 'write', {
+        userId: user.id,
+        network: conversation.get('network'),
+        line: `MODE ${conversation.get('name')} ${password === '' ? '-k foobar' : `+k ${password}`}`
+    });
 
     return { status: 'OK' };
 }
 
-async function processUpdateTopic({ userId, conversationId, network, topic }) {
+async function processUpdateTopic({ userId, conversationId, topic }) {
     const user = await User.fetch(userId);
     const conversation = await Conversation.fetch(conversationId);
-    const networkInfo = await findOrCreateNetworkInfo(user, network);
+    const networkInfo = await findOrCreateNetworkInfo(user, conversation.get('network'));
 
     if (networkInfo.get('state') !== 'connected') {
         return {
