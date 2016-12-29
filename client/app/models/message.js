@@ -297,7 +297,7 @@ export default BaseModel.extend({
         // Convert Unicode emojis to :emojis:
         text = emojione.toShort(text);
 
-        text = text.replace(/:.+?:/g, match => {
+        text = text.replace(/:[a-zA-Z0-9_]+?:/g, match => {
             const emoji = emojione.emojioneList[match];
 
             if (emoji) {
