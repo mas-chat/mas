@@ -5,7 +5,7 @@
   "description": "MAS Web App",
   "dependencies": {
     "async-to-gen": "^1.3.0",
-    "bcrypt": "^1.0.1",
+    "bcrypt": "^1.0.2",
     "carrier": "~0.3.0",
     "colors": "~1.1.0",
     "cron": "~1.1.0",
