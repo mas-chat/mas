@@ -71,9 +71,7 @@ function handleIdentConnection(socket) {
     });
 
     carrier.carry(socket, line => {
-        const ports = line.split(',');
-        const localPort = parseInt(ports[0]);
-        const remotePort = parseInt(ports[1]);
+        const [ localPort, remotePort ] = line.split(',').map(port => parseInt(port));
         const prefix = `${localPort}, ${remotePort}`;
 
         if (Number.isInteger(localPort) && Number.isInteger(remotePort)) {
@@ -98,8 +96,7 @@ function handleIdentConnection(socket) {
 }
 
 // Connect
-courier.on('connect', params => {
-    const network = params.network;
+courier.on('connect', ({ network, userId, nick, delay }) => {
     const rateLimit = conf.get(`irc:networks:${network}:rate_limit`); // connections per minute
     let rateLimitDelay = 0;
 
@@ -110,18 +107,16 @@ courier.on('connect', params => {
         rateLimitDelay = nextNetworkConnectionSlot[network] - Date.now();
     }
 
-    setTimeout(() => connect(params.userId, params.nick, network), rateLimitDelay + params.delay);
+    setTimeout(() => connect(userId, nick, network), rateLimitDelay + delay);
 
     nextNetworkConnectionSlot[network] += Math.round((60 / rateLimit) * 1000);
 });
 
 // Disconnect
-courier.on('disconnect', params => {
-    const network = params.network;
-    const userId = params.userId;
+courier.on('disconnect', ({ network, userId, reason }) => {
     const socketName = `${userId}:${network}`;
 
-    write({ userId, network, reportError: false }, `QUIT :${params.reason}`);
+    write({ userId, network, reportError: false }, `QUIT :${reason}`);
 
     if (sockets[socketName]) {
         sockets[socketName].end();
@@ -129,8 +124,8 @@ courier.on('disconnect', params => {
 });
 
 // Write
-courier.on('write', params => {
-    write({ userId: params.userId, network: params.network, reportError: true }, params.line);
+courier.on('write', ({ userId, network, line }) => {
+    write({ userId, network, reportError: true }, line);
 });
 
 (async function main() {
