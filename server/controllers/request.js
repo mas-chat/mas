@@ -421,6 +421,11 @@ async function handleFetch({ command, conversation }) {
 
 async function handleRequestFriend({ user, command }) {
     const friendCandidateUserGId = UserGId.create(command.userId);
+
+    if (!friendCandidateUserGId.isMASUser) {
+        return { status: 'ERROR', errorMsg: 'Can\'t be friends with an external user.' };
+    }
+
     const friendUser = await User.fetch(friendCandidateUserGId.id);
 
     if (!friendUser) {
