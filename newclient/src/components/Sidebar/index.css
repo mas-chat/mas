@@ -1,3 +1,5 @@
-.item {
-  background-color: red;
+.sidebar {
+  heigth: 100%;
+  width: 50px;
+  background-color: #303035;
 }

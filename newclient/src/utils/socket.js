@@ -54,10 +54,6 @@ class Socket {
       const type = notification.id;
       delete notification.id;
 
-      if (type !== 'MSG') {
-        log.info(`← NTF: ${type}`);
-      }
-
       const event = serverIdToEventMap[type];
 
       if (event) {
