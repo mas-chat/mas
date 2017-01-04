@@ -3,7 +3,7 @@ import './index.css';
 
 const ConversationMessage = ({ ts, body, userId }) =>
   <div>
-    foo: <span styleName="timestamp">{ts}</span>: {userId} {body}
+    <span styleName="timestamp">{ts}</span>: {userId} {body}
   </div>;
 
 ConversationMessage.propTypes = {

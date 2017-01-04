@@ -7,3 +7,9 @@ body {
   height: 100vh;
   display: flex;
 }
+
+.content {
+  flex: 1;
+  height: 100%;
+  overflow-y: scroll;
+}

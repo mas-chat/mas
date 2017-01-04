@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Sidebar from '../Sidebar';
 import ConversationMessage from '../ConversationMessage';
+import { getFormattedMessages } from '../../selectors/message'
 import './index.css';
 
 const Desktop = ({ messages }) => {
@@ -11,7 +12,9 @@ const Desktop = ({ messages }) => {
   return (
     <div styleName="desktop">
       <Sidebar />
-      Works! messages: {msgs}
+      <div styleName="content">
+        {msgs}
+      </div>
     </div>
   );
 };
@@ -21,7 +24,7 @@ Desktop.propTypes = {
 };
 
 const mapStateToProps = state => ({
-  messages: state.messages.messages.toArray()
+  messages: getFormattedMessages(state)
 });
 
 export default connect(mapStateToProps)(Desktop);
