@@ -35,4 +35,5 @@ RUN /root/.yarn/bin/yarn \
   && /root/.yarn/bin/yarn run prod \
   && rm -fr node_modules
 
+WORKDIR /app/server/
 CMD ["npm", "run", "start-frontend"]
