@@ -36,11 +36,7 @@ exports.info = function info(user, msg) {
 };
 
 exports.warn = function warn(user, msg) {
-    logEntry('warn', user, msg, () => {
-        if (conf.get('common:dev_mode')) {
-            init.shutdown();
-        }
-    });
+    logEntry('warn', user, msg, () => {});
 };
 
 exports.error = function error(user, msg) {

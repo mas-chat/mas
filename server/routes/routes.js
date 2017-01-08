@@ -20,6 +20,7 @@ const path = require('path');
 const router = require('koa-router')();
 const serve = require('koa-static');
 const mount = require('koa-mount');
+const proxy = require('koa-proxy');
 const bodyParser = require('koa-bodyparser');
 const koaBody = require('koa-body');
 const conf = require('../lib/conf');
@@ -95,9 +96,16 @@ exports.register = function register(app) {
         maxage: ONE_YEAR_IN_MS
     }));
 
-    app.use(mount('/sector17/', serve(path.join(__dirname, '../../newclient/dist'), {
-        maxage: ONE_YEAR_IN_MS // TODO: Bad for index.html
-    })));
+    if (conf.get('common:dev_mode')) {
+        app.use(mount('/sector17/', proxy({
+          host: 'http://localhost:8080',
+          map: path => `/sector17/${path}`
+        })));
+    } else {
+        app.use(mount('/sector17/', serve(path.join(__dirname, '../../newclient/dist'), {
+            maxage: ONE_YEAR_IN_MS // TODO: Bad for index.html
+        })));
+    }
 
     // Ember client assets, cacheFilter handles caching
     app.use(mount('/app', serve(path.join(__dirname, '../../client/dist'))));

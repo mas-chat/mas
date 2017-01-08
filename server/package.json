@@ -60,6 +60,7 @@
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.7.1",
     "foreman": "^2.0.0",
+    "koa-proxy": "^0.7.0",
     "mocha": "^3.2.0",
     "proxyquire": "^1.7.3",
     "sinon": "^1.17.2",

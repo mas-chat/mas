@@ -8,7 +8,7 @@ const nodeEnv = process.env.NODE_ENV;
 
 const isProduction = nodeEnv === 'production';
 
-console.log(`Production mode: ${isProduction}`); // eslint-disable-line no-console
+console.log(`MODE: ${nodeEnv}`); // eslint-disable-line no-console
 
 const config = {
   entry: `${prefix}/src/app.js`,

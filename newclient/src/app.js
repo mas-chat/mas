@@ -17,7 +17,7 @@ rootElement.id = 'root';
 
 document.body.appendChild(rootElement);
 
-// TODO: Don't add devtools in production builds
+const devTools = process.env.NODE_ENV === 'production' ? null : <DevTools />;
 
 render(
   <Provider store={store}>
@@ -25,7 +25,7 @@ render(
       <Router history={browserHistory}>
         <Route path="/sector17" component={Desktop} />
       </Router>
-      <DevTools />
+      {devTools}
     </span>
   </Provider>,
   document.getElementById('root')
