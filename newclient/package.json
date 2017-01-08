@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dashboard -- webpack-dev-server --watch --hot -d",
-    "prod" "NODE_ENV=production webpack"
+    "prod": "NODE_ENV=production webpack"
   },
   "author": "Ilkka Oksanen <iao@iki.fi> (http://iao.fi)",
   "license": "Apache-2.0",
