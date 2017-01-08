@@ -11,11 +11,28 @@ RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 0.18.0
 
 COPY client /app/client/
 WORKDIR /app/client/
-RUN /root/.yarn/bin/yarn && /root/.yarn/bin/yarn run bower && /root/.yarn/bin/yarn run build  && rm -fr node_modules bower_components tmp
+
+RUN /root/.yarn/bin/yarn \
+  && /root/.yarn/bin/yarn run bower \
+  && /root/.yarn/bin/yarn run build  \
+  && rm -fr node_modules bower_components tmp
 
 COPY server /app/server/
 WORKDIR /app/server/
-RUN /root/.yarn/bin/yarn && /root/.yarn/bin/yarn run prod
-RUN cd website && /root/.yarn/bin/yarn && /root/.yarn/bin/yarn run prod && rm -fr node_modules
+
+RUN /root/.yarn/bin/yarn \
+  && /root/.yarn/bin/yarn run prod
+
+RUN cd website \
+  && /root/.yarn/bin/yarn \
+  && /root/.yarn/bin/yarn run prod \
+  && rm -fr node_modules
+
+COPY newclient /app/newclient/
+WORKDIR /app/newclient
+
+RUN /root/.yarn/bin/yarn \
+  && /root/.yarn/bin/yarn run prod \
+  && rm -fr node_modules
 
 CMD ["npm", "run", "start-frontend"]
