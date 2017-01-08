@@ -29,7 +29,8 @@ const Desktop = ({ messages, users }) => {
 };
 
 Desktop.propTypes = {
-  messages: React.PropTypes.shape({})
+  messages: React.PropTypes.shape({}),
+  users: React.PropTypes.shape({})
 };
 
 const mapStateToProps = state => ({

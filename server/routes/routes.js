@@ -98,8 +98,8 @@ exports.register = function register(app) {
 
     if (conf.get('common:dev_mode')) {
         app.use(mount('/sector17/', proxy({
-          host: 'http://localhost:8080',
-          map: path => `/sector17/${path}`
+            host: 'http://localhost:8080',
+            map: urlPath => `/sector17/${urlPath}`
         })));
     } else {
         app.use(mount('/sector17/', serve(path.join(__dirname, '../../newclient/dist'), {

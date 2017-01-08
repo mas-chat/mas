@@ -12,8 +12,8 @@ export default function users(state = initialState, action) {
 
       return {
         users: Object.entries(mapping).reduce(
-          (state, [ userId, details]) => state.set(userId, details), state.users)
-      }
+          (currentUsers, [ userId, details ]) => currentUsers.set(userId, details), state.users)
+      };
     }
     default:
       return state;
