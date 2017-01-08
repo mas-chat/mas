@@ -83,7 +83,7 @@ services:
       - "127.0.0.1:9200:9200"
       - "127.0.0.1:9300:9300"
   redis:
-    image: 'redis:latest'
+    image: 'redis:3.2.6'
     volumes:
       - /data/redis:/data
     ports:
