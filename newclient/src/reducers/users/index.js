@@ -8,11 +8,12 @@ const initialState = {
 export default function users(state = initialState, action) {
   switch (action.type) {
     case types.ADD_USERS_SERVER: {
-      for (const [ userId, details ] of Object.entries(action.data.mapping)) {
-        state.users.set(userId, details);
-      }
+      const mapping = action.data.mapping;
 
-      return state;
+      return {
+        users: Object.entries(mapping).reduce(
+          (state, [ userId, details]) => state.set(userId, details), state.users)
+      }
     }
     default:
       return state;

@@ -1,3 +1,21 @@
 .timestamp {
   color: red;
 }
+
+.message {
+  width: 100%;
+  display: flex;
+}
+
+.timestamp {
+  width: 50px;
+}
+
+.content {
+  flex: 1;
+  word-wrap: break-word;
+}
+
+.nick {
+  color: blue
+}

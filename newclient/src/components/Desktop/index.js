@@ -2,12 +2,21 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Sidebar from '../Sidebar';
 import ConversationMessage from '../ConversationMessage';
-import { getFormattedMessages } from '../../selectors/message'
 import './index.css';
 
-const Desktop = ({ messages }) => {
-  const msgs = messages.map(msg =>
-    <ConversationMessage ts={msg.ts} body={msg.body} userId={msg.userId} />);
+const Desktop = ({ messages, users }) => {
+  const msgs = messages.toArray().map(msg => {
+    const nick = msg.userId ? users.get(msg.userId).nick.mas : null;
+
+    return (
+      <ConversationMessage
+        key={msg.gid}
+        ts={msg.ts}
+        body={msg.body}
+        nick={nick}
+      />
+    );
+  });
 
   return (
     <div styleName="desktop">
@@ -24,7 +33,8 @@ Desktop.propTypes = {
 };
 
 const mapStateToProps = state => ({
-  messages: getFormattedMessages(state)
+  messages: state.messages.messages,
+  users: state.users.users
 });
 
 export default connect(mapStateToProps)(Desktop);
