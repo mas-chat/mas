@@ -5,10 +5,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const prefix = path.resolve(__dirname);
 const nodeEnv = process.env.NODE_ENV;
-
 const isProduction = nodeEnv === 'production';
 
-console.log(`MODE: ${nodeEnv}`); // eslint-disable-line no-console
+console.log(`MODE: ${isProduction ? 'production' : 'development'}`); // eslint-disable-line no-console
 
 const config = {
   entry: `${prefix}/src/app.js`,
