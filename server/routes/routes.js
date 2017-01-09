@@ -20,6 +20,7 @@ const path = require('path');
 const router = require('koa-router')();
 const serve = require('koa-static');
 const mount = require('koa-mount');
+const send = require('koa-send');
 const proxy = require('koa-proxy');
 const bodyParser = require('koa-bodyparser');
 const koaBody = require('koa-body');
@@ -82,6 +83,13 @@ exports.register = function register(app) {
 
     // Public assets
     router.get('/files/:uuid/:slug*', userFilesController);
+
+    // New client
+    router.get('/sector17', function *index(next) {
+        yield send(this, path.join('newclient/dist/index.html'), {
+            root: path.join(__dirname, '..', '..')
+        });
+    });
 
     app.use(router.routes()).use(router.allowedMethods());
 

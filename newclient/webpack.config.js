@@ -14,7 +14,7 @@ const config = {
   output: {
     path: `${prefix}/dist`,
     publicPath: '/sector17/',
-    filename: 'app.js'
+    filename: isProduction ? 'app-[hash].js' : 'app.js'
   },
   module: {
     rules: [{
@@ -38,7 +38,10 @@ const config = {
         NODE_ENV: JSON.stringify(nodeEnv)
       }
     }),
-    new HtmlWebpackPlugin()
+    new HtmlWebpackPlugin({
+      title: 'MAS',
+      hash: isProduction
+    })
   ]
 };
 
