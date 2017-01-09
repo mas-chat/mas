@@ -6,6 +6,7 @@ import configureStore from './store/configureStore';
 import Desktop from './components/Desktop';
 import DevTools from './components/DevTools';
 import socket from './utils/socket';
+import './app.css';
 
 const store = configureStore();
 
