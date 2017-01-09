@@ -249,8 +249,11 @@ export default BaseModel.extend({
 
                     if (startTime) {
                         const re = startTime.match(/^(?:(\d{1,2})h)?(?:(\d{1,2})m)?(?:(\d{1,2})s)?$/);
-                        inSeconds = parseInt(re[1] || 0) * 3600 + parseInt(re[2] || 0) * 60 +
-                            parseInt(re[3] || 0);
+
+                        if (re) {
+                            inSeconds = parseInt(re[1] || 0) * 3600 + parseInt(re[2] || 0) * 60 +
+                                parseInt(re[3] || 0);
+                        }
                     }
 
                     media.push({
