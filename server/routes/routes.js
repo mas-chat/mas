@@ -85,7 +85,7 @@ exports.register = function register(app) {
     router.get('/files/:uuid/:slug*', userFilesController);
 
     // New client
-    router.get('/sector17', function *index(next) {
+    router.get('/sector17', function *index() {
         yield send(this, path.join('newclient/dist/index.html'), {
             root: path.join(__dirname, '..', '..')
         });
