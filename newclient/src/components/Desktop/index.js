@@ -10,7 +10,7 @@ class Desktop extends PureComponent {
       return false;
     }
 
-    return super.shouldComponentUpdate();
+    return true; // TODO: Not optimal
   }
 
   render() {
