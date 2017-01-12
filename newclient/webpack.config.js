@@ -42,7 +42,17 @@ const config = {
       title: 'MAS',
       hash: isProduction
     })
-  ]
+  ],
+  devServer: {
+    stats: {
+      assets: true,
+      colors: true,
+      reasons: true,
+      children: false,
+      chunks: false,
+      modules: false
+    }
+  }
 };
 
 if (!isProduction) {
