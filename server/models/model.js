@@ -17,6 +17,7 @@
 'use strict';
 
 const assert = require('assert');
+const util = require('util');
 const Rigiddb = require('rigiddb');
 const conf = require('../lib/conf');
 
@@ -108,7 +109,7 @@ module.exports = class Model {
 
         const { err, val } = await db.find(this.collection, props);
 
-        assert(!err, `Model findIds failed: ${err}, ${JSON.stringify(props)}`);
+        assert(!err, `Model findIds failed: ${err}, ${util.inspect(props)}`);
 
         return val.sort((a, b) => a - b);
     }
