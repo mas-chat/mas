@@ -110,7 +110,11 @@ async function authLocal(username, password, done) {
 async function authExt(openidId, oauthId, profile, done) {
     // Some old users are known by their google OpenID 2.0 identifier. Google is closing down
     // OpenID support so always convert in that case to OAuth 2.0 id.
-    let user = await User.findFirst({ extAuthId: openidId });
+    let user = null;
+
+    if (openidId) {
+        user = await User.findFirst({ extAuthId: openidId });
+    }
 
     if (user && oauthId) {
         // User is identified by his OpenID 2.0 identifier even we know his OAuth 2.0 id.
