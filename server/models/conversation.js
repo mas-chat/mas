@@ -31,7 +31,7 @@ module.exports = class Conversation extends Model {
             secret: props.secret || false
         };
 
-        return await super.create(data);
+        return super.create(data);
     }
 
     static get mutableProperties() {

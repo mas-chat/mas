@@ -36,7 +36,7 @@ exports.getNick = async function getNick(userGId, network) {
 };
 
 exports.getUser = async function getUser(nick, network) {
-    return await fetchUser(nick, network);
+    return fetchUser(nick, network);
 };
 
 exports.getUserGId = async function getUserGId(nick, network) {

@@ -28,7 +28,7 @@ module.exports = class NetworkInfo extends Model {
             retryCount: 0
         };
 
-        return await super.create(data);
+        return super.create(data);
     }
 
     static get mutableProperties() {

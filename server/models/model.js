@@ -99,7 +99,7 @@ module.exports = class Model {
     static async fetchAll() {
         const { err, val } = await db.list(this.collection);
 
-        return err ? [] : await this.fetchMany(val);
+        return err ? [] : this.fetchMany(val);
     }
 
     static async findIds(props) {
@@ -121,11 +121,11 @@ module.exports = class Model {
             return null;
         }
 
-        return await onlyFirst ? this.fetch(ids[0]) : this.fetchMany(ids);
+        return onlyFirst ? this.fetch(ids[0]) : this.fetchMany(ids);
     }
 
     static async findFirst(props) {
-        return await this.find(props, { onlyFirst: true });
+        return this.find(props, { onlyFirst: true });
     }
 
     static async create(props, { skipSetters = false } = {}) {

@@ -33,7 +33,7 @@ module.exports = class Window extends Model {
             column: 0
         };
 
-        return await super.create(data);
+        return super.create(data);
     }
 
     static get mutableProperties() {

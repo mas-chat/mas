@@ -84,7 +84,7 @@ exports.findOrCreate1on1 = async function findOrCreate1on1(user, peerUserGId, ne
 };
 
 exports.delete = async function deleteCoversation(conversation) {
-    return await remove(conversation);
+    return remove(conversation);
 };
 
 exports.getAll = async function getAll(user) {
@@ -190,7 +190,7 @@ exports.removeGroupMember = async function removeGroupMember(conversation, userG
 
 exports.addMessage = async function addMessage(conversation, { userGId = null, cat, body = '' },
     excludeSession) {
-    return await broadcastAddMessage(conversation, { userGId, cat, body }, excludeSession);
+    return broadcastAddMessage(conversation, { userGId, cat, body }, excludeSession);
 };
 
 exports.editMessage = async function editMessage(conversation, user, conversationMessageId, text) {
@@ -217,7 +217,7 @@ exports.editMessage = async function editMessage(conversation, user, conversatio
 };
 
 exports.sendFullAddMembers = async function sendFullAddMembers(conversation, user) {
-    return await sendCompleteAddMembers(conversation, user);
+    return sendCompleteAddMembers(conversation, user);
 };
 
 exports.setTopic = async function setTopic(conversation, topic, nickName) {

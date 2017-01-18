@@ -31,7 +31,7 @@ module.exports = class ConversationMessage extends Model {
             status: 'original'
         };
 
-        return await super.create(data);
+        return super.create(data);
     }
 
     static get mutableProperties() {

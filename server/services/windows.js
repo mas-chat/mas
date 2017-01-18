@@ -43,7 +43,7 @@ exports.findOrCreate = async function findOrCreate(user, conversation) {
 };
 
 exports.create = async function create(user, conversation) {
-    return await createWindow(user, conversation);
+    return createWindow(user, conversation);
 };
 
 exports.remove = async function remove(user, conversation) {
@@ -62,7 +62,7 @@ exports.remove = async function remove(user, conversation) {
 };
 
 exports.findByConversation = async function findByConversation(user, conversation) {
-    return await Window.findFirst({ userId: user.id, conversationId: conversation.id });
+    return Window.findFirst({ userId: user.id, conversationId: conversation.id });
 };
 
 exports.isValidDesktop = async function isValidDesktop(user, desktop) {

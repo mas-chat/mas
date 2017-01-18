@@ -61,7 +61,7 @@ module.exports = class User extends Model {
             secretExpires: null
         };
 
-        return await super.create(data, { skipSetters });
+        return super.create(data, { skipSetters });
     }
 
     static get setters() {
@@ -218,7 +218,7 @@ module.exports = class User extends Model {
     }
 
     async delete() {
-        return await this._set({
+        return this._set({
             deleted: true,
             deletionTime: new Date(),
             email: null,
@@ -248,5 +248,5 @@ function validatePassword(password) {
 }
 
 async function bcryptPassword(password) {
-    return await bcrypt.hash(password, bcrypt.genSaltSync(10));
+    return bcrypt.hash(password, bcrypt.genSaltSync(10));
 }

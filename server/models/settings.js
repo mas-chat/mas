@@ -36,7 +36,7 @@ module.exports = class Setting extends Model {
             theme: props.theme || 'default'
         };
 
-        return await super.create(data);
+        return super.create(data);
     }
 
     static get mutableProperties() {

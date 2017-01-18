@@ -100,7 +100,7 @@ exports.process = async function process(session, command) {
     const handler = handlers[command.id];
 
     if (handler) {
-        return await handler({ user, session, window, conversation, backend, command, network });
+        return handler({ user, session, window, conversation, backend, command, network });
     }
 
     log.warn(user, `Reveiced unknown request: ${command.id}`);
@@ -166,7 +166,7 @@ async function handleCommand({ command, conversation, user, backend }) {
             return { status: 'ERROR', errorMsg: 'No MAS user with that nick.' };
         }
 
-        return await start1on1(user, targetUser.gId, 'mas');
+        return start1on1(user, targetUser.gId, 'mas');
     } else if (name === 'ircquery') {
         if (backend === 'loopbackparser') {
             return { status: 'ERROR', errorMsg: 'You can only use /ircquery on IRC window' };
@@ -177,10 +177,10 @@ async function handleCommand({ command, conversation, user, backend }) {
 
         // 1on1s between MAS users are forced through loopback backend as multiple 1on1s between
         // same people via different networks isn't useful feature, just confusing.
-        return await start1on1(user, targetUserGId, targetUserGId.isMASUser ? 'mas' : network);
+        return start1on1(user, targetUserGId, targetUserGId.isMASUser ? 'mas' : network);
     }
 
-    return await courier.call(backend, 'textCommand', {
+    return courier.call(backend, 'textCommand', {
         userId: user.id,
         conversationId: conversation.id,
         command: name,
@@ -189,7 +189,7 @@ async function handleCommand({ command, conversation, user, backend }) {
 }
 
 async function handleCreate({ command, user }) {
-    return await courier.call('loopbackparser', 'create', {
+    return courier.call('loopbackparser', 'create', {
         userId: user.id,
         name: command.name,
         password: command.password
@@ -219,7 +219,7 @@ async function handleJoin({ user, command, backend, network }) {
         }
     }
 
-    return await courier.call(backend, 'join', {
+    return courier.call(backend, 'join', {
         userId: user.id,
         name: command.name,
         password: command.password || null, // Normalize, no password is null
@@ -297,7 +297,7 @@ async function handleUpdatePassword({ user, command, conversation, backend }) {
         return { status: 'ERROR', errorMsg: 'Can\'t set password for 1on1.' };
     }
 
-    return await courier.call(backend, 'updatePassword', {
+    return courier.call(backend, 'updatePassword', {
         userId: user.id,
         conversationId: conversation.id,
         password
@@ -309,7 +309,7 @@ async function handleUpdateTopic({ user, command, conversation, backend }) {
         return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
     }
 
-    return await courier.call(backend, 'updateTopic', {
+    return courier.call(backend, 'updateTopic', {
         userId: user.id,
         conversationId: conversation.id,
         topic: command.topic
@@ -353,7 +353,7 @@ async function handleChat({ user, command }) {
     const targetUserGId = UserGId.create(command.userId);
     const network = command.network;
 
-    return await start1on1(user, targetUserGId, network);
+    return start1on1(user, targetUserGId, network);
 }
 
 async function start1on1(user, targetUserGId, network) {

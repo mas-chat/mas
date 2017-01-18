@@ -2,7 +2,8 @@ module.exports = {
     "extends": "airbnb",
     "rules": {
         "keyword-spacing": 2,
-        "generator-star-spacing": 0, // Temporary, remove when generators are gone
+        "generator-star-spacing": 0, // TODO: Temporary, remove when generators are gone
+        "no-await-in-loop": 0, // TODO: Investigate if this can be actually enabled
         "no-restricted-syntax": 0,
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "strict": ["error", "safe"],
@@ -15,7 +16,7 @@ module.exports = {
         "radix": ["error", "as-needed"],
         "import/no-extraneous-dependencies": ["error", {"devDependencies": true, "optionalDependencies": false}],
         "no-continue": ["off"],
-        "jsx-a11y/no-static-element-interactions": ["off"], // Consider
+        "jsx-a11y/no-static-element-interactions": ["off"], // TODO: Consider
         "arrow-parens": ["off"]
     },
     "parserOptions": {
