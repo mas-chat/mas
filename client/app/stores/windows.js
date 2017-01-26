@@ -35,21 +35,26 @@ export default Store.extend({
 
     // TODO: Re-factor leftovers
     userId: null,
-    secret: null,
+    token: null,
 
     initDone: false,
 
     init() {
-        let [ userId, secret ] = (Cookies.get('auth') || '').split('-');
+        let cookie = null;
 
-        if (!userId || !secret) {
-            Ember.Logger.info(`Authentication cookie not found. Exiting.`);
+        try {
+            cookie = JSON.parse(window.btoa(Cookies.get('session') || ''));
+        } catch (e) {
+            Ember.Logger.info(`Session cookie not found or corrupted. Exiting.`);
             this._logout({ informServer: false });
-        } else {
-            this.userId = userId;
-            this.secret = secret;
-            this.msgBuffer = [];
+            return;
         }
+
+        debugger;
+
+        this.userId = cookie.userId;
+        this.token = cookie.token;
+        this.msgBuffer = [];
 
         this._super();
     },

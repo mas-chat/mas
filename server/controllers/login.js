@@ -25,7 +25,7 @@ exports.localLogin = function *localLogin(next) {
 
     yield passport.authenticate('local', function *authenticate(err, user) {
         let success = false;
-        let msg;
+        let msg = 'Successful login';
 
         if (err === 'useExt') {
             msg = 'This email address can login only through Google/Yahoo login.';
@@ -33,16 +33,11 @@ exports.localLogin = function *localLogin(next) {
             // Unknown user, wrong password, or disabled account
             msg = 'Incorrect password or nick/email.';
         } else {
-            yield user.set('lastIp', that.req.connection.remoteAddress);
             yield cookie.createSession(user, that);
             success = true;
         }
 
-        if (success) {
-            that.body = { success: true, msg, userId: user.id, secret: user.get('secret') };
-        } else {
-            that.body = { success: false, msg };
-        }
+        that.body = { success, msg };
     }).call(this, next);
 };
 

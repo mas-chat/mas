@@ -1923,7 +1923,7 @@ koa-bodyparser@^2.3.0:
     co-body "^4.2.0"
     copy-to "^2.0.1"
 
-koa-compose@^2.2.0, koa-compose@^2.3.0:
+koa-compose@^2.3.0:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/koa-compose/-/koa-compose-2.5.1.tgz#726cfb17694de5cb9fbf03c0adf172303f83f156"
 
@@ -1963,13 +1963,6 @@ koa-logger@~1.3.0:
     humanize-number "~0.0.1"
     passthrough-counter "^1.0.0"
 
-koa-mount@~1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/koa-mount/-/koa-mount-1.3.0.tgz#de6ab775ec4b71ba6e67f2925a3d40dd5fab3ed0"
-  dependencies:
-    debug "*"
-    koa-compose "^2.2.0"
-
 koa-passport@^1.3.0:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/koa-passport/-/koa-passport-1.3.1.tgz#52f627e943ae6908708916fe48d6e85f8f139127"
@@ -1993,15 +1986,6 @@ koa-router@~5.4.0:
     methods "^1.0.1"
     path-to-regexp "^1.1.1"
 
-koa-send@~3.1.0:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/koa-send/-/koa-send-3.1.1.tgz#ef0af0f9a531ec817e88056b52b8e32d2e0ba91a"
-  dependencies:
-    co "^4.6.0"
-    debug "*"
-    mz "^2.3.1"
-    resolve-path "^1.3.1"
-
 koa-send@~3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/koa-send/-/koa-send-3.2.0.tgz#a4063c2631b7ebed9f9fc2a77568799ba606449b"
@@ -2010,13 +1994,6 @@ koa-send@~3.2.0:
     debug "*"
     mz "^2.3.1"
     resolve-path "^1.3.1"
-
-koa-static@~2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/koa-static/-/koa-static-2.0.0.tgz#2693482e1a4c0219e6d926be1703a2658b754f26"
-  dependencies:
-    debug "*"
-    koa-send "~3.1.0"
 
 koa@~1.2.0:
   version "1.2.4"

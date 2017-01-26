@@ -16,17 +16,23 @@
 
 'use strict';
 
+const Session = require('../models/session');
+
+const ONE_WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
+
 exports.createSession = async function createSession(user, ctx) {
-    const ts = new Date();
-    let secret = user.get('secret');
-    let secretExpires = user.get('secretExpires');
+    const session = await Session.create({
+        userId: user.id,
+        ip: ctx.request.ip
+    });
 
-    if (!secret || !secretExpires || ts > secretExpires) {
-        ({ secret, secretExpires } = await user.generateNewSecret());
-    }
+    const cookieValue = new Buffer(JSON.stringify({
+        token: session.get('token'),
+        userId: session.get('userId')
+    })).toString('base64');
 
-    ctx.cookies.set('auth', `${user.gId}-${secret}-n`, {
-        expires: secretExpires,
+    ctx.cookies.set('session', cookieValue, {
+        maxAge: ONE_WEEK_IN_MS, // Same as expiration time check in Session model
         path: '/',
         httpOnly: false
     });

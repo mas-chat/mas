@@ -69,6 +69,20 @@ db.setSchema({
             }
         }
     },
+    sessions: {
+        definition: {
+            userId: { type: 'int', allowNull: false },
+            token: { type: 'string', allowNull: false },
+            updatedAt: { type: 'timestamp', allowNull: false },
+            ip: { type: 'string', allowNull: false }
+        },
+        indices: {
+            userId: {
+                uniq: false,
+                fields: [ 'userId' ]
+            }
+        }
+    },
     windows: {
         definition: {
             userId: { type: 'int', allowNull: false },

@@ -24,6 +24,7 @@ const log = require('../lib/log');
 const friendsService = require('../services/friends');
 const sessionService = require('../services/session');
 const User = require('../models/user');
+const Session = require('../models/session');
 const UserGId = require('../models/userGId');
 const conf = require('../lib/conf');
 const userIntroducer = require('../lib/userIntroducer');
@@ -60,10 +61,10 @@ exports.setup = function setup(server) {
                 return;
             }
 
-            const secret = data.secret;
+            const token = data.token;
             const userGId = UserGId.create(data.userId);
 
-            if (!userGId || !secret) {
+            if (!userGId || !token) {
                 log.info('Invalid init socket.io message.');
                 socket.emit('terminate', {
                     code: 'INVALID_INIT',
@@ -74,22 +75,33 @@ exports.setup = function setup(server) {
             }
 
             const user = await User.fetch(userGId.id);
-            const ts = Math.round(Date.now() / 1000);
+            const authSession = await Session.findFirst({ userId: userGId.id, token });
 
-            if (!(user && user.get('secretExpires') > ts &&
-                user.get('secret') === secret && user.get('inUse'))) {
+            if (!user || !authSession || authSession.expired || !user.get('inUse')) {
                 socket.emit('terminate', {
-                    code: 'INVALID_SECRET',
-                    reason: 'Invalid or expired secret.'
+                    code: 'INVALID_TOKEN',
+                    reason: 'Invalid or expired session.'
                 });
-                await end('Invalid secret.');
+                await end('Invalid token.');
 
                 if (user) {
-                    log.info(user, 'Init message with incorrect or expired secret.');
+                    log.info(user, 'Init message with incorrect or expired token.');
+                }
+
+                if (authSession) {
+                    authSession.destroy();
                 }
 
                 return;
             }
+
+            const now = new Date();
+
+            await authSession.set({
+                token: uuid(20),
+                updatedAt: now,
+                ip: socket.request.connection.remoteAddress
+            });
 
             session.user = user;
             session.state = 'authenticated';
@@ -99,6 +111,7 @@ exports.setup = function setup(server) {
 
             socket.emit('initok', {
                 sessionId: session.id,
+                refreshToken: authSession.get('token'),
                 maxBacklogMsgs
             });
 

@@ -178,9 +178,9 @@ exports.create = function *create() {
 
     if (newUser.valid) {
         yield newUser.set('inUse', true);
-
         yield cookie.createSession(newUser, this);
-        this.body = { success: true, userId: newUser.id, secret: newUser.get('secret') };
+
+        this.body = { success: true };
     } else {
         this.body = { success: false, errors: newUser.errors };
     }

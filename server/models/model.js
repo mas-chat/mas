@@ -139,6 +139,7 @@ module.exports = class Model {
         }
 
         if (record.valid) {
+            console.log(record.collection)
             const { err, val, indices } = await db.create(record.collection, finalProps);
 
             if (err === 'notUnique') {

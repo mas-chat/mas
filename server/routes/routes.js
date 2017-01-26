@@ -18,15 +18,12 @@
 
 const path = require('path');
 const router = require('koa-router')();
-const serve = require('koa-static');
-const mount = require('koa-mount');
 const send = require('koa-send');
 const proxy = require('koa-proxy');
 const bodyParser = require('koa-bodyparser');
 const koaBody = require('koa-body');
 const conf = require('../lib/conf');
 const passport = require('../lib/passport');
-const cacheFilter = require('../lib/cacheFilter');
 const registerController = require('../controllers/register');
 const loginController = require('../controllers/login');
 const websiteController = require('../controllers/website');
@@ -36,10 +33,11 @@ const forgotPasswordController = require('../controllers/forgotPassword');
 const confirmEmailController = require('../controllers/confirmEmail');
 
 const ONE_YEAR_IN_MS = 1000 * 60 * 60 * 24 * 365;
+const TWO_DAYS_IN_MS = 1000 * 60 * 60 * 24 * 2;
+const fingerPrintRe = /^assets\/\S+-.{32}\.\w+$/;
+const devMode = conf.get('common:dev_mode');
 
 exports.register = function register(app) {
-    app.use(cacheFilter);
-
     // Passport authentication routes
     if (conf.get('googleauth:enabled') && conf.get('googleauth:openid_realm')) {
         router.get('/auth/google', passport.authenticate('google', {
@@ -77,44 +75,63 @@ exports.register = function register(app) {
     // Confirm email
     router.get('/confirm-email/:token', confirmEmailController.show);
 
-    // Web site pages route
-    router.get('/', websiteController);
-    router.get('/:page', websiteController);
-
-    // Public assets
+    // Public uploaded files
     router.get('/files/:uuid/:slug*', userFilesController);
 
-    // New client
-    router.get('/sector17', function *index() {
-        yield send(this, path.join('newclient/dist/index.html'), {
-            root: path.join(__dirname, '..', '..')
-        });
+    // Client
+    router.get('/app', function *client() {
+        this.set('Cache-control', 'private, max-age=0, no-cache');
+        yield sendFile(this, 'client/dist/', 'index.html');
     });
 
-    app.use(router.routes()).use(router.allowedMethods());
+    // Client assets
+    router.get(/^\/app\/(.+)/, function *clientAssets() {
+        const subPath = this.params[0];
+        const maxage = devMode ? 0 : fingerPrintRe.test(subPath) ? ONE_YEAR_IN_MS : TWO_DAYS_IN_MS;
+
+        yield sendFile(this, 'client/dist/', this.params[0], { maxage });
+    });
 
     // Ember CLI Live Reload redirect hack
-    if (conf.get('common:dev_mode')) {
+    if (devMode) {
         router.get('/ember-cli-live-reload.js', function *redirect() { // eslint-disable-line require-yield, max-len
             this.redirect('http://localhost:4200/ember-cli-live-reload.js');
         });
     }
 
-    app.use(serve(path.join(__dirname, '..', 'website'), {
-        maxage: ONE_YEAR_IN_MS
-    }));
+    // New client
+    router.get(/\/sector17(.*)/, function *newClientAssets() {
+        const subPath = this.params[0].replace(/^\//, '');
 
-    if (conf.get('common:dev_mode')) {
-        app.use(mount('/sector17/', proxy({
-            host: 'http://localhost:8080',
-            map: urlPath => `/sector17/${urlPath}`
-        })));
-    } else {
-        app.use(mount('/sector17/', serve(path.join(__dirname, '../../newclient/dist'), {
-            maxage: ONE_YEAR_IN_MS // TODO: Bad for index.html
-        })));
-    }
+        if (devMode) {
+            yield proxy.call(this, {
+                host: 'http://localhost:8080',
+                map: () => `/sector17/${subPath}`
+            });
 
-    // Ember client assets, cacheFilter handles caching
-    app.use(mount('/app', serve(path.join(__dirname, '../../client/dist'))));
+            this.set('Cache-control', 'private, max-age=0, no-cache');
+        } else {
+            yield sendFile(this, 'newclient/dist/', this.params[0], {
+                maxage: subPath === '' ? 0 : ONE_YEAR_IN_MS
+            });
+        }
+    });
+
+    // Web site pages
+    router.get(/^\/(about|$)\/?$/, websiteController);
+
+    // Web site assets
+    router.get(/^\/website-assets\/(.+)/, function *websiteAssets() {
+        yield sendFile(this, 'server/website/dist/', this.params[0], { maxage: ONE_YEAR_IN_MS });
+    });
+
+    app.use(router.routes()).use(router.allowedMethods());
 };
+
+function *sendFile(ctx, root, filePath, options = {}) {
+    const sendOptions = Object.assign({}, options, {
+        root: path.join(__dirname, `../../${root}`)
+    });
+
+    yield send(ctx, filePath === '' ? '/' : filePath, sendOptions);
+}
