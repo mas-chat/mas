@@ -27,6 +27,8 @@ module.exports = function *index(next) {
     if (this.mas.user) {
         this.redirect('/app');
     } else {
+        this.set('Cache-control', 'private, max-age=0, no-cache');
+
         yield this.render('index', {
             config: JSON.stringify({ auth: authOptions }),
             appJSFile: manifest['main.js']
