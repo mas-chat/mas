@@ -14,7 +14,7 @@ const config = {
     entry: `${prefix}/javascripts/app.js`,
     output: {
         path: `${prefix}/dist`,
-        publicPath: '/dist/',
+        publicPath: '/website-assets/',
         filename: isProduction ? 'app-[hash].js' : 'app.js'
     },
     module: {

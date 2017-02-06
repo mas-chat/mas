@@ -21,12 +21,12 @@ const fs = require('fs');
 const authOptions = require('../lib/authOptions');
 
 const manifest = JSON.parse(fs.readFileSync(
-    path.join(__dirname, '..', 'website', 'dist', 'manifest.json')));
+    path.join(__dirname, '../website/dist/manifest.json')));
 
 const PAGES = [ 'home', 'about' ];
 
 module.exports = function *index(next) {
-    const page = this.params.page || 'home';
+    const page = this.params[0] || 'home';
     const name = PAGES.find(availablePage => page.startsWith(availablePage));
 
     if (!name) {
