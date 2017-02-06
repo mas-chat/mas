@@ -23,25 +23,12 @@ const authOptions = require('../lib/authOptions');
 const manifest = JSON.parse(fs.readFileSync(
     path.join(__dirname, '../website/dist/manifest.json')));
 
-const PAGES = [ 'home', 'about' ];
-
 module.exports = function *index(next) {
-    const page = this.params[0] || 'home';
-    const name = PAGES.find(availablePage => page.startsWith(availablePage));
-
-    if (!name) {
-        yield next;
-        return;
-    }
-
     if (this.mas.user) {
         this.redirect('/app');
     } else {
         yield this.render('index', {
-            config: JSON.stringify({
-                auth: authOptions,
-                page: name
-            }),
+            config: JSON.stringify({ auth: authOptions }),
             appJSFile: manifest['main.js']
         });
     }
