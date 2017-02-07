@@ -1,4 +1,4 @@
-FROM node:7.2.1
+FROM node:7.5.0
 
 RUN apt-get update
 RUN apt-get install exiftran
@@ -7,7 +7,7 @@ ENV NPM_CONFIG_LOGLEVEL warn
 
 MAINTAINER Ilkka Oksanen <iao@iki.fi>
 
-RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 0.18.0
+RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 0.19.1
 
 COPY client /app/client/
 WORKDIR /app/client/
