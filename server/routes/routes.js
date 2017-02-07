@@ -20,8 +20,7 @@ const path = require('path');
 const router = require('koa-router')();
 const send = require('koa-send');
 const proxy = require('koa-proxy');
-const bodyParser = require('koa-bodyparser');
-const koaBody = require('koa-body');
+const body = require('koa-body');
 const conf = require('../lib/conf');
 const passport = require('../lib/passport');
 const registerController = require('../controllers/register');
@@ -57,19 +56,19 @@ exports.register = function register(app) {
         router.get('/auth/cloudron/callback', loginController.cloudronLogin);
     }
 
-    router.post('/login', bodyParser(), loginController.localLogin);
+    router.post('/login', body(), loginController.localLogin);
 
     // File upload endpoint
-    router.post('/api/v1/upload', koaBody({ multipart: true }), uploadController);
+    router.post('/api/v1/upload', body({ multipart: true }), uploadController);
 
     // Registration routes
     router.get('/register', registerController.index);
-    router.post('/register', bodyParser(), registerController.create);
+    router.post('/register', body(), registerController.create);
     router.post('/register-ext', registerController.createExt);
     router.post('/register-reset', registerController.createReset);
 
     // Forgot password
-    router.post('/forgot-password', bodyParser(), forgotPasswordController.create);
+    router.post('/forgot-password', body(), forgotPasswordController.create);
     router.get('/reset-password/:token', registerController.indexReset);
 
     // Confirm email
@@ -118,7 +117,7 @@ exports.register = function register(app) {
     });
 
     // Web site pages
-    router.get(/^\/(about|$)\/?$/, websiteController);
+    router.get(/^\/(about|home|tos|pricing|support|$)\/?$/, websiteController);
 
     // Web site assets
     router.get(/^\/website-assets\/(.+)/, function *websiteAssets() {

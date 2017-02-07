@@ -465,7 +465,7 @@ cluster-key-slot@^1.0.6:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/cluster-key-slot/-/cluster-key-slot-1.0.8.tgz#7654556085a65330932a2e8b5976f8e2d0b3e414"
 
-co-body@*, co-body@^4.2.0:
+co-body@*:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/co-body/-/co-body-4.2.0.tgz#74df20fa73262125dc45482af04e342ea8db3515"
   dependencies:
@@ -616,10 +616,6 @@ cookies@~0.6.1:
   dependencies:
     depd "~1.1.0"
     keygrip "~1.0.1"
-
-copy-to@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/copy-to/-/copy-to-2.0.1.tgz#2680fbb8068a48d08656b6098092bdafc906f4a5"
 
 core-util-is@~1.0.0:
   version "1.0.2"
@@ -1922,13 +1918,6 @@ koa-body@^1.6.0:
     co-body "*"
     extend "1.3.0"
     formidable "1.0.17"
-
-koa-bodyparser@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/koa-bodyparser/-/koa-bodyparser-2.3.0.tgz#236ed90a16f562e79cade2b958f67c848824e818"
-  dependencies:
-    co-body "^4.2.0"
-    copy-to "^2.0.1"
 
 koa-compose@^2.3.0:
   version "2.5.1"
