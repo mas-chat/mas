@@ -1,4 +1,4 @@
-#!/usr/bin/env node --harmony_async_await
+#!/usr/bin/env node
 //
 //   Copyright 2009-2016 Ilkka Oksanen <iao@iki.fi>
 //
