@@ -27,9 +27,7 @@ const conf = require('./conf');
 require('colors');
 require('winston-papertrail');
 
-const logger = new (winston.Logger)({
-    transports: configTransports()
-});
+let logger = null;
 
 exports.info = function info(user, msg) {
     logEntry('info', user, msg, () => {});
@@ -53,8 +51,14 @@ exports.quit = function quit() {
 
 function logEntry(type, user, msg, callback) {
     // user is an optional parameter
-    const parsedMessage = user && msg ?
-      `[u: ${user.id}] ${msg}` : user;
+    const parsedMessage = user && msg ? `[u: ${user.id}] ${msg}` : user;
+
+    if (!logger) {
+        // Delay configuration as long as possible to be sure that process.title is set.
+        logger = new (winston.Logger)({
+            transports: configTransports()
+        });
+    }
 
     logger.log(type, parsedMessage, callback);
 }
