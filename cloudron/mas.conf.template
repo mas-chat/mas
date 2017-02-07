@@ -7,8 +7,6 @@ user=false
 group=false
 env=default
 admin=m1
-dev_mode=false
-test_mode=false
 
 [site]
 admin_email=##ADMIN_EMAIL

@@ -23,8 +23,6 @@
 [common]
 env=master ; Affects only process name: mas-[env]-[service]
 admin=1 ; first registered user becomes super user
-dev_mode=false
-test_mode=false
 
 ; Unless there's a proxy in front of mas frontend, 'site_url' should be a HTTPS URL if
 ; HTTPS is enabled in frontend section below. Also the port must match similarly.

@@ -35,7 +35,7 @@ const confirmEmailController = require('../controllers/confirmEmail');
 const ONE_YEAR_IN_MS = 1000 * 60 * 60 * 24 * 365;
 const TWO_DAYS_IN_MS = 1000 * 60 * 60 * 24 * 2;
 const fingerPrintRe = /^assets\/\S+-.{32}\.\w+$/;
-const devMode = conf.get('common:dev_mode');
+const devMode = process.env.NODE_ENV !== 'production';
 
 exports.register = function register(app) {
     // Passport authentication routes
@@ -92,8 +92,8 @@ exports.register = function register(app) {
         yield sendFile(this, 'client/dist/', this.params[0], { maxage });
     });
 
-    // Ember CLI Live Reload redirect hack
     if (devMode) {
+        // Ember CLI Live Reload redirect hack
         router.get('/ember-cli-live-reload.js', function *redirect() { // eslint-disable-line require-yield, max-len
             this.redirect('http://localhost:4200/ember-cli-live-reload.js');
         });

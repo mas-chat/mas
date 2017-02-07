@@ -21,7 +21,7 @@ const koa = require('koa');
 const hbs = require('koa-hbs');
 const error = require('koa-error');
 const compress = require('koa-compress');
-// const logger = require('koa-logger');
+const logger = require('koa-logger');
 const handlebarsHelpers = require('./lib/handlebarsHelpers');
 const log = require('./lib/log');
 const redisModule = require('./lib/redis');
@@ -35,21 +35,21 @@ const socketController = require('./controllers/socket');
 const conf = require('./lib/conf');
 
 const app = koa();
+const devMode = process.env.NODE_ENV !== 'production';
 
 exports.init = async function initServer(httpServer, httpsServer, setHttpHandlers) {
-    // Development only
-    if (app.env === 'development') {
-        app.use(error());
-        // app.use(logger());
+    if (devMode) {
+        app.use(logger());
     }
+
+    app.use(error());
 
     app.use(function *xFrameOptionsMiddleware(next) {
         this.set('X-Frame-Options', 'DENY');
         yield next;
     });
 
-    // Enable GZIP compression
-    app.use(compress());
+    app.use(compress()); // Enable GZIP compression
 
     app.use(passport.initialize());
 
@@ -102,4 +102,6 @@ exports.init = async function initServer(httpServer, httpsServer, setHttpHandler
         httpServer.close();
         log.quit();
     });
+
+    log.info('Ready to serve');
 };
