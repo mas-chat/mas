@@ -21,7 +21,6 @@
 ; Test_mode is not used for anything currently
 
 [common]
-env=master ; Affects only process name: mas-[env]-[service]
 admin=1 ; first registered user becomes super user
 
 ; Unless there's a proxy in front of mas frontend, 'site_url' should be a HTTPS URL if

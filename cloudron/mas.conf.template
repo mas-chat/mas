@@ -5,7 +5,6 @@
 [common]
 user=false
 group=false
-env=default
 admin=m1
 
 [site]

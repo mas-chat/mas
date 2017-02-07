@@ -19,7 +19,6 @@
 const assert = require('assert');
 const semver = require('semver');
 const _ = require('lodash');
-const conf = require('./conf');
 const log = require('./log');
 
 checkNodeVersion();
@@ -39,10 +38,8 @@ process.on('unhandledRejection', (reason, p) => {
 });
 
 exports.configureProcess = function configureProcess(serverName) {
-    const processName = `mas-${serverName}-${conf.get('common:env')}`;
-
     process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
-    process.title = processName;
+    process.title = `mas-${serverName}`;
 
     log.warn(`${serverName} starting...`);
 
