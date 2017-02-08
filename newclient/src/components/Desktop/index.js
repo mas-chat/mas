@@ -45,6 +45,11 @@ Desktop.propTypes = {
   users: React.PropTypes.shape({})
 };
 
+Desktop.defaultProps = {
+  messages: {},
+  users: {}
+};
+
 const mapStateToProps = state => ({
   messages: state.messages.messages,
   startupFinished: state.messages.startupFinished,

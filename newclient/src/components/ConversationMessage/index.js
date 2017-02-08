@@ -25,4 +25,9 @@ ConversationMessage.propTypes = {
   nick: React.PropTypes.string
 };
 
+ConversationMessage.defaultProps = {
+  body: null,
+  nick: null
+};
+
 export default ConversationMessage;
