@@ -86,9 +86,15 @@ exports.register = function register(app) {
     // Client assets
     router.get(/^\/app\/(.+)/, function *clientAssets() {
         const subPath = this.params[0];
-        const maxage = devMode ? 0 : fingerPrintRe.test(subPath) ? ONE_YEAR_IN_MS : TWO_DAYS_IN_MS;
+        let maxage = TWO_DAYS_IN_MS;
 
-        yield sendFile(this, 'client/dist/', this.params[0], { maxage });
+        if (devMode) {
+            maxage = 0;
+        } else if (fingerPrintRe.test(subPath)) {
+            maxage = ONE_YEAR_IN_MS;
+        }
+
+        yield sendFile(this, 'client/dist/', subPath, { maxage });
     });
 
     if (devMode) {
@@ -110,7 +116,7 @@ exports.register = function register(app) {
 
             this.set('Cache-control', 'private, max-age=0, no-cache');
         } else {
-            yield sendFile(this, 'newclient/dist/', this.params[0], {
+            yield sendFile(this, 'newclient/dist/', subPath, {
                 maxage: subPath === '' ? 0 : ONE_YEAR_IN_MS
             });
         }

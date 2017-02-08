@@ -23,7 +23,7 @@ const authOptions = require('../lib/authOptions');
 const manifest = JSON.parse(fs.readFileSync(
     path.join(__dirname, '../website/dist/manifest.json')));
 
-module.exports = function *index(next) {
+module.exports = function *index() {
     if (this.mas.user) {
         this.redirect('/app');
     } else {
