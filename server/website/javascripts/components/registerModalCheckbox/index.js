@@ -40,8 +40,8 @@ class RegisterModalCheckbox extends Component {
 
 RegisterModalCheckbox.propTypes = {
     label: React.PropTypes.string.isRequired,
-    getValue: React.PropTypes.func, // formsy
-    setValue: React.PropTypes.func // formsy
+    getValue: React.PropTypes.func.isRequired, // formsy
+    setValue: React.PropTypes.func.isRequired // formsy
 };
 
 export default HOC(RegisterModalCheckbox); // eslint-disable-line new-cap

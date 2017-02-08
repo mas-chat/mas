@@ -49,10 +49,15 @@ RegisterModalPassword.propTypes = {
     showErrorMessage: React.PropTypes.bool,
     label: React.PropTypes.string.isRequired,
     autocomplete: React.PropTypes.string,
-    getErrorMessage: React.PropTypes.func, // formsy
-    getValue: React.PropTypes.func, // formsy
-    setValue: React.PropTypes.func, // formsy
-    showError: React.PropTypes.func // formsy
+    getErrorMessage: React.PropTypes.func.isRequired, // formsy
+    getValue: React.PropTypes.func.isRequired, // formsy
+    setValue: React.PropTypes.func.isRequired, // formsy
+    showError: React.PropTypes.func.isRequired // formsy
+};
+
+RegisterModalPassword.defaultProps = {
+    showErrorMessage: false,
+    autocomplete: false
 };
 
 export default HOC(RegisterModalPassword); // eslint-disable-line new-cap

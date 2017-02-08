@@ -51,10 +51,16 @@ RegisterModalInput.propTypes = {
     label: React.PropTypes.string.isRequired,
     autocomplete: React.PropTypes.string,
     autoFocus: React.PropTypes.bool,
-    getErrorMessage: React.PropTypes.func, // formsy
-    getValue: React.PropTypes.func, // formsy
-    setValue: React.PropTypes.func, // formsy
-    showError: React.PropTypes.func // formsy
+    getErrorMessage: React.PropTypes.func.isRequired, // formsy
+    getValue: React.PropTypes.func.isRequired, // formsy
+    setValue: React.PropTypes.func.isRequired, // formsy
+    showError: React.PropTypes.func.isRequired // formsy
+};
+
+RegisterModalInput.defaultProps = {
+    focus: false,
+    autocomplete: false,
+    autoFocus: false
 };
 
 export default HOC(RegisterModalInput); // eslint-disable-line new-cap
