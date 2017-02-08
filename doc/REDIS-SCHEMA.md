@@ -2,6 +2,8 @@
 MAS Redis structures
 ====================
 
+Most of data is stored to rigidDB. These are the raw redis data structures MAS uses.
+
 ```
  1on1conversationhistory:<userId> (list)
    <conversationId1>, <conversationId2>
@@ -38,8 +40,7 @@ MAS Redis structures
    message
 ```
 
- IRC backend
- ===========
+## IRC backend
 
 ```
  inbox:ircparser (list)
@@ -55,123 +56,17 @@ MAS Redis structures
    <channelName> (string, password)
 ```
 
- Loopback backend
- ================
+## Loopback backend
 
 ```
  inbox:loopbackparser (list)
 ```
 
-Global IDs
-==========
+## Global IDs
 
 ```
  nextGlobalNoteId (string) (integer, counter)
  nextGlobalAnnouncementId (string) (integer, counter)
 ```
 
-Deleted
-======
 
-```
- user:<userId> (hash)
-   name (string)
-   email (string)
-   emailconfirmed (string, 'true', 'false')
-   inuse (string, 'true', 'false')
-   deleted (string, 'true', 'false')
-   lastlogout (int, unix time) (0 = online)
-   password (string)
-   nick (string)
-   secret (string)
-   secretExpires (int, unix time)
-   lastip (string)
-   maxwindows (int)
-   openidurl (string)
-   registrationtime (int, unix time)
-   nextwindowid (int)
-
- userlist (set)
-   <userId1>, <userId2> ...
-
- index:user (hash)
-   <email> (int, userId)
-   <nick> (int, userId)
-   <openidurl> (int, userId)
-
- friendsrequests:<userId> (set)
-   <userId1>, <userId2> ...
-
- friends:<userId> (set)
-   <userId1>, <userId2> ...
-
- settings:<userId> (hash)
-   <name> (string)
-
- windowlist:<userId> (set)
-   <windowId1>, <windowId2> ...
-
- window:<userId>:<windowId> (hash)
-   conversationId (string)
-   emailAlert (bool)
-   notificationAlert (bool)
-   soundAlert (bool)
-   titleAlert (bool)
-   minimizedNamesList (bool)
-   desktop (int)
-   row (int)
-   column (int)
-   group (int)
-
- index:windowIds (hash)
-   <userId>:<conversationId> (int, windowId)
-
- conversation:<conversationId> (hash)
-   owner (string, userId) (mas group only)
-   type (string, 'group', '1on1')
-   name (string) (e.g. '#foo', 'bar'. '' if not group)
-   network (string) (e.g 'MAS' or 'IRCNet', 'FreeNode', 'W3C')
-   topic (string)
-   password (string)
-   apikey (string)
-
-index:conversation (hash)
-   group:<network>:<name> (int, conversationId)
-   1on1:<network>:<userId1>:<userId2> (int, conversationId)
-
-conversationmembers:<conversationId> (hash)
-   <userId>: (string, '*' (owner) '@', (op) '+' (voice), 'u' (user)
-   ...
-
-outbox:<userId>:<sessionId> (list)
-   msg1, msg2
-
-sessionlastheartbeat (zset)
-   userId:sessionId1, timestamp1, userId:sessionId2, timestamp2 ...
-
-sessionlist:<userId> (zset)
-   sessionId1, timeStamp1, sessionId2, timeStamp2 ...
-
-sessionknownuserids:<userId>:<sessionId> set
-   <userId1>, <userId2>, ...
-
-conversationlist:<userId> (set)
-   <conversationId1>, <conversationId2>, ...
-
-conversationmsgs:<conversationId> (list) [oldest message on the right]
-
-networklist (set)
-   <network1>, <network2> ...
-
-networks:<userId>:<network> (hash)
-   state (string) (e.g. 'connected', 'connecting', 'disconnected')
-   currentnick (text)
-   retryCount (int)
-
-index:currentnick (hash)
-   <network>:<nick> (string, userId)
-
- ircuser:<userId>
-   nick (string)
-   network (string)
-```
