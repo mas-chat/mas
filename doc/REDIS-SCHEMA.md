@@ -26,6 +26,8 @@ Most of data is stored to rigidDB. These are the raw redis data structures MAS u
  activealerts:<userId> (set)
    <id3>, <id4> ...
 
+ nextGlobalAnnouncementId (string) (integer, counter)
+
  emailnotifications (set)
    <userId1>, <userId2> ...
 
@@ -44,16 +46,12 @@ Most of data is stored to rigidDB. These are the raw redis data structures MAS u
 
 ```
  inbox:ircparser (list)
-
  inbox:connectionmanager (list)
 
  namesbuffer:<userId>:<conversationId> (hash, expiry 1 min)
    name1, name2 ...
 
  ircnamesreporter:<conversationId> (string with expiry time, userId)
-
- ircchannelsubscriptions:<userId>:<network> (hash)
-   <channelName> (string, password)
 ```
 
 ## Loopback backend
@@ -61,12 +59,3 @@ Most of data is stored to rigidDB. These are the raw redis data structures MAS u
 ```
  inbox:loopbackparser (list)
 ```
-
-## Global IDs
-
-```
- nextGlobalNoteId (string) (integer, counter)
- nextGlobalAnnouncementId (string) (integer, counter)
-```
-
-

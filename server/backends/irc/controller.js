@@ -732,8 +732,8 @@ async function handleJoin(user, msg) {
 
         if (!subscription) {
             // IrcSubscription entry is missing. This means IRC server has added the user
-            // to a channel without any action from the user. ircchannelsubscriptions must be
-            // updated as it's used to rejoin channels after a server restart.
+            // to a channel without any action from the user. IRC channel subscription must be
+            // added as it's used to rejoin channels after a server restart.
             subscription = await IrcSubscription.create({
                 userId: targetUser.id,
                 network,
