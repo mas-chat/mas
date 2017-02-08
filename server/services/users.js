@@ -28,16 +28,18 @@ exports.addUser = async function addUser(details, { skipSetters = false } = {}) 
 
     if (user.valid) {
         await Settings.create({ userId: user.id });
-
-        await NetworkInfo.create({
-            userId: user.id,
-            network: 'mas',
-            state: 'connected',
-            nick: user.get('nick')
-        });
     } else {
         log.warn(`User creation failed, errors: ${JSON.stringify(user.errors)}`);
     }
 
     return user;
+};
+
+exports.addMASNetworkInfo = async function addMASNetworkInfo(user) {
+    await NetworkInfo.create({
+        userId: user.id,
+        network: 'mas',
+        state: 'connected',
+        nick: user.get('nick')
+    });
 };

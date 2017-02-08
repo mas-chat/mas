@@ -178,6 +178,7 @@ exports.create = function *create() {
 
     if (newUser.valid) {
         yield newUser.set('inUse', true);
+        yield usersService.addMASNetworkInfo(newUser);
 
         yield cookie.createSession(newUser, this);
         this.body = { success: true, userId: newUser.id, secret: newUser.get('secret') };
@@ -197,37 +198,38 @@ exports.createExt = function *createExt() {
         });
     }
 
-    if (!this.mas.user) {
+    const user = this.mas.user;
+
+    if (!user) {
         this.status = httpStatus('bad request');
         return;
     }
 
-    const userRecord = this.mas.user;
-
-    if (userRecord.get('email') === form.data.email) {
+    if (user.get('email') === form.data.email) {
         // If the user didn't change his email address, we trust what Google/Yahoo gave us.
-        yield userRecord.set('emailConfirmed', true);
+        yield user.set('emailConfirmed', true);
     } else {
-        yield userRecord.updateEmail(form.data.email);
+        yield user.updateEmail(form.data.email);
     }
 
-    if (userRecord.valid) {
-        yield userRecord.set('nick', form.data.nick);
+    if (user.valid) {
+        yield user.set('nick', form.data.nick);
+        yield usersService.addMASNetworkInfo(user);
     }
 
     if (!form.isValid()) {
         yield renderForm(this);
         return;
-    } else if (!userRecord.valid) {
-        Object.keys(userRecord.errors).forEach(field => {
-            form.fields[field].error = userRecord.errors[field];
+    } else if (!user.valid) {
+        Object.keys(user.errors).forEach(field => {
+            form.fields[field].error = user.errors[field];
         });
 
         yield renderForm(this);
         return;
     }
 
-    userRecord.set('inUse', true);
+    user.set('inUse', true);
 
     this.response.redirect('/app');
 };
