@@ -48,7 +48,7 @@
             "access_key": "${SAUCE_ACCESS_KEY}",
             "desiredCapabilities": {
                 "browserName": "firefox",
-                "version": "48.0",
+                "version": "50.0",
                 "platform": "OS X 10.11",
                 "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
                 "build": "travis-build-${TRAVIS_JOB_NUMBER}"
@@ -62,7 +62,7 @@
             "access_key": "${SAUCE_ACCESS_KEY}",
             "desiredCapabilities": {
                 "browserName": "chrome",
-                "version": "53",
+                "version": "55",
                 "platform": "Windows 10",
                 "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
                 "build": "travis-build-${TRAVIS_JOB_NUMBER}"
@@ -76,7 +76,7 @@
             "access_key": "${SAUCE_ACCESS_KEY}",
             "desiredCapabilities": {
                 "browserName": "MicrosoftEdge",
-                "version": "13.10586",
+                "version": "14.14393",
                 "platform": "Windows 10",
                 "tunnel-identifier": "${TRAVIS_JOB_NUMBER}",
                 "build": "travis-build-${TRAVIS_JOB_NUMBER}"
