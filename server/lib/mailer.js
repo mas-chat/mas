@@ -86,7 +86,9 @@ function setupTransporter() {
         fromAddress = conf.get('site:admin_email');
         senderAddress = fromAddress;
     } else {
-        transporter = nodemailer.createTransport();
+        transporter = nodemailer.createTransport({
+            sendmail: true
+        });
         fromAddress = conf.get('site:admin_email');
         senderAddress = fromAddress;
     }
