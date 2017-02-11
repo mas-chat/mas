@@ -34,23 +34,21 @@ export default Store.extend({
     cachedUpto: 0,
 
     // TODO: Re-factor leftovers
+    cookie: null,
     userId: null,
-    secret: null,
 
     initDone: false,
 
     init() {
-        let [ userId, secret ] = (Cookies.get('auth') || '').split('-');
+        this.cookie = Cookies.get('mas') || '';
 
-        if (!userId || !secret) {
-            Ember.Logger.info(`Authentication cookie not found. Exiting.`);
+        if (!this.cookie) {
+            Ember.Logger.info(`Session cookie not found or corrupted. Exiting.`);
             this._logout({ informServer: false });
-        } else {
-            this.userId = userId;
-            this.secret = secret;
-            this.msgBuffer = [];
+            return;
         }
 
+        this.msgBuffer = [];
         this._super();
     },
 
@@ -633,15 +631,15 @@ export default Store.extend({
 
     // TODO: Move these handlers somewhere else
 
-    handleLogout() {
-        this._logout({ informServer: true });
+    handleLogout({ allSessions = false } = {}) {
+        this._logout({ informServer: true, allSessions });
     },
 
     handleDestroyAccount() {
         socket.send({
             id: 'DESTROY_ACCOUNT'
         }, () => {
-            Cookies.remove('auth', { path: '/' });
+            Cookies.remove('mas', { path: '/' });
             window.location = '/';
         });
     },
@@ -656,8 +654,8 @@ export default Store.extend({
         return this.get('windows').getByIndex(windowId);
     },
 
-    _logout({ informServer = false } = {}) {
-        Cookies.remove('auth', { path: '/' });
+    _logout({ informServer = false, allSessions = false } = {}) {
+        Cookies.remove('mas', { path: '/' });
 
         if (typeof Storage !== 'undefined') {
             window.localStorage.removeItem('data');
@@ -669,7 +667,8 @@ export default Store.extend({
 
         if (informServer) {
             socket.send({
-                id: 'LOGOUT'
+                id: 'LOGOUT',
+                allSessions: allSessions
             }, exit);
         } else {
             exit();

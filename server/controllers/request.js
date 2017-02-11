@@ -25,6 +25,7 @@ const search = require('../lib/search');
 const conf = require('../lib/conf');
 const courier = require('../lib/courier').create();
 const mailer = require('../lib/mailer');
+const authSession = require('../services/authSession');
 const conversationsService = require('../services/conversations');
 const windowsService = require('../services/windows');
 const friendsService = require('../services/friends');
@@ -398,10 +399,17 @@ async function handleAckAlert({ user, command }) {
     return { status: 'OK' };
 }
 
-function handleLogout({ user, session }) {
+async function handleLogout({ user, command, session }) {
     log.info(user, `User ended session. SessionId: ${session.id}`);
 
     session.state = 'terminating';
+
+    if (command.allSessions) {
+        await authSession.deleteAll(user.id);
+        redis.publish(`${user.id}`, JSON.stringify({ type: 'terminate' }));
+    } else {
+        await authSession.deleteByCookieValue(session.refreshCookie);
+    }
 
     return { status: 'OK' };
 }

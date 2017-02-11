@@ -17,22 +17,25 @@
 'use strict';
 
 const User = require('../models/user');
+const authSessionService = require('../services/authSession');
 
 exports.auth = function *auth(next) {
-    const cookie = this.cookies.get('auth') || '';
-    const ts = new Date();
-
     this.mas = this.mas || {};
     this.mas.user = null;
 
-    const [ userId, secret ] = cookie.split('-');
+    const cookieValue = this.cookies.get('mas');
 
-    if (userId && secret) {
-        const user = yield User.fetch(parseInt(userId.substring(1)));
+    if (cookieValue) {
+        const userId = yield authSessionService.validate(cookieValue);
+        const user = userId ? yield User.fetch(userId) : null;
 
-        if (user && user.get('secretExpires') > ts && user.get('secret') === secret) {
-            this.mas.user = user;
+        if (!user || !user.get('inUse')) {
+            this.cookies.set('mas'); // Delete the potentially invalid cookie
+            this.response.redirect('/');
+            return;
         }
+
+        this.mas.user = user;
     }
 
     yield next;

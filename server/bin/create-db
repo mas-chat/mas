@@ -40,15 +40,15 @@ db.setSchema({
             canUseIRC: { type: 'boolean', allowNull: false },
             planLevel: { type: 'int', allowNull: false },
             discount: 'int',
-            lastIp: 'string',
+            lastIp: 'string', // not used
             lastLogout: { type: 'timestamp', allowNull: false },
             name: 'string',
             nick: 'string',
             password: 'string',
             passwordType: 'string',
             registrationTime: { type: 'timestamp', allowNull: false },
-            secret: 'string',
-            secretExpires: 'timestamp'
+            secret: 'string', // not used
+            secretExpires: 'timestamp' // not used
         },
         indices: {
             email: {
@@ -66,6 +66,20 @@ db.setSchema({
             extAuth: {
                 uniq: true,
                 fields: [ 'extAuthId' ]
+            }
+        }
+    },
+    sessions: {
+        definition: {
+            userId: { type: 'int', allowNull: false },
+            token: { type: 'string', allowNull: false },
+            updatedAt: { type: 'timestamp', allowNull: false },
+            ip: { type: 'string', allowNull: false }
+        },
+        indices: {
+            userId: {
+                uniq: false,
+                fields: [ 'userId' ]
             }
         }
     },

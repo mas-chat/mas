@@ -21,6 +21,7 @@ const socketIo = require('socket.io');
 const uuid = require('uid2');
 const requestController = require('./request');
 const log = require('../lib/log');
+const authSessionService = require('../services/authSession');
 const friendsService = require('../services/friends');
 const sessionService = require('../services/session');
 const User = require('../models/user');
@@ -60,32 +61,28 @@ exports.setup = function setup(server) {
                 return;
             }
 
-            const secret = data.secret;
-            const userGId = UserGId.create(data.userId);
-
-            if (!userGId || !secret) {
-                log.info('Invalid init socket.io message.');
+            if (!data.cookie) {
+                log.info('Invalid init socket.io message, cookie missing');
                 socket.emit('terminate', {
                     code: 'INVALID_INIT',
-                    reason: 'Invalid init event.'
+                    reason: 'Invalid init event. Token missing.'
                 });
-                await end('Invalid init.');
+                await end('Invalid init, cookie missing.');
                 return;
             }
 
-            const user = await User.fetch(userGId.id);
-            const ts = Math.round(Date.now() / 1000);
+            const userId = await authSessionService.validate(data.cookie, { delete: true });
+            const user = userId ? await User.fetch(userId) : null;
 
-            if (!(user && user.get('secretExpires') > ts &&
-                user.get('secret') === secret && user.get('inUse'))) {
+            if (!user || !user.get('inUse')) {
                 socket.emit('terminate', {
-                    code: 'INVALID_SECRET',
-                    reason: 'Invalid or expired secret.'
+                    code: 'INVALID_TOKEN',
+                    reason: 'Invalid or expired session.'
                 });
-                await end('Invalid secret.');
+                await end('Invalid cookie.');
 
                 if (user) {
-                    log.info(user, 'Init message with incorrect or expired secret.');
+                    log.info(user, 'Init message with incorrect or expired cookie.');
                 }
 
                 return;
@@ -96,9 +93,15 @@ exports.setup = function setup(server) {
 
             const maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
             const cachedUpto = isInteger(data.cachedUpto) ? data.cachedUpto : 0;
+            const remoteIp = socket.conn.remoteAddress;
+            const refreshCookie = await authSessionService.create(user.id, remoteIp);
+
+            session.refreshCookie = refreshCookie;
 
             socket.emit('initok', {
                 sessionId: session.id,
+                userId,
+                refreshCookie,
                 maxBacklogMsgs
             });
 
@@ -136,13 +139,21 @@ exports.setup = function setup(server) {
                 }
             }
 
-            redisSubscribe.on('message', (channel, message) => {
-                if (session.state === 'authenticated') {
-                    process(channel, message);
+            redisSubscribe.on('message', async (channel, data) => {
+                const { type, msg } = JSON.parse(data);
+
+                if (type === 'terminate') {
+                    socket.emit('terminate', {
+                        code: 'LOGOUT_ALL',
+                        reason: 'User initiated global logout.'
+                    });
+                    await end('Multiple inits.');
+                } else if (session.state === 'authenticated') {
+                    process(channel, msg);
                 }
             });
 
-            await userIntroducer.introduce(user, userGId, session);
+            await userIntroducer.introduce(user, UserGId.create({ type: 'mas', id: userId }), session);
             await sessionService.init(user, session, maxBacklogMsgs, cachedUpto);
         });
 

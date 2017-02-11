@@ -2,7 +2,6 @@
 
 import React, { Component } from 'react';
 import 'whatwg-fetch';
-import Cookies from 'js-cookie';
 import classNames from 'classnames/bind';
 import styles from './index.css';
 
@@ -46,13 +45,13 @@ class LoginModal extends Component {
         fetch('/login', {
             method: 'POST',
             headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: this.state.userName, password: this.state.password })
+            body: JSON.stringify({ username: this.state.userName, password: this.state.password }),
+            credentials: 'include'
         })
         .then(response => response.json())
         .then(data => {
             if (data.success === true) {
-                Cookies.set('auth', `m${data.userId}-${data.secret}-n`, { expires: 7, path: '/' });
-
+                // Server has set the session cookie, just redirect
                 window.location.pathname = '/app/';
             } else {
                 this.setState({ invalidLogin: true, password: '' });
@@ -64,7 +63,8 @@ class LoginModal extends Component {
         fetch('/forgot-password', {
             method: 'POST',
             headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: this.state.forgotEmail })
+            body: JSON.stringify({ email: this.state.forgotEmail }),
+            credentials: 'include'
         })
         .then(response => response.json())
         .then(data => {

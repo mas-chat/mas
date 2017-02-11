@@ -20,9 +20,9 @@ const forms = require('forms');
 const httpStatus = require('statuses');
 const redis = require('../lib/redis').createClient();
 const authOptions = require('../lib/authOptions');
-const cookie = require('../lib/cookie');
 const User = require('../models/user');
 const usersService = require('../services/users');
+const authSessionService = require('../services/authSession');
 
 const fields = forms.fields;
 const widgets = forms.widgets;
@@ -128,6 +128,8 @@ function decodeForm(req, inputForm) {
     }));
 }
 
+const ONE_WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
+
 exports.index = function *index() {
     if (this.query.ext !== 'true') {
         return;
@@ -180,8 +182,10 @@ exports.create = function *create() {
         yield newUser.set('inUse', true);
         yield usersService.addMASNetworkInfo(newUser);
 
-        yield cookie.createSession(newUser, this);
-        this.body = { success: true, userId: newUser.id, secret: newUser.get('secret') };
+        const cookieValue = yield authSessionService.create(newUser.id, this.request.ip);
+        this.cookies.set('mas', cookieValue, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
+
+        this.body = { success: true };
     } else {
         this.body = { success: false, errors: newUser.errors };
     }
@@ -230,6 +234,9 @@ exports.createExt = function *createExt() {
     }
 
     user.set('inUse', true);
+
+    const cookieValue = yield authSessionService.create(user.id, this.request.ip);
+    this.cookies.set('mas', cookieValue, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
 
     this.response.redirect('/app');
 };

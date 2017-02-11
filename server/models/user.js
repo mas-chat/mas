@@ -18,7 +18,6 @@
 
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
-const uuid = require('uid2');
 const md5 = require('md5');
 const redis = require('../lib/redis').createClient();
 const UserGId = require('./userGId');
@@ -146,17 +145,6 @@ module.exports = class User extends Model {
         const sessions = await redis.pubsub('NUMSUB', this.id);
 
         return sessions[1] !== 0;
-    }
-
-    async generateNewSecret() {
-        const newSecret = {
-            secret: uuid(20),
-            secretExpires: new Date(Date.now() + (14 * 24 * 60 * 60 * 1000))
-        };
-
-        await this._set(newSecret);
-
-        return newSecret;
     }
 
     async changeEmail(email) {

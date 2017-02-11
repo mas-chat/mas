@@ -36,15 +36,15 @@ async function sendNotifications(user, sessionId, excludeSessionId, ntfs) {
 
     for (const ntf of ntfsArray) {
         if (sessionId) {
-            redis.publish(`${user.id}:${sessionId}`, ntf);
+            redis.publish(`${user.id}:${sessionId}`, JSON.stringify({ type: 'ntf', msg: ntf }));
         } else if (!excludeSessionId) {
-            redis.publish(`${user.id}`, ntf);
+            redis.publish(user.id, JSON.stringify({ type: 'ntf', msg: ntf }));
         } else {
             const subcriptions = await redis.pubsub('CHANNELS', `${user.id}:*`);
 
             for (const subscription of subcriptions) {
                 if (subscription !== `${user.id}:${excludeSessionId}`) {
-                    redis.publish(subscription, ntf);
+                    redis.publish(subscription, JSON.stringify({ type: 'ntf', msg: ntf }));
                 }
             }
         }

@@ -81,7 +81,7 @@ the client should use the cachedUpto parameter.
 ```JSON
 {
     "userId": "m453353",
-    "secret": "O1BgcLMBBEFC2etpjsRo",
+    "cookie": "O1BgcLMBBEFC2etpjsRo",
     "clientName": "my_client_app",
     "clientOS": "android",
     "version": "1.0",
@@ -92,7 +92,7 @@ the client should use the cachedUpto parameter.
 | Parameter      | Type      | Description                                        |
 |----------------|-----------|----------------------------------------------------|
 | userId         | mandatory | User Id                                            |
-| secret         | mandatory | Secret authentication token                        |
+| cookie         | mandatory | Authentication cookie                              |
 | clientName     | optional  | Client name                                        |
 | clientOS       | optional  | Client operating system                            |
 | version        | mandatory | Must be string "1.0"                               |
@@ -111,13 +111,14 @@ the client should use the cachedUpto parameter.
 |------------|-----------|----------------------------------------------------|
 | sessionId  | mandatory | Session identifier. Client needs it currently only when uploading images. |
 | maxBacklogMsgs | mandatory | Maximum amount of messages per window the server sends to the client before 'INITDONE' notification. This is either the value the client sent in 'init' message if the server approved it or a default value if the client didn't send maxBacklogMsgs parameter or the value it send was rejected.
+| refreshCookie | mandatory | A new cookie that the client must use during the next init.
 
 ## Terminate event payload
 
 ```JSON
 {
     "code": "INVALID_SECRET",
-    "reason": "Invalid or expired secret."
+    "reason": "Invalid or expired cookie."
 }
 ```
 

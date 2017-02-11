@@ -27,7 +27,12 @@ export default Store.extend({
     userId: null,
 
     init() {
-        this.userId = (Cookies.get('auth') || '').split('-')[0];
+        try {
+            // TODO: Should read this from initok request but that's too late
+            this.userId = `m${JSON.parse(window.atob(Cookies.get('mas'))).userId}`;
+        } catch (e) {
+            this.userId = null;
+        }
 
         this._super();
     },

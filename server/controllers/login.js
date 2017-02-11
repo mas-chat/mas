@@ -18,10 +18,12 @@
 
 const passport = require('../lib/passport');
 const log = require('../lib/log');
-const cookie = require('../lib/cookie');
+const authSesssionService = require('../services/authSession');
+
+const ONE_WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
 
 exports.localLogin = function *localLogin(next) {
-    const that = this;
+    const ctx = this;
 
     yield passport.authenticate('local', function *authenticate(err, user) {
         let success = false;
@@ -33,16 +35,13 @@ exports.localLogin = function *localLogin(next) {
             // Unknown user, wrong password, or disabled account
             msg = 'Incorrect password or nick/email.';
         } else {
-            yield user.set('lastIp', that.req.connection.remoteAddress);
-            yield cookie.createSession(user, that);
+            msg = 'Successful login';
+            const cookieValue = yield authSesssionService.create(user.id, ctx.request.ip);
+            ctx.cookies.set('mas', cookieValue, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
             success = true;
         }
 
-        if (success) {
-            that.body = { success: true, msg, userId: user.id, secret: user.get('secret') };
-        } else {
-            that.body = { success: false, msg };
-        }
+        ctx.body = { success, msg };
     }).call(this, next);
 };
 
@@ -71,10 +70,10 @@ function *auth(ctx, next, provider) {
 
         log.info('External login finished');
 
-        yield cookie.createSession(user, ctx);
+        const cookieValue = yield authSesssionService.create(user.id, ctx.request.ip);
+        ctx.cookies.set('mas', cookieValue, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
 
         if (user.get('inUse')) {
-            // TODO: yield updateIpAddress(ctx, userId);
             ctx.redirect('/app/');
         } else {
             ctx.redirect('/register?ext=true');

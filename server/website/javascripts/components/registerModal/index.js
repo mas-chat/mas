@@ -2,7 +2,6 @@
 
 import React, { Component } from 'react';
 import 'whatwg-fetch';
-import Cookies from 'js-cookie';
 import Formsy from 'formsy-react';
 import classNames from 'classnames/bind';
 import styles from './index.css';
@@ -43,12 +42,12 @@ class RegisterModal extends Component {
                 Accept: 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(model)
+            body: JSON.stringify(model),
+            credentials: 'include'
         }).then(response => response.json())
             .then(data => {
                 if (data.success === true) {
-                    Cookies.set('auth', `m${data.userId}-${data.secret}-n`, { expires: 7, path: '/' });
-
+                    // Server has set the cookie, just redirect
                     window.location.pathname = '/app/';
                 } else {
                     this.setState({ showErrors: true });

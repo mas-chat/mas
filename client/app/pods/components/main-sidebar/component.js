@@ -36,6 +36,10 @@ export default Ember.Component.extend(KeyboardShortcuts, {
             dispatch('LOGOUT');
         },
 
+        logoutAll() {
+            dispatch('LOGOUT', { allSessions: true });
+        },
+
         toggleDarkTheme() {
             dispatch('TOGGLE_THEME');
         }

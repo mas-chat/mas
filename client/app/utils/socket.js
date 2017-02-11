@@ -63,8 +63,12 @@ let SocketService = Ember.Object.extend({
         ioSocket.on('initok', Ember.run.bind(this, function(data) {
             this.set('_connected', true);
 
-            this.set('sessionId', data.sessionId);
+            this.set('sessionId', data.sessionId); // TODO: Should not needed, use cookie always
+            this.set('_windowsStore.userId', `m${data.userId}`);
+            this.set('_windowsStore.cookie', data.refreshCookie);
             this.set('_windowsStore.maxBacklogMsgs', data.maxBacklogMsgs);
+
+            Cookies.set('mas', data.refreshCookie, { expires: 7 });
 
             // TODO: Delete oldest messages for windows that have more messages than
             // maxBacklogMsgs. They can be stale, when editing becomes possible.
@@ -139,13 +143,13 @@ let SocketService = Ember.Object.extend({
         let maxBacklogMsgs = calcMsgHistorySize();
         let cachedUpto = this.get('_windowsStore.cachedUpto');
         let userId = this.get('_windowsStore.userId');
-        let secret = this.get('_windowsStore.secret');
+        let cookie = this.get('_windowsStore.cookie');
 
         ioSocket.emit('init', {
             clientName: 'web',
             clientOS: navigator.platform,
             userId: userId,
-            secret: secret,
+            cookie: cookie,
             version: '1.0',
             maxBacklogMsgs: maxBacklogMsgs,
             cachedUpto: cachedUpto
@@ -175,7 +179,7 @@ let SocketService = Ember.Object.extend({
     },
 
     _logout() {
-        Cookies.remove('auth', { path: '/' });
+        Cookies.remove('mas', { path: '/' });
         window.location = '/';
     }
 });
