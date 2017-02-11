@@ -20,8 +20,8 @@ const path = require('path');
 const fs = require('fs');
 const authOptions = require('../lib/authOptions');
 
-const manifest = JSON.parse(fs.readFileSync(
-    path.join(__dirname, '../website/dist/manifest.json')));
+const manifestFile = fs.readFileSync(path.join(__dirname, '../website/dist/manifest.json'));
+const manifest = JSON.parse(manifestFile);
 
 module.exports = function *index() {
     if (this.mas.user) {
