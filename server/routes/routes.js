@@ -127,7 +127,8 @@ exports.register = function register(app) {
 
     // Web site assets
     router.get(/^\/website-assets\/(.+)/, function *websiteAssets() {
-        yield sendFile(this, 'server/website/dist/', this.params[0], { maxage: ONE_YEAR_IN_MS });
+        const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
+        yield sendFile(this, 'server/website/dist/', this.params[0], { maxage });
     });
 
     app.use(router.routes()).use(router.allowedMethods());
