@@ -19,12 +19,23 @@
 const Session = require('../models/session');
 
 exports.create = async function create(userId, ip) {
-    const session = await Session.create({ userId, ip });
-
-    return encodeCookieValue(session);
+    return Session.create({ userId, ip });
 };
 
-exports.validate = async function validate(cookie, options = {}) {
+exports.deleteAll = async function deleteAll(userId) {
+    const sessions = await Session.find({ userId });
+
+    sessions.forEach(session => session.delete());
+};
+
+exports.encodeToCookie = function encodeToCookie(session) {
+    return new Buffer(JSON.stringify({
+        token: session.get('token'),
+        userId: session.get('userId')
+    })).toString('base64');
+};
+
+exports.validateCookie = async function validate(cookie, options = {}) {
     const sessionData = decodeCookieValue(cookie);
     const session = await findSession(sessionData);
 
@@ -42,28 +53,6 @@ exports.validate = async function validate(cookie, options = {}) {
 
     return session.get('userId');
 };
-
-exports.deleteByCookieValue = async function deleteByCookieValue(cookie) {
-    const sessionData = decodeCookieValue(cookie);
-    const session = await findSession(sessionData);
-
-    if (session) {
-        session.delete();
-    }
-};
-
-exports.deleteAll = async function deleteAll(userId) {
-    const sessions = await Session.find({ userId });
-
-    sessions.forEach(session => session.delete());
-};
-
-function encodeCookieValue(session) {
-    return new Buffer(JSON.stringify({
-        token: session.get('token'),
-        userId: session.get('userId')
-    })).toString('base64');
-}
 
 function decodeCookieValue(value) {
     try {

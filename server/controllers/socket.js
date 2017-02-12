@@ -71,7 +71,7 @@ exports.setup = function setup(server) {
                 return;
             }
 
-            const userId = await authSessionService.validate(data.cookie, { delete: true });
+            const userId = await authSessionService.validateCookie(data.cookie, { delete: true });
             const user = userId ? await User.fetch(userId) : null;
 
             if (!user || !user.get('inUse')) {
@@ -88,20 +88,18 @@ exports.setup = function setup(server) {
                 return;
             }
 
-            session.user = user;
-            session.state = 'authenticated';
-
             const maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
             const cachedUpto = isInteger(data.cachedUpto) ? data.cachedUpto : 0;
             const remoteIp = socket.conn.remoteAddress;
-            const refreshCookie = await authSessionService.create(user.id, remoteIp);
 
-            session.refreshCookie = refreshCookie;
+            session.user = user;
+            session.state = 'authenticated';
+            session.authSession = await authSessionService.create(user.id, remoteIp);
 
             socket.emit('initok', {
                 sessionId: session.id,
                 userId,
-                refreshCookie,
+                refreshCookie: authSessionService.encodeToCookie(session.authSession),
                 maxBacklogMsgs
             });
 
@@ -139,8 +137,8 @@ exports.setup = function setup(server) {
                 }
             }
 
-            redisSubscribe.on('message', async (channel, data) => {
-                const { type, msg } = JSON.parse(data);
+            redisSubscribe.on('message', async (channel, message) => {
+                const { type, msg } = JSON.parse(message);
 
                 if (type === 'terminate') {
                     socket.emit('terminate', {

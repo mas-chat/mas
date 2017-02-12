@@ -182,8 +182,10 @@ exports.create = function *create() {
         yield newUser.set('inUse', true);
         yield usersService.addMASNetworkInfo(newUser);
 
-        const cookieValue = yield authSessionService.create(newUser.id, this.request.ip);
-        this.cookies.set('mas', cookieValue, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
+        const cookie = authSessionService.encodeToCookie(
+            yield authSessionService.create(newUser.id, this.request.ip));
+
+        this.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
 
         this.body = { success: true };
     } else {
@@ -235,8 +237,10 @@ exports.createExt = function *createExt() {
 
     user.set('inUse', true);
 
-    const cookieValue = yield authSessionService.create(user.id, this.request.ip);
-    this.cookies.set('mas', cookieValue, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
+    const cookie = authSessionService.encodeToCookie(
+        yield authSessionService.create(user.id, this.request.ip));
+
+    this.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
 
     this.response.redirect('/app');
 };

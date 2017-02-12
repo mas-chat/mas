@@ -26,7 +26,7 @@ const handlebarsHelpers = require('./lib/handlebarsHelpers');
 const log = require('./lib/log');
 const redisModule = require('./lib/redis');
 const passport = require('./lib/passport');
-const userSession = require('./lib/userSession');
+const authSessionChecker = require('./lib/authSessionChecker');
 const routes = require('./routes/routes');
 const init = require('./lib/init');
 const scheduler = require('./lib/scheduler');
@@ -59,7 +59,7 @@ exports.init = async function initServer(httpServer, httpsServer, setHttpHandler
         defaultLayout: 'main'
     }));
 
-    app.use(userSession.auth);
+    app.use(authSessionChecker.processCookie);
 
     handlebarsHelpers.registerHelpers(hbs);
 

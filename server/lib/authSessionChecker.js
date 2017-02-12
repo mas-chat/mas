@@ -19,18 +19,18 @@
 const User = require('../models/user');
 const authSessionService = require('../services/authSession');
 
-exports.auth = function *auth(next) {
+exports.processCookie = function *processCookie(next) {
     this.mas = this.mas || {};
     this.mas.user = null;
 
     const cookieValue = this.cookies.get('mas');
 
     if (cookieValue) {
-        const userId = yield authSessionService.validate(cookieValue);
+        const userId = yield authSessionService.validateCookie(cookieValue);
         const user = userId ? yield User.fetch(userId) : null;
 
         if (!user || !user.get('inUse')) {
-            this.cookies.set('mas'); // Delete the potentially invalid cookie
+            this.cookies.set('mas'); // Delete the invalid cookie
             this.response.redirect('/');
             return;
         }

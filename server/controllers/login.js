@@ -36,8 +36,11 @@ exports.localLogin = function *localLogin(next) {
             msg = 'Incorrect password or nick/email.';
         } else {
             msg = 'Successful login';
-            const cookieValue = yield authSesssionService.create(user.id, ctx.request.ip);
-            ctx.cookies.set('mas', cookieValue, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
+
+            const cookie = authSesssionService.encodeToCookie(
+                yield authSesssionService.create(user.id, ctx.request.ip));
+
+            ctx.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
             success = true;
         }
 
@@ -70,8 +73,10 @@ function *auth(ctx, next, provider) {
 
         log.info('External login finished');
 
-        const cookieValue = yield authSesssionService.create(user.id, ctx.request.ip);
-        ctx.cookies.set('mas', cookieValue, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
+        const cookie = authSesssionService.encodeToCookie(
+            yield authSesssionService.create(user.id, ctx.request.ip));
+
+        ctx.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
 
         if (user.get('inUse')) {
             ctx.redirect('/app/');
