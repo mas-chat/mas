@@ -34,21 +34,13 @@ export default Store.extend({
     cachedUpto: 0,
 
     // TODO: Re-factor leftovers
-    cookie: null,
     userId: null,
 
     initDone: false,
 
     init() {
-        this.cookie = Cookies.get('mas') || '';
-
-        if (!this.cookie) {
-            Ember.Logger.info(`Session cookie not found or corrupted. Exiting.`);
-            this._logout({ informServer: false });
-            return;
-        }
-
         this.msgBuffer = [];
+
         this._super();
     },
 
@@ -632,7 +624,16 @@ export default Store.extend({
     // TODO: Move these handlers somewhere else
 
     handleLogout({ allSessions = false } = {}) {
-        this._logout({ informServer: true, allSessions });
+        Cookies.remove('mas', { path: '/' });
+
+        if (typeof Storage !== 'undefined') {
+            window.localStorage.removeItem('data');
+        }
+
+        socket.send({
+            id: 'LOGOUT',
+            allSessions: allSessions
+        }, () => window.location = '/');
     },
 
     handleDestroyAccount() {
@@ -652,27 +653,6 @@ export default Store.extend({
 
     _getWindow(windowId) {
         return this.get('windows').getByIndex(windowId);
-    },
-
-    _logout({ informServer = false, allSessions = false } = {}) {
-        Cookies.remove('mas', { path: '/' });
-
-        if (typeof Storage !== 'undefined') {
-            window.localStorage.removeItem('data');
-        }
-
-        function exit() {
-            window.location = '/';
-        }
-
-        if (informServer) {
-            socket.send({
-                id: 'LOGOUT',
-                allSessions: allSessions
-            }, exit);
-        } else {
-            exit();
-        }
     },
 
     _trimBacklog(messages) {

@@ -42,6 +42,7 @@ let ioSocket = io.connect(); // Start connection as early as possible.
 
 let SocketService = Ember.Object.extend({
     sessionId: 0,
+    cookie: null,
 
     _connected: false,
     _sendQueue: null,
@@ -51,7 +52,15 @@ let SocketService = Ember.Object.extend({
 
     init() {
         this._super();
+
+        this.cookie = Cookies.get('mas') || '';
         this._sendQueue = Ember.A([]);
+
+        if (!this.cookie) {
+            Ember.Logger.info(`Session cookie not found or corrupted. Exiting.`);
+            this._logout();
+            return;
+        }
     },
 
     start() {
@@ -64,8 +73,9 @@ let SocketService = Ember.Object.extend({
             this.set('_connected', true);
 
             this.set('sessionId', data.sessionId); // TODO: Should not needed, use cookie always
+            this.set('cookie', data.refreshCookie);
+
             this.set('_windowsStore.userId', `m${data.userId}`);
-            this.set('_windowsStore.cookie', data.refreshCookie);
             this.set('_windowsStore.maxBacklogMsgs', data.maxBacklogMsgs);
 
             Cookies.set('mas', data.refreshCookie, { expires: 7 });
@@ -143,7 +153,7 @@ let SocketService = Ember.Object.extend({
         let maxBacklogMsgs = calcMsgHistorySize();
         let cachedUpto = this.get('_windowsStore.cachedUpto');
         let userId = this.get('_windowsStore.userId');
-        let cookie = this.get('_windowsStore.cookie');
+        let cookie = this.get('cookie');
 
         ioSocket.emit('init', {
             clientName: 'web',
