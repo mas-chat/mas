@@ -174,7 +174,13 @@ async function handleCommand({ command, conversation, user, backend }) {
         }
 
         const network = conversation.get('network');
-        const targetUserGId = await nicksService.getUserGId(params.trim(), network);
+        const nick = params.trim();
+
+        if (nick === '') {
+            return { status: 'ERROR', errorMsg: 'Nick missing, use e.g. /ircquery john' };
+        }
+
+        const targetUserGId = await nicksService.getUserGId(nick, network);
 
         // 1on1s between MAS users are forced through loopback backend as multiple 1on1s between
         // same people via different networks isn't useful feature, just confusing.
