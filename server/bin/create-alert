@@ -21,6 +21,8 @@ const readline = require('readline');
 const log = require('../lib/log');
 const redisModule = require('../lib/redis');
 const User = require('../models/user');
+const Ipm = require('../models/ipm');
+const PendingIpm = require('../models/pendingIpm');
 const notification = require('../lib/notification');
 
 const rl = readline.createInterface({
@@ -31,51 +33,16 @@ const rl = readline.createInterface({
 const redis = redisModule.createClient();
 
 (async function main() {
-    const message = await question('Message: ');
+    const body = await question('Message: ');
     const expiresInHours = await question('Expires in (hours): ');
-    const dismissible = await yesOrNo('Can be dismissed?');
 
-    const now = Math.round(Date.now() / 1000);
-    const ts = now + (expiresInHours * 60 * 60);
+    const expiresAt = now();
+    expiresAt.setHours(expiresAt.getHours() + expiresInHours);
 
-    const alertId = await redis.incr('nextGlobalAlertId');
+    const ipm = await Ipm.create({ body, expiresAt });
 
-    const alert = {
-        message,
-        expires: ts,
-        dismissible,
-        report: true
-    };
-
-    await redis.hmset(`alert:${alertId}`, alert);
-    await redis.sadd('alertlist', alertId);
-
-    const allIds = await redis.smembers('alertlist');
-
-    // Delete expired alerts
-    for (const oldAlertId of allIds) {
-        const oldAlert = await redis.hgetall(`alert:${oldAlertId}`);
-
-        if (now > parseInt(oldAlert.expires)) {
-            redis.del('`alert:${oldAlertId})`');
-            redis.srem('alertlist', oldAlertId);
-        }
-    }
-
-    // Deliver the alert
-    console.log('Delivering the alert to all users...'); // eslint-disable-line no-console
-
-    const allUsers = await User.fetchAll();
-
-    // Convert object to MAS notification
-    alert.id = 'ALERT';
-    alert.alertId = alertId;
-    delete alert.expires;
-
-    for (const user of allUsers) {
-        await redis.sadd(`activealerts:${user.id}`, alertId);
-        await notification.broadcast(user, alert);
-    }
+    await deliverIpm(ipm);
+    await deleteExpiredIpms();
 
     redisModule.shutdown();
     log.quit();
@@ -84,6 +51,39 @@ const redis = redisModule.createClient();
 
     rl.close();
 }());
+
+async function deleteExpiredIpms() {
+    const allIpms = await Ipm.fetchAll();
+
+    for (const ipm of allIpms) {
+        if (ipm.get('expiresAt') < now()) {
+            const pendingIpms = await PendingIpm.find({ ipmId: ipm.id });
+
+            for (const pendingIpm of pendingIpms) {
+                await pendingIpm.delete();
+            }
+
+            await ipm.delete();
+        }
+    }
+}
+
+async function deliverIpm(ipm) {
+    console.log('Delivering the alert to all users...'); // eslint-disable-line no-console
+
+    const allUsers = await User.fetchAll();
+
+    const alertNtf = {
+        id: 'ALERT',
+        alertId: ipm.id,
+        message: ipm.get('body')
+    };
+
+    for (const user of allUsers) {
+        await PendingIpm.create({ userId: user.id, ipmId: ipm.id })
+        await notification.broadcast(user, alertNtf);
+    }
+}
 
 async function question(label) {
     return new Promise(resolve => rl.question(label, answer => resolve(answer)));
@@ -103,4 +103,8 @@ async function yesOrNo(label) {
     }
 
     return result;
+}
+
+function now() {
+    return new Date();
 }

@@ -62,8 +62,6 @@ export default Store.extend({
             dispatch('SHOW_ALERT', {
                 alertId: `client-${Date.now()}`,
                 message: msg,
-                dismissible: true,
-                report: false,
                 postponeLabel: false,
                 ackLabel: 'Okay',
                 resultCallback: () => this.set('emailConfirmed', true)

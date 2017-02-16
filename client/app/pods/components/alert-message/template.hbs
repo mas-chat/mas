@@ -2,26 +2,23 @@
     <div class="flex-1 announcement-message">
         {{{currentAlert.message}}}
     </div>
-
-    {{#if currentAlert.dismissible}}
-        {{#if currentAlert.postponeLabel}}
-            <div>
-                <button {{action "close" "postpone"}} type="button" class="btn btn-default">
-                    {{currentAlert.postponeLabel}}
-                </button>
-            </div>
-        {{/if}}
-        {{#if currentAlert.nackLabel}}
-            <div>
-                <button {{action "close" "nack"}} type="button" class="btn btn-default">
-                    {{currentAlert.nackLabel}}
-                </button>
-            </div>
-        {{/if}}
+    {{#if currentAlert.postponeLabel}}
         <div>
-            <button {{action "close" "ack"}} type="button" class="btn btn-primary">
-                {{currentAlert.ackLabel}}
+            <button {{action "close" "postpone"}} type="button" class="btn btn-default">
+                {{currentAlert.postponeLabel}}
             </button>
         </div>
     {{/if}}
+    {{#if currentAlert.nackLabel}}
+        <div>
+            <button {{action "close" "nack"}} type="button" class="btn btn-default">
+                {{currentAlert.nackLabel}}
+            </button>
+        </div>
+    {{/if}}
+    <div>
+        <button {{action "close" "ack"}} type="button" class="btn btn-primary">
+            {{currentAlert.ackLabel}}
+        </button>
+    </div>
 {{/if}}

@@ -350,12 +350,8 @@ Show a generic alert info message.
 
   "alertId": 32433,
   "message": "There will be service break on Monday",
-  "dismissible": true,
-  "report": false
 }
 ```
-
-If ```report``` is true then the client must send ```ACKALERT``` request when the user has dismissed the alert.
 
 ### INITDONE
 

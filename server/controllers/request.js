@@ -32,6 +32,7 @@ const friendsService = require('../services/friends');
 const nicksService = require('../services/nicks');
 const Conversation = require('../models/conversation');
 const User = require('../models/user');
+const PendingIpm = require('../models/pendingIpm');
 const Friend = require('../models/friend');
 const Window = require('../models/window');
 const Settings = require('../models/settings');
@@ -399,8 +400,14 @@ async function start1on1(user, targetUserGId, network) {
 }
 
 async function handleAckAlert({ user, command }) {
-    const alertId = command.alertId;
-    await redis.srem(`activealerts:${user.id}`, alertId);
+    const pendingIpms = await PendingIpm.find({ userId: user.id });
+
+    const toBeDeletedPendingIpm = pendingIpms.find(
+        pendingIpm => pendingIpm.get('ipmId') === command.alertId);
+
+    if (toBeDeletedPendingIpm) {
+        await toBeDeletedPendingIpm.delete();
+    }
 
     return { status: 'OK' };
 }

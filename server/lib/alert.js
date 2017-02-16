@@ -16,24 +16,25 @@
 
 'use strict';
 
+const Ipm = require('../models/ipm.js');
+const PendingIpm = require('../models/pendingIpm');
 const notification = require('../lib/notification');
-const redis = require('../lib/redis').createClient();
 
 exports.sendAlerts = async function sendAlerts(user, sessionId) {
-    const now = Math.round(Date.now() / 1000);
-    const alertIds = await redis.smembers(`activealerts:${user.id}`);
+    const now = new Date();
+    const pendingIpms = await PendingIpm.find({ userId: user.id });
 
-    for (const alertId of alertIds) {
-        const alert = await redis.hgetall(`alert:${alertId}`);
+    for (const pendingIpm of pendingIpms) {
+        const ipm = await Ipm.fetch(pendingIpm.get('ipmId'));
 
-        if (alert && now < parseInt(alert.expires)) {
-            alert.id = 'ALERT';
-            alert.alertId = alertId;
+        // create-alert deletes expired alerts lazily
 
-            await notification.send(user, sessionId, alert);
-        } else {
-            // Alert has expired
-            await redis.srem(`activealerts:${user.id}`, alertId);
+        if (ipm && ipm.get('expiresAt') > now) {
+            await notification.send(user, sessionId, {
+                id: 'ALERT',
+                alertId: ipm.id,
+                message: ipm.get('body')
+            });
         }
     }
 };

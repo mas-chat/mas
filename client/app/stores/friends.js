@@ -50,7 +50,6 @@ export default Store.extend({
             dispatch('SHOW_ALERT', {
                 alertId: `internal:${Date.now()}`,
                 message: message,
-                dismissible: true,
                 report: false,
                 postponeLabel: false,
                 ackLabel: 'Okay'
@@ -71,7 +70,6 @@ export default Store.extend({
             dispatch('SHOW_ALERT', {
                 alertId: friendCandidate.userId,
                 message: message,
-                dismissible: true,
                 report: false,
                 postponeLabel: 'Decide later',
                 nackLabel: 'Ignore',
