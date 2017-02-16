@@ -250,6 +250,37 @@ db.setSchema({
                 fields: [ 'userId', 'network', { name: 'channel', caseInsensitive: true } ]
             }
         }
+    },
+    ipms: {
+        definition: {
+            body: { type: 'string', allowNull: false },
+            expiresAt: { type: 'timestamp', allowNull: false }
+        }
+    },
+    pendingIpms: {
+        definition: {
+            userId: { type: 'int', allowNull: false },
+            ipmId: { type: 'int', allowNull: false },
+        },
+        indices: {
+            userId: {
+                uniq: false,
+                fields: [ 'userId' ]
+            },
+            ipmId: {
+                uniq: false,
+                fields: [ 'ipmId' ]
+            }
+        }
+    },
+    missedMessages: {
+        definition: {
+            userId: { type: 'int', allowNull: false },
+            conversationId: { type: 'int', allowNull: false },
+            msgUserGId: { type: 'string', allowNull: false },
+            msgBody: { type: 'string', allowNull: false },
+            msgTs: { type: 'timestamp', allowNull: false }
+        }
     }
 }).then(function(result) {
     const { val, reason } = result;
