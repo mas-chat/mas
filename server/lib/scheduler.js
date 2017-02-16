@@ -65,8 +65,6 @@ async function processUserMissedMessages(missedPerConversations, user) {
 
     for (const conversationId of Object.keys(missedPerConversations)) {
         // Notification are sorted by ts in the db, therefore the first one is the oldest
-        console.log(`Timestamp oli: ${missedPerConversations[conversationId][0].get('msgTs')}`)
-        console.log(`twoMinutesAgo: ${twoMinutesAgo}`)
         if (missedPerConversations[conversationId][0].get('msgTs') > twoMinutesAgo) {
             // Wait for the next job execution
             continue;
