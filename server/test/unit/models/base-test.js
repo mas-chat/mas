@@ -10,15 +10,15 @@ const expect = require('chai').expect;
 
 chai.use(sinonChai);
 
-let Model;
+let Base;
 let Customer;
 let rigiddbStub;
 
-describe('Model', () => {
+describe('Base', () => {
     beforeEach(() => {
         rigiddbStub = sinon.stub();
-        Model = proxyquire('../../../models/model', { rigiddb: rigiddbStub });
-        Customer = class Customer extends Model { // eslint-disable-line no-shadow
+        Base = proxyquire('../../../models/base', { rigiddb: rigiddbStub });
+        Customer = class Customer extends Base { // eslint-disable-line no-shadow
             static get mutableProperties() {
                 return [ 'name' ];
             }
@@ -71,7 +71,7 @@ describe('Model', () => {
     });
 
     it('create() fails, index error, descriptions are set', async () => {
-        Customer = class Customer extends Model { // eslint-disable-line no-shadow
+        Customer = class Customer extends Base { // eslint-disable-line no-shadow
             static get config() {
                 return {
                     indexErrorDescriptions: {
@@ -155,7 +155,7 @@ describe('Model', () => {
     });
 
     it('set() fails, forbidden property', async () => {
-        Customer = class Customer extends Model { // eslint-disable-line no-shadow
+        Customer = class Customer extends Base { // eslint-disable-line no-shadow
             static get mutableProperties() {
                 return [ 'age' ];
             }
