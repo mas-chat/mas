@@ -25,7 +25,7 @@
                                         <p>You were just contacted on MeetAndSpeak.</p>
                                     </td>
                                 </tr>
-                                {{#each notifications}}
+                                {{#each messages}}
                                     <tr>
                                         <td class="content-block">
                                             <p><b>{{@key}}:</b></p>
@@ -34,7 +34,7 @@
                                     <tr>
                                         <td class="content-block">
                                             {{#each this}}
-                                                <p class="mentioned"><b>{{senderNick}}:</b> {{message}}</p>
+                                                <p class="mentioned"><b>{{nick}}:</b> {{body}}</p>
                                             {{/each}}
                                         </td>
                                     </tr>

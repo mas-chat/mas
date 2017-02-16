@@ -16,19 +16,21 @@
 
 'use strict';
 
-const _ = require('lodash');
 const CronJob = require('cron').CronJob;
-const redis = require('./redis').createClient();
 const log = require('./log');
 const mailer = require('./mailer');
 const User = require('../models/user');
+const MissedMessage = require('../models/missedMessage');
+const Conversation = require('../models/conversation');
 const UserGId = require('../models/userGId');
+const nicksService = require('../services/nicks');
+const conversationsService = require('../services/conversations');
 
 const jobs = [];
 
 exports.init = function init() {
-    // Once in 15 minutes
-    jobs.push(new CronJob('0 */10 * * * *', deliverEmails, null, true));
+    // Once in 5 minutes
+    jobs.push(new CronJob('0 */1 * * * *', deliverEmails, null, true));
 };
 
 exports.quit = function quit() {
@@ -39,42 +41,75 @@ exports.quit = function quit() {
 
 // Sends email notifications to offline users
 async function deliverEmails() {
-    log.info('Running deliverEmails job');
+    const missedMessages = await MissedMessage.fetchAll();
+    const missedPerUser = groupBy(missedMessages, 'userId');
 
-    const userGIdStrings = await redis.smembers('emailnotifications');
-
-    for (const userGIdString of userGIdStrings) {
-        const notificationIds = await redis.lrange(
-            `emailnotificationslist:${userGIdString}`, 0, -1);
-        let notifications = [];
-
-        for (const notificationId of notificationIds) {
-            const notification = await redis.hgetall(`emailnotification:${notificationId}`);
-
-            if (notification) {
-                notifications.push(notification);
-            }
-        }
-
-        notifications = _.groupBy(notifications,
-            ntf => (ntf.groupName ? `Group: ${ntf.groupName}` : `1-on-1: ${ntf.senderName}`));
-
-        const userGId = UserGId.create(userGIdString);
-        const user = await User.fetch(userGId.id);
+    for (const userId of Object.keys(missedPerUser)) {
+        const user = await User.fetch(parseInt(userId));
+        const missedPerConversations = groupBy(missedPerUser[userId], 'conversationId');
+        const formattedMessages = await processUserMissedMessages(missedPerConversations, user);
 
         // TODO: Better would be to clear pending notifications during login
-        if (!(await user.isOnline())) {
+        if (!(await user.isOnline()) && Object.keys(formattedMessages).length > 0) {
             mailer.send('emails/build/mentioned.hbs', {
                 name: user.get('name'),
-                notifications
+                messages: formattedMessages
             }, user.get('email'), 'You were just mentioned on MeetAndSpeak');
         }
+    }
+}
 
-        for (const notificationId of notificationIds) {
-            await redis.del(`emailnotification:${notificationId}`);
+async function processUserMissedMessages(missedPerConversations, user) {
+    const twoMinutesAgo = new Date(Date.now() - (1000 * 60 * 2));
+    const formattedMessages = {};
+
+    for (const conversationId of Object.keys(missedPerConversations)) {
+        // Notification are sorted by ts in the db, therefore the first one is the oldest
+        console.log(`Timestamp oli: ${missedPerConversations[conversationId][0].get('msgTs')}`)
+        console.log(`twoMinutesAgo: ${twoMinutesAgo}`)
+        if (missedPerConversations[conversationId][0].get('msgTs') > twoMinutesAgo) {
+            // Wait for the next job execution
+            continue;
         }
 
-        await redis.del(`emailnotificationslist:${userGIdString}`);
-        await redis.srem('emailnotifications', userGIdString);
+        const conversation = await Conversation.fetch(parseInt(conversationId));
+        const name = await getName(conversation, user);
+
+        formattedMessages[name] = [];
+
+        for (const message of missedPerConversations[conversationId]) {
+            const userGId = UserGId.create(message.get('msgUserGId'));
+            const nick = await nicksService.getNick(userGId, conversation.get('network'));
+
+            formattedMessages[name].push({ nick, body: message.get('msgBody') });
+        }
+
+        missedPerConversations[conversationId].forEach(message => message.delete());
     }
+
+    return formattedMessages;
+}
+
+async function getName(conversation, user) {
+    if (conversation.get('type') === 'group') {
+        return `Group ${conversation.get('name')}`;
+    }
+
+    const peerMember = await conversationsService.getPeerMember(conversation, user.gId);
+    const nick = await nicksService.getNick(peerMember.gId, conversation.get('network'));
+
+    return `1on1 with ${nick}`;
+}
+
+function groupBy(array, groupByProperty) {
+    const result = {};
+
+    array.forEach(item => {
+        const key = item.get(groupByProperty);
+
+        result[key] = result[key] || [];
+        result[key].push(item);
+    });
+
+    return result;
 }

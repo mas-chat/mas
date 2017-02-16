@@ -17,14 +17,13 @@
 'use strict';
 
 const assert = require('assert');
-const uuid = require('uid2');
-const redis = require('../lib/redis').createClient();
 const User = require('../models/user');
 const Window = require('../models/window');
 const Settings = require('../models/settings');
 const Conversation = require('../models/conversation');
 const ConversationMember = require('../models/conversationMember');
 const ConversationMessage = require('../models/conversationMessage');
+const MissedMessage = require('../models/missedMessage');
 const notification = require('../lib/notification');
 const nicksService = require('../services/nicks');
 const conversaionsService = require('../services/conversations');
@@ -97,7 +96,6 @@ exports.scanMentions = async function scanMentions(conversation, message) {
     const users = [];
     const srcUserGId = UserGId.create(message.get('userGId'));
     const network = conversation.get('network');
-    const nickName = await nicksService.getNick(srcUserGId, network);
 
     if (conversation.get('type') === 'group') {
         const mentions = message.get('body').match(/(?:^| )@\S+(?=$| )/g);
@@ -141,28 +139,15 @@ exports.scanMentions = async function scanMentions(conversation, message) {
             continue; // Mentioned user is online
         }
 
-        const window = await Window.findFirst({
-            userId: user.id,
-            conversationId: conversation.id
-        });
+        const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
 
-        if (!window) {
-            continue; // Mentioned user is not on this group
-        }
-
-        if (window.get('emailAlert')) {
-            const notificationId = uuid(20);
-
-            // TODO: Needs to be a transaction, add lua script
-            await redis.sadd('emailnotifications', user.gId);
-            await redis.lpush(`emailnotificationslist:${user.gId}`, notificationId);
-
-            await redis.hmset(`emailnotification:${notificationId}`, {
-                type: conversation.get('type'),
-                senderName: user.get('name'),
-                senderNick: nickName,
-                groupName: conversation.get('name'),
-                message: message.get('body')
+        if (window && window.get('emailAlert')) {
+            await MissedMessage.create({
+                userId: user.id,
+                conversationId: conversation.id,
+                msgUserGId: message.get('userGId'),
+                msgBody: message.get('body'),
+                msgTs: new Date()
             });
         }
     }
