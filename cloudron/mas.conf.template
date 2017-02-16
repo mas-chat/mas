@@ -41,8 +41,6 @@ https_port=443
 https_key=ssl/server.key
 https_cert=ssl/server.crt
 https_ca=ssl/ca1.crt,ssl/ca2.crt
-demo_mode=false
-demo_user_email=whogets@fakemessages.com
 
 [mailgun]
 enabled=false

@@ -30,7 +30,6 @@ const authSessionChecker = require('./lib/authSessionChecker');
 const routes = require('./routes/routes');
 const init = require('./lib/init');
 const scheduler = require('./lib/scheduler');
-const demoContent = require('./lib/demoContent');
 const socketController = require('./controllers/socket');
 const conf = require('./lib/conf');
 
@@ -86,10 +85,6 @@ exports.init = async function initServer(httpServer, httpsServer, setHttpHandler
         socketController.setup(httpServer);
 
         setHttpHandlers(app.callback(), null);
-    }
-
-    if (conf.get('frontend:demo_mode')) {
-        demoContent.enable();
     }
 
     init.on('beforeShutdown', async () => {
