@@ -21,9 +21,9 @@ const bcrypt = require('bcrypt');
 const md5 = require('md5');
 const redis = require('../lib/redis').createClient();
 const UserGId = require('./userGId');
-const Model = require('./model');
+const Base = require('./base');
 
-module.exports = class User extends Model {
+module.exports = class User extends Base {
     static async create(props, { skipSetters = false } = {}) {
         trimWhiteSpace(props);
 

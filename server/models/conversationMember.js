@@ -16,10 +16,10 @@
 
 'use strict';
 
-const Model = require('./model');
+const Base = require('./base');
 const UserGId = require('./userGId');
 
-module.exports = class ConversationMember extends Model {
+module.exports = class ConversationMember extends Base {
     static get mutableProperties() {
         return [
             'userGId',

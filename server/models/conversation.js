@@ -16,9 +16,9 @@
 
 'use strict';
 
-const Model = require('./model');
+const Base = require('./base');
 
-module.exports = class Conversation extends Model {
+module.exports = class Conversation extends Base {
     static async create(props) {
         const data = {
             type: props.type,

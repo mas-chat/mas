@@ -16,9 +16,9 @@
 
 'use strict';
 
-const Model = require('./model');
+const Base = require('./base');
 
-module.exports = class Friend extends Model {
+module.exports = class Friend extends Base {
     static get mutableProperties() {
         return [
             'state'

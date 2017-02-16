@@ -16,9 +16,9 @@
 
 'use strict';
 
-const Model = require('./model');
+const Base = require('./base');
 
-module.exports = class Setting extends Model {
+module.exports = class Setting extends Base {
     static async findOrCreate(userId) {
         let record = await this.findFirst({ userId });
 

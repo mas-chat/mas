@@ -16,9 +16,9 @@
 
 'use strict';
 
-const Model = require('./model');
+const Base = require('./base');
 
-module.exports = class NetworkInfo extends Model {
+module.exports = class NetworkInfo extends Base {
     static async create(props) {
         const data = {
             userId: props.userId,

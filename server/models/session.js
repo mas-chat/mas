@@ -17,11 +17,11 @@
 'use strict';
 
 const uuid = require('uid2');
-const Model = require('./model');
+const Base = require('./base');
 
 const ONE_WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000;
 
-module.exports = class Session extends Model {
+module.exports = class Session extends Base {
     static async create(props) {
         const data = {
             userId: props.userId,

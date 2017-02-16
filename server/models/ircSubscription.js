@@ -16,9 +16,9 @@
 
 'use strict';
 
-const Model = require('./model');
+const Base = require('./base');
 
-module.exports = class IrcSubscription extends Model {
+module.exports = class IrcSubscription extends Base {
     static get mutableProperties() {
         return [
             'password'

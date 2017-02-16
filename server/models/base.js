@@ -27,7 +27,7 @@ const db = new Rigiddb('mas', 1, {
     port: conf.get('redis:port')
 });
 
-module.exports = class Model {
+module.exports = class Base {
     constructor(collection, id = null, initialProps = {}) {
         if (typeof id !== 'number' && id !== null) {
             throw new Error('ID must be a number or null.');
@@ -170,7 +170,7 @@ module.exports = class Model {
 
         assert(typeof rawVal !== 'undefined', `Tried to read non-existenting property ${prop}`);
 
-        return Model.getters[prop] ? Model.getters[prop](rawVal) : rawVal;
+        return Base.getters[prop] ? Base.getters[prop](rawVal) : rawVal;
     }
 
     getAll() {
@@ -180,7 +180,7 @@ module.exports = class Model {
 
         Object.keys(this._props).forEach(prop => {
             const rawVal = this._props[prop];
-            props[prop] = Model.getters[prop] ? Model.getters[prop](rawVal) : rawVal;
+            props[prop] = Base.getters[prop] ? Base.getters[prop](rawVal) : rawVal;
         });
 
         return props;
@@ -202,7 +202,7 @@ module.exports = class Model {
     async _set(objectProps) {
         assert(!this.deleted, 'Tried to mutate deleted model');
 
-        const { errors, preparedProps } = runSetters(objectProps, Model.setters);
+        const { errors, preparedProps } = runSetters(objectProps, Base.setters);
 
         if (!preparedProps) {
             Object.keys(objectProps).forEach(prop => {
