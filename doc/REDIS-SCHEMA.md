@@ -2,60 +2,38 @@
 MAS Redis structures
 ====================
 
-Most of data is stored to rigidDB. These are the raw redis data structures MAS uses.
+All persistent data is stored to rigidDB (which uses Redis as a storage backend).
+
+The following temporary data is stored directly to Redis.
+
+## Frontend server
 
 ```
- 1on1conversationhistory:<userId> (list)
-   <conversationId1>, <conversationId2>
+ key:   1on1conversationhistory:<userId> (TODO: migrate to rigiddb soon)
+ type:  list
+ value: conversationId1, conversationId2, ...
 
- passwordresettoken:<token> (string with expiry time)
-   <userId>
+ key:   passwordresettoken:<token>
+ type:  string, with expiry time)
+ value: userId
 
- emailconfirmationtoken:<token> (string with expiry time)
-   <userId>
-
- alert:<id> (hash)
-   message (text)
-   expires (unix time)
-   dismissible (bool)
-   report (bool)
-
- alertlist (set)
-   <id1>, <id2> ...
-
- activealerts:<userId> (set)
-   <id3>, <id4> ...
-
- nextGlobalAnnouncementId (string) (integer, counter)
-
- emailnotifications (set)
-   <userId1>, <userId2> ...
-
- emailnotificationslist:<userId> (list)
-   <ntfId1>, <ntfId2>, ...
-
- emailnotification:<ntfId> (hash)
-   type
-   senderName
-   senderNick
-   groupName
-   message
+ key:   emailconfirmationtoken:<token>
+ type:  string, with expiry time
+ value: userId
 ```
 
-## IRC backend
+## IRC backend server
 
 ```
- inbox:ircparser (list)
- inbox:connectionmanager (list)
+ key:   namesbuffer:<userId>:<conversationId>
+ type:  hash, with expiry time 1 min
+ value: nicknameX, nicknameY, ...
 
- namesbuffer:<userId>:<conversationId> (hash, expiry 1 min)
-   name1, name2 ...
+ key:   ircnamesreporter:<conversationId>
+ type:  string, with expiry time
+ value: userId
 
- ircnamesreporter:<conversationId> (string with expiry time, userId)
-```
-
-## Loopback backend
-
-```
- inbox:loopbackparser (list)
+ key:   ircduplicates:<conversationId>:<msgBody>:<userGid>
+ type:  string, with expiry time
+ value: userId
 ```
