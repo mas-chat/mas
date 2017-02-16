@@ -17,7 +17,6 @@
 'use strict';
 
 const CronJob = require('cron').CronJob;
-const log = require('./log');
 const mailer = require('./mailer');
 const User = require('../models/user');
 const MissedMessage = require('../models/missedMessage');
