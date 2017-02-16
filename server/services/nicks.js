@@ -16,6 +16,7 @@
 
 'use strict';
 
+const assert = require('assert');
 const NetworkInfo = require('../models/networkInfo');
 const UserGId = require('../models/userGId');
 const User = require('../models/user');
@@ -32,7 +33,11 @@ exports.getNick = async function getNick(userGId, network) {
         return 'IRC server';
     }
 
-    return new Buffer(userGId.id, 'base64').toString('ascii');
+    const encodedIrcNick = userGId.id;
+
+    assert(typeof encodedIrcNick === 'string', 'Expected base64 encoded IRC nick');
+
+    return new Buffer(encodedIrcNick, 'base64').toString('ascii');
 };
 
 exports.getUser = async function getUser(nick, network) {
