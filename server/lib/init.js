@@ -73,6 +73,7 @@ async function execShutdown() {
 
     log.warn('Shutdown sequence started.');
 
+    // TODO: only use of lodash, convert and remove lodash
     const entries = _.sortBy(stateChangeCallbacks, entry => shutdownOrder[entry.state]);
 
     for (const entry of entries) {
