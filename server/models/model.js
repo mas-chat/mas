@@ -168,6 +168,8 @@ module.exports = class Model {
 
         const rawVal = this._props[prop];
 
+        assert(typeof rawVal !== 'undefined', `Tried to read non-existenting property ${prop}`);
+
         return Model.getters[prop] ? Model.getters[prop](rawVal) : rawVal;
     }
 
