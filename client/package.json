@@ -57,7 +57,7 @@
     "marked": "~0.3.6",
     "moment": "^2.17.1",
     "perfect-scrollbar": "^0.6.15",
-    "socket.io-client": "^1.7.2",
-    "urijs": "^1.18.4"
+    "socket.io-client": "^1.7.3",
+    "urijs": "^1.18.7"
   }
 }
