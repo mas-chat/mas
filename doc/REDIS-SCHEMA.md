@@ -14,7 +14,7 @@ The following temporary data is stored directly to Redis.
  value: conversationId1, conversationId2, ...
 
  key:   passwordresettoken:<token>
- type:  string, with expiry time)
+ type:  string, with expiry time
  value: userId
 
  key:   emailconfirmationtoken:<token>
@@ -26,7 +26,7 @@ The following temporary data is stored directly to Redis.
 
 ```
  key:   namesbuffer:<userId>:<conversationId>
- type:  hash, with expiry time 1 min
+ type:  hash, with 1min expiry time
  value: nicknameX, nicknameY, ...
 
  key:   ircnamesreporter:<conversationId>
@@ -36,4 +36,8 @@ The following temporary data is stored directly to Redis.
  key:   ircduplicates:<conversationId>:<msgBody>:<userGid>
  type:  string, with expiry time
  value: userId
+
+ key:   nickchangemutex:<network>:<oldNick>:<newNick>
+ type:  string, with 20s expiry time
+ value: "1"
 ```
