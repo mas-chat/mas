@@ -53,12 +53,12 @@ function createRedisClient({ autoClose = true } = {}) {
     };
 
     client.shutdown = function shutdown() {
-        assert (!shutdownDone, 'Call shutdown() only once');
+        assert(!shutdownDone, 'Call shutdown() only once');
 
         shutdownDone = true;
         log.info(`Closing ${activeClients.length} redis connections`);
 
-        activeClients.forEach(client => client.quit());
+        activeClients.forEach(activeClient => activeClient.quit());
     };
 
     if (autoClose) {
