@@ -71,10 +71,10 @@ async function execShutdown() {
 
     for (const entry of entries) {
         await entry.cb();
-
-        console.log('Shutdown complete.'); // eslint-disable-line no-console
-        process.exit(0);
     }
+
+    console.log('Shutdown complete.'); // eslint-disable-line no-console
+    process.exit(0);
 }
 
 function checkNodeVersion() {
