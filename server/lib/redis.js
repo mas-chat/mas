@@ -22,7 +22,7 @@ const log = require('./log');
 const conf = require('./conf');
 
 const activeClients = [];
-const shutdownDone = false;
+let shutdownDone = false;
 
 module.exports = createRedisClient();
 
@@ -33,7 +33,7 @@ function createRedisClient({ autoClose = true } = {}) {
         host: conf.get('redis:host'),
         password: conf.get('redis:password') || null,
         path: connType === 'socket' ? null : conf.get('redis:unix_socket_path'),
-        retryStrategy: times => Math.min(times * 500, 2000)
+        retryStrategy: times => Math.min(times * 500, 5000)
     });
 
     client.__quit = client.quit;
@@ -64,6 +64,10 @@ function createRedisClient({ autoClose = true } = {}) {
     if (autoClose) {
         activeClients.push(client);
     }
+
+    client.on('error', error => {
+        log.warn('Redis error', error.message);
+    });
 
     return client;
 }
