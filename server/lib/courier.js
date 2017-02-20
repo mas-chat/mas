@@ -39,8 +39,6 @@ function Courier(name) {
     this.name = name || uid2(32);
     this.handlers = {};
     this.isEndpoint = !!name;
-
-    log.info('Courier: New instance created.');
 }
 
 Courier.prototype.listen = async function listen() {
@@ -54,7 +52,7 @@ Courier.prototype.listen = async function listen() {
         const msg = JSON.parse(result);
         const handler = this.handlers[msg.__type];
 
-        log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}] DATA: ${result}`);
+        log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}]\n     DATA: ${result}`);
 
         assert(handler, `${this.name}: Missing message handler for: ${msg.__type}`);
 

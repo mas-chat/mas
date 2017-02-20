@@ -38,7 +38,7 @@ const httpServer = http.Server(httpHandlerSelector); // eslint-disable-line new-
 let httpsServer = null;
 
 httpServer.listen(httpPort, httpListenDone);
-log.info(`MAS frontend http server listening, http://localhost:${httpPort}/`);
+log.info(`Frontend HTTP server listening: http://0.0.0.0:${httpPort}/`);
 
 if (conf.get('frontend:https')) {
     const caCerts = [];
