@@ -9,35 +9,37 @@ The following temporary data is stored directly to Redis.
 ## Frontend server
 
 ```
- key:   1on1conversationhistory:<userId> (TODO: migrate to rigiddb soon)
- type:  list
- value: conversationId1, conversationId2, ...
+ key:     passwordresettoken:<token>
+ type:    string
+ expires: 24 hours
+ value:   <userId>
 
- key:   passwordresettoken:<token>
- type:  string, with expiry time
- value: userId
-
- key:   emailconfirmationtoken:<token>
- type:  string, with expiry time
- value: userId
+ key:     emailconfirmationtoken:<token>
+ type:    string
+ expires: 24 hours
+ value:   <userId>
 ```
 
 ## IRC backend server
 
 ```
- key:   namesbuffer:<userId>:<conversationId>
- type:  hash, with 1min expiry time
- value: nicknameX, nicknameY, ...
+ key:     namesbuffer:<userId>:<conversationId>
+ type:    hash
+ expires: 1 minute
+ value:   <nicknameX>, <nicknameY>, ...
 
- key:   ircnamesreporter:<conversationId>
- type:  string, with expiry time
- value: userId
+ key:     ircnamesreporter:<conversationId>
+ type:    string
+ expires: 15 seconds
+ value:   <userId>
 
- key:   ircduplicates:<conversationId>:<msgBody>:<userGid>
- type:  string, with expiry time
- value: userId
+ key:     ircduplicates:<conversationId>:<msgBody>:<userGid>
+ type:    string
+ expires: 45 seconds
+ value:   <userId>
 
- key:   nickchangemutex:<network>:<oldNick>:<newNick>
- type:  string, with 20s expiry time
- value: "1"
+ key:     nickchangemutex:<network>:<oldNick>:<newNick>
+ type:    string
+ expires: 20 seconds
+ value:   "1"
 ```

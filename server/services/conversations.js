@@ -17,7 +17,6 @@
 'use strict';
 
 const assert = require('assert');
-const redis = require('../lib/redis').createClient();
 const log = require('../lib/log');
 const search = require('../lib/search');
 const notification = require('../lib/notification');
@@ -71,13 +70,6 @@ exports.findOrCreate1on1 = async function findOrCreate1on1(user, peerUserGId, ne
             userGId: peerUserGId.toString(),
             role: 'u'
         });
-
-        // Update 1on1 conversation histories
-        await redis.sadd(`1on1conversationhistory:${user.gIdString}`, conversation.id);
-
-        if (peerUserGId.type === 'mas') {
-            await redis.sadd(`1on1conversationhistory:${peerUserGId.toString()}`, conversation.id);
-        }
     }
 
     return conversation;
