@@ -76,7 +76,19 @@ exports.findOrCreate1on1 = async function findOrCreate1on1(user, peerUserGId, ne
 };
 
 exports.delete = async function deleteCoversation(conversation) {
-    return remove(conversation);
+    const members = await ConversationMember.find({ conversationId: conversation.id });
+
+    for (const member of members) {
+        await member.delete();
+    }
+
+    const msgs = await ConversationMessage.find({ conversationId: conversation.id });
+
+    for (const msg of msgs) {
+        await msg.delete();
+    }
+
+    await conversation.delete();
 };
 
 exports.getAll = async function getAll(user) {
@@ -344,22 +356,6 @@ async function createFullAddMemberNtf(conversation) {
         reset: true,
         members: membersList
     };
-}
-
-async function remove(conversation) {
-    const members = await ConversationMember.find({ conversationId: conversation.id });
-
-    for (const member of members) {
-        await member.delete();
-    }
-
-    const msgs = await ConversationMessage.find({ conversationId: conversation.id });
-
-    for (const msg of msgs) {
-        await msg.delete();
-    }
-
-    await conversation.delete();
 }
 
 async function deleteConversationMember(conversation, member, options) {
