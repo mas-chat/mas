@@ -24,7 +24,7 @@ init.configureProcess('irc');
 const assert = require('assert');
 const conf = require('../../lib/conf');
 const log = require('../../lib/log');
-const redisModule = require('../../lib/redis');
+const redis = require('../../lib/redis');
 const courier = require('../../lib/courier').createEndPoint('ircparser');
 const userIntroducer = require('../../lib/userIntroducer');
 const User = require('../../models/user');
@@ -37,8 +37,6 @@ const conversationsService = require('../../services/conversations');
 const windowsService = require('../../services/windows');
 const nicksService = require('../../services/nicks');
 const ircScheduler = require('./scheduler');
-
-const redis = redisModule.createClient();
 
 const OPER = '@';
 const VOICE = '+';
@@ -95,7 +93,7 @@ init.on('beforeShutdown', async () => {
 });
 
 init.on('afterShutdown', () => {
-    redisModule.shutdown();
+    redis.shutdown();
     log.quit();
 });
 

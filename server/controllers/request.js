@@ -18,7 +18,7 @@
 
 const log = require('../lib/log');
 const uid2 = require('uid2');
-const redis = require('../lib/redis').createClient();
+const redis = require('../lib/redis');
 const init = require('../lib/init');
 const notification = require('../lib/notification');
 const search = require('../lib/search');

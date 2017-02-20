@@ -16,7 +16,7 @@
 
 'use strict';
 
-const redisModule = require('../lib/redis');
+const redis = require('../lib/redis');
 const socketIo = require('socket.io');
 const uuid = require('uid2');
 const requestController = require('./request');
@@ -106,7 +106,7 @@ exports.setup = function setup(server) {
             log.info(user, `New session init: ${session.id}, client: ${data.clientName}`);
             log.info(user, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
 
-            redisSubscribe = redisModule.createClient();
+            redisSubscribe = redis.createClient();
             await redisSubscribe.subscribe(user.id, `${user.id}:${session.id}`);
 
             let processing = false;

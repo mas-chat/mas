@@ -16,7 +16,7 @@
 
 'use strict';
 
-const redis = require('../lib/redis').createClient();
+const redis = require('../lib/redis');
 const User = require('../models/user');
 const settingsService = require('../services/settings');
 

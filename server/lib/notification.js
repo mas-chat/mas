@@ -18,7 +18,7 @@
 
 const assert = require('assert');
 const util = require('util');
-const redis = require('./redis').createClient();
+const redis = require('./redis');
 
 exports.send = async function send(user, sessionId, ntfs) {
     await sendNotifications(user, sessionId, null, ntfs);

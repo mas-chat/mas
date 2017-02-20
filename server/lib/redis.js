@@ -16,21 +16,15 @@
 
 'use strict';
 
+const assert = require('assert');
 const Redis = require('ioredis');
 const log = require('./log');
 const conf = require('./conf');
 
 const activeClients = [];
+const shutdownDone = false;
 
-exports.createClient = function createClient(options) {
-    return createRedisClient(options);
-};
-
-exports.shutdown = function shutdown() {
-    log.info(`Closing ${activeClients.length} redis connections`);
-
-    activeClients.forEach(client => client.quit());
-};
+module.exports = createRedisClient();
 
 function createRedisClient({ autoClose = true } = {}) {
     const connType = conf.get('redis:connection_type');
@@ -52,6 +46,19 @@ function createRedisClient({ autoClose = true } = {}) {
         }
 
         return client.__quit();
+    };
+
+    client.createClient = function createClient(options) {
+        return createRedisClient(options);
+    };
+
+    client.shutdown = function shutdown() {
+        assert (!shutdownDone, 'Call shutdown() only once');
+
+        shutdownDone = true;
+        log.info(`Closing ${activeClients.length} redis connections`);
+
+        activeClients.forEach(client => client.quit());
     };
 
     if (autoClose) {

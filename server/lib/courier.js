@@ -18,11 +18,10 @@
 
 const assert = require('assert');
 const uid2 = require('uid2');
-const redisModule = require('./redis');
+const redis = require('./redis');
 const log = require('./log');
 
-const rcvRedis = redisModule.createClient();
-const sendRedis = redisModule.createClient();
+const rcvRedis = redis.createClient();
 
 let processing = false;
 let resolveQuit = null;
@@ -82,7 +81,7 @@ Courier.prototype.call = async function call(dest, type, params) {
 
     const uid = Date.now() + uid2(10);
     const data = this._convertToString(type, params, uid);
-    const reqRedis = redisModule.createClient();
+    const reqRedis = redis.createClient();
 
     await reqRedis.lpush(`inbox:${dest}`, data);
 
@@ -108,15 +107,15 @@ Courier.prototype.callNoWait = async function callNoWait(dest, type, params, ttl
     const data = this._convertToString(type, params);
     const key = `inbox:${dest}`;
 
-    await sendRedis.lpush(key, data);
+    await redis.lpush(key, data);
 
     if (ttl) {
-        await sendRedis.expire(key, ttl);
+        await redis.expire(key, ttl);
     }
 };
 
 Courier.prototype.clearInbox = async function clearInbox(name) {
-    await sendRedis.del(`inbox:${name}`);
+    await redis.del(`inbox:${name}`);
 };
 
 Courier.prototype.on = function on(type, callback) {

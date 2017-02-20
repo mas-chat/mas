@@ -24,7 +24,7 @@ const compress = require('koa-compress');
 const logger = require('koa-logger');
 const handlebarsHelpers = require('./lib/handlebarsHelpers');
 const log = require('./lib/log');
-const redisModule = require('./lib/redis');
+const redis = require('./lib/redis');
 const passport = require('./lib/passport');
 const authSessionChecker = require('./lib/authSessionChecker');
 const routes = require('./routes/routes');
@@ -93,7 +93,7 @@ exports.init = async function initServer(httpServer, httpsServer, setHttpHandler
     });
 
     init.on('afterShutdown', async () => {
-        redisModule.shutdown();
+        redis.shutdown();
         httpServer.close();
         log.quit();
     });

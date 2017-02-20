@@ -19,7 +19,7 @@
 
 const readline = require('readline');
 const log = require('../lib/log');
-const redisModule = require('../lib/redis');
+const redis = require('../lib/redis');
 const User = require('../models/user');
 const Ipm = require('../models/ipm');
 const PendingIpm = require('../models/pendingIpm');
@@ -29,8 +29,6 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
-
-const redis = redisModule.createClient();
 
 (async function main() {
     const body = await question('Message: ');
@@ -44,7 +42,7 @@ const redis = redisModule.createClient();
     await deliverIpm(ipm);
     await deleteExpiredIpms();
 
-    redisModule.shutdown();
+    redis.shutdown();
     log.quit();
 
     console.log('Done. All OK.'); // eslint-disable-line no-console

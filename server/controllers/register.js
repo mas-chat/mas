@@ -18,7 +18,7 @@
 
 const forms = require('forms');
 const httpStatus = require('statuses');
-const redis = require('../lib/redis').createClient();
+const redis = require('../lib/redis');
 const authOptions = require('../lib/authOptions');
 const User = require('../models/user');
 const usersService = require('../services/users');

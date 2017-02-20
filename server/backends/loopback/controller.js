@@ -20,7 +20,7 @@ const init = require('../../lib/init');
 
 init.configureProcess('loopback');
 
-const redisModule = require('../../lib/redis');
+const redis = require('../../lib/redis');
 const conf = require('../../lib/conf');
 const log = require('../../lib/log');
 const courier = require('../../lib/courier').createEndPoint('loopbackparser');
@@ -35,7 +35,7 @@ init.on('beforeShutdown', async () => {
 });
 
 init.on('afterShutdown', () => {
-    redisModule.shutdown();
+    redis.shutdown();
     log.quit();
 });
 
