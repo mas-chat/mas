@@ -60,10 +60,6 @@ exports.remove = async function remove(user, conversation) {
     }
 };
 
-exports.findByConversation = async function findByConversation(user, conversation) {
-    return Window.findFirst({ userId: user.id, conversationId: conversation.id });
-};
-
 exports.isValidDesktop = async function isValidDesktop(user, desktop) {
     const windows = await Window.find({ userId: user.id });
 

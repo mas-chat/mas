@@ -33,6 +33,7 @@ const Conversation = require('../../models/conversation');
 const ConversationMember = require('../../models/conversationMember');
 const NetworkInfo = require('../../models/networkInfo');
 const UserGId = require('../../models/userGId');
+const Window = require('../../models/window');
 const conversationsService = require('../../services/conversations');
 const windowsService = require('../../services/windows');
 const nicksService = require('../../services/nicks');
@@ -754,7 +755,7 @@ async function handleJoin(user, msg) {
             log.info(targetUser, `First mas user joined channel: ${network}:${channel}`);
         }
 
-        const window = await windowsService.findByConversation(targetUser, conversation);
+        const window = Window.findFirst({ userId: targetUser.id, conversationId: conversation.id });
 
         if (!window) {
             await windowsService.create(targetUser, conversation);

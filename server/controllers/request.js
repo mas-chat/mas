@@ -31,10 +31,10 @@ const windowsService = require('../services/windows');
 const friendsService = require('../services/friends');
 const nicksService = require('../services/nicks');
 const Conversation = require('../models/conversation');
+const Window = require('../models/window');
 const User = require('../models/user');
 const PendingIpm = require('../models/pendingIpm');
 const Friend = require('../models/friend');
-const Window = require('../models/window');
 const Settings = require('../models/settings');
 const IrcSubscription = require('../models/ircSubscription');
 const UserGId = require('../models/userGId');
@@ -385,9 +385,9 @@ async function start1on1(user, targetUserGId, network) {
     const conversation = await conversationsService.findOrCreate1on1(
         user, targetUserGId, selectedNetwork);
 
-    const existingWindow = await windowsService.findByConversation(user, conversation);
+    const window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
 
-    if (existingWindow) {
+    if (window) {
         return {
             status: 'ERROR',
             errorMsg: '1on1 chat window with this person is already open.'
