@@ -63,7 +63,7 @@
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "prod": "./bin/build-emails.js",
+    "prod": "./bin/build-emails",
     "dev": "cd .. && nf --procfile Procfile.dev --env conf/env.dev start",
     "start-frontend": "./bin/create-db && node ./server.js",
     "start-loopback": "./bin/create-db && node ./backends/loopback/server.js",
