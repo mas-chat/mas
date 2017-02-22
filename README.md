@@ -46,7 +46,7 @@ MacOS/Linux/Windows.
 
 ## Development setup
 
-1. Install Redis and latest release of node.js (6.x)
+1. Install Redis and latest release of node.js (version 7.6 or later is required)
 
    On Mac you can do this by installing first [Homebrew](http://brew.sh/) and then
 

@@ -4,7 +4,6 @@
   "private": true,
   "description": "MAS Web App",
   "dependencies": {
-    "async-to-gen": "^1.3.2",
     "bcrypt": "^1.0.2",
     "carrier": "~0.3.0",
     "colors": "~1.1.0",
@@ -66,11 +65,11 @@
   "scripts": {
     "prod": "./bin/build-emails.js",
     "dev": "cd .. && nf --procfile Procfile.dev --env conf/env.dev start",
-    "start-frontend": "./bin/create-db && async-node ./server.js",
-    "start-loopback": "./bin/create-db && async-node ./backends/loopback/server.js",
-    "start-irc": "./bin/create-db && async-node ./backends/irc/server.js",
-    "start-irc-scktmgr": "./bin/create-db && async-node ./backends/irc/connection-manager/server.js",
-    "test": "mocha --require async-to-gen/register --recursive test/unit && ./test/browser/bin/run-tests saucelabs",
+    "start-frontend": "./bin/create-db && node ./server.js",
+    "start-loopback": "./bin/create-db && node ./backends/loopback/server.js",
+    "start-irc": "./bin/create-db && node ./backends/irc/server.js",
+    "start-irc-scktmgr": "./bin/create-db && node ./backends/irc/connection-manager/server.js",
+    "test": "mocha --recursive test/unit && ./test/browser/bin/run-tests saucelabs",
     "lint-server": "eslint --env node --ignore-pattern website/dist --ignore-pattern node_modules .",
     "lint-client": "eslint --env browser ../newclient/src",
     "test-server": "mocha server/test/**/*test.js"

@@ -1,8 +1,0 @@
-#!/usr/bin/env node
-
-// TODO: Remove this wrapper when async-to-gen is removed
-
-'use strict';
-
-require('async-to-gen/register');
-require('nightwatch/bin/runner.js');

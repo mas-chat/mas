@@ -78,8 +78,8 @@ async function execShutdown() {
 }
 
 function checkNodeVersion() {
-    if (semver.lt(process.version, 'v6.0.0')) {
-        const msg = 'ERROR: Installed Node.js version must be at least v6.0.0';
+    if (semver.lt(process.version, 'v7.6.0')) {
+        const msg = 'ERROR: Installed Node.js version must be at least v7.6.0';
         console.log(msg); // eslint-disable-line no-console
         process.exit(1);
     }
