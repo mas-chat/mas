@@ -34,10 +34,9 @@ const socketController = require('./controllers/socket');
 const conf = require('./lib/conf');
 
 const app = koa();
-const devMode = process.env.NODE_ENV !== 'production';
 
 exports.init = async function initServer(httpServer, httpsServer, setHttpHandlers) {
-    if (devMode) {
+    if (process.env.NODE_ENV === 'development') {
         app.use(logger());
     }
 
