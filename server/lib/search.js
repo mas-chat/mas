@@ -16,7 +16,6 @@
 
 'use strict';
 
-const elasticSearch = require('./elasticSearch');
 const log = require('./log');
 const conf = require('./conf');
 
@@ -127,7 +126,7 @@ function elasticSearchAvailable() {
     if (!conf.get('elasticsearch:enabled')) {
         return false;
     } else if (!elasticSearchClient) {
-        elasticSearchClient = elasticSearch.getClient();
+        elasticSearchClient = require('./elasticSearch').getClient(); // Module is slow to require
     }
 
     return true;

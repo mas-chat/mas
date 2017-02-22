@@ -19,9 +19,7 @@
 const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
-const mailgun = require('nodemailer-mailgun-transport');
 const htmlToText = require('nodemailer-html-to-text').htmlToText;
-const smtpTransport = require('nodemailer-smtp-transport');
 const handlebars = require('handlebars');
 const conf = require('../lib/conf');
 const log = require('../lib/log');
@@ -59,6 +57,7 @@ exports.send = function send(templateName, data, address, subject) {
 
 function setupTransporter() {
     if (conf.get('mailgun:enabled')) {
+        const mailgun = require('nodemailer-mailgun-transport'); // Slow module to require
         const mailgunAuth = {
             auth: {
                 api_key: conf.get('mailgun:api_key'), // eslint-disable-line camelcase
@@ -70,6 +69,7 @@ function setupTransporter() {
         fromAddress = conf.get('mailgun:from');
         senderAddress = conf.get('mailgun:sender');
     } else if (conf.get('smtp:enabled')) {
+        const smtpTransport = require('nodemailer-smtp-transport');
         const smtpOptions = {
             host: conf.get('smtp:server'),
             port: conf.get('smtp:port')

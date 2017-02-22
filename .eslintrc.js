@@ -4,6 +4,7 @@ module.exports = {
         "keyword-spacing": 2,
         "generator-star-spacing": 0, // TODO: Temporary, remove when generators are gone
         "no-await-in-loop": 0, // TODO: Investigate if this can be actually enabled
+        "global-require": 0, // We want to optimize dev startup speed by requiring some modules only if a feature needs it
         "no-restricted-syntax": 0,
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "strict": ["error", "safe"],

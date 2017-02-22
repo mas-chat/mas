@@ -16,12 +16,8 @@
 
 'use strict';
 
-const jwt = require('jwt-simple');
 const passport = require('koa-passport');
 const LocalStrategy = require('passport-local').Strategy;
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-const YahooStrategy = require('passport-yahoo').Strategy;
-const CloudronStrategy = require('passport-cloudron');
 const User = require('../models/user');
 const usersService = require('../services/users');
 const log = require('../lib/log');
@@ -39,6 +35,9 @@ exports.authenticate = function authenticate(type, cb) {
 
 function setup() {
     if (conf.get('googleauth:enabled')) {
+        const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+        const jwt = require('jwt-simple');
+
         const google = new GoogleStrategy({
             clientID: conf.get('googleauth:client_id'),
             clientSecret: conf.get('googleauth:client_secret'),
@@ -52,6 +51,7 @@ function setup() {
     }
 
     if (conf.get('yahooauth:enabled')) {
+        const YahooStrategy = require('passport-yahoo').Strategy;
         const yahoo = new YahooStrategy({
             returnURL: `${conf.getComputed('site_url')}/auth/yahoo/callback`,
             realm: conf.getComputed('site_url')
@@ -63,6 +63,7 @@ function setup() {
     }
 
     if (conf.get('cloudronauth:enabled')) {
+        const CloudronStrategy = require('passport-cloudron');
         const cloudron = new CloudronStrategy({
             callbackURL: `${conf.getComputed('site_url')}/auth/cloudron/callback`
         }, (token, tokenSecret, profile, done) => {
