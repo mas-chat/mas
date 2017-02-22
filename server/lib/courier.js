@@ -52,7 +52,8 @@ Courier.prototype.listen = async function listen() {
         const msg = JSON.parse(result);
         const handler = this.handlers[msg.__type];
 
-        log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}]\n     DATA: ${result}`);
+        log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}]`);
+        log.info(`Courier: Payload: ${result}`);
 
         assert(handler, `${this.name}: Missing message handler for: ${msg.__type}`);
 

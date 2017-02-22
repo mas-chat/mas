@@ -34,9 +34,8 @@ MasConsoleLogger.prototype.log = function log(level, msg, meta, callback) {
     const processParts = process.title.split('-');
     const processName = processParts[1];
     const processExtension = processParts[2];
-    const userIdColumn = meta.userId || 'N/A';
     let processColumn;
-    let levelColumn;
+    let cat;
 
     switch (processName) {
         case 'irc':
@@ -54,22 +53,24 @@ MasConsoleLogger.prototype.log = function log(level, msg, meta, callback) {
 
     switch (level) {
         case 'info':
-            levelColumn = 'INFO';
+            cat = 'INFO';
             break;
         case 'warn':
-            levelColumn = 'WARN'.red;
+            cat = 'WARN'.red;
             break;
         case 'error':
-            levelColumn = 'ERR '.red;
+            cat = 'ERR '.red;
             break;
         default:
-            levelColumn = 'UNKN'.red;
+            cat = 'UNKN'.red;
     }
 
     const date = new Date().toISOString();
+    const prefix = process.env.NODE_ENV === 'development'
+      ? `${cat} ${meta.userId ? `[${meta.userId}] ` : ''}`
+      : `${date.yellow} ${processColumn}-${cat}-${meta.userId ? `[${meta.userId}] ` : 'N/A'}: `;
 
-    process.stdout.write(
-        `${date.yellow} ${processColumn}-${levelColumn}-${userIdColumn}: ${msg}\n`);
+    process.stdout.write(`${prefix}${msg}\n`);
 
     callback(null, true);
 };
