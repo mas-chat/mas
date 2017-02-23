@@ -18,10 +18,10 @@
 
 const CronJob = require('cron').CronJob;
 const mailer = require('./mailer');
+const UserGId = require('./userGId');
 const User = require('../models/user');
 const MissedMessage = require('../models/missedMessage');
 const Conversation = require('../models/conversation');
-const UserGId = require('../models/userGId');
 const nicksService = require('../services/nicks');
 const conversationsService = require('../services/conversations');
 

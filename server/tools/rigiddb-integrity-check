@@ -4,6 +4,7 @@
 
 const readline = require('readline');
 const RigidDB = require('rigiddb');
+const UserGId = require('../lib/userGId');
 const User = require('../models/user');
 const Conversation = require('../models/conversation');
 const ConversationMember = require('../models/conversationMember');
@@ -11,7 +12,6 @@ const ConversationMessage = require('../models/conversationMessage');
 const Window = require('../models/window');
 const Friend = require('../models/friend');
 const Settings = require('../models/settings');
-const UserGId = require('../models/userGId');
 const NetworkInfo = require('../models/networkInfo');
 const IRCSubscription = require('../models/ircSubscription');
 

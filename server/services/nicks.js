@@ -17,8 +17,8 @@
 'use strict';
 
 const assert = require('assert');
+const UserGId = require('../lib/userGId');
 const NetworkInfo = require('../models/networkInfo');
-const UserGId = require('../models/userGId');
 const User = require('../models/user');
 
 // User's master nick is stored in 'nick' property in user model. User's nicks in

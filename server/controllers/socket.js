@@ -21,13 +21,13 @@ const socketIo = require('socket.io');
 const uuid = require('uid2');
 const requestController = require('./request');
 const log = require('../lib/log');
+const UserGId = require('../lib/userGId');
+const conf = require('../lib/conf');
+const userIntroducer = require('../lib/userIntroducer');
 const authSessionService = require('../services/authSession');
 const friendsService = require('../services/friends');
 const sessionService = require('../services/session');
 const User = require('../models/user');
-const UserGId = require('../models/userGId');
-const conf = require('../lib/conf');
-const userIntroducer = require('../lib/userIntroducer');
 
 const ioServers = [];
 const clientSocketList = [];

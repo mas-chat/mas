@@ -20,12 +20,12 @@ const assert = require('assert');
 const log = require('../lib/log');
 const search = require('../lib/search');
 const notification = require('../lib/notification');
+const UserGId = require('../lib/userGId');
 const User = require('../models/user');
 const Window = require('../models/window');
 const Conversation = require('../models/conversation');
 const ConversationMember = require('../models/conversationMember');
 const ConversationMessage = require('../models/conversationMessage');
-const UserGId = require('../models/userGId');
 const windowsService = require('../services/windows');
 
 const MSG_BUFFER_SIZE = 200; // TODO: This should come from session:max_backlog setting

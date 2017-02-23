@@ -17,6 +17,10 @@
 'use strict';
 
 const assert = require('assert');
+const notification = require('../lib/notification');
+const UserGId = require('../lib/userGId');
+const log = require('../lib/log');
+const conf = require('../lib/conf');
 const User = require('../models/user');
 const Window = require('../models/window');
 const Settings = require('../models/settings');
@@ -24,12 +28,8 @@ const Conversation = require('../models/conversation');
 const ConversationMember = require('../models/conversationMember');
 const ConversationMessage = require('../models/conversationMessage');
 const MissedMessage = require('../models/missedMessage');
-const notification = require('../lib/notification');
 const nicksService = require('../services/nicks');
 const conversaionsService = require('../services/conversations');
-const UserGId = require('../models/userGId');
-const log = require('../lib/log');
-const conf = require('../lib/conf');
 
 exports.findOrCreate = async function findOrCreate(user, conversation) {
     let window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });

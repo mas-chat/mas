@@ -25,6 +25,7 @@ const search = require('../lib/search');
 const conf = require('../lib/conf');
 const courier = require('../lib/courier').create();
 const mailer = require('../lib/mailer');
+const UserGId = require('../lib/userGId');
 const authSessionService = require('../services/authSession');
 const conversationsService = require('../services/conversations');
 const windowsService = require('../services/windows');
@@ -37,7 +38,6 @@ const PendingIpm = require('../models/pendingIpm');
 const Friend = require('../models/friend');
 const Settings = require('../models/settings');
 const IrcSubscription = require('../models/ircSubscription');
-const UserGId = require('../models/userGId');
 
 const handlers = {
     SEND: handleSend,

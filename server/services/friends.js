@@ -16,10 +16,10 @@
 
 'use strict';
 
-const UserGId = require('../models/userGId');
+const UserGId = require('../lib/userGId');
+const notification = require('../lib/notification');
 const User = require('../models/user');
 const Friend = require('../models/friend');
-const notification = require('../lib/notification');
 
 const EPOCH_DATE = new Date(1);
 

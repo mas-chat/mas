@@ -17,7 +17,7 @@
 'use strict';
 
 const Base = require('./base');
-const UserGId = require('./userGId');
+const UserGId = require('../lib/userGId');
 
 module.exports = class ConversationMember extends Base {
     static get mutableProperties() {
