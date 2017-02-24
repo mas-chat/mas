@@ -42,15 +42,27 @@ const conf = require('./lib/conf');
 let httpHandler = initialHandler;
 let httpsHandler = initialHandler;
 
+const httpServer = http.Server((req, resp) => httpHandler(req, resp)); // eslint-disable-line new-cap;
+let httpsServer = null;
+
 createHTTPServers();
+scheduler.init();
 
-function httpHandlerSelector(request, response) {
-    httpHandler(request, response);
-}
+init.on('beforeShutdown', async () => {
+    await socketController.shutdown();
+    scheduler.quit();
+});
 
-function httpsHandlerSelector(request, response) {
-    httpsHandler(request, response);
-}
+init.on('afterShutdown', async () => {
+    redis.shutdown();
+    httpServer.close();
+
+    if (httpServer) {
+        httpServer.close();
+    }
+
+    log.quit();
+});
 
 function initialHandler(request, response) {
     response.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -60,39 +72,36 @@ function initialHandler(request, response) {
 function createHTTPServers() {
     const httpPort = conf.get('frontend:http_port');
     const httpsPort = conf.get('frontend:https_port');
-    const httpServer = http.Server(httpHandlerSelector); // eslint-disable-line new-cap
 
     httpServer.listen(httpPort, () => {
         log.info(`Frontend HTTP server listening: http://0.0.0.0:${httpPort}/`);
     });
 
+    const app = createFrontendApp();
+
     if (conf.get('frontend:https')) {
-        const caCerts = [];
-        const caCertFileList = conf.get('frontend:https_ca');
+        const caCertList = conf.get('frontend:https_ca');
 
-        if (caCertFileList) {
-            for (const file of caCertFileList.split(',')) {
-                caCerts.push(fs.readFileSync(file));
-            }
-        }
-
-        const httpsServer = https.createServer({
+        httpsServer = https.createServer({
             key: fs.readFileSync(conf.get('frontend:https_key')),
             cert: fs.readFileSync(conf.get('frontend:https_cert')),
-            ca: caCerts
-        }, httpsHandlerSelector);
-
-        initApp(httpServer, httpsServer);
+            ca: caCertList ? caCertList.split(',').map(file => fs.readFileSync(file)) : []
+        }, (req, resp) => httpsHandler(req, resp));
 
         httpsServer.listen(httpsPort, () => {
             log.info(`MAS frontend https server listening, https://localhost:${httpsPort}/`);
         });
+
+        httpsHandler = app.callback();
+        httpHandler = createForceSSLApp().callback();
     } else {
-        initApp(httpServer, null);
+        httpHandler = app.callback();
     }
+
+    socketController.setup(conf.get('frontend:https') ? httpsServer : httpServer);
 }
 
-async function initApp(httpServer, httpsServer) {
+function createFrontendApp() {
     const app = koa();
 
     if (process.env.NODE_ENV === 'development') {
@@ -120,41 +129,21 @@ async function initApp(httpServer, httpsServer) {
 
     handlebarsHelpers.registerHelpers(hbs);
 
-    log.info('Registering website routes');
     routes.register(app);
-
-    scheduler.init();
 
     // Socket.io server (socketController) must be created after last app.use()
 
-    if (conf.get('frontend:https')) {
-        socketController.setup(httpsServer);
+    return app;
+}
 
-        const forceSSLApp = koa();
+function createForceSSLApp() {
+    const app = koa();
 
-        // To keep things simple, force SSL is always activated if https is enabled
-        forceSSLApp.use(function *forceSSLAppMiddleware() { // eslint-disable-line require-yield
-            this.response.status = 301;
-            this.response.redirect(conf.getComputed('site_url') + this.request.url);
-        });
-
-        httpHandler = forceSSLApp.callback();
-        httpsHandler = app.callback();
-    } else {
-        socketController.setup(httpServer);
-
-        httpHandler = app.callback();
-        httpsHandler = null;
-    }
-
-    init.on('beforeShutdown', async () => {
-        await socketController.shutdown();
-        scheduler.quit();
+    // To keep things simple, force SSL is always activated if https is enabled
+    app.use(function *forceSSLAppMiddleware() { // eslint-disable-line require-yield
+        this.response.status = 301;
+        this.response.redirect(conf.getComputed('site_url') + this.request.url);
     });
 
-    init.on('afterShutdown', async () => {
-        redis.shutdown();
-        httpServer.close();
-        log.quit();
-    });
+    return app;
 }

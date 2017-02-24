@@ -22,6 +22,7 @@ const send = require('koa-send');
 const proxy = require('koa-proxy');
 const body = require('koa-body');
 const conf = require('../lib/conf');
+const log = require('../lib/log');
 const passport = require('../lib/passport');
 const registerController = require('../controllers/register');
 const loginController = require('../controllers/login');
@@ -37,6 +38,8 @@ const fingerPrintRe = /^assets\/\S+-.{32}\.\w+$/;
 const devMode = process.env.NODE_ENV !== 'production';
 
 exports.register = function register(app) {
+    log.info('Registering website routes');
+
     // Passport authentication routes
     if (conf.get('googleauth:enabled') && conf.get('googleauth:openid_realm')) {
         router.get('/auth/google', passport.authenticate('google', {
