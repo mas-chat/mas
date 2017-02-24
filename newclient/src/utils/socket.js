@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import { userId, secret } from './credentials';
+import Cookies from 'js-cookie';
 import log from './log';
 import calcMsgHistorySize from './msg-history-sizer';
 
@@ -42,6 +42,8 @@ class Socket {
       this.connected = true;
       this.sessionId = data.sessionId;
       this.maxBacklogMsgs = data.maxBacklogMsgs;
+
+      Cookies.set('mas', data.refreshCookie, { expires: 7 });
 
       this._emitReq(); // In case there are items in sendQueue from previous session
     });
@@ -107,14 +109,14 @@ class Socket {
   }
 
   static _emitInit() {
+    const cookie = Cookies.get('mas'); // TODO: Abort if not found
     const maxBacklogMsgs = calcMsgHistorySize();
 
     ioSocket.emit('init', {
+      cookie,
+      maxBacklogMsgs,
       clientName: 'web',
       clientOS: navigator.platform,
-      userId,
-      secret,
-      maxBacklogMsgs,
       version: '1.0',
       cachedUpto: 0 // TODO: Implement local storage based caching
     });

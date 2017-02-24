@@ -158,7 +158,6 @@ let SocketService = Ember.Object.extend({
         ioSocket.emit('init', {
             clientName: 'web',
             clientOS: navigator.platform,
-            userId: userId,
             cookie: cookie,
             version: '1.0',
             maxBacklogMsgs: maxBacklogMsgs,
