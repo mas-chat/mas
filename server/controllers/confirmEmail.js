@@ -21,7 +21,7 @@ const User = require('../models/user');
 const settingsService = require('../services/settings');
 
 exports.show = function *show() {
-    const userId = yield redis.get(`emailconfirmationtoken:${this.params.token}`);
+    const userId = yield redis.get(`frontend:email_confirmation_token:${this.params.token}`);
 
     if (!userId) {
         this.body = 'Expired or invalid email confirmation link.';

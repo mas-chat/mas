@@ -9,12 +9,12 @@ The following temporary data is stored directly to Redis.
 ## Frontend server
 
 ```
- key:     passwordresettoken:<token>
+ key:     frontend:password_reset_token:<token>
  type:    string
  expires: 24 hours
  value:   <userId>
 
- key:     emailconfirmationtoken:<token>
+ key:     frontend:email_confirmation_token:<token>
  type:    string
  expires: 24 hours
  value:   <userId>
@@ -23,22 +23,22 @@ The following temporary data is stored directly to Redis.
 ## IRC backend server
 
 ```
- key:     namesbuffer:<userId>:<conversationId>
+ key:     irc:names_buffer:<userId>:<conversationId>
  type:    hash
  expires: 1 minute
  value:   <nicknameX>, <nicknameY>, ...
 
- key:     ircnamesreporter:<conversationId>
+ key:     irc:names_reporter:<conversationId>
  type:    string
  expires: 15 seconds
  value:   <userId>
 
- key:     ircduplicates:<conversationId>:<msgBody>:<userGid>
+ key:     irc:duplicates_check:<conversationId>:<msgBody>:<userGid>
  type:    string
  expires: 45 seconds
  value:   <userId>
 
- key:     nickchangemutex:<network>:<oldNick>:<newNick>
+ key:     irc:nick_changed_mutex:<network>:<oldNick>:<newNick>
  type:    string
  expires: 20 seconds
  value:   "1"

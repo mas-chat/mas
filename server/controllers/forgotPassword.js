@@ -36,8 +36,8 @@ exports.create = function *create() {
             url: link
         }, userRecord.get('email'), 'Password reset link');
 
-        yield redis.set(`passwordresettoken:${token}`, userRecord.id);
-        yield redis.expire(`passwordresettoken:${token}`, 60 * 60 * 24); // 24 hours
+        yield redis.set(`frontend:password_reset_token:${token}`, userRecord.id);
+        yield redis.expire(`frontend:password_reset_token:${token}`, 60 * 60 * 24); // 24 hours
 
         log.info(userRecord.id, `Password reset email sent, link is: ${link}`);
     } else {

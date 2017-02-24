@@ -158,7 +158,7 @@ exports.index = function *index() {
 
 exports.indexReset = function *indexReset() {
     const token = this.params.token;
-    const userId = yield redis.get(`passwordresettoken:${token}`);
+    const userId = yield redis.get(`frontend:password_reset_token:${token}`);
 
     if (!userId) {
         this.body = 'Expired or invalid password reset link.';
@@ -248,7 +248,7 @@ exports.createExt = function *createExt() {
 exports.createReset = function *createReset() {
     const form = yield decodeForm(this.req, registrationFormReset);
 
-    const userId = yield redis.get(`passwordresettoken:${form.data.token}`);
+    const userId = yield redis.get(`frontend:password_reset_token:${form.data.token}`);
 
     function *renderForm(ctx) {
         yield ctx.render('register-reset', {
@@ -268,7 +268,7 @@ exports.createReset = function *createReset() {
         return;
     }
 
-  //  yield redis.del(`passwordresettoken:${form.data.token}`);
+    yield redis.del(`frontend:password_reset_token:${form.data.token}`);
 
     const userRecord = yield User.fetch(parseInt(userId));
 

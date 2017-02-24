@@ -141,7 +141,7 @@ async function processSend({ conversationId, userId, text = '' }) {
     }
 
     // See addMessageUnlessDuplicate() for the rest of duplication detection logic
-    const key = `ircduplicates:${conversation.id}:${msgFingerPrint(text)}:${user.gIdString}`;
+    const key = `irc:duplicates_check:${conversation.id}:${msgFingerPrint(text)}:${user.gIdString}`;
     await redis.setex(key, 45, user.id);
 
     sendPrivmsg(user, network, target, text.replace(/\n/g, ' '));
@@ -644,7 +644,7 @@ async function handle366(user, msg) {
         return;
     }
 
-    const key = `namesbuffer:${user.id}:${conversation.id}`;
+    const key = `irc:names_buffer:${user.id}:${conversation.id}`;
     const namesHash = await redis.hgetall(key);
 
     await redis.del(key);
@@ -658,10 +658,10 @@ async function handle366(user, msg) {
         // incremental JOINS messages (preferably from the original reporter.) This leaves some
         // theoretical error edge cases (left as homework) that maybe are worth fixing.
         const noActiveReporter = await redis.setnx(
-            `ircnamesreporter:${conversation.id}`, user.id);
+            `irc:names_reporter:${conversation.id}`, user.id);
 
         if (noActiveReporter) {
-            await redis.expire(`ircnamesreporter:${conversation.id}`, 15); // 15s
+            await redis.expire(`irc:names_reporter:${conversation.id}`, 15); // 15s
             await conversationsService.setGroupMembers(conversation, namesHash);
         }
     }
@@ -1116,7 +1116,7 @@ async function updateNick(user, network, oldNick, newNick) {
         }
     } else {
         changed = await redis.set(
-            `nickchangemutex:${network}:${oldNick}:${newNick}`, 1, 'ex', 20, 'nx');
+            `irc:nick_changed_mutex:${network}:${oldNick}:${newNick}`, 1, 'ex', 20, 'nx');
         targetUserGId = await nicksService.getUserGId(oldNick, network);
     }
 
@@ -1218,7 +1218,7 @@ async function addMessageUnlessDuplicate(conversation, user, { userGId = null, c
     // The code below works because IRC server doesn't echo messages back to their senders.
     // If that wasn't the case, the logic would fail. (If a reporter sees a new identical message
     // it's not considered as duplicate. Somebody is just repeating their line.)
-    const key = `ircduplicates:${conversation.id}:${msgFingerPrint(body)}:${userGId}`;
+    const key = `irc:duplicates_check:${conversation.id}:${msgFingerPrint(body)}:${userGId}`;
     const reporter = user.id;
 
     const [ setexResult, getResult ] = await redis.multi().setnx(key, reporter).get(key).exec();
@@ -1289,7 +1289,7 @@ async function bufferNames(names, user, network, conversation) {
         namesHash[memberUserGId.toString()] = userClass;
     }
 
-    const key = `namesbuffer:${user.id}:${conversation.id}`;
+    const key = `irc:names_buffer:${user.id}:${conversation.id}`;
 
     await redis.hmset(key, namesHash);
     await redis.expire(key, 60); // 1 minute. Does cleanup if we never get End of NAMES list reply.
