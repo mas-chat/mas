@@ -42,7 +42,8 @@ const conf = require('./lib/conf');
 let httpHandler = initialHandler;
 let httpsHandler = initialHandler;
 
-const httpServer = http.Server((req, resp) => httpHandler(req, resp)); // eslint-disable-line new-cap;
+// eslint-disable-next-line new-cap
+const httpServer = http.Server((req, resp) => httpHandler(req, resp));
 let httpsServer = null;
 
 createHTTPServers();
