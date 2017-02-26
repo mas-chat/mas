@@ -24,7 +24,7 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const path = require('path');
-const koa = require('koa');
+const Koa = require('koa');
 const hbs = require('koa-hbs');
 const error = require('koa-error');
 const compress = require('koa-compress');
@@ -103,7 +103,7 @@ function createHTTPServers() {
 }
 
 function createFrontendApp() {
-    const app = koa();
+    const app = new Koa();
 
     if (process.env.NODE_ENV === 'development') {
         app.use(logger());
@@ -138,7 +138,7 @@ function createFrontendApp() {
 }
 
 function createForceSSLApp() {
-    const app = koa();
+    const app = new Koa();
 
     // To keep things simple, force SSL is always activated if https is enabled
     app.use(function *forceSSLAppMiddleware() { // eslint-disable-line require-yield
