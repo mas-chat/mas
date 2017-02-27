@@ -59,7 +59,7 @@ exports.cloudronLogin = async function cloudronLogin(ctx) {
 };
 
 async function auth(ctx, provider) {
-    await (passport.authenticate(provider, {}, async (user, err) => {
+    await (passport.authenticate(provider, {}, async (err, user) => {
         if (err) {
             ctx.body = `External login failed, reason: ${err}`;
             log.warn(`Invalid external login attempt, reason: ${err}`);

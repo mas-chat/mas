@@ -84,12 +84,12 @@ async function authLocal(username, password, done) {
     });
 
     if (!user || user.get('deleted')) {
-        done('invalid', false);
+        await done('invalid', false);
         return;
     }
 
     if (user && !user.get('password') && user.get('extAuthId')) {
-        done('useExt', false);
+        await done('useExt', false);
         return;
     }
 
@@ -103,20 +103,12 @@ async function authLocal(username, password, done) {
 }
 
 async function authExt(openidId, oauthId, profile, done) {
-    // Some old users are known by their google OpenID 2.0 identifier. Google is closing down
-    // OpenID support so always convert in that case to OAuth 2.0 id.
     let user = null;
 
-    if (openidId) {
-        user = await User.findFirst({ extAuthId: openidId });
-    }
-
-    if (user && oauthId) {
-        // User is identified by his OpenID 2.0 identifier even we know his OAuth 2.0 id.
-        // Start to solely use OAuth 2.0 id.
-        await user.set('extAuthId', oauthId);
-    } else if (oauthId) {
+    if (oauthId) {
         user = await User.findFirst({ extAuthId: oauthId });
+    } else if (openidId) {
+        user = await User.findFirst({ extAuthId: openidId });
     }
 
     if (!user) {
@@ -131,10 +123,11 @@ async function authExt(openidId, oauthId, profile, done) {
         }, { skipSetters: true });
 
         if (!user) {
-            done('An account with this email address already exists. Login with password.', false);
+            await done(
+                'An account with this email address already exists. Login with password.', false);
             return;
         }
     }
 
-    done(null, user);
+    await done(null, user);
 }
