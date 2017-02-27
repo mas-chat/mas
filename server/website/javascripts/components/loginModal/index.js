@@ -54,7 +54,7 @@ class LoginModal extends Component {
                 // Server has set the session cookie, just redirect
                 window.location.pathname = '/app/';
             } else {
-                this.setState({ invalidLogin: true, password: '' });
+                this.setState({ invalidLogin: data.success ? false : data.msg, password: '' });
             }
         });
     }
@@ -135,7 +135,7 @@ class LoginModal extends Component {
                     <input id="password" className="input" type="password" value={this.state.password} onChange={this.handleChangePassword} />
                     <i className="fa fa-key" />
                 </p>
-                {this.state.invalidLogin ? <span className="help is-danger">Invalid login credentials.</span> : null}
+                {this.state.invalidLogin ? <span className="help is-danger">{this.state.invalidLogin}</span> : null}
                 <p className={cx('m-controls', 'control')}>
                     <button onClick={this.handleLogin} className="button is-primary is-fullwidth">Enter</button>
                 </p>
