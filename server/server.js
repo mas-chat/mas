@@ -106,7 +106,11 @@ function createHTTPServers() {
 function createFrontendApp() {
     const app = new Koa();
 
-    app.on('error', err => log.warn(`Koa server error: ${util.inspect(err)}`));
+    app.on('error', err => {
+        if (err.status !== 404) {
+            log.warn(`Koa server error: ${util.inspect(err)}`);
+        }
+    });
 
     if (process.env.NODE_ENV === 'development') {
         app.use(logger());
