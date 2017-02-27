@@ -16,6 +16,7 @@
 
 'use strict';
 
+const util = require('util');
 const passport = require('../lib/passport');
 const log = require('../lib/log');
 const authSesssionService = require('../services/authSession');
@@ -59,10 +60,10 @@ exports.cloudronLogin = async function cloudronLogin(ctx) {
 };
 
 async function auth(ctx, provider) {
-    await (passport.authenticate(provider, {}, async (err, user) => {
+    await (passport.authenticate(provider, {}, async (user, err) => {
         if (err) {
             ctx.body = `External login failed, reason: ${err}`;
-            log.warn(`Invalid external login attempt, reason: ${err}`);
+            log.warn(`Invalid external login, u: ${util.inspect(user)}, err: ${util.inspect(err)}`);
             return;
         } else if (!user) {
             ctx.body = 'No account found. Login failed.';
