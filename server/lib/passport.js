@@ -21,17 +21,11 @@ const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user');
 const usersService = require('../services/users');
 const log = require('../lib/log');
-
 const conf = require('./conf');
 
-exports.initialize = function initialize() {
-    setup();
-    return passport.initialize();
-};
+setup();
 
-exports.authenticate = function authenticate(type, cb) {
-    return passport.authenticate(type, cb);
-};
+module.exports = passport;
 
 function setup() {
     if (conf.get('googleauth:enabled')) {
@@ -102,9 +96,9 @@ async function authLocal(username, password, done) {
     const correctPassword = await user.verifyPassword(password);
 
     if (correctPassword && user.get('inUse')) {
-        done(null, user);
+        await done(null, user);
     } else {
-        done('invalid', false);
+        await done('invalid', false);
     }
 }
 

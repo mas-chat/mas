@@ -19,24 +19,24 @@
 const User = require('../models/user');
 const authSessionService = require('../services/authSession');
 
-exports.processCookie = function *processCookie(next) {
-    this.mas = this.mas || {};
-    this.mas.user = null;
+exports.processCookie = async function processCookie(ctx, next) {
+    ctx.mas = ctx.mas || {};
+    ctx.mas.user = null;
 
-    const cookieValue = this.cookies.get('mas');
+    const cookieValue = ctx.cookies.get('mas');
 
     if (cookieValue) {
-        const userId = yield authSessionService.validateCookie(cookieValue);
-        const user = userId ? yield User.fetch(userId) : null;
+        const userId = await authSessionService.validateCookie(cookieValue);
+        const user = userId ? await User.fetch(userId) : null;
 
         if (!user || !user.get('inUse')) {
-            this.cookies.set('mas'); // Delete the invalid cookie
-            this.response.redirect('/');
+            ctx.cookies.set('mas'); // Delete the invalid cookie
+            ctx.response.redirect('/');
             return;
         }
 
-        this.mas.user = user;
+        ctx.mas.user = user;
     }
 
-    yield next;
+    await next();
 };

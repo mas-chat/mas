@@ -29,16 +29,16 @@ if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
-module.exports = function *userFiles() {
-    const uuid = this.params.uuid.substring(0, 20);
+module.exports = async function userFiles(ctx) {
+    const uuid = ctx.params.uuid.substring(0, 20);
     const subDirectory = uuid.substring(0, 2);
-    const metaData = yield readMetaDataFile(path.join(dataDirectory, subDirectory, `${uuid}.json`));
+    const metaData = await readMetaDataFile(path.join(dataDirectory, subDirectory, `${uuid}.json`));
 
-    yield send(this, path.join(subDirectory, uuid + path.extname(metaData.originalFileName)), {
+    await send(ctx, path.join(subDirectory, uuid + path.extname(metaData.originalFileName)), {
         root: dataDirectory
     });
 
-    this.set('Cache-Control', `public, max-age=${oneYearInSeconds}`);
+    ctx.set('Cache-Control', `public, max-age=${oneYearInSeconds}`);
 };
 
 function readMetaDataFile(file) {

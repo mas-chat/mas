@@ -22,10 +22,8 @@ const authSesssionService = require('../services/authSession');
 
 const ONE_WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
 
-exports.localLogin = function *localLogin(next) {
-    const ctx = this;
-
-    yield passport.authenticate('local', function *authenticate(err, user) {
+exports.localLogin = async function localLogin(ctx) {
+    await (passport.authenticate('local', {}, async (user, err) => {
         let success = false;
         let msg;
 
@@ -38,30 +36,30 @@ exports.localLogin = function *localLogin(next) {
             msg = 'Successful login';
 
             const cookie = authSesssionService.encodeToCookie(
-                yield authSesssionService.create(user.id, ctx.request.ip));
+                (await authSesssionService.create(user.id, ctx.request.ip)));
 
             ctx.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
             success = true;
         }
 
         ctx.body = { success, msg };
-    }).call(this, next);
+    })(ctx));
 };
 
-exports.googleLogin = function *googleLogin(next) {
-    yield auth(this, next, 'google');
+exports.googleLogin = async function googleLogin(ctx) {
+    await auth(ctx, 'google');
 };
 
-exports.yahooLogin = function *yahooLogin(next) {
-    yield auth(this, next, 'yahoo');
+exports.yahooLogin = async function yahooLogin(ctx) {
+    await auth(ctx, 'yahoo');
 };
 
-exports.cloudronLogin = function *cloudronLogin(next) {
-    yield auth(this, next, 'cloudron');
+exports.cloudronLogin = async function cloudronLogin(ctx) {
+    await auth(ctx, 'cloudron');
 };
 
-function *auth(ctx, next, provider) {
-    yield passport.authenticate(provider, function *authenticate(err, user) {
+async function auth(ctx, provider) {
+    await (passport.authenticate(provider, {}, async (user, err) => {
         if (err) {
             ctx.body = `External login failed, reason: ${err}`;
             log.warn(`Invalid external login attempt, reason: ${err}`);
@@ -74,7 +72,7 @@ function *auth(ctx, next, provider) {
         log.info('External login finished');
 
         const cookie = authSesssionService.encodeToCookie(
-            yield authSesssionService.create(user.id, ctx.request.ip));
+            (await authSesssionService.create(user.id, ctx.request.ip)));
 
         ctx.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
 
@@ -83,5 +81,5 @@ function *auth(ctx, next, provider) {
         } else {
             ctx.redirect('/register?ext=true');
         }
-    }).call(ctx, next);
+    })(ctx));
 }

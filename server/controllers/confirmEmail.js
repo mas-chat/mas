@@ -20,20 +20,20 @@ const redis = require('../lib/redis');
 const User = require('../models/user');
 const settingsService = require('../services/settings');
 
-exports.show = function *show() {
-    const userId = yield redis.get(`frontend:email_confirmation_token:${this.params.token}`);
+exports.show = async function show(ctx) {
+    const userId = await redis.get(`frontend:email_confirmation_token:${ctx.params.token}`);
 
     if (!userId) {
-        this.body = 'Expired or invalid email confirmation link.';
+        ctx.body = 'Expired or invalid email confirmation link.';
         return;
     }
 
-    const user = yield User.fetch(parseInt(userId));
-    yield user.set('emailConfirmed', true);
+    const user = await User.fetch(parseInt(userId));
+    await user.set('emailConfirmed', true);
 
-    yield settingsService.sendSet(user);
+    await settingsService.sendSet(user);
 
-    yield this.render('confirmed-email', {
+    await ctx.render('confirmed-email', {
         page: 'confirmed-email',
         title: 'Email confirmed'
     });

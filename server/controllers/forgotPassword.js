@@ -23,9 +23,9 @@ const log = require('../lib/log');
 const mailer = require('../lib/mailer');
 const conf = require('../lib/conf');
 
-exports.create = function *create() {
-    const email = this.request.body.email;
-    const userRecord = yield User.findFirst({ email: email.trim() });
+exports.create = async function create(ctx) {
+    const email = ctx.request.body.email;
+    const userRecord = await User.findFirst({ email: email.trim() });
 
     if (userRecord) {
         const token = uuid(30);
@@ -36,13 +36,13 @@ exports.create = function *create() {
             url: link
         }, userRecord.get('email'), 'Password reset link');
 
-        yield redis.set(`frontend:password_reset_token:${token}`, userRecord.id);
-        yield redis.expire(`frontend:password_reset_token:${token}`, 60 * 60 * 24); // 24 hours
+        await redis.set(`frontend:password_reset_token:${token}`, userRecord.id);
+        await redis.expire(`frontend:password_reset_token:${token}`, 60 * 60 * 24); // 24 hours
 
         log.info(userRecord.id, `Password reset email sent, link is: ${link}`);
     } else {
         log.warn('Bogus password reset request received');
     }
 
-    this.body = { success: true };
+    ctx.body = { success: true };
 };

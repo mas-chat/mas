@@ -23,13 +23,13 @@ const authOptions = require('../lib/authOptions');
 const manifestFile = fs.readFileSync(path.join(__dirname, '../website/dist/manifest.json'));
 const manifest = JSON.parse(manifestFile);
 
-module.exports = function *index() {
-    if (this.mas.user) {
-        this.redirect('/app');
+module.exports = async function index(ctx) {
+    if (ctx.mas.user) {
+        ctx.redirect('/app');
     } else {
-        this.set('Cache-control', 'private, max-age=0, no-cache');
+        ctx.set('Cache-control', 'private, max-age=0, no-cache');
 
-        yield this.render('index', {
+        await ctx.render('index', {
             config: JSON.stringify({ auth: authOptions }),
             appJSFile: manifest['main.js']
         });

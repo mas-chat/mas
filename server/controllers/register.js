@@ -130,15 +130,15 @@ function decodeForm(req, inputForm) {
 
 const ONE_WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
 
-exports.index = function *index() {
-    if (this.query.ext !== 'true') {
+exports.index = async function index(ctx) {
+    if (ctx.query.ext !== 'true') {
         return;
     }
 
-    const newUser = this.mas.user;
+    const newUser = ctx.mas.user;
 
     if (!newUser) {
-        this.status = httpStatus('bad request');
+        ctx.status = httpStatus('bad request');
         return;
     }
 
@@ -148,7 +148,7 @@ exports.index = function *index() {
         registrationType: 'ext'
     });
 
-    yield this.render('register-ext', {
+    await ctx.render('register-ext', {
         page: 'register',
         title: 'Register',
         registrationForm: form.toHTML(),
@@ -156,102 +156,101 @@ exports.index = function *index() {
     });
 };
 
-exports.indexReset = function *indexReset() {
-    const token = this.params.token;
-    const userId = yield redis.get(`frontend:password_reset_token:${token}`);
+exports.indexReset = async function indexReset(ctx) {
+    const token = ctx.params.token;
+    const userId = await redis.get(`frontend:password_reset_token:${token}`);
 
     if (!userId) {
-        this.body = 'Expired or invalid password reset link.';
+        ctx.body = 'Expired or invalid password reset link.';
         return;
     }
 
     const form = registrationFormReset.bind({ token });
 
-    yield this.render('register-reset', {
+    await ctx.render('register-reset', {
         page: 'register',
         title: 'Register',
         registrationForm: form.toHTML()
     });
 };
 
-exports.create = function *create() {
-    const details = this.request.body;
-    const newUser = yield usersService.addUser(details);
+exports.create = async function create(ctx) {
+    const details = ctx.request.body;
+    const newUser = await usersService.addUser(details);
 
     if (newUser.valid) {
-        yield newUser.set('inUse', true);
-        yield usersService.addMASNetworkInfo(newUser);
+        await newUser.set('inUse', true);
+        await usersService.addMASNetworkInfo(newUser);
 
         const cookie = authSessionService.encodeToCookie(
-            yield authSessionService.create(newUser.id, this.request.ip));
+            await authSessionService.create(newUser.id, ctx.request.ip));
 
-        this.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
+        ctx.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
 
-        this.body = { success: true };
+        ctx.body = { success: true };
     } else {
-        this.body = { success: false, errors: newUser.errors };
+        ctx.body = { success: false, errors: newUser.errors };
     }
 };
 
-exports.createExt = function *createExt() {
-    const form = yield decodeForm(this.req, registrationFormExt);
+exports.createExt = async function createExt(ctx) {
+    const form = await decodeForm(ctx.req, registrationFormExt);
 
-    function *renderForm(ctx) {
-        yield ctx.render('register-ext', {
+    async function renderForm() {
+        await ctx.render('register-ext', {
             page: 'register',
             title: 'Register',
             registrationForm: form.toHTML()
         });
     }
 
-    const user = this.mas.user;
+    const user = ctx.mas.user;
 
     if (!user) {
-        this.status = httpStatus('bad request');
+        ctx.status = httpStatus('bad request');
         return;
     }
 
     if (user.get('email') === form.data.email) {
         // If the user didn't change his email address, we trust what Google/Yahoo gave us.
-        yield user.set('emailConfirmed', true);
+        await user.set('emailConfirmed', true);
     } else {
-        yield user.updateEmail(form.data.email);
+        await user.updateEmail(form.data.email);
     }
 
     if (user.valid) {
-        yield user.set('nick', form.data.nick);
-        yield usersService.addMASNetworkInfo(user);
+        await user.set('nick', form.data.nick);
+        await usersService.addMASNetworkInfo(user);
     }
 
     if (!form.isValid()) {
-        yield renderForm(this);
+        await renderForm();
         return;
     } else if (!user.valid) {
         Object.keys(user.errors).forEach(field => {
             form.fields[field].error = user.errors[field];
         });
 
-        yield renderForm(this);
+        await renderForm();
         return;
     }
 
     user.set('inUse', true);
 
     const cookie = authSessionService.encodeToCookie(
-        yield authSessionService.create(user.id, this.request.ip));
+        await authSessionService.create(user.id, ctx.request.ip));
 
-    this.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
+    ctx.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
 
-    this.response.redirect('/app');
+    ctx.response.redirect('/app');
 };
 
-exports.createReset = function *createReset() {
-    const form = yield decodeForm(this.req, registrationFormReset);
+exports.createReset = async function createReset(ctx) {
+    const form = await decodeForm(ctx.req, registrationFormReset);
+    const userId = await redis.get(`frontend:password_reset_token:${form.data.token}`);
 
-    const userId = yield redis.get(`frontend:password_reset_token:${form.data.token}`);
-
-    function *renderForm(ctx) {
-        yield ctx.render('register-reset', {
+    async function renderForm() {
+        await ctx.render('register-reset', {
             page: 'register',
             title: 'Register',
             registrationForm: form.toHTML()
@@ -259,34 +258,34 @@ exports.createReset = function *createReset() {
     }
 
     if (!userId) {
-        this.status = httpStatus('bad request');
+        ctx.status = httpStatus('bad request');
         return;
     }
 
     if (!form.isValid()) {
-        yield renderForm(this);
+        await renderForm();
         return;
     }
 
-    yield redis.del(`frontend:password_reset_token:${form.data.token}`);
+    await redis.del(`frontend:password_reset_token:${form.data.token}`);
 
-    const userRecord = yield User.fetch(parseInt(userId));
+    const userRecord = await User.fetch(parseInt(userId));
 
     if (!userRecord) {
-        this.status = httpStatus('bad request');
+        ctx.status = httpStatus('bad request');
         return;
     }
 
-    yield userRecord.changePassword(form.data.password);
+    await userRecord.changePassword(form.data.password);
 
     if (!userRecord.valid) {
         Object.keys(userRecord.errors).forEach(field => {
             form.fields[field].error = userRecord.errors[field];
         });
 
-        yield renderForm(this);
+        await renderForm();
         return;
     }
 
-    this.response.redirect('/');
+    ctx.response.redirect('/');
 };

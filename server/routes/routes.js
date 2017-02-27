@@ -17,7 +17,7 @@
 'use strict';
 
 const path = require('path');
-const router = require('koa-router')();
+const Router = require('koa-router');
 const send = require('koa-send');
 const proxy = require('koa-proxy');
 const body = require('koa-body');
@@ -39,6 +39,8 @@ const devMode = process.env.NODE_ENV !== 'production';
 
 exports.register = function register(app) {
     log.info('Registering website routes');
+
+    const router = new Router();
 
     // Passport authentication routes
     if (conf.get('googleauth:enabled') && conf.get('googleauth:openid_realm')) {
@@ -81,14 +83,14 @@ exports.register = function register(app) {
     router.get('/files/:uuid/:slug*', userFilesController);
 
     // Client
-    router.get('/app', function *client() {
-        this.set('Cache-control', 'private, max-age=0, no-cache');
-        yield sendFile(this, 'client/dist/', 'index.html');
+    router.get('/app', async ctx => {
+        ctx.set('Cache-control', 'private, max-age=0, no-cache');
+        await sendFile(ctx, 'client/dist/', 'index.html');
     });
 
     // Client assets
-    router.get(/^\/app\/(.+)/, function *clientAssets() {
-        const subPath = this.params[0];
+    router.get(/^\/app\/(.+)/, async ctx => {
+        const subPath = ctx.params[0];
         let maxage = TWO_DAYS_IN_MS;
 
         if (devMode) {
@@ -97,29 +99,28 @@ exports.register = function register(app) {
             maxage = ONE_YEAR_IN_MS;
         }
 
-        yield sendFile(this, 'client/dist/', subPath, { maxage });
+        await sendFile(ctx, 'client/dist/', subPath, { maxage });
     });
 
     if (devMode) {
         // Ember CLI Live Reload redirect hack
-        router.get('/ember-cli-live-reload.js', function *redirect() { // eslint-disable-line require-yield, max-len
-            this.redirect('http://localhost:4200/ember-cli-live-reload.js');
-        });
+        router.get('/ember-cli-live-reload.js', ctx =>
+            ctx.redirect('http://localhost:4200/ember-cli-live-reload.js'));
     }
 
     // New client
-    router.get(/\/sector17(.*)/, function *newClientAssets() {
-        const subPath = this.params[0].replace(/^\//, '');
+    router.get(/\/sector17(.*)/, async ctx => {
+        const subPath = ctx.params[0].replace(/^\//, '');
 
         if (devMode) {
-            yield proxy.call(this, {
+            await proxy.call(ctx, {
                 host: 'http://localhost:8080',
                 map: () => `/sector17/${subPath}`
             });
 
-            this.set('Cache-control', 'private, max-age=0, no-cache');
+            ctx.set('Cache-control', 'private, max-age=0, no-cache');
         } else {
-            yield sendFile(this, 'newclient/dist/', subPath, {
+            await sendFile(ctx, 'newclient/dist/', subPath, {
                 maxage: subPath === '' ? 0 : ONE_YEAR_IN_MS
             });
         }
@@ -129,18 +130,18 @@ exports.register = function register(app) {
     router.get(/^\/(about|home|tos|pricing|support|$)\/?$/, websiteController);
 
     // Web site assets
-    router.get(/^\/website-assets\/(.+)/, function *websiteAssets() {
+    router.get(/^\/website-assets\/(.+)/, async ctx => {
         const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
-        yield sendFile(this, 'server/website/dist/', this.params[0], { maxage });
+        await sendFile(ctx, 'server/website/dist/', ctx.params[0], { maxage });
     });
 
     app.use(router.routes()).use(router.allowedMethods());
 };
 
-function *sendFile(ctx, root, filePath, options = {}) {
+async function sendFile(ctx, root, filePath, options = {}) {
     const sendOptions = Object.assign({}, options, {
         root: path.join(__dirname, `../../${root}`)
     });
 
-    yield send(ctx, filePath === '' ? '/' : filePath, sendOptions);
+    await send(ctx, filePath === '' ? '/' : filePath, sendOptions);
 }

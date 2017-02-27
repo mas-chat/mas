@@ -31,29 +31,29 @@ if (dataDirectory.charAt(0) !== path.sep) {
     dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
-module.exports = function *handle() {
-    const user = this.mas.user;
+module.exports = async function handle(ctx) {
+    const user = ctx.mas.user;
 
-    if (!this.request.body || !this.request.body.files || !this.request.body.files.file) {
-        this.status = 400;
+    if (!ctx.request.body || !ctx.request.body.files || !ctx.request.body.files.file) {
+        ctx.status = 400;
         return;
     }
 
     try {
-        const url = yield upload(user, this.request.body.files.file);
+        const url = await upload(user, ctx.request.body.files.file);
 
-        this.status = 200;
-        this.body = { url: [ url ] };
+        ctx.status = 200;
+        ctx.body = { url: [ url ] };
 
         log.info(user, `Successful upload: ${url}`);
     } catch (e) {
-        this.status = e === 'E_TOO_LARGE' ? 413 : 400;
+        ctx.status = e === 'E_TOO_LARGE' ? 413 : 400;
 
         log.warn(user, `Upload failed: ${e}`);
     }
 };
 
-function *upload(user, fileObject) {
+async function upload(user, fileObject) {
     const fileName = fileObject.name;
     const filePath = fileObject.path;
     const extension = path.extname(fileName);
@@ -68,12 +68,12 @@ function *upload(user, fileObject) {
     }
 
     if (conf.get('files:autorotate_jpegs')) {
-        yield autoRotateJPEGFile(filePath, extension);
+        await autoRotateJPEGFile(filePath, extension);
     }
 
-    yield ensureUploadDirExists(targetDirectory);
-    yield copy(filePath, path.join(targetDirectory, fileUUID + extension));
-    yield writeMetaDataFile(path.join(targetDirectory, `${fileUUID}.json`), fileName, user.id);
+    await ensureUploadDirExists(targetDirectory);
+    await copy(filePath, path.join(targetDirectory, fileUUID + extension));
+    await writeMetaDataFile(path.join(targetDirectory, `${fileUUID}.json`), fileName, user.id);
 
     return `${conf.getComputed('site_url')}/files/${fileUUID}/${encodeURIComponent(fileName)}`;
 }

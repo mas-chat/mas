@@ -111,9 +111,9 @@ function createFrontendApp() {
 
     app.use(error());
 
-    app.use(function *xFrameOptionsMiddleware(next) {
-        this.set('X-Frame-Options', 'DENY');
-        yield next;
+    app.use(async (ctx, next) => {
+        ctx.set('X-Frame-Options', 'DENY');
+        await next();
     });
 
     app.use(compress()); // Enable GZIP compression
@@ -141,9 +141,9 @@ function createForceSSLApp() {
     const app = new Koa();
 
     // To keep things simple, force SSL is always activated if https is enabled
-    app.use(function *forceSSLAppMiddleware() { // eslint-disable-line require-yield
-        this.response.status = 301;
-        this.response.redirect(conf.getComputed('site_url') + this.request.url);
+    app.use(ctx => {
+        ctx.response.status = 301;
+        ctx.response.redirect(conf.getComputed('site_url') + ctx.request.url);
     });
 
     return app;
