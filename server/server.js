@@ -24,6 +24,7 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const path = require('path');
+const util = require('util');
 const Koa = require('koa');
 const hbs = require('koa-hbs');
 const error = require('koa-error');
@@ -104,6 +105,8 @@ function createHTTPServers() {
 
 function createFrontendApp() {
     const app = new Koa();
+
+    app.on('error', err => log.warn(`Koa server error: ${util.inspect(err)}`));
 
     if (process.env.NODE_ENV === 'development') {
         app.use(logger());
