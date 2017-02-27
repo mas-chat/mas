@@ -24,26 +24,20 @@ const authSesssionService = require('../services/authSession');
 const ONE_WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
 
 exports.localLogin = async function localLogin(ctx) {
-    await (passport.authenticate('local', {}, async (user, err) => {
-        let success = false;
-        let msg;
+    await (passport.authenticate('local', {}, async (err, user, info) => {
+        if (user) {
+            const authSession = await authSesssionService.create(user.id, ctx.request.ip);
 
-        if (err === 'useExt') {
-            msg = 'This email address can login only through Google/Yahoo login.';
-        } else if (err || !user) {
-            // Unknown user, wrong password, or disabled account
-            msg = 'Incorrect password or nick/email.';
-        } else {
-            msg = 'Successful login';
-
-            const cookie = authSesssionService.encodeToCookie(
-                (await authSesssionService.create(user.id, ctx.request.ip)));
-
-            ctx.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
-            success = true;
+            ctx.cookies.set('mas', authSesssionService.encodeToCookie(authSession), {
+                maxAge: ONE_WEEK_IN_MS,
+                httpOnly: false
+            });
         }
 
-        ctx.body = { success, msg };
+        ctx.body = {
+            success: !!user,
+            msg: user ? 'Successful login' : info.message
+        };
     })(ctx));
 };
 
@@ -60,19 +54,21 @@ exports.cloudronLogin = async function cloudronLogin(ctx) {
 };
 
 async function auth(ctx, provider) {
-    await (passport.authenticate(provider, {}, async (user, err) => {
-        if (!user) {
-            ctx.body = `External login failed, reason: ${err}`;
-            log.warn(`Invalid external login, u: ${util.inspect(user)}, err: ${util.inspect(err)}`);
+    await (passport.authenticate(provider, {}, async (err, user, info) => {
+        if (err || !user) {
+            ctx.body = `External login failed, reason: ${err || info.message}`;
+            log.warn(`Invalid external login, err: ${util.inspect(err || info.message)}`);
             return;
         }
 
         log.info('External login finished');
 
-        const cookie = authSesssionService.encodeToCookie(
-            (await authSesssionService.create(user.id, ctx.request.ip)));
+        const authSession = await authSesssionService.create(user.id, ctx.request.ip);
 
-        ctx.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
+        ctx.cookies.set('mas', authSesssionService.encodeToCookie(authSession), {
+            maxAge: ONE_WEEK_IN_MS,
+            httpOnly: false
+        });
 
         if (user.get('inUse')) {
             ctx.redirect('/app/');

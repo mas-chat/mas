@@ -83,13 +83,18 @@ async function authLocal(username, password, done) {
         [username.includes('@') ? 'email' : 'nick']: username
     });
 
-    if (!user || user.get('deleted')) {
-        await done('invalid', false);
+    if (!user) {
+        await done(null, false, { message: 'Incorrect password or nick/email.' });
+        return;
+    }
+
+    if (user.get('deleted')) {
+        await done(null, false, { message: 'Account unavailable.' });
         return;
     }
 
     if (user && !user.get('password') && user.get('extAuthId')) {
-        await done('useExt', false);
+        await done(null, false, { message: 'Use external service to login' });
         return;
     }
 
@@ -98,7 +103,7 @@ async function authLocal(username, password, done) {
     if (correctPassword && user.get('inUse')) {
         await done(null, user);
     } else {
-        await done('invalid', false);
+        await done(null, false, { message: 'Incorrect password or nick/email.' });
     }
 }
 
@@ -123,8 +128,7 @@ async function authExt(openidId, oauthId, profile, done) {
         }, { skipSetters: true });
 
         if (!user) {
-            await done(
-                'An account with this email address already exists. Login with password.', false);
+            await done(null, false, { message: 'An account already exists. Login with password.' });
             return;
         }
     }
