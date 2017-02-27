@@ -74,7 +74,7 @@ async function execShutdown() {
     }
 
     console.log('Shutdown complete.'); // eslint-disable-line no-console
-    process.exit(0);
+    process.exit();
 }
 
 function checkNodeVersion() {
