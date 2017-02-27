@@ -24,14 +24,9 @@ const authSesssionService = require('../services/authSession');
 const ONE_WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
 
 exports.localLogin = async function localLogin(ctx) {
-    await (passport.authenticate('local', {}, async (err, user, info) => {
+    await (passport.authenticate('local', async (err, user, info) => {
         if (user) {
-            const authSession = await authSesssionService.create(user.id, ctx.request.ip);
-
-            ctx.cookies.set('mas', authSesssionService.encodeToCookie(authSession), {
-                maxAge: ONE_WEEK_IN_MS,
-                httpOnly: false
-            });
+            await createAuthSession(ctx, user);
         }
 
         ctx.body = {
@@ -54,26 +49,24 @@ exports.cloudronLogin = async function cloudronLogin(ctx) {
 };
 
 async function auth(ctx, provider) {
-    await (passport.authenticate(provider, {}, async (err, user, info) => {
+    await (passport.authenticate(provider, async (err, user, info) => {
         if (err || !user) {
             ctx.body = `External login failed, reason: ${err || info.message}`;
             log.warn(`Invalid external login, err: ${util.inspect(err || info.message)}`);
             return;
         }
 
-        log.info('External login finished');
+        await createAuthSession(ctx, user);
 
-        const authSession = await authSesssionService.create(user.id, ctx.request.ip);
-
-        ctx.cookies.set('mas', authSesssionService.encodeToCookie(authSession), {
-            maxAge: ONE_WEEK_IN_MS,
-            httpOnly: false
-        });
-
-        if (user.get('inUse')) {
-            ctx.redirect('/app/');
-        } else {
-            ctx.redirect('/register?ext=true');
-        }
+        ctx.redirect(user.get('inUse') ? '/app' : '/register?ext=true');
     })(ctx));
+}
+
+async function createAuthSession(ctx, user) {
+    const authSession = await authSesssionService.create(user.id, ctx.request.ip);
+
+    ctx.cookies.set('mas', authSesssionService.encodeToCookie(authSession), {
+        maxAge: ONE_WEEK_IN_MS,
+        httpOnly: false
+    });
 }
