@@ -37,6 +37,7 @@ Client: [![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat&pat
 ## Dependencies:
 
 - Node.js: http://nodejs.org/
+- Yarn: https://yarnpkg.com/
 - Redis: http://redis.io/
 - Elasticsearch: https://www.elastic.co/products/elasticsearch/ (optional)
 
@@ -46,12 +47,12 @@ MacOS/Linux/Windows.
 
 ## Development setup
 
-1. Install Redis and latest release of node.js (version 7.6 or later is required)
+1. Install Redis, yarn, and latest release of node.js (version 7.6 or later is required)
 
    On Mac you can do this by installing first [Homebrew](http://brew.sh/) and then
 
    ```bash
-   $ brew install node redis
+   $ brew install node yarn redis
    ```
 
 2. Build different components and install required npm modules using the dev script
