@@ -24,43 +24,29 @@ const authSesssionService = require('../services/authSession');
 const ONE_WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
 
 exports.localLogin = async function localLogin(ctx) {
-    await (passport.authenticate('local', async (err, user, info) => {
+    await passport.authenticate('local', async (err, user, info) => {
         if (user) {
             await createAuthSession(ctx, user);
+            ctx.body = { success: true };
+        } else {
+            ctx.body = { success: false, msg: info.message };
         }
-
-        ctx.body = {
-            success: !!user,
-            msg: user ? 'Successful login' : info.message
-        };
-    })(ctx));
+    })(ctx);
 };
 
-exports.googleLogin = async function googleLogin(ctx) {
-    await auth(ctx, 'google');
+exports.externalLogin = function externalLogin(provider) {
+    return async ctx => {
+        await passport.authenticate(provider, async (err, user, info) => {
+            if (user) {
+                await createAuthSession(ctx, user);
+                ctx.redirect(user.get('inUse') ? '/app' : '/register?ext=true');
+            } else {
+                ctx.body = `External login failed, reason: ${err || info.message}`;
+                log.warn(`Invalid external login, err: ${util.inspect(err || info.message)}`);
+            }
+        })(ctx);
+    };
 };
-
-exports.yahooLogin = async function yahooLogin(ctx) {
-    await auth(ctx, 'yahoo');
-};
-
-exports.cloudronLogin = async function cloudronLogin(ctx) {
-    await auth(ctx, 'cloudron');
-};
-
-async function auth(ctx, provider) {
-    await (passport.authenticate(provider, async (err, user, info) => {
-        if (err || !user) {
-            ctx.body = `External login failed, reason: ${err || info.message}`;
-            log.warn(`Invalid external login, err: ${util.inspect(err || info.message)}`);
-            return;
-        }
-
-        await createAuthSession(ctx, user);
-
-        ctx.redirect(user.get('inUse') ? '/app' : '/register?ext=true');
-    })(ctx));
-}
 
 async function createAuthSession(ctx, user) {
     const authSession = await authSesssionService.create(user.id, ctx.request.ip);

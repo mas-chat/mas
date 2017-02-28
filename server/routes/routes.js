@@ -48,17 +48,17 @@ exports.register = function register(app) {
             scope: 'email profile',
             openIDRealm: conf.get('googleauth:openid_realm')
         }));
-        router.get('/auth/google/oauth2callback', loginController.googleLogin);
+        router.get('/auth/google/oauth2callback', loginController.externalLogin('google'));
     }
 
     if (conf.get('yahooauth:enabled')) {
         router.get('/auth/yahoo', passport.authenticate('yahoo'));
-        router.get('/auth/yahoo/callback', loginController.yahooLogin);
+        router.get('/auth/yahoo/callback', loginController.externalLogin('yahoo'));
     }
 
     if (conf.get('cloudronauth:enabled')) {
         router.get('/auth/cloudron', passport.authenticate('cloudron'));
-        router.get('/auth/cloudron/callback', loginController.cloudronLogin);
+        router.get('/auth/cloudron/callback', loginController.externalLogin('cloudron'));
     }
 
     router.post('/login', body(), loginController.localLogin);
