@@ -16,10 +16,11 @@
 
 'use strict';
 
-checkNodeVersion();
-
 const assert = require('assert');
 const semver = require('semver');
+
+checkNodeVersion();
+
 const log = require('./log');
 
 const stateChangeCallbacks = [];
