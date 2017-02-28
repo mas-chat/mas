@@ -20,7 +20,7 @@ RUN /root/.yarn/bin/yarn \
 COPY server /app/server/
 WORKDIR /app/server/
 
-RUN /root/.yarn/bin/yarn \
+RUN /root/.yarn/bin/yarn --production \
   && /root/.yarn/bin/yarn run prod
 
 RUN cd website \
