@@ -16,12 +16,11 @@
 
 'use strict';
 
+checkNodeVersion();
+
 const assert = require('assert');
 const semver = require('semver');
-const _ = require('lodash');
 const log = require('./log');
-
-checkNodeVersion();
 
 const stateChangeCallbacks = [];
 let shutdownInProgress = false;
@@ -66,8 +65,8 @@ async function execShutdown() {
 
     log.warn('Shutdown sequence started.');
 
-    // TODO: only use of lodash, convert and remove lodash
-    const entries = _.sortBy(stateChangeCallbacks, entry => shutdownOrder[entry.state]);
+    const entries = stateChangeCallbacks.sort(
+        (a, b) => shutdownOrder[a.state] - shutdownOrder[b.state]);
 
     for (const entry of entries) {
         await entry.cb();

@@ -26,7 +26,6 @@
     "koa-passport": "3.0.0-rc.3",
     "koa-router": "next",
     "koa-send": "^3.3.0",
-    "lodash": "^4.17.4",
     "md5": "^2.0.0",
     "mkdirp": "~0.5.0",
     "nconf": "~0.8.0",
