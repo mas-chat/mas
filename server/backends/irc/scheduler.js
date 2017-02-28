@@ -16,7 +16,7 @@
 
 'use strict';
 
-const CronJob = require('cron').CronJob;
+const cron = require('node-cron');
 const log = require('../../lib/log');
 const conf = require('../../lib/conf');
 const courier = require('../../lib/courier').create();
@@ -30,11 +30,11 @@ exports.init = function init(disconnectCB) {
     disconnect = disconnectCB;
 
     // Twice in a day
-    jobs.push(new CronJob('0 0 7,19 * * *', disconnectInactiveIRCUsers, null, true));
+    jobs.push(cron.schedule('0 7,19 * * *', disconnectInactiveIRCUsers));
 };
 
 exports.quit = async function quit() {
-    jobs.forEach(job => job.stop());
+    jobs.forEach(job => job.destroy());
 
     await courier.quit();
 };

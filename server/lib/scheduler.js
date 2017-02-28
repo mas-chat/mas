@@ -16,7 +16,7 @@
 
 'use strict';
 
-const CronJob = require('cron').CronJob;
+const cron = require('node-cron');
 const mailer = require('./mailer');
 const UserGId = require('./userGId');
 const User = require('../models/user');
@@ -28,14 +28,11 @@ const conversationsService = require('../services/conversations');
 const jobs = [];
 
 exports.init = function init() {
-    // Once in 5 minutes
-    jobs.push(new CronJob('0 */1 * * * *', deliverEmails, null, true));
+    jobs.push(cron.schedule('*/5 * * * *', deliverEmails)); // Once in 5 minutes
 };
 
 exports.quit = function quit() {
-    for (const job of jobs) {
-        job.stop();
-    }
+    jobs.forEach(job => job.destroy());
 };
 
 // Sends email notifications to offline users

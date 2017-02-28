@@ -587,12 +587,6 @@ core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
 
-cron@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/cron/-/cron-1.2.1.tgz#3a86c09b41b8f261ac863a7cc85ea4735857eab2"
-  dependencies:
-    moment-timezone "^0.5.x"
-
 cross-spawn@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-5.0.1.tgz#a3bbb302db2297cbea3c04edf36941f4613aa399"
@@ -2251,16 +2245,6 @@ module-not-found-error@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/module-not-found-error/-/module-not-found-error-1.0.1.tgz#cf8b4ff4f29640674d6cdd02b0e3bc523c2bbdc0"
 
-moment-timezone@^0.5.x:
-  version "0.5.11"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.11.tgz#9b76c03d8ef514c7e4249a7bbce649eed39ef29f"
-  dependencies:
-    moment ">= 2.6.0"
-
-"moment@>= 2.6.0":
-  version "2.16.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.16.0.tgz#f38f2c97c9889b0ee18fc6cc392e1e443ad2da8e"
-
 ms@0.7.1:
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/ms/-/ms-0.7.1.tgz#9cd13c03adbff25b65effde7ce864ee952017098"
@@ -2309,6 +2293,10 @@ negotiator@0.6.1:
 netmask@~1.0.4:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/netmask/-/netmask-1.0.6.tgz#20297e89d86f6f6400f250d9f4f6b4c1945fcd35"
+
+node-cron@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/node-cron/-/node-cron-1.1.3.tgz#f161c743812302d50f5251bd93ca57019a5298d2"
 
 node-pre-gyp@0.6.32:
   version "0.6.32"
