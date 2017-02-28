@@ -16,6 +16,7 @@ module.exports = {
         "no-plusplus": ["off"],
         "radix": ["error", "as-needed"],
         "import/no-extraneous-dependencies": ["error", {"devDependencies": true, "optionalDependencies": false}],
+        "no-console": ["error", { allow: ["warn", "error"] }],
         "no-continue": ["off"],
         "jsx-a11y/no-static-element-interactions": ["off"], // TODO: Consider
         "arrow-parens": ["off"]

@@ -76,8 +76,7 @@ function configTransports() {
         const fileName = path.join(logDirectory, `${process.title}.log`);
 
         if (!fs.existsSync(logDirectory)) {
-            console.error( // eslint-disable-line no-console
-                `${'ERROR:'.red} Log directory ${logDirectory} doesn't exist.`);
+            console.error(`${'ERROR:'.red} Log directory ${logDirectory} doesn't exist.`);
             process.exit(1);
         }
 
