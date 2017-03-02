@@ -21,6 +21,7 @@ const Router = require('koa-router');
 const send = require('koa-send');
 const proxy = require('koa-proxy');
 const body = require('koa-body');
+const convert = require('koa-convert');
 const conf = require('../lib/conf');
 const log = require('../lib/log');
 const passport = require('../lib/passport');
@@ -36,6 +37,11 @@ const ONE_YEAR_IN_MS = 1000 * 60 * 60 * 24 * 365;
 const TWO_DAYS_IN_MS = 1000 * 60 * 60 * 24 * 2;
 const fingerPrintRe = /^assets\/\S+-.{32}\.\w+$/;
 const devMode = process.env.NODE_ENV !== 'production';
+
+const newClientDevProxy = convert(proxy({
+    host: 'http://localhost:8080',
+    map: urlPath => (urlPath === '/sector17' ? '/sector17/' : urlPath)
+}));
 
 exports.register = function register(app) {
     log.info('Registering website routes');
@@ -113,11 +119,7 @@ exports.register = function register(app) {
         const subPath = ctx.params[0].replace(/^\//, '');
 
         if (devMode) {
-            await proxy.call(ctx, {
-                host: 'http://localhost:8080',
-                map: () => `/sector17/${subPath}`
-            });
-
+            await newClientDevProxy(ctx);
             ctx.set('Cache-control', 'private, max-age=0, no-cache');
         } else {
             await sendFile(ctx, 'newclient/dist/', subPath, {
