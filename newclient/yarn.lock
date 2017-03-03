@@ -3215,16 +3215,7 @@ postcss@5.1.2:
     source-map "^0.5.6"
     supports-color "^3.1.2"
 
-postcss@^5.0.0, postcss@^5.0.10, postcss@^5.0.14, postcss@^5.0.20, postcss@^5.0.21, postcss@^5.0.4, postcss@^5.0.6, postcss@^5.0.8, postcss@^5.2.6, postcss@^5.2.8:
-  version "5.2.8"
-  resolved "https://registry.yarnpkg.com/postcss/-/postcss-5.2.8.tgz#05720c49df23c79bda51fd01daeb1e9222e94390"
-  dependencies:
-    chalk "^1.1.3"
-    js-base64 "^2.1.9"
-    source-map "^0.5.6"
-    supports-color "^3.1.2"
-
-postcss@^5.0.11, postcss@^5.0.12, postcss@^5.0.13, postcss@^5.0.16, postcss@^5.0.18, postcss@^5.0.2, postcss@^5.0.5, postcss@^5.2.13, postcss@^5.2.14, postcss@^5.2.4:
+postcss@^5.0.0, postcss@^5.0.10, postcss@^5.0.11, postcss@^5.0.12, postcss@^5.0.13, postcss@^5.0.14, postcss@^5.0.16, postcss@^5.0.18, postcss@^5.0.2, postcss@^5.0.21, postcss@^5.0.4, postcss@^5.0.5, postcss@^5.0.8, postcss@^5.2.13, postcss@^5.2.14, postcss@^5.2.4, postcss@^5.2.8:
   version "5.2.15"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-5.2.15.tgz#a9e8685e50e06cc5b3fdea5297273246c26f5b30"
   dependencies:
@@ -3232,6 +3223,15 @@ postcss@^5.0.11, postcss@^5.0.12, postcss@^5.0.13, postcss@^5.0.16, postcss@^5.0
     js-base64 "^2.1.9"
     source-map "^0.5.6"
     supports-color "^3.2.3"
+
+postcss@^5.0.20, postcss@^5.0.6, postcss@^5.2.6:
+  version "5.2.8"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-5.2.8.tgz#05720c49df23c79bda51fd01daeb1e9222e94390"
+  dependencies:
+    chalk "^1.1.3"
+    js-base64 "^2.1.9"
+    source-map "^0.5.6"
+    supports-color "^3.1.2"
 
 prepend-http@^1.0.0:
   version "1.0.4"
@@ -3596,9 +3596,9 @@ redux-devtools@^3.3.2:
     lodash "^4.2.0"
     redux-devtools-instrument "^1.0.1"
 
-redux-logger@^2.8.1:
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/redux-logger/-/redux-logger-2.8.1.tgz#c00e689ba00342f44858701d76b1d73fbade72bd"
+redux-logger@^2.8.2:
+  version "2.8.2"
+  resolved "https://registry.yarnpkg.com/redux-logger/-/redux-logger-2.8.2.tgz#52140a89afa1c1d25312cc17649c116650bf7fca"
   dependencies:
     deep-diff "0.3.4"
 
