@@ -40,45 +40,36 @@ const scheduler = require('./lib/scheduler');
 const socketController = require('./controllers/socket');
 const conf = require('./lib/conf');
 
-let httpHandler = initialHandler;
-let httpsHandler = initialHandler;
+main();
 
-// eslint-disable-next-line new-cap
-const httpServer = http.Server((req, resp) => httpHandler(req, resp));
-let httpsServer = null;
+function main() {
+    const { httpServer, httpsServer } = createHTTPServers();
 
-createHTTPServers();
-scheduler.init();
+    socketController.setup(httpsServer || httpServer);
+    scheduler.init();
 
-init.on('beforeShutdown', async () => {
-    await socketController.shutdown();
-    scheduler.quit();
-});
+    init.on('beforeShutdown', async () => {
+        await socketController.shutdown();
+        scheduler.quit();
+    });
 
-init.on('afterShutdown', async () => {
-    redis.shutdown();
-    httpServer.close();
-
-    if (httpServer) {
+    init.on('afterShutdown', async () => {
+        redis.shutdown();
         httpServer.close();
-    }
 
-    log.quit();
-});
+        if (httpsServer) {
+            httpsServer.close();
+        }
 
-function initialHandler(request, response) {
-    response.writeHead(200, { 'Content-Type': 'text/plain' });
-    response.end('Server starting. Try again in a second...\n');
+        log.quit();
+    });
 }
 
 function createHTTPServers() {
+    let httpServer;
+    let httpsServer;
     const httpPort = conf.get('frontend:http_port');
     const httpsPort = conf.get('frontend:https_port');
-
-    httpServer.listen(httpPort, () => {
-        log.info(`Frontend HTTP server listening: http://0.0.0.0:${httpPort}/`);
-    });
-
     const app = createFrontendApp();
 
     if (conf.get('frontend:https')) {
@@ -88,19 +79,22 @@ function createHTTPServers() {
             key: fs.readFileSync(conf.get('frontend:https_key')),
             cert: fs.readFileSync(conf.get('frontend:https_cert')),
             ca: caCertList ? caCertList.split(',').map(file => fs.readFileSync(file)) : []
-        }, (req, resp) => httpsHandler(req, resp));
+        }, app.callback());
 
         httpsServer.listen(httpsPort, () => {
-            log.info(`MAS frontend https server listening, https://localhost:${httpsPort}/`);
+            log.info(`MAS frontend HTTPS server listening, https://0.0.0.0:${httpsPort}/`);
         });
 
-        httpsHandler = app.callback();
-        httpHandler = createForceSSLApp().callback();
+        httpServer = http.Server(createForceSSLApp().callback());
     } else {
-        httpHandler = app.callback();
+        httpServer = http.Server(app.callback());
     }
 
-    socketController.setup(conf.get('frontend:https') ? httpsServer : httpServer);
+    httpServer.listen(httpPort, () => {
+        log.info(`Frontend HTTP server listening: http://0.0.0.0:${httpPort}/`);
+    });
+
+    return { httpServer, httpsServer };
 }
 
 function createFrontendApp() {
