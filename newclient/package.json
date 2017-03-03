@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dashboard -- webpack-dev-server --watch --hot -d",
+    "csslint": "stylelint **/*css",
     "prod": "NODE_ENV=production webpack"
   },
   "author": "Ilkka Oksanen <iao@iki.fi> (http://iao.fi)",
@@ -22,6 +23,9 @@
     "redux-devtools-log-monitor": "^1.2.0",
     "redux-logger": "^2.8.1",
     "style-loader": "^0.13.2",
+    "stylelint": "^7.9.0",
+    "stylelint-config-standard": "^16.0.0",
+    "stylelint-order": "^0.3.0",
     "url-loader": "^0.5.8",
     "webpack": "^2.2.1",
     "webpack-dashboard": "^0.3.0",

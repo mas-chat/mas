@@ -17,6 +17,10 @@ echo "Running eslint for /newclient"
 npm run lint-client
 cd ..
 
+cd newclient
+npm run csslint
+cd ..
+
 # TODO: Replace manual docker setup in this script with docker-compose.yml file
 docker build -t ilkkao/mas-browser-tests .
 docker network create mas-test || true
