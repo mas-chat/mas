@@ -1661,9 +1661,9 @@ ioredis@^2.5.0:
     redis-commands "^1.2.0"
     redis-parser "^1.3.0"
 
-ip@^1.1.2, ip@~1.1.0:
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/ip/-/ip-1.1.4.tgz#de8247ffef940451832550fba284945e6e039bfb"
+ip@^1.1.2, ip@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/ip/-/ip-1.1.5.tgz#bdded70114290828c0a039e72ef25f5aaec4354a"
 
 is-arrayish@^0.2.1:
   version "0.2.1"
@@ -3536,9 +3536,9 @@ window-size@^0.1.2, window-size@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/window-size/-/window-size-0.1.4.tgz#f8e1aa1ee5a53ec5bf151ffa09742a6ad7697876"
 
-winston-daily-rotate-file@^1.4.4:
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/winston-daily-rotate-file/-/winston-daily-rotate-file-1.4.4.tgz#3aecb5eb6ac9e309f5635524ff8f739037bd99a7"
+winston-daily-rotate-file@^1.4.5:
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/winston-daily-rotate-file/-/winston-daily-rotate-file-1.4.5.tgz#d0d5159db7d5cbb676eeaaf4e41fba4fa7b602a7"
 
 winston-papertrail@^1.0.4:
   version "1.0.4"
