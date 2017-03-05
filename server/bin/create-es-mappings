@@ -17,8 +17,8 @@
 
 'use strict';
 
-const elasticsearch = require('elasticsearch'),
-      argv = require('yargs').argv;
+const elasticsearch = require('elasticsearch');
+const argv = require('minimist')(process.argv.slice(1));
 
 let client = new elasticsearch.Client({
     host: 'localhost:9200',

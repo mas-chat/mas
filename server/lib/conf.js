@@ -19,7 +19,7 @@
 const path = require('path');
 const assert = require('assert');
 const nconf = require('nconf');
-const argv = require('yargs').argv;
+const argv = require('minimist')(process.argv.slice(1));
 
 require('colors');
 
