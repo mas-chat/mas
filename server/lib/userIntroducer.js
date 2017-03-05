@@ -90,11 +90,11 @@ async function introduceUsers(user, userGIds, session, socket) {
 
     if (Object.keys(newUsers).length > 0) {
         const ntf = {
-            id: 'USERS',
+            id: 'ADD_USERS',
             mapping: newUsers
         };
 
-        log.info(user, `Emitted USERS ${JSON.stringify(ntf)}`);
+        log.info(user, `Emitted ADD_USERS ${JSON.stringify(ntf)}`);
 
         if (socket) {
             socket.emit('ntf', ntf);

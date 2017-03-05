@@ -19,10 +19,10 @@
 const Settings = require('../models/settings');
 const notification = require('../lib/notification');
 
-exports.sendSet = async function sendSet(user, sessionId) {
+exports.sendUpdateSettings = async function sendUpdateSettings(user, sessionId) {
     const settingsRecord = await Settings.findOrCreate(user.id);
     const command = {
-        id: 'SET',
+        id: 'UPDATE_SETTINGS',
         settings: {
             activeDesktop: settingsRecord.get('activeDesktop'),
             theme: settingsRecord.get('theme'),

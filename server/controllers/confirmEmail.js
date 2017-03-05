@@ -31,7 +31,7 @@ exports.show = async function show(ctx) {
     const user = await User.fetch(parseInt(userId));
     await user.set('emailConfirmed', true);
 
-    await settingsService.sendSet(user);
+    await settingsService.sendUpdateSettings(user);
 
     await ctx.render('confirmed-email', {
         page: 'confirmed-email',

@@ -23,19 +23,19 @@ import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import { dispatch, getStore } from 'emflux/dispatcher';
 
 const serverIdToEventMap = {
-    ADDMEMBERS: 'ADD_MEMBERS_SERVER',
-    ALERT: 'SHOW_ALERT_SERVER',
-    CLOSE: 'DELETE_WINDOW_SERVER',
-    CREATE: 'ADD_WINDOW_SERVER',
-    DELMEMBERS: 'DELETE_MEMBERS_SERVER',
-    FRIENDS: 'ADD_FRIENDS_SERVER',
-    FRIENDSCONFIRM: 'CONFIRM_FRIENDS_SERVER',
-    INITDONE: 'FINISH_STARTUP_SERVER',
-    MSG: 'ADD_MESSAGE_SERVER',
-    NETWORKS: 'UPDATE_NETWORKS_SERVER',
-    SET: 'UPDATE_SETTINGS_SERVER',
-    UPDATE: 'UPDATE_WINDOW_SERVER',
-    USERS: 'ADD_USERS_SERVER'
+    UPDATE_MEMBERS: 'ADD_MEMBERS_SERVER',
+    ADD_ALERT: 'SHOW_ALERT_SERVER',
+    DELETE_WINDOW: 'DELETE_WINDOW_SERVER',
+    ADD_WINDOW: 'ADD_WINDOW_SERVER',
+    DELETE_MEMBERS: 'DELETE_MEMBERS_SERVER',
+    UPDATE_FRIENDS: 'ADD_FRIENDS_SERVER',
+    CONFIRM_FRIENDS: 'CONFIRM_FRIENDS_SERVER',
+    FINISH_INIT: 'FINISH_STARTUP_SERVER',
+    ADD_MESSAGE: 'ADD_MESSAGE_SERVER',
+    UPDATE_NETWORKS: 'UPDATE_NETWORKS_SERVER',
+    UPDATE_SETTINGS: 'UPDATE_SETTINGS_SERVER',
+    UPDATE_WINDOW: 'UPDATE_WINDOW_SERVER',
+    ADD_USERS: 'ADD_USERS_SERVER'
 };
 
 let ioSocket = io.connect(); // Start connection as early as possible.
@@ -94,7 +94,7 @@ let SocketService = Ember.Object.extend({
             let type = notification.id;
             delete notification.id;
 
-            if (type !== 'MSG') {
+            if (type !== 'ADD_MESSAGE') {
                 Ember.Logger.info(`← NTF: ${type}`);
             }
 

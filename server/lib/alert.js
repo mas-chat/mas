@@ -31,7 +31,7 @@ exports.sendAlerts = async function sendAlerts(user, sessionId) {
 
         if (ipm && ipm.get('expiresAt') > now) {
             await notification.send(user, sessionId, {
-                id: 'ALERT',
+                id: 'ADD_ALERT',
                 alertId: ipm.id,
                 message: ipm.get('body')
             });

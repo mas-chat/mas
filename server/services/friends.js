@@ -23,21 +23,19 @@ const Friend = require('../models/friend');
 
 const EPOCH_DATE = new Date(1);
 
-// TODO: Instead of FRIENDS and FRIENDSUPDATE, use ADDFRIENDS
-
-exports.sendFriends = function sendFriends(user, sessionId) {
-    sendFriendsNtf(user, sessionId);
+exports.sendUpdateFriends = function sendUpdateFriends(user, sessionId) {
+    sendUpdateFriendsNtf(user, sessionId);
 };
 
-exports.sendFriendConfirm = async function sendFriendConfirm(user, sessionId) {
+exports.sendConfirmFriends = async function sendConfirmFriends(user, sessionId) {
     const friendAsDst = await Friend.find({ srcUserId: user.id });
     const friendUsers = friendAsDst.filter(friend => friend.get('state') === 'pending');
 
     if (friendUsers.length > 0) {
-        // Uses userId property so that related USERS notification is send automatically
+        // Uses userId property so that related ADD_USERS notification is send automatically
         // See lib/notification.js for the details.
         const ntf = {
-            id: 'FRIENDSCONFIRM',
+            id: 'CONFIRM_FRIENDS',
             friends: friendUsers.map(friendUser => {
                 const friendUserGId = UserGId.create({
                     id: friendUser.get('dstUserId'),
@@ -58,7 +56,7 @@ exports.sendFriendConfirm = async function sendFriendConfirm(user, sessionId) {
 
 exports.informStateChange = async function informStateChange(user, eventType) {
     const command = {
-        id: 'FRIENDS',
+        id: 'UPDATE_FRIENDS',
         reset: false,
         friends: [ {
             userId: user.gId.toString(),
@@ -107,8 +105,8 @@ exports.activateFriends = async function activeFriends(user, friendUser) {
     await dstFriend.set({ state: 'active' });
 
     // Inform both parties
-    await sendFriendsNtf(user);
-    await sendFriendsNtf(friendUser);
+    await sendUpdateFriendsNtf(user);
+    await sendUpdateFriendsNtf(friendUser);
 };
 
 exports.removeFriends = async function removeFriends(user, friendUser) {
@@ -139,9 +137,9 @@ exports.removeUser = async function removeUser(user) {
     }
 };
 
-async function sendFriendsNtf(user, sessionId) {
+async function sendUpdateFriendsNtf(user, sessionId) {
     const command = {
-        id: 'FRIENDS',
+        id: 'UPDATE_FRIENDS',
         reset: true,
         friends: []
     };

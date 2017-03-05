@@ -72,7 +72,7 @@ async function deliverIpm(ipm) {
     const allUsers = await User.fetchAll();
 
     const alertNtf = {
-        id: 'ALERT',
+        id: 'ADD_ALERT',
         alertId: ipm.id,
         message: ipm.get('body')
     };

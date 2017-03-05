@@ -36,9 +36,9 @@ const networkNames = [
 // TODO: Is courier quit() needed?
 
 exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
-    await settingsService.sendSet(user, session.id);
-    await friendsService.sendFriends(user, session.id);
-    await friendsService.sendFriendConfirm(user, session.id);
+    await settingsService.sendUpdateSettings(user, session.id);
+    await friendsService.sendUpdateFriends(user, session.id);
+    await friendsService.sendConfirmFriends(user, session.id);
     await friendsService.informStateChange(user, 'login');
 
     await alerts.sendAlerts(user, session.id);
@@ -66,7 +66,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
         }
 
         messages.push({
-            id: 'CREATE',
+            id: 'ADD_WINDOW',
             windowId: window.id,
             name: conversation.get('name'),
             userId: oneOnOneMember && oneOnOneMember.get('userGId'),
@@ -88,7 +88,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
         });
 
         messages.push({
-            id: 'ADDMEMBERS',
+            id: 'UPDATE_MEMBERS',
             windowId: window.id,
             reset: true,
             members: members.map(member => ({
@@ -114,7 +114,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
         });
     }
 
-    messages.push({ id: 'INITDONE' });
+    messages.push({ id: 'FINISH_INIT' });
 
     await notification.send(user, session.id, messages);
 
@@ -124,7 +124,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
 
 async function sendNetworkList(userGId, sessionId) {
     await notification.send(userGId, sessionId, {
-        id: 'NETWORKS',
+        id: 'UPDATE_NETWORKS',
         networks: networkNames
     });
 }

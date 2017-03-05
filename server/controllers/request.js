@@ -279,7 +279,7 @@ async function handleUpdate({ user, command, window, session }) {
     if (update) {
         // Notify all sessions. Undefined body properties won't appear in the JSON message
         await notification.broadcast(user, {
-            id: 'UPDATE',
+            id: 'UPDATE_WINDOW',
             windowId: window.id,
             row: command.row,
             column: command.column,
@@ -462,7 +462,7 @@ async function handleRequestFriend({ user, command }) {
     }
 
     await friendsService.createPending(user, friendUser);
-    await friendsService.sendFriendConfirm(user, friendUser);
+    await friendsService.sendConfirmFriends(user, friendUser);
 
     return { status: 'OK' };
 }
@@ -487,7 +487,7 @@ async function handleRemoveFriend({ user, command }) {
     const friendUser = await User.fetch(friendUserGId.id);
 
     await friendsService.removeFriends(user, friendUser);
-    await friendsService.sendFriends(user);
+    await friendsService.sendUpdateFriends(user);
 
     return { status: 'OK' };
 }
