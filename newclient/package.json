@@ -5,9 +5,9 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dashboard -- webpack-dev-server --watch --hot -d",
+    "dev": "webpack-dashboard -- webpack-dev-server --watch --hot --output-pathinfo --debug --devtool inline-source-map",
     "csslint": "stylelint **/*css",
-    "prod": "NODE_ENV=production webpack"
+    "prod": "NODE_ENV=production webpacks"
   },
   "author": "Ilkka Oksanen <iao@iki.fi> (http://iao.fi)",
   "license": "Apache-2.0",
@@ -44,7 +44,6 @@
     "react-virtualized": "^9.1.0",
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0",
-    "reselect": "^2.5.4",
     "socket.io-client": "^1.7.3"
   }
 }
