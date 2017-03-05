@@ -5,3 +5,7 @@
   padding: 10px;
   width: 219px;
 }
+
+.selected {
+  background-color: #5070e4;
+}

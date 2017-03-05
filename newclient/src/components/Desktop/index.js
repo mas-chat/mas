@@ -1,10 +1,17 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import * as actions from '../../actions/desktop';
 import Sidebar from '../Sidebar';
-import ConversationMessage from '../ConversationMessage';
+import ConversationWindow from '../ConversationWindow';
 import './index.css';
 
 class Desktop extends PureComponent {
+  constructor(props) {
+    super(props);
+
+    this.select = this.select.bind(this);
+  }
+
   shouldComponentUpdate(nextProps) {
     if (!nextProps.startupFinished) {
       return false;
@@ -13,27 +20,28 @@ class Desktop extends PureComponent {
     return true; // TODO: Not optimal
   }
 
+  select(windowId) {
+    const { dispatch } = this.props;
+
+    dispatch(actions.select(windowId));
+  }
+
   render() {
-    const { messages, users } = this.props;
+    const { windows, active, messages, users } = this.props;
 
-    const msgs = messages.toArray().map(msg => {
-      const nick = msg.userId ? users.get(msg.userId).nick.mas : null;
-
-      return (
-        <ConversationMessage
-          key={msg.gid}
-          ts={msg.ts}
-          body={msg.body}
-          nick={nick}
-        />
-      );
-    });
+    const masWindows = windows.map(masWindow => (
+      <ConversationWindow
+        messages={messages.get(masWindow.windowId)}
+        users={users}
+        visible={masWindow.windowId === active}
+      />
+    ));
 
     return (
       <div styleName="desktop">
-        <Sidebar />
+        <Sidebar windows={windows} active={active} onChange={this.select} />
         <div styleName="content">
-          {msgs}
+          {masWindows}
         </div>
       </div>
     );
@@ -41,8 +49,11 @@ class Desktop extends PureComponent {
 }
 
 Desktop.propTypes = {
-  messages: React.PropTypes.shape({}),
-  users: React.PropTypes.shape({})
+  dispatch: PropTypes.func.isRequired,
+  windows: PropTypes.shape({}).isRequired,
+  active: PropTypes.number.isRequired,
+  messages: PropTypes.shape({}),
+  users: PropTypes.shape({})
 };
 
 Desktop.defaultProps = {
@@ -51,6 +62,8 @@ Desktop.defaultProps = {
 };
 
 const mapStateToProps = state => ({
+  windows: state.windows.windows,
+  active: state.desktop.active,
   messages: state.messages.messages,
   startupFinished: state.messages.startupFinished,
   users: state.users.users

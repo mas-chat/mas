@@ -2,10 +2,10 @@ import { Map } from 'immutable';
 import * as types from '../../actions/users/types';
 
 const initialState = {
-  users: Map() // eslint-disable-line new-cap
+  users: new Map()
 };
 
-export default function users(state = initialState, action) {
+export default function usersReducer(state = initialState, action) {
   switch (action.type) {
     case types.ADD_USERS_SERVER: {
       const mapping = action.data.mapping;

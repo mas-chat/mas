@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import moment from 'moment';
 import './index.css';
 
@@ -20,9 +20,9 @@ const ConversationMessage = ({ ts, body, nick }) => {
 };
 
 ConversationMessage.propTypes = {
-  ts: React.PropTypes.number.isRequired,
-  body: React.PropTypes.string,
-  nick: React.PropTypes.string
+  ts: PropTypes.number.isRequired,
+  body: PropTypes.string,
+  nick: PropTypes.string
 };
 
 ConversationMessage.defaultProps = {

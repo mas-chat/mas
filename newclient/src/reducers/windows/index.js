@@ -2,15 +2,15 @@ import { Map } from 'immutable';
 import * as types from '../../actions/windows/types';
 
 const initialState = {
-  windows: Map() // eslint-disable-line new-cap
+  windows: new Map()
 };
 
-export default function windows(state = initialState, action) {
+export default function windowsReducer(state = initialState, action) {
   switch (action.type) {
     case types.ADD_WINDOW_SERVER: {
-      return Object.assign({}, state, {
-        foo: true
-      });
+      return {
+        windows: state.windows.set(action.data.windowId, action.data)
+      };
     }
     default:
       return state;

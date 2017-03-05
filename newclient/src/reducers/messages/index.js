@@ -1,16 +1,24 @@
 import { Map } from 'immutable';
 import * as types from '../../actions/messages/types';
 
-const initialState = {
-  messages: Map(), // eslint-disable-line new-cap
+const initialState = { // TODO: Use immutable map also here
+  messages: new Map(),
   startupFinished: false
 };
 
-export default function messages(state = initialState, action) {
+export default function messagesReducer(state = initialState, action) {
   switch (action.type) {
     case types.ADD_MESSAGE_SERVER: {
+      const windowId = action.data.windowId;
+      let messages = state.messages;
+
+      if (!messages.has(windowId)) {
+        messages = messages.set(windowId, new Map());
+      }
+
       return {
-        messages: state.messages.set(action.data.gid, action.data)
+        messages: messages.setIn([ windowId, action.data.gid ], action.data),
+        startupFinished: state.startupFinished
       };
     }
     case types.FINISH_STARTUP_SERVER: {
