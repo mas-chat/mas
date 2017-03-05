@@ -123,6 +123,7 @@ exports.register = function register(app) {
             ctx.set('Cache-control', 'private, max-age=0, no-cache');
         } else {
             await sendFile(ctx, 'newclient/dist/', subPath, {
+                index: 'index.html',
                 maxage: subPath === '' ? 0 : ONE_YEAR_IN_MS
             });
         }
