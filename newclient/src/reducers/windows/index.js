@@ -7,7 +7,7 @@ const initialState = {
 
 export default function windowsReducer(state = initialState, action) {
   switch (action.type) {
-    case types.ADD_WINDOW_SERVER: {
+    case types.SERVER_ADD_WINDOW: {
       return {
         windows: state.windows.set(action.data.windowId, action.data)
       };

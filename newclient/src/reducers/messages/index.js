@@ -8,7 +8,7 @@ const initialState = { // TODO: Use immutable map also here
 
 export default function messagesReducer(state = initialState, action) {
   switch (action.type) {
-    case types.ADD_MESSAGE_SERVER: {
+    case types.SERVER_ADD_MESSAGE: {
       const windowId = action.data.windowId;
       let messages = state.messages;
 
@@ -21,7 +21,7 @@ export default function messagesReducer(state = initialState, action) {
         startupFinished: state.startupFinished
       };
     }
-    case types.FINISH_STARTUP_SERVER: {
+    case types.SERVER_FINISH_INIT: {
       return {
         messages: state.messages,
         startupFinished: true

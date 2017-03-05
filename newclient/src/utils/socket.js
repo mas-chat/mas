@@ -5,23 +5,6 @@ import calcMsgHistorySize from './msg-history-sizer';
 
 const ioSocket = io.connect(); // Start connection as early as possible.
 
-// TODO: Remove _SERVER suffix eventually
-const serverIdToEventMap = {
-  UPDATE_MEMBERS: 'ADD_MEMBERS_SERVER',
-  ADD_ALERT: 'SHOW_ALERT_SERVER',
-  DELETE_WINDOW: 'DELETE_WINDOW_SERVER',
-  ADD_WINDOW: 'ADD_WINDOW_SERVER',
-  DELETE_MEMBERS: 'DELETE_MEMBERS_SERVER',
-  UPDATE_FRIENDS: 'ADD_FRIENDS_SERVER',
-  CONFIRM_FRIENDS: 'CONFIRM_FRIENDS_SERVER',
-  FINISH_INIT: 'FINISH_STARTUP_SERVER',
-  ADD_MESSAGE: 'ADD_MESSAGE_SERVER',
-  UPDATE_NETWORKS: 'UPDATE_NETWORKS_SERVER',
-  UPDATE_SETTINGS: 'UPDATE_SETTINGS_SERVER',
-  UPDATE_WINDOW: 'UPDATE_WINDOW_SERVER',
-  ADD_USERS: 'ADD_USERS_SERVER'
-};
-
 class Socket {
   constructor() {
     this.sessionId = 0;
@@ -56,13 +39,7 @@ class Socket {
       const type = notification.id;
       delete notification.id;
 
-      const event = serverIdToEventMap[type];
-
-      if (event) {
-        this.store.dispatch({ type: event, data: notification });
-      } else {
-        log.warn(`Unknown notification received: ${type}`);
-      }
+      this.store.dispatch({ type: `SERVER_${type}`, data: notification });
     });
 
     ioSocket.on('disconnect', () => {
