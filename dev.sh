@@ -7,12 +7,13 @@ ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
 cd $ROOT
 
 case "$1" in
-    start)
+    s|start)
+        clear
         cd server
         yarn run dev
         ;;
 
-    build)
+    b|build)
         set -x
         cd client
         yarn
@@ -30,7 +31,7 @@ case "$1" in
         echo "Install done."
         ;;
 
-    clean)
+    c|clean)
         set -x
         rm -fr client/node_modules client/bower_components client/tmp client/dist
         rm -fr newclient/dist newclient/node_modules
