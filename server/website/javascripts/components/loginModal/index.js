@@ -54,7 +54,7 @@ class LoginModal extends Component {
                 // Server has set the session cookie, just redirect
                 window.location.pathname = '/app/';
             } else {
-                this.setState({ invalidLogin: data.success ? false : data.msg, password: '' });
+                this.setState({ invalidLogin: data.msg, password: '' });
             }
         });
     }
