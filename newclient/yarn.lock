@@ -273,9 +273,9 @@ babel-helpers@^6.23.0:
     babel-runtime "^6.22.0"
     babel-template "^6.23.0"
 
-babel-loader@^6.3.2:
-  version "6.3.2"
-  resolved "https://registry.yarnpkg.com/babel-loader/-/babel-loader-6.3.2.tgz#18de4566385578c1b4f8ffe6cbc668f5e2a5ef03"
+babel-loader@^6.4.0:
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/babel-loader/-/babel-loader-6.4.0.tgz#e98c239662a22533b9e7a49594ef216d7635ea28"
   dependencies:
     find-cache-dir "^0.1.1"
     loader-utils "^0.2.16"
@@ -288,9 +288,9 @@ babel-messages@^6.23.0:
   dependencies:
     babel-runtime "^6.22.0"
 
-babel-plugin-react-css-modules@^2.2.0:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/babel-plugin-react-css-modules/-/babel-plugin-react-css-modules-2.4.1.tgz#81ce66eff5802b89330a2992d1ef932e2f5f6d12"
+babel-plugin-react-css-modules@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-react-css-modules/-/babel-plugin-react-css-modules-2.5.0.tgz#01bf241af6060d2667d75ea0c49d3e0142e714f5"
   dependencies:
     ajv "^4.11.4"
     babel-plugin-syntax-jsx "^6.18.0"
@@ -3438,9 +3438,13 @@ react-router@^3.0.2:
     loose-envify "^1.2.0"
     warning "^3.0.0"
 
-react-virtualized@^9.1.0:
-  version "9.2.1"
-  resolved "https://registry.yarnpkg.com/react-virtualized/-/react-virtualized-9.2.1.tgz#6408bf870b07e5c669399c4be30eba2c2f66b2d7"
+react-textarea-autosize@^4.0.5:
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/react-textarea-autosize/-/react-textarea-autosize-4.0.5.tgz#55379f6a6fa575fc87d1b8de2756e57e3b6c995d"
+
+react-virtualized@^9.2.2:
+  version "9.2.2"
+  resolved "https://registry.yarnpkg.com/react-virtualized/-/react-virtualized-9.2.2.tgz#69bf1baa8f390488a7b3926313585ae3f491e5ac"
   dependencies:
     babel-runtime "^6.11.6"
     classnames "^2.2.3"
