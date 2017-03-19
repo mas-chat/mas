@@ -7,7 +7,7 @@ Work in progress.
 
 # Introduction
 
-MAS protocol is message based, server driven and built on top of
+MAS protocol is event based, server driven and built on top of
 [socket.io](http://socket.io/) version 1.x.
 
 # Login
@@ -45,7 +45,7 @@ The overall approach is:
 
 3. Server responds either with 'initok' or 'terminate' event. If the client receives 'terminate' it needs to login again to get a new secret.
 
-4. After 'initok' the server emits N 'ntf' (notification) events. These notification messages allow the client to draw the initial UI. Event payload contains a JSON message which describes the notification type and other parameters.
+4. After 'initok' the server emits N 'ntf' (notification) events. These notification events allow the client to draw the initial UI. Event payload contains a JSON message which describes the event type and other parameters.
 
 5. When the client initiates an action it emits an 'req' (request) event. Event payload contains a JSON message which describes the request type and other parameters.
 
@@ -96,7 +96,7 @@ the client should use the cachedUpto parameter.
 | clientName     | optional  | Client name                                        |
 | clientOS       | optional  | Client operating system                            |
 | version        | mandatory | Must be string "1.0"                               |
-| cachedUpto     | optional  | Every ADD_MESSAGE notification has a gid field which is ever increasing global id. This parameter communicates the highest the client has already seen and stored. The server will omit of sending messages with lower gid in the beginning of session. Without this option, the server sends up to 200 ADD_MESSAGE notification for every window to fill the window backlog. |
+| cachedUpto     | optional  | Every ADD_MESSAGE notification has a gid field which is ever increasing global id. This parameter communicates the highest the client has already seen and stored. The server will omit of sending events with lower gid in the beginning of session. Without this option, the server sends up to 200 ADD_MESSAGE notification for every window to fill the window backlog. |
 | maxBacklogMsgs | optional  | Maximum amount of messages per window the client wants the server to send when a new session starts. Server might not respect this value, see 'initok' event.
 
 ## Initok event payload
@@ -163,7 +163,7 @@ Add a message line to window.
 
 ```JSON
 {
-  "id": "ADD_MESSAGE",
+  "type": "ADD_MESSAGE",
 
   "windowId": 1,
   "body": "Hello worlds!",
@@ -207,7 +207,7 @@ Close window.
 
 ```JSON
 {
-  "id": "DELETE_WINDOW",
+  "type": "DELETE_WINDOW",
 
    "windowId": 1
 }
@@ -219,12 +219,12 @@ Create new window. Window identifier is either ```userId``` or ```name```.
 
 ```JSON
 {
-  "id": "ADD_WINDOW",
+  "type": "ADD_WINDOW",
 
   "windowId": 1,
   "name": "testone",
   "userId": "m43544",
-  "type": "group",
+  "windowType": "group",
   "network": "MAS",
   "password": "",
   "alerts": {
@@ -262,7 +262,7 @@ Information about the userIds. Server sends ADD_USERS command containing a userI
 
 ```JSON
 {
-  "id": "ADD_USERS",
+  "type": "ADD_USERS",
 
   "mapping": {
     "m42": {
@@ -300,7 +300,7 @@ List of configured networks the user able to connect using JOIN request. The lis
 
 ```JSON
 {
-  "id": "UPDATE_NETWORKS",
+  "type": "UPDATE_NETWORKS",
 
   "networks": [
     "MAS"
@@ -319,7 +319,7 @@ Full list of user's contacts (friends). Send by the server during the session st
 
 ```JSON
 {
-  "id": "UPDATE_FRIENDS",
+  "type": "UPDATE_FRIENDS",
 
   "reset": true,
   "friends": [{
@@ -346,7 +346,7 @@ Show a generic alert info message.
 
 ```JSON
 {
-  "id": "ADD_ALERT",
+  "type": "ADD_ALERT",
 
   "alertId": 32433,
   "message": "There will be service break on Monday",
@@ -359,7 +359,7 @@ Initialization is complete. A hint that client can now render the UI as all init
 
 ```JSON
 {
-  "id": "FINISH_INIT"
+  "type": "FINISH_INIT"
 }
 
 ```
@@ -370,7 +370,7 @@ Add or update users in window participant list.
 
 ```JSON
 {
-  "id": "UPDATE_MEMBERS",
+  "type": "UPDATE_MEMBERS",
 
   "windowId": 1,
   "reset": true,
@@ -398,7 +398,7 @@ Remove one or more users from window participant list.
 
 ```JSON
 {
-  "id": "DELETE_MEMBERS",
+  "type": "DELETE_MEMBERS",
 
   "windowId": 1,
   "members": [{
@@ -416,7 +416,7 @@ Update settings and application wide parameters
 
 ```JSON
 {
-  "id": "UPDATE_SETTINGS",
+  "type": "UPDATE_SETTINGS",
 
   "settings": {
     "activeDesktop": 1428135577,
@@ -436,7 +436,7 @@ Update existing parameter for existing window.
 
 ```JSON
 {
-  "id": "UPDATE_WINDOW",
+  "type": "UPDATE_WINDOW",
   "windowId": 1,
 
   "password": "newsecret"
@@ -456,7 +456,7 @@ Another user(s) wants to add the user to his/her contacts list
 
 ```JSON
 {
-  "id": "CONFIRM_FRIENDS",
+  "type": "CONFIRM_FRIENDS",
 
   "friends": [{
     "userId": "m4242"
