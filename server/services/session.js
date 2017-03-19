@@ -66,11 +66,11 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
         }
 
         messages.push({
-            id: 'ADD_WINDOW',
+            type: 'ADD_WINDOW',
             windowId: window.id,
             name: conversation.get('name'),
             userId: oneOnOneMember && oneOnOneMember.get('userGId'),
-            type: conversation.get('type'),
+            windowType: conversation.get('type'),
             network: conversation.get('network'),
             password: conversation.get('password'),
             topic: conversation.get('topic'),
@@ -88,7 +88,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
         });
 
         messages.push({
-            id: 'UPDATE_MEMBERS',
+            type: 'UPDATE_MEMBERS',
             windowId: window.id,
             reset: true,
             members: members.map(member => ({
@@ -114,7 +114,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
         });
     }
 
-    messages.push({ id: 'FINISH_INIT' });
+    messages.push({ type: 'FINISH_INIT' });
 
     await notification.send(user, session.id, messages);
 
@@ -124,7 +124,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
 
 async function sendNetworkList(userGId, sessionId) {
     await notification.send(userGId, sessionId, {
-        id: 'UPDATE_NETWORKS',
+        type: 'UPDATE_NETWORKS',
         networks: networkNames
     });
 }

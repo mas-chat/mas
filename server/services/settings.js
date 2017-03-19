@@ -22,7 +22,7 @@ const notification = require('../lib/notification');
 exports.sendUpdateSettings = async function sendUpdateSettings(user, sessionId) {
     const settingsRecord = await Settings.findOrCreate(user.id);
     const command = {
-        id: 'UPDATE_SETTINGS',
+        type: 'UPDATE_SETTINGS',
         settings: {
             activeDesktop: settingsRecord.get('activeDesktop'),
             theme: settingsRecord.get('theme'),

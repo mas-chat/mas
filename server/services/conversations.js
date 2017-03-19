@@ -231,7 +231,7 @@ exports.setTopic = async function setTopic(conversation, topic, nickName) {
         return;
     }
 
-    await broadcast(conversation, { id: 'UPDATE_WINDOW', topic });
+    await broadcast(conversation, { type: 'UPDATE_WINDOW', topic });
 
     await broadcastAddMessage(conversation, {
         cat: 'info',
@@ -247,7 +247,7 @@ exports.setPassword = async function setPassword(conversation, password) {
     }
 
     await broadcast(conversation, {
-        id: 'UPDATE_WINDOW',
+        type: 'UPDATE_WINDOW',
         password
     });
 
@@ -292,7 +292,7 @@ async function broadcastAddMessage(conversation, { userGId = null, cat, body = '
 
 async function broadcastAddMembers(conversation, userGId, role, options) {
     await broadcast(conversation, {
-        id: 'UPDATE_MEMBERS',
+        type: 'UPDATE_MEMBERS',
         reset: false,
         members: [ {
             userId: userGId.toString(),
@@ -352,7 +352,7 @@ async function createFullAddMemberNtf(conversation) {
     }));
 
     return {
-        id: 'UPDATE_MEMBERS',
+        type: 'UPDATE_MEMBERS',
         reset: true,
         members: membersList
     };
@@ -371,7 +371,7 @@ async function deleteConversationMember(conversation, member, options) {
 
     if (!options.skipCleanUp) {
         await broadcast(conversation, {
-            id: 'DELETE_MEMBERS',
+            type: 'DELETE_MEMBERS',
             members: [ {
                 userId: member.get('userGId')
             } ]

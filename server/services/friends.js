@@ -35,7 +35,7 @@ exports.sendConfirmFriends = async function sendConfirmFriends(user, sessionId) 
         // Uses userId property so that related ADD_USERS notification is send automatically
         // See lib/notification.js for the details.
         const ntf = {
-            id: 'CONFIRM_FRIENDS',
+            type: 'CONFIRM_FRIENDS',
             friends: friendUsers.map(friendUser => {
                 const friendUserGId = UserGId.create({
                     id: friendUser.get('dstUserId'),
@@ -56,7 +56,7 @@ exports.sendConfirmFriends = async function sendConfirmFriends(user, sessionId) 
 
 exports.informStateChange = async function informStateChange(user, eventType) {
     const command = {
-        id: 'UPDATE_FRIENDS',
+        type: 'UPDATE_FRIENDS',
         reset: false,
         friends: [ {
             userId: user.gId.toString(),
@@ -139,7 +139,7 @@ exports.removeUser = async function removeUser(user) {
 
 async function sendUpdateFriendsNtf(user, sessionId) {
     const command = {
-        id: 'UPDATE_FRIENDS',
+        type: 'UPDATE_FRIENDS',
         reset: true,
         friends: []
     };

@@ -90,7 +90,7 @@ async function introduceUsers(user, userGIds, session, socket) {
 
     if (Object.keys(newUsers).length > 0) {
         const ntf = {
-            id: 'ADD_USERS',
+            type: 'ADD_USERS',
             mapping: newUsers
         };
 

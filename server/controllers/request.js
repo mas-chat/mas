@@ -279,7 +279,7 @@ async function handleUpdate({ user, command, window, session }) {
     if (update) {
         // Notify all sessions. Undefined body properties won't appear in the JSON message
         await notification.broadcast(user, {
-            id: 'UPDATE_WINDOW',
+            type: 'UPDATE_WINDOW',
             windowId: window.id,
             row: command.row,
             column: command.column,

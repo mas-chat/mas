@@ -52,7 +52,7 @@ exports.remove = async function remove(user, conversation) {
         log.info(user, `Removing window, id: ${window.id}`);
 
         await notification.broadcast(user, {
-            id: 'DELETE_WINDOW',
+            type: 'DELETE_WINDOW',
             windowId: window.id
         });
 
@@ -174,11 +174,11 @@ async function createWindow(user, conversation) {
 
     // TODO: Copy paste code
     await notification.broadcast(user, {
-        id: 'ADD_WINDOW',
+        type: 'ADD_WINDOW',
         windowId: window.id,
         name: conversation.get('name'),
         userId: peerMember && peerMember.get('userGId'),
-        type: conversation.get('type'),
+        windowType: conversation.get('type'),
         network: conversation.get('network'),
         password: conversation.get('password') || null,
         topic: conversation.get('topic'),
