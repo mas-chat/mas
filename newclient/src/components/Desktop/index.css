@@ -4,6 +4,7 @@ body {
 
 .desktop {
   display: flex;
+  flex-direction: row;
   height: 100vh;
   width: 100vw;
 }
@@ -11,5 +12,5 @@ body {
 .content {
   flex: 1;
   height: 100%;
-  overflow-y: scroll;
+  position: relative;
 }
