@@ -2,11 +2,11 @@ import React, { PropTypes } from 'react';
 import moment from 'moment';
 import './index.css';
 
-const ConversationMessage = ({ ts, body, nick }) => {
+const ConversationMessage = ({ style, ts, body, nick }) => {
   const formattedTs = moment.unix(ts).format('HH:mm');
 
   return (
-    <div styleName="message">
+    <div style={style} styleName="message">
       <div styleName="timestamp">
         {formattedTs}
       </div>
@@ -22,7 +22,8 @@ const ConversationMessage = ({ ts, body, nick }) => {
 ConversationMessage.propTypes = {
   ts: PropTypes.number.isRequired,
   body: PropTypes.string,
-  nick: PropTypes.string
+  nick: PropTypes.string,
+  style: PropTypes.string.isRequired
 };
 
 ConversationMessage.defaultProps = {

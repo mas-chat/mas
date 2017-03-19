@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { Router, Route, browserHistory } from 'react-router';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import configureStore from './store/configureStore';
 import Desktop from './components/Desktop';
@@ -23,7 +23,7 @@ const devTools = process.env.NODE_ENV === 'production' ? null : <DevTools />;
 render(
   <Provider store={store}>
     <span>
-      <Router history={browserHistory}>
+      <Router>
         <Route path="/sector17" component={Desktop} />
       </Router>
       {devTools}

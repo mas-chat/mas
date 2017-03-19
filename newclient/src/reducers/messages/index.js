@@ -8,8 +8,8 @@ const initialState = { // TODO: Use immutable map also here
 
 export default function messagesReducer(state = initialState, action) {
   switch (action.type) {
-    case types.SERVER_ADD_MESSAGE: {
-      const windowId = action.data.windowId;
+    case types.ADD_MESSAGE: {
+      const windowId = action.windowId;
       let messages = state.messages;
 
       if (!messages.has(windowId)) {
@@ -17,11 +17,11 @@ export default function messagesReducer(state = initialState, action) {
       }
 
       return {
-        messages: messages.setIn([ windowId, action.data.gid ], action.data),
+        messages: messages.setIn([ windowId, action.gid ], action),
         startupFinished: state.startupFinished
       };
     }
-    case types.SERVER_FINISH_INIT: {
+    case types.FINISH_INIT: {
       return {
         messages: state.messages,
         startupFinished: true

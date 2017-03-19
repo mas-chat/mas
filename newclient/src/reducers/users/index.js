@@ -7,8 +7,8 @@ const initialState = {
 
 export default function usersReducer(state = initialState, action) {
   switch (action.type) {
-    case types.SERVER_ADD_USERS: {
-      const mapping = action.data.mapping;
+    case types.ADD_USERS: {
+      const mapping = action.mapping;
 
       return {
         users: Object.entries(mapping).reduce(

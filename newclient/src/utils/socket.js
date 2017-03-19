@@ -1,6 +1,7 @@
 import io from 'socket.io-client';
 import Cookies from 'js-cookie';
 import log from './log';
+import userInfo from './userInfo';
 import calcMsgHistorySize from './msg-history-sizer';
 
 const ioSocket = io.connect(); // Start connection as early as possible.
@@ -28,6 +29,8 @@ class Socket {
 
       Cookies.set('mas', data.refreshCookie, { expires: 7 });
 
+      userInfo.userId = `m${data.userId}`;
+
       this._emitReq(); // In case there are items in sendQueue from previous session
     });
 
@@ -35,12 +38,7 @@ class Socket {
       console.log('TERMINATE'); // eslint-disable-line no-console
     });
 
-    ioSocket.on('ntf', notification => {
-      const type = notification.id;
-      delete notification.id;
-
-      this.store.dispatch({ type: `SERVER_${type}`, data: notification });
-    });
+    ioSocket.on('ntf', notification => this.store.dispatch(notification));
 
     ioSocket.on('disconnect', () => {
       log.info('Socket.io connection lost.');
@@ -74,16 +72,18 @@ class Socket {
     });
   }
 
-  send(command, callback) {
-    this.sendQueue.push({
-      request: command,
-      callback
+  send(request) {
+    const promise = new Promise((resolve, reject) => {
+      this.sendQueue.push({ request, resolve, reject });
+
+      if (this.sendQueue.length === 1 && this.connected) {
+        this._emitReq();
+      }
     });
 
-    if (this.sendQueue.length === 1 && this.connected) {
-      this._emitReq();
-    }
+    return promise;
   }
+
 
   static _emitInit() {
     const cookie = Cookies.get('mas'); // TODO: Abort if not found
@@ -109,14 +109,12 @@ class Socket {
     const req = this.sendQueue[0];
 
     ioSocket.emit('req', req.request, data => {
-      if (req.callback) {
-        log.info('← RESP');
-        req.callback(data);
-      }
-
-      this.sendQueue.shift();
-      this._emitReq();
+      log.info('← RESP');
+      req.resolve(data);
     });
+
+    this.sendQueue.shift();
+    this._emitReq();
 
     log.info(`→ REQ: ${req.request.id}`);
   }

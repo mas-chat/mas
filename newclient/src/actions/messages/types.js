@@ -1,2 +1,2 @@
-export const SERVER_ADD_MESSAGE = 'SERVER_ADD_MESSAGE';
-export const SERVER_FINISH_INIT = 'SERVER_FINISH_INIT'; // TODO: Correct place?
+export const ADD_MESSAGE = 'ADD_MESSAGE';
+export const FINISH_INIT = 'FINISH_INIT'; // TODO: Correct place?

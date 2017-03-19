@@ -1,6 +1,7 @@
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import * as actions from '../../actions/desktop';
+import { select } from '../../actions/desktop';
+import { sendMessage } from '../../actions/windows';
 import Sidebar from '../Sidebar';
 import ConversationWindow from '../ConversationWindow';
 import './index.css';
@@ -9,6 +10,7 @@ class Desktop extends PureComponent {
   constructor(props) {
     super(props);
 
+    this.onSend = this.onSend.bind(this);
     this.select = this.select.bind(this);
   }
 
@@ -20,10 +22,16 @@ class Desktop extends PureComponent {
     return true; // TODO: Not optimal
   }
 
+  onSend(text, windowId) {
+    const { dispatch } = this.props;
+
+    dispatch(sendMessage(text, windowId));
+  }
+
   select(windowId) {
     const { dispatch } = this.props;
 
-    dispatch(actions.select(windowId));
+    dispatch(select(windowId));
   }
 
   render() {
@@ -31,9 +39,11 @@ class Desktop extends PureComponent {
 
     const masWindows = windows.map(masWindow => (
       <ConversationWindow
-        messages={messages.get(masWindow.windowId)}
+        messages={messages.get(masWindow.windowId).sortBy(message => message.gid).toArray()}
+        onSend={this.onSend}
         users={users}
         visible={masWindow.windowId === active}
+        windowId={masWindow.windowId}
       />
     ));
 

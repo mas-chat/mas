@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dashboard -- webpack-dev-server --watch --hot --output-pathinfo --debug --devtool inline-source-map",
+    "dev": "webpack-dashboard --minimal -- webpack-dev-server --watch --hot --output-pathinfo --debug --devtool inline-source-map",
     "csslint": "stylelint **/*css",
     "prod": "NODE_ENV=production webpack"
   },
@@ -40,7 +40,7 @@
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-redux": "^5.0.3",
-    "react-router": "^4.0.0",
+    "react-router-dom": "^4.0.0",
     "react-textarea-autosize": "^4.0.5",
     "react-virtualized": "^9.3.0",
     "redux": "^3.6.0",
