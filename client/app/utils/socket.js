@@ -91,8 +91,8 @@ let SocketService = Ember.Object.extend({
         }));
 
         ioSocket.on('ntf', Ember.run.bind(this, function(notification) {
-            let type = notification.id;
-            delete notification.id;
+            let type = notification.type;
+            delete notification.type;
 
             if (type !== 'ADD_MESSAGE') {
                 Ember.Logger.info(`← NTF: ${type}`);

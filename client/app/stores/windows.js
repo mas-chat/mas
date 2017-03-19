@@ -457,6 +457,9 @@ export default Store.extend({
     },
 
     handleAddWindowServer(data) {
+        data.type = data.windowType;
+        delete data.windowType;
+
         this.get('windows').upsertModel(data, { generation: socket.sessionId });
     },
 
