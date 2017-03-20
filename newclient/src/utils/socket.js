@@ -35,7 +35,8 @@ class Socket {
     });
 
     ioSocket.on('terminate', () => {
-      console.log('TERMINATE'); // eslint-disable-line no-console
+      Cookies.remove('mas');
+      Window.location.assign('/');
     });
 
     ioSocket.on('ntf', notification => this.store.dispatch(notification));
