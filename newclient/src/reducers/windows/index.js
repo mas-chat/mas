@@ -1,5 +1,5 @@
 import { Map } from 'immutable';
-import * as types from '../../actions/windows/types';
+import { ADD_WINDOW } from '../../actions/windows/types';
 
 const initialState = {
   windows: new Map()
@@ -7,7 +7,7 @@ const initialState = {
 
 export default function windowsReducer(state = initialState, action) {
   switch (action.type) {
-    case types.ADD_WINDOW: {
+    case ADD_WINDOW: {
       return {
         windows: state.windows.set(action.windowId, action)
       };

@@ -1,10 +1,8 @@
 import * as types from './types';
 
-export function select(windowId) {
+export function select(windowId) { // eslint-disable-line import/prefer-default-export
   return {
     type: types.SELECT,
     windowId
   };
 }
-
-export function foo() {} // TODO: Workaround to avoid eslint warning

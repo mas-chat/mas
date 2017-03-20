@@ -2,7 +2,7 @@ import { ADD_MESSAGE } from '../messages/types';
 import socket from '../../utils/socket';
 import userInfo from '../../utils/userInfo';
 
-export function sendMessage(text, windowId) {
+export function sendMessage(text, windowId) { // eslint-disable-line import/prefer-default-export
   return dispatch => {
     socket.send({
       id: 'SEND',
@@ -24,5 +24,3 @@ export function sendMessage(text, windowId) {
     });
   };
 }
-
-export function foo() {} // TODO: Workaround to avoid eslint warning

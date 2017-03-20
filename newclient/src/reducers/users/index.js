@@ -1,5 +1,5 @@
 import { Map } from 'immutable';
-import * as types from '../../actions/users/types';
+import { ADD_USERS } from '../../actions/users/types';
 
 const initialState = {
   users: new Map()
@@ -7,7 +7,7 @@ const initialState = {
 
 export default function usersReducer(state = initialState, action) {
   switch (action.type) {
-    case types.ADD_USERS: {
+    case ADD_USERS: {
       const mapping = action.mapping;
 
       return {

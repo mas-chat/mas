@@ -1,5 +1,5 @@
-import * as types from '../../actions/desktop/types';
-import * as windowsTypes from '../../actions/windows/types';
+import { SELECT } from '../../actions/desktop/types';
+import { ADD_WINDOW } from '../../actions/windows/types';
 
 const initialState = {
   active: null
@@ -7,8 +7,8 @@ const initialState = {
 
 export default function windowsReducer(state = initialState, action) {
   switch (action.type) {
-    case windowsTypes.ADD_WINDOW:
-    case types.SELECT: {
+    case ADD_WINDOW:
+    case SELECT: {
       return {
         active: action.windowId
       };

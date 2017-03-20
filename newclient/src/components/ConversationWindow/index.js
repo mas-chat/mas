@@ -18,14 +18,16 @@ class ConversationWindow extends PureComponent {
   }
 
   onKeyPress(e) {
+    const { onSend, windowId } = this.props;
+
     if (e.charCode === 13) {
       e.preventDefault();
-      onSend(textAreaInput.value, windowId);
-      textAreaInput.value = '';
+      onSend(this.textAreaInput.value, windowId);
+      this.textAreaInput.value = '';
     }
   }
 
-  rowRenderer({ index, isScrolling, key, parent, style }) {
+  rowRenderer({ index, key, parent, style }) {
     const { messages, users } = this.props;
 
     const msg = messages[index];
@@ -39,7 +41,7 @@ class ConversationWindow extends PureComponent {
         parent={parent}
         rowIndex={index}
       >
-        {({ measure }) => (
+        {() => ( // TODO: ({ measure }) use when images are loaded
           <ConversationMessage
             style={style}
             key={msg.gid}
@@ -53,9 +55,7 @@ class ConversationWindow extends PureComponent {
   }
 
   render() {
-    const { messages, visible, windowId, onSend } = this.props;
-
-    let textAreaInput = null;
+    const { messages, visible } = this.props;
 
     return (
       <div styleName={`window ${visible ? '' : 'hidden'}`}>
@@ -76,7 +76,7 @@ class ConversationWindow extends PureComponent {
         </div>
         <div styleName="controls">
           <Textarea
-            ref={(input) => { textAreaInput = input; }}
+            ref={(input) => { this.textAreaInput = input; }}
             styleName="textarea"
             onKeyPress={this.onKeyPress}
           />
@@ -88,7 +88,7 @@ class ConversationWindow extends PureComponent {
 
 ConversationWindow.propTypes = {
   messages: PropTypes.arrayOf(PropTypes.object).isRequired,
-  users: PropTypes.arrayOf(PropTypes.object).isRequired,
+  users: PropTypes.shape({}).isRequired,
   onSend: PropTypes.func.isRequired,
   visible: PropTypes.bool.isRequired,
   windowId: PropTypes.number.isRequired

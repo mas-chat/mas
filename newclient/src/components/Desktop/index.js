@@ -61,12 +61,13 @@ class Desktop extends PureComponent {
 Desktop.propTypes = {
   dispatch: PropTypes.func.isRequired,
   windows: PropTypes.shape({}).isRequired,
-  active: PropTypes.number.isRequired,
+  active: PropTypes.number,
   messages: PropTypes.shape({}),
   users: PropTypes.shape({})
 };
 
 Desktop.defaultProps = {
+  active: null,
   messages: {},
   users: {}
 };

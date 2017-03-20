@@ -20,7 +20,11 @@ class Sidebar extends Component {
       const windowId = masWindow.windowId;
 
       return (
-        <div styleName={windowId === active ? 'selected' : ''} onClick={() => this.switch(windowId)} >
+        <div
+          key={windowId}
+          styleName={windowId === active ? 'selected' : ''}
+          onClick={() => this.switch(windowId)}
+        >
           {title}
         </div>
       );

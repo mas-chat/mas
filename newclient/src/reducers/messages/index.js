@@ -1,5 +1,6 @@
 import { Map } from 'immutable';
-import * as types from '../../actions/messages/types';
+import { FINISH_INIT } from '../../actions/desktop/types';
+import { ADD_MESSAGE } from '../../actions/messages/types';
 
 const initialState = { // TODO: Use immutable map also here
   messages: new Map(),
@@ -8,7 +9,7 @@ const initialState = { // TODO: Use immutable map also here
 
 export default function messagesReducer(state = initialState, action) {
   switch (action.type) {
-    case types.ADD_MESSAGE: {
+    case ADD_MESSAGE: {
       const windowId = action.windowId;
       let messages = state.messages;
 
@@ -21,7 +22,7 @@ export default function messagesReducer(state = initialState, action) {
         startupFinished: state.startupFinished
       };
     }
-    case types.FINISH_INIT: {
+    case FINISH_INIT: {
       return {
         messages: state.messages,
         startupFinished: true

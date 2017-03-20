@@ -23,7 +23,7 @@ ConversationMessage.propTypes = {
   ts: PropTypes.number.isRequired,
   body: PropTypes.string,
   nick: PropTypes.string,
-  style: PropTypes.string.isRequired
+  style: PropTypes.shape({}).isRequired
 };
 
 ConversationMessage.defaultProps = {

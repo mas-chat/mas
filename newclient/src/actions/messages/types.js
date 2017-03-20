@@ -1,2 +1,2 @@
-export const ADD_MESSAGE = 'ADD_MESSAGE';
-export const FINISH_INIT = 'FINISH_INIT'; // TODO: Correct place?
+export const ADD_MESSAGE = 'ADD_MESSAGE'; // eslint-disable-line import/prefer-default-export
+
