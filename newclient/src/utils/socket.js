@@ -36,7 +36,7 @@ class Socket {
 
     ioSocket.on('terminate', () => {
       Cookies.remove('mas');
-      Window.location.assign('/');
+      window.location.assign('/');
     });
 
     ioSocket.on('ntf', notification => this.store.dispatch(notification));
