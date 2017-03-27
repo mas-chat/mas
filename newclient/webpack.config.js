@@ -28,9 +28,12 @@ const config = {
         'css-loader?importLoader=1&modules&localIdentName=[path]_[local]_[hash:base64:7]'
       ]
     }, {
-      test: /\.(ttf|eot|svg|woff|woff2)$/,
-      use: 'url?limit=10000'
-    } ]
+      test: /\.(ttf|eot|woff|woff2)$/,
+      use: 'url-loader?limit=3000'
+    }, {
+      test: /\.svg$/,
+      use: 'file-loader'
+    }]
   },
   plugins: [
     new webpack.DefinePlugin({

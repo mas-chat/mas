@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import moment from 'moment';
+import emojione from 'emojione';
 import URI from 'urijs';
 import './index.css';
 
@@ -13,7 +14,7 @@ function processLink(url) {
 
   if (IMAGE_FILE_EXTENSIONS.includes(urlObj.suffix().toLowerCase())) {
     label = urlObj.filename();
-    media = { type: 'image', url: urlObj.toString() };
+    media = { type: 'image', href: urlObj.toString() };
   } else if ((domain === 'youtube.com' && urlObj.search(true).v) ||
     domain === 'youtu.be') {
     label = urlObj.toString();
@@ -30,7 +31,7 @@ function processLink(url) {
       }
     }
 
-    media = { type: 'youtubelink', url: urlObj.toString(), start: inSeconds };
+    media = { type: 'youtubelink', href: urlObj.toString(), start: inSeconds };
   } else {
     label = urlObj.readable();
   }
@@ -47,7 +48,26 @@ function processLink(url) {
     normalized = urlObj;
   }
 
-  return { url: normalized.toString(), label, media };
+  return { href: normalized.toString(), label, media };
+}
+
+function processText(text) {
+  // Find @ character 1) after space, 2) in the beginning of string, 3) after HTML tag (>)
+  // text = text.replace(/(^| |>)(@\S+)(?=( |$))/g,
+  //     (match, p1, p2) => this._renderMention(p1, p2));
+
+  // Convert first Unicode emojis to :emojis:
+  const parts = emojione.toShort(text).split(/(:\S+?:)/);
+
+  return parts.map(part => {
+    const emoji = emojione.emojioneList[part];
+
+    if (emoji) {
+      return { type: 'emoji', text: part, emoji };
+    } else {
+      return { type: 'txt', text: part };
+    }
+  });
 }
 
 function splitByLinks(text) {
@@ -57,7 +77,7 @@ function splitByLinks(text) {
 
   URI.withinString(text, (url, start, end) => {
     if (previousEnd !== start) {
-      parts.push({ type: 'txt', text: text.substring(previousEnd, start) });
+      parts.push(...processText(text.substring(previousEnd, start)));
     }
 
     const linkDetails = processLink(url);
@@ -66,12 +86,12 @@ function splitByLinks(text) {
       mediaParts.push(linkDetails.media);
     }
 
-    parts.push({ type: 'url', url: linkDetails.url, label: linkDetails.label });
+    parts.push({ type: 'url', href: linkDetails.href, label: linkDetails.label });
     previousEnd = end;
   });
 
   if (previousEnd !== text.length) {
-    parts.push({ type: 'txt', text: text.substring(previousEnd) });
+    parts.push(...processText(text.substring(previousEnd)));
   }
 
   return { parts, mediaParts };
@@ -85,7 +105,12 @@ const ConversationMessage = ({ style, ts, body, nick }) => {
       case 'txt':
         return part.text;
       case 'url':
-        return <a href={part.url} target="_blank" rel="noopener noreferrer">{part.label}</a>;
+        return <a href={part.href} target="_blank" rel="noopener noreferrer">{part.label}</a>;
+      case 'emoji':
+        const emoji = part.emoji;
+        const unicode = emoji.unicode[emoji.unicode.length - 1];
+        const src = require('emojione/assets/svg/' + unicode + '.svg');
+        return <img styleName="emoji" alt={part.text} title={part.text} src={src} />;
       default:
         return null;
     }
