@@ -54,15 +54,15 @@ function processLink(url) {
 function processText(line) {
   const parts = emojione.toShort(line) // Convert unicode emojis to :emojis:
     .split(/(:\S+?:)|(^| )(@\S+)(?= |$)/)
-    .filter(part => part !== undefined && part !== '');
+    .filter(text => text !== undefined && text !== '');
 
   return parts.map(text => {
-    const emoji = emojione.emojioneList[part];
+    const emoji = emojione.emojioneList[text];
     let type = 'txt';
 
     if (emoji) {
       type = 'emoji';
-    } else if (part.match(/^@\S+$/)) {
+    } else if (text.match(/^@\S+$/)) {
       type = 'mention';
     }
 
