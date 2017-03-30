@@ -111,7 +111,7 @@ const ConversationMessage = ({ style, ts, body, nick }) => {
       case 'emoji': {
         const emoji = part.emoji;
         const unicode = emoji.unicode[emoji.unicode.length - 1];
-        const src = require(`emojione/assets/svg/${unicode}/.svg`); // eslint-disable-line import/no-dynamic-require
+        const src = require(`emojione/assets/svg/${unicode}.svg`); // eslint-disable-line import/no-dynamic-require
         return <img styleName="emoji" alt={part.text} title={part.text} src={src} />;
       }
       case 'mention': {
