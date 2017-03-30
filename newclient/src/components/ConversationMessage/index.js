@@ -52,21 +52,20 @@ function processLink(url) {
 }
 
 function processText(text) {
-  // Find @ character 1) after space, 2) in the beginning of string, 3) after HTML tag (>)
-  // text = text.replace(/(^| |>)(@\S+)(?=( |$))/g,
-  //     (match, p1, p2) => this._renderMention(p1, p2));
-
-  // Convert first Unicode emojis to :emojis:
-  const parts = emojione.toShort(text).split(/(:\S+?:)/);
+  const parts = text
+    .split(/(:\S+?:)|(^| )(@\S+)(?= |$)/)
+    .filter(part => part !== undefined && part !== '');
 
   return parts.map(part => {
     const emoji = emojione.emojioneList[part];
 
     if (emoji) {
       return { type: 'emoji', text: part, emoji };
-    } else {
-      return { type: 'txt', text: part };
+    } else if (part.match(/^@\S+$/)) {
+      return { type: 'mention', text: part };
     }
+
+    return { type: 'txt', text: part };
   });
 }
 
@@ -102,17 +101,24 @@ const ConversationMessage = ({ style, ts, body, nick }) => {
 
   const formattedBody = splitByLinks(body).parts.map(part => {
     switch (part.type) {
-      case 'txt':
+      case 'txt': {
         return part.text;
-      case 'url':
+      }
+      case 'url': {
         return <a href={part.href} target="_blank" rel="noopener noreferrer">{part.label}</a>;
-      case 'emoji':
+      }
+      case 'emoji': {
         const emoji = part.emoji;
         const unicode = emoji.unicode[emoji.unicode.length - 1];
-        const src = require('emojione/assets/svg/' + unicode + '.svg');
+        const src = require(`emojione/assets/svg/${unicode}/.svg`); // eslint-disable-line import/no-dynamic-require
         return <img styleName="emoji" alt={part.text} title={part.text} src={src} />;
-      default:
+      }
+      case 'mention': {
+        return <span styleName="mention">{part.text}</span>;
+      }
+      default: {
         return null;
+      }
     }
   });
 
