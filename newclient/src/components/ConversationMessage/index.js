@@ -51,21 +51,22 @@ function processLink(url) {
   return { href: normalized.toString(), label, media };
 }
 
-function processText(text) {
-  const parts = text
+function processText(line) {
+  const parts = emojione.toShort(line) // Convert unicode emojis to :emojis:
     .split(/(:\S+?:)|(^| )(@\S+)(?= |$)/)
     .filter(part => part !== undefined && part !== '');
 
-  return parts.map(part => {
+  return parts.map(text => {
     const emoji = emojione.emojioneList[part];
+    let type = 'txt';
 
     if (emoji) {
-      return { type: 'emoji', text: part, emoji };
+      type = 'emoji';
     } else if (part.match(/^@\S+$/)) {
-      return { type: 'mention', text: part };
+      type = 'mention';
     }
 
-    return { type: 'txt', text: part };
+    return { type, text, emoji };
   });
 }
 
