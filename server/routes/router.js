@@ -43,7 +43,7 @@ const newClientDevProxy = convert(proxy({
     map: urlPath => (urlPath === '/sector17' ? '/sector17/' : urlPath)
 }));
 
-exports.register = function register(app) {
+module.exports = function buildRouter() {
     log.info('Registering website routes');
 
     const router = new Router();
@@ -115,8 +115,8 @@ exports.register = function register(app) {
     }
 
     // New client
-    router.get(/\/sector17(.*)/, async ctx => {
-        const subPath = ctx.params[0].replace(/^\//, '');
+    router.get(/\/sector17\/?(.*)/, async ctx => {
+        const subPath = ctx.params[0];
 
         if (devMode) {
             await newClientDevProxy(ctx);
@@ -138,7 +138,7 @@ exports.register = function register(app) {
         await sendFile(ctx, 'server/website/dist/', ctx.params[0], { maxage });
     });
 
-    app.use(router.routes()).use(router.allowedMethods());
+    return router;
 };
 
 async function sendFile(ctx, root, filePath, options = {}) {

@@ -30,12 +30,11 @@ const hbs = require('koa-hbs');
 const error = require('koa-error');
 const compress = require('koa-compress');
 const logger = require('koa-logger');
-const handlebarsHelpers = require('./lib/handlebarsHelpers');
 const log = require('./lib/log');
 const redis = require('./lib/redis');
 const passport = require('./lib/passport');
 const authSessionChecker = require('./lib/authSessionChecker');
-const routes = require('./routes/routes');
+const router = require('./routes/router')();
 const scheduler = require('./lib/scheduler');
 const socketController = require('./controllers/socket');
 const conf = require('./lib/conf');
@@ -129,11 +128,8 @@ function createFrontendApp() {
 
     app.use(authSessionChecker.processCookie);
 
-    handlebarsHelpers.registerHelpers(hbs);
-
-    routes.register(app);
-
-    // Socket.io server (socketController) must be created after last app.use()
+    app.use(router.routes());
+    app.use(router.allowedMethods());
 
     return app;
 }
