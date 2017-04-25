@@ -5,6 +5,18 @@ import URI from 'urijs';
 import './index.css';
 
 const IMAGE_FILE_EXTENSIONS = [ 'png', 'jpg', 'jpeg', 'gif' ];
+const EMOJI_LOOKUP_TABLE = buildEmojiLookupTable();
+
+function buildEmojiLookupTable() {
+  const res = {};
+
+  for (const [ emojiName, emoji ] of Object.entries(emojione.emojioneList)) {
+    res[emojiName] = emoji;
+    emoji.shortnames.forEach(shortname => { res[shortname] = emoji; });
+  }
+
+  return res;
+}
 
 function processLink(url) {
   let label = null;
@@ -57,16 +69,13 @@ function processText(line) {
     .filter(text => text !== undefined && text !== '');
 
   return parts.map(text => {
-    const emoji = emojione.emojioneList[text];
-    let type = 'txt';
-
-    if (emoji) {
-      type = 'emoji';
+    if (EMOJI_LOOKUP_TABLE[text]) {
+      return { type: 'emoji', text, emoji: EMOJI_LOOKUP_TABLE[text] };
     } else if (text.match(/^@\S+$/)) {
-      type = 'mention';
+      return { type: 'mention', text };
     }
 
-    return { type, text, emoji };
+    return { type: 'txt', text };
   });
 }
 
@@ -109,10 +118,10 @@ const ConversationMessage = ({ style, ts, body, nick }) => {
         return <a href={part.href} target="_blank" rel="noopener noreferrer">{part.label}</a>;
       }
       case 'emoji': {
-        const emoji = part.emoji;
-        const unicode = emoji.unicode[emoji.unicode.length - 1];
-        const src = require(`emojione/assets/svg/${unicode}.svg`); // eslint-disable-line import/no-dynamic-require
-        return <img styleName="emoji" alt={part.text} title={part.text} src={src} />;
+        const id = part.emoji.uc_base;
+        const url = `${emojione.imagePathPNG}${id}.png`;
+
+        return <img styleName="emoji" alt={part.text} title={part.text} src={url} />;
       }
       case 'mention': {
         return <span styleName="mention">{part.text}</span>;
