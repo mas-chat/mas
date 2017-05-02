@@ -13,7 +13,7 @@
     "iconv-lite": "^0.4.16",
     "ioredis": "^2.5.0",
     "ip": "^1.1.5",
-    "is-utf8": "~0.2.0",
+    "is-utf8": "git+ssh://git@github.com/ilkkao/is-utf8#697531304d87206ae063fbfe3ee0ffad87a16af4",
     "juice": "^4.0.2",
     "jwt-simple": "~0.5.0",
     "koa": "^2.2.0",
