@@ -10,7 +10,7 @@ case "$1" in
     s|start)
         clear
         cd server
-        yarn run dev
+        yarn run --silent dev
         ;;
 
     b|build)
