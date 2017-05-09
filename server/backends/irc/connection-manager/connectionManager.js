@@ -27,7 +27,7 @@ init.configureProcess('irc-connman');
 const net = require('net');
 const tls = require('tls');
 const carrier = require('carrier');
-const isUtf8 = require('is-utf8');
+const isUtf8 = require('utf-8-validate');
 const iconv = require('iconv-lite');
 const ip = require('ip');
 const conf = require('../../../lib/conf');
