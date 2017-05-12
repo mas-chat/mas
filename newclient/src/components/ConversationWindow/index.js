@@ -1,4 +1,5 @@
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import Textarea from 'react-textarea-autosize';
 import { CellMeasurer, CellMeasurerCache, AutoSizer, List } from 'react-virtualized';
 import ConversationMessage from '../ConversationMessage';
