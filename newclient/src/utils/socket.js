@@ -27,8 +27,6 @@ class Socket {
       this.sessionId = data.sessionId;
       this.maxBacklogMsgs = data.maxBacklogMsgs;
 
-      Cookies.set('mas', data.refreshCookie, { expires: 7 });
-
       userInfo.userId = `m${data.userId}`;
 
       this._emitReq(); // In case there are items in sendQueue from previous session
@@ -37,6 +35,11 @@ class Socket {
     ioSocket.on('terminate', () => {
       Cookies.remove('mas');
       window.location.assign('/');
+    });
+
+    ioSocket.on('refresh_session', data => {
+      Cookies.set('mas', data.refreshCookie, { expires: 7 });
+      ioSocket.emit('refresh_done');
     });
 
     ioSocket.on('ntf', notification => this.store.dispatch(notification));
