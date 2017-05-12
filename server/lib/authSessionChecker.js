@@ -23,11 +23,11 @@ exports.processCookie = async function processCookie(ctx, next) {
     ctx.mas = ctx.mas || {};
     ctx.mas.user = null;
 
-    const cookieValue = ctx.cookies.get('mas');
+    const sessionCookie = ctx.cookies.get('mas');
 
-    if (cookieValue) {
-        const userId = await authSessionService.validateCookie(cookieValue);
-        const user = userId ? await User.fetch(userId) : null;
+    if (sessionCookie) {
+        const session = await authSessionService.get(sessionCookie);
+        const user = session ? await User.fetch(session.get('userId')) : null;
 
         if (!user || !user.get('inUse')) {
             ctx.cookies.set('mas'); // Delete the invalid cookie

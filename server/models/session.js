@@ -36,6 +36,13 @@ module.exports = class Session extends Base {
     get expired() {
         return (now() - this.get('updatedAt')) > ONE_WEEK_IN_MS;
     }
+
+    encodeToCookie() {
+        return new Buffer(JSON.stringify({
+            token: this.get('token'),
+            userId: this.get('userId')
+        })).toString('base64');
+    }
 };
 
 function now() {

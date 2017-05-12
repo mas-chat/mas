@@ -22,36 +22,31 @@ exports.create = async function create(userId, ip) {
     return Session.create({ userId, ip });
 };
 
-exports.deleteAll = async function deleteAll(userId) {
-    const sessions = await Session.find({ userId });
-
-    sessions.forEach(session => session.delete());
-};
-
-exports.encodeToCookie = function encodeToCookie(session) {
-    return new Buffer(JSON.stringify({
-        token: session.get('token'),
-        userId: session.get('userId')
-    })).toString('base64');
-};
-
-exports.validateCookie = async function validate(cookie, options = {}) {
+exports.get = async function get(cookie) {
     const sessionData = decodeCookieValue(cookie);
+
+    if (!sessionData) {
+        return null;
+    }
+
     const session = await findSession(sessionData);
 
     if (!session) {
         return null;
     }
 
-    if (session.expired || options.delete) {
-        session.delete();
-    }
-
     if (session.expired) {
+        session.delete();
         return null;
     }
 
-    return session.get('userId');
+    return session;
+};
+
+exports.deleteAll = async function deleteAll(userId) {
+    const sessions = await Session.find({ userId });
+
+    sessions.forEach(session => session.delete());
 };
 
 function decodeCookieValue(value) {

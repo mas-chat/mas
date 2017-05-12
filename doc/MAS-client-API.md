@@ -70,6 +70,8 @@ List of used custom events.
 | terminate            | server     |
 | ntf                  | server     |
 | req                  | client     |
+| refresh_session      | server     |
+| refresh_done         | client     |
 
 ## Socket.io client disconnect event
 
@@ -111,7 +113,6 @@ the client should use the cachedUpto parameter.
 |------------|-----------|----------------------------------------------------|
 | sessionId  | mandatory | Session identifier. Client needs it currently only when uploading images. |
 | maxBacklogMsgs | mandatory | Maximum amount of messages per window the server sends to the client before 'FINISH_INIT' notification. This is either the value the client sent in 'init' message if the server approved it or a default value if the client didn't send maxBacklogMsgs parameter or the value it send was rejected.
-| refreshCookie | mandatory | A new cookie that the client must use during the next init.
 
 ## Terminate event payload
 
@@ -141,6 +142,14 @@ the client should use the cachedUpto parameter.
 | id         | mandatory | Type of the notification, request                  |
 
 Other parameters are specific to notification or request type. See below.
+
+## Refresh session event payload
+
+| Parameter     | Type      | Description                                        |
+|---------------|-----------|----------------------------------------------------|
+| refreshCookie | mandatory | A new cookie that the client must use during the next init.
+
+Server sends this event after successful session init to refresh the cookie. Client must respond by emitting a `refresh_done` event (no payload).
 
 # Example scenario
 

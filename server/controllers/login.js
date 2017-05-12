@@ -49,9 +49,9 @@ exports.externalLogin = function externalLogin(provider) {
 };
 
 async function createAuthSession(ctx, user) {
-    const authSession = await authSesssionService.create(user.id, ctx.request.ip);
+    const session = await authSesssionService.create(user.id, ctx.request.ip);
 
-    ctx.cookies.set('mas', authSesssionService.encodeToCookie(authSession), {
+    ctx.cookies.set('mas', session.encodeToCookie(), {
         maxAge: ONE_WEEK_IN_MS,
         httpOnly: false
     });

@@ -73,12 +73,9 @@ let SocketService = Ember.Object.extend({
             this.set('_connected', true);
 
             this.set('sessionId', data.sessionId); // TODO: Should not needed, use cookie always
-            this.set('cookie', data.refreshCookie);
 
             this.set('_windowsStore.userId', `m${data.userId}`);
             this.set('_windowsStore.maxBacklogMsgs', data.maxBacklogMsgs);
-
-            Cookies.set('mas', data.refreshCookie, { expires: 7 });
 
             // TODO: Delete oldest messages for windows that have more messages than
             // maxBacklogMsgs. They can be stale, when editing becomes possible.
@@ -88,6 +85,12 @@ let SocketService = Ember.Object.extend({
 
         ioSocket.on('terminate', Ember.run.bind(this, function() {
             this._logout();
+        }));
+
+        ioSocket.on('refresh_session', Ember.run.bind(this, function(data) {
+            this.set('cookie', data.refreshCookie);
+            Cookies.set('mas', data.refreshCookie, { expires: 7 });
+            ioSocket.emit('refresh_done');
         }));
 
         ioSocket.on('ntf', Ember.run.bind(this, function(notification) {

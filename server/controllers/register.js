@@ -182,10 +182,12 @@ exports.create = async function create(ctx) {
         await newUser.set('inUse', true);
         await usersService.addMASNetworkInfo(newUser);
 
-        const cookie = authSessionService.encodeToCookie(
-            await authSessionService.create(newUser.id, ctx.request.ip));
+        const session = await authSessionService.create(newUser.id, ctx.request.ip);
 
-        ctx.cookies.set('mas', cookie, { maxAge: ONE_WEEK_IN_MS, httpOnly: false });
+        ctx.cookies.set('mas', session.encodeToCookie(), {
+            maxAge: ONE_WEEK_IN_MS,
+            httpOnly: false
+        });
 
         ctx.body = { success: true };
     } else {

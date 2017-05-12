@@ -421,7 +421,11 @@ async function handleLogout({ user, command, session }) {
         await authSessionService.deleteAll(user.id);
         redis.publish(`${user.id}`, JSON.stringify({ type: 'terminate' }));
     } else {
-        session.authSession.delete();
+        session.auth.delete();
+
+        if (session.newAuth) {
+            session.newAuth.delete();
+        }
     }
 
     return { status: 'OK' };

@@ -71,7 +71,9 @@ exports.setup = function setup(server) {
                 return;
             }
 
-            const userId = await authSessionService.validateCookie(data.cookie, { delete: true });
+            session.auth = await authSessionService.get(data.cookie);
+
+            const userId = session.auth ? session.auth.get('userId') : null;
             const user = userId ? await User.fetch(userId) : null;
 
             if (!user || !user.get('inUse')) {
@@ -94,14 +96,15 @@ exports.setup = function setup(server) {
 
             session.user = user;
             session.state = 'authenticated';
-            session.authSession = await authSessionService.create(user.id, remoteIp);
 
             socket.emit('initok', {
                 sessionId: session.id,
                 userId,
-                refreshCookie: authSessionService.encodeToCookie(session.authSession),
                 maxBacklogMsgs
             });
+
+            session.newAuth = await authSessionService.create(user.id, remoteIp);
+            socket.emit('refresh_session', { refreshCookie: session.newAuth.encodeToCookie() });
 
             log.info(user, `New session init: ${session.id}, client: ${data.clientName}`);
             log.info(user, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
@@ -153,6 +156,14 @@ exports.setup = function setup(server) {
 
             await userIntroducer.introduce(user, UserGId.create({ type: 'mas', id: userId }), session);
             await sessionService.init(user, session, maxBacklogMsgs, cachedUpto);
+        });
+
+        socket.on('refresh_done', () => {
+            session.auth.delete();
+            session.auth = session.newAuth;
+            session.newAuth = null;
+
+            log.info(session.user, 'Successfully refreshed the session');
         });
 
         socket.on('req', async (data, cb) => {
