@@ -1,10 +1,10 @@
 import { Map } from 'immutable';
 import { FINISH_INIT } from '../../actions/desktop/types';
 import { ADD_MESSAGE } from '../../actions/messages/types';
+import { setstartUpFinished } from '../../store/configureStore';
 
 const initialState = { // TODO: Use immutable map also here
-  messages: new Map(),
-  startupFinished: false
+  messages: new Map()
 };
 
 export default function messagesReducer(state = initialState, action) {
@@ -18,14 +18,15 @@ export default function messagesReducer(state = initialState, action) {
       }
 
       return {
-        messages: messages.setIn([ windowId, action.gid ], action),
-        startupFinished: state.startupFinished
+        messages: messages.setIn([ windowId, action.gid ], action)
       };
     }
     case FINISH_INIT: {
+      console.log('Setting startUpFinished = true'); // eslint-disable-line
+
+      setstartUpFinished(true);
       return {
-        messages: state.messages,
-        startupFinished: true
+        messages: state.messages
       };
     }
     default:

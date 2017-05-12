@@ -11,7 +11,7 @@
 }
 
 .heading {
-  margin-bottom: 14px;
+  color: #bbb;
 }
 
 .item:hover:not(.selected) {

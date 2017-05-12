@@ -15,14 +15,6 @@ class Desktop extends PureComponent {
     this.select = this.select.bind(this);
   }
 
-  shouldComponentUpdate(nextProps) {
-    if (!nextProps.startupFinished) {
-      return false;
-    }
-
-    return true; // TODO: Not optimal
-  }
-
   onSend(text, windowId) {
     const { dispatch } = this.props;
 
@@ -78,7 +70,6 @@ const mapStateToProps = state => ({
   windows: state.windows.windows,
   active: state.desktop.active,
   messages: state.messages.messages,
-  startupFinished: state.messages.startupFinished,
   users: state.users.users
 });
 

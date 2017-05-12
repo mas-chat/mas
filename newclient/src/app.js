@@ -9,6 +9,8 @@ import DevTools from './components/DevTools';
 import socket from './utils/socket';
 import './app.css';
 
+console.log('Starting'); // eslint-disable-line no-console
+
 const store = configureStore();
 
 socket.configure(store);

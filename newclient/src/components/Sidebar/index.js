@@ -49,7 +49,7 @@ class Sidebar extends Component {
           {groups}
         </div>
         <div styleName="section">
-          <div styleName="heading">1-on-1s</div>
+          <div styleName="heading">1-ON-1S</div>
           {private1on1s}
         </div>
       </div>
@@ -61,7 +61,7 @@ Sidebar.propTypes = {
   windows: PropTypes.shape({}),
   onChange: PropTypes.func.isRequired,
   active: PropTypes.number,
-  users: PropTypes.shape({}).isRequired,
+  users: PropTypes.shape({}).isRequired
 };
 
 Sidebar.defaultProps = {
