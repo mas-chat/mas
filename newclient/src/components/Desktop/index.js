@@ -38,8 +38,9 @@ class Desktop extends PureComponent {
   render() {
     const { windows, active, messages, users } = this.props;
 
-    const masWindows = windows.map(masWindow => (
+    const masWindows = windows.valueSeq().map(masWindow => (
       <ConversationWindow
+        key={masWindow.windowId}
         messages={messages.get(masWindow.windowId).sortBy(message => message.gid).toArray()}
         onSend={this.onSend}
         users={users}
@@ -50,7 +51,7 @@ class Desktop extends PureComponent {
 
     return (
       <div styleName="desktop">
-        <Sidebar windows={windows} active={active} onChange={this.select} />
+        <Sidebar windows={windows} users={users} active={active} onChange={this.select} />
         <div styleName="content">
           {masWindows}
         </div>

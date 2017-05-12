@@ -14,16 +14,27 @@ class Sidebar extends Component {
   }
 
   render() {
-    const { windows, active } = this.props;
+    const { windows, active, users } = this.props;
+    const groups = [];
+    const private1on1s = [];
 
-    const names = windows.toArray().map(masWindow => {
-      const title = masWindow.name || '1on1';
+    windows.toArray().forEach(masWindow => {
+      let destination;
+      let title;
       const windowId = masWindow.windowId;
 
-      return (
+      if (masWindow.windowType === 'group') {
+        destination = groups;
+        title = masWindow.name;
+      } else {
+        destination = private1on1s;
+        title = users.get(masWindow.userId).nick.mas;
+      }
+
+      destination.push(
         <div
           key={windowId}
-          styleName={windowId === active ? 'selected' : ''}
+          styleName={`item ${windowId === active ? 'selected' : ''}`}
           onClick={() => this.switch(windowId)}
         >
           {title}
@@ -33,7 +44,14 @@ class Sidebar extends Component {
 
     return (
       <div styleName="sidebar">
-        {names}
+        <div styleName="section">
+          <div styleName="heading">GROUPS</div>
+          {groups}
+        </div>
+        <div styleName="section">
+          <div styleName="heading">1-on-1s</div>
+          {private1on1s}
+        </div>
       </div>
     );
   }
@@ -42,7 +60,8 @@ class Sidebar extends Component {
 Sidebar.propTypes = {
   windows: PropTypes.shape({}),
   onChange: PropTypes.func.isRequired,
-  active: PropTypes.number
+  active: PropTypes.number,
+  users: PropTypes.shape({}).isRequired,
 };
 
 Sidebar.defaultProps = {

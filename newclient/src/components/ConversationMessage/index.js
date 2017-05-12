@@ -116,16 +116,25 @@ const ConversationMessage = ({ style, ts, body, nick }) => {
         return part.text;
       }
       case 'url': {
-        return <a href={part.href} target="_blank" rel="noopener noreferrer">{part.label}</a>;
+        return (
+          <a
+            key={part.href + part.label}
+            href={part.href}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {part.label}
+          </a>
+        );
       }
       case 'emoji': {
         const id = part.emoji.uc_base;
         const url = `${emojione.imagePathPNG}${id}.png`;
 
-        return <img styleName="emoji" alt={part.text} title={part.text} src={url} />;
+        return <img key={url} styleName="emoji" alt={part.text} title={part.text} src={url} />;
       }
       case 'mention': {
-        return <span styleName="mention">{part.text}</span>;
+        return <span key={part.text} styleName="mention">{part.text}</span>;
       }
       default: {
         return null;

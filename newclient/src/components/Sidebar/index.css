@@ -6,6 +6,18 @@
   width: 219px;
 }
 
+.section {
+  margin-bottom: 14px;
+}
+
+.heading {
+  margin-bottom: 14px;
+}
+
+.item:hover:not(.selected) {
+  background-color:#384f9f;
+}
+
 .selected {
   background-color: #5070e4;
 }
