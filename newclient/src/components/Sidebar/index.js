@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import './index.css';
 
-class Sidebar extends Component {
+class Sidebar extends PureComponent {
   constructor(props) {
     super(props);
 
