@@ -43,7 +43,8 @@ const config = {
     }),
     new HtmlWebpackPlugin({
       title: 'MAS',
-      hash: isProduction
+      hash: isProduction,
+      template: './index.ejs'
     })
   ],
   devServer: {
