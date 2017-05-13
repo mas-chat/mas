@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import Textarea from 'react-textarea-autosize';
 import { CellMeasurer, CellMeasurerCache, AutoSizer, List } from 'react-virtualized';
-import ConversationMessage from '../ConversationMessage';
+import Message from '../Message';
 import './index.css';
 
 class ConversationWindow extends PureComponent {
@@ -43,7 +43,7 @@ class ConversationWindow extends PureComponent {
         rowIndex={index}
       >
         {() => ( // TODO: ({ measure }) use when images are loaded
-          <ConversationMessage
+          <Message
             style={style}
             key={msg.gid}
             ts={msg.ts}

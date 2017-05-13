@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { select } from '../../actions/desktop';
 import { sendMessage } from '../../actions/windows';
 import Sidebar from '../Sidebar';
-import ConversationWindow from '../ConversationWindow';
+import Window from '../Window';
 import './index.css';
 
 class Desktop extends PureComponent {
@@ -31,7 +31,7 @@ class Desktop extends PureComponent {
     const { windows, active, messages, users } = this.props;
 
     const masWindows = windows.valueSeq().map(masWindow => (
-      <ConversationWindow
+      <Window
         key={masWindow.windowId}
         messages={messages.get(masWindow.windowId).sortBy(message => message.gid).toArray()}
         onSend={this.onSend}
