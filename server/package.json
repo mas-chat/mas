@@ -19,9 +19,9 @@
     "koa-body": "^2.0.1",
     "koa-compress": "^2.0.0",
     "koa-convert": "^1.2.0",
-    "koa-error": "^3.0.0",
+    "koa-error": "^3.0.1",
     "koa-hbs": "next",
-    "koa-logger": "^2.0.1",
+    "koa-logger": "^3.0.0",
     "koa-passport": "^3.0.0",
     "koa-proxy": "^0.8.0",
     "koa-router": "^7.1.1",
@@ -47,7 +47,7 @@
     "utf-8-validate": "^3.0.1",
     "winston": "^2.3.1",
     "winston-daily-rotate-file": "^1.4.6",
-    "winston-papertrail": "^1.0.4"
+    "winston-papertrail": "^1.0.5"
   },
   "devDependencies": {
     "chai": "~3.5.0",
@@ -57,8 +57,8 @@
     "eslint-plugin-jsx-a11y": "^4.0.0",
     "eslint-plugin-react": "^6.10.3",
     "foreman": "^2.0.0",
-    "mocha": "^3.3.0",
-    "proxyquire": "^1.7.11",
+    "mocha": "^3.4.1",
+    "proxyquire": "^1.8.0",
     "sinon": "^2.2.0",
     "sinon-chai": "^2.10.0"
   },
