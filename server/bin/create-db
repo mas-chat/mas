@@ -24,6 +24,9 @@ const db = new Rigiddb('mas', 1, {
     db: 10,
     host: conf.get('redis:host'),
     port: conf.get('redis:port')
+}, error => {
+    console.error(`Failed to connect to Redis, error: ${error}`);
+    process.exit(0);
 });
 
 (async function main() {

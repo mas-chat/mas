@@ -19,13 +19,16 @@
 const assert = require('assert');
 const util = require('util');
 const Rigiddb = require('rigiddb');
+const redis = require('../lib/redis');
 const conf = require('../lib/conf');
+const log = require('../lib/log');
 
 const db = new Rigiddb('mas', 1, {
     db: 10,
     host: conf.get('redis:host'), // TODO: Add Unix socket support
-    port: conf.get('redis:port')
-});
+    port: conf.get('redis:port'),
+    retryStrategy: redis.retryStrategy
+}, redis.errorHandler);
 
 module.exports = class Base {
     constructor(collection, id = null, initialProps = {}) {

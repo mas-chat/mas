@@ -33,8 +33,10 @@ function createRedisClient({ autoClose = true } = {}) {
         host: conf.get('redis:host'),
         password: conf.get('redis:password') || null,
         path: connType === 'socket' ? null : conf.get('redis:unix_socket_path'),
-        retryStrategy: times => Math.min(times * 500, 5000)
+        retryStrategy: retryStrategy
     });
+
+    client.on('error', errorHandler);
 
     client.__quit = client.quit;
 
@@ -46,10 +48,6 @@ function createRedisClient({ autoClose = true } = {}) {
         }
 
         return client.__quit();
-    };
-
-    client.createClient = function createClient(options) {
-        return createRedisClient(options);
     };
 
     client.shutdown = function shutdown() {
@@ -65,9 +63,22 @@ function createRedisClient({ autoClose = true } = {}) {
         activeClients.push(client);
     }
 
-    client.on('error', error => {
-        log.warn('Redis error', error.message);
-    });
+    // Extra "exported" functions
+    client.createClient = createRedisClient;
+    client.retryStrategy = retryStrategy;
+    client.errorHandler = errorHandler;
 
     return client;
+}
+
+function retryStrategy(times) {
+    const delay = Math.min(times * 1000 + 1000, 5000);
+
+    log.info(`Trying to connect to Redis in ${delay}ms...`);
+
+    return delay;
+}
+
+function errorHandler(error) {
+    log.warn(`Connection to Redis failed, reason: ${error}`);
 }
