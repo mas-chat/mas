@@ -86,6 +86,12 @@ services:
         soft: -1
         hard: -1
     mem_limit: 6g
+    environment:
+      - xpack.security.enabled=false
+      - xpack.monitoring.enabled=false
+      - xpack.graph.enabled=false
+      - xpack.watcher.enabled=false
+      - xpack.ml.enabled=false
     volumes:
       - /data/elasticsearch:/usr/share/elasticsearch/data
     ports:
