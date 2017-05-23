@@ -60,20 +60,30 @@ class ConversationWindow extends PureComponent {
 
     return (
       <div styleName={`window ${visible ? '' : 'hidden'}`}>
-        <div styleName="messages">
-          <AutoSizer>
-            {({ height, width }) => (
-              <List
-                width={width}
-                height={height}
-                rowCount={messages.length}
-                rowRenderer={this.rowRenderer}
-                scrollToIndex={messages.length - 1}
-                deferredMeasurementCache={this.cache}
-                rowHeight={this.cache.rowHeight}
-              />
-            )}
-          </AutoSizer>
+        <div styleName="main">
+          <div styleName="messages">
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  width={width}
+                  height={height}
+                  rowCount={messages.length}
+                  rowRenderer={this.rowRenderer}
+                  scrollToIndex={messages.length - 1}
+                  deferredMeasurementCache={this.cache}
+                  rowHeight={this.cache.rowHeight}
+                />
+              )}
+            </AutoSizer>
+          </div>
+          <div styleName="members">
+            <div styleName="memberList">
+              X X X X X X X X X X X X X X
+            </div>
+            <div styleName="toggleMembers">
+             v
+            </div>
+          </div>
         </div>
         <div styleName="controls">
           <Textarea
@@ -81,6 +91,8 @@ class ConversationWindow extends PureComponent {
             styleName="textarea"
             onKeyPress={this.onKeyPress}
           />
+          <div>[U]</div>
+          <div>[S]</div>
         </div>
       </div>
     );

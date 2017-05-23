@@ -9,13 +9,35 @@
   margin: 5px;
 }
 
-.messages {
-  width: 100%;
+.main {
+  display: flex;
+  flex-direction: row;
   flex: 1;
+}
+
+.messages {
+  flex: 1;
+  height: 100%;
   overflow-y: scroll;
 }
 
+.members {
+  width: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.memberList {
+  flex: 1;
+}
+
+.toggleMembers {
+
+}
+
 .controls {
+  display: flex;
+  flex-direction: row;
   width: 100%;
 }
 

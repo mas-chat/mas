@@ -4,12 +4,28 @@ body {
 
 .desktop {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   height: 100vh;
   width: 100vw;
 }
 
+.mobileLayout {
+  flex-direction: column;
+}
+
 .content {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  flex: 1;
+}
+
+.fullWidth {
+  width: 100vw;
+}
+
+.windowArea {
+  position: relative;
   flex: 1;
   height: 100%;
   position: relative;
