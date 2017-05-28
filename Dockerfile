@@ -34,4 +34,3 @@ RUN yarn install \
   && rm -fr node_modules
 
 WORKDIR /app/server/
-CMD ["npm", "run", "start-frontend"]

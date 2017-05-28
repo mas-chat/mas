@@ -1,7 +1,12 @@
-version: '2'
+version: '3'
+volumes:
+  mas-frontend-data:
+  mas-elasticsearch-data:
+  mas-redis-data:
 services:
   mas-frontend:
-    image: 'ilkkao/mas:latest'
+    image: 'mas:latest'
+    build: .
     depends_on:
       - elasticsearch
       - redis
@@ -11,18 +16,18 @@ services:
       - FILES__UPLOAD_DIRECTORY=/data/uploads/
       - FILES__CACHE_DIRECTORY=/data/cache/
       - FILES__AUTOROTATE_JPEGS=true
-      - LOG__CONSOLE=true
-      - LOG__DIRECTORY=/data/logs/
       - REDIS__HOST=redis
       - ELASTICSEARCH__ENABLED=true
       - ELASTICSEARCH__HOST=elasticsearch
+    command: yarn run start-frontend
     ports:
       - '80:3200'
       - '443:3201'
     volumes:
-      - /data:/data
+      - mas-frontend-data:/data
   mas-loopback:
-    image: 'ilkkao/mas:latest'
+    image: 'mas:latest'
+    build: .
     depends_on:
       - elasticsearch
       - redis
@@ -32,16 +37,13 @@ services:
       - FILES__UPLOAD_DIRECTORY=/data/uploads/
       - FILES__CACHE_DIRECTORY=/data/cache/
       - FILES__AUTOROTATE_JPEGS=true
-      - LOG__CONSOLE=true
-      - LOG__DIRECTORY=/data/logs/
       - REDIS__HOST=redis
       - ELASTICSEARCH__ENABLED=true
       - ELASTICSEARCH__HOST=elasticsearch
-    command: npm run start-loopback
-    volumes:
-      - /data:/data
+    command: yarn run start-loopback
   mas-irc:
-    image: 'ilkkao/mas:latest'
+    image: 'mas:latest'
+    build: .
     depends_on:
       - elasticsearch
       - redis
@@ -51,16 +53,13 @@ services:
       - FILES__UPLOAD_DIRECTORY=/data/uploads/
       - FILES__CACHE_DIRECTORY=/data/cache/
       - FILES__AUTOROTATE_JPEGS=true
-      - LOG__CONSOLE=true
-      - LOG__DIRECTORY=/data/logs/
       - REDIS__HOST=redis
       - ELASTICSEARCH__ENABLED=true
       - ELASTICSEARCH__HOST=elasticsearch
-    command: npm run start-irc
-    volumes:
-      - /data:/data
+    command: yarn run start-irc
   mas-irc-scktmgr:
-    image: 'ilkkao/mas:latest'
+    image: 'mas:latest'
+    build: .
     depends_on:
       - elasticsearch
       - redis
@@ -69,14 +68,10 @@ services:
       - FILES__UPLOAD_DIRECTORY=/data/uploads/
       - FILES__CACHE_DIRECTORY=/data/cache/
       - FILES__AUTOROTATE_JPEGS=true
-      - LOG__CONSOLE=true
-      - LOG__DIRECTORY=/data/logs/
       - REDIS__HOST=redis
       - ELASTICSEARCH__ENABLED=true
       - ELASTICSEARCH__HOST=elasticsearch
-    command: npm run start-irc-scktmgr
-    volumes:
-      - /data:/data
+    command: yarn run start-irc-scktmgr
     ports:
       - '113:113'
   elasticsearch:
@@ -85,7 +80,10 @@ services:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 6g
+    deploy:
+      resources:
+        limits:
+          memory: 6G
     environment:
       - xpack.security.enabled=false
       - xpack.monitoring.enabled=false
@@ -93,7 +91,7 @@ services:
       - xpack.watcher.enabled=false
       - xpack.ml.enabled=false
     volumes:
-      - /data/elasticsearch:/usr/share/elasticsearch/data
+      - mas-elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - '127.0.0.1:9200:9200'
       - '127.0.0.1:9300:9300'
@@ -103,8 +101,12 @@ services:
       - '127.0.0.1:9100:9100'
   redis:
     image: 'redis:3.2.8'
+    deploy:
+      resources:
+        limits:
+          memory: 2G
     volumes:
-      - /data/redis:/data
+      - mas-redis-data:/data
     ports:
       - '127.0.0.1:6379:6379'
     command: redis-server --appendonly yes --save 600 1 --save 300 10 --save 60 10000

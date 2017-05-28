@@ -69,15 +69,18 @@ MacOS/Linux/Windows.
 
 4. Browse to ```http://localhost:3200/``` and register an account.
 
-## Production setup
+## Production like setup
 
-First add your [default configuration values](https://github.com/ilkkao/mas/blob/master/server/mas.conf.default) overrides
-to the `docker-compose.yml` file. Then
+First check `docker-compose.yml` file. To customize your installation, add [default configuration value](https://github.com/ilkkao/mas/blob/master/server/mas.conf.default) overrides
+to that file as new environment variables. Then you are ready launch the stack:
 
    ```bash
-   $ mkdir /data
-   $ docker-compose up
+   $ docker-compose up -d
    ```
+
+When everything is running, navigate to `http://localhost/`. MAS frontend server is listening on port 80 on all interfaces.
+
+Docker compose will create three data volumes. One of the is for the frontend server. Frontend server needs it to store uploaded files. Also if HTTPS is enabled, one option is to place the certs to this volume. In that case it's simplest to use a volume that is mounted from the host.
 
 ## Code Climate
 
