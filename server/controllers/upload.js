@@ -34,7 +34,7 @@ if (dataDirectory.charAt(0) !== path.sep) {
 module.exports = async function handle(ctx) {
     const user = ctx.mas.user;
 
-    if (!ctx.request.body || !ctx.request.body.files || !ctx.request.body.files.file) {
+    if (!user || !ctx.request.body || !ctx.request.body.files || !ctx.request.body.files.file) {
         ctx.status = 400;
         return;
     }
