@@ -210,6 +210,41 @@ Client can for example use different colors for different categories.
 
 ```status``` is an optional property. It can be have value 'original', 'edited', or 'deleted'. A missing ```status``` property means 'original'.
 
+### ADD_MESSAGES
+
+Add several message lines to windows.
+
+```JSON
+{
+  "type": "ADD_MESSAGES",
+
+  messages: [{
+    windowId: 42,
+    messages: [{
+      "body": "Hello worlds!",
+      "cat": "msg",
+      "ts": 2093243,
+      "updatedTs": 2093315.
+      "userId": "m432454",
+      "status": "edited",
+      "gid": 823458234
+    }]
+  }, {
+    windowId: 43,
+    messages: [{
+      "body": "Hello again",
+      "cat": "msg",
+      "ts": 2093243,
+      "updatedTs": 2093315.
+      "userId": "m432454",
+      "status": "edited",
+      "gid": 923458134
+    }]
+  }]
+}
+
+See `ADD_MESSAGE` for description
+
 ### DELETE_WINDOW
 
 Close window.

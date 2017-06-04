@@ -44,6 +44,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
     await alerts.sendAlerts(user, session.id);
     await sendNetworkList(user, session.id);
 
+    const ntfs = [];
     const messages = [];
     const windows = await Window.find({ userId: user.id });
 
@@ -65,7 +66,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
             oneOnOneMember = members.find(member => member.get('userGId') !== user.gIdString);
         }
 
-        messages.push({
+        ntfs.push({
             type: 'ADD_WINDOW',
             windowId: window.id,
             name: conversation.get('name'),
@@ -87,7 +88,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
             role
         });
 
-        messages.push({
+        ntfs.push({
             type: 'UPDATE_MEMBERS',
             windowId: window.id,
             reset: true,
@@ -100,24 +101,28 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
         const lines = await ConversationMessage.find({ conversationId: conversation.id });
         const firstBacklogMessage = lines.length - maxBacklogLines;
 
+        const windowMessages = [];
+
         lines.forEach((message, index) => {
             const newMsg = index >= firstBacklogMessage && message.id > cachedUpto;
             const newEdit = message.get('status') !== 'original' &&
                 message.get('updatedId') >= cachedUpto;
 
             if (newMsg || newEdit) {
-                const ntf = message.convertToNtf();
-                ntf.type = 'ADD_MESSAGE';
-                ntf.windowId = window.id;
-
-                messages.push(ntf);
+                windowMessages.push(message.convertToNtf());
             }
+        });
+
+        messages.push({
+            windowId: window.id,
+            messages: windowMessages
         });
     }
 
-    messages.push({ type: 'FINISH_INIT' });
+    ntfs.push({ type: 'ADD_MESSAGES', messages });
+    ntfs.push({ type: 'FINISH_INIT' });
 
-    await notification.send(user, session.id, messages);
+    await notification.send(user, session.id, ntfs);
 
     // Check if the user was away too long
     courier.callNoWait('ircparser', 'reconnectifinactive', { userId: user.id });

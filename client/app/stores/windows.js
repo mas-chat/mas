@@ -234,6 +234,24 @@ export default Store.extend({
         return true;
     },
 
+    handleAddMessagesServer(data) {
+        data.messages.forEach(windowMessages => {
+            const windowObject = this._getWindow(windowMessages.windowId)
+
+            if (windowObject) {
+                windowMessages.messages.forEach(message => {
+                    message.window = windowObject;
+                });
+
+                windowObject.messages.upsertModels(windowMessages.messages);
+
+                this._trimBacklog(windowObject.messages);
+            }
+        });
+
+        return true;
+    },
+
     handleAddError(data) {
         data.window.messages.upsertModel({
             body: data.body,

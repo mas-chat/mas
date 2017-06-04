@@ -129,7 +129,7 @@ exports.setup = function setup(server) {
 
                 socket.emit('ntf', ntf);
 
-                if (ntf.id !== 'ADD_MESSAGE') {
+                if (!(ntf.id === 'ADD_MESSAGE' || ntf.id === 'ADD_MESSAGES')) {
                     log.info(user, `Emitted ${ntf.type} (sessionId: ${session.id}) ${message}`);
                 }
 
