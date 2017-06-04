@@ -1,0 +1,46 @@
+.titleBar {
+  display: flex;
+  flex-direction: row;
+  background-color: #303035;
+  align-items: center;
+}
+
+.namePart {
+  color: #eee;
+  font-weight: 700;
+  box-sizing: border-box;
+  padding: 4px;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.sidebarOpen {
+  width: 160px;
+}
+
+.topicPart {
+  color: #ccc;
+  padding: 4px;
+  flex: 1;
+}
+
+.logo {
+  color: #98cafa;
+  padding: 4px;
+}
+
+.menu {
+  color: #eee;
+  padding: 4px;
+}
+
+.button {
+  border: 1px solid #eee;
+  border-radius: 3px;
+  margin: 6px;
+  padding: 4px 8px;
+}

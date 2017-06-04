@@ -3,7 +3,8 @@
   box-sizing: border-box;
   color: whitesmoke;
   padding: 10px;
-  width: 219px;
+  width: 160px;
+  padding: 0 4px;
 }
 
 .section {

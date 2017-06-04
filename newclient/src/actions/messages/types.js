@@ -1,2 +1,3 @@
-export const ADD_MESSAGE = 'ADD_MESSAGE'; // eslint-disable-line import/prefer-default-export
+export const ADD_MESSAGE = 'ADD_MESSAGE';
+export const ADD_MESSAGES = 'ADD_MESSAGES';
 

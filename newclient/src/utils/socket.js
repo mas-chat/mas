@@ -20,7 +20,7 @@ class Socket {
   }
 
   start() {
-    Socket._emitInit();
+    this._emitInit();
 
     ioSocket.on('initok', data => {
       this.connected = true;
@@ -89,7 +89,7 @@ class Socket {
   }
 
 
-  static _emitInit() {
+  _emitInit() {
     const cookie = Cookies.get('mas'); // TODO: Abort if not found
     const maxBacklogMsgs = calcMsgHistorySize();
 

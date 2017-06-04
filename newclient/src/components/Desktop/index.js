@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { select } from '../../actions/desktop';
 import { sendMessage } from '../../actions/windows';
 import Sidebar from '../Sidebar';
+import MobileTopBar from '../MobileTopBar';
 import Window from '../Window';
 import './index.css';
 
@@ -11,8 +12,13 @@ class Desktop extends PureComponent {
   constructor(props) {
     super(props);
 
+    this.state = {
+      sidebarVisible: !props.isMobile
+    };
+
     this.onSend = this.onSend.bind(this);
     this.select = this.select.bind(this);
+    this.onToggleSidebar = this.onToggleSidebar.bind(this);
   }
 
   onSend(text, windowId) {
@@ -21,14 +27,22 @@ class Desktop extends PureComponent {
     dispatch(sendMessage(text, windowId));
   }
 
+  onToggleSidebar() {
+    this.setState({ sidebarVisible: !this.state.sidebarVisible });
+  }
+
   select(windowId) {
-    const { dispatch } = this.props;
+    const { dispatch, isMobile } = this.props;
+
+    if (isMobile) {
+      this.setState({ sidebarVisible: false });
+    }
 
     dispatch(select(windowId));
   }
 
   render() {
-    const { windows, active, messages, users } = this.props;
+    const { windows, active, messages, users, isMobile } = this.props;
 
     const masWindows = windows.valueSeq().map(masWindow => (
       <Window
@@ -41,11 +55,37 @@ class Desktop extends PureComponent {
       />
     ));
 
+    let mobileTopBar = null;
+    let sideBar = null;
+
+    if (isMobile) {
+      const activeWindow = windows.get(active);
+      const title = activeWindow ? activeWindow.topic : '';
+      const name = activeWindow && isMobile ? `${activeWindow.name}` : '';
+
+      mobileTopBar = (
+        <MobileTopBar
+          onNameClick={this.onToggleSidebar}
+          name={name}
+          title={title}
+          open={this.state.isSidebarVisible}
+        />
+      );
+    }
+
+    sideBar = <Sidebar windows={windows} users={users} active={active} onChange={this.select} />;
+
+    // TODO: Only render one window on mobile
+    // TODO: fullwidth kikka ei toimi
+
     return (
       <div styleName="desktop">
-        <Sidebar windows={windows} users={users} active={active} onChange={this.select} />
+        {mobileTopBar}
         <div styleName="content">
-          {masWindows}
+          {this.state.sidebarVisible ? sideBar : null}
+          <div styleName={`windowArea ${isMobile ? 'fullWidth' : ''}`}>
+            {masWindows}
+          </div>
         </div>
       </div>
     );
@@ -57,7 +97,8 @@ Desktop.propTypes = {
   windows: PropTypes.shape({}).isRequired,
   active: PropTypes.number,
   messages: PropTypes.shape({}),
-  users: PropTypes.shape({})
+  users: PropTypes.shape({}),
+  isMobile: PropTypes.bool.isRequired
 };
 
 Desktop.defaultProps = {
@@ -69,6 +110,7 @@ Desktop.defaultProps = {
 const mapStateToProps = state => ({
   windows: state.windows.windows,
   active: state.desktop.active,
+  isMobile: state.desktop.isMobile,
   messages: state.messages.messages,
   users: state.users.users
 });

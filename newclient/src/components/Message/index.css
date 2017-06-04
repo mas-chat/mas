@@ -5,6 +5,7 @@
 .message {
   display: flex;
   width: 100%;
+  font-size: 14px;
 }
 
 .timestamp {
@@ -19,6 +20,7 @@
 
 .nick {
   color: blue;
+  margin-right: 6px;
 }
 
 .emoji {
