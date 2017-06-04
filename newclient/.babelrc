@@ -1,6 +1,12 @@
 {
   "presets": [
-    "react"
+    "react",
+    ["env", {
+      "targets": {
+        "browsers": ["last 2 versions", "safari >= 7"],
+        "uglify": true
+      }
+    }]
   ],
   "plugins": [
     [ "react-css-modules", { "generateScopedName": "[path]_[local]_[hash:base64:7]" } ]
