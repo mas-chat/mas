@@ -215,7 +215,10 @@ exports.editMessage = async function editMessage(conversation, user, conversatio
     await message.set('status', text === '' ? 'deleted' : 'edited');
     await message.set('updatedId', await ConversationMessage.currentId());
 
-    await broadcast(conversation, message.convertToNtf());
+    const ntf = message.convertToNtf();
+    ntf.type = 'ADD_MESSAGE';
+
+    await broadcast(conversation, ntf);
 
     return true;
 };
@@ -281,6 +284,7 @@ async function broadcastAddMessage(conversation, { userGId = null, cat, body = '
     }
 
     const ntf = message.convertToNtf();
+    ntf.type = 'ADD_MESSAGE';
 
     await windowsService.scanMentions(conversation, message);
 

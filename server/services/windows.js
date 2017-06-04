@@ -200,6 +200,7 @@ async function createWindow(user, conversation) {
 
     for (const message of messages.slice(-1 * maxBacklogLines)) {
         const ntf = message.convertToNtf();
+        ntf.type = 'ADD_MESSAGE';
         ntf.windowId = window.id;
 
         await notification.broadcast(user, ntf);

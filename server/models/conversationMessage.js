@@ -45,9 +45,7 @@ module.exports = class ConversationMessage extends Base {
 
     convertToNtf() {
         const ntf = {
-            type: 'ADD_MESSAGE',
             gid: this.id,
-            conversationId: this.get('conversationId'),
             userId: this.get('userGId'),
             ts: Math.floor(this.get('ts').getTime() / 1000),
             cat: this.get('cat'),

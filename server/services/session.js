@@ -107,6 +107,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
 
             if (newMsg || newEdit) {
                 const ntf = message.convertToNtf();
+                ntf.type = 'ADD_MESSAGE';
                 ntf.windowId = window.id;
 
                 messages.push(ntf);
