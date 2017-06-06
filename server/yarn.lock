@@ -361,9 +361,9 @@ center-align@^0.1.1:
     align-text "^0.1.3"
     lazy-cache "^1.0.3"
 
-chai@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/chai/-/chai-4.0.1.tgz#9e41e808e17a7f10807721e2ac5a589d5bb09082"
+chai@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/chai/-/chai-4.0.2.tgz#2f7327c4de6f385dd7787999e2ab02697a32b83b"
   dependencies:
     assertion-error "^1.0.1"
     check-error "^1.0.1"
@@ -1294,13 +1294,13 @@ formatio@1.2.0:
   dependencies:
     samsam "1.x"
 
-formidable@1.0.17, formidable@~1.0.14:
-  version "1.0.17"
-  resolved "https://registry.yarnpkg.com/formidable/-/formidable-1.0.17.tgz#ef5491490f9433b705faa77249c99029ae348559"
-
-formidable@^1.0.17:
+formidable@1.1.1, formidable@^1.0.17:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/formidable/-/formidable-1.1.1.tgz#96b8886f7c3c3508b932d6bd70c4d3a88f35f1a9"
+
+formidable@~1.0.14:
+  version "1.0.17"
+  resolved "https://registry.yarnpkg.com/formidable/-/formidable-1.0.17.tgz#ef5491490f9433b705faa77249c99029ae348559"
 
 forms@^1.3.0:
   version "1.3.0"
@@ -1939,12 +1939,12 @@ kind-of@^3.0.2:
   dependencies:
     is-buffer "^1.0.2"
 
-koa-body@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/koa-body/-/koa-body-2.0.1.tgz#87a171d5f8d74b354e7d68abf3ad510999b15ce3"
+koa-body@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/koa-body/-/koa-body-2.1.0.tgz#e7fbad752b9b14972dd2a10159fe9ccbbb94fc4f"
   dependencies:
     co-body "*"
-    formidable "1.0.17"
+    formidable "1.1.1"
 
 koa-compose@^3.0.0:
   version "3.2.1"
@@ -2399,9 +2399,9 @@ node-abi@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-2.0.0.tgz#443bfd151b599231028ae425e592e76cd31cb537"
 
-node-cron@^1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/node-cron/-/node-cron-1.1.3.tgz#f161c743812302d50f5251bd93ca57019a5298d2"
+node-cron@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/node-cron/-/node-cron-1.2.0.tgz#024987b1b492044aa00d75f5ca64aa7c94e0d256"
 
 node-pre-gyp@0.6.32:
   version "0.6.32"
