@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import emojione from 'emojione';
@@ -107,54 +107,62 @@ function splitByLinks(text) {
   return { parts, mediaParts };
 }
 
-const ConversationMessage = ({ style, ts, body, nick }) => {
-  const formattedTs = moment.unix(ts).format('HH:mm');
+class ConversationMessage extends PureComponent {
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.props.nick !== nextProps.nick || this.props.body !== nextProps.body;
+  }
 
-  const formattedBody = splitByLinks(body).parts.map(part => {
-    switch (part.type) {
-      case 'txt': {
-        return part.text;
-      }
-      case 'url': {
-        return (
-          <a
-            key={part.href + part.label}
-            href={part.href}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {part.label}
-          </a>
-        );
-      }
-      case 'emoji': {
-        const id = part.emoji.uc_base;
-        const url = `${emojione.imagePathPNG}${id}.png`;
+  render() {
+    const { style, ts, body, nick } = this.props;
 
-        return <img key={url} styleName="emoji" alt={part.text} title={part.text} src={url} />;
-      }
-      case 'mention': {
-        return <span key={part.text} styleName="mention">{part.text}</span>;
-      }
-      default: {
-        return null;
-      }
-    }
-  });
+    const formattedTs = moment.unix(ts).format('HH:mm');
 
-  return (
-    <div style={style} styleName="message">
-      <div styleName="timestamp">
-        {formattedTs}
+    const formattedBody = splitByLinks(body).parts.map(part => {
+      switch (part.type) {
+        case 'txt': {
+          return part.text;
+        }
+        case 'url': {
+          return (
+            <a
+              key={part.href + part.label}
+              href={part.href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {part.label}
+            </a>
+          );
+        }
+        case 'emoji': {
+          const id = part.emoji.uc_base;
+          const url = `${emojione.imagePathPNG}${id}.png`;
+
+          return <img key={url} styleName="emoji" alt={part.text} title={part.text} src={url} />;
+        }
+        case 'mention': {
+          return <span key={part.text} styleName="mention">{part.text}</span>;
+        }
+        default: {
+          return null;
+        }
+      }
+    });
+
+    return (
+      <div style={style} styleName="message">
+        <div styleName="timestamp">
+          {formattedTs}
+        </div>
+        <div styleName="content">
+          <span styleName="nick">
+            {nick}
+          </span>
+          {formattedBody}
+        </div>
       </div>
-      <div styleName="content">
-        <span styleName="nick">
-          {nick}
-        </span>
-        {formattedBody}
-      </div>
-    </div>
-  );
+    );
+  }
 };
 
 ConversationMessage.propTypes = {
