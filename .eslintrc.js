@@ -14,6 +14,7 @@ module.exports = {
         "array-bracket-spacing": ["error", "always"],
         "no-underscore-dangle": ["off"],
         "no-plusplus": ["off"],
+        "class-methods-use-this": ["off"],
         "radix": ["error", "as-needed"],
         "import/no-extraneous-dependencies": ["error", {"devDependencies": true, "optionalDependencies": false}],
         "no-console": ["error", { allow: ["warn", "error"] }],

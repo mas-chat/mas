@@ -108,7 +108,7 @@ function splitByLinks(text) {
 }
 
 class ConversationMessage extends PureComponent {
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     return this.props.nick !== nextProps.nick || this.props.body !== nextProps.body;
   }
 
@@ -163,7 +163,7 @@ class ConversationMessage extends PureComponent {
       </div>
     );
   }
-};
+}
 
 ConversationMessage.propTypes = {
   ts: PropTypes.number.isRequired,
