@@ -113,7 +113,7 @@ class ConversationMessage extends PureComponent {
   }
 
   render() {
-    const { style, ts, body, nick } = this.props;
+    const { ts, body, nick } = this.props;
 
     const formattedTs = moment.unix(ts).format('HH:mm');
 
@@ -150,7 +150,7 @@ class ConversationMessage extends PureComponent {
     });
 
     return (
-      <div style={style} styleName="message">
+      <div styleName="message">
         <div styleName="timestamp">
           {formattedTs}
         </div>
@@ -168,8 +168,7 @@ class ConversationMessage extends PureComponent {
 ConversationMessage.propTypes = {
   ts: PropTypes.number.isRequired,
   body: PropTypes.string,
-  nick: PropTypes.string,
-  style: PropTypes.shape({}).isRequired
+  nick: PropTypes.string
 };
 
 ConversationMessage.defaultProps = {

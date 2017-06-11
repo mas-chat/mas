@@ -43,13 +43,14 @@ class ConversationWindow extends PureComponent {
         rowIndex={index}
       >
         {() => ( // TODO: ({ measure }) use when images are loaded
-          <Message
-            style={style}
-            key={msg.gid}
-            ts={msg.ts}
-            body={msg.body}
-            nick={nick}
-          />
+          <div style={style}>
+            <Message
+              key={msg.gid}
+              ts={msg.ts}
+              body={msg.body}
+              nick={nick}
+            />
+          </div>
         )}
       </CellMeasurer>
     );
