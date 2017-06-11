@@ -41,10 +41,6 @@
   width: 100%;
 }
 
-.hidden {
-  display: none;
-}
-
 .textarea:focus {
   background-color: rgb(247, 243, 200);
   color: blue;

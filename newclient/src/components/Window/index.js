@@ -59,8 +59,12 @@ class ConversationWindow extends PureComponent {
   render() {
     const { messages, visible } = this.props;
 
+    if (!visible) {
+      return null;
+    }
+
     return (
-      <div styleName={`window ${visible ? '' : 'hidden'}`}>
+      <div styleName="window">
         <div styleName="main">
           <div styleName="messages">
             <AutoSizer>
