@@ -67,7 +67,9 @@ class ConversationWindow extends PureComponent {
       <div styleName="window">
         <div styleName="main">
           <div styleName="messages">
-            <AutoSizer>
+            <AutoSizer
+              onResize={() =>this.cache.clearAll()}
+            >
               {({ height, width }) => (
                 <List
                   width={width}
