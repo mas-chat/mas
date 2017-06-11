@@ -40,9 +40,8 @@ export default function messagesReducer(state = initialState, action) {
       console.log('Setting startUpFinished = true'); // eslint-disable-line
 
       setstartUpFinished(true);
-      return {
-        messages: state.messages
-      };
+
+      return state;
     }
     default:
       return state;

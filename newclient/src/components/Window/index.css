@@ -42,7 +42,7 @@
 }
 
 .hidden {
-  visibility: hidden;
+  display: none;
 }
 
 .textarea:focus {
