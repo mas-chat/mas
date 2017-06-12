@@ -1,9 +1,11 @@
 import { SELECT } from '../../actions/desktop/types';
 import { ADD_WINDOW } from '../../actions/windows/types';
 
+const isMobileDevice = document.documentElement.clientWidth < 770;
+
 const initialState = {
   active: null,
-  isMobile: true
+  isMobile: isMobileDevice
 };
 
 export default function windowsReducer(state = initialState, action) {
