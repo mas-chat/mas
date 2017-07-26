@@ -48,15 +48,15 @@ class LoginModal extends Component {
             body: JSON.stringify({ username: this.state.userName, password: this.state.password }),
             credentials: 'include'
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success === true) {
-                // Server has set the session cookie, just redirect
-                window.location.pathname = '/app/';
-            } else {
-                this.setState({ invalidLogin: data.msg, password: '' });
-            }
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success === true) {
+                    // Server has set the session cookie, just redirect
+                    window.location.pathname = '/app/';
+                } else {
+                    this.setState({ invalidLogin: data.msg, password: '' });
+                }
+            });
     }
 
     handleResetPassword() {
@@ -66,12 +66,12 @@ class LoginModal extends Component {
             body: JSON.stringify({ email: this.state.forgotEmail }),
             credentials: 'include'
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success === true) {
-                this.setState({ mode: 'forgotPasswordDone' });
-            }
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success === true) {
+                    this.setState({ mode: 'forgotPasswordDone' });
+                }
+            });
     }
 
     switchToForgotPassword() {

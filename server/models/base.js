@@ -21,7 +21,6 @@ const util = require('util');
 const Rigiddb = require('rigiddb');
 const redis = require('../lib/redis');
 const conf = require('../lib/conf');
-const log = require('../lib/log');
 
 const db = new Rigiddb('mas', 1, {
     db: 10,

@@ -67,8 +67,8 @@ MasConsoleLogger.prototype.log = function log(level, msg, meta, callback) {
 
     const date = new Date().toISOString();
     const prefix = process.env.NODE_ENV === 'development'
-      ? `${cat} ${meta.userId ? `[${meta.userId}] ` : ''}`
-      : `${date.yellow} ${processColumn}-${cat}-${meta.userId ? `[${meta.userId}] ` : 'N/A'}: `;
+        ? `${cat} ${meta.userId ? `[${meta.userId}] ` : ''}`
+        : `${date.yellow} ${processColumn}-${cat}-${meta.userId ? `[${meta.userId}] ` : 'N/A'}: `;
 
     process.stdout.write(`${prefix}${msg}\n`);
 

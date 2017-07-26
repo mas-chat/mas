@@ -108,8 +108,8 @@ async function introduceUsers(user, userGIds, session, socket) {
 
 function scanUserGIds(msg) {
     return Object.keys(scan(msg))
-      .map(userGIdString => UserGId.create(userGIdString))
-      .filter(userGId => userGId && userGId.valid);
+        .map(userGIdString => UserGId.create(userGIdString))
+        .filter(userGId => userGId && userGId.valid);
 }
 
 function scan(msg) {

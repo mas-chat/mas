@@ -33,7 +33,7 @@ function createRedisClient({ autoClose = true } = {}) {
         host: conf.get('redis:host'),
         password: conf.get('redis:password') || null,
         path: connType === 'socket' ? null : conf.get('redis:unix_socket_path'),
-        retryStrategy: retryStrategy
+        retryStrategy
     });
 
     client.on('error', errorHandler);
@@ -72,7 +72,7 @@ function createRedisClient({ autoClose = true } = {}) {
 }
 
 function retryStrategy(times) {
-    const delay = Math.min(times * 1000 + 1000, 5000);
+    const delay = Math.min((times * 1000) + 1000, 5000);
 
     log.info(`Trying to connect to Redis in ${delay}ms...`);
 

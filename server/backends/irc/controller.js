@@ -830,7 +830,7 @@ async function handle433(user, msg) {
         await tryDifferentNick(user, msg.network);
     } else {
         await addSystemMessage(user, msg.network, 'info',
-           `ERROR: Nick ${msg.params[0]} is already taken.`);
+            `ERROR: Nick ${msg.params[0]} is already taken.`);
     }
 }
 
@@ -1259,7 +1259,7 @@ async function disconnectIfIdle(user, network) {
 
     if (onlyServer1on1Left) {
         await addSystemMessage(user, network,
-           'info', 'No open windows left for this network. Disconnected.');
+            'info', 'No open windows left for this network. Disconnected.');
     }
 }
 

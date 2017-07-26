@@ -18,18 +18,18 @@ exports.tearDown = function tearDown(done) {
 
         if (userName && accessKey && sessionId) {
             request
-            .put(`${baseUrl}${userName}/jobs/${sessionId}`)
-            .send({ passed: passedStatus })
-            .auth(userName, accessKey)
-            .end((error, res) => {
-                if (error) {
-                    console.log('ERROR sending verdict');
-                    console.log(error);
-                } else {
-                    console.log(`Verdict sent to Sauce Labs, response: ${res.res.statusMessage}`);
-                }
-                done();
-            });
+                .put(`${baseUrl}${userName}/jobs/${sessionId}`)
+                .send({ passed: passedStatus })
+                .auth(userName, accessKey)
+                .end((error, res) => {
+                    if (error) {
+                        console.log('ERROR sending verdict');
+                        console.log(error);
+                    } else {
+                        console.log(`Verdict sent to Sauce Labs, response: ${res.res.statusMessage}`);
+                    }
+                    done();
+                });
         } else {
             console.log(`Username or access key missing, username: ${userName}`);
             done();

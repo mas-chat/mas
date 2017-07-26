@@ -1,5 +1,3 @@
-/* globals describe, it */
-
 'use strict';
 
 // TODO: Remove and convert to models/user-test.js
