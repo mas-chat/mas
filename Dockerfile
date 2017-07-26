@@ -1,4 +1,4 @@
-FROM node:8.0.0
+FROM node:8.2.1
 
 RUN apt-get update
 RUN apt-get install exiftran
