@@ -21,16 +21,16 @@ const config = {
         rules: [ {
             test: /\.js$/,
             exclude: /(node_modules)/,
-            use: 'babel'
+            use: 'babel-loader'
         }, {
             test: /\.scss$/,
-            use: [ 'style', 'css', 'postcss', 'sass' ]
+            use: [ 'style-loader', 'css-loader', 'postcss-loader', 'sass-loader' ]
         }, {
             test: /\.css$/,
-            use: [ 'style', 'css?modules', 'postcss' ]
+            use: [ 'style-loader', 'css-loader?modules', 'postcss-loader' ]
         }, {
             test: /\.(ttf|eot|svg|woff|woff2)$/,
-            use: 'url?limit=10000'
+            use: 'url-loader?limit=10000'
         } ]
     },
     plugins: [
