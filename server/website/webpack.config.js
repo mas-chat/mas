@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const DashboardPlugin = require('webpack-dashboard/plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 
 const prefix = path.resolve(__dirname);
@@ -45,9 +44,5 @@ const config = {
         new ManifestPlugin()
     ]
 };
-
-if (!isProduction) {
-    config.plugins.push(new DashboardPlugin());
-}
 
 module.exports = config;
