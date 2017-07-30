@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { HOC } from 'formsy-react';
 
 let idCounter = 0;
@@ -46,15 +47,15 @@ class RegisterModalInput extends Component {
 }
 
 RegisterModalInput.propTypes = {
-    focus: React.PropTypes.bool,
-    showErrorMessage: React.PropTypes.bool.isRequired,
-    label: React.PropTypes.string.isRequired,
-    autocomplete: React.PropTypes.string,
-    autoFocus: React.PropTypes.bool,
-    getErrorMessage: React.PropTypes.func.isRequired, // formsy
-    getValue: React.PropTypes.func.isRequired, // formsy
-    setValue: React.PropTypes.func.isRequired, // formsy
-    showError: React.PropTypes.func.isRequired // formsy
+    focus: PropTypes.bool,
+    showErrorMessage: PropTypes.bool.isRequired,
+    label: PropTypes.string.isRequired,
+    autocomplete: PropTypes.string,
+    autoFocus: PropTypes.bool,
+    getErrorMessage: PropTypes.func.isRequired, // formsy
+    getValue: PropTypes.func.isRequired, // formsy
+    setValue: PropTypes.func.isRequired, // formsy
+    showError: PropTypes.func.isRequired // formsy
 };
 
 RegisterModalInput.defaultProps = {

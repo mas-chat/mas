@@ -1,6 +1,7 @@
 /* global config */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import 'whatwg-fetch';
 import classNames from 'classnames/bind';
 import styles from './index.css';
@@ -194,7 +195,7 @@ class LoginModal extends Component {
 }
 
 LoginModal.propTypes = {
-    onHide: React.PropTypes.func.isRequired
+    onHide: PropTypes.func.isRequired
 };
 
 export default LoginModal;

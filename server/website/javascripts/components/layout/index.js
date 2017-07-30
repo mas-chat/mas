@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router';
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import LoginModal from '../loginModal';
 import styles from './index.css';
@@ -74,7 +75,7 @@ class Layout extends Component {
 }
 
 Layout.propTypes = {
-    children: React.PropTypes.node.isRequired
+    children: PropTypes.node.isRequired
 };
 
 export default Layout;

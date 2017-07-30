@@ -1,6 +1,7 @@
 /* global config */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import 'whatwg-fetch';
 import Formsy from 'formsy-react';
 import classNames from 'classnames/bind';
@@ -129,7 +130,7 @@ class RegisterModal extends Component {
 }
 
 RegisterModal.propTypes = {
-    onHide: React.PropTypes.func.isRequired
+    onHide: PropTypes.func.isRequired
 };
 
 export default RegisterModal;

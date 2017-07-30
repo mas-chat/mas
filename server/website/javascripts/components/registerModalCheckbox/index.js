@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { HOC } from 'formsy-react';
 import classNames from 'classnames/bind';
 import styles from './index.css';
@@ -39,9 +40,9 @@ class RegisterModalCheckbox extends Component {
 }
 
 RegisterModalCheckbox.propTypes = {
-    label: React.PropTypes.string.isRequired,
-    getValue: React.PropTypes.func.isRequired, // formsy
-    setValue: React.PropTypes.func.isRequired // formsy
+    label: PropTypes.string.isRequired,
+    getValue: PropTypes.func.isRequired, // formsy
+    setValue: PropTypes.func.isRequired // formsy
 };
 
 export default HOC(RegisterModalCheckbox); // eslint-disable-line new-cap

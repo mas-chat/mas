@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { HOC } from 'formsy-react';
 
 let idCounter = 0;
@@ -46,13 +47,13 @@ class RegisterModalPassword extends Component {
 }
 
 RegisterModalPassword.propTypes = {
-    showErrorMessage: React.PropTypes.bool,
-    label: React.PropTypes.string.isRequired,
-    autocomplete: React.PropTypes.string,
-    getErrorMessage: React.PropTypes.func.isRequired, // formsy
-    getValue: React.PropTypes.func.isRequired, // formsy
-    setValue: React.PropTypes.func.isRequired, // formsy
-    showError: React.PropTypes.func.isRequired // formsy
+    showErrorMessage: PropTypes.bool,
+    label: PropTypes.string.isRequired,
+    autocomplete: PropTypes.string,
+    getErrorMessage: PropTypes.func.isRequired, // formsy
+    getValue: PropTypes.func.isRequired, // formsy
+    setValue: PropTypes.func.isRequired, // formsy
+    showError: PropTypes.func.isRequired // formsy
 };
 
 RegisterModalPassword.defaultProps = {
