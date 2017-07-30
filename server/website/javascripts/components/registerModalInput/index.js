@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { HOC } from 'formsy-react';
+import classNames from 'classnames/bind';
+import styles from './index.css';
+
+const cx = classNames.bind(styles);
 
 let idCounter = 0;
 
@@ -22,24 +26,24 @@ class RegisterModalInput extends Component {
     render() {
         const error = this.props.showError();
         const errorMessage = this.props.getErrorMessage();
-        const inputClass = `input ${error ? 'is-danger' : 'is-success'}`;
+        const inputClass = cx('input', error ? 'is-danger' : 'is-success');
         const value = this.props.getValue();
         const id = this.state.id;
         let icon = null;
 
         if (error && value) {
-            icon = <i className="fa fa-warning" />;
+            icon = <i className={cx('fa', 'fa fa-warning')} />;
         } else if (value) {
-            icon = <i className="fa fa-check" />;
+            icon = <i className={cx('fa', 'fa fa-check')} />;
         }
 
         return (
             <span>
-                <label htmlFor={id} className="label">{this.props.label}</label>
-                <p className="control has-icon has-icon-right">
+                <label htmlFor={id} className={cx('label')}>{this.props.label}</label>
+                <p className={cx('control', 'has-icon')}>
                     <input id={id} className={inputClass} type="text" value={value} autoFocus={this.props.autoFocus} autoComplete={this.props.autocomplete} onChange={this.changeValue} ref={(e) => ((this.props.focus && e) ? e.focus() : false)} />
                     {icon}
-                    {this.props.showErrorMessage ? <span className="help is-danger">{errorMessage}</span> : null}
+                    {this.props.showErrorMessage ? <span className={cx('help', 'is-danger')}>{errorMessage}</span> : null}
                 </p>
             </span>
         );

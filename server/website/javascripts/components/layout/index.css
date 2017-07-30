@@ -1,49 +1,84 @@
-.m-menu {
-    left: 0;
-    position: absolute;
-    padding: 10px 30px;
+@import "../../../stylesheets/bulma-core";
+@import "~bulma/sass/elements/other";
+@import "~bulma/sass/components/nav";
+@import "~bulma/sass/elements/button";
+
+.container {
+    @extend .container;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+@include mobile {
+    .name {
+        display: none;
+    }
+}
+
+.beta {
+    font-size: 13px;
+    font-family: arial;
+    font-weight: bolder;
+    border-radius: 2px;
+    color: white;
+    background-color: #5cadff;
+    padding: 2px 6px;
+    margin-left: 15px;
+}
+
+.menu {
+    background-color: unset;
     width: 100%;
-    max-width: 1200px;
-    left: 50%;
-    transform: translate(-50%, 0);
+    max-width: 1000px;
+
+    a {
+        color: #dbdbdb;
+    }
+
+    a.menu-item-active, a:hover {
+        color: #5cadff;
+    }
+
+    .nav-right {
+        flex-grow: 0;
+        background-color: #13262f;
+    }
+
+    .nav-toggle:hover {
+        background-color: inherit;
+    }
 }
 
-.m-home {
-    align-items: center;
-    display: flex;
-    justify-content: center;
-    padding: 10px;
-    color: #dbdbdb;
+.nav-toggle {
+    @extend .nav-toggle;
+
+    span {
+        background-color: #dbdbdb;
+    }
 }
 
-.m-home:hover {
-    color: #ececec;
+.home {
+    .logo {
+        @extend .icon;
+        color: #dbdbdb;
+        width: 50px;
+    }
+
+    .name {
+        color: #dbdbdb;
+    }
+
+    &:hover {
+        color: #ececec;
+    }
 }
 
-.m-menu-item {
-    align-items: center;
-    display: flex;
-    justify-content: center;
-    padding: 10px;
-    color: #dbdbdb;
-}
-
-.m-menu-item:hover {
-    color: #5cadff;
-}
-
-.m-menu-item-active {
-    color: #5cadff;
-}
-
-.m-menu-item-active:hover {
-    color: #5cadff;
-}
-
-.m-icon {
-    padding-right: 35px;
-}
-
-.m-button {
-    margin-left: 40px;
+.button {
+    @extend .button;
+    @extend .is-primary;
+    @extend .is-outlined;
 }

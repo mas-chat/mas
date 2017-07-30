@@ -8,6 +8,8 @@ import styles from './index.css';
 const cx = classNames.bind(styles);
 
 const pages = [
+    'pricing',
+    'support',
     'about'
 ];
 
@@ -35,38 +37,41 @@ class Layout extends Component {
     render() {
         const { children } = this.props;
 
-        const navBar = pages.map(page => <Link key={page} className={cx('m-menu-item')} activeClassName={cx('m-menu-item-active')} to={page}>{page}</Link>);
+        const navBar = pages.map(page => <Link key={page} className={cx('nav-item')} activeClassName={cx('menu-item-active')} to={page}>{page}</Link>);
 
         const loginModal = this.state.loginModalOpen ? <LoginModal onHide={this.toggleLoginModal} /> : null;
 
         return (
-            <div className="container">
-                <div className={cx('m-menu', 'nav')}>
-                    <div className="nav-left">
-                        <Link className={cx('m-home')} to="home">
-                            <div className={cx('m-icon', 'icon')}>
-                                <i className="fa fa-map-signs" />
+            <div className={cx('container', 'widescreen')}>
+                <nav className={cx('menu', 'nav')}>
+                    <div className={cx('nav-left')}>
+                        <Link className={cx('home', 'nav-item')} to="home">
+                            <div className={cx('logo')}>
+                                <i className="fa fa-comment" />
                             </div>
-                            MeetAndSpeak
+                            <div className={cx('name')}>
+                                MeetAndSpeak <span className={cx('beta')}>BETA</span>
+                            </div>
                         </Link>
                     </div>
-                    <div className={`nav-right nav-menu ${this.state.menuOpen ? 'is-active' : ''}`}>
+                    <div className={cx('nav-center')}>
+                        <div className={cx('nav-item')}>
+                            <button onClick={this.toggleLoginModal} className={cx('button')}>
+                                <span>
+                                    Sign In
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                    <div onClick={this.handleMenuClick} className={cx('nav-right', 'nav-menu', this.state.menuOpen ? 'is-active' : '')}>
                         {navBar}
                     </div>
-                    <span onClick={this.handleMenuClick} className="nav-toggle">
+                    <span onClick={this.handleMenuClick} className={cx('nav-toggle')}>
                         <span />
                         <span />
                         <span />
                     </span>
-
-                    <span className="nav-item">
-                        <button onClick={this.toggleLoginModal} className={cx('m-button', 'button is-primary is-outlined')}>
-                            <span>
-                                Sign In
-                            </span>
-                        </button>
-                    </span>
-                </div>
+                </nav>
                 {loginModal}
                 {children}
             </div>

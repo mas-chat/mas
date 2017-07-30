@@ -1,0 +1,66 @@
+@import "../../../../stylesheets/bulma-core";
+@import "~bulma/sass/elements/other";
+@import "~bulma/sass/elements/title";
+
+.main {
+    @extend .container;
+
+    margin-top: 90px;
+    width: 700px;
+    max-width: 85%;
+    min-height: 85vh;
+    color: #bbb;
+
+    h1, h2, h3, h4, h5, h6 {
+        color: #5cadff;
+    }
+
+    a:hover {
+        color: #ddd;
+    }
+
+    hr {
+        margin: 10px 0;
+        color: #5cadff;
+    }
+}
+
+.plans {
+    display: flex;
+    color: white;
+    font-size: 14px;
+    margin-bottom: 80px;
+}
+
+.plan {
+    width: 280px;
+    border-radius: 5px;
+    padding: 0 0 20px 0;
+    margin: 20px;
+    text-align: center;
+}
+
+.plan-title {
+    font-size: 22px;
+    font-weight: 900;
+    padding: 5px;
+    background-color: #5cadff;
+    color: #f2fff5;
+}
+
+.plan-price {
+    margin: 40px 0;
+    font-size: 30px;
+    color: #83e87f;
+}
+
+.plan-divider {
+    width: 100%;
+    margin: 25px 0;
+    border-bottom: 1px solid #5cadff;
+}
+
+.plan-item {
+    font-size: 15px;
+    padding: 0px 20px;
+}

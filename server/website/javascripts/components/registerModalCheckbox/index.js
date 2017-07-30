@@ -28,9 +28,9 @@ class RegisterModalCheckbox extends Component {
 
         return (
             <span>
-                <p className={cx('m-wrapper', 'control')}>
-                    <label htmlFor={id} className="checkbox">
-                        <input id={id} className={cx('m-checkbox')} type="checkbox" value={value} onChange={this.changeValue} />
+                <p className={cx('wrapper')}>
+                    <label htmlFor={id} className={cx('checkbox')}>
+                        <input id={id} className={cx('tos')} type="checkbox" value={value} onChange={this.changeValue} />
                         {this.props.label}
                     </label>
                 </p>

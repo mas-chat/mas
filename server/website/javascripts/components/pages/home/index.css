@@ -1,14 +1,85 @@
-.m-container {
+@import "../../../../stylesheets/bulma-core";
+@import "~bulma/sass/elements/title";
+@import "~bulma/sass/elements/other";
+@import "~bulma/sass/elements/button";
+@import "~bulma/sass/grid/columns";
+
+.main {
     display: flex;
-    height: 100vh;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
 }
 
-.m-title {
+.slogan {
+    text-align: center;
+    margin: 50px 20px;
+}
+
+.title {
+    @extend .title;
+    margin-top: 80px;
+    font-size: 40px;
+    color: #5cadff;
+}
+
+.subtitle {
+    @extend .subtitle;
+    font-weight: 100;
+    font-size: 33px;
+    color: #dbdbdb
+}
+
+@include mobile {
+    .title {
+        font-size: 25px;
+    }
+
+    .subtitle {
+        font-size: 20px;
+    }
+}
+
+.register-button {
+    @extend .button;
+    @extend .is-primary;
+    @extend .is-large;
+    @extend .is-outlined;
+    margin-left: 35px;
+}
+
+@include until(950) {
+    .register-button {
+        display: flex;
+        margin: 30px 0 0 0;
+    }
+}
+
+.screenshot {
+    margin-top: 40px;
+    width: 70%;
+    max-width: 1165px;
+    opacity: 0.85;
+    box-shadow: 7px 7px 101px -22px rgba(255,255,255,0.64);
+}
+
+.footer {
+    @extend .columns;
+    width: 100%;
+    max-width: 850px;
+    font-size: 13px;
     color: #dbdbdb;
-}
+    justify-content: center;
+    padding-bottom: 20px;
 
-.m-subtitle {
-    color: #ececec;
+    & > * {
+        padding: 0 30px;
+    }
+
+    & * {
+        text-align: center;
+    }
+
+    a:hover {
+        color: #aaa;
+    }
 }

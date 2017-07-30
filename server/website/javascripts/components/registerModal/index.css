@@ -1,33 +1,71 @@
-.m-content {
+@import "../../../stylesheets/bulma-core";
+@import "~bulma/sass/elements/button";
+@import "~bulma/sass/elements/other";
+@import "~bulma/sass/elements/title";
+@import "~bulma/sass/elements/form";
+@import "~bulma/sass/components/level";
+@import "~bulma/sass/components/modal";
+@import "~bulma/sass/layout/section";
+
+.modal-content {
+    @extend .modal-content;
     max-width: 500px;
     margin: 0;
 }
 
-.m-controls {
-    margin-top: 20px;
+.control {
+    @extend .control;
+    margin-top: 30px;
 }
 
-.m-background {
+.background {
+    @extend .modal-background;
     background-color: rgba(17, 17, 17, 0.5);
     backdrop-filter: blur(2px);
 }
 
-.m-google {
+@include mobile {
+    .modal-content {
+        max-width: initial;
+        max-height: inherit;
+
+        .section {
+            height: 100vh;
+        }
+    }
+
+    .modal-close {
+        background-color: #ccc;
+    }
+}
+
+.google {
+    @extend .button;
+    @extend .is-medium;
+
     color: #4285f4;
 }
 
-.m-yahoo {
+.yahoo {
+    @extend .button;
+    @extend .is-medium;
+
     color: #410093;
 }
 
-.m-cloudron {
+.cloudron {
+    @extend .button;
+    @extend .is-medium;
+
     color: #62bdfc;
 }
 
-.m-yahoo, .m-cloudron {
+.yahoo, .cloudron {
     margin-left: 8px;
 }
 
-.m-ext {
+.ext {
+    @extend .level;
+
     margin-top: 20px;
 }

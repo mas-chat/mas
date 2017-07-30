@@ -1,30 +1,26 @@
 @import "../../../../stylesheets/bulma-core";
 @import "~bulma/sass/elements/other";
 @import "~bulma/sass/elements/title";
-@import "~bulma/sass/layout/section";
+@import "~bulma/sass/elements/content";
 
 .main {
     @extend .container;
 
     padding-top: 90px;
+    margin-bottom: 50px;
     width: 700px;
     max-width: 85%;
-    min-height: 85vh;
     color: #bbb;
 
     h1, h2, h3, h4, h5, h6 {
         color: #5cadff;
     }
 
-    p {
-        margin-bottom: 20px;
-    }
-
     a:hover {
         color: #ddd;
     }
 
-    a:visited {
-        color: #5cadff !important;
+    .content {
+        color: #bbb;
     }
 }

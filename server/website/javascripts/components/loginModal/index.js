@@ -22,6 +22,7 @@ class LoginModal extends Component {
 
         this.handleChangeUserName = this.handleChangeUserName.bind(this);
         this.handleChangePassword = this.handleChangePassword.bind(this);
+        this.handlePasswordKeyPress = this.handlePasswordKeyPress.bind(this);
         this.handleChangeForgotEmail = this.handleChangeForgotEmail.bind(this);
         this.handleLogin = this.handleLogin.bind(this);
         this.handleResetPassword = this.handleResetPassword.bind(this);
@@ -40,6 +41,12 @@ class LoginModal extends Component {
 
     handleChangeForgotEmail(event) {
         this.setState({ forgotEmail: event.target.value });
+    }
+
+    handlePasswordKeyPress(event) {
+        if (event.key === 'Enter') {
+            this.handleLogin();
+        }
     }
 
     handleLogin() {
@@ -89,33 +96,33 @@ class LoginModal extends Component {
 
     render() {
         const AuthButtonGoogle = config.auth.google ? (
-            <a href="/auth/google" className={cx('m-google', 'button is-medium')}>
-                <span className="icon is-medium">
+            <a href="/auth/google" className={cx('google')}>
+                <span className={cx('icon', 'is-medium')}>
                     <i className="fa fa-google" title="Google account" />
                 </span>
             </a>
         ) : null;
 
         const AuthButtonYahoo = config.auth.yahoo ? (
-            <a href="/auth/yahoo" className={cx('m-yahoo', 'button is-medium')}>
-                <span className="icon is-medium">
+            <a href="/auth/yahoo" className={cx('yahoo')}>
+                <span className={cx('icon', 'is-medium')}>
                     <i className="fa fa-yahoo" title="Yahoo account" />
                 </span>
             </a>
         ) : null;
 
         const AuthButtonCloudron = config.auth.cloudron ? (
-            <a href="/auth/cloudron" className={cx('m-cloudron', 'button is-medium')}>
-                <span className="icon is-medium">
+            <a href="/auth/cloudron" className={cx('cloudron')}>
+                <span className={cx('icon', 'is-medium')}>
                     <i className="fa fa-cloud" title="Cloudron.io account" />
                 </span>
             </a>
         ) : null;
 
         const AuthButtons = (config.auth.google || config.auth.yahoo || config.auth.cloudron) ? (
-            <div className={cx('m-auth', 'container')}>
-                <h4 className={cx('m-auth-title', 'title is-5 has-text-centered')}>
-                    Sign in with account
+            <div className={cx('auth-section', 'has-text-centered')}>
+                <h4 className={cx('auth-title', 'is-5', 'has-text-centered')}>
+                    Or sign in with account
                 </h4>
                 {AuthButtonGoogle}
                 {AuthButtonYahoo}
@@ -124,48 +131,48 @@ class LoginModal extends Component {
         ) : null;
 
         const loginPanel = (
-            <section className="section">
-                <h4 className="title is-5 has-text-centered">Sign in</h4>
-                <label className="label" htmlFor="username">Username or email</label>
-                <p className="control has-icon has-icon-left">
-                    <input id="username" autoFocus className="input" type="text" value={this.state.userName} onChange={this.handleChangeUserName} />
-                    <i className="fa fa-user" />
+            <section className={cx('section')}>
+                <h4 className={cx('title', 'is-5', 'has-text-centered')}>Sign in</h4>
+                <label className={cx('label')} htmlFor="username">Username or email</label>
+                <p className={cx('control', 'has-icon')}>
+                    <input id="username" autoFocus className={cx('input')} type="text" value={this.state.userName} onChange={this.handleChangeUserName} />
+                    <i className={cx('fa', 'fa fa-user')} />
                 </p>
-                <label className="label" htmlFor="password">Password</label>
-                <p className="control has-icon has-icon-left">
-                    <input id="password" className="input" type="password" value={this.state.password} onChange={this.handleChangePassword} />
-                    <i className="fa fa-key" />
+                <label className={cx('label')} htmlFor="password">Password</label>
+                <p className={cx('control', 'has-icon')}>
+                    <input id="password" className={cx('input')} type="password" value={this.state.password} onKeyPress={this.handlePasswordKeyPress} onChange={this.handleChangePassword} />
+                    <i className={cx('fa', 'fa fa-key')} />
                 </p>
-                {this.state.invalidLogin ? <span className="help is-danger">{this.state.invalidLogin}</span> : null}
-                <p className={cx('m-controls', 'control')}>
-                    <button onClick={this.handleLogin} className="button is-primary is-fullwidth">Enter</button>
+                {this.state.invalidLogin ? <span className={cx('help', 'is-danger')}>{this.state.invalidLogin}</span> : null}
+                <p className={cx('control')}>
+                    <button onClick={this.handleLogin} className={cx('login', 'button', 'is-primary', 'is-fullwidth')}>Sign In</button>
                 </p>
+                <div className={cx('forgot')} onClick={this.switchToForgotPassword}>Forgot password?</div>
                 {AuthButtons}
-                <div className={cx('m-forgot')} onClick={this.switchToForgotPassword}>Forgot password?</div>
             </section>
         );
 
         const forgotPasswordPanel = (
-            <section className="section">
-                <h4 className="title is-5 has-text-centered">Reset your password</h4>
-                <label className="label" htmlFor="email">Type your email</label>
-                <p className="control has-icon has-icon-left">
-                    <input id="email" autoFocus className="input" type="text" value={this.state.forgotEmail} onChange={this.handleChangeForgotEmail} />
-                    <i className="fa fa-user" />
+            <section className={cx('section')}>
+                <h4 className={cx('title', 'is-5', 'has-text-centered')}>Reset your password</h4>
+                <label className={cx('label')} htmlFor="email">Type your email</label>
+                <p className={cx('control', 'has-icon')}>
+                    <input id="email" autoFocus className={cx('input')} type="text" value={this.state.forgotEmail} onChange={this.handleChangeForgotEmail} />
+                    <i className={cx('fa', 'fa fa-user')} />
                 </p>
-                <p className={cx('m-controls', 'control')}>
-                    <button onClick={this.handleResetPassword} className="button is-primary is-fullwidth">Proceed</button>
+                <p className={cx('control')}>
+                    <button onClick={this.handleResetPassword} className={cx('button', 'is-primary', 'is-fullwidth')}>Proceed</button>
                 </p>
-                <div className={cx('m-forgot')} onClick={this.switchToLogin}>Back to sign</div>
+                <div className={cx('forgot')} onClick={this.switchToLogin}>Cancel</div>
             </section>
         );
 
         const forgotPasswordDonePanel = (
-            <section className="section">
-                <h4 className="title is-5 has-text-centered">Done</h4>
+            <section className={cx('section')}>
+                <h4 className={cx('title', 'is-5', 'has-text-centered')}>Done</h4>
                 <p>Password reset email sent! See your spam folder if you don&apos;t see it in couple minutes.</p>
-                <p className={cx('m-controls', 'control')}>
-                    <button onClick={this.switchToLogin} className="button is-primary is-fullwidth">Ok</button>
+                <p className={cx('control')}>
+                    <button onClick={this.switchToLogin} className={cx('button', 'is-primary', 'is-fullwidth')}>Ok</button>
                 </p>
             </section>
         );
@@ -181,14 +188,12 @@ class LoginModal extends Component {
         }
 
         return (
-            <div className="modal is-active">
-                <div onClick={this.props.onHide} className={cx('m-background', 'modal-background')} />
-                <div className="modal-container">
-                    <div className={cx('m-content', 'modal-content')}>
-                        {panel}
-                    </div>
+            <div className={cx('modal', 'is-active')}>
+                <div onClick={this.props.onHide} className={cx('background')} />
+                <div className={cx('modal-content')}>
+                    {panel}
                 </div>
-                <button onClick={this.props.onHide} className="modal-close" />
+                <button onClick={this.props.onHide} className={cx('modal-close')} />
             </div>
         );
     }

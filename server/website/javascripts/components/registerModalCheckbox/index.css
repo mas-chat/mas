@@ -1,7 +1,12 @@
-.m-wrapper {
+@import "../../../stylesheets/bulma-core";
+@import "~bulma/sass/elements/form";
+
+.wrapper {
+    @extend .control;
+
     margin: 20px 0;
 }
 
-.m-checkbox {
+.tos {
     margin-right: 10px;
 }

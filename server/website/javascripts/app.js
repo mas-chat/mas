@@ -22,11 +22,15 @@ import {
     Switch
 } from 'react-router-dom';
 
-import '../stylesheets/pages.scss';
+import '!!style!css!sass!../stylesheets/pages.scss';
+import 'file?name=favicon.ico!../favicon.ico';
 
 import Layout from './components/layout';
 import AboutPage from './components/pages/about';
 import HomePage from './components/pages/home';
+import TOSPage from './components/pages/tos';
+import SupportPage from './components/pages/support';
+import PricingPage from './components/pages/pricing';
 
 render((
     <Router>
@@ -34,7 +38,10 @@ render((
             <Switch>
                 <Route exact path='/' component={HomePage} />
                 <Route path="/home" component={HomePage} />
+                <Route path="/support" component={SupportPage} />
                 <Route path="/about" component={AboutPage} />
+                <Route path="/tos" component={TOSPage} />
+                <Route path="/pricing" component={PricingPage} />
             </Switch>
         </Layout>
     </Router>
