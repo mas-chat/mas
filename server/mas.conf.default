@@ -55,15 +55,15 @@ enabled=false
 
 ; If https is true, HTTP server force redirects all request to HTTPS
 
-; 'https_ca' can be false or comma separated list of CA cert files
+; 'https_ca' can be false or comma separated list of CA cert files, e.g https_ca=ssl/ca1.pem,ssl/ca2.pem
 
 [frontend]
 http_port=3200
 https=false
 https_port=443
-https_key=ssl/server.key
-https_cert=ssl/server.crt
-https_ca=ssl/ca1.crt,ssl/ca2.crt
+https_key=ssl/privkey.pem
+https_cert=ssl/fullchain.pem
+https_ca=false
 
 [mailgun]
 enabled=false
