@@ -1,8 +1,4 @@
-@import "../../../../stylesheets/bulma-core";
-@import "~bulma/sass/elements/title";
-@import "~bulma/sass/elements/other";
-@import "~bulma/sass/elements/button";
-@import "~bulma/sass/grid/columns";
+@import "~bulma/sass/utilities/_all.sass";
 
 .main {
     display: flex;
@@ -16,17 +12,15 @@
 }
 
 .title {
-    @extend .title;
+    composes: title from 'bulma';
     margin-top: 80px;
     font-size: 40px;
-    color: #5cadff;
 }
 
 .subtitle {
-    @extend .subtitle;
+    composes: subtitle from 'bulma';
     font-weight: 100;
     font-size: 33px;
-    color: #dbdbdb
 }
 
 @include mobile {
@@ -40,10 +34,7 @@
 }
 
 .register-button {
-    @extend .button;
-    @extend .is-primary;
-    @extend .is-large;
-    @extend .is-outlined;
+    composes: button is-primary is-large is-outlined from 'bulma';
     margin-left: 35px;
 }
 
@@ -63,11 +54,10 @@
 }
 
 .footer {
-    @extend .columns;
+    composes: columns from 'bulma';
     width: 100%;
     max-width: 850px;
     font-size: 13px;
-    color: #dbdbdb;
     justify-content: center;
     padding-bottom: 20px;
 
@@ -77,9 +67,5 @@
 
     & * {
         text-align: center;
-    }
-
-    a:hover {
-        color: #aaa;
     }
 }

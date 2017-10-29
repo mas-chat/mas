@@ -97,7 +97,7 @@ class LoginModal extends Component {
     render() {
         const AuthButtonGoogle = config.auth.google ? (
             <a href="/auth/google" className={cx('google')}>
-                <span className={cx('icon', 'is-medium')}>
+                <span className={cx('icon')}>
                     <i className="fa fa-google" title="Google account" />
                 </span>
             </a>
@@ -105,7 +105,7 @@ class LoginModal extends Component {
 
         const AuthButtonYahoo = config.auth.yahoo ? (
             <a href="/auth/yahoo" className={cx('yahoo')}>
-                <span className={cx('icon', 'is-medium')}>
+                <span className={cx('icon')}>
                     <i className="fa fa-yahoo" title="Yahoo account" />
                 </span>
             </a>
@@ -113,7 +113,7 @@ class LoginModal extends Component {
 
         const AuthButtonCloudron = config.auth.cloudron ? (
             <a href="/auth/cloudron" className={cx('cloudron')}>
-                <span className={cx('icon', 'is-medium')}>
+                <span className={cx('icon')}>
                     <i className="fa fa-cloud" title="Cloudron.io account" />
                 </span>
             </a>
@@ -132,20 +132,23 @@ class LoginModal extends Component {
 
         const loginPanel = (
             <section className={cx('section')}>
-                <h4 className={cx('title', 'is-5', 'has-text-centered')}>Sign in</h4>
-                <label className={cx('label')} htmlFor="username">Username or email</label>
-                <p className={cx('control', 'has-icon')}>
-                    <input id="username" autoFocus className={cx('input')} type="text" value={this.state.userName} onChange={this.handleChangeUserName} />
-                    <i className={cx('fa', 'fa fa-user')} />
-                </p>
-                <label className={cx('label')} htmlFor="password">Password</label>
-                <p className={cx('control', 'has-icon')}>
-                    <input id="password" className={cx('input')} type="password" value={this.state.password} onKeyPress={this.handlePasswordKeyPress} onChange={this.handleChangePassword} />
-                    <i className={cx('fa', 'fa fa-key')} />
-                </p>
-                {this.state.invalidLogin ? <span className={cx('help', 'is-danger')}>{this.state.invalidLogin}</span> : null}
+                <h4 className={cx('headline')}>Sign in</h4>
+
+                <div className={cx('field')}>
+                    <label className={cx('label')} htmlFor="username">Username or email</label>
+                    <div className={cx('control')}>
+                        <input id="username" autoFocus className={cx('input')} type="text" value={this.state.userName} onChange={this.handleChangeUserName} />
+                    </div>
+                </div>
+                <div className={cx('field')}>
+                    <label className={cx('label')} htmlFor="password">Password</label>
+                    <div className={cx('control')}>
+                        <input id="password" className={cx('input')} type="password" value={this.state.password} onKeyPress={this.handlePasswordKeyPress} onChange={this.handleChangePassword} />
+                    </div>
+                </div>
+                {this.state.invalidLogin ? <span className={cx('help-danger')}>{this.state.invalidLogin}</span> : null}
                 <p className={cx('control')}>
-                    <button onClick={this.handleLogin} className={cx('login', 'button', 'is-primary', 'is-fullwidth')}>Sign In</button>
+                    <button onClick={this.handleLogin} className={cx('login', 'wide-button')}>Sign In</button>
                 </p>
                 <div className={cx('forgot')} onClick={this.switchToForgotPassword}>Forgot password?</div>
                 {AuthButtons}
@@ -154,14 +157,14 @@ class LoginModal extends Component {
 
         const forgotPasswordPanel = (
             <section className={cx('section')}>
-                <h4 className={cx('title', 'is-5', 'has-text-centered')}>Reset your password</h4>
+                <h4 className={cx('headline')}>Reset your password</h4>
                 <label className={cx('label')} htmlFor="email">Type your email</label>
-                <p className={cx('control', 'has-icon')}>
+                <p className={cx('icon-control')}>
                     <input id="email" autoFocus className={cx('input')} type="text" value={this.state.forgotEmail} onChange={this.handleChangeForgotEmail} />
                     <i className={cx('fa', 'fa fa-user')} />
                 </p>
                 <p className={cx('control')}>
-                    <button onClick={this.handleResetPassword} className={cx('button', 'is-primary', 'is-fullwidth')}>Proceed</button>
+                    <button onClick={this.handleResetPassword} className={cx('wide-button')}>Proceed</button>
                 </p>
                 <div className={cx('forgot')} onClick={this.switchToLogin}>Cancel</div>
             </section>
@@ -169,10 +172,10 @@ class LoginModal extends Component {
 
         const forgotPasswordDonePanel = (
             <section className={cx('section')}>
-                <h4 className={cx('title', 'is-5', 'has-text-centered')}>Done</h4>
+                <h4 className={cx('headline')}>Done</h4>
                 <p>Password reset email sent! See your spam folder if you don&apos;t see it in couple minutes.</p>
                 <p className={cx('control')}>
-                    <button onClick={this.switchToLogin} className={cx('button', 'is-primary', 'is-fullwidth')}>Ok</button>
+                    <button onClick={this.switchToLogin} className={cx('wide-button')}>Ok</button>
                 </p>
             </section>
         );
@@ -188,7 +191,7 @@ class LoginModal extends Component {
         }
 
         return (
-            <div className={cx('modal', 'is-active')}>
+            <div className={cx('active-modal')}>
                 <div onClick={this.props.onHide} className={cx('background')} />
                 <div className={cx('modal-content')}>
                     {panel}

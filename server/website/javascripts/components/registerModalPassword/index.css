@@ -1,2 +1,23 @@
-@import "../../../stylesheets/bulma-core";
-@import "~bulma/sass/elements/form";
+.input {
+    composes: input from 'bulma';
+}
+
+.is-danger {
+    composes: is-danger from 'bulma';
+}
+
+.is-success {
+    composes: is-success from 'bulma';
+}
+
+.label {
+    composes: label from 'bulma';
+}
+
+.control {
+    composes: control has-icon from 'bulma';
+}
+
+.help-danger {
+    composes: help is-danger from 'bulma';
+}

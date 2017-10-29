@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import LoginModal from '../loginModal';
 import styles from './index.css';
@@ -37,40 +37,38 @@ class Layout extends Component {
     render() {
         const { children } = this.props;
 
-        const navBar = pages.map(page => <Link key={page} className={cx('nav-item')} activeClassName={cx('menu-item-active')} to={page}>{page}</Link>);
+        const navBar = pages.map(page => <NavLink key={page} className={cx('navbar-item')} activeClassName={cx('menu-item-active')} to={`/${page}`}>{page}</NavLink>);
 
         const loginModal = this.state.loginModalOpen ? <LoginModal onHide={this.toggleLoginModal} /> : null;
 
         return (
-            <div className={cx('container', 'widescreen')}>
-                <nav className={cx('menu', 'nav')}>
-                    <div className={cx('nav-left')}>
-                        <Link className={cx('home', 'nav-item')} to="home">
-                            <div className={cx('logo')}>
-                                <i className="fa fa-comment" />
-                            </div>
-                            <div className={cx('name')}>
-                                MeetAndSpeak <span className={cx('beta')}>BETA</span>
-                            </div>
-                        </Link>
-                    </div>
-                    <div className={cx('nav-center')}>
-                        <div className={cx('nav-item')}>
+            <div className={cx('container')}>
+                <nav className={cx('navbar')}>
+                    <div className={cx('navbar-brand')}>
+                        <NavLink className={cx('home')} to="home">
+                            <i className="fa fa-comment" />
+                            <span className={cx('title')}>
+                                MeetAndSpeak
+                            </span>
+                        </NavLink>
+                        <div className={cx('navbar-item')}>
                             <button onClick={this.toggleLoginModal} className={cx('button')}>
                                 <span>
                                     Sign In
                                 </span>
                             </button>
                         </div>
+                        <div className={cx('burger', this.state.menuOpen ? 'is-active' : '')} onClick={this.handleMenuClick}>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
                     </div>
-                    <div onClick={this.handleMenuClick} className={cx('nav-right', 'nav-menu', this.state.menuOpen ? 'is-active' : '')}>
-                        {navBar}
+                    <div className={cx('navbar-menu', this.state.menuOpen ? 'is-active' : '')}>
+                        <div className={cx('navbar-end')} onClick={this.handleMenuClick}>
+                            {navBar}
+                        </div>
                     </div>
-                    <span onClick={this.handleMenuClick} className={cx('nav-toggle')}>
-                        <span />
-                        <span />
-                        <span />
-                    </span>
                 </nav>
                 {loginModal}
                 {children}

@@ -1,25 +1,35 @@
-@import "../../../stylesheets/bulma-core";
-@import "~bulma/sass/elements/button";
-@import "~bulma/sass/elements/other";
-@import "~bulma/sass/elements/title";
-@import "~bulma/sass/elements/form";
-@import "~bulma/sass/components/level";
-@import "~bulma/sass/components/modal";
-@import "~bulma/sass/layout/section";
+@import "~bulma/sass/utilities/_all.sass";
+
+.active-modal {
+    composes: modal is-active from 'bulma';
+}
 
 .modal-content {
-    @extend .modal-content;
+    composes: modal-content from 'bulma';
+    background-color: white;
     max-width: 500px;
     margin: 0;
 }
 
+.modal-close {
+    composes: modal-close from 'bulma';
+}
+
+.section {
+    composes: section from 'bulma';
+}
+
+.headline {
+    composes: title is-4 has-text-centered from 'bulma';
+}
+
 .control {
-    @extend .control;
+    compose: control from 'bulma';
     margin-top: 30px;
 }
 
 .background {
-    @extend .modal-background;
+    composes: modal-background from 'bulma';
     background-color: rgba(17, 17, 17, 0.5);
     backdrop-filter: blur(2px);
 }
@@ -39,24 +49,34 @@
     }
 }
 
-.google {
-    @extend .button;
-    @extend .is-medium;
+.level-left {
+    composes: level-left from 'bulma';
+}
 
+.level-item {
+    composes: level-item from 'bulma';
+}
+
+.primary-button {
+    composes: button is-primary from 'bulma';
+}
+
+.icon {
+    composes: icon is-medium from 'bulma';
+}
+
+.google {
+    composes: button is-medium from 'bulma';
     color: #4285f4;
 }
 
 .yahoo {
-    @extend .button;
-    @extend .is-medium;
-
+    composes: button is-medium from 'bulma';
     color: #410093;
 }
 
 .cloudron {
-    @extend .button;
-    @extend .is-medium;
-
+    composes: button is-medium from 'bulma';
     color: #62bdfc;
 }
 
@@ -65,7 +85,7 @@
 }
 
 .ext {
-    @extend .level;
+    composes: level from 'bulma';
 
     margin-top: 20px;
 }

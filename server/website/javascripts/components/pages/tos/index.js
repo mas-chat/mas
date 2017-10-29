@@ -6,7 +6,7 @@ const cx = classNames.bind(styles);
 
 const TOSPage = () => (
     <main className={cx('main')}>
-        <h1 className={cx('plans', 'title', 'is-2')}>
+        <h1 className={cx('headline')}>
             Terms and conditions
         </h1>
         <div className={cx('content')}>

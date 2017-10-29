@@ -40,10 +40,10 @@ class RegisterModalPassword extends Component {
         return (
             <span>
                 <label htmlFor={id} className={cx('label')}>{this.props.label}</label>
-                <p className={cx('control', 'has-icon')}>
+                <p className={cx('control')}>
                     <input id={id} className={inputClass} type="password" value={value} autoComplete={this.props.autocomplete} onChange={this.changeValue} />
                     {icon}
-                    {this.props.showErrorMessage ? <span className={cx('help', 'is-danger')}>{errorMessage}</span> : null}
+                    {this.props.showErrorMessage ? <span className={cx('help-danger')}>{errorMessage}</span> : null}
                 </p>
             </span>
         );

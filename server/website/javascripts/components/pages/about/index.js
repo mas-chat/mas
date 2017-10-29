@@ -6,7 +6,7 @@ const cx = classNames.bind(styles);
 
 const AboutPage = () => (
     <main className={cx('main')}>
-        <h1 className={cx('plans', 'title', 'is-2')}>
+        <h1 className={cx('headline')}>
             About
         </h1>
         <p>

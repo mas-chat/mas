@@ -1,16 +1,9 @@
-@import "../../../stylesheets/bulma-core";
-@import "~bulma/sass/elements/other";
-@import "~bulma/sass/components/nav";
-@import "~bulma/sass/elements/button";
+@import "~bulma/sass/utilities/_all.sass";
 
 .container {
-    @extend .container;
+    max-width: 1200px;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin: 16px;
 }
 
 @include mobile {
@@ -19,66 +12,58 @@
     }
 }
 
-.beta {
-    font-size: 13px;
-    font-family: arial;
-    font-weight: bolder;
-    border-radius: 2px;
-    color: white;
-    background-color: #5cadff;
-    padding: 2px 6px;
-    margin-left: 15px;
+.navbar {
+    composes: navbar from 'bulma';
 }
 
-.menu {
-    background-color: unset;
-    width: 100%;
-    max-width: 1000px;
-
-    a {
-        color: #dbdbdb;
-    }
-
-    a.menu-item-active, a:hover {
-        color: #5cadff;
-    }
-
-    .nav-right {
-        flex-grow: 0;
-        background-color: #13262f;
-    }
-
-    .nav-toggle:hover {
-        background-color: inherit;
-    }
+.navbar-brand {
+    composes: navbar-brand from 'bulma';
+    flex: 1000;
 }
 
-.nav-toggle {
-    @extend .nav-toggle;
+.navbar-menu {
+    composes: navbar-menu from 'bulma';
+}
 
-    span {
-        background-color: #dbdbdb;
-    }
+.navbar-item {
+    composes: navbar-item from 'bulma';
+}
+
+.burger {
+    composes: navbar-burger from 'bulma';
+}
+
+.menu-item-active {
+    composes: menu-item-active from 'bulma';
+}
+
+a.menu-item-active, a:hover {
+    color: #5cadff;
+}
+
+.navbar-end {
+    composes: navbar-end from 'bulma';
+}
+
+.is-active {
+    composes: is-active from 'bulma';
+}
+
+.logo {
+    composes: icon from 'bulma';
+    color: #dbdbdb;
+    width: 50px;
+}
+
+.title {
+    margin-left: 8px;
 }
 
 .home {
-    .logo {
-        @extend .icon;
-        color: #dbdbdb;
-        width: 50px;
-    }
-
-    .name {
-        color: #dbdbdb;
-    }
-
-    &:hover {
-        color: #ececec;
-    }
+    composes: navbar-item from 'bulma';
+    flex: 1;
 }
 
 .button {
-    @extend .button;
-    @extend .is-primary;
-    @extend .is-outlined;
+    composes: button is-primary is-outlined from 'bulma';
 }

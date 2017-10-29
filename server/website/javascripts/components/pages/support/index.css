@@ -1,9 +1,5 @@
-@import "../../../../stylesheets/bulma-core";
-@import "~bulma/sass/elements/other";
-@import "~bulma/sass/elements/title";
-
 .main {
-    @extend .container;
+    composes: container from 'bulma';
 
     margin-top: 90px;
     width: 700px;
@@ -18,4 +14,8 @@
     a:hover {
         color: #ddd;
     }
+}
+
+.headline {
+    composes: title is-2 from 'bulma';
 }

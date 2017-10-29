@@ -1,23 +1,22 @@
-@import "../../../stylesheets/bulma-core";
-@import "~bulma/sass/elements/button";
-@import "~bulma/sass/elements/other";
-@import "~bulma/sass/elements/title";
-@import "~bulma/sass/elements/form";
-@import "~bulma/sass/components/modal";
-@import "~bulma/sass/layout/section";
+@import "~bulma/sass/utilities/_all.sass";
+
+.active-modal {
+    composes: modal is-active from 'bulma';
+}
 
 .modal-content {
-    @extend .modal-content;
+    composes: modal-content from 'bulma';
+    background-color: white;
     max-width: 250px;
     margin: 0;
 }
 
-.control {
-    @extend .control;
+.modal-close {
+    composes: modal-close from 'bulma';
 }
 
 .background {
-    @extend .modal-background;
+    composes: modal-background from 'bulma';
     background-color: rgba(17, 17, 17, 0.5);
     backdrop-filter: blur(2px);
 }
@@ -43,7 +42,7 @@
 }
 
 .auth-title {
-    @extend .title;
+    composes: title from 'bulma';
     margin-top: 20px;
 }
 
@@ -52,23 +51,58 @@
 }
 
 .google {
-    @extend .button;
-    @extend .is-medium;
+    composes: button is-medium from 'bulma';
     color: #4285f4;
 }
 
 .yahoo {
-    @extend .button;
-    @extend .is-medium;
+    composes: button is-medium from 'bulma';
     color: #410093;
 }
 
 .cloudron {
-    @extend .button;
-    @extend .is-medium;
+    composes: button is-medium from 'bulma';
     color: #62bdfc;
 }
 
 .forgot {
+    margin-top: 12px;
+    color: black;
     cursor: pointer;
+}
+
+.icon {
+    composes: icon is-medium from 'bulma';
+}
+
+.section {
+    composes: section from 'bulma';
+}
+
+.headline {
+    composes: title is-5 has-text-centered from 'bulma';
+}
+
+.control {
+    composes: control from 'bulma';
+}
+
+.field {
+    composes: field from 'bulma';
+}
+
+.label {
+    composes: label from 'bulma';
+}
+
+.input {
+    composes: input from 'bulma';
+}
+
+.help-danger {
+    composes: help is-danger from 'bulma';
+}
+
+.wide-button {
+    composes: button is-primary is-fullwidth from 'bulma';
 }

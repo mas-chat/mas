@@ -1,10 +1,5 @@
-@import "../../../../stylesheets/bulma-core";
-@import "~bulma/sass/elements/other";
-@import "~bulma/sass/elements/title";
-@import "~bulma/sass/elements/content";
-
 .main {
-    @extend .container;
+    composes: container from 'bulma';
 
     padding-top: 90px;
     margin-bottom: 50px;
@@ -23,4 +18,8 @@
     .content {
         color: #bbb;
     }
+}
+
+.headline {
+    composes: title is-2 from 'bulma';
 }

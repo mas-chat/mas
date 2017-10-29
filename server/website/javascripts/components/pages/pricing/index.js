@@ -6,7 +6,7 @@ const cx = classNames.bind(styles);
 
 const PricingPage = () => (
     <main className={cx('main')}>
-        <h1 className={cx('plans', 'title', 'is-2')}>
+        <h1 className={cx('plans', 'headline')}>
             Plans
         </h1>
         <div className={cx('plans')}>

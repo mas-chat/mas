@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const ManifestPlugin = require('webpack-manifest-plugin');
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 const prefix = path.resolve(__dirname);
 const nodeEnv = process.env.NODE_ENV;
@@ -22,11 +23,14 @@ const config = {
             exclude: /(node_modules)/,
             use: 'babel-loader'
         }, {
-            test: /\.scss$/,
-            use: [ 'style-loader', 'css-loader', 'postcss-loader', 'sass-loader' ]
-        }, {
-            test: /\.css$/,
-            use: [ 'style-loader', 'css-loader?modules&localIdentName=[path][name]---[local]', 'postcss-loader', 'sass-loader' ]
+            test: /\.(scss|css)$/,
+            use: [
+                'style-loader',
+                'css-loader?modules&importLoaders=3&localIdentName=[path][name]---[local]',
+                'postcss-loader',
+                'sass-loader',
+                'bulma-loader?theme=stylesheets/bulma-theme.scss'
+            ]
         }, {
             test: /\.(ttf|eot|svg|woff|woff2)$/,
             use: 'url-loader?limit=10000'
@@ -44,7 +48,8 @@ const config = {
         new webpack.ProvidePlugin({
             Promise: 'bluebird'
         }),
-        new ManifestPlugin()
+        new ManifestPlugin(),
+        new OptimizeCssAssetsPlugin()
     ]
 };
 

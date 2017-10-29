@@ -61,7 +61,7 @@ class RegisterModal extends Component {
     render() {
         const RegisterButtonGoogle = config.auth.google ? (
             <a href="/auth/google" className={cx('google')}>
-                <span className={cx('icon', 'is-medium')}>
+                <span className={cx('icon')}>
                     <i className="fa fa-google" title="Google account" />
                 </span>
             </a>
@@ -69,7 +69,7 @@ class RegisterModal extends Component {
 
         const RegisterButtonYahoo = config.auth.yahoo ? (
             <a href="/auth/yahoo" className={cx('yahoo')}>
-                <span className={cx('icon', 'is-medium')}>
+                <span className={cx('icon')}>
                     <i className="fa fa-yahoo" title="Yahoo account" />
                 </span>
             </a>
@@ -77,7 +77,7 @@ class RegisterModal extends Component {
 
         const RegisterButtonCloudron = config.auth.cloudron ? (
             <a href="/auth/cloudron" className={cx('cloudron')}>
-                <span className={cx('icon', 'is-medium')}>
+                <span className={cx('icon')}>
                     <i className="fa fa-cloud" title="Cloudron.io account" />
                 </span>
             </a>
@@ -101,12 +101,12 @@ class RegisterModal extends Component {
         ) : null;
 
         return (
-            <div className={cx('modal', 'is-active')}>
+            <div className={cx('active-modal')}>
                 <div onClick={this.props.onHide} className={cx('background')} />
                 <div className={cx('modal-content')}>
                     <section className={cx('section')}>
                         <Formsy.Form onValidSubmit={this.register} onValid={this.enableButton} onInvalid={this.disableButton}>
-                            <h4 className={cx('title', 'is-4', 'has-text-centered')}>Instant registration, just fill the fields!</h4>
+                            <h4 className={cx('headline')}>Instant registration, just fill the fields!</h4>
 
                             <RegisterModalInput showErrorMessage={this.state.showErrors} autoFocus name="name" validations="minLength:6" validationError="Please enter at least 6 characters" label="Your name" autocomplete="name" required />
                             <RegisterModalInput showErrorMessage={this.state.showErrors} name="email" validations="isEmail" validationError="This is not a valid email" label="Email address" autocomplete="email" required />
@@ -118,7 +118,7 @@ class RegisterModal extends Component {
                             <Link to="tos"> Privacy Policy and Terms of Service</Link>
 
                             <p className={cx('control')}>
-                                <button type="submit" className={cx('button', 'is-primary')} disabled={!this.state.validDetails}>Register</button>
+                                <button type="submit" className={cx('primary-button')} disabled={!this.state.validDetails}>Register</button>
                             </p>
                         </Formsy.Form>
                         {ExtRegister}

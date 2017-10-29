@@ -22,8 +22,8 @@ import {
     Switch
 } from 'react-router-dom';
 
-import '!!style!css!sass!../stylesheets/pages.scss';
-import 'file?name=favicon.ico!../favicon.ico';
+import '!!style-loader!css-loader!sass-loader!../stylesheets/global.scss';
+import 'file-loader?name=favicon.ico!../favicon.ico';
 
 import Layout from './components/layout';
 import AboutPage from './components/pages/about';

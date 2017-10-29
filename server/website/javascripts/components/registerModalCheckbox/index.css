@@ -1,10 +1,11 @@
-@import "../../../stylesheets/bulma-core";
-@import "~bulma/sass/elements/form";
-
 .wrapper {
-    @extend .control;
+    composes: control from 'bulma';
 
     margin: 20px 0;
+}
+
+.checkbox {
+    composes: checkbox from 'bulma';
 }
 
 .tos {
