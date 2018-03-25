@@ -100,11 +100,7 @@ services:
     ports:
       - '127.0.0.1:9100:9100'
   redis:
-    image: 'redis:3.2.8'
-    deploy:
-      resources:
-        limits:
-          memory: 2G
+    image: 'redis:4.0.8'
     volumes:
       - mas-redis-data:/data
     ports:
