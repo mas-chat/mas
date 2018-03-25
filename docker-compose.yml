@@ -75,11 +75,7 @@ services:
     ports:
       - '113:113'
   elasticsearch:
-    image: 'docker.elastic.co/elasticsearch/elasticsearch:5.6.8'
-    deploy:
-      resources:
-        limits:
-          memory: 6G
+    image: 'docker.elastic.co/elasticsearch/elasticsearch:6.2.3'
     environment:
       - xpack.security.enabled=false
       - xpack.monitoring.enabled=false
