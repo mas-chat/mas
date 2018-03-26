@@ -1,6 +1,8 @@
-FROM node:9.9.0-alpine
+FROM node:9.9.0
 
-RUN apk update && apk add python g++ make libc6-compat fbida-exiftran git && rm -rf /var/cache/apk/*
+RUN apt-get update && apt-get install -y \
+  exiftran \
+  && rm -rf /var/lib/apt/lists/*
 
 ENV NPM_CONFIG_LOGLEVEL warn
 
