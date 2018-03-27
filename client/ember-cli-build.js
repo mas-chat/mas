@@ -9,16 +9,8 @@ let EmberApp = require('ember-cli/lib/broccoli/ember-app'),
 module.exports = function(defaults) {
     let app = new EmberApp(defaults, {
         hinting: false,
-        babel: {
+        'ember-cli-babel': {
             includePolyfill: true
-        },
-        lessOptions: {
-            paths: [
-                'bower_components/bootstrap/less',
-                'bower_components/bootswatch/superhero',
-                'bower_components',
-                'node_modules'
-            ]
         },
         autoprefixer: {
             browsers: [ 'last 2 versions' ],
@@ -42,13 +34,14 @@ module.exports = function(defaults) {
     // please specify an object with the list of modules as keys
     // along with the exports of each module as its value.
 
-    app.import('bower_components/bootstrap/dist/js/bootstrap.js');
-    app.import('bower_components/bootstrap-datepicker/js/bootstrap-datepicker.js');
-    app.import('bower_components/jquery.atwho/dist/js/jquery.atwho.js');
-    app.import('bower_components/Caret.js/dist/jquery.caret.min.js');
-    app.import('bower_components/magnific-popup/dist/jquery.magnific-popup.js');
-    app.import('bower_components/bootstrap-contextmenu/bootstrap-contextmenu.js');
-    app.import('bower_components/velocity/velocity.js');
+    app.import('node_modules/bootstrap/dist/js/bootstrap.js');
+    app.import('node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.js');
+    app.import('node_modules/at.js/dist/js/jquery.atwho.js');
+    // TODO: fixme
+    // app.import('bower_components/Caret.js/dist/jquery.caret.min.js');
+    app.import('node_modules/magnific-popup/dist/jquery.magnific-popup.js');
+    app.import('node_modules/bootstrap-contextmenu/bootstrap-contextmenu.js');
+    app.import('node_modules/velocity-animate/velocity.js');
 
     // Copy only the relevant files:
     let fontsFontAwesome = pickFiles('node_modules/font-awesome/fonts', {
@@ -56,10 +49,7 @@ module.exports = function(defaults) {
         destDir: '/assets/fonts'
     });
 
-    let fontsBootstrap = pickFiles('bower_components/bootstrap/dist/fonts', {
-        srcDir: '/',
-        destDir: '/assets/fonts'
-    });
+    // TODO: fixme bootstrap fonts
 
     let emojify = pickFiles('node_modules/emojione/assets/png', {
         srcDir: '/',
@@ -70,7 +60,6 @@ module.exports = function(defaults) {
     return mergeTrees([
         app.toTree(),
         fontsFontAwesome,
-        fontsBootstrap,
         emojify
     ]);
 };

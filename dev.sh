@@ -17,7 +17,6 @@ case "$1" in
         set -x
         cd client
         yarn
-        yarn run bower
         yarn run build-dev
         cd ../newclient
         yarn
