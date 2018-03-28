@@ -14,17 +14,19 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { computed } from '@ember/object';
+
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
+export default Component.extend({
     draggedWindow: false,
 
-    dropAreaCSSClass: Ember.computed('draggedWindow', function() {
+    dropAreaCSSClass: computed('draggedWindow', function() {
         return this.get('draggedWindow') ? 'main-desktop-droparea' : '';
     }),
 
-    selectedCSSClass: Ember.computed('selected', 'id', function() {
+    selectedCSSClass: computed('selected', 'id', function() {
         return (this.get('id') === this.get('selected')) ? 'main-desktop-button-selected' : '';
     }),
 

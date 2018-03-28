@@ -16,13 +16,19 @@
 
 /* globals $ */
 
-import Ember from 'ember';
+import { A } from '@ember/array';
+
+import { next, scheduleOnce, bind } from '@ember/runloop';
+import { observer } from '@ember/object';
+import { alias } from '@ember/object/computed';
+import { inject as service } from '@ember/service';
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 const CURSORWIDTH = 50;
 
-export default Ember.Component.extend({
-    stores: Ember.inject.service(),
+export default Component.extend({
+    stores: service(),
 
     classNames: [ 'grid', 'flex-1', 'flex-grow-column' ],
 
@@ -35,15 +41,15 @@ export default Ember.Component.extend({
 
     windowComponents: null,
 
-    model: Ember.computed.alias('stores.windows.windows'),
+    model: alias('stores.windows.windows'),
 
-    mustRelayout: Ember.observer('stores.windows.initDone', 'stores.settings.theme', function() {
-        Ember.run.next(this, function() { this._layoutWindows(false); });
+    mustRelayout: observer('stores.windows.initDone', 'stores.settings.theme', function() {
+        next(this, function() { this._layoutWindows(false); });
     }),
 
-    mustRelayoutAfterRender: Ember.observer(
+    mustRelayoutAfterRender: observer(
         'stores.alerts.alerts.[]', 'stores.settings.emailConfirmed', function() {
-        Ember.run.scheduleOnce('afterRender', this, function() {
+        scheduleOnce('afterRender', this, function() {
             this._layoutWindows(false);
         });
     }),
@@ -51,7 +57,7 @@ export default Ember.Component.extend({
     init() {
         this._super();
 
-        this.set('windowComponents', Ember.A([]));
+        this.set('windowComponents', A([]));
     },
 
     actions: {
@@ -79,7 +85,7 @@ export default Ember.Component.extend({
 
             this.relayoutScheduled = true;
 
-            Ember.run.next(this, function() {
+            next(this, function() {
                 this.relayoutScheduled = false;
                 this._layoutWindows(this.relayoutAnimate);
                 this.relayoutAnimate = null;
@@ -100,7 +106,7 @@ export default Ember.Component.extend({
     },
 
     didInsertElement() {
-        $(window).on('resize', Ember.run.bind(this, function() {
+        $(window).on('resize', bind(this, function() {
             this._layoutWindows(false);
         }));
     },

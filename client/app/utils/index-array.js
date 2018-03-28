@@ -16,9 +16,12 @@
 
 /* globals Map */
 
-import Ember from 'ember';
+import { assert } from '@ember/debug';
 
-export default Ember.ArrayProxy.extend({
+import { A } from '@ember/array';
+import ArrayProxy from '@ember/array/proxy';
+
+export default ArrayProxy.extend({
     content: null,
     _lookupTable: null,
 
@@ -26,7 +29,7 @@ export default Ember.ArrayProxy.extend({
     factory: null,
 
     init() {
-        this.set('content', Ember.A());
+        this.set('content', A());
         this._super();
 
         this.set('_lookupTable', new Map());
@@ -71,7 +74,7 @@ export default Ember.ArrayProxy.extend({
 
         for (let object of objects) {
             let primaryKey = object[primaryKeyName];
-            Ember.assert(`Primary key '${primaryKeyName}' must exist`, primaryKey !== undefined);
+            assert(`Primary key '${primaryKeyName}' must exist`, primaryKey !== undefined);
 
             let existingModel = this.get('_lookupTable').get(primaryKey);
 

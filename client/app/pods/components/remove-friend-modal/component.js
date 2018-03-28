@@ -14,19 +14,23 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { computed } from '@ember/object';
+
+import { alias } from '@ember/object/computed';
+import { inject as service } from '@ember/service';
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
-    stores: Ember.inject.service(),
+export default Component.extend({
+    stores: service(),
 
-    userId: Ember.computed.alias('model'),
+    userId: alias('model'),
 
-    name: Ember.computed('userId', function() {
+    name: computed('userId', function() {
         return this.get('stores.users.users').getByIndex(this.get('userId')).get('name');
     }),
 
-    nick: Ember.computed('userId', function() {
+    nick: computed('userId', function() {
         return this.get('stores.users.users').getByIndex(this.get('userId')).get('nick')['MAS'];
     }),
 

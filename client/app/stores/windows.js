@@ -16,7 +16,9 @@
 
 /* globals $ */
 
-import Ember from 'ember';
+import { A } from '@ember/array';
+
+import { computed, observer } from '@ember/object';
 import moment from 'npm:moment';
 import Cookies from 'npm:js-cookie';
 import isMobile from 'npm:ismobilejs';
@@ -44,9 +46,9 @@ const WindowsStore = Store.extend({
         this._super();
     },
 
-    desktops: Ember.computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
+    desktops: computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
         let desktops = {};
-        let desktopsArray = Ember.A([]);
+        let desktopsArray = A([]);
 
         this.get('windows').forEach(function(masWindow) {
             let newMessages = masWindow.get('newMessagesCount');
@@ -71,7 +73,7 @@ const WindowsStore = Store.extend({
         return desktopsArray;
     }),
 
-    deletedDesktopCheck: Ember.observer('desktops.[]', 'initDone', function() {
+    deletedDesktopCheck: observer('desktops.[]', 'initDone', function() {
         if (!this.get('initDone')) {
             return;
         }

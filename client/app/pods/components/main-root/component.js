@@ -16,12 +16,15 @@
 
 /* global $ */
 
-import Ember from 'ember';
+import { observer } from '@ember/object';
+
+import { inject as service } from '@ember/service';
+import Component from '@ember/component';
 import socket from '../../../utils/socket'
 import { darkTheme } from '../../../utils/theme-dark'
 
-export default Ember.Component.extend({
-    stores: Ember.inject.service(),
+export default Component.extend({
+    stores: service(),
 
     classNames: [ 'flex-grow-column', 'flex-1' ],
 
@@ -32,7 +35,7 @@ export default Ember.Component.extend({
         socket.start(); // Let's get the show started.
     },
 
-    changeTheme: Ember.observer('stores.settings.theme', function() {
+    changeTheme: observer('stores.settings.theme', function() {
         $('#theme-stylesheet').text(this.get('stores.settings.theme') === 'dark' ? darkTheme : '');
     })
 });

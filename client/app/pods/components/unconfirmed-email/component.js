@@ -14,16 +14,19 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { alias } from '@ember/object/computed';
+
+import { inject as service } from '@ember/service';
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
-    stores: Ember.inject.service(),
+export default Component.extend({
+    stores: service(),
 
     classNames: [ 'flex-row', 'unconfirmed-email' ],
 
-    email: Ember.computed.alias('stores.settings.email'),
-    emailConfirmed: Ember.computed.alias('stores.settings.emailConfirmed'),
+    email: alias('stores.settings.email'),
+    emailConfirmed: alias('stores.settings.emailConfirmed'),
 
     actions: {
         requestConfirmation() {

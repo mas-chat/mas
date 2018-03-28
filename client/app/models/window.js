@@ -14,7 +14,9 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import EmberObject, { computed } from '@ember/object';
+
+import { A } from '@ember/array';
 import moment from 'npm:moment';
 import isMobile from 'npm:ismobilejs'
 import BaseModel from './base';
@@ -67,11 +69,11 @@ export default BaseModel.extend({
         this.set('messages', IndexArray.create({ index: 'gid', factory: Message }));
         this.set('logMessages', IndexArray.create({ index: 'gid', factory: Message }));
 
-        this.set('operators', Ember.A([]));
-        this.set('voices', Ember.A([]));
-        this.set('users', Ember.A([]));
+        this.set('operators', A([]));
+        this.set('voices', A([]));
+        this.set('users', A([]));
 
-        this.set('alerts', Ember.Object.create({
+        this.set('alerts', EmberObject.create({
             email: false,
             notification: false,
             sound: false,
@@ -79,7 +81,7 @@ export default BaseModel.extend({
         }));
     },
 
-    desktop: Ember.computed('_desktop', {
+    desktop: computed('_desktop', {
         get() {
             return this.get('_desktop');
         },
@@ -92,7 +94,7 @@ export default BaseModel.extend({
         }
     }),
 
-    sortedMessages: Ember.computed('messages.[]', '_dayServiceStore.dayCounter', function() {
+    sortedMessages: computed('messages.[]', '_dayServiceStore.dayCounter', function() {
         let result = this.get('messages').sortBy('gid');
 
         let addDayDivider = (array, dateString, index) => {
@@ -119,7 +121,7 @@ export default BaseModel.extend({
         return result;
     }),
 
-    userNickHighlightRegex: Ember.computed('_windowsStore.userId', '_usersStore.isDirty',
+    userNickHighlightRegex: computed('_windowsStore.userId', '_usersStore.isDirty',
         function() {
         let userId = this.get('_windowsStore.userId');
         let nick = this.get('_usersStore.users').getByIndex(userId)
@@ -128,19 +130,19 @@ export default BaseModel.extend({
         return new RegExp(`(^|[@ ])${nick}[ :]`);
     }),
 
-    operatorNames: Ember.computed('operators.[]', '_usersStore.isDirty', function() {
+    operatorNames: computed('operators.[]', '_usersStore.isDirty', function() {
         return this._mapUserIdsToNicks('operators').sortBy('nick');
     }),
 
-    voiceNames: Ember.computed('voices.[]', '_usersStore.isDirty', function() {
+    voiceNames: computed('voices.[]', '_usersStore.isDirty', function() {
         return this._mapUserIdsToNicks('voices').sortBy('nick');
     }),
 
-    userNames: Ember.computed('users.[]', '_usersStore.isDirty', function() {
+    userNames: computed('users.[]', '_usersStore.isDirty', function() {
         return this._mapUserIdsToNicks('users').sortBy('nick');
     }),
 
-    decoratedTitle: Ember.computed('name', 'network', 'type', '_usersStore.isDirty', function() {
+    decoratedTitle: computed('name', 'network', 'type', '_usersStore.isDirty', function() {
         let title;
         let type = this.get('type');
         let userId = this.get('userId');
@@ -164,11 +166,11 @@ export default BaseModel.extend({
         return title;
     }),
 
-    decoratedTopic: Ember.computed('topic', function() {
+    decoratedTopic: computed('topic', function() {
         return this.get('topic') ? '- ' + this.get('topic') : '';
     }),
 
-    simplifiedName: Ember.computed('name', function() {
+    simplifiedName: computed('name', function() {
         let windowName = this.get('name');
         let network = this.get('network');
         let type = this.get('type');
@@ -184,12 +186,12 @@ export default BaseModel.extend({
         return windowName;
     }),
 
-    tooltipTopic: Ember.computed('topic', function() {
+    tooltipTopic: computed('topic', function() {
         let topic = this.get('topic');
         return topic ? 'Topic: ' + topic : 'Topic not set.';
     }),
 
-    explainedType: Ember.computed('type', function() {
+    explainedType: computed('type', function() {
         let type = this.get('type');
         let network = this.get('network');
 

@@ -14,19 +14,22 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { computed } from '@ember/object';
+
+import { oneWay, not } from '@ember/object/computed';
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
+export default Component.extend({
     model: null,
     errorMsg: '',
 
-    password: Ember.computed.oneWay('model.password'),
+    password: oneWay('model.password'),
 
     passwordEnabled: false,
-    passwordDisabled: Ember.computed.not('passwordEnabled'),
+    passwordDisabled: not('passwordEnabled'),
 
-    passwordTitle: Ember.computed('model.name', function() {
+    passwordTitle: computed('model.name', function() {
         return `Change Password for '${this.get('model.name')}'`;
     }),
 

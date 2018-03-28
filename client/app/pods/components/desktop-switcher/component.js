@@ -14,15 +14,18 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { alias } from '@ember/object/computed';
 
-export default Ember.Component.extend({
-    stores: Ember.inject.service(),
+import { inject as service } from '@ember/service';
+import Component from '@ember/component';
+
+export default Component.extend({
+    stores: service(),
 
     classNames: [ 'main-desktop-switcher' ],
 
-    activeDesktop: Ember.computed.alias('stores.settings.activeDesktop'),
+    activeDesktop: alias('stores.settings.activeDesktop'),
     draggedWindow: false,
 
-    desktops: Ember.computed.alias('stores.windows.desktops')
+    desktops: alias('stores.windows.desktops')
 });

@@ -14,15 +14,18 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { alias } from '@ember/object/computed';
+
+import { inject as service } from '@ember/service';
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
-    stores: Ember.inject.service(),
+export default Component.extend({
+    stores: service(),
 
-    name: Ember.computed.alias('stores.profile.name'),
-    email: Ember.computed.alias('stores.profile.email'),
-    nick: Ember.computed.alias('stores.profile.nick'),
+    name: alias('stores.profile.name'),
+    email: alias('stores.profile.email'),
+    nick: alias('stores.profile.nick'),
 
     errorMsg: '',
 

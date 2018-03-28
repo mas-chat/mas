@@ -16,11 +16,15 @@
 
 /* globals $ */
 
-import Ember from 'ember';
+import { next } from '@ember/runloop';
+
+import { computed } from '@ember/object';
+import { gt } from '@ember/object/computed';
+import Component from '@ember/component';
 import moment from 'npm:moment';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
+export default Component.extend({
     classNames: [ 'flex-column', 'flex-1' ],
     classNameBindings: [ 'enabled:visible:hidden' ],
 
@@ -32,7 +36,7 @@ export default Ember.Component.extend({
     currentDate: null,
 
     // Temporary solution, pagination is coming
-    tooManyMessages: Ember.computed.gt('window.logMessages', 999),
+    tooManyMessages: gt('window.logMessages', 999),
 
     init() {
         this._super();
@@ -40,7 +44,7 @@ export default Ember.Component.extend({
         this.set('currentDate', new Date());
     },
 
-    friendlyDate: Ember.computed('currentDate', function() {
+    friendlyDate: computed('currentDate', function() {
         return moment(this.get('currentDate')).format('dddd, MMMM Do YYYY');
     }),
 
@@ -110,7 +114,7 @@ export default Ember.Component.extend({
     },
 
     _loadImages() {
-        Ember.run.next(this, function() {
+        next(this, function() {
             this.$('img[data-src]').each(function() {
                 let $img = $(this);
                 $img.attr('src', $img.data('src'));

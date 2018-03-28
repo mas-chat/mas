@@ -14,9 +14,9 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import Component from '@ember/component';
 
-export default Ember.Component.extend({
+export default Component.extend({
     classNames: [ 'modal', 'fade' ],
 
     actions: {

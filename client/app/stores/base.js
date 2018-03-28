@@ -1,8 +1,9 @@
-import Ember from 'ember';
+import { next } from '@ember/runloop';
+import EmberObject from '@ember/object';
 
 let localStorageSupported = typeof Storage !== 'undefined';
 
-export default Ember.Object.extend({
+export default EmberObject.extend({
     _snapshotInterval: 60 * 1000, // 1 minute
 
     init() {
@@ -10,7 +11,7 @@ export default Ember.Object.extend({
             this._loadSnapshot();
 
             setInterval(() => {
-                Ember.run.next(this, this._saveSnapshot);
+                next(this, this._saveSnapshot);
             }, this.get('_snapshotInterval'));
         }
     },

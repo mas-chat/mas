@@ -14,11 +14,11 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { A } from '@ember/array';
 import Store from './base';
 
 const NetworksStore = Store.extend({
-    networks: Ember.A([]),
+    networks: A([]),
 
     handleUpdateNetworksServer(data) {
         this.get('networks').setObjects(data.networks);

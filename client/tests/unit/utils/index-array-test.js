@@ -1,6 +1,6 @@
 /* jshint expr:true */
 
-import Ember from 'ember';
+import EmberObject from '@ember/object';
 import { expect } from 'chai';
 import { beforeEach, describe, it } from 'mocha';
 import indexArray from 'mas/utils/index-array';
@@ -27,7 +27,7 @@ describe('indexArray', function() {
     });
 
     it('requires that index is set', function() {
-        let model = Ember.Object.create({ name: 'Ilkka' });
+        let model = EmberObject.create({ name: 'Ilkka' });
 
         expect(this.obj.upsertModels.bind(this.obj, [ model ]))
           .to.throw('Assertion Failed: Primary key \'ssn\' must exist');

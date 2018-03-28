@@ -1,6 +1,4 @@
 
-import Ember from 'ember';
-
 const noopCb = () => {};
 
 export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) {

@@ -14,14 +14,16 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { sort } from '@ember/object/computed';
+
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
+export default Component.extend({
     sortProperties: [ 'online:desc', 'last:desc', 'name' ],
     sortAscending: false,
 
-    sortedFriends: Ember.computed.sort('friends', 'sortProperties'),
+    sortedFriends: sort('friends', 'sortProperties'),
 
     actions: {
         startChat(userId) {

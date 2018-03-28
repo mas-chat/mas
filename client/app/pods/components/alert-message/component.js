@@ -14,17 +14,21 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { computed } from '@ember/object';
+
+import { oneWay } from '@ember/object/computed';
+import { inject as service } from '@ember/service';
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
-    stores: Ember.inject.service(),
+export default Component.extend({
+    stores: service(),
 
     classNames: [ 'flex-row', 'announcement' ],
 
-    alerts: Ember.computed.oneWay('stores.alerts.alerts'),
+    alerts: oneWay('stores.alerts.alerts'),
 
-    currentAlert: Ember.computed('alerts.[]', function() {
+    currentAlert: computed('alerts.[]', function() {
         let alerts = this.get('alerts');
 
         return alerts.length === 0 ? null : alerts.get('firstObject');

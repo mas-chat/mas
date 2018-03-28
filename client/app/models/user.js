@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import EmberObject from '@ember/object';
 import BaseModel from './base';
 
 export default BaseModel.extend({
@@ -23,6 +23,6 @@ export default BaseModel.extend({
     gravatar: '',
 
     init() {
-        this.set('nick', Ember.Object.create());
+        this.set('nick', EmberObject.create());
     }
 });

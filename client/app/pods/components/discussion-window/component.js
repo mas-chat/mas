@@ -16,7 +16,19 @@
 
 /* globals $ */
 
-import Ember from 'ember';
+import {
+  debounce,
+  scheduleOnce,
+  bind,
+  cancel,
+  throttle,
+  run
+} from '@ember/runloop';
+
+import { computed, observer } from '@ember/object';
+import { alias } from '@ember/object/computed';
+import { inject as service } from '@ember/service';
+import Component from '@ember/component';
 import Ps from 'npm:perfect-scrollbar';
 import Favico from 'npm:favico.js';
 import isMobile from 'npm:ismobilejs';
@@ -36,8 +48,8 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
-export default Ember.Component.extend({
-    stores: Ember.inject.service(),
+export default Component.extend({
+    stores: service(),
 
     classNames: [ 'window' ],
 
@@ -49,7 +61,7 @@ export default Ember.Component.extend({
         'type'
     ],
 
-    activeDesktop: Ember.computed.alias('stores.settings.activeDesktop'),
+    activeDesktop: alias('stores.settings.activeDesktop'),
 
     expanded: false,
     animating: false,
@@ -73,35 +85,35 @@ export default Ember.Component.extend({
 
     participants: null,
 
-    row: Ember.computed.alias('content.row'),
-    column: Ember.computed.alias('content.column'),
-    desktop: Ember.computed.alias('content.desktop'),
+    row: alias('content.row'),
+    column: alias('content.column'),
+    desktop: alias('content.desktop'),
 
-    visible: Ember.computed('activeDesktop', 'content.desktop', function() {
+    visible: computed('activeDesktop', 'content.desktop', function() {
         return this.get('activeDesktop') === this.get('content.desktop');
     }),
 
-    logOrMobileModeEnabled: Ember.computed('logModeEnabled', function() {
+    logOrMobileModeEnabled: computed('logModeEnabled', function() {
         return this.get('logModeEnabled') || isMobile.any;
     }),
 
-    fullBackLog: Ember.computed('content.messages.[]', function() {
+    fullBackLog: computed('content.messages.[]', function() {
         return this.get('content.messages.length') >= this.get('stores.windows.maxBacklogMsgs');
     }),
 
-    beginningReached: Ember.computed('fullBackLog', 'noOlderMessages', function() {
+    beginningReached: computed('fullBackLog', 'noOlderMessages', function() {
         return !this.get('fullBackLog') || (this.get('noOlderMessages'));
     }),
 
-    ircServerWindow: Ember.computed('content.userId', function() {
+    ircServerWindow: computed('content.userId', function() {
         return this.get('content.userId') === 'i0' ? 'irc-server-window' : '';
     }),
 
-    isGroup: Ember.computed('content.type', function() {
+    isGroup: computed('content.type', function() {
         return this.get('content.type') === 'group';
     }),
 
-    type: Ember.computed('content.type', function() {
+    type: computed('content.type', function() {
         if (this.get('content.type') === 'group') {
             return 'group';
         } else if (this.get('content.userId') === 'i0') {
@@ -111,19 +123,19 @@ export default Ember.Component.extend({
         }
     }),
 
-    hiddenIfLogMode: Ember.computed('logModeEnabled', function() {
+    hiddenIfLogMode: computed('logModeEnabled', function() {
         return this.get('logModeEnabled') ? 'hidden' : '';
     }),
 
-    hiddenIfMinimizedUserNames: Ember.computed('content.minimizedNamesList', function() {
+    hiddenIfMinimizedUserNames: computed('content.minimizedNamesList', function() {
         return this.get('content.minimizedNamesList') ? 'hidden' : '';
     }),
 
-    wideUnlessminimizedNamesList: Ember.computed('content.minimizedNamesList', function() {
+    wideUnlessminimizedNamesList: computed('content.minimizedNamesList', function() {
         return this.get('content.minimizedNamesList') ? '' : 'window-members-wide';
     }),
 
-    windowChanged: Ember.observer('row', 'column', 'desktop', function() {
+    windowChanged: observer('row', 'column', 'desktop', function() {
         if (this.get('elementInserted')) {
             this.sendAction('relayout', { animate: true });
         }
@@ -140,7 +152,7 @@ export default Ember.Component.extend({
     }.observes('visible').on('init'),
 
     nickCompletion: function() {
-        Ember.run.debounce(this, function() {
+        debounce(this, function() {
             this.set('participants',
                 this.get('content.operatorNames').concat(this.get('content.voiceNames'),
                     this.get('content.userNames')));
@@ -185,7 +197,7 @@ export default Ember.Component.extend({
             }
         }
 
-        Ember.run.scheduleOnce('afterRender', this, function() {
+        scheduleOnce('afterRender', this, function() {
             this._goToBottom(true);
         });
     },
@@ -212,7 +224,7 @@ export default Ember.Component.extend({
                 window: this.get('content')
             });
 
-            Ember.run.scheduleOnce('afterRender', this, function() {
+            scheduleOnce('afterRender', this, function() {
                 this._goToBottom(true);
             });
         },
@@ -278,7 +290,7 @@ export default Ember.Component.extend({
         this.$().velocity('stop').velocity(dim, {
             duration: duration,
             visibility: 'visible',
-            complete: Ember.run.bind(this, function() {
+            complete: bind(this, function() {
                 this.set('animating', false);
                 this._goToBottom(false, () => {
                     this._showImages(); // Make sure window shows the images after scrolling
@@ -405,10 +417,10 @@ export default Ember.Component.extend({
 
         this.sendAction('unregister', this);
 
-        Ember.run.cancel(this.scrollTimer);
-        Ember.run.cancel(this.lazyImageTimer);
+        cancel(this.scrollTimer);
+        cancel(this.lazyImageTimer);
 
-        Ember.run.scheduleOnce('afterRender', this, function() {
+        scheduleOnce('afterRender', this, function() {
             this.sendAction('relayout', { animate: true });
         });
     },
@@ -444,7 +456,7 @@ export default Ember.Component.extend({
             duration: duration,
             easing: 'spring',
             offset: -1 * this.$messagePanel.innerHeight() + 15, // 5px padding plus some extra
-            complete: Ember.run.bind(this, function() {
+            complete: bind(this, function() {
                 if (callback) {
                     callback();
                 }
@@ -497,13 +509,13 @@ export default Ember.Component.extend({
 
         this.$messagePanel.on('scroll', () => {
             // Delay nust be longer than goToBottom animation
-            this.scrollTimer = Ember.run.throttle(this, handler, 250, false);
+            this.scrollTimer = throttle(this, handler, 250, false);
         });
     },
 
     _addLazyImageScrollHandler() {
         this.$messagePanel.on('scroll', () => {
-            this.lazyImageTimer = Ember.run.throttle(this, this._showImages, 250, false);
+            this.lazyImageTimer = throttle(this, this._showImages, 250, false);
         });
     },
 
@@ -558,7 +570,7 @@ export default Ember.Component.extend({
                 $image.parent().hide(); // Container list element
             }
 
-            Ember.run(function() {
+            run(function() {
                 console.log('Lazy loaded image');
                 that._goToBottom(true);
             });

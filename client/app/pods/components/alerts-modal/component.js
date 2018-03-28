@@ -14,12 +14,15 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { computed } from '@ember/object';
+
+import { oneWay } from '@ember/object/computed';
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
+export default Component.extend({
     model: null,
-    alerts: Ember.computed.oneWay('model.alerts'),
+    alerts: oneWay('model.alerts'),
 
     actions: {
         changeAlerts() {
@@ -41,7 +44,7 @@ export default Ember.Component.extend({
         }
     },
 
-    alertsTitle: Ember.computed('model.name', function() {
+    alertsTitle: computed('model.name', function() {
         return 'Configure alerts for \'' + this.get('model.simplifiedName') + '\'';
     })
 });

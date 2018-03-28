@@ -14,10 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import Helper from '@ember/component/helper';
 import moment from 'npm:moment';
 
-export default Ember.Helper.extend({
+export default Helper.extend({
     compute(params) {
         let online = params[0];
         let timeStamp = params[1];

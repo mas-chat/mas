@@ -14,13 +14,16 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { computed } from '@ember/object';
+
+import { oneWay } from '@ember/object/computed';
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
-    topic: Ember.computed.oneWay('model.topic'),
+export default Component.extend({
+    topic: oneWay('model.topic'),
 
-    topicTitle: Ember.computed('model.name', function() {
+    topicTitle: computed('model.name', function() {
         return `Edit topic for '${this.get('model.name')}'`;
     }),
 

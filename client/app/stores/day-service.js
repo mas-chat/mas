@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { later } from '@ember/runloop';
 import moment from 'npm:moment';
 import Store from './base';
 
@@ -33,10 +33,10 @@ const DayServiceStore = Store.extend({
 
         let changeDay = function() {
             this.incrementProperty('dayCounter');
-            Ember.run.later(this, changeDay, 1000 * 60 * 60 * 24);
+            later(this, changeDay, 1000 * 60 * 60 * 24);
         };
 
-        Ember.run.later(this, changeDay, timeToTomorrow);
+        later(this, changeDay, timeToTomorrow);
     }
 });
 

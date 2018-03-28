@@ -14,12 +14,15 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { bind } from '@ember/runloop';
 
-export default Ember.Service.extend({
+import { computed } from '@ember/object';
+import Service from '@ember/service';
+
+export default Service.extend({
     stream: null,
 
-    streamActive: Ember.computed('stream', function() {
+    streamActive: computed('stream', function() {
         return !!this.get('stream');
     }),
 
@@ -42,7 +45,7 @@ export default Ember.Service.extend({
                 height: 600
             }
         })
-        .then(Ember.run.bind(this, function(newStream) {
+        .then(bind(this, function(newStream) {
             this.set('stream', newStream);
             successCb(newStream);
         }))

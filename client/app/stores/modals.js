@@ -14,11 +14,11 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { A } from '@ember/array';
 import Store from './base';
 
 const ModalsStore = Store.extend({
-    modals: Ember.A([]),
+    modals: A([]),
 
     handleOpenModal(data) {
         this.get('modals').pushObject({

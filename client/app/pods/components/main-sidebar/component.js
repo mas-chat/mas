@@ -14,18 +14,22 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { computed } from '@ember/object';
+
+import { alias } from '@ember/object/computed';
+import { inject as service } from '@ember/service';
+import Component from '@ember/component';
 //import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend(/*KeyboardShortcuts,*/ {
-    stores: Ember.inject.service(),
+export default Component.extend(/*KeyboardShortcuts,*/ {
+    stores: service(),
 
     classNames: [ 'sidebar', 'flex-grow-column' ],
 
     draggedWindow: false,
-    friends: Ember.computed.alias('stores.friends.friends'),
-    canUseIRC: Ember.computed.alias('stores.settings.canUseIRC'),
+    friends: alias('stores.friends.friends'),
+    canUseIRC: alias('stores.settings.canUseIRC'),
 
     actions: {
         openModal(modal) {
@@ -49,11 +53,11 @@ export default Ember.Component.extend(/*KeyboardShortcuts,*/ {
         'up up down down i o': 'toggleDarkTheme'
     },
 
-    friendsOnline: Ember.computed('friends.@each.online', function() {
+    friendsOnline: computed('friends.@each.online', function() {
         return this.get('friends').filterBy('online', true).length;
     }),
 
-    darkTheme: Ember.computed('stores.settings.theme', function() {
+    darkTheme: computed('stores.settings.theme', function() {
         return this.get('stores.settings.theme') === 'dark';
     })
 });

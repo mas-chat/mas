@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { computed } from '@ember/object';
 import BaseModel from './base';
 
 export default BaseModel.extend({
@@ -27,7 +27,7 @@ export default BaseModel.extend({
         this.set('_usersStore', window.stores.users);
     },
 
-    name: Ember.computed('_usersStore.isDirty', function() {
+    name: computed('_usersStore.isDirty', function() {
         let userId = this.get('userId');
         return this.get('_usersStore.users').getByIndex(userId).get('name');
     })

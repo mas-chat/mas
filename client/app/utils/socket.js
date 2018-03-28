@@ -16,7 +16,10 @@
 
 /* globals $ */
 
-import Ember from 'ember';
+import { bind, later, cancel } from '@ember/runloop';
+
+import { A } from '@ember/array';
+import EmberObject from '@ember/object';
 import io from 'npm:socket.io-client';
 import Cookies from 'npm:js-cookie';
 import { calcMsgHistorySize } from './msg-history-sizer';
@@ -41,7 +44,7 @@ const serverIdToEventMap = {
 
 let ioSocket = io.connect(); // Start connection as early as possible.
 
-let SocketService = Ember.Object.extend({
+let SocketService = EmberObject.extend({
     sessionId: 0,
     cookie: null,
 
@@ -55,7 +58,7 @@ let SocketService = Ember.Object.extend({
         this._super();
 
         this.cookie = Cookies.get('mas') || '';
-        this._sendQueue = Ember.A([]);
+        this._sendQueue = A([]);
 
         if (!this.cookie) {
             console.error(`Session cookie not found or corrupted. Exiting.`);
@@ -70,7 +73,7 @@ let SocketService = Ember.Object.extend({
         this.set('_windowsStore.initDone', false);
         this._emitInit();
 
-        ioSocket.on('initok', Ember.run.bind(this, function(data) {
+        ioSocket.on('initok', bind(this, function(data) {
             this.set('_connected', true);
 
             this.set('sessionId', data.sessionId); // TODO: Should not needed, use cookie always
@@ -84,17 +87,17 @@ let SocketService = Ember.Object.extend({
             this._emitReq(); // In case there are items in sendQueue from previous session
         }));
 
-        ioSocket.on('terminate', Ember.run.bind(this, function() {
+        ioSocket.on('terminate', bind(this, function() {
             this._logout();
         }));
 
-        ioSocket.on('refresh_session', Ember.run.bind(this, function(data) {
+        ioSocket.on('refresh_session', bind(this, function(data) {
             this.set('cookie', data.refreshCookie);
             Cookies.set('mas', data.refreshCookie, { expires: 7 });
             ioSocket.emit('refresh_done');
         }));
 
-        ioSocket.on('ntf', Ember.run.bind(this, function(notification) {
+        ioSocket.on('ntf', bind(this, function(notification) {
             let type = notification.type;
             delete notification.type;
 
@@ -111,12 +114,12 @@ let SocketService = Ember.Object.extend({
             }
         }));
 
-        ioSocket.on('disconnect', Ember.run.bind(this, function() {
+        ioSocket.on('disconnect', bind(this, function() {
             console.log('Socket.io connection lost.');
 
             this.set('_connected', false);
 
-            this.set('_disconnectedTimer', Ember.run.later(this, function() {
+            this.set('_disconnectedTimer', later(this, function() {
                 dispatch('OPEN_PRIORITY_MODAL', {
                     name: 'non-interactive-modal',
                     model: {
@@ -129,11 +132,11 @@ let SocketService = Ember.Object.extend({
             }, 5000));
         }));
 
-        ioSocket.on('reconnect', Ember.run.bind(this, function() {
+        ioSocket.on('reconnect', bind(this, function() {
             let timer = this.get('_disconnectedTimer');
 
             if (timer) {
-                Ember.run.cancel(timer);
+                cancel(timer);
             } else {
                 dispatch('CLOSE_PRIORITY_MODAL');
             }

@@ -14,7 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { A } from '@ember/array';
+
+import EmberObject, { computed } from '@ember/object';
+import { alias } from '@ember/object/computed';
 import marked from 'npm:marked';
 import emojione from 'npm:emojione';
 import moment from 'npm:moment';
@@ -50,19 +53,19 @@ export default BaseModel.extend({
         this.set('_usersStore', window.stores.users);
     },
 
-    mentionedRegEx: Ember.computed.alias('window.userNickHighlightRegex'),
+    mentionedRegEx: alias('window.userNickHighlightRegex'),
 
     ircMotd: false,
 
-    edited: Ember.computed('status', function() {
+    edited: computed('status', function() {
         return this.get('status') === 'edited';
     }),
 
-    deleted: Ember.computed('status', function() {
+    deleted: computed('status', function() {
         return this.get('status') === 'deleted';
     }),
 
-    updatedTime: Ember.computed('updatedTs', function() {
+    updatedTime: computed('updatedTs', function() {
         let updatedTs = this.get('updatedTs');
 
         if (!updatedTs) {
@@ -76,29 +79,29 @@ export default BaseModel.extend({
             'HH:mm' : 'MMM Do HH:mm')}`;
     }),
 
-    updatedDate: Ember.computed('updatedTs', function() {
+    updatedDate: computed('updatedTs', function() {
         let updatedTs = this.get('updatedTs');
 
         return updatedTs ? `at ${moment.unix(updatedTs).format('MMM Do HH:mm')}` : '';
     }),
 
-    updatedDateLong: Ember.computed('updatedTs', function() {
+    updatedDateLong: computed('updatedTs', function() {
         let updatedTs = this.get('updatedTs');
 
         return updatedTs ? `at ${moment.unix(updatedTs).format('dddd, MMMM D HH:mm')}` : '';
     }),
 
-    nick: Ember.computed('userId', 'window', function() {
+    nick: computed('userId', 'window', function() {
         let user = this.get('_usersStore.users').getByIndex(this.get('userId'));
         return user ? user.get('nick')[this.get('window.network')] : '';
     }),
 
-    avatarUrl: Ember.computed('userId', function() {
+    avatarUrl: computed('userId', function() {
         let user = this.get('_usersStore.users').getByIndex(this.get('userId'));
         return user ? `//gravatar.com/avatar/${user.get('gravatar')}?d=mm` : '';
     }),
 
-    decoratedCat: Ember.computed('cat', 'nick', 'body', 'mentionedRegEx', function() {
+    decoratedCat: computed('cat', 'nick', 'body', 'mentionedRegEx', function() {
         let cat = this.get('cat');
         let body = this.get('body');
         let userId = this.get('userId');
@@ -116,11 +119,11 @@ export default BaseModel.extend({
         return cat;
     }),
 
-    decoratedTs: Ember.computed('ts', function() {
+    decoratedTs: computed('ts', function() {
         return moment.unix(this.get('ts')).format('HH:mm');
     }),
 
-    channelAction: Ember.computed('cat', function() {
+    channelAction: computed('cat', function() {
         let category = this.get('cat');
         let nick = this.get('nick');
         let groupName = this.get('window.name');
@@ -138,11 +141,11 @@ export default BaseModel.extend({
         }
     }),
 
-    myNotDeletedMessage: Ember.computed('decoratedCat', function() {
+    myNotDeletedMessage: computed('decoratedCat', function() {
         return this.get('decoratedCat') === 'mymsg' && this.get('status') !== 'deleted';
     }),
 
-    bodyParts: Ember.computed('body', function() {
+    bodyParts: computed('body', function() {
         let body = this.get('body');
         let cat = this.get('cat');
 
@@ -160,30 +163,30 @@ export default BaseModel.extend({
 
         parts.push({ type: 'text', text: body });
 
-        return Ember.A(parts.map(item => Ember.Object.create(item)));
+        return A(parts.map(item => EmberObject.create(item)));
     }),
 
-    text: Ember.computed('bodyParts', function() {
+    text: computed('bodyParts', function() {
         return this.get('bodyParts').findBy('type', 'text').text;
     }),
 
-    images: Ember.computed('bodyParts', function() {
+    images: computed('bodyParts', function() {
         return this.get('bodyParts').filterBy('type', 'image');
     }),
 
-    hasMedia: Ember.computed('bodyParts', function() {
+    hasMedia: computed('bodyParts', function() {
         return !this.get('bodyParts').isEvery('type', 'text');
     }),
 
-    hasImages: Ember.computed('bodyParts', function() {
+    hasImages: computed('bodyParts', function() {
         return this.get('bodyParts').isAny('type', 'image');
     }),
 
-    hasYoutubeVideo: Ember.computed('bodyParts', function() {
+    hasYoutubeVideo: computed('bodyParts', function() {
         return this.get('bodyParts').isAny('type', 'youtubelink');
     }),
 
-    videoId: Ember.computed('bodyParts', function() {
+    videoId: computed('bodyParts', function() {
         let video = this.get('bodyParts').findBy('type', 'youtubelink');
 
         if (video) {
@@ -195,7 +198,7 @@ export default BaseModel.extend({
         }
     }),
 
-    videoParams: Ember.computed('bodyParts', function() {
+    videoParams: computed('bodyParts', function() {
         let video = this.get('bodyParts').findBy('type', 'youtubelink');
 
         const start = video.start ? `&start=${video.start}` : '';

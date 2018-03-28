@@ -14,12 +14,15 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { bind } from '@ember/runloop';
+
+import { inject as service } from '@ember/service';
+import Component from '@ember/component';
 import captureVideoFrame from 'npm:capture-video-frame';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
-    video: Ember.inject.service(),
+export default Component.extend({
+    video: service(),
 
     shot: null,
     note: 'Allow webcam access in your browser.',
@@ -63,8 +66,8 @@ export default Ember.Component.extend({
         this.$('.btn-capture').addClass('disabled');
         this.$('#webcam-snapshot').hide();
 
-        this.get('video').getStream(Ember.run.bind(this, this._getStreamSuccess),
-            Ember.run.bind(this, this._getStreamError));
+        this.get('video').getStream(bind(this, this._getStreamSuccess),
+            bind(this, this._getStreamError));
     },
 
     willDestroyElement() {

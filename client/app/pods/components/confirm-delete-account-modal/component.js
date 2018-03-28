@@ -14,10 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
+export default Component.extend({
     actions: {
         closeModal() {
             this.sendAction('closeModal');

@@ -14,12 +14,14 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { observer } from '@ember/object';
+
+import TextArea from '@ember/component/text-area';
 import emojione from 'npm:emojione';
 
 let emojisList = Object.keys(emojione.emojioneList).sort().map((value, i) => ({ id: i, name: value }));
 
-export default Ember.TextArea.extend({
+export default TextArea.extend({
     participants: null,
     pendingClear: false,
 
@@ -41,7 +43,7 @@ export default Ember.TextArea.extend({
         this._updateHeight();
     },
 
-    nickCompletion: Ember.observer('participants', function() {
+    nickCompletion: observer('participants', function() {
         let participants = this.get('participants') || [];
 
         this.$().atwho({

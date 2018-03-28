@@ -14,13 +14,16 @@
 //   governing permissions and limitations under the License.
 //
 
-import Ember from 'ember';
+import { computed } from '@ember/object';
+
+import { inject as service } from '@ember/service';
+import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend({
-    stores: Ember.inject.service(),
+export default Component.extend({
+    stores: service(),
 
-    activeModal: Ember.computed('stores.modals.modals.[]', function() {
+    activeModal: computed('stores.modals.modals.[]', function() {
         let modalQueue = this.get('stores.modals.modals');
 
         return modalQueue.length === 0 ?
