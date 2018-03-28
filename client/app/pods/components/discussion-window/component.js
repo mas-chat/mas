@@ -485,11 +485,11 @@ export default Ember.Component.extend({
                     this.set('content.newMessagesCount', 0);
                 }
 
-                Ember.Logger.info('scrollock off');
+                console.log('scrollock off');
             } else if (!this.deletedLine) {
                 this.set('scrollLock', true);
 
-                Ember.Logger.info('scrollock on');
+                console.log('scrollock on');
             }
 
             this.deletedLine = false;
@@ -559,7 +559,7 @@ export default Ember.Component.extend({
             }
 
             Ember.run(function() {
-                Ember.Logger.info('Lazy loaded image');
+                console.log('Lazy loaded image');
                 that._goToBottom(true);
             });
         });

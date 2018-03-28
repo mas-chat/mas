@@ -154,7 +154,7 @@ const WindowsStore = Store.extend({
         return; // TODO: Enable when missing user problem is solved.
 
         if (data.userId !== this.get('userId') || data.version !== 4) {
-            Ember.Logger.info(`Corrupted windows snapshot.`);
+            console.log(`Corrupted windows snapshot.`);
             return;
         }
 
@@ -591,14 +591,14 @@ const WindowsStore = Store.extend({
         this.get('windows').removeModels(deletedWindows);
 
         // Insert buffered message in one go.
-        Ember.Logger.info(`MsgBuffer processing started.`);
+        console.log(`MsgBuffer processing started.`);
 
         for (let i = 0; i < this.msgBuffer.length; i++) {
             let item = this.msgBuffer[i];
             item.window.messages.upsertModel(item);
         }
 
-        Ember.Logger.info(`MsgBuffer processing ended.`);
+        console.log(`MsgBuffer processing ended.`);
 
         this.msgBuffer = [];
         this.set('initDone', true);

@@ -17,12 +17,12 @@ export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) 
             let noLog = storeObj[handler].call(storeObj, data, acceptCb, rejectCb);
 
             if (!noLog) {
-                Ember.Logger.info(`[${store.name}-store] Consumed action ${type}.`);
+                console.log(`[${store.name}-store] Consumed action ${type}.`);
             }
         }
     }
 
     if (!consumed) {
-        Ember.Logger.error(`No store handled action: ${type}`);
+        console.error(`No store handled action: ${type}`);
     }
 }

@@ -58,7 +58,7 @@ let SocketService = Ember.Object.extend({
         this._sendQueue = Ember.A([]);
 
         if (!this.cookie) {
-            Ember.Logger.info(`Session cookie not found or corrupted. Exiting.`);
+            console.error(`Session cookie not found or corrupted. Exiting.`);
             this._logout();
             return;
         }
@@ -99,7 +99,7 @@ let SocketService = Ember.Object.extend({
             delete notification.type;
 
             if (type !== 'ADD_MESSAGE') {
-                Ember.Logger.info(`← NTF: ${type}`);
+                console.log(`← NTF: ${type}`);
             }
 
             let event = serverIdToEventMap[type];
@@ -107,12 +107,12 @@ let SocketService = Ember.Object.extend({
             if (event) {
                 dispatch(event, notification);
             } else {
-                Ember.Logger.warn(`Unknown notification received: ${type}`);
+                console.warn(`Unknown notification received: ${type}`);
             }
         }));
 
         ioSocket.on('disconnect', Ember.run.bind(this, function() {
-            Ember.Logger.info('Socket.io connection lost.');
+            console.log('Socket.io connection lost.');
 
             this.set('_connected', false);
 
@@ -168,7 +168,7 @@ let SocketService = Ember.Object.extend({
             cachedUpto: cachedUpto
         });
 
-        Ember.Logger.info(`→ INIT: cachedUpto: ${cachedUpto}, maxBacklogMsgs: ${maxBacklogMsgs}`);
+        console.log(`→ INIT: cachedUpto: ${cachedUpto}, maxBacklogMsgs: ${maxBacklogMsgs}`);
     },
 
     _emitReq() {
@@ -180,7 +180,7 @@ let SocketService = Ember.Object.extend({
 
         ioSocket.emit('req', req.request, data => {
             if (req.callback) {
-                Ember.Logger.info('← RESP');
+                console.log('← RESP');
                 req.callback(data);
             }
 
@@ -188,7 +188,7 @@ let SocketService = Ember.Object.extend({
             this._emitReq();
         });
 
-        Ember.Logger.info('→ REQ: ' + req.request.id);
+        console.log('→ REQ: ' + req.request.id);
     },
 
     _logout() {
