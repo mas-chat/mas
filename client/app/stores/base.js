@@ -38,7 +38,7 @@ export default EmberObject.extend({
 
             this.fromJSON(data)
 
-            console.log('[${name}-store] Snapshot loaded and processed.');
+            console.log(`[${name}-store] Snapshot loaded and processed.`);
         } catch (e) {
             console.log(`[${name}-store] Failed to load or validate snapshot, error: ${e}`);
         }
