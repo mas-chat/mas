@@ -19,6 +19,16 @@ import Resolver from './resolver';
 import loadInitializers from 'ember-load-initializers';
 import config from './config/environment';
 
+import './stores/alerts';
+import './stores/day-service';
+import './stores/friends';
+import './stores/modals';
+import './stores/networks';
+import './stores/profile';
+import './stores/settings';
+import './stores/users';
+import './stores/windows';
+
 const App = Application.extend({
     modulePrefix: config.modulePrefix,
     podModulePrefix: config.podModulePrefix,

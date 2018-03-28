@@ -17,7 +17,7 @@
 /* globals $ */
 
 import Ember from 'ember';
-import { dispatch } from 'emflux/dispatcher';
+import { dispatch } from '../../../utils/dispatcher';
 
 const CURSORWIDTH = 50;
 

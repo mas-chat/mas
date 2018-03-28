@@ -15,11 +15,11 @@
 //
 
 import isMobile from 'npm:ismobilejs';
-import Store from 'emflux/store';
-import { dispatch } from 'emflux/dispatcher';
+import Store from './base';
+import { dispatch } from '../utils/dispatcher';
 import socket from '../utils/socket';
 
-export default Store.extend({
+const SettingsStore = Store.extend({
     theme: 'default',
     activeDesktop: 1,
     email: '', // TODO: Remove from here, keep in profile
@@ -94,3 +94,6 @@ export default Store.extend({
         this.setProperties(data.settings);
     }
 });
+
+window.stores = window.stores || {}
+window.stores.settings = SettingsStore.create();

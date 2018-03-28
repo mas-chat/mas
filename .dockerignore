@@ -1,5 +1,4 @@
 .git
 client/node_modules
-client/bower_components
 server/node_modules
 server/website/node_modules

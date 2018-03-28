@@ -20,7 +20,7 @@ import Ember from 'ember';
 import Ps from 'npm:perfect-scrollbar';
 import Favico from 'npm:favico.js';
 import isMobile from 'npm:ismobilejs';
-import { dispatch } from 'emflux/dispatcher';
+import { dispatch } from '../../../utils/dispatcher';
 import { play } from '../../../utils/sound';
 
 let faviconCounter = 0;

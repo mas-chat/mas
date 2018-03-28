@@ -14,13 +14,13 @@
 //   governing permissions and limitations under the License.
 //
 
-import Store from 'emflux/store';
-import { dispatch, getStore } from 'emflux/dispatcher';
+import Store from './base';
+import { dispatch } from '../utils/dispatcher';
 import Friend from '../models/friend';
 import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
 
-export default Store.extend({
+const FriendsStore = Store.extend({
     friends: IndexArray.create({ index: 'userId', factory: Friend }),
 
     handleAddFriendsServer(data) {
@@ -58,7 +58,7 @@ export default Store.extend({
     },
 
     handleConfirmFriendsServer(data) {
-        let users = getStore('users').get('users');
+        let users = window.stores.users.get('users');
 
         for (let friendCandidate of data.friends) {
             let userId = friendCandidate.userId;
@@ -94,3 +94,6 @@ export default Store.extend({
         });
     }
 });
+
+window.stores = window.stores || {}
+window.stores.friends = FriendsStore.create();

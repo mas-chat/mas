@@ -20,7 +20,6 @@ import isMobile from 'npm:ismobilejs'
 import BaseModel from './base';
 import Message from './message';
 import IndexArray from '../utils/index-array';
-import { getStore } from 'emflux/dispatcher';
 
 let mobileDesktop = 1;
 
@@ -59,9 +58,9 @@ export default BaseModel.extend({
     init() {
         this._super();
 
-        this.set('_dayServiceStore', getStore('day-service'));
-        this.set('_windowsStore', getStore('windows'));
-        this.set('_usersStore', getStore('users'));
+        this.set('_dayServiceStore', window.stores['day-service']);
+        this.set('_windowsStore', window.stores.windows);
+        this.set('_usersStore', window.stores.users);
 
         this.set('_desktop', mobileDesktop++);
 

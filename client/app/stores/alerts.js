@@ -14,12 +14,12 @@
 //   governing permissions and limitations under the License.
 //
 
-import Store from 'emflux/store';
+import Store from './base';
 import IndexArray from '../utils/index-array';
 import Alert from '../models/alert';
 import socket from '../utils/socket';
 
-export default Store.extend({
+const AlertsStore = Store.extend({
     alerts: IndexArray.create({ index: 'alertId', factory: Alert }),
 
     handleShowAlert(data) {
@@ -53,3 +53,6 @@ export default Store.extend({
         this.get('alerts').shiftObject();
     }
 });
+
+window.stores = window.stores || {}
+window.stores.alerts = AlertsStore.create();

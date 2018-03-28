@@ -12,6 +12,13 @@ module.exports = function(defaults) {
         'ember-cli-babel': {
             includePolyfill: true
         },
+        lessOptions: {
+            paths: [
+                'node_modules/bootstrap/less',
+                'node_modules/bootswatch/superhero',
+                'node_modules'
+            ]
+        },
         autoprefixer: {
             browsers: [ 'last 2 versions' ],
             cascade: false
@@ -36,9 +43,8 @@ module.exports = function(defaults) {
 
     app.import('node_modules/bootstrap/dist/js/bootstrap.js');
     app.import('node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.js');
-    app.import('node_modules/at.js/dist/js/jquery.atwho.js');
-    // TODO: fixme
-    // app.import('bower_components/Caret.js/dist/jquery.caret.min.js');
+    app.import('vendor/jquery.atwho.min.js');
+    app.import('node_modules/jquery.caret/dist/jquery.caret.min.js');
     app.import('node_modules/magnific-popup/dist/jquery.magnific-popup.js');
     app.import('node_modules/bootstrap-contextmenu/bootstrap-contextmenu.js');
     app.import('node_modules/velocity-animate/velocity.js');
@@ -49,7 +55,10 @@ module.exports = function(defaults) {
         destDir: '/assets/fonts'
     });
 
-    // TODO: fixme bootstrap fonts
+    let fontsBootstrap = pickFiles('node_modules/bootstrap/dist/fonts', {
+        srcDir: '/',
+        destDir: '/assets/fonts'
+    });
 
     let emojify = pickFiles('node_modules/emojione/assets/png', {
         srcDir: '/',
@@ -60,6 +69,7 @@ module.exports = function(defaults) {
     return mergeTrees([
         app.toTree(),
         fontsFontAwesome,
+        fontsBootstrap,
         emojify
     ]);
 };

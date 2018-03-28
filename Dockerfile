@@ -12,9 +12,8 @@ COPY client /app/client/
 WORKDIR /app/client/
 
 RUN yarn install \
-  && yarn run bower \
   && yarn run build  \
-  && rm -fr node_modules bower_components tmp \
+  && rm -fr node_modules tmp \
   && yarn cache clean
 
 COPY server /app/server/

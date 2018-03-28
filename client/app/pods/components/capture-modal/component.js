@@ -16,7 +16,7 @@
 
 import Ember from 'ember';
 import captureVideoFrame from 'npm:capture-video-frame';
-import { dispatch } from 'emflux/dispatcher';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
     video: Ember.inject.service(),

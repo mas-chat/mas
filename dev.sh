@@ -32,7 +32,7 @@ case "$1" in
 
     c|clean)
         set -x
-        rm -fr client/node_modules client/bower_components client/tmp client/dist
+        rm -fr client/node_modules client/tmp client/dist
         rm -fr newclient/dist newclient/node_modules
         rm -fr server/node_modules
         rm -fr server/website/node_modules server/website/dist

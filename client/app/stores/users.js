@@ -14,14 +14,13 @@
 //   governing permissions and limitations under the License.
 //
 
-import Store from 'emflux/store';
+import Store from './base';
 import Cookies from 'npm:js-cookie';
-import { getStore } from 'emflux/dispatcher';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import User from '../models/user';
 import IndexArray from '../utils/index-array';
 
-export default Store.extend({
+const UsersStore = Store.extend({
     users: IndexArray.create({ index: 'userId', factory: User }),
     isDirty: 0,
     userId: null,
@@ -45,7 +44,7 @@ export default Store.extend({
         };
 
         // Only persist users of recent messages
-        getStore('windows').get('windows').forEach(function(masWindow) {
+        window.stores.windows.get('windows').forEach(function(masWindow) {
             let sortedMessages = masWindow.get('messages').sortBy('gid')
                 .slice(-1 * calcMsgHistorySize());
 
@@ -92,3 +91,6 @@ export default Store.extend({
         this.incrementProperty('isDirty');
     }
 });
+
+window.stores = window.stores || {}
+window.stores.users = UsersStore.create();

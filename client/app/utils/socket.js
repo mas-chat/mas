@@ -19,8 +19,8 @@
 import Ember from 'ember';
 import io from 'npm:socket.io-client';
 import Cookies from 'npm:js-cookie';
-import { calcMsgHistorySize } from '../utils/msg-history-sizer';
-import { dispatch, getStore } from 'emflux/dispatcher';
+import { calcMsgHistorySize } from './msg-history-sizer';
+import { dispatch } from './dispatcher';
 
 const serverIdToEventMap = {
     UPDATE_MEMBERS: 'ADD_MEMBERS_SERVER',
@@ -65,7 +65,7 @@ let SocketService = Ember.Object.extend({
     },
 
     start() {
-        this.set('_windowsStore', getStore('windows'));
+        this.set('_windowsStore', window.stores.windows);
 
         this.set('_windowsStore.initDone', false);
         this._emitInit();

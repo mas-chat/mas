@@ -17,7 +17,7 @@ RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh | b
 
 ENV PATH $NVM_DIR/versions/io.js/v2.5.0/bin:$PATH
 
-RUN npm install -g bower gulp ember-cli
+RUN npm install -g ember-cli
 
 ADD . /app/code
 RUN mkdir /app/code/logs /app/code/run
@@ -28,7 +28,6 @@ RUN gulp build-pages
 
 WORKDIR /app/code/client
 RUN npm install
-RUN bower install --allow-root
 RUN ember build
 
 EXPOSE 3200

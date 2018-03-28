@@ -15,7 +15,7 @@
 //
 
 import Ember from 'ember';
-import { dispatch } from 'emflux/dispatcher';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
     model: null,

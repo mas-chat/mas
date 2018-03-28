@@ -14,7 +14,6 @@
     "build": "ember build --prod",
     "build-dev": "ember build",
     "start": "ember server",
-    "bower": "bower --allow-root install",
     "test": "ember test"
   },
   "devDependencies": {
@@ -28,7 +27,6 @@
     "ember-cli-autoprefixer": "~0.6.0",
     "ember-cli-babel": "^6.6.0",
     "ember-cli-dependency-checker": "^2.0.0",
-    "ember-cli-emflux": "ilkkao/ember-cli-emflux#35c753dcb1b22112976b4ef31ef1fcf8d942eb5c",
     "ember-cli-htmlbars": "^2.0.1",
     "ember-cli-htmlbars-inline-precompile": "^1.0.0",
     "ember-cli-inject-live-reload": "^1.4.1",
@@ -43,17 +41,19 @@
   },
   "dependencies": {
     "at.js": "^1.5.3",
-    "bootstrap": "^4.0.0",
+    "bootstrap": "3.3.1",
     "bootstrap-contextmenu": "^1.0.0",
     "bootstrap-datepicker": "^1.7.1",
-    "bootswatch": "^4.0.0",
+    "bootswatch": "3.3.1",
     "capture-video-frame": "~0.1.1",
+    "ember-cli-less": "^1.5.5",
     "emojione": "^2.2.7",
     "favico.js": "~0.3.10",
     "font-awesome": "^4.7.0",
     "howler": "^2.0.2",
     "ismobilejs": "~0.4.0",
     "jquery": "^3.3.1",
+    "jquery.caret": "^0.3.1",
     "js-cookie": "^2.1.3",
     "loader.js": "^4.6.0",
     "magnific-popup": "^1.1.0",
@@ -63,7 +63,7 @@
     "perfect-scrollbar": "^0.6.15",
     "socket.io-client": "^2.0.1",
     "urijs": "^1.18.7",
-    "velocity-animate": "^2.0.2"
+    "velocity-animate": "1.4.0"
   },
   "engines": {
     "node": "^4.5 || 6.* || >= 7.*"

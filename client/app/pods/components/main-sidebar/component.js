@@ -15,10 +15,10 @@
 //
 
 import Ember from 'ember';
-import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
-import { dispatch } from 'emflux/dispatcher';
+//import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
+import { dispatch } from '../../../utils/dispatcher';
 
-export default Ember.Component.extend(KeyboardShortcuts, {
+export default Ember.Component.extend(/*KeyboardShortcuts,*/ {
     stores: Ember.inject.service(),
 
     classNames: [ 'sidebar', 'flex-grow-column' ],

@@ -15,12 +15,15 @@
 //
 
 import Ember from 'ember';
-import Store from 'emflux/store';
+import Store from './base';
 
-export default Store.extend({
+const NetworksStore = Store.extend({
     networks: Ember.A([]),
 
     handleUpdateNetworksServer(data) {
         this.get('networks').setObjects(data.networks);
     }
 });
+
+window.stores = window.stores || {}
+window.stores.networks = NetworksStore.create();

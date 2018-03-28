@@ -14,11 +14,11 @@
 //   governing permissions and limitations under the License.
 //
 
-import Store from 'emflux/store';
-import { dispatch } from 'emflux/dispatcher';
+import Store from './base';
+import { dispatch } from '../utils/dispatcher';
 import socket from '../utils/socket';
 
-export default Store.extend({
+const ProfileStore = Store.extend({
     nick: '',
     name: '',
     email: '',
@@ -49,3 +49,6 @@ export default Store.extend({
         });
     }
 });
+
+window.stores = window.stores || {}
+window.stores.profile = ProfileStore.create();

@@ -16,7 +16,6 @@
 
 /client/dist/
 /client/tmp/
-/client/bower_components/
 /client/node_modules/
 
 /newclient/dist

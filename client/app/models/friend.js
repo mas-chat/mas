@@ -16,7 +16,6 @@
 
 import Ember from 'ember';
 import BaseModel from './base';
-import { getStore } from 'emflux/dispatcher';
 
 export default BaseModel.extend({
     userId: null,
@@ -25,7 +24,7 @@ export default BaseModel.extend({
 
     init() {
         this._super();
-        this.set('_usersStore', getStore('users'));
+        this.set('_usersStore', window.stores.users);
     },
 
     name: Ember.computed('_usersStore.isDirty', function() {

@@ -20,14 +20,14 @@ import Ember from 'ember';
 import moment from 'npm:moment';
 import Cookies from 'npm:js-cookie';
 import isMobile from 'npm:ismobilejs';
-import Store from 'emflux/store';
-import { dispatch, getStore } from 'emflux/dispatcher';
+import Store from './base';
+import { dispatch } from '../utils/dispatcher';
 import Window from '../models/window';
 import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 
-export default Store.extend({
+const WindowsStore = Store.extend({
     windows: IndexArray.create({ index: 'windowId', factory: Window }),
     msgBuffer: null, // Only used during startup
     maxBacklogMsgs: 100000,
@@ -78,7 +78,7 @@ export default Store.extend({
 
         let desktopIds = this.get('desktops').map(d => d.id);
 
-        if (desktopIds.indexOf(getStore('settings').get('activeDesktop')) === -1) {
+        if (desktopIds.indexOf(window.stores.settings.get('activeDesktop')) === -1) {
             dispatch('CHANGE_ACTIVE_DESKTOP', {
                 desktop: this.get('desktops').map(d => d.id).sort()[0] // Oldest
             });
@@ -562,7 +562,7 @@ export default Store.extend({
 
     handleSeekActiveDesktop(data) {
         let desktops = this.get('desktops');
-        let activeDesktop = getStore('settings').get('activeDesktop');
+        let activeDesktop = window.settings.settings.get('activeDesktop');
         let index = desktops.indexOf(desktops.findBy('id', activeDesktop));
 
         index += data.direction;
@@ -683,3 +683,6 @@ export default Store.extend({
         }
     }
 });
+
+window.stores = window.stores || {}
+window.stores.windows = WindowsStore.create();

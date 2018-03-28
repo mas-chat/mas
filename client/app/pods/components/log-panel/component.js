@@ -18,7 +18,7 @@
 
 import Ember from 'ember';
 import moment from 'npm:moment';
-import { dispatch } from 'emflux/dispatcher';
+import { dispatch } from '../../../utils/dispatcher';
 
 export default Ember.Component.extend({
     classNames: [ 'flex-column', 'flex-1' ],

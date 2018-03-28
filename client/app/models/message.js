@@ -20,7 +20,6 @@ import emojione from 'npm:emojione';
 import moment from 'npm:moment';
 import URI from 'npm:urijs';
 import BaseModel from './base';
-import { getStore } from 'emflux/dispatcher';
 
 marked.setOptions({
     breaks: true,
@@ -47,8 +46,8 @@ export default BaseModel.extend({
     init() {
         this._super();
 
-        this.set('_windowsStore', getStore('windows'));
-        this.set('_usersStore', getStore('users'));
+        this.set('_windowsStore', window.stores.windows);
+        this.set('_usersStore', window.stores.users);
     },
 
     mentionedRegEx: Ember.computed.alias('window.userNickHighlightRegex'),

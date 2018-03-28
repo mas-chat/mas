@@ -16,9 +16,9 @@
 
 import Ember from 'ember';
 import moment from 'npm:moment';
-import Store from 'emflux/store';
+import Store from './base';
 
-export default Store.extend({
+const DayServiceStore = Store.extend({
     dayCounter: 0,
 
     init() {
@@ -39,3 +39,7 @@ export default Store.extend({
         Ember.run.later(this, changeDay, timeToTomorrow);
     }
 });
+
+
+window.stores = window.stores || {}
+window.stores['day-service'] = DayServiceStore.create();

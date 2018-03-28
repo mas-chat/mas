@@ -15,9 +15,9 @@
 //
 
 import Ember from 'ember';
-import Store from 'emflux/store';
+import Store from './base';
 
-export default Store.extend({
+const ModalsStore = Store.extend({
     modals: Ember.A([]),
 
     handleOpenModal(data) {
@@ -42,3 +42,6 @@ export default Store.extend({
         this.get('modals').shiftObject();
     }
 });
+
+window.stores = window.stores || {}
+window.stores.modals = ModalsStore.create();
