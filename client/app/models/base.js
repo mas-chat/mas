@@ -17,20 +17,20 @@
 import EmberObject from '@ember/object';
 
 export default EmberObject.extend({
-    setModelProperties(props) {
-        // Support second level nested object simple properties
+  setModelProperties(props) {
+    // Support second level nested object simple properties
 
-        for (let prop of Object.keys(props)) {
-            let value = props[prop];
+    for (const prop of Object.keys(props)) {
+      const value = props[prop];
 
-            if (value !== null && typeof(value) === 'object' && !(value.constructor && value.constructor.isClass)) {
-                this.get(prop).setProperties(value)
-                delete props[prop];
-            }
-        }
-
-        this.setProperties(props);
-
-        return this;
+      if (value !== null && typeof value === 'object' && !(value.constructor && value.constructor.isClass)) {
+        this.get(prop).setProperties(value);
+        delete props[prop];
+      }
     }
+
+    this.setProperties(props);
+
+    return this;
+  }
 });

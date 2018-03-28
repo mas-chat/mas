@@ -21,30 +21,29 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    model: null,
-    alerts: oneWay('model.alerts'),
+  model: null,
+  alerts: oneWay('model.alerts'),
 
-    actions: {
-        changeAlerts() {
-            if (this.get('alerts.notification') && 'Notification' in window &&
-                Notification.permission !== 'granted') {
-                Notification.requestPermission();
-            }
+  actions: {
+    changeAlerts() {
+      if (this.get('alerts.notification') && 'Notification' in window && Notification.permission !== 'granted') {
+        Notification.requestPermission();
+      }
 
-            dispatch('UPDATE_WINDOW_ALERTS', {
-                window: this.get('model'),
-                alerts: this.get('alerts')
-            });
+      dispatch('UPDATE_WINDOW_ALERTS', {
+        window: this.get('model'),
+        alerts: this.get('alerts')
+      });
 
-            this.sendAction('closeModal');
-        },
-
-        closeModal() {
-            this.sendAction('closeModal');
-        }
+      this.sendAction('closeModal');
     },
 
-    alertsTitle: computed('model.name', function() {
-        return 'Configure alerts for \'' + this.get('model.simplifiedName') + '\'';
-    })
+    closeModal() {
+      this.sendAction('closeModal');
+    }
+  },
+
+  alertsTitle: computed('model.name', function() {
+    return `Configure alerts for '${this.get('model.simplifiedName')}'`;
+  })
 });

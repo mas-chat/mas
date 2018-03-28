@@ -21,20 +21,20 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    stores: service(),
+  stores: service(),
 
-    classNames: [ 'flex-row', 'unconfirmed-email' ],
+  classNames: ['flex-row', 'unconfirmed-email'],
 
-    email: alias('stores.settings.email'),
-    emailConfirmed: alias('stores.settings.emailConfirmed'),
+  email: alias('stores.settings.email'),
+  emailConfirmed: alias('stores.settings.emailConfirmed'),
 
-    actions: {
-        requestConfirmation() {
-            dispatch('CONFIRM_EMAIL');
-        },
+  actions: {
+    requestConfirmation() {
+      dispatch('CONFIRM_EMAIL');
+    },
 
-        openModal(modal) {
-            dispatch('OPEN_MODAL', { name: modal });
-        }
+    openModal(modal) {
+      dispatch('OPEN_MODAL', { name: modal });
     }
+  }
 });

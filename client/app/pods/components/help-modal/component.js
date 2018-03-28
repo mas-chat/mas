@@ -17,9 +17,9 @@
 import Component from '@ember/component';
 
 export default Component.extend({
-    actions: {
-        closeModal() {
-            this.sendAction('closeModal');
-        }
+  actions: {
+    closeModal() {
+      this.sendAction('closeModal');
     }
+  }
 });

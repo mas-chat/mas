@@ -19,77 +19,79 @@ import { observer } from '@ember/object';
 import TextArea from '@ember/component/text-area';
 import emojione from 'npm:emojione';
 
-let emojisList = Object.keys(emojione.emojioneList).sort().map((value, i) => ({ id: i, name: value }));
+const emojisList = Object.keys(emojione.emojioneList)
+  .sort()
+  .map((value, i) => ({ id: i, name: value }));
 
 export default TextArea.extend({
-    participants: null,
-    pendingClear: false,
+  participants: null,
+  pendingClear: false,
 
-    keyPress(e) {
-        if (e.keyCode === 13 && !e.shiftKey) {
-            e.preventDefault();
+  keyPress(e) {
+    if (e.keyCode === 13 && !e.shiftKey) {
+      e.preventDefault();
 
-            let value = this.get('value');
+      const value = this.get('value');
 
-            if (value !== '') {
-                this.sendAction('sendMessage', value);
-                this.set('value', '');
-                this.$().height('100%');
-            }
-        }
-    },
-
-    input() {
-        this._updateHeight();
-    },
-
-    nickCompletion: observer('participants', function() {
-        let participants = this.get('participants') || [];
-
-        this.$().atwho({
-            at: '@',
-            data: participants.map(item => item.nick),
-            limit: 15
-        });
-    }),
-
-    didInsertElement() {
-        this.$().atwho({
-            at: ':',
-            displayTpl: data => {
-                const emoji = emojione.emojioneList[data.name];
-                const unicode = emoji.unicode[emoji.unicode.length - 1];
-                return `<li><img src="/app/assets/images/emoji/${unicode}.png"> ${data.name}</li>`;
-            },
-            insertTpl: '${name}',
-            data: emojisList,
-            highlightFirst: false,
-            limit: 20
-        });
-
-        this.$().on('hidden.atwho', function(e) {
-            e.stopPropagation();
-        });
-    },
-
-    _updateHeight() {
-        let prevHeight = this.$().prop('style').height; // Get the non-computed value
-
-        if (prevHeight !== '100%') {
-            // By setting the height to 100%, scrollHeight below returns the actual value even when
-            // content shrinks. We do this trick only when necessary as it causes noticeable lag
-            // on Firefox.
-            this.$().css('height', '100%');
-        }
-
-        let newHeight = Math.min(this.$().prop('scrollHeight'), 300);
-
-        if (newHeight < 35) {
-            newHeight = '100%';
-        }
-
-        if (newHeight !== '100%') {
-            this.$().height(newHeight);
-        }
+      if (value !== '') {
+        this.sendAction('sendMessage', value);
+        this.set('value', '');
+        this.$().height('100%');
+      }
     }
+  },
+
+  input() {
+    this._updateHeight();
+  },
+
+  nickCompletion: observer('participants', function() {
+    const participants = this.get('participants') || [];
+
+    this.$().atwho({
+      at: '@',
+      data: participants.map(item => item.nick),
+      limit: 15
+    });
+  }),
+
+  didInsertElement() {
+    this.$().atwho({
+      at: ':',
+      displayTpl: data => {
+        const emoji = emojione.emojioneList[data.name];
+        const unicode = emoji.unicode[emoji.unicode.length - 1];
+        return `<li><img src="/app/assets/images/emoji/${unicode}.png"> ${data.name}</li>`;
+      },
+      insertTpl: '${name}', // eslint-disable-line no-template-curly-in-string
+      data: emojisList,
+      highlightFirst: false,
+      limit: 20
+    });
+
+    this.$().on('hidden.atwho', e => {
+      e.stopPropagation();
+    });
+  },
+
+  _updateHeight() {
+    const prevHeight = this.$().prop('style').height; // Get the non-computed value
+
+    if (prevHeight !== '100%') {
+      // By setting the height to 100%, scrollHeight below returns the actual value even when
+      // content shrinks. We do this trick only when necessary as it causes noticeable lag
+      // on Firefox.
+      this.$().css('height', '100%');
+    }
+
+    let newHeight = Math.min(this.$().prop('scrollHeight'), 300);
+
+    if (newHeight < 35) {
+      newHeight = '100%';
+    }
+
+    if (newHeight !== '100%') {
+      this.$().height(newHeight);
+    }
+  }
 });

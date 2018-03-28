@@ -17,13 +17,13 @@
 /* globals $ */
 
 export function calcMsgHistorySize() {
-    const minLines = 40;
-    const maxLines = 180;
+  const minLines = 40;
+  const maxLines = 180;
 
-    const lineHeight = 19;
-    const screenHeight = $(window).height();
+  const lineHeight = 19;
+  const screenHeight = $(window).height();
 
-    let twoScreenfulls = Math.floor(screenHeight / lineHeight * 1.7);
+  const twoScreenfulls = Math.floor(screenHeight / lineHeight * 1.7);
 
-    return Math.min(Math.max(twoScreenfulls, minLines), maxLines);
+  return Math.min(Math.max(twoScreenfulls, minLines), maxLines);
 }

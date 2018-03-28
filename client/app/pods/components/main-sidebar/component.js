@@ -19,45 +19,47 @@ import { computed } from '@ember/object';
 import { alias } from '@ember/object/computed';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
-//import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
+// import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Component.extend(/*KeyboardShortcuts,*/ {
+export default Component.extend(
+  /* KeyboardShortcuts, */ {
     stores: service(),
 
-    classNames: [ 'sidebar', 'flex-grow-column' ],
+    classNames: ['sidebar', 'flex-grow-column'],
 
     draggedWindow: false,
     friends: alias('stores.friends.friends'),
     canUseIRC: alias('stores.settings.canUseIRC'),
 
     actions: {
-        openModal(modal) {
-            dispatch('OPEN_MODAL', { name: modal });
-        },
+      openModal(modal) {
+        dispatch('OPEN_MODAL', { name: modal });
+      },
 
-        logout() {
-            dispatch('LOGOUT');
-        },
+      logout() {
+        dispatch('LOGOUT');
+      },
 
-        logoutAll() {
-            dispatch('LOGOUT', { allSessions: true });
-        },
+      logoutAll() {
+        dispatch('LOGOUT', { allSessions: true });
+      },
 
-        toggleDarkTheme() {
-            dispatch('TOGGLE_THEME');
-        }
+      toggleDarkTheme() {
+        dispatch('TOGGLE_THEME');
+      }
     },
 
     keyboardShortcuts: {
-        'up up down down i o': 'toggleDarkTheme'
+      'up up down down i o': 'toggleDarkTheme'
     },
 
     friendsOnline: computed('friends.@each.online', function() {
-        return this.get('friends').filterBy('online', true).length;
+      return this.get('friends').filterBy('online', true).length;
     }),
 
     darkTheme: computed('stores.settings.theme', function() {
-        return this.get('stores.settings.theme') === 'dark';
+      return this.get('stores.settings.theme') === 'dark';
     })
-});
+  }
+);

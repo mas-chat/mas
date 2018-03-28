@@ -18,13 +18,13 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    actions: {
-        closeModal() {
-            this.sendAction('closeModal');
-        },
+  actions: {
+    closeModal() {
+      this.sendAction('closeModal');
+    },
 
-        destroy() {
-            dispatch('DESTROY_ACCOUNT');
-        }
+    destroy() {
+      dispatch('DESTROY_ACCOUNT');
     }
+  }
 });

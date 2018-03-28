@@ -20,39 +20,41 @@ import Alert from '../models/alert';
 import socket from '../utils/socket';
 
 const AlertsStore = Store.extend({
-    alerts: IndexArray.create({ index: 'alertId', factory: Alert }),
+  alerts: IndexArray.create({ index: 'alertId', factory: Alert }),
 
-    handleShowAlert(data) {
-        this.get('alerts').upsertModel(data);
-    },
+  handleShowAlert(data) {
+    this.get('alerts').upsertModel(data);
+  },
 
-    handleShowAlertServer(data) {
-        // Default labels for alerts
-        data.postponeLabel = 'Show again later';
-        data.ackLabel = 'Dismiss';
+  handleShowAlertServer(data) {
+    // Default labels for alerts
+    data.postponeLabel = 'Show again later';
+    data.ackLabel = 'Dismiss';
 
-        data.resultCallback = result => {
-            if (result === 'ack') {
-                socket.send({
-                    id: 'ACKALERT',
-                    alertId: data.alertId
-                });
-            }
-        };
+    data.resultCallback = result => {
+      if (result === 'ack') {
+        socket.send({
+          id: 'ACKALERT',
+          alertId: data.alertId
+        });
+      }
+    };
 
-        this.get('alerts').upsertModel(data);
-    },
+    this.get('alerts').upsertModel(data);
+  },
 
-    handleCloseAlert(data) {
-        let callback = this.get('alerts').get('firstObject').get('resultCallback');
+  handleCloseAlert(data) {
+    const callback = this.get('alerts')
+      .get('firstObject')
+      .get('resultCallback');
 
-        if (callback) {
-            callback(data.result);
-        }
-
-        this.get('alerts').shiftObject();
+    if (callback) {
+      callback(data.result);
     }
+
+    this.get('alerts').shiftObject();
+  }
 });
 
-window.stores = window.stores || {}
+window.stores = window.stores || {};
 window.stores.alerts = AlertsStore.create();

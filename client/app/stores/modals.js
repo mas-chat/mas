@@ -18,30 +18,31 @@ import { A } from '@ember/array';
 import Store from './base';
 
 const ModalsStore = Store.extend({
-    modals: A([]),
+  modals: A([]),
 
-    handleOpenModal(data) {
-        this.get('modals').pushObject({
-            name: data.name,
-            model: data.model
-        });
-    },
+  handleOpenModal(data) {
+    this.get('modals').pushObject({
+      name: data.name,
+      model: data.model
+    });
+  },
 
-    handleCloseModal() {
-        this.get('modals').shiftObject();
-    },
+  handleCloseModal() {
+    this.get('modals').shiftObject();
+  },
 
-    handleOpenPriorityModal(data) {
-        this.get('modals').unshiftObject({ // Show immediately
-            name: data.name,
-            model: data.model
-        });
-    },
+  handleOpenPriorityModal(data) {
+    this.get('modals').unshiftObject({
+      // Show immediately
+      name: data.name,
+      model: data.model
+    });
+  },
 
-    handleClosePriorityModal() {
-        this.get('modals').shiftObject();
-    }
+  handleClosePriorityModal() {
+    this.get('modals').shiftObject();
+  }
 });
 
-window.stores = window.stores || {}
+window.stores = window.stores || {};
 window.stores.modals = ModalsStore.create();

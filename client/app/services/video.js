@@ -20,47 +20,50 @@ import { computed } from '@ember/object';
 import Service from '@ember/service';
 
 export default Service.extend({
-    stream: null,
+  stream: null,
 
-    streamActive: computed('stream', function() {
-        return !!this.get('stream');
-    }),
+  streamActive: computed('stream', function() {
+    return !!this.get('stream');
+  }),
 
-    getStream(successCb, failureCb) {
-        let stream = this.get('stream');
+  getStream(successCb, failureCb) {
+    const stream = this.get('stream');
 
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            failureCb();
-        }
-
-        if (stream) {
-            successCb(stream);
-            return;
-        }
-
-        navigator.mediaDevices.getUserMedia({
-            audio: false,
-            video: {
-                width: 800,
-                height: 600
-            }
-        })
-        .then(bind(this, function(newStream) {
-            this.set('stream', newStream);
-            successCb(newStream);
-        }))
-        .catch(failureCb);
-    },
-
-    closeStream() {
-        let stream = this.get('stream');
-
-        if (stream) {
-            for (let track of stream.getTracks()) {
-                track.stop();
-            }
-
-            this.set('stream', null);
-        }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      failureCb();
     }
+
+    if (stream) {
+      successCb(stream);
+      return;
+    }
+
+    navigator.mediaDevices
+      .getUserMedia({
+        audio: false,
+        video: {
+          width: 800,
+          height: 600
+        }
+      })
+      .then(
+        bind(this, function(newStream) {
+          this.set('stream', newStream);
+          successCb(newStream);
+        })
+      )
+      .catch(failureCb);
+  },
+
+  closeStream() {
+    const stream = this.get('stream');
+
+    if (stream) {
+      for (const track of stream.getTracks()) {
+        track.stop();
+      }
+
+      this.set('stream', null);
+    }
+  }
 });

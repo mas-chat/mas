@@ -18,19 +18,19 @@ import Helper from '@ember/component/helper';
 import moment from 'npm:moment';
 
 export default Helper.extend({
-    compute(params) {
-        let online = params[0];
-        let timeStamp = params[1];
-        let dateString;
+  compute(params) {
+    const online = params[0];
+    const timeStamp = params[1];
+    let dateString;
 
-        if (online) {
-            dateString = '';
-        } else if (timeStamp === -1) {
-            dateString = 'never';
-        } else {
-            dateString = moment.unix(timeStamp).fromNow(true);
-        }
-
-        return dateString;
+    if (online) {
+      dateString = '';
+    } else if (timeStamp === -1) {
+      dateString = 'never';
+    } else {
+      dateString = moment.unix(timeStamp).fromNow(true);
     }
+
+    return dateString;
+  }
 });

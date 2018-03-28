@@ -22,29 +22,33 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    stores: service(),
+  stores: service(),
 
-    userId: alias('model'),
+  userId: alias('model'),
 
-    name: computed('userId', function() {
-        return this.get('stores.users.users').getByIndex(this.get('userId')).get('name');
-    }),
+  name: computed('userId', function() {
+    return this.get('stores.users.users')
+      .getByIndex(this.get('userId'))
+      .get('name');
+  }),
 
-    nick: computed('userId', function() {
-        return this.get('stores.users.users').getByIndex(this.get('userId')).get('nick')['MAS'];
-    }),
+  nick: computed('userId', function() {
+    return this.get('stores.users.users')
+      .getByIndex(this.get('userId'))
+      .get('nick').MAS;
+  }),
 
-    actions: {
-        remove() {
-            dispatch('REMOVE_FRIEND', {
-                userId: this.get('userId')
-            });
+  actions: {
+    remove() {
+      dispatch('REMOVE_FRIEND', {
+        userId: this.get('userId')
+      });
 
-            this.sendAction('closeModal');
-        },
+      this.sendAction('closeModal');
+    },
 
-        closeModal() {
-            this.sendAction('closeModal');
-        }
+    closeModal() {
+      this.sendAction('closeModal');
     }
+  }
 });

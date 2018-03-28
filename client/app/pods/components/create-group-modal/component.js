@@ -18,28 +18,31 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    group: '',
-    password: '',
-    errorMsg: '',
+  group: '',
+  password: '',
+  errorMsg: '',
 
-    actions: {
-        newGroup() {
-            let password = this.get('password').trim();
+  actions: {
+    newGroup() {
+      let password = this.get('password').trim();
 
-            if (password === '') {
-                password = null;
-            }
+      if (password === '') {
+        password = null;
+      }
 
-            dispatch('CREATE_GROUP', {
-                name: this.get('group'),
-                password: password
-            },
-            () => this.sendAction('closeModal'), // Accept
-            reason => this.set('errorMsg', reason)); // Reject
+      dispatch(
+        'CREATE_GROUP',
+        {
+          name: this.get('group'),
+          password
         },
+        () => this.sendAction('closeModal'), // Accept
+        reason => this.set('errorMsg', reason)
+      ); // Reject
+    },
 
-        closeModal() {
-            this.sendAction('closeModal');
-        }
+    closeModal() {
+      this.sendAction('closeModal');
     }
+  }
 });

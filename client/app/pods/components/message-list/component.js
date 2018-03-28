@@ -17,46 +17,46 @@
 import Component from '@ember/component';
 
 export default Component.extend({
-    classNames: [ 'message-list' ],
+  classNames: ['message-list'],
 
-    editBody: null,
-    previousEditedMessage: null,
+  editBody: null,
+  previousEditedMessage: null,
 
-    actions: {
-        toggleImages(message) {
-            message.toggleProperty('hideImages');
-        },
-
-        edit(message) {
-            this._endEdit();
-
-            this.set('editBody', message.get('body'));
-            message.set('editing', true); // TODO: Mutates store
-
-            this.set('previousEditedMessage', message);
-        },
-
-        change(message) {
-            this.sendAction('editMessage', message.gid, this.get('editBody'));
-            this._endEdit();
-        },
-
-        cancel() {
-            this._endEdit();
-        },
-
-        delete(message) {
-            this.sendAction('deleteMessage', message.gid);
-            this._endEdit();
-        }
+  actions: {
+    toggleImages(message) {
+      message.toggleProperty('hideImages');
     },
 
-    _endEdit() {
-        let previousEditedMessage = this.get('previousEditedMessage');
+    edit(message) {
+      this._endEdit();
 
-        if (previousEditedMessage) {
-            previousEditedMessage.set('editing', false); // TODO: Mutates store
-            this.set('previousEditedMessage', null);
-        }
+      this.set('editBody', message.get('body'));
+      message.set('editing', true); // TODO: Mutates store
+
+      this.set('previousEditedMessage', message);
+    },
+
+    change(message) {
+      this.sendAction('editMessage', message.gid, this.get('editBody'));
+      this._endEdit();
+    },
+
+    cancel() {
+      this._endEdit();
+    },
+
+    delete(message) {
+      this.sendAction('deleteMessage', message.gid);
+      this._endEdit();
     }
+  },
+
+  _endEdit() {
+    const previousEditedMessage = this.get('previousEditedMessage');
+
+    if (previousEditedMessage) {
+      previousEditedMessage.set('editing', false); // TODO: Mutates store
+      this.set('previousEditedMessage', null);
+    }
+  }
 });

@@ -18,12 +18,12 @@ import { A } from '@ember/array';
 import Store from './base';
 
 const NetworksStore = Store.extend({
-    networks: A([]),
+  networks: A([]),
 
-    handleUpdateNetworksServer(data) {
-        this.get('networks').setObjects(data.networks);
-    }
+  handleUpdateNetworksServer(data) {
+    this.get('networks').setObjects(data.networks);
+  }
 });
 
-window.stores = window.stores || {}
+window.stores = window.stores || {};
 window.stores.networks = NetworksStore.create();

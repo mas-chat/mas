@@ -18,17 +18,19 @@ import { computed } from '@ember/object';
 import BaseModel from './base';
 
 export default BaseModel.extend({
-    userId: null,
+  userId: null,
 
-    _usersStore: null,
+  _usersStore: null,
 
-    init() {
-        this._super();
-        this.set('_usersStore', window.stores.users);
-    },
+  init() {
+    this._super();
+    this.set('_usersStore', window.stores.users);
+  },
 
-    name: computed('_usersStore.isDirty', function() {
-        let userId = this.get('userId');
-        return this.get('_usersStore.users').getByIndex(userId).get('name');
-    })
+  name: computed('_usersStore.isDirty', function() {
+    const userId = this.get('userId');
+    return this.get('_usersStore.users')
+      .getByIndex(userId)
+      .get('name');
+  })
 });

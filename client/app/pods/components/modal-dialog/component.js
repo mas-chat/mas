@@ -17,30 +17,30 @@
 import Component from '@ember/component';
 
 export default Component.extend({
-    classNames: [ 'modal', 'fade' ],
+  classNames: ['modal', 'fade'],
 
-    actions: {
-        terminate() {
-            this.sendAction('terminate');
-        },
-
-        cancel() {
-            this.sendAction('cancel');
-        },
-
-        proceed() {
-            this.sendAction('submit');
-        }
+  actions: {
+    terminate() {
+      this.sendAction('terminate');
     },
 
-    didInsertElement() {
-        this.$().modal({
-            backdrop: 'static',
-            keyboard: false
-        });
+    cancel() {
+      this.sendAction('cancel');
     },
 
-    willDestroyElement() {
-        this.$().modal('hide');
+    proceed() {
+      this.sendAction('submit');
     }
+  },
+
+  didInsertElement() {
+    this.$().modal({
+      backdrop: 'static',
+      keyboard: false
+    });
+  },
+
+  willDestroyElement() {
+    this.$().modal('hide');
+  }
 });

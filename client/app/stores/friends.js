@@ -21,79 +21,83 @@ import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
 
 const FriendsStore = Store.extend({
-    friends: IndexArray.create({ index: 'userId', factory: Friend }),
+  friends: IndexArray.create({ index: 'userId', factory: Friend }),
 
-    handleAddFriendsServer(data) {
-        if (data.reset) {
-            this.get('friends').clearModels();
-        }
-
-        this.get('friends').upsertModels(data.friends);
-    },
-
-    handleConfirmRemoveFriend(data) {
-        dispatch('OPEN_MODAL', {
-            name: 'remove-friend-modal',
-            model: data.userId
-        });
-    },
-
-    handleRequestFriend(data) {
-        socket.send({
-            id: 'REQUEST_FRIEND',
-            userId: data.userId
-        }, resp => {
-            let message = resp.status === 'OK' ?
-                'Request sent. Contact will added to your list when he or she approves.' :
-                resp.errorMsg;
-
-            dispatch('SHOW_ALERT', {
-                alertId: `internal:${Date.now()}`,
-                message: message,
-                report: false,
-                postponeLabel: false,
-                ackLabel: 'Okay'
-            });
-        });
-    },
-
-    handleConfirmFriendsServer(data) {
-        let users = window.stores.users.get('users');
-
-        for (let friendCandidate of data.friends) {
-            let userId = friendCandidate.userId;
-            let user = users.getByIndex(userId);
-            let nick = user.get('nick')['MAS'];
-
-            let message = `Allow ${user.get('name')} (${nick}) to add you to his/her contacts list?`
-
-            dispatch('SHOW_ALERT', {
-                alertId: friendCandidate.userId,
-                message: message,
-                report: false,
-                postponeLabel: 'Decide later',
-                nackLabel: 'Ignore',
-                ackLabel: 'Allow',
-                resultCallback: (result) => {
-                    if (result === 'ack' || result === 'nack') {
-                        socket.send({
-                            id: 'FRIEND_VERDICT',
-                            userId: userId,
-                            allow: result === 'ack'
-                        });
-                    }
-                }
-            });
-        }
-    },
-
-    handleRemoveFriend(data) {
-        socket.send({
-            id: 'REMOVE_FRIEND',
-            userId: data.userId
-        });
+  handleAddFriendsServer(data) {
+    if (data.reset) {
+      this.get('friends').clearModels();
     }
+
+    this.get('friends').upsertModels(data.friends);
+  },
+
+  handleConfirmRemoveFriend(data) {
+    dispatch('OPEN_MODAL', {
+      name: 'remove-friend-modal',
+      model: data.userId
+    });
+  },
+
+  handleRequestFriend(data) {
+    socket.send(
+      {
+        id: 'REQUEST_FRIEND',
+        userId: data.userId
+      },
+      resp => {
+        const message =
+          resp.status === 'OK'
+            ? 'Request sent. Contact will added to your list when he or she approves.'
+            : resp.errorMsg;
+
+        dispatch('SHOW_ALERT', {
+          alertId: `internal:${Date.now()}`,
+          message,
+          report: false,
+          postponeLabel: false,
+          ackLabel: 'Okay'
+        });
+      }
+    );
+  },
+
+  handleConfirmFriendsServer(data) {
+    const users = window.stores.users.get('users');
+
+    for (const friendCandidate of data.friends) {
+      const userId = friendCandidate.userId;
+      const user = users.getByIndex(userId);
+      const nick = user.get('nick').MAS;
+
+      const message = `Allow ${user.get('name')} (${nick}) to add you to his/her contacts list?`;
+
+      dispatch('SHOW_ALERT', {
+        alertId: friendCandidate.userId,
+        message,
+        report: false,
+        postponeLabel: 'Decide later',
+        nackLabel: 'Ignore',
+        ackLabel: 'Allow',
+        resultCallback: result => {
+          if (result === 'ack' || result === 'nack') {
+            socket.send({
+              id: 'FRIEND_VERDICT',
+              userId,
+              allow: result === 'ack'
+            });
+          }
+        }
+      });
+    }
+  },
+
+  handleRemoveFriend(data) {
+    socket.send({
+      id: 'REMOVE_FRIEND',
+      userId: data.userId
+    });
+  }
 });
 
-window.stores = window.stores || {}
+window.stores = window.stores || {};
 window.stores.friends = FriendsStore.create();

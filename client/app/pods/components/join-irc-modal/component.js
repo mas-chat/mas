@@ -21,40 +21,44 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    stores: service(),
+  stores: service(),
 
-    channel: '',
-    password: '',
-    errorMsg: '',
+  channel: '',
+  password: '',
+  errorMsg: '',
 
-    selectedNetwork: null,
+  selectedNetwork: null,
 
-    ircNetworks: computed('stores.networks.networks', function() {
-        return this.get('stores.networks.networks').removeObject('MAS');
-    }),
+  ircNetworks: computed('stores.networks.networks', function() {
+    return this.get('stores.networks.networks').removeObject('MAS');
+  }),
 
-    actions: {
-        joinIRC() {
-            let password = this.get('password').trim();
+  actions: {
+    joinIRC() {
+      const password = this.get('password').trim();
 
-            dispatch('JOIN_IRC_CHANNEL', {
-                name: this.get('channel'),
-                network: this.get('selectedNetwork'),
-                password: password
-            },
-            () => { // Accept
-                this.sendAction('closeModal');
-                this.set('selectedNetwork', null);
-            },
-            reason => this.set('errorMsg', reason)); // Reject
+      dispatch(
+        'JOIN_IRC_CHANNEL',
+        {
+          name: this.get('channel'),
+          network: this.get('selectedNetwork'),
+          password
         },
-
-        changeNetwork() {
-            this.set('selectedNetwork', this.$('select').val());
+        () => {
+          // Accept
+          this.sendAction('closeModal');
+          this.set('selectedNetwork', null);
         },
+        reason => this.set('errorMsg', reason)
+      ); // Reject
+    },
 
-        closeModal() {
-            this.sendAction('closeModal');
-        }
+    changeNetwork() {
+      this.set('selectedNetwork', this.$('select').val());
+    },
+
+    closeModal() {
+      this.sendAction('closeModal');
     }
+  }
 });

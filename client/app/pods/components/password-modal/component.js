@@ -21,36 +21,39 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    model: null,
-    errorMsg: '',
+  model: null,
+  errorMsg: '',
 
-    password: oneWay('model.password'),
+  password: oneWay('model.password'),
 
-    passwordEnabled: false,
-    passwordDisabled: not('passwordEnabled'),
+  passwordEnabled: false,
+  passwordDisabled: not('passwordEnabled'),
 
-    passwordTitle: computed('model.name', function() {
-        return `Change Password for '${this.get('model.name')}'`;
-    }),
+  passwordTitle: computed('model.name', function() {
+    return `Change Password for '${this.get('model.name')}'`;
+  }),
 
-    didInitAttrs() {
-        this.set('passwordEnabled', this.get('password') !== '');
+  didInitAttrs() {
+    this.set('passwordEnabled', this.get('password') !== '');
+  },
+
+  actions: {
+    changePassword() {
+      const newPassword = this.get('passwordEnabled') ? this.get('password') : '';
+
+      dispatch(
+        'UPDATE_PASSWORD',
+        {
+          window: this.get('model'),
+          password: newPassword
+        },
+        () => this.sendAction('closeModal'), // Accept
+        reason => this.set('errorMsg', reason)
+      ); // Reject
     },
 
-    actions: {
-        changePassword() {
-            let newPassword = this.get('passwordEnabled') ? this.get('password') : '';
-
-            dispatch('UPDATE_PASSWORD', {
-                window: this.get('model'),
-                password: newPassword
-            },
-            () => this.sendAction('closeModal'), // Accept
-            reason => this.set('errorMsg', reason)); // Reject
-        },
-
-        closeModal() {
-            this.sendAction('closeModal');
-        }
+    closeModal() {
+      this.sendAction('closeModal');
     }
+  }
 });

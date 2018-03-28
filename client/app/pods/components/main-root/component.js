@@ -20,22 +20,22 @@ import { observer } from '@ember/object';
 
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
-import socket from '../../../utils/socket'
-import { darkTheme } from '../../../utils/theme-dark'
+import socket from '../../../utils/socket';
+import { darkTheme } from '../../../utils/theme-dark';
 
 export default Component.extend({
-    stores: service(),
+  stores: service(),
 
-    classNames: [ 'flex-grow-column', 'flex-1' ],
+  classNames: ['flex-grow-column', 'flex-1'],
 
-    draggedWindow: false,
+  draggedWindow: false,
 
-    init() {
-        this._super(...arguments);
-        socket.start(); // Let's get the show started.
-    },
+  init() {
+    this._super(...arguments);
+    socket.start(); // Let's get the show started.
+  },
 
-    changeTheme: observer('stores.settings.theme', function() {
-        $('#theme-stylesheet').text(this.get('stores.settings.theme') === 'dark' ? darkTheme : '');
-    })
+  changeTheme: observer('stores.settings.theme', function() {
+    $('#theme-stylesheet').text(this.get('stores.settings.theme') === 'dark' ? darkTheme : '');
+  })
 });

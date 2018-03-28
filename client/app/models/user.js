@@ -18,11 +18,11 @@ import EmberObject from '@ember/object';
 import BaseModel from './base';
 
 export default BaseModel.extend({
-    userId: null,
-    nick: null,
-    gravatar: '',
+  userId: null,
+  nick: null,
+  gravatar: '',
 
-    init() {
-        this.set('nick', EmberObject.create());
-    }
+  init() {
+    this.set('nick', EmberObject.create());
+  }
 });

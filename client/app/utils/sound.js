@@ -18,21 +18,21 @@ import Howler from 'npm:howler';
 
 let playing = false;
 
-let notification = new Howler.Howl({
-    src: [ '/app/assets/sounds/staple_gun.mp3', '/app/assets/sounds/staple_gun.mp3' ],
-    volume: 0.6,
+const notification = new Howler.Howl({
+  src: ['/app/assets/sounds/staple_gun.mp3', '/app/assets/sounds/staple_gun.mp3'],
+  volume: 0.6,
 
-    onplay() {
-        playing = true;
-    },
+  onplay() {
+    playing = true;
+  },
 
-    onend() {
-        playing = false;
-    }
+  onend() {
+    playing = false;
+  }
 });
 
 export function play() {
-    if (!playing) {
-        notification.play();
-    }
+  if (!playing) {
+    notification.play();
+  }
 }

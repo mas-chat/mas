@@ -22,21 +22,21 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    stores: service(),
+  stores: service(),
 
-    classNames: [ 'flex-row', 'announcement' ],
+  classNames: ['flex-row', 'announcement'],
 
-    alerts: oneWay('stores.alerts.alerts'),
+  alerts: oneWay('stores.alerts.alerts'),
 
-    currentAlert: computed('alerts.[]', function() {
-        let alerts = this.get('alerts');
+  currentAlert: computed('alerts.[]', function() {
+    const alerts = this.get('alerts');
 
-        return alerts.length === 0 ? null : alerts.get('firstObject');
-    }),
+    return alerts.length === 0 ? null : alerts.get('firstObject');
+  }),
 
-    actions: {
-        close(result) {
-            dispatch('CLOSE_ALERT', { result: result });
-        }
+  actions: {
+    close(result) {
+      dispatch('CLOSE_ALERT', { result });
     }
+  }
 });

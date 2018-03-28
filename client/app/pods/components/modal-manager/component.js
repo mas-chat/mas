@@ -21,18 +21,17 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    stores: service(),
+  stores: service(),
 
-    activeModal: computed('stores.modals.modals.[]', function() {
-        let modalQueue = this.get('stores.modals.modals');
+  activeModal: computed('stores.modals.modals.[]', function() {
+    const modalQueue = this.get('stores.modals.modals');
 
-        return modalQueue.length === 0 ?
-            { model: null, name: 'empty-modal' } : modalQueue.get('firstObject');
-    }),
+    return modalQueue.length === 0 ? { model: null, name: 'empty-modal' } : modalQueue.get('firstObject');
+  }),
 
-    actions: {
-        closeModal() {
-            dispatch('CLOSE_MODAL');
-        }
+  actions: {
+    closeModal() {
+      dispatch('CLOSE_MODAL');
     }
+  }
 });

@@ -21,37 +21,40 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    stores: service(),
+  stores: service(),
 
-    name: alias('stores.profile.name'),
-    email: alias('stores.profile.email'),
-    nick: alias('stores.profile.nick'),
+  name: alias('stores.profile.name'),
+  email: alias('stores.profile.email'),
+  nick: alias('stores.profile.nick'),
 
-    errorMsg: '',
+  errorMsg: '',
 
-    actions: {
-        edit() {
-            dispatch('UPDATE_PROFILE', {
-                name: this.get('name'),
-                email: this.get('email')
-            },
-            () => this.sendAction('closeModal'), // Accept
-            reason => this.set('errorMsg', reason)); // Reject
+  actions: {
+    edit() {
+      dispatch(
+        'UPDATE_PROFILE',
+        {
+          name: this.get('name'),
+          email: this.get('email')
         },
-
-        terminate() {
-            dispatch('OPEN_MODAL', {
-                name: 'confirm-delete-account-modal'
-            });
-            this.sendAction('closeModal');
-        },
-
-        closeModal() {
-            this.sendAction('closeModal');
-        }
+        () => this.sendAction('closeModal'), // Accept
+        reason => this.set('errorMsg', reason)
+      ); // Reject
     },
 
-    didInsertElement() {
-        dispatch('FETCH_PROFILE');
+    terminate() {
+      dispatch('OPEN_MODAL', {
+        name: 'confirm-delete-account-modal'
+      });
+      this.sendAction('closeModal');
+    },
+
+    closeModal() {
+      this.sendAction('closeModal');
     }
+  },
+
+  didInsertElement() {
+    dispatch('FETCH_PROFILE');
+  }
 });

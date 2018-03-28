@@ -19,27 +19,29 @@ import moment from 'npm:moment';
 import Store from './base';
 
 const DayServiceStore = Store.extend({
-    dayCounter: 0,
+  dayCounter: 0,
 
-    init() {
-        this._super();
+  init() {
+    this._super();
 
-        this._startDayChangedService();
-    },
+    this._startDayChangedService();
+  },
 
-    _startDayChangedService() {
-        // Day has changed service
-        let timeToTomorrow = moment().endOf('day').diff(moment()) + 1;
+  _startDayChangedService() {
+    // Day has changed service
+    const timeToTomorrow =
+      moment()
+        .endOf('day')
+        .diff(moment()) + 1;
 
-        let changeDay = function() {
-            this.incrementProperty('dayCounter');
-            later(this, changeDay, 1000 * 60 * 60 * 24);
-        };
+    const changeDay = function() {
+      this.incrementProperty('dayCounter');
+      later(this, changeDay, 1000 * 60 * 60 * 24);
+    };
 
-        later(this, changeDay, timeToTomorrow);
-    }
+    later(this, changeDay, timeToTomorrow);
+  }
 });
 
-
-window.stores = window.stores || {}
+window.stores = window.stores || {};
 window.stores['day-service'] = DayServiceStore.create();

@@ -22,102 +22,102 @@ import { A } from '@ember/array';
 import ArrayProxy from '@ember/array/proxy';
 
 export default ArrayProxy.extend({
-    content: null,
-    _lookupTable: null,
+  content: null,
+  _lookupTable: null,
 
-    index: '',
-    factory: null,
+  index: '',
+  factory: null,
 
-    init() {
-        this.set('content', A());
-        this._super();
+  init() {
+    this.set('content', A());
+    this._super();
 
-        this.set('_lookupTable', new Map());
-    },
+    this.set('_lookupTable', new Map());
+  },
 
-    upsertModel(object, mixin) {
-        return this._upsertObjects([ object ], { prepend: false, mixin: mixin });
-    },
+  upsertModel(object, mixin) {
+    return this._upsertObjects([object], { prepend: false, mixin });
+  },
 
-    upsertModelPrepend(object, mixin) {
-        return this._upsertObjects([ object ], { prepend: true, mixin: mixin });
-    },
+  upsertModelPrepend(object, mixin) {
+    return this._upsertObjects([object], { prepend: true, mixin });
+  },
 
-    upsertModels(objects, mixin) {
-        return this._upsertObjects(objects, { prepend: false, mixin: mixin });
-    },
+  upsertModels(objects, mixin) {
+    return this._upsertObjects(objects, { prepend: false, mixin });
+  },
 
-    upsertModelsPrepend(objects, mixin) {
-        return this._upsertObjects(objects, { prepend: true, mixin: mixin });
-    },
+  upsertModelsPrepend(objects, mixin) {
+    return this._upsertObjects(objects, { prepend: true, mixin });
+  },
 
-    getByIndex(index) {
-        return this.get('_lookupTable').get(index);
-    },
+  getByIndex(index) {
+    return this.get('_lookupTable').get(index);
+  },
 
-    removeModel(model) {
-        return this._removeModels([ model ]);
-    },
+  removeModel(model) {
+    return this._removeModels([model]);
+  },
 
-    removeModels(models) {
-        return this._removeModels(models);
-    },
+  removeModels(models) {
+    return this._removeModels(models);
+  },
 
-    clearModels() {
-        this.get('_lookupTable').clear();
-        return this.clear();
-    },
+  clearModels() {
+    this.get('_lookupTable').clear();
+    return this.clear();
+  },
 
-    _upsertObjects(objects, options) {
-        let primaryKeyName = this.get('index');
-        let model;
+  _upsertObjects(objects, options) {
+    const primaryKeyName = this.get('index');
+    let model;
 
-        for (let object of objects) {
-            let primaryKey = object[primaryKeyName];
-            assert(`Primary key '${primaryKeyName}' must exist`, primaryKey !== undefined);
+    for (const object of objects) {
+      const primaryKey = object[primaryKeyName];
+      assert(`Primary key '${primaryKeyName}' must exist`, primaryKey !== undefined);
 
-            let existingModel = this.get('_lookupTable').get(primaryKey);
+      const existingModel = this.get('_lookupTable').get(primaryKey);
 
-            if (existingModel) {
-                model = existingModel.setModelProperties(object);
-            } else {
-                model = this._createModel(object);
-                this.get('_lookupTable').set(primaryKey, model);
+      if (existingModel) {
+        model = existingModel.setModelProperties(object);
+      } else {
+        model = this._createModel(object);
+        this.get('_lookupTable').set(primaryKey, model);
 
-                if (options.prepend) {
-                    this.unshiftObject(model);
-                } else {
-                    this.pushObject(model);
-                }
-            }
-
-            if (options.mixin) {
-                for (let prop of Object.keys(options.mixin)) {
-                    model.set(prop, options.mixin[prop]);
-                }
-            }
+        if (options.prepend) {
+          this.unshiftObject(model);
+        } else {
+          this.pushObject(model);
         }
+      }
 
-        return model; // Last model
-    },
-
-    _createModel(object) {
-        let model = this.get('factory').create();
-        model.setModelProperties(object); // Never set properties with create()
-
-        return model;
-    },
-
-    _removeModels(models) {
-        let primaryKeyName = this.get('index');
-
-        for (let model of models) {
-            let primaryKey = model && model.get && model.get(primaryKeyName);
-            let found = this.get('_lookupTable').delete(primaryKey);
-
-            if (found) {
-                this.removeObject(model);
-            }
+      if (options.mixin) {
+        for (const prop of Object.keys(options.mixin)) {
+          model.set(prop, options.mixin[prop]);
         }
+      }
     }
+
+    return model; // Last model
+  },
+
+  _createModel(object) {
+    const model = this.get('factory').create();
+    model.setModelProperties(object); // Never set properties with create()
+
+    return model;
+  },
+
+  _removeModels(models) {
+    const primaryKeyName = this.get('index');
+
+    for (const model of models) {
+      const primaryKey = model && model.get && model.get(primaryKeyName);
+      const found = this.get('_lookupTable').delete(primaryKey);
+
+      if (found) {
+        this.removeObject(model);
+      }
+    }
+  }
 });

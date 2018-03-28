@@ -20,23 +20,23 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    sortProperties: [ 'online:desc', 'last:desc', 'name' ],
-    sortAscending: false,
+  sortProperties: ['online:desc', 'last:desc', 'name'],
+  sortAscending: false,
 
-    sortedFriends: sort('friends', 'sortProperties'),
+  sortedFriends: sort('friends', 'sortProperties'),
 
-    actions: {
-        startChat(userId) {
-            dispatch('START_CHAT', {
-                userId: userId,
-                network: 'mas'
-            });
-        },
+  actions: {
+    startChat(userId) {
+      dispatch('START_CHAT', {
+        userId,
+        network: 'mas'
+      });
+    },
 
-        removeFriend(userId) {
-            dispatch('CONFIRM_REMOVE_FRIEND', {
-                userId: userId
-            });
-        }
+    removeFriend(userId) {
+      dispatch('CONFIRM_REMOVE_FRIEND', {
+        userId
+      });
     }
+  }
 });

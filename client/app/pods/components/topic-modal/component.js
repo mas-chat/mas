@@ -21,25 +21,25 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    topic: oneWay('model.topic'),
+  topic: oneWay('model.topic'),
 
-    topicTitle: computed('model.name', function() {
-        return `Edit topic for '${this.get('model.name')}'`;
-    }),
+  topicTitle: computed('model.name', function() {
+    return `Edit topic for '${this.get('model.name')}'`;
+  }),
 
-    actions: {
-        changeTopic() {
-            dispatch('UPDATE_TOPIC', {
-                topic: this.get('topic'),
-                window: this.get('model')
-            });
+  actions: {
+    changeTopic() {
+      dispatch('UPDATE_TOPIC', {
+        topic: this.get('topic'),
+        window: this.get('model')
+      });
 
-            // TODO: Handle error cases
-            this.sendAction('closeModal');
-        },
+      // TODO: Handle error cases
+      this.sendAction('closeModal');
+    },
 
-        closeModal() {
-            this.sendAction('closeModal');
-        }
+    closeModal() {
+      this.sendAction('closeModal');
     }
+  }
 });

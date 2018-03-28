@@ -1,26 +1,28 @@
-
 const noopCb = () => {};
 
 export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) {
-    let consumed = false;
-    let name = type.split('_').map(part => part.toLowerCase().capitalize()).join('');
-    let handler = `handle${name}`;
+  let consumed = false;
+  const name = type
+    .split('_')
+    .map(part => part.toLowerCase().capitalize())
+    .join('');
+  const handler = `handle${name}`;
 
-    for (let store of Object.keys(window.stores)) {
-        let storeObj = window.stores[store];
+  for (const store of Object.keys(window.stores)) {
+    const storeObj = window.stores[store];
 
-        if (storeObj[handler]) {
-            consumed = true;
+    if (storeObj[handler]) {
+      consumed = true;
 
-            let noLog = storeObj[handler].call(storeObj, data, acceptCb, rejectCb);
+      const noLog = storeObj[handler].call(storeObj, data, acceptCb, rejectCb);
 
-            if (!noLog) {
-                console.log(`[${store.name}-store] Consumed action ${type}.`);
-            }
-        }
+      if (!noLog) {
+        console.log(`[${store.name}-store] Consumed action ${type}.`);
+      }
     }
+  }
 
-    if (!consumed) {
-        console.error(`No store handled action: ${type}`);
-    }
+  if (!consumed) {
+    console.error(`No store handled action: ${type}`);
+  }
 }

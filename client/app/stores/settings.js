@@ -20,80 +20,83 @@ import { dispatch } from '../utils/dispatcher';
 import socket from '../utils/socket';
 
 const SettingsStore = Store.extend({
-    theme: 'default',
-    activeDesktop: 1,
-    email: '', // TODO: Remove from here, keep in profile
-    emailConfirmed: true,
-    canUseIRC: false,
+  theme: 'default',
+  activeDesktop: 1,
+  email: '', // TODO: Remove from here, keep in profile
+  emailConfirmed: true,
+  canUseIRC: false,
 
-    toJSON() {
-        return {
-            version: 1,
-            activeDesktop: this.get('activeDesktop')
-        };
-    },
+  toJSON() {
+    return {
+      version: 1,
+      activeDesktop: this.get('activeDesktop')
+    };
+  },
 
-    fromJSON(data) {
-        if (data.version !== 1) {
-            return;
-        }
-
-        this.set('activeDesktop', data.activeDesktop);
-    },
-
-    handleToggleTheme() {
-        let newTheme = this.get('theme') === 'dark' ? 'default' : 'dark';
-
-        this.set('theme', newTheme);
-        socket.send({
-            id: 'SET',
-            settings: {
-                theme: newTheme
-            }
-        });
-    },
-
-    handleConfirmEmail() {
-        const msg = 'Confirmation link sent. Check your spam folder if you don\'t see it in inbox.';
-
-        socket.send({
-            id: 'SEND_CONFIRM_EMAIL'
-        }, () => {
-            dispatch('SHOW_ALERT', {
-                alertId: `client-${Date.now()}`,
-                message: msg,
-                postponeLabel: false,
-                ackLabel: 'Okay',
-                resultCallback: () => this.set('emailConfirmed', true)
-            });
-        });
-    },
-
-    handleSetEmailConfirmed() {
-        this.set('emailConfirmed', true);
-    },
-
-    handleChangeActiveDesktop(data) {
-        this.set('activeDesktop', data.desktop);
-
-        if (!isMobile.any) {
-            socket.send({
-                id: 'SET',
-                settings: {
-                    activeDesktop: data.desktop
-                }
-            });
-        }
-    },
-
-    handleUpdateSettingsServer(data) {
-        if (isMobile.any) {
-            delete data.settings.activeDesktop;
-        }
-
-        this.setProperties(data.settings);
+  fromJSON(data) {
+    if (data.version !== 1) {
+      return;
     }
+
+    this.set('activeDesktop', data.activeDesktop);
+  },
+
+  handleToggleTheme() {
+    const newTheme = this.get('theme') === 'dark' ? 'default' : 'dark';
+
+    this.set('theme', newTheme);
+    socket.send({
+      id: 'SET',
+      settings: {
+        theme: newTheme
+      }
+    });
+  },
+
+  handleConfirmEmail() {
+    const msg = "Confirmation link sent. Check your spam folder if you don't see it in inbox.";
+
+    socket.send(
+      {
+        id: 'SEND_CONFIRM_EMAIL'
+      },
+      () => {
+        dispatch('SHOW_ALERT', {
+          alertId: `client-${Date.now()}`,
+          message: msg,
+          postponeLabel: false,
+          ackLabel: 'Okay',
+          resultCallback: () => this.set('emailConfirmed', true)
+        });
+      }
+    );
+  },
+
+  handleSetEmailConfirmed() {
+    this.set('emailConfirmed', true);
+  },
+
+  handleChangeActiveDesktop(data) {
+    this.set('activeDesktop', data.desktop);
+
+    if (!isMobile.any) {
+      socket.send({
+        id: 'SET',
+        settings: {
+          activeDesktop: data.desktop
+        }
+      });
+    }
+  },
+
+  handleUpdateSettingsServer(data) {
+    if (isMobile.any) {
+      delete data.settings.activeDesktop;
+    }
+
+    this.setProperties(data.settings);
+  }
 });
 
-window.stores = window.stores || {}
+window.stores = window.stores || {};
 window.stores.settings = SettingsStore.create();

@@ -20,33 +20,33 @@ import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({
-    draggedWindow: false,
+  draggedWindow: false,
 
-    dropAreaCSSClass: computed('draggedWindow', function() {
-        return this.get('draggedWindow') ? 'main-desktop-droparea' : '';
-    }),
+  dropAreaCSSClass: computed('draggedWindow', function() {
+    return this.get('draggedWindow') ? 'main-desktop-droparea' : '';
+  }),
 
-    selectedCSSClass: computed('selected', 'id', function() {
-        return (this.get('id') === this.get('selected')) ? 'main-desktop-button-selected' : '';
-    }),
+  selectedCSSClass: computed('selected', 'id', function() {
+    return this.get('id') === this.get('selected') ? 'main-desktop-button-selected' : '';
+  }),
 
-    actions: {
-        switch() {
-            dispatch('CHANGE_ACTIVE_DESKTOP', {
-                desktop: this.get('id')
-            });
-        },
+  actions: {
+    switch() {
+      dispatch('CHANGE_ACTIVE_DESKTOP', {
+        desktop: this.get('id')
+      });
+    },
 
-        switchNext() {
-            dispatch('SEEK_ACTIVE_DESKTOP', {
-                direction: 1
-            });
-        },
+    switchNext() {
+      dispatch('SEEK_ACTIVE_DESKTOP', {
+        direction: 1
+      });
+    },
 
-        switchPrevious() {
-            dispatch('SEEK_ACTIVE_DESKTOP', {
-                direction: -1
-            });
-        }
+    switchPrevious() {
+      dispatch('SEEK_ACTIVE_DESKTOP', {
+        direction: -1
+      });
     }
+  }
 });
