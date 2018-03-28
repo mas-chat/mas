@@ -19,27 +19,22 @@
 const Base = require('./base');
 
 module.exports = class Conversation extends Base {
-    static async create(props) {
-        const data = {
-            type: props.type,
-            network: props.network,
-            name: props.name,
-            owner: props.owner || null,
-            topic: props.topic || null,
-            password: props.password || null,
-            team: props.team || null,
-            secret: props.secret || false
-        };
+  static async create(props) {
+    const data = {
+      type: props.type,
+      network: props.network,
+      name: props.name,
+      owner: props.owner || null,
+      topic: props.topic || null,
+      password: props.password || null,
+      team: props.team || null,
+      secret: props.secret || false
+    };
 
-        return super.create(data);
-    }
+    return super.create(data);
+  }
 
-    static get mutableProperties() {
-        return [
-            'name',
-            'owner',
-            'topic',
-            'password'
-        ];
-    }
+  static get mutableProperties() {
+    return ['name', 'owner', 'topic', 'password'];
+  }
 };

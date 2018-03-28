@@ -19,30 +19,27 @@
 const Base = require('./base');
 
 module.exports = class Setting extends Base {
-    static async findOrCreate(userId) {
-        let record = await this.findFirst({ userId });
+  static async findOrCreate(userId) {
+    let record = await this.findFirst({ userId });
 
-        if (!record) {
-            record = await this.create({ userId });
-        }
-
-        return record;
+    if (!record) {
+      record = await this.create({ userId });
     }
 
-    static async create(props) {
-        const data = {
-            userId: props.userId,
-            activeDesktop: props.activeDesktop || 0,
-            theme: props.theme || 'default'
-        };
+    return record;
+  }
 
-        return super.create(data);
-    }
+  static async create(props) {
+    const data = {
+      userId: props.userId,
+      activeDesktop: props.activeDesktop || 0,
+      theme: props.theme || 'default'
+    };
 
-    static get mutableProperties() {
-        return [
-            'activeDesktop',
-            'theme'
-        ];
-    }
+    return super.create(data);
+  }
+
+  static get mutableProperties() {
+    return ['activeDesktop', 'theme'];
+  }
 };

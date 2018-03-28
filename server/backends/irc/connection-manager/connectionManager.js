@@ -41,229 +41,230 @@ let identServer;
 const LAG_POLL_INTERVAL = 60 * 1000; // 60s
 
 init.on('beforeShutdown', async () => {
-    if (conf.get('irc:identd')) {
-        identServer.close();
-    }
+  if (conf.get('irc:identd')) {
+    identServer.close();
+  }
 
-    await courier.quit();
+  await courier.quit();
 
-    for (const key of Object.keys(sockets)) {
-        const socket = sockets[key];
-        socket.end('QUIT :MAS server restart.\r\n');
-        socket.destroy();
-    }
+  for (const key of Object.keys(sockets)) {
+    const socket = sockets[key];
+    socket.end('QUIT :MAS server restart.\r\n');
+    socket.destroy();
+  }
 });
 
 init.on('afterShutdown', () => {
-    log.quit();
+  log.quit();
 });
 
 function handleIdentConnection(socket) {
-    const timer = setTimeout(() => {
-        if (socket) {
-            socket.destroy();
+  const timer = setTimeout(() => {
+    if (socket) {
+      socket.destroy();
+    }
+  }, 3000);
+
+  socket.on('error', error => {
+    log.info(`Ident socket error: ${error}`);
+    socket.destroy();
+  });
+
+  carrier.carry(socket, line => {
+    const [localPort, remotePort] = line.split(',').map(port => parseInt(port));
+    const prefix = `${localPort}, ${remotePort}`;
+
+    if (Number.isInteger(localPort) && Number.isInteger(remotePort)) {
+      let resp = 'ERROR : NO-USER';
+
+      for (const key of Object.keys(sockets)) {
+        if (
+          sockets[key].localPort === localPort &&
+          sockets[key].remotePort === remotePort &&
+          ip.isEqual(sockets[key].remoteAddress, socket.remoteAddress)
+        ) {
+          resp = `USERID : UNIX : ${sockets[key].nick}`;
+          break;
         }
-    }, 3000);
+      }
 
-    socket.on('error', error => {
-        log.info(`Ident socket error: ${error}`);
-        socket.destroy();
-    });
+      socket.write(`${prefix} : ${resp}\r\n`);
+      log.info(`Ident request from ${socket.remoteAddress}, req: ${line}, resp: ${resp}`);
+    }
 
-    carrier.carry(socket, line => {
-        const [ localPort, remotePort ] = line.split(',').map(port => parseInt(port));
-        const prefix = `${localPort}, ${remotePort}`;
-
-        if (Number.isInteger(localPort) && Number.isInteger(remotePort)) {
-            let resp = 'ERROR : NO-USER';
-
-            for (const key of Object.keys(sockets)) {
-                if (sockets[key].localPort === localPort &&
-                    sockets[key].remotePort === remotePort &&
-                    ip.isEqual(sockets[key].remoteAddress, socket.remoteAddress)) {
-                    resp = `USERID : UNIX : ${sockets[key].nick}`;
-                    break;
-                }
-            }
-
-            socket.write(`${prefix} : ${resp}\r\n`);
-            log.info(`Ident request from ${socket.remoteAddress}, req: ${line}, resp: ${resp}`);
-        }
-
-        clearTimeout(timer);
-        socket.end();
-    });
+    clearTimeout(timer);
+    socket.end();
+  });
 }
 
 // Connect
 courier.on('connect', ({ network, userId, nick, delay }) => {
-    const rateLimit = conf.get(`irc:networks:${network}:rate_limit`); // connections per minute
-    let rateLimitDelay = 0;
+  const rateLimit = conf.get(`irc:networks:${network}:rate_limit`); // connections per minute
+  let rateLimitDelay = 0;
 
-    if (!nextNetworkConnectionSlot[network] || nextNetworkConnectionSlot[network] < Date.now()) {
-        // Rate limiting not active
-        nextNetworkConnectionSlot[network] = Date.now();
-    } else {
-        rateLimitDelay = nextNetworkConnectionSlot[network] - Date.now();
-    }
+  if (!nextNetworkConnectionSlot[network] || nextNetworkConnectionSlot[network] < Date.now()) {
+    // Rate limiting not active
+    nextNetworkConnectionSlot[network] = Date.now();
+  } else {
+    rateLimitDelay = nextNetworkConnectionSlot[network] - Date.now();
+  }
 
-    setTimeout(() => connect(userId, nick, network), rateLimitDelay + delay);
+  setTimeout(() => connect(userId, nick, network), rateLimitDelay + delay);
 
-    nextNetworkConnectionSlot[network] += Math.round((60 / rateLimit) * 1000);
+  nextNetworkConnectionSlot[network] += Math.round(60 / rateLimit * 1000);
 });
 
 // Disconnect
 courier.on('disconnect', ({ network, userId, reason }) => {
-    const socketName = `${userId}:${network}`;
+  const socketName = `${userId}:${network}`;
 
-    write({ userId, network, reportError: false }, `QUIT :${reason}`);
+  write({ userId, network, reportError: false }, `QUIT :${reason}`);
 
-    if (sockets[socketName]) {
-        sockets[socketName].end();
-    }
+  if (sockets[socketName]) {
+    sockets[socketName].end();
+  }
 });
 
 // Write
 courier.on('write', ({ userId, network, line }) => {
-    write({ userId, network, reportError: true }, line);
+  write({ userId, network, reportError: true }, line);
 });
 
 (async function main() {
-    // Start IDENT server
-    if (conf.get('irc:identd')) {
-        identServer = net.createServer(handleIdentConnection);
-        identServer.listen(conf.get('irc:identd_port'));
-    }
+  // Start IDENT server
+  if (conf.get('irc:identd')) {
+    identServer = net.createServer(handleIdentConnection);
+    identServer.listen(conf.get('irc:identd_port'));
+  }
 
-    await courier.clearInbox('ircparser');
-    courier.callNoWait('ircparser', 'restarted');
-    await courier.listen();
-}());
+  await courier.clearInbox('ircparser');
+  courier.callNoWait('ircparser', 'restarted');
+  await courier.listen();
+})();
 
 function connect(userId, nick, network) {
-    if (sockets[`${userId}:${network}`]) {
-        log.warn({ id: userId }, `Impossible happened. Already connected to IRC network: ${network}`);
-        return;
+  if (sockets[`${userId}:${network}`]) {
+    log.warn({ id: userId }, `Impossible happened. Already connected to IRC network: ${network}`);
+    return;
+  }
+
+  const port = conf.get(`irc:networks:${network}:port`);
+  const host = conf.get(`irc:networks:${network}:host`);
+  const options = { host, port };
+  let socket;
+  let ssl = false;
+
+  if (conf.get(`irc:networks:${network}:ssl`)) {
+    ssl = true;
+    socket = tls.connect(port, host, {});
+  } else {
+    socket = net.connect(options);
+  }
+
+  log.info({ id: userId }, `Connecting to IRC server, SSL: ${ssl}, host: ${host}, port: ${port}`);
+
+  socket.nick = nick;
+  socket.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
+
+  function sendPing() {
+    if (Date.now() - socket.last > LAG_POLL_INTERVAL) {
+      // Nothing has been sent after previous round
+      socket.write(`PING ${socket.ircServerName}\r\n`);
     }
+  }
 
-    const port = conf.get(`irc:networks:${network}:port`);
-    const host = conf.get(`irc:networks:${network}:host`);
-    const options = { host, port };
-    let socket;
-    let ssl = false;
+  socket.on('connect', () => {
+    courier.callNoWait('ircparser', 'connected', { userId, network });
 
-    if (conf.get(`irc:networks:${network}:ssl`)) {
-        ssl = true;
-        socket = tls.connect(port, host, {});
-    } else {
-        socket = net.connect(options);
-    }
+    socket.pingTimer = setInterval(sendPing, LAG_POLL_INTERVAL);
+  });
 
-    log.info({ id: userId }, `Connecting to IRC server, SSL: ${ssl}, host: ${host}, port: ${port}`);
+  let buffer = '';
 
-    socket.nick = nick;
-    socket.setKeepAlive(true, 2 * 60 * 1000); // 2 minutes
+  socket.on('data', data => {
+    socket.last = Date.now();
 
-    function sendPing() {
-        if (Date.now() - socket.last > LAG_POLL_INTERVAL) {
-            // Nothing has been sent after previous round
-            socket.write(`PING ${socket.ircServerName}\r\n`);
-        }
-    }
+    // IRC protocol doesn't have character set concept, we need to guess. Algorithm is simple,
+    // if the received binary data is valid utf8 then do no conversion. Else assume that the
+    // character set is iso-8859-15 and convert it to utf8.
+    const chunk = buffer + (isUtf8(data) ? data.toString() : iconv.decode(data, 'iso-8859-15'));
+    const lines = chunk.split(/\r\n/);
 
-    socket.on('connect', () => {
-        courier.callNoWait('ircparser', 'connected', { userId, network });
+    buffer = lines.pop(); // Save the potential partial line to buffer
 
-        socket.pingTimer = setInterval(sendPing, LAG_POLL_INTERVAL);
+    lines.forEach(line => {
+      const proceed = handlePing(socket, line);
+
+      if (proceed) {
+        courier.callNoWait('ircparser', 'data', { userId, network, line });
+      }
     });
+  });
 
-    let buffer = '';
+  socket.on('end', () => {
+    handleEnd(userId, network, null);
+  });
 
-    socket.on('data', data => {
-        socket.last = Date.now();
+  socket.on('error', error => {
+    handleEnd(userId, network, error);
+  });
 
-        // IRC protocol doesn't have character set concept, we need to guess. Algorithm is simple,
-        // if the received binary data is valid utf8 then do no conversion. Else assume that the
-        // character set is iso-8859-15 and convert it to utf8.
-        const chunk = buffer + (isUtf8(data) ? data.toString() : iconv.decode(data, 'iso-8859-15'));
-        const lines = chunk.split(/\r\n/);
+  socket.on('close', () => {
+    handleEnd(userId, network, null);
+  });
 
-        buffer = lines.pop(); // Save the potential partial line to buffer
-
-        lines.forEach(line => {
-            const proceed = handlePing(socket, line);
-
-            if (proceed) {
-                courier.callNoWait('ircparser', 'data', { userId, network, line });
-            }
-        });
-    });
-
-    socket.on('end', () => {
-        handleEnd(userId, network, null);
-    });
-
-    socket.on('error', error => {
-        handleEnd(userId, network, error);
-    });
-
-    socket.on('close', () => {
-        handleEnd(userId, network, null);
-    });
-
-    sockets[`${userId}:${network}`] = socket;
+  sockets[`${userId}:${network}`] = socket;
 }
 
 function write(options, data) {
-    const socket = sockets[`${options.userId}:${options.network}`];
+  const socket = sockets[`${options.userId}:${options.network}`];
 
-    if (!socket) {
-        if (options.reportError) {
-            courier.callNoWait(
-                'ircparser', 'noconnection', { userId: options.userId, network: options.network });
-        }
-        return;
+  if (!socket) {
+    if (options.reportError) {
+      courier.callNoWait('ircparser', 'noconnection', { userId: options.userId, network: options.network });
     }
+    return;
+  }
 
-    const chunk = typeof data === 'string' ? [ data ] : data;
+  const chunk = typeof data === 'string' ? [data] : data;
 
-    chunk.forEach(line => socket.write(`${line}\r\n`));
+  chunk.forEach(line => socket.write(`${line}\r\n`));
 
-    socket.last = Date.now();
+  socket.last = Date.now();
 }
 
 // Minimal parser to handle server sent PING command at this layer
 function handlePing(socket, line) {
-    const parts = line.split(' ');
+  const parts = line.split(' ');
 
-    if ((parts[0].charAt(0) === ':')) {
-        parts.shift();
-    }
+  if (parts[0].charAt(0) === ':') {
+    parts.shift();
+  }
 
-    const command = parts.shift();
+  const command = parts.shift();
 
-    if (command === 'PING') {
-        socket.write(`PONG :${socket.ircServerName}\r\n`);
-        return false;
-    } else if (command === '004') {
-        socket.ircServerName = parts[1]; // RFC 2812, reply 004
-    }
+  if (command === 'PING') {
+    socket.write(`PONG :${socket.ircServerName}\r\n`);
+    return false;
+  } else if (command === '004') {
+    socket.ircServerName = parts[1]; // RFC 2812, reply 004
+  }
 
-    return true;
+  return true;
 }
 
 function handleEnd(userId, network, error) {
-    const socket = sockets[`${userId}:${network}`];
-    const reason = error ? error.code : 'connection closed by the server';
+  const socket = sockets[`${userId}:${network}`];
+  const reason = error ? error.code : 'connection closed by the server';
 
-    if (!socket) {
-        return; // Already handled
-    }
+  if (!socket) {
+    return; // Already handled
+  }
 
-    delete sockets[`${userId}:${network}`];
-    clearInterval(socket.pingTimer);
+  delete sockets[`${userId}:${network}`];
+  clearInterval(socket.pingTimer);
 
-    log.info({ id: userId }, 'IRC connection closed by the server or network.');
+  log.info({ id: userId }, 'IRC connection closed by the server or network.');
 
-    courier.callNoWait('ircparser', 'disconnected', { userId, network, reason });
+  courier.callNoWait('ircparser', 'disconnected', { userId, network, reason });
 }

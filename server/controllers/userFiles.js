@@ -26,29 +26,29 @@ let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
 // TODO: make this computed config property. Add exists check.
 if (dataDirectory.charAt(0) !== path.sep) {
-    dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
+  dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
 module.exports = async function userFiles(ctx) {
-    const uuid = ctx.params.uuid.substring(0, 20);
-    const subDirectory = uuid.substring(0, 2);
-    const metaData = await readMetaDataFile(path.join(dataDirectory, subDirectory, `${uuid}.json`));
+  const uuid = ctx.params.uuid.substring(0, 20);
+  const subDirectory = uuid.substring(0, 2);
+  const metaData = await readMetaDataFile(path.join(dataDirectory, subDirectory, `${uuid}.json`));
 
-    await send(ctx, path.join(subDirectory, uuid + path.extname(metaData.originalFileName)), {
-        root: dataDirectory
-    });
+  await send(ctx, path.join(subDirectory, uuid + path.extname(metaData.originalFileName)), {
+    root: dataDirectory
+  });
 
-    ctx.set('Cache-Control', `public, max-age=${oneYearInSeconds}`);
+  ctx.set('Cache-Control', `public, max-age=${oneYearInSeconds}`);
 };
 
 function readMetaDataFile(file) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(file, (err, data) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(JSON.parse(data));
-            }
-        });
+  return new Promise((resolve, reject) => {
+    fs.readFile(file, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.parse(data));
+      }
     });
+  });
 }

@@ -28,121 +28,124 @@ let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
 // TODO: move this to library.
 if (dataDirectory.charAt(0) !== path.sep) {
-    dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
+  dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
 }
 
 module.exports = async function handle(ctx) {
-    const user = ctx.mas.user;
+  const user = ctx.mas.user;
 
-    if (!user || !ctx.request.body || !ctx.request.body.files || !ctx.request.body.files.file) {
-        ctx.status = 400;
-        return;
-    }
+  if (!user || !ctx.request.body || !ctx.request.body.files || !ctx.request.body.files.file) {
+    ctx.status = 400;
+    return;
+  }
 
-    try {
-        const url = await upload(user, ctx.request.body.files.file);
+  try {
+    const url = await upload(user, ctx.request.body.files.file);
 
-        ctx.status = 200;
-        ctx.body = { url: [ url ] };
+    ctx.status = 200;
+    ctx.body = { url: [url] };
 
-        log.info(user, `Successful upload: ${url}`);
-    } catch (e) {
-        ctx.status = e === 'E_TOO_LARGE' ? 413 : 400;
+    log.info(user, `Successful upload: ${url}`);
+  } catch (e) {
+    ctx.status = e === 'E_TOO_LARGE' ? 413 : 400;
 
-        log.warn(user, `Upload failed: ${e}`);
-    }
+    log.warn(user, `Upload failed: ${e}`);
+  }
 };
 
 async function upload(user, fileObject) {
-    const fileName = fileObject.name;
-    const filePath = fileObject.path;
-    const extension = path.extname(fileName);
+  const fileName = fileObject.name;
+  const filePath = fileObject.path;
+  const extension = path.extname(fileName);
 
-    const fileUUID = uuid(20);
-    const hashDirectory = fileUUID.substring(0, 2);
+  const fileUUID = uuid(20);
+  const hashDirectory = fileUUID.substring(0, 2);
 
-    const targetDirectory = path.join(dataDirectory, hashDirectory);
+  const targetDirectory = path.join(dataDirectory, hashDirectory);
 
-    if (fileObject.size > 10000000) { // 10MB
-        throw new Error('E_TOO_LARGE');
-    }
+  if (fileObject.size > 10000000) {
+    // 10MB
+    throw new Error('E_TOO_LARGE');
+  }
 
-    if (conf.get('files:autorotate_jpegs')) {
-        await autoRotateJPEGFile(filePath, extension);
-    }
+  if (conf.get('files:autorotate_jpegs')) {
+    await autoRotateJPEGFile(filePath, extension);
+  }
 
-    await ensureUploadDirExists(targetDirectory);
-    await copy(filePath, path.join(targetDirectory, fileUUID + extension));
-    await writeMetaDataFile(path.join(targetDirectory, `${fileUUID}.json`), fileName, user.id);
+  await ensureUploadDirExists(targetDirectory);
+  await copy(filePath, path.join(targetDirectory, fileUUID + extension));
+  await writeMetaDataFile(path.join(targetDirectory, `${fileUUID}.json`), fileName, user.id);
 
-    return `${conf.getComputed('site_url')}/files/${fileUUID}/${encodeURIComponent(fileName)}`;
+  return `${conf.getComputed('site_url')}/files/${fileUUID}/${encodeURIComponent(fileName)}`;
 }
 
 function ensureUploadDirExists(targetDirectory) {
-    return new Promise((resolve, reject) => mkdirp(targetDirectory, err => {
-        if (err) {
-            reject(err);
-        } else {
-            resolve();
-        }
-    }));
+  return new Promise((resolve, reject) =>
+    mkdirp(targetDirectory, err => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    })
+  );
 }
 
 function autoRotateJPEGFile(fileName, extension) {
-    if (extension.match(/\.(jpeg|jpg)$/i) === null) {
-        return Promise.resolve();
-    }
+  if (extension.match(/\.(jpeg|jpg)$/i) === null) {
+    return Promise.resolve();
+  }
 
-    return new Promise((resolve, reject) => {
-        const exiftrans = spawn('exiftran', [ '-ai', fileName ]);
+  return new Promise((resolve, reject) => {
+    const exiftrans = spawn('exiftran', ['-ai', fileName]);
 
-        exiftrans.on('error', err => {
-            reject(err);
-        });
-
-        exiftrans.on('close', code => {
-            if (code !== 0) {
-                log.warn(`JPG exiftrans autorotate failed, exit code: ${code}, file: ${fileName}`);
-            }
-
-            resolve();
-        });
+    exiftrans.on('error', err => {
+      reject(err);
     });
+
+    exiftrans.on('close', code => {
+      if (code !== 0) {
+        log.warn(`JPG exiftrans autorotate failed, exit code: ${code}, file: ${fileName}`);
+      }
+
+      resolve();
+    });
+  });
 }
 
 function copy(srcFilePath, targetFilePath) {
-    return new Promise((resolve, reject) => {
-        const rd = fs.createReadStream(srcFilePath);
-        const wr = fs.createWriteStream(targetFilePath);
+  return new Promise((resolve, reject) => {
+    const rd = fs.createReadStream(srcFilePath);
+    const wr = fs.createWriteStream(targetFilePath);
 
-        const rejectCleanup = err => {
-            rd.destroy();
-            wr.end();
-            reject(err);
-        };
+    const rejectCleanup = err => {
+      rd.destroy();
+      wr.end();
+      reject(err);
+    };
 
-        rd.on('error', rejectCleanup);
-        wr.on('error', rejectCleanup);
-        wr.on('finish', resolve);
+    rd.on('error', rejectCleanup);
+    wr.on('error', rejectCleanup);
+    wr.on('finish', resolve);
 
-        rd.pipe(wr);
-    });
+    rd.pipe(wr);
+  });
 }
 
 function writeMetaDataFile(filePath, originalFileName, userId) {
-    const metaData = {
-        userId,
-        originalFileName,
-        ts: Math.round(Date.now() / 1000)
-    };
+  const metaData = {
+    userId,
+    originalFileName,
+    ts: Math.round(Date.now() / 1000)
+  };
 
-    return new Promise((resolve, reject) => {
-        fs.writeFile(filePath, JSON.stringify(metaData), err => {
-            if (err) {
-                reject(new Error('File upload metadata file write error'));
-            } else {
-                resolve();
-            }
-        });
+  return new Promise((resolve, reject) => {
+    fs.writeFile(filePath, JSON.stringify(metaData), err => {
+      if (err) {
+        reject(new Error('File upload metadata file write error'));
+      } else {
+        resolve();
+      }
     });
+  });
 }

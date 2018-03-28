@@ -19,9 +19,7 @@
 const Base = require('./base');
 
 module.exports = class IrcSubscription extends Base {
-    static get mutableProperties() {
-        return [
-            'password'
-        ];
-    }
+  static get mutableProperties() {
+    return ['password'];
+  }
 };

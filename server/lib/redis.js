@@ -27,58 +27,58 @@ let shutdownDone = false;
 module.exports = createRedisClient();
 
 function createRedisClient({ autoClose = true } = {}) {
-    const connType = conf.get('redis:connection_type');
-    const client = new Redis({
-        port: conf.get('redis:port'),
-        host: conf.get('redis:host'),
-        password: conf.get('redis:password') || null,
-        path: connType === 'socket' ? null : conf.get('redis:unix_socket_path'),
-        retryStrategy
-    });
+  const connType = conf.get('redis:connection_type');
+  const client = new Redis({
+    port: conf.get('redis:port'),
+    host: conf.get('redis:host'),
+    password: conf.get('redis:password') || null,
+    path: connType === 'socket' ? null : conf.get('redis:unix_socket_path'),
+    retryStrategy
+  });
 
-    client.on('error', errorHandler);
+  client.on('error', errorHandler);
 
-    client.__quit = client.quit;
+  client.__quit = client.quit;
 
-    client.quit = function quit() {
-        const index = activeClients.indexOf(client);
+  client.quit = function quit() {
+    const index = activeClients.indexOf(client);
 
-        if (index > -1) {
-            activeClients.splice(index, 1);
-        }
-
-        return client.__quit();
-    };
-
-    client.shutdown = function shutdown() {
-        assert(!shutdownDone, 'Call shutdown() only once');
-
-        shutdownDone = true;
-        log.info(`Closing ${activeClients.length} redis connections`);
-
-        activeClients.forEach(activeClient => activeClient.quit());
-    };
-
-    if (autoClose) {
-        activeClients.push(client);
+    if (index > -1) {
+      activeClients.splice(index, 1);
     }
 
-    // Extra "exported" functions
-    client.createClient = createRedisClient;
-    client.retryStrategy = retryStrategy;
-    client.errorHandler = errorHandler;
+    return client.__quit();
+  };
 
-    return client;
+  client.shutdown = function shutdown() {
+    assert(!shutdownDone, 'Call shutdown() only once');
+
+    shutdownDone = true;
+    log.info(`Closing ${activeClients.length} redis connections`);
+
+    activeClients.forEach(activeClient => activeClient.quit());
+  };
+
+  if (autoClose) {
+    activeClients.push(client);
+  }
+
+  // Extra "exported" functions
+  client.createClient = createRedisClient;
+  client.retryStrategy = retryStrategy;
+  client.errorHandler = errorHandler;
+
+  return client;
 }
 
 function retryStrategy(times) {
-    const delay = Math.min((times * 1000) + 1000, 5000);
+  const delay = Math.min(times * 1000 + 1000, 5000);
 
-    log.info(`Trying to connect to Redis in ${delay}ms...`);
+  log.info(`Trying to connect to Redis in ${delay}ms...`);
 
-    return delay;
+  return delay;
 }
 
 function errorHandler(error) {
-    log.warn(`Connection to Redis failed, reason: ${error}`);
+  log.warn(`Connection to Redis failed, reason: ${error}`);
 }

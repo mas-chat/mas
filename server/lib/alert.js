@@ -21,20 +21,20 @@ const PendingIpm = require('../models/pendingIpm');
 const notification = require('../lib/notification');
 
 exports.sendAlerts = async function sendAlerts(user, sessionId) {
-    const now = new Date();
-    const pendingIpms = await PendingIpm.find({ userId: user.id });
+  const now = new Date();
+  const pendingIpms = await PendingIpm.find({ userId: user.id });
 
-    for (const pendingIpm of pendingIpms) {
-        const ipm = await Ipm.fetch(pendingIpm.get('ipmId'));
+  for (const pendingIpm of pendingIpms) {
+    const ipm = await Ipm.fetch(pendingIpm.get('ipmId'));
 
-        // create-alert deletes expired alerts lazily
+    // create-alert deletes expired alerts lazily
 
-        if (ipm && ipm.get('expiresAt') > now) {
-            await notification.send(user, sessionId, {
-                type: 'ADD_ALERT',
-                alertId: ipm.id,
-                message: ipm.get('body')
-            });
-        }
+    if (ipm && ipm.get('expiresAt') > now) {
+      await notification.send(user, sessionId, {
+        type: 'ADD_ALERT',
+        alertId: ipm.id,
+        message: ipm.get('body')
+      });
     }
+  }
 };

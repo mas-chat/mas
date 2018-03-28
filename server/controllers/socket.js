@@ -33,225 +33,225 @@ const ioServers = [];
 const clientSocketList = [];
 
 exports.setup = function setup(server) {
-    const io = socketIo(server, { pingInterval: 10000, pingTimeout: 15000 });
-    ioServers.push(io);
+  const io = socketIo(server, { pingInterval: 10000, pingTimeout: 15000 });
+  ioServers.push(io);
 
-    io.on('connection', socket => {
-        const session = {
-            id: uuid(15),
-            user: null,
-            state: 'connected' // connected, authenticated, terminating, disconnected
-        };
+  io.on('connection', socket => {
+    const session = {
+      id: uuid(15),
+      user: null,
+      state: 'connected' // connected, authenticated, terminating, disconnected
+    };
 
-        log.info(`Socket.io session created, id: ${session.id}`);
+    log.info(`Socket.io session created, id: ${session.id}`);
 
-        let redisSubscribe = null;
+    let redisSubscribe = null;
 
-        clientSocketList.push(socket);
+    clientSocketList.push(socket);
 
-        socket.on('init', async data => {
-            log.info(`socket.io init message received, session: ${session.id}`);
+    socket.on('init', async data => {
+      log.info(`socket.io init message received, session: ${session.id}`);
 
-            if (session.state === 'authenticated') {
-                socket.emit('terminate', {
-                    code: 'MULTIPLE_INITS',
-                    reason: 'INIT event can be send only once per socket.io connection.'
-                });
-                await end('Multiple inits.');
-                return;
-            }
-
-            if (!data.cookie) {
-                log.info('Invalid init socket.io message, cookie missing');
-                socket.emit('terminate', {
-                    code: 'INVALID_INIT',
-                    reason: 'Invalid init event. Token missing.'
-                });
-                await end('Invalid init, cookie missing.');
-                return;
-            }
-
-            session.auth = await authSessionService.get(data.cookie);
-
-            const userId = session.auth ? session.auth.get('userId') : null;
-            const user = userId ? await User.fetch(userId) : null;
-
-            if (!user || !user.get('inUse')) {
-                socket.emit('terminate', {
-                    code: 'INVALID_TOKEN',
-                    reason: 'Invalid or expired session.'
-                });
-                await end('Invalid cookie.');
-
-                if (user) {
-                    log.info(user, 'Init message with incorrect or expired cookie.');
-                }
-
-                return;
-            }
-
-            const maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
-            const cachedUpto = isInteger(data.cachedUpto) ? data.cachedUpto : 0;
-            const remoteIp = socket.conn.remoteAddress;
-
-            session.user = user;
-            session.state = 'authenticated';
-
-            socket.emit('initok', {
-                sessionId: session.id,
-                userId,
-                maxBacklogMsgs
-            });
-
-            session.newAuth = await authSessionService.create(user.id, remoteIp);
-            socket.emit('refresh_session', { refreshCookie: session.newAuth.encodeToCookie() });
-
-            log.info(user, `New session init: ${session.id}, client: ${data.clientName}`);
-            log.info(user, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
-
-            redisSubscribe = redis.createClient();
-            await redisSubscribe.subscribe(user.id, `${user.id}:${session.id}`);
-
-            let processing = false;
-            const queue = [];
-
-            async function process(channel, message) {
-                if (processing) {
-                    queue.push(message);
-                    return;
-                }
-
-                processing = true;
-
-                const ntf = JSON.parse(message);
-
-                await userIntroducer.scanAndIntroduce(user, ntf, session, socket);
-
-                socket.emit('ntf', ntf);
-
-                if (!(ntf.id === 'ADD_MESSAGE' || ntf.id === 'ADD_MESSAGES')) {
-                    log.info(user, `Emitted ${ntf.type} (sessionId: ${session.id}) ${message}`);
-                }
-
-                processing = false;
-
-                if (queue.length > 0) {
-                    process(null, queue.shift());
-                }
-            }
-
-            redisSubscribe.on('message', async (channel, message) => {
-                const { type, msg } = JSON.parse(message);
-
-                if (type === 'terminate') {
-                    socket.emit('terminate', {
-                        code: 'LOGOUT_ALL',
-                        reason: 'User initiated global logout.'
-                    });
-                    await end('Multiple inits.');
-                } else if (session.state === 'authenticated') {
-                    process(channel, msg);
-                }
-            });
-
-            await userIntroducer.introduce(user, UserGId.create({ type: 'mas', id: userId }), session);
-            await sessionService.init(user, session, maxBacklogMsgs, cachedUpto);
+      if (session.state === 'authenticated') {
+        socket.emit('terminate', {
+          code: 'MULTIPLE_INITS',
+          reason: 'INIT event can be send only once per socket.io connection.'
         });
+        await end('Multiple inits.');
+        return;
+      }
 
-        socket.on('refresh_done', () => {
-            session.auth.delete();
-            session.auth = session.newAuth;
-            session.newAuth = null;
-
-            log.info(session.user, 'Successfully refreshed the session');
+      if (!data.cookie) {
+        log.info('Invalid init socket.io message, cookie missing');
+        socket.emit('terminate', {
+          code: 'INVALID_INIT',
+          reason: 'Invalid init event. Token missing.'
         });
+        await end('Invalid init, cookie missing.');
+        return;
+      }
 
-        socket.on('req', async (data, cb) => {
-            if (session.state !== 'authenticated') {
-                await end('Request arrived before init.');
-                return;
-            }
+      session.auth = await authSessionService.get(data.cookie);
 
-            let resp;
+      const userId = session.auth ? session.auth.get('userId') : null;
+      const user = userId ? await User.fetch(userId) : null;
 
-            try {
-                resp = await requestController.process(session, data);
-            } catch (e) {
-                resp = { status: 'INTERNAL_ERROR', errorMsg: 'Internal error.' };
-                log.warn(session.user, `Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
-            }
-
-            await userIntroducer.scanAndIntroduce(session.user, resp, session);
-
-            if (cb) {
-                cb(resp); // Send the response as Socket.io acknowledgment.
-            }
-
-            if (session.state !== 'authenticated') {
-                await end('Request processing requested termination.');
-            }
+      if (!user || !user.get('inUse')) {
+        socket.emit('terminate', {
+          code: 'INVALID_TOKEN',
+          reason: 'Invalid or expired session.'
         });
+        await end('Invalid cookie.');
 
-        socket.on('disconnect', async () => {
-            await end('Socket.io disconnect.');
-        });
-
-        async function end(reason) {
-            if (session.state !== 'disconnected') {
-                session.state = 'disconnected';
-
-                clientSocketList.splice(clientSocketList.indexOf(socket), 1);
-
-                socket.disconnect(true);
-
-                if (redisSubscribe) {
-                    await redisSubscribe.unsubscribe();
-                    const sessions = await redisSubscribe.pubsub('NUMSUB', session.user.id);
-                    await redisSubscribe.quit();
-
-                    if (sessions[1] === 0) {
-                        await friendsService.informStateChange(session.user, 'logout');
-                    }
-                }
-
-                const sessionIdExplained = session.id || '<not assigned>';
-                log.info(`Session ${sessionIdExplained} ended. Reason: ${reason}`);
-            }
+        if (user) {
+          log.info(user, 'Init message with incorrect or expired cookie.');
         }
+
+        return;
+      }
+
+      const maxBacklogMsgs = checkBacklogParameterBounds(data.maxBacklogMsgs);
+      const cachedUpto = isInteger(data.cachedUpto) ? data.cachedUpto : 0;
+      const remoteIp = socket.conn.remoteAddress;
+
+      session.user = user;
+      session.state = 'authenticated';
+
+      socket.emit('initok', {
+        sessionId: session.id,
+        userId,
+        maxBacklogMsgs
+      });
+
+      session.newAuth = await authSessionService.create(user.id, remoteIp);
+      socket.emit('refresh_session', { refreshCookie: session.newAuth.encodeToCookie() });
+
+      log.info(user, `New session init: ${session.id}, client: ${data.clientName}`);
+      log.info(user, `maxBacklogMsgs: ${maxBacklogMsgs}, cachedUpto: ${cachedUpto}`);
+
+      redisSubscribe = redis.createClient();
+      await redisSubscribe.subscribe(user.id, `${user.id}:${session.id}`);
+
+      let processing = false;
+      const queue = [];
+
+      async function process(channel, message) {
+        if (processing) {
+          queue.push(message);
+          return;
+        }
+
+        processing = true;
+
+        const ntf = JSON.parse(message);
+
+        await userIntroducer.scanAndIntroduce(user, ntf, session, socket);
+
+        socket.emit('ntf', ntf);
+
+        if (!(ntf.id === 'ADD_MESSAGE' || ntf.id === 'ADD_MESSAGES')) {
+          log.info(user, `Emitted ${ntf.type} (sessionId: ${session.id}) ${message}`);
+        }
+
+        processing = false;
+
+        if (queue.length > 0) {
+          process(null, queue.shift());
+        }
+      }
+
+      redisSubscribe.on('message', async (channel, message) => {
+        const { type, msg } = JSON.parse(message);
+
+        if (type === 'terminate') {
+          socket.emit('terminate', {
+            code: 'LOGOUT_ALL',
+            reason: 'User initiated global logout.'
+          });
+          await end('Multiple inits.');
+        } else if (session.state === 'authenticated') {
+          process(channel, msg);
+        }
+      });
+
+      await userIntroducer.introduce(user, UserGId.create({ type: 'mas', id: userId }), session);
+      await sessionService.init(user, session, maxBacklogMsgs, cachedUpto);
     });
+
+    socket.on('refresh_done', () => {
+      session.auth.delete();
+      session.auth = session.newAuth;
+      session.newAuth = null;
+
+      log.info(session.user, 'Successfully refreshed the session');
+    });
+
+    socket.on('req', async (data, cb) => {
+      if (session.state !== 'authenticated') {
+        await end('Request arrived before init.');
+        return;
+      }
+
+      let resp;
+
+      try {
+        resp = await requestController.process(session, data);
+      } catch (e) {
+        resp = { status: 'INTERNAL_ERROR', errorMsg: 'Internal error.' };
+        log.warn(session.user, `Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
+      }
+
+      await userIntroducer.scanAndIntroduce(session.user, resp, session);
+
+      if (cb) {
+        cb(resp); // Send the response as Socket.io acknowledgment.
+      }
+
+      if (session.state !== 'authenticated') {
+        await end('Request processing requested termination.');
+      }
+    });
+
+    socket.on('disconnect', async () => {
+      await end('Socket.io disconnect.');
+    });
+
+    async function end(reason) {
+      if (session.state !== 'disconnected') {
+        session.state = 'disconnected';
+
+        clientSocketList.splice(clientSocketList.indexOf(socket), 1);
+
+        socket.disconnect(true);
+
+        if (redisSubscribe) {
+          await redisSubscribe.unsubscribe();
+          const sessions = await redisSubscribe.pubsub('NUMSUB', session.user.id);
+          await redisSubscribe.quit();
+
+          if (sessions[1] === 0) {
+            await friendsService.informStateChange(session.user, 'logout');
+          }
+        }
+
+        const sessionIdExplained = session.id || '<not assigned>';
+        log.info(`Session ${sessionIdExplained} ended. Reason: ${reason}`);
+      }
+    }
+  });
 };
 
 exports.shutdown = function shutdown() {
-    for (const server of ioServers) {
-        server.close();
-    }
+  for (const server of ioServers) {
+    server.close();
+  }
 
-    terminateClientConnections();
+  terminateClientConnections();
 };
 
 function checkBacklogParameterBounds(value) {
-    const minAllowedBacklog = conf.get('session:min_backlog');
-    const maxAllowedBacklog = conf.get('session:max_backlog');
+  const minAllowedBacklog = conf.get('session:min_backlog');
+  const maxAllowedBacklog = conf.get('session:max_backlog');
 
-    if (!isInteger(value)) {
-        return maxAllowedBacklog;
-    } else if (value < minAllowedBacklog) {
-        return minAllowedBacklog;
-    } else if (value > maxAllowedBacklog) {
-        return maxAllowedBacklog;
-    }
+  if (!isInteger(value)) {
+    return maxAllowedBacklog;
+  } else if (value < minAllowedBacklog) {
+    return minAllowedBacklog;
+  } else if (value > maxAllowedBacklog) {
+    return maxAllowedBacklog;
+  }
 
-    return value;
+  return value;
 }
 
 function terminateClientConnections() {
-    log.info(`Closing all ${clientSocketList.length} socket.io connections`);
+  log.info(`Closing all ${clientSocketList.length} socket.io connections`);
 
-    for (const socket of clientSocketList) {
-        socket.disconnect(true);
-    }
+  for (const socket of clientSocketList) {
+    socket.disconnect(true);
+  }
 }
 
 function isInteger(x) {
-    return (typeof x === 'number') && (x % 1 === 0);
+  return typeof x === 'number' && x % 1 === 0;
 }

@@ -20,26 +20,23 @@ const Base = require('./base');
 const UserGId = require('../lib/userGId');
 
 module.exports = class ConversationMember extends Base {
-    static get mutableProperties() {
-        return [
-            'userGId',
-            'role'
-        ];
+  static get mutableProperties() {
+    return ['userGId', 'role'];
+  }
+
+  get gId() {
+    if (!this._gId) {
+      this._gId = UserGId.create(this.get('userGId'));
     }
 
-    get gId() {
-        if (!this._gId) {
-            this._gId = UserGId.create(this.get('userGId'));
-        }
+    return this._gId;
+  }
 
-        return this._gId;
+  get gIdString() {
+    if (!this._gIdString) {
+      this._gIdString = this.gId.toString();
     }
 
-    get gIdString() {
-        if (!this._gIdString) {
-            this._gIdString = this.gId.toString();
-        }
-
-        return this._gIdString;
-    }
+    return this._gIdString;
+  }
 };

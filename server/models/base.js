@@ -22,265 +22,265 @@ const Rigiddb = require('rigiddb');
 const redis = require('../lib/redis');
 const conf = require('../lib/conf');
 
-const db = new Rigiddb('mas', 1, {
+const db = new Rigiddb(
+  'mas',
+  1,
+  {
     db: 10,
     host: conf.get('redis:host'), // TODO: Add Unix socket support
     port: conf.get('redis:port'),
     retryStrategy: redis.retryStrategy
-}, redis.errorHandler);
+  },
+  redis.errorHandler
+);
 
 module.exports = class Base {
-    constructor(collection, id = null, initialProps = {}) {
-        if (typeof id !== 'number' && id !== null) {
-            throw new Error('ID must be a number or null.');
-        }
-
-        if (collection === 'models') {
-            throw new Error('An abstract Model class cannot be instantiated.');
-        }
-
-        this.deleted = false;
-        this.collection = collection;
-        this.id = id;
-        this.errors = {};
-
-        this._props = initialProps;
+  constructor(collection, id = null, initialProps = {}) {
+    if (typeof id !== 'number' && id !== null) {
+      throw new Error('ID must be a number or null.');
     }
 
-    static get mutableProperties() {
-        return [];
+    if (collection === 'models') {
+      throw new Error('An abstract Model class cannot be instantiated.');
     }
 
-    static get getters() {
-        return {};
+    this.deleted = false;
+    this.collection = collection;
+    this.id = id;
+    this.errors = {};
+
+    this._props = initialProps;
+  }
+
+  static get mutableProperties() {
+    return [];
+  }
+
+  static get getters() {
+    return {};
+  }
+
+  static get setters() {
+    return {};
+  }
+
+  static get config() {
+    // Default configuration. Can be overwritten in derived classes.
+    return {
+      indexErrorDescriptions: {}
+    };
+  }
+
+  static get collection() {
+    return `${this.name[0].toLowerCase()}${this.name.substring(1)}s`;
+  }
+
+  get valid() {
+    assert(!this.deleted, 'Tried to validate deleted model');
+    return Object.keys(this.errors).length === 0;
+  }
+
+  static async fetch(id) {
+    const record = new this(this.collection, id);
+    const { err, val } = await db.get(record.collection, id);
+
+    if (err) {
+      return null;
     }
 
-    static get setters() {
-        return {};
+    record._props = val;
+    return record;
+  }
+
+  static async fetchMany(ids) {
+    const res = [];
+
+    for (const id of ids) {
+      res.push(await db.get(this.collection, id));
     }
 
-    static get config() {
-        // Default configuration. Can be overwritten in derived classes.
-        return {
-            indexErrorDescriptions: {}
-        };
+    return res.filter(({ err }) => !err).map(({ val }, index) => new this(this.collection, ids[index], val));
+  }
+
+  static async fetchAll() {
+    const { err, val } = await db.list(this.collection);
+
+    return err ? [] : this.fetchMany(val);
+  }
+
+  static async findIds(props) {
+    if (!props || Object.keys(props) === 0) {
+      return null;
     }
 
-    static get collection() {
-        return `${this.name[0].toLowerCase()}${this.name.substring(1)}s`;
+    const { err, val } = await db.find(this.collection, props);
+
+    assert(!err, `Model findIds failed: ${err}, ${util.inspect(props)}`);
+
+    return val.sort((a, b) => a - b);
+  }
+
+  static async find(props, { onlyFirst = false } = {}) {
+    const ids = await this.findIds(props);
+
+    if (onlyFirst && ids.length === 0) {
+      return null;
     }
 
-    get valid() {
-        assert(!this.deleted, 'Tried to validate deleted model');
-        return Object.keys(this.errors).length === 0;
+    return onlyFirst ? this.fetch(ids[0]) : this.fetchMany(ids);
+  }
+
+  static async findFirst(props) {
+    return this.find(props, { onlyFirst: true });
+  }
+
+  static async create(props, { skipSetters = false } = {}) {
+    const record = new this(this.collection);
+    let finalProps = props;
+
+    if (!skipSetters) {
+      const { errors, preparedProps } = runSetters(props, this.setters);
+      finalProps = preparedProps;
+      record.errors = errors;
     }
 
-    static async fetch(id) {
-        const record = new this(this.collection, id);
-        const { err, val } = await db.get(record.collection, id);
+    if (record.valid) {
+      const { err, val, indices } = await db.create(record.collection, finalProps);
 
-        if (err) {
-            return null;
-        }
-
-        record._props = val;
-        return record;
+      if (err === 'notUnique') {
+        record.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
+      } else if (err) {
+        throw new Error(`DB ERROR: ${err}, c: ${this.collection}, p: ${JSON.stringify(props)}`);
+      } else {
+        record.id = val || null;
+        record._props = finalProps;
+      }
     }
 
-    static async fetchMany(ids) {
-        const res = [];
+    return record;
+  }
 
-        for (const id of ids) {
-            res.push(await db.get(this.collection, id));
-        }
+  static async currentId() {
+    const { err, val } = await db.currentId(this.collection);
 
-        return res.filter(({ err }) => !err).map(({ val }, index) =>
-            new this(this.collection, ids[index], val));
+    assert(!err, 'Failed to read currentId');
+
+    return val;
+  }
+
+  get(prop) {
+    assert(!this.deleted, `Tried to read property ${prop} from deleted model`);
+
+    const rawVal = this._props[prop];
+
+    assert(typeof rawVal !== 'undefined', `Tried to read non-existenting property ${prop}`);
+
+    return Base.getters[prop] ? Base.getters[prop](rawVal) : rawVal;
+  }
+
+  getAll() {
+    assert(!this.deleted, 'Tried to read deleted model');
+
+    const props = {};
+
+    Object.keys(this._props).forEach(prop => {
+      const rawVal = this._props[prop];
+      props[prop] = Base.getters[prop] ? Base.getters[prop](rawVal) : rawVal;
+    });
+
+    return props;
+  }
+
+  async set(props, value) {
+    const objectProps = convertToObject(props, value);
+
+    const allowed = Object.keys(objectProps).every(prop => this.constructor.mutableProperties.includes(prop));
+
+    if (!allowed) {
+      throw new Error('Tried to set non-existent or protected property');
     }
 
-    static async fetchAll() {
-        const { err, val } = await db.list(this.collection);
+    return this._set(objectProps);
+  }
 
-        return err ? [] : this.fetchMany(val);
-    }
+  async _set(objectProps) {
+    assert(!this.deleted, 'Tried to mutate deleted model');
 
-    static async findIds(props) {
-        if (!props || Object.keys(props) === 0) {
-            return null;
-        }
+    const { errors, preparedProps } = runSetters(objectProps, Base.setters);
 
-        const { err, val } = await db.find(this.collection, props);
-
-        assert(!err, `Model findIds failed: ${err}, ${util.inspect(props)}`);
-
-        return val.sort((a, b) => a - b);
-    }
-
-    static async find(props, { onlyFirst = false } = {}) {
-        const ids = await this.findIds(props);
-
-        if (onlyFirst && ids.length === 0) {
-            return null;
-        }
-
-        return onlyFirst ? this.fetch(ids[0]) : this.fetchMany(ids);
-    }
-
-    static async findFirst(props) {
-        return this.find(props, { onlyFirst: true });
-    }
-
-    static async create(props, { skipSetters = false } = {}) {
-        const record = new this(this.collection);
-        let finalProps = props;
-
-        if (!skipSetters) {
-            const { errors, preparedProps } = runSetters(props, this.setters);
-            finalProps = preparedProps;
-            record.errors = errors;
-        }
-
-        if (record.valid) {
-            const { err, val, indices } = await db.create(record.collection, finalProps);
-
-            if (err === 'notUnique') {
-                record.errors = explainIndexErrors(indices, this.config.indexErrorDescriptions);
-            } else if (err) {
-                throw new Error(
-                    `DB ERROR: ${err}, c: ${this.collection}, p: ${JSON.stringify(props)}`);
-            } else {
-                record.id = val || null;
-                record._props = finalProps;
-            }
-        }
-
-        return record;
-    }
-
-    static async currentId() {
-        const { err, val } = await db.currentId(this.collection);
-
-        assert(!err, 'Failed to read currentId');
-
-        return val;
-    }
-
-    get(prop) {
-        assert(!this.deleted, `Tried to read property ${prop} from deleted model`);
-
-        const rawVal = this._props[prop];
-
-        assert(typeof rawVal !== 'undefined', `Tried to read non-existenting property ${prop}`);
-
-        return Base.getters[prop] ? Base.getters[prop](rawVal) : rawVal;
-    }
-
-    getAll() {
-        assert(!this.deleted, 'Tried to read deleted model');
-
-        const props = {};
-
-        Object.keys(this._props).forEach(prop => {
-            const rawVal = this._props[prop];
-            props[prop] = Base.getters[prop] ? Base.getters[prop](rawVal) : rawVal;
-        });
-
-        return props;
-    }
-
-    async set(props, value) {
-        const objectProps = convertToObject(props, value);
-
-        const allowed = Object.keys(objectProps).every(prop =>
-            this.constructor.mutableProperties.includes(prop));
-
-        if (!allowed) {
-            throw new Error('Tried to set non-existent or protected property');
-        }
-
-        return this._set(objectProps);
-    }
-
-    async _set(objectProps) {
-        assert(!this.deleted, 'Tried to mutate deleted model');
-
-        const { errors, preparedProps } = runSetters(objectProps, Base.setters);
-
-        if (!preparedProps) {
-            Object.keys(objectProps).forEach(prop => {
-                if (errors[prop]) {
-                    this.errors[prop] = errors[prop];
-                } else {
-                    delete this.errors[prop];
-                }
-            });
-
-            return false; // One or more setters failed
-        }
-
-        const { err, indices, val } = await db.update(this.collection, this.id, preparedProps);
-
-        if (err === 'notUnique') {
-            this.errors = explainIndexErrors(
-                indices, this.constructor.config.indexErrorDescriptions);
-        } else if (err) {
-            throw new Error(
-                `DB ERROR: ${err}, c: ${this.collection}, p: ${JSON.stringify(objectProps)}`);
+    if (!preparedProps) {
+      Object.keys(objectProps).forEach(prop => {
+        if (errors[prop]) {
+          this.errors[prop] = errors[prop];
         } else {
-            this.errors = {};
-            Object.assign(this._props, objectProps);
+          delete this.errors[prop];
         }
+      });
 
-        return val;
+      return false; // One or more setters failed
     }
 
-    async delete() {
-        assert(!this.deleted, 'Tried to delete deleted model');
+    const { err, indices, val } = await db.update(this.collection, this.id, preparedProps);
 
-        const { val } = await db.delete(this.collection, this.id);
-        this.deleted = true;
-
-        return val;
+    if (err === 'notUnique') {
+      this.errors = explainIndexErrors(indices, this.constructor.config.indexErrorDescriptions);
+    } else if (err) {
+      throw new Error(`DB ERROR: ${err}, c: ${this.collection}, p: ${JSON.stringify(objectProps)}`);
+    } else {
+      this.errors = {};
+      Object.assign(this._props, objectProps);
     }
+
+    return val;
+  }
+
+  async delete() {
+    assert(!this.deleted, 'Tried to delete deleted model');
+
+    const { val } = await db.delete(this.collection, this.id);
+    this.deleted = true;
+
+    return val;
+  }
 };
 
 function runSetters(objectProps, setters) {
-    const preparedProps = {};
-    const errors = {};
+  const preparedProps = {};
+  const errors = {};
 
-    for (const prop of Object.keys(objectProps)) {
-        const value = objectProps[prop];
+  for (const prop of Object.keys(objectProps)) {
+    const value = objectProps[prop];
 
-        if (setters[prop]) {
-            const { valid, value: rawValue, error } = setters[prop](value);
+    if (setters[prop]) {
+      const { valid, value: rawValue, error } = setters[prop](value);
 
-            if (!valid) {
-                errors[prop] = error;
-            }
+      if (!valid) {
+        errors[prop] = error;
+      }
 
-            preparedProps[prop] = valid ? rawValue : null;
-        } else {
-            preparedProps[prop] = value;
-        }
+      preparedProps[prop] = valid ? rawValue : null;
+    } else {
+      preparedProps[prop] = value;
     }
+  }
 
-    return { errors, preparedProps };
+  return { errors, preparedProps };
 }
 
 function convertToObject(props, value) {
-    if (!props) {
-        return {};
-    }
+  if (!props) {
+    return {};
+  }
 
-    return typeof props === 'string' ? { [props]: value } : props;
+  return typeof props === 'string' ? { [props]: value } : props;
 }
 
 function explainIndexErrors(indices, descriptions = {}) {
-    const errors = {};
+  const errors = {};
 
-    indices.forEach(index => {
-        errors[index] = descriptions[index] || 'INDEX ERROR: Value already exists.';
-    });
+  indices.forEach(index => {
+    errors[index] = descriptions[index] || 'INDEX ERROR: Value already exists.';
+  });
 
-    return errors;
+  return errors;
 }

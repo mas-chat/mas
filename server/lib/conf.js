@@ -27,54 +27,58 @@ const configFileOption = argv.configFile;
 let configFile;
 
 if (configFileOption && configFileOption.charAt(0) === path.sep) {
-    // Absolute path
-    configFile = path.normalize(configFileOption);
+  // Absolute path
+  configFile = path.normalize(configFileOption);
 } else {
-    configFile = path.join(__dirname, '..', configFileOption || 'mas.conf');
+  configFile = path.join(__dirname, '..', configFileOption || 'mas.conf');
 }
 
-nconf.env({
+nconf
+  .env({
     separator: '__',
     lowerCase: true
-}).argv().file('user_overrides', {
+  })
+  .argv()
+  .file('user_overrides', {
     file: configFile,
     format: nconf.formats.ini
-}).file('defaults', {
+  })
+  .file('defaults', {
     file: path.join(__dirname, '..', 'mas.conf.default'),
     format: nconf.formats.ini
-});
+  });
 
 exports.get = function get(key) {
-    return getValue(key);
+  return getValue(key);
 };
 
 exports.getComputed = function getComputed(key) {
-    let ret = '';
+  let ret = '';
 
-    switch (key) {
-        case 'site_url':
-            ret = getValue('site:site_url');
+  switch (key) {
+    case 'site_url':
+      ret = getValue('site:site_url');
 
-            if (ret.endsWith('/')) {
-                ret = ret.substring(0, ret.length - 1);
-            }
-            break;
+      if (ret.endsWith('/')) {
+        ret = ret.substring(0, ret.length - 1);
+      }
+      break;
 
-        default:
-            assert(false, 'Unknown conf key');
-    }
+    default:
+      assert(false, 'Unknown conf key');
+  }
 
-    return ret;
+  return ret;
 };
 
 function getValue(key) {
-    const value = nconf.get(key);
+  const value = nconf.get(key);
 
-    if (value === undefined) {
-        // TODO: Add config validator, allows very early exit
-        console.error(`Missing config variable: ${key}`); // eslint-disable-line no-console
-        process.exit(1);
-    }
+  if (value === undefined) {
+    // TODO: Add config validator, allows very early exit
+    console.error(`Missing config variable: ${key}`); // eslint-disable-line no-console
+    process.exit(1);
+  }
 
-    return value;
+  return value;
 }

@@ -19,46 +19,41 @@
 const Base = require('./base');
 
 module.exports = class ConversationMessage extends Base {
-    static async create(props) {
-        const data = {
-            conversationId: props.conversationId,
-            userGId: props.userGId || null,
-            ts: new Date(),
-            updatedTs: null,
-            updatedId: null,
-            cat: props.cat,
-            body: props.body || null,
-            status: 'original'
-        };
+  static async create(props) {
+    const data = {
+      conversationId: props.conversationId,
+      userGId: props.userGId || null,
+      ts: new Date(),
+      updatedTs: null,
+      updatedId: null,
+      cat: props.cat,
+      body: props.body || null,
+      status: 'original'
+    };
 
-        return super.create(data);
+    return super.create(data);
+  }
+
+  static get mutableProperties() {
+    return ['updatedTs', 'updatedId', 'body', 'status'];
+  }
+
+  convertToNtf() {
+    const ntf = {
+      gid: this.id,
+      userId: this.get('userGId'),
+      ts: Math.floor(this.get('ts').getTime() / 1000),
+      cat: this.get('cat'),
+      body: this.get('body') || '',
+      status: this.get('status')
+    };
+
+    const updatedTs = this.get('updatedTs');
+
+    if (updatedTs) {
+      ntf.updatedTs = Math.floor(updatedTs.getTime() / 1000);
     }
 
-    static get mutableProperties() {
-        return [
-            'updatedTs',
-            'updatedId',
-            'body',
-            'status'
-        ];
-    }
-
-    convertToNtf() {
-        const ntf = {
-            gid: this.id,
-            userId: this.get('userGId'),
-            ts: Math.floor(this.get('ts').getTime() / 1000),
-            cat: this.get('cat'),
-            body: this.get('body') || '',
-            status: this.get('status')
-        };
-
-        const updatedTs = this.get('updatedTs');
-
-        if (updatedTs) {
-            ntf.updatedTs = Math.floor(updatedTs.getTime() / 1000);
-        }
-
-        return ntf;
-    }
+    return ntf;
+  }
 };

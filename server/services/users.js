@@ -24,22 +24,22 @@ const log = require('../lib/log');
 // TODO: Send password update mail here?
 
 exports.addUser = async function addUser(details, { skipSetters = false } = {}) {
-    const user = await User.create(details, { skipSetters });
+  const user = await User.create(details, { skipSetters });
 
-    if (user.valid) {
-        await Settings.create({ userId: user.id });
-    } else {
-        log.warn(`User creation failed, errors: ${JSON.stringify(user.errors)}`);
-    }
+  if (user.valid) {
+    await Settings.create({ userId: user.id });
+  } else {
+    log.warn(`User creation failed, errors: ${JSON.stringify(user.errors)}`);
+  }
 
-    return user;
+  return user;
 };
 
 exports.addMASNetworkInfo = async function addMASNetworkInfo(user) {
-    await NetworkInfo.create({
-        userId: user.id,
-        network: 'mas',
-        state: 'connected',
-        nick: user.get('nick')
-    });
+  await NetworkInfo.create({
+    userId: user.id,
+    network: 'mas',
+    state: 'connected',
+    nick: user.get('nick')
+  });
 };

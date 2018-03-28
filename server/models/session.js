@@ -22,29 +22,31 @@ const Base = require('./base');
 const ONE_WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000;
 
 module.exports = class Session extends Base {
-    static async create(props) {
-        const data = {
-            userId: props.userId,
-            ip: props.ip,
-            token: uuid(20),
-            updatedAt: now()
-        };
+  static async create(props) {
+    const data = {
+      userId: props.userId,
+      ip: props.ip,
+      token: uuid(20),
+      updatedAt: now()
+    };
 
-        return super.create(data);
-    }
+    return super.create(data);
+  }
 
-    get expired() {
-        return (now() - this.get('updatedAt')) > ONE_WEEK_IN_MS;
-    }
+  get expired() {
+    return now() - this.get('updatedAt') > ONE_WEEK_IN_MS;
+  }
 
-    encodeToCookie() {
-        return Buffer.from(JSON.stringify({
-            token: this.get('token'),
-            userId: this.get('userId')
-        })).toString('base64');
-    }
+  encodeToCookie() {
+    return Buffer.from(
+      JSON.stringify({
+        token: this.get('token'),
+        userId: this.get('userId')
+      })
+    ).toString('base64');
+  }
 };
 
 function now() {
-    return new Date();
+  return new Date();
 }

@@ -21,32 +21,33 @@ const util = require('util');
 const redis = require('./redis');
 
 exports.send = async function send(user, sessionId, ntfs) {
-    await sendNotifications(user, sessionId, null, ntfs);
+  await sendNotifications(user, sessionId, null, ntfs);
 };
 
 exports.broadcast = async function broadcast(user, ntfs, excludeSessionId) {
-    await sendNotifications(user, null, excludeSessionId, ntfs);
+  await sendNotifications(user, null, excludeSessionId, ntfs);
 };
 
 async function sendNotifications(user, sessionId, excludeSessionId, ntfs) {
-    assert(ntfs);
+  assert(ntfs);
 
-    const ntfsArray = (util.isArray(ntfs) ? ntfs : [ ntfs ])
-        .map(ntf => (typeof ntf === 'string' ? ntf : JSON.stringify(ntf)));
+  const ntfsArray = (util.isArray(ntfs) ? ntfs : [ntfs]).map(
+    ntf => (typeof ntf === 'string' ? ntf : JSON.stringify(ntf))
+  );
 
-    for (const ntf of ntfsArray) {
-        if (sessionId) {
-            redis.publish(`${user.id}:${sessionId}`, JSON.stringify({ type: 'ntf', msg: ntf }));
-        } else if (!excludeSessionId) {
-            redis.publish(user.id, JSON.stringify({ type: 'ntf', msg: ntf }));
-        } else {
-            const subcriptions = await redis.pubsub('CHANNELS', `${user.id}:*`);
+  for (const ntf of ntfsArray) {
+    if (sessionId) {
+      redis.publish(`${user.id}:${sessionId}`, JSON.stringify({ type: 'ntf', msg: ntf }));
+    } else if (!excludeSessionId) {
+      redis.publish(user.id, JSON.stringify({ type: 'ntf', msg: ntf }));
+    } else {
+      const subcriptions = await redis.pubsub('CHANNELS', `${user.id}:*`);
 
-            for (const subscription of subcriptions) {
-                if (subscription !== `${user.id}:${excludeSessionId}`) {
-                    redis.publish(subscription, JSON.stringify({ type: 'ntf', msg: ntf }));
-                }
-            }
+      for (const subscription of subcriptions) {
+        if (subscription !== `${user.id}:${excludeSessionId}`) {
+          redis.publish(subscription, JSON.stringify({ type: 'ntf', msg: ntf }));
         }
+      }
     }
+  }
 }

@@ -28,82 +28,87 @@ const conversationsService = require('../services/conversations');
 const jobs = [];
 
 exports.init = function init() {
-    jobs.push(cron.schedule('*/5 * * * *', deliverEmails)); // Once in 5 minutes
+  jobs.push(cron.schedule('*/5 * * * *', deliverEmails)); // Once in 5 minutes
 };
 
 exports.quit = function quit() {
-    jobs.forEach(job => job.destroy());
+  jobs.forEach(job => job.destroy());
 };
 
 // Sends email notifications to offline users
 async function deliverEmails() {
-    const missedMessages = await MissedMessage.fetchAll();
-    const missedPerUser = groupBy(missedMessages, 'userId');
+  const missedMessages = await MissedMessage.fetchAll();
+  const missedPerUser = groupBy(missedMessages, 'userId');
 
-    for (const userId of Object.keys(missedPerUser)) {
-        const user = await User.fetch(parseInt(userId));
-        const missedPerConversations = groupBy(missedPerUser[userId], 'conversationId');
-        const formattedMessages = await processUserMissedMessages(missedPerConversations, user);
+  for (const userId of Object.keys(missedPerUser)) {
+    const user = await User.fetch(parseInt(userId));
+    const missedPerConversations = groupBy(missedPerUser[userId], 'conversationId');
+    const formattedMessages = await processUserMissedMessages(missedPerConversations, user);
 
-        // TODO: Better would be to clear pending notifications during login
-        if (!(await user.isOnline()) && Object.keys(formattedMessages).length > 0) {
-            mailer.send('emails/build/mentioned.hbs', {
-                name: user.get('name'),
-                messages: formattedMessages
-            }, user.get('email'), 'You were just mentioned on MeetAndSpeak');
-        }
+    // TODO: Better would be to clear pending notifications during login
+    if (!await user.isOnline() && Object.keys(formattedMessages).length > 0) {
+      mailer.send(
+        'emails/build/mentioned.hbs',
+        {
+          name: user.get('name'),
+          messages: formattedMessages
+        },
+        user.get('email'),
+        'You were just mentioned on MeetAndSpeak'
+      );
     }
+  }
 }
 
 async function processUserMissedMessages(missedPerConversations, user) {
-    const twoMinutesAgo = new Date(Date.now() - (1000 * 60 * 2));
-    const formattedMessages = {};
+  const twoMinutesAgo = new Date(Date.now() - 1000 * 60 * 2);
+  const formattedMessages = {};
 
-    for (const conversationId of Object.keys(missedPerConversations)) {
-        // Notification are sorted by ts in the db, therefore the first one is the oldest
-        if (missedPerConversations[conversationId][0].get('msgTs') > twoMinutesAgo) {
-            // Wait for the next job execution
-            continue;
-        }
-
-        const conversation = await Conversation.fetch(parseInt(conversationId));
-        const name = await getName(conversation, user);
-
-        formattedMessages[name] = [];
-
-        for (const message of missedPerConversations[conversationId]) {
-            const userGId = UserGId.create(message.get('msgUserGId'));
-            const nick = await nicksService.getNick(userGId, conversation.get('network'));
-
-            formattedMessages[name].push({ nick, body: message.get('msgBody') });
-        }
-
-        missedPerConversations[conversationId].forEach(message => message.delete());
+  for (const conversationId of Object.keys(missedPerConversations)) {
+    // Notification are sorted by ts in the db, therefore the first one is the oldest
+    if (missedPerConversations[conversationId][0].get('msgTs') > twoMinutesAgo) {
+      // Wait for the next job execution
+      continue;
     }
 
-    return formattedMessages;
+    const conversation = await Conversation.fetch(parseInt(conversationId));
+    const name = await getName(conversation, user);
+
+    formattedMessages[name] = [];
+
+    for (const message of missedPerConversations[conversationId]) {
+      const userGId = UserGId.create(message.get('msgUserGId'));
+      const nick = await nicksService.getNick(userGId, conversation.get('network'));
+
+      formattedMessages[name].push({ nick, body: message.get('msgBody') });
+    }
+
+    missedPerConversations[conversationId].forEach(message => message.delete());
+  }
+
+  return formattedMessages;
 }
 
 async function getName(conversation, user) {
-    if (conversation.get('type') === 'group') {
-        return `Group ${conversation.get('name')}`;
-    }
+  if (conversation.get('type') === 'group') {
+    return `Group ${conversation.get('name')}`;
+  }
 
-    const peerMember = await conversationsService.getPeerMember(conversation, user.gId);
-    const nick = await nicksService.getNick(peerMember.gId, conversation.get('network'));
+  const peerMember = await conversationsService.getPeerMember(conversation, user.gId);
+  const nick = await nicksService.getNick(peerMember.gId, conversation.get('network'));
 
-    return `1on1 with ${nick}`;
+  return `1on1 with ${nick}`;
 }
 
 function groupBy(array, groupByProperty) {
-    const result = {};
+  const result = {};
 
-    array.forEach(item => {
-        const key = item.get(groupByProperty);
+  array.forEach(item => {
+    const key = item.get(groupByProperty);
 
-        result[key] = result[key] || [];
-        result[key].push(item);
-    });
+    result[key] = result[key] || [];
+    result[key].push(item);
+  });
 
-    return result;
+  return result;
 }

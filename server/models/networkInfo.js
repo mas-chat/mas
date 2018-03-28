@@ -19,23 +19,19 @@
 const Base = require('./base');
 
 module.exports = class NetworkInfo extends Base {
-    static async create(props) {
-        const data = {
-            userId: props.userId,
-            network: props.network,
-            nick: props.nick,
-            state: props.state || 'disconnected',
-            retryCount: 0
-        };
+  static async create(props) {
+    const data = {
+      userId: props.userId,
+      network: props.network,
+      nick: props.nick,
+      state: props.state || 'disconnected',
+      retryCount: 0
+    };
 
-        return super.create(data);
-    }
+    return super.create(data);
+  }
 
-    static get mutableProperties() {
-        return [
-            'nick',
-            'state',
-            'retryCount'
-        ];
-    }
+  static get mutableProperties() {
+    return ['nick', 'state', 'retryCount'];
+  }
 };

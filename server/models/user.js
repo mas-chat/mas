@@ -24,217 +24,226 @@ const UserGId = require('../lib/userGId');
 const Base = require('./base');
 
 module.exports = class User extends Base {
-    static async create(props, { skipSetters = false } = {}) {
-        trimWhiteSpace(props);
+  static async create(props, { skipSetters = false } = {}) {
+    trimWhiteSpace(props);
 
-        if (!skipSetters) {
-            const passwordValidation = validatePassword(props.password);
+    if (!skipSetters) {
+      const passwordValidation = validatePassword(props.password);
 
-            if (!passwordValidation.valid) {
-                const user = new User();
-                user.errors = { password: passwordValidation.error };
-                return user;
-            }
+      if (!passwordValidation.valid) {
+        const user = new User();
+        user.errors = { password: passwordValidation.error };
+        return user;
+      }
+    }
+
+    const data = {
+      deleted: false,
+      deletionTime: null,
+      email: props.email,
+      deletedEmail: null,
+      emailConfirmed: false,
+      emailMD5: md5(props.email.toLowerCase()),
+      extAuthId: props.extAuthId || null,
+      inUse: props.inUse || false,
+      canUseIRC: props.canUseIRC || false,
+      lastIp: null,
+      lastLogout: new Date(0),
+      planLevel: props.planLevel || 50,
+      discount: props.discount || 0,
+      name: props.name,
+      nick: props.nick,
+      password: props.password ? await bcryptPassword(props.password) : null,
+      passwordType: props.password ? 'bcrypt' : null,
+      registrationTime: new Date(),
+      secret: null,
+      secretExpires: null
+    };
+
+    return super.create(data, { skipSetters });
+  }
+
+  static get setters() {
+    return {
+      name: function name(realName) {
+        if (!realName || realName.length < 6) {
+          return { valid: false, error: 'Please enter at least 6 characters.' };
         }
 
-        const data = {
-            deleted: false,
-            deletionTime: null,
-            email: props.email,
-            deletedEmail: null,
-            emailConfirmed: false,
-            emailMD5: md5(props.email.toLowerCase()),
-            extAuthId: props.extAuthId || null,
-            inUse: props.inUse || false,
-            canUseIRC: props.canUseIRC || false,
-            lastIp: null,
-            lastLogout: new Date(0),
-            planLevel: props.planLevel || 50,
-            discount: props.discount || 0,
-            name: props.name,
-            nick: props.nick,
-            password: props.password ? (await bcryptPassword(props.password)) : null,
-            passwordType: props.password ? 'bcrypt' : null,
-            registrationTime: new Date(),
-            secret: null,
-            secretExpires: null
-        };
+        return { valid: true, value: realName };
+      },
+      email: function email(emailAddress) {
+        const parts = emailAddress.split('@');
 
-        return super.create(data, { skipSetters });
-    }
-
-    static get setters() {
-        return {
-            name: function name(realName) {
-                if (!realName || realName.length < 6) {
-                    return { valid: false, error: 'Please enter at least 6 characters.' };
-                }
-
-                return { valid: true, value: realName };
-            },
-            email: function email(emailAddress) {
-                const parts = emailAddress.split('@');
-
-                if (!emailAddress || parts.length !== 2 || parts[0].length === 0 ||
-                    !parts[1].includes('.') ||
-                    parts[1].length < 3) {
-                    return { valid: false, error: 'Please enter a valid email address.' };
-                }
-
-                return { valid: true, value: emailAddress };
-            },
-            nick: function nick(nickName) {
-                if (!nickName) {
-                    return { valid: false, error: 'Please enter a nick' };
-                } else if (nickName.length < 3 || nickName.length > 15) {
-                    return { valid: false, error: 'Nick has to be 3-15 characters long.' };
-                } else if (/[0-9]/.test(nickName.charAt(0))) {
-                    return { valid: false, error: 'Nick can\'t start with digit' };
-                } else if (!(/^[A-Z`a-z0-9[\]\\_^{|}]+$/.test(nickName))) {
-                    const valid = [ 'a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}' ];
-                    return { valid: false,
-                        error: `Illegal characters, allowed are ${valid.join(', ')}` };
-                }
-
-                return { valid: true, value: nickName };
-            }
-        };
-    }
-
-    static get mutableProperties() {
-        return [
-            'extAuthId',
-            'inUse',
-            'lastIp',
-            'lastLogout',
-            'name',
-            'email',
-            'emailConfirmed',
-            'nick',
-            'canUseIRC',
-            'registrationTime'
-        ];
-    }
-
-    static get config() {
-        return {
-            indexErrorDescriptions: {
-                nick: 'This nick is already reserved.',
-                email: 'This email address is already reserved.'
-            }
-        };
-    }
-
-    get gId() {
-        if (!this._gId) {
-            this._gId = UserGId.create({ type: 'mas', id: this.id });
+        if (
+          !emailAddress ||
+          parts.length !== 2 ||
+          parts[0].length === 0 ||
+          !parts[1].includes('.') ||
+          parts[1].length < 3
+        ) {
+          return { valid: false, error: 'Please enter a valid email address.' };
         }
 
-        return this._gId;
-    }
-
-    get gIdString() {
-        if (!this._gIdString) {
-            this._gIdString = this.gId.toString();
+        return { valid: true, value: emailAddress };
+      },
+      nick: function nick(nickName) {
+        if (!nickName) {
+          return { valid: false, error: 'Please enter a nick' };
+        } else if (nickName.length < 3 || nickName.length > 15) {
+          return { valid: false, error: 'Nick has to be 3-15 characters long.' };
+        } else if (/[0-9]/.test(nickName.charAt(0))) {
+          return { valid: false, error: "Nick can't start with digit" };
+        } else if (!/^[A-Z`a-z0-9[\]\\_^{|}]+$/.test(nickName)) {
+          const valid = ['a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}'];
+          return {
+            valid: false,
+            error: `Illegal characters, allowed are ${valid.join(', ')}`
+          };
         }
 
-        return this._gIdString;
+        return { valid: true, value: nickName };
+      }
+    };
+  }
+
+  static get mutableProperties() {
+    return [
+      'extAuthId',
+      'inUse',
+      'lastIp',
+      'lastLogout',
+      'name',
+      'email',
+      'emailConfirmed',
+      'nick',
+      'canUseIRC',
+      'registrationTime'
+    ];
+  }
+
+  static get config() {
+    return {
+      indexErrorDescriptions: {
+        nick: 'This nick is already reserved.',
+        email: 'This email address is already reserved.'
+      }
+    };
+  }
+
+  get gId() {
+    if (!this._gId) {
+      this._gId = UserGId.create({ type: 'mas', id: this.id });
     }
 
-    async isOnline() {
-        const sessions = await redis.pubsub('NUMSUB', this.id);
+    return this._gId;
+  }
 
-        return sessions[1] !== 0;
+  get gIdString() {
+    if (!this._gIdString) {
+      this._gIdString = this.gId.toString();
     }
 
-    async changeEmail(email) {
-        const trimmedEmail = email.trim();
+    return this._gIdString;
+  }
 
-        if (this.get('email') !== trimmedEmail) {
-            await this._set({
-                email: trimmedEmail,
-                emailMD5: md5(trimmedEmail.toLowerCase()),
-                emailConfirmed: false
-            });
+  async isOnline() {
+    const sessions = await redis.pubsub('NUMSUB', this.id);
 
-            // TODO: await sendEmailConfirmationEmail(this.id, trimmedEmail);
-        }
+    return sessions[1] !== 0;
+  }
+
+  async changeEmail(email) {
+    const trimmedEmail = email.trim();
+
+    if (this.get('email') !== trimmedEmail) {
+      await this._set({
+        email: trimmedEmail,
+        emailMD5: md5(trimmedEmail.toLowerCase()),
+        emailConfirmed: false
+      });
+
+      // TODO: await sendEmailConfirmationEmail(this.id, trimmedEmail);
+    }
+  }
+
+  async changePassword(password) {
+    const passwordValidation = validatePassword(password);
+
+    if (!passwordValidation.valid) {
+      this.errors = { password: passwordValidation.error };
+      return null;
     }
 
-    async changePassword(password) {
-        const passwordValidation = validatePassword(password);
+    const newPassword = {
+      password: await bcrypt.hash(password, bcrypt.genSaltSync(10)),
+      passwordType: 'bcrypt'
+    };
 
-        if (!passwordValidation.valid) {
-            this.errors = { password: passwordValidation.error };
-            return null;
-        }
+    await this._set(newPassword);
 
-        const newPassword = {
-            password: await bcrypt.hash(password, bcrypt.genSaltSync(10)),
-            passwordType: 'bcrypt'
-        };
+    return newPassword;
+  }
 
-        await this._set(newPassword);
+  async verifyPassword(password) {
+    const encryptedPassword = this.get('password');
+    const encryptionMethod = this.get('passwordType');
 
-        return newPassword;
+    if (!encryptedPassword) {
+      return false;
     }
 
-    async verifyPassword(password) {
-        const encryptedPassword = this.get('password');
-        const encryptionMethod = this.get('passwordType');
+    if (encryptionMethod === 'sha256') {
+      const expectedSha = crypto
+        .createHash('sha256')
+        .update(password, 'utf8')
+        .digest('hex');
 
-        if (!encryptedPassword) {
-            return false;
-        }
-
-        if (encryptionMethod === 'sha256') {
-            const expectedSha = crypto.createHash('sha256').update(password, 'utf8').digest('hex');
-
-            if (encryptedPassword === expectedSha) {
-                // Migrate to bcrypt
-                await this.changePassword(password); // TODO: Can't fail
-                return true;
-            }
-        } else if (encryptionMethod === 'bcrypt') {
-            return bcrypt.compare(password, encryptedPassword);
-        } else if (encryptionMethod === 'plain') {
-            // Only used in testing
-            return encryptedPassword === password;
-        }
-
-        return false;
+      if (encryptedPassword === expectedSha) {
+        // Migrate to bcrypt
+        await this.changePassword(password); // TODO: Can't fail
+        return true;
+      }
+    } else if (encryptionMethod === 'bcrypt') {
+      return bcrypt.compare(password, encryptedPassword);
+    } else if (encryptionMethod === 'plain') {
+      // Only used in testing
+      return encryptedPassword === password;
     }
 
-    async delete() {
-        return this._set({
-            deleted: true,
-            deletionTime: new Date(),
-            email: null,
-            deletedEmail: this.get('email'),
-            emailMD5: null,
-            extAuthId: null
-        });
-    }
+    return false;
+  }
+
+  async delete() {
+    return this._set({
+      deleted: true,
+      deletionTime: new Date(),
+      email: null,
+      deletedEmail: this.get('email'),
+      emailMD5: null,
+      extAuthId: null
+    });
+  }
 };
 
 function trimWhiteSpace(props) {
-    for (const prop of Object.keys(props)) {
-        const value = props[prop];
+  for (const prop of Object.keys(props)) {
+    const value = props[prop];
 
-        if (typeof value === 'string') {
-            props[prop] = value.trim();
-        }
+    if (typeof value === 'string') {
+      props[prop] = value.trim();
     }
+  }
 }
 
 function validatePassword(password) {
-    if (!password || password.length < 6) {
-        return { valid: false, error: 'Please enter at least 6 characters.' };
-    }
+  if (!password || password.length < 6) {
+    return { valid: false, error: 'Please enter at least 6 characters.' };
+  }
 
-    return { valid: true };
+  return { valid: true };
 }
 
 async function bcryptPassword(password) {
-    return bcrypt.hash(password, bcrypt.genSaltSync(10));
+  return bcrypt.hash(password, bcrypt.genSaltSync(10));
 }

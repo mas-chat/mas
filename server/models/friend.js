@@ -19,9 +19,7 @@
 const Base = require('./base');
 
 module.exports = class Friend extends Base {
-    static get mutableProperties() {
-        return [
-            'state'
-        ];
-    }
+  static get mutableProperties() {
+    return ['state'];
+  }
 };

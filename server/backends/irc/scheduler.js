@@ -27,36 +27,36 @@ const jobs = [];
 let disconnect = null;
 
 exports.init = function init(disconnectCB) {
-    disconnect = disconnectCB;
+  disconnect = disconnectCB;
 
-    // Twice in a day
-    jobs.push(cron.schedule('0 7,19 * * *', disconnectInactiveIRCUsers));
+  // Twice in a day
+  jobs.push(cron.schedule('0 7,19 * * *', disconnectInactiveIRCUsers));
 };
 
 exports.quit = async function quit() {
-    jobs.forEach(job => job.destroy());
+  jobs.forEach(job => job.destroy());
 
-    await courier.quit();
+  await courier.quit();
 };
 
 async function disconnectInactiveIRCUsers() {
-    log.info('Running disconnectInactiveIRCUsers job');
+  log.info('Running disconnectInactiveIRCUsers job');
 
-    const cutOffDate = new Date();
-    cutOffDate.setDate(cutOffDate.getDate() - conf.get('irc:inactivity_timeout'));
+  const cutOffDate = new Date();
+  cutOffDate.setDate(cutOffDate.getDate() - conf.get('irc:inactivity_timeout'));
 
-    const networkInfos = await NetworkInfo.fetchAll();
+  const networkInfos = await NetworkInfo.fetchAll();
 
-    for (const networkInfo of networkInfos) {
-        if (networkInfo.get('state') === 'connected') {
-            const user = await User.fetch(networkInfo.get('userId'));
+  for (const networkInfo of networkInfos) {
+    if (networkInfo.get('state') === 'connected') {
+      const user = await User.fetch(networkInfo.get('userId'));
 
-            if (!user.isOnline && user.get('lastLogout') < cutOffDate) {
-                const network = networkInfo.get('network');
+      if (!user.isOnline && user.get('lastLogout') < cutOffDate) {
+        const network = networkInfo.get('network');
 
-                await disconnect(user, network, 'idleclosing');
-                log.info(user, `Disconnected inactive user, network: ${network}`);
-            }
-        }
+        await disconnect(user, network, 'idleclosing');
+        log.info(user, `Disconnected inactive user, network: ${network}`);
+      }
     }
+  }
 }

@@ -20,21 +20,21 @@ const Settings = require('../models/settings');
 const notification = require('../lib/notification');
 
 exports.sendUpdateSettings = async function sendUpdateSettings(user, sessionId) {
-    const settingsRecord = await Settings.findOrCreate(user.id);
-    const command = {
-        type: 'UPDATE_SETTINGS',
-        settings: {
-            activeDesktop: settingsRecord.get('activeDesktop'),
-            theme: settingsRecord.get('theme'),
-            email: user.get('email'),
-            emailConfirmed: user.get('emailConfirmed'),
-            canUseIRC: user.get('canUseIRC')
-        }
-    };
-
-    if (sessionId) {
-        await notification.send(user, sessionId, command);
-    } else {
-        await notification.broadcast(user, command);
+  const settingsRecord = await Settings.findOrCreate(user.id);
+  const command = {
+    type: 'UPDATE_SETTINGS',
+    settings: {
+      activeDesktop: settingsRecord.get('activeDesktop'),
+      theme: settingsRecord.get('theme'),
+      email: user.get('email'),
+      emailConfirmed: user.get('emailConfirmed'),
+      canUseIRC: user.get('canUseIRC')
     }
+  };
+
+  if (sessionId) {
+    await notification.send(user, sessionId, command);
+  } else {
+    await notification.broadcast(user, command);
+  }
 };

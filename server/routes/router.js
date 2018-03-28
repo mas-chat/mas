@@ -38,113 +38,117 @@ const TWO_DAYS_IN_MS = 1000 * 60 * 60 * 24 * 2;
 const fingerPrintRe = /^assets\/\S+-.{32}\.\w+$/;
 const devMode = process.env.NODE_ENV !== 'production';
 
-const newClientDevProxy = convert(proxy({
+const newClientDevProxy = convert(
+  proxy({
     host: 'http://localhost:8080',
     map: urlPath => (urlPath === '/sector17' ? '/sector17/' : urlPath)
-}));
+  })
+);
 
 module.exports = function buildRouter() {
-    log.info('Registering website routes');
+  log.info('Registering website routes');
 
-    const router = new Router();
+  const router = new Router();
 
-    // Passport authentication routes
-    if (conf.get('googleauth:enabled') && conf.get('googleauth:openid_realm')) {
-        router.get('/auth/google', passport.authenticate('google', {
-            scope: 'email profile',
-            openIDRealm: conf.get('googleauth:openid_realm')
-        }));
-        router.get('/auth/google/oauth2callback', loginController.externalLogin('google'));
-    }
+  // Passport authentication routes
+  if (conf.get('googleauth:enabled') && conf.get('googleauth:openid_realm')) {
+    router.get(
+      '/auth/google',
+      passport.authenticate('google', {
+        scope: 'email profile',
+        openIDRealm: conf.get('googleauth:openid_realm')
+      })
+    );
+    router.get('/auth/google/oauth2callback', loginController.externalLogin('google'));
+  }
 
-    if (conf.get('yahooauth:enabled')) {
-        router.get('/auth/yahoo', passport.authenticate('yahoo'));
-        router.get('/auth/yahoo/callback', loginController.externalLogin('yahoo'));
-    }
+  if (conf.get('yahooauth:enabled')) {
+    router.get('/auth/yahoo', passport.authenticate('yahoo'));
+    router.get('/auth/yahoo/callback', loginController.externalLogin('yahoo'));
+  }
 
-    if (conf.get('cloudronauth:enabled')) {
-        router.get('/auth/cloudron', passport.authenticate('cloudron'));
-        router.get('/auth/cloudron/callback', loginController.externalLogin('cloudron'));
-    }
+  if (conf.get('cloudronauth:enabled')) {
+    router.get('/auth/cloudron', passport.authenticate('cloudron'));
+    router.get('/auth/cloudron/callback', loginController.externalLogin('cloudron'));
+  }
 
-    router.post('/login', body(), loginController.localLogin);
+  router.post('/login', body(), loginController.localLogin);
 
-    // File upload endpoint
-    router.post('/api/v1/upload', body({ multipart: true }), uploadController);
+  // File upload endpoint
+  router.post('/api/v1/upload', body({ multipart: true }), uploadController);
 
-    // Registration routes
-    router.get('/register', registerController.index);
-    router.post('/register', body(), registerController.create);
-    router.post('/register-ext', registerController.createExt);
-    router.post('/register-reset', registerController.createReset);
+  // Registration routes
+  router.get('/register', registerController.index);
+  router.post('/register', body(), registerController.create);
+  router.post('/register-ext', registerController.createExt);
+  router.post('/register-reset', registerController.createReset);
 
-    // Forgot password
-    router.post('/forgot-password', body(), forgotPasswordController.create);
-    router.get('/reset-password/:token', registerController.indexReset);
+  // Forgot password
+  router.post('/forgot-password', body(), forgotPasswordController.create);
+  router.get('/reset-password/:token', registerController.indexReset);
 
-    // Confirm email
-    router.get('/confirm-email/:token', confirmEmailController.show);
+  // Confirm email
+  router.get('/confirm-email/:token', confirmEmailController.show);
 
-    // Public uploaded files
-    router.get('/files/:uuid/:slug*', userFilesController);
+  // Public uploaded files
+  router.get('/files/:uuid/:slug*', userFilesController);
 
-    // Client
-    router.get('/app', async ctx => {
-        ctx.set('Cache-control', 'private, max-age=0, no-cache');
-        await sendFile(ctx, 'client/dist/', 'index.html');
-    });
+  // Client
+  router.get('/app', async ctx => {
+    ctx.set('Cache-control', 'private, max-age=0, no-cache');
+    await sendFile(ctx, 'client/dist/', 'index.html');
+  });
 
-    // Client assets
-    router.get(/^\/app\/(.+)/, async ctx => {
-        const subPath = ctx.params[0];
-        let maxage = TWO_DAYS_IN_MS;
-
-        if (devMode) {
-            maxage = 0;
-        } else if (fingerPrintRe.test(subPath)) {
-            maxage = ONE_YEAR_IN_MS;
-        }
-
-        await sendFile(ctx, 'client/dist/', subPath, { maxage });
-    });
+  // Client assets
+  router.get(/^\/app\/(.+)/, async ctx => {
+    const subPath = ctx.params[0];
+    let maxage = TWO_DAYS_IN_MS;
 
     if (devMode) {
-        // Ember CLI Live Reload redirect hack
-        router.get('/ember-cli-live-reload.js', ctx =>
-            ctx.redirect('http://localhost:4200/ember-cli-live-reload.js'));
+      maxage = 0;
+    } else if (fingerPrintRe.test(subPath)) {
+      maxage = ONE_YEAR_IN_MS;
     }
 
-    // New client
-    router.get(/\/sector17\/?(.*)/, async ctx => {
-        const subPath = ctx.params[0];
+    await sendFile(ctx, 'client/dist/', subPath, { maxage });
+  });
 
-        if (devMode) {
-            await newClientDevProxy(ctx);
-            ctx.set('Cache-control', 'private, max-age=0, no-cache');
-        } else {
-            await sendFile(ctx, 'newclient/dist/', subPath, {
-                index: 'index.html',
-                maxage: subPath === '' ? 0 : ONE_YEAR_IN_MS
-            });
-        }
-    });
+  if (devMode) {
+    // Ember CLI Live Reload redirect hack
+    router.get('/ember-cli-live-reload.js', ctx => ctx.redirect('http://localhost:4200/ember-cli-live-reload.js'));
+  }
 
-    // Web site pages
-    router.get(/^\/(about|home|tos|pricing|support|$)\/?$/, websiteController);
+  // New client
+  router.get(/\/sector17\/?(.*)/, async ctx => {
+    const subPath = ctx.params[0];
 
-    // Web site assets
-    router.get(/^\/website-assets\/(.+)/, async ctx => {
-        const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
-        await sendFile(ctx, 'server/website/dist/', ctx.params[0], { maxage });
-    });
+    if (devMode) {
+      await newClientDevProxy(ctx);
+      ctx.set('Cache-control', 'private, max-age=0, no-cache');
+    } else {
+      await sendFile(ctx, 'newclient/dist/', subPath, {
+        index: 'index.html',
+        maxage: subPath === '' ? 0 : ONE_YEAR_IN_MS
+      });
+    }
+  });
 
-    return router;
+  // Web site pages
+  router.get(/^\/(about|home|tos|pricing|support|$)\/?$/, websiteController);
+
+  // Web site assets
+  router.get(/^\/website-assets\/(.+)/, async ctx => {
+    const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
+    await sendFile(ctx, 'server/website/dist/', ctx.params[0], { maxage });
+  });
+
+  return router;
 };
 
 async function sendFile(ctx, root, filePath, options = {}) {
-    const sendOptions = Object.assign({}, options, {
-        root: path.join(__dirname, `../../${root}`)
-    });
+  const sendOptions = Object.assign({}, options, {
+    root: path.join(__dirname, `../../${root}`)
+  });
 
-    await send(ctx, filePath === '' ? '/' : filePath, sendOptions);
+  await send(ctx, filePath === '' ? '/' : filePath, sendOptions);
 }

@@ -22,77 +22,78 @@ const winston = require('winston');
 require('colors');
 
 function MasConsoleLogger(options) {
-    winston.Transport.call(this, options);
+  winston.Transport.call(this, options);
 
-    this.name = 'masConsoleLogger';
-    this.level = options.level || 'info';
+  this.name = 'masConsoleLogger';
+  this.level = options.level || 'info';
 }
 
 util.inherits(MasConsoleLogger, winston.Transport);
 
 MasConsoleLogger.prototype.log = function log(level, msg, meta, callback) {
-    const processParts = process.title.split('-');
-    const processName = processParts[1];
-    const processExtension = processParts[2];
-    let processColumn;
-    let cat;
+  const processParts = process.title.split('-');
+  const processName = processParts[1];
+  const processExtension = processParts[2];
+  let processColumn;
+  let cat;
 
-    switch (processName) {
-        case 'irc':
-            processColumn = (processExtension === 'connman' ? 'ircco' : 'irc  ').green;
-            break;
-        case 'frontend':
-            processColumn = 'front'.blue;
-            break;
-        case 'loopback':
-            processColumn = 'loop '.yellow;
-            break;
-        default:
-            processColumn = 'UNKWN'.red;
-    }
+  switch (processName) {
+    case 'irc':
+      processColumn = (processExtension === 'connman' ? 'ircco' : 'irc  ').green;
+      break;
+    case 'frontend':
+      processColumn = 'front'.blue;
+      break;
+    case 'loopback':
+      processColumn = 'loop '.yellow;
+      break;
+    default:
+      processColumn = 'UNKWN'.red;
+  }
 
-    switch (level) {
-        case 'info':
-            cat = 'INFO';
-            break;
-        case 'warn':
-            cat = 'WARN'.red;
-            break;
-        case 'error':
-            cat = 'ERR '.red;
-            break;
-        default:
-            cat = 'UNKN'.red;
-    }
+  switch (level) {
+    case 'info':
+      cat = 'INFO';
+      break;
+    case 'warn':
+      cat = 'WARN'.red;
+      break;
+    case 'error':
+      cat = 'ERR '.red;
+      break;
+    default:
+      cat = 'UNKN'.red;
+  }
 
-    const date = new Date().toISOString();
-    const prefix = process.env.NODE_ENV === 'development'
-        ? `${cat} ${meta.userId ? `[${meta.userId}] ` : ''}`
-        : `${date.yellow} ${processColumn}-${cat}-${meta.userId ? `[${meta.userId}] ` : 'N/A'}: `;
+  const date = new Date().toISOString();
+  const prefix =
+    process.env.NODE_ENV === 'development'
+      ? `${cat} ${meta.userId ? `[${meta.userId}] ` : ''}`
+      : `${date.yellow} ${processColumn}-${cat}-${meta.userId ? `[${meta.userId}] ` : 'N/A'}: `;
 
-    process.stdout.write(`${prefix}${msg}\n`);
+  process.stdout.write(`${prefix}${msg}\n`);
 
-    callback(null, true);
+  callback(null, true);
 };
 
 MasConsoleLogger.prototype.logException = function logException(msg, meta, callback) {
-    const that = this;
+  const that = this;
 
-    function onLogged() {
-        that.removeListener('error', onError);
-        callback();
-    }
+  function onLogged() {
+    that.removeListener('error', onError);
+    callback();
+  }
 
-    function onError() {
-        that.removeListener('logged', onLogged);
-        callback();
-    }
+  function onError() {
+    that.removeListener('logged', onLogged);
+    callback();
+  }
 
-    this.once('logged', onLogged);
-    this.once('error', onError);
-    this.log('error', msg, meta, () => {});
+  this.once('logged', onLogged);
+  this.once('error', onError);
+  this.log('error', msg, meta, () => {});
 
-    meta.stack.forEach(line => console.log(line.red)); // eslint-disable-line no-console
+  meta.stack.forEach(line => console.log(line.red)); // eslint-disable-line no-console
 };
 
 module.exports = MasConsoleLogger;

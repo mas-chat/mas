@@ -32,66 +32,69 @@ let senderAddress;
 setupTransporter();
 
 exports.send = function send(templateName, data, address, subject) {
-    const templatePath = path.join(__dirname, '..', templateName);
-    let template = templateCache[templatePath];
+  const templatePath = path.join(__dirname, '..', templateName);
+  let template = templateCache[templatePath];
 
-    if (!template) {
-        template = handlebars.compile(fs.readFileSync(templatePath, 'utf8'));
-        templateCache[templatePath] = template;
+  if (!template) {
+    template = handlebars.compile(fs.readFileSync(templatePath, 'utf8'));
+    templateCache[templatePath] = template;
+  }
+
+  log.info(`Sending email to: ${address}`);
+
+  transporter.sendMail(
+    {
+      from: `MAS admin <${fromAddress}>`,
+      sender: senderAddress,
+      to: address,
+      subject,
+      html: template(data)
+    },
+    error => {
+      if (error) {
+        log.warn(`Failed to send email: ${error}`);
+      }
     }
-
-    log.info(`Sending email to: ${address}`);
-
-    transporter.sendMail({
-        from: `MAS admin <${fromAddress}>`,
-        sender: senderAddress,
-        to: address,
-        subject,
-        html: template(data)
-    }, error => {
-        if (error) {
-            log.warn(`Failed to send email: ${error}`);
-        }
-    });
+  );
 };
 
 function setupTransporter() {
-    if (conf.get('mailgun:enabled')) {
-        const mailgun = require('nodemailer-mailgun-transport'); // Slow module to require
-        const mailgunAuth = {
-            auth: {
-                api_key: conf.get('mailgun:api_key'), // eslint-disable-line camelcase
-                domain: conf.get('mailgun:domain')
-            }
-        };
+  if (conf.get('mailgun:enabled')) {
+    const mailgun = require('nodemailer-mailgun-transport'); // Slow module to require
+    const mailgunAuth = {
+      auth: {
+        api_key: conf.get('mailgun:api_key'), // eslint-disable-line camelcase
+        domain: conf.get('mailgun:domain')
+      }
+    };
 
-        transporter = nodemailer.createTransport(mailgun(mailgunAuth));
-        fromAddress = conf.get('mailgun:from');
-        senderAddress = conf.get('mailgun:sender');
-    } else if (conf.get('smtp:enabled')) {
-        const smtpTransport = require('nodemailer-smtp-transport');
-        const smtpOptions = {
-            host: conf.get('smtp:server'),
-            port: conf.get('smtp:port')
-        };
+    transporter = nodemailer.createTransport(mailgun(mailgunAuth));
+    fromAddress = conf.get('mailgun:from');
+    senderAddress = conf.get('mailgun:sender');
+  } else if (conf.get('smtp:enabled')) {
+    const smtpTransport = require('nodemailer-smtp-transport');
+    const smtpOptions = {
+      host: conf.get('smtp:server'),
+      port: conf.get('smtp:port')
+    };
 
-        if (conf.get('smtp:user').length !== 0) {
-            smtpOptions.auth = {
-                user: conf.get('smtp:user'),
-                pass: conf.get('smtp:password')
-            };
-        }
-
-        transporter = nodemailer.createTransport(smtpTransport(smtpOptions));
-        fromAddress = conf.get('site:admin_email');
-        senderAddress = fromAddress;
-    } else {
-        transporter = nodemailer.createTransport({
-            sendmail: true
-        });
-        fromAddress = conf.get('site:admin_email');
-        senderAddress = fromAddress;
+    if (conf.get('smtp:user').length !== 0) {
+      smtpOptions.auth = {
+        user: conf.get('smtp:user'),
+        pass: conf.get('smtp:password')
+      };
     }
 
-    transporter.use('compile', htmlToText());
+    transporter = nodemailer.createTransport(smtpTransport(smtpOptions));
+    fromAddress = conf.get('site:admin_email');
+    senderAddress = fromAddress;
+  } else {
+    transporter = nodemailer.createTransport({
+      sendmail: true
+    });
+    fromAddress = conf.get('site:admin_email');
+    senderAddress = fromAddress;
+  }
+
+  transporter.use('compile', htmlToText());
 }

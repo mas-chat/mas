@@ -24,9 +24,9 @@ const yahoo = conf.get('yahooauth:enabled');
 const cloudron = conf.get('cloudronauth:enabled');
 
 module.exports = {
-    password,
-    google,
-    yahoo,
-    cloudron,
-    ext: google || yahoo || cloudron
+  password,
+  google,
+  yahoo,
+  cloudron,
+  ext: google || yahoo || cloudron
 };

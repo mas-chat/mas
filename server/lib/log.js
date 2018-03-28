@@ -30,100 +30,100 @@ require('winston-papertrail');
 let logger = null;
 
 exports.info = function info(user, msg) {
-    logEntry('info', user, msg, () => {});
+  logEntry('info', user, msg, () => {});
 };
 
 exports.warn = function warn(user, msg) {
-    logEntry('warn', user, msg, () => {});
+  logEntry('warn', user, msg, () => {});
 };
 
 exports.error = function error(user, msg) {
-    logEntry('error', user, msg, () => {
-        init.shutdown();
-    });
+  logEntry('error', user, msg, () => {
+    init.shutdown();
+  });
 };
 
 exports.quit = function quit() {
-    if (logger) {
-        logger.clear();
-    }
+  if (logger) {
+    logger.clear();
+  }
 };
 
 function logEntry(type, user, msg, callback) {
-    // user is an optional parameter
-    const parsedMessage = user && msg ? `[u: ${user.id}] ${msg}` : user;
+  // user is an optional parameter
+  const parsedMessage = user && msg ? `[u: ${user.id}] ${msg}` : user;
 
-    if (!logger) {
-        // Delay configuration as long as possible to be sure that process.title is set.
-        logger = new (winston.Logger)({
-            transports: configTransports()
-        });
-    }
+  if (!logger) {
+    // Delay configuration as long as possible to be sure that process.title is set.
+    logger = new winston.Logger({
+      transports: configTransports()
+    });
+  }
 
-    logger.log(type, parsedMessage, callback);
+  logger.log(type, parsedMessage, callback);
 }
 
 function configTransports() {
-    const transports = [];
+  const transports = [];
 
-    if (conf.get('log:file')) {
-        let logDirectory = path.normalize(conf.get('log:directory'));
+  if (conf.get('log:file')) {
+    let logDirectory = path.normalize(conf.get('log:directory'));
 
-        if (logDirectory.charAt(0) !== path.sep) {
-            logDirectory = path.join(__dirname, '..', '..', logDirectory);
-        }
-
-        const fileName = path.join(logDirectory, `${process.title}.log`);
-
-        if (!fs.existsSync(logDirectory)) {
-            console.error(`${'ERROR:'.red} Log directory ${logDirectory} doesn't exist.`);
-            process.exit(1);
-        }
-
-        if (conf.get('log:clear_at_startup') && fs.existsSync(fileName)) {
-            try {
-                fs.unlinkSync(fileName);
-            } catch (e) {
-                // Race condition is possible
-                if (e.code !== 'ENOENT') {
-                    throw e;
-                }
-            }
-        }
-
-        const fileTransportOptions = {
-            filename: fileName,
-            colorize: false,
-            handleExceptions: true
-        };
-
-        const fileTransport = conf.get('log:rotate_daily') ?
-            new DailyRotateFile(fileTransportOptions) :
-            new (winston.transports.File)(fileTransportOptions);
-
-        transports.push(fileTransport);
+    if (logDirectory.charAt(0) !== path.sep) {
+      logDirectory = path.join(__dirname, '..', '..', logDirectory);
     }
 
-    if (conf.get('log:console')) {
-        const consoleTransport = new (MasTransport)({
-            handleExceptions: true
-        });
+    const fileName = path.join(logDirectory, `${process.title}.log`);
 
-        transports.push(consoleTransport);
+    if (!fs.existsSync(logDirectory)) {
+      console.error(`${'ERROR:'.red} Log directory ${logDirectory} doesn't exist.`);
+      process.exit(1);
     }
 
-    if (conf.get('papertrail:enabled')) {
-        const papertrailTransport = new winston.transports.Papertrail({
-            host: conf.get('papertrail:host'),
-            port: conf.get('papertrail:port'),
-            level: conf.get('papertrail:level'),
-            hostname: 'mas',
-            program: process.title,
-            logFormat: (level, message) => `[${level}] ${message}`
-        });
-
-        transports.push(papertrailTransport);
+    if (conf.get('log:clear_at_startup') && fs.existsSync(fileName)) {
+      try {
+        fs.unlinkSync(fileName);
+      } catch (e) {
+        // Race condition is possible
+        if (e.code !== 'ENOENT') {
+          throw e;
+        }
+      }
     }
 
-    return transports;
+    const fileTransportOptions = {
+      filename: fileName,
+      colorize: false,
+      handleExceptions: true
+    };
+
+    const fileTransport = conf.get('log:rotate_daily')
+      ? new DailyRotateFile(fileTransportOptions)
+      : new winston.transports.File(fileTransportOptions);
+
+    transports.push(fileTransport);
+  }
+
+  if (conf.get('log:console')) {
+    const consoleTransport = new MasTransport({
+      handleExceptions: true
+    });
+
+    transports.push(consoleTransport);
+  }
+
+  if (conf.get('papertrail:enabled')) {
+    const papertrailTransport = new winston.transports.Papertrail({
+      host: conf.get('papertrail:host'),
+      port: conf.get('papertrail:port'),
+      level: conf.get('papertrail:level'),
+      hostname: 'mas',
+      program: process.title,
+      logFormat: (level, message) => `[${level}] ${message}`
+    });
+
+    transports.push(papertrailTransport);
+  }
+
+  return transports;
 }

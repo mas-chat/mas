@@ -42,106 +42,111 @@ const conf = require('./lib/conf');
 main();
 
 function main() {
-    const { httpServer, httpsServer } = createHTTPServers();
+  const { httpServer, httpsServer } = createHTTPServers();
 
-    socketController.setup(httpsServer || httpServer);
-    scheduler.init();
+  socketController.setup(httpsServer || httpServer);
+  scheduler.init();
 
-    init.on('beforeShutdown', async () => {
-        await socketController.shutdown();
-        scheduler.quit();
-    });
+  init.on('beforeShutdown', async () => {
+    await socketController.shutdown();
+    scheduler.quit();
+  });
 
-    init.on('afterShutdown', async () => {
-        redis.shutdown();
-        httpServer.close();
+  init.on('afterShutdown', async () => {
+    redis.shutdown();
+    httpServer.close();
 
-        if (httpsServer) {
-            httpsServer.close();
-        }
+    if (httpsServer) {
+      httpsServer.close();
+    }
 
-        log.quit();
-    });
+    log.quit();
+  });
 }
 
 function createHTTPServers() {
-    let httpServer;
-    let httpsServer;
-    const httpPort = conf.get('frontend:http_port');
-    const httpsPort = conf.get('frontend:https_port');
-    const app = createFrontendApp();
+  let httpServer;
+  let httpsServer;
+  const httpPort = conf.get('frontend:http_port');
+  const httpsPort = conf.get('frontend:https_port');
+  const app = createFrontendApp();
 
-    if (conf.get('frontend:https')) {
-        const caCertList = conf.get('frontend:https_ca');
+  if (conf.get('frontend:https')) {
+    const caCertList = conf.get('frontend:https_ca');
 
-        httpsServer = https.createServer({
-            key: fs.readFileSync(conf.get('frontend:https_key')),
-            cert: fs.readFileSync(conf.get('frontend:https_cert')),
-            ca: caCertList ? caCertList.split(',').map(file => fs.readFileSync(file)) : []
-        }, app.callback());
+    httpsServer = https.createServer(
+      {
+        key: fs.readFileSync(conf.get('frontend:https_key')),
+        cert: fs.readFileSync(conf.get('frontend:https_cert')),
+        ca: caCertList ? caCertList.split(',').map(file => fs.readFileSync(file)) : []
+      },
+      app.callback()
+    );
 
-        httpsServer.listen(httpsPort, () => {
-            log.info(`MAS frontend HTTPS server listening, https://0.0.0.0:${httpsPort}/`);
-        });
-
-        httpServer = http.Server(createForceSSLApp().callback());
-    } else {
-        httpServer = http.Server(app.callback());
-    }
-
-    httpServer.listen(httpPort, () => {
-        log.info(`Frontend HTTP server listening: http://0.0.0.0:${httpPort}/`);
+    httpsServer.listen(httpsPort, () => {
+      log.info(`MAS frontend HTTPS server listening, https://0.0.0.0:${httpsPort}/`);
     });
 
-    return { httpServer, httpsServer };
+    httpServer = http.Server(createForceSSLApp().callback());
+  } else {
+    httpServer = http.Server(app.callback());
+  }
+
+  httpServer.listen(httpPort, () => {
+    log.info(`Frontend HTTP server listening: http://0.0.0.0:${httpPort}/`);
+  });
+
+  return { httpServer, httpsServer };
 }
 
 function createFrontendApp() {
-    const app = new Koa();
+  const app = new Koa();
 
-    app.on('error', err => {
-        if (err.status !== 404) {
-            log.warn(`Koa server error: ${util.inspect(err)}`);
-        }
-    });
-
-    if (process.env.NODE_ENV === 'development') {
-        app.use(logger());
+  app.on('error', err => {
+    if (err.status !== 404) {
+      log.warn(`Koa server error: ${util.inspect(err)}`);
     }
+  });
 
-    app.use(error());
+  if (process.env.NODE_ENV === 'development') {
+    app.use(logger());
+  }
 
-    app.use(async (ctx, next) => {
-        ctx.set('X-Frame-Options', 'DENY');
-        await next();
-    });
+  app.use(error());
 
-    app.use(compress()); // Enable GZIP compression
+  app.use(async (ctx, next) => {
+    ctx.set('X-Frame-Options', 'DENY');
+    await next();
+  });
 
-    app.use(passport.initialize());
+  app.use(compress()); // Enable GZIP compression
 
-    app.use(hbs.middleware({
-        layoutsPath: path.join(__dirname, 'views/layouts'),
-        viewPath: path.join(__dirname, 'views'),
-        defaultLayout: 'main'
-    }));
+  app.use(passport.initialize());
 
-    app.use(authSessionChecker.processCookie);
+  app.use(
+    hbs.middleware({
+      layoutsPath: path.join(__dirname, 'views/layouts'),
+      viewPath: path.join(__dirname, 'views'),
+      defaultLayout: 'main'
+    })
+  );
 
-    app.use(router.routes());
-    app.use(router.allowedMethods());
+  app.use(authSessionChecker.processCookie);
 
-    return app;
+  app.use(router.routes());
+  app.use(router.allowedMethods());
+
+  return app;
 }
 
 function createForceSSLApp() {
-    const app = new Koa();
+  const app = new Koa();
 
-    // To keep things simple, force SSL is always activated if https is enabled
-    app.use(ctx => {
-        ctx.response.status = 301;
-        ctx.response.redirect(conf.getComputed('site_url') + ctx.request.url);
-    });
+  // To keep things simple, force SSL is always activated if https is enabled
+  app.use(ctx => {
+    ctx.response.status = 301;
+    ctx.response.redirect(conf.getComputed('site_url') + ctx.request.url);
+  });
 
-    return app;
+  return app;
 }

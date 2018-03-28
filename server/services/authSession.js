@@ -19,50 +19,50 @@
 const Session = require('../models/session');
 
 exports.create = async function create(userId, ip) {
-    return Session.create({ userId, ip });
+  return Session.create({ userId, ip });
 };
 
 exports.get = async function get(cookie) {
-    const sessionData = decodeCookieValue(cookie);
+  const sessionData = decodeCookieValue(cookie);
 
-    if (!sessionData) {
-        return null;
-    }
+  if (!sessionData) {
+    return null;
+  }
 
-    const session = await findSession(sessionData);
+  const session = await findSession(sessionData);
 
-    if (!session) {
-        return null;
-    }
+  if (!session) {
+    return null;
+  }
 
-    if (session.expired) {
-        session.delete();
-        return null;
-    }
+  if (session.expired) {
+    session.delete();
+    return null;
+  }
 
-    return session;
+  return session;
 };
 
 exports.deleteAll = async function deleteAll(userId) {
-    const sessions = await Session.find({ userId });
+  const sessions = await Session.find({ userId });
 
-    sessions.forEach(session => session.delete());
+  sessions.forEach(session => session.delete());
 };
 
 function decodeCookieValue(value) {
-    try {
-        return JSON.parse(Buffer.from(value, 'base64').toString('ascii'));
-    } catch (e) {
-        return null;
-    }
+  try {
+    return JSON.parse(Buffer.from(value, 'base64').toString('ascii'));
+  } catch (e) {
+    return null;
+  }
 }
 
 async function findSession({ userId, token } = {}) {
-    if (!userId || !token) {
-        return null;
-    }
+  if (!userId || !token) {
+    return null;
+  }
 
-    const sessions = await Session.find({ userId });
+  const sessions = await Session.find({ userId });
 
-    return sessions.find(userSession => userSession.get('token') === token);
+  return sessions.find(userSession => userSession.get('token') === token);
 }

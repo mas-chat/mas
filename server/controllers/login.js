@@ -24,35 +24,35 @@ const authSesssionService = require('../services/authSession');
 const ONE_WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
 
 exports.localLogin = async function localLogin(ctx) {
-    await passport.authenticate('local', async (err, user, info) => {
-        if (user) {
-            await createAuthSession(ctx, user);
-            ctx.body = { success: true };
-        } else {
-            ctx.body = { success: false, msg: info.message };
-        }
-    })(ctx);
+  await passport.authenticate('local', async (err, user, info) => {
+    if (user) {
+      await createAuthSession(ctx, user);
+      ctx.body = { success: true };
+    } else {
+      ctx.body = { success: false, msg: info.message };
+    }
+  })(ctx);
 };
 
 exports.externalLogin = function externalLogin(provider) {
-    return async ctx => {
-        await passport.authenticate(provider, async (err, user, info) => {
-            if (user) {
-                await createAuthSession(ctx, user);
-                ctx.redirect(user.get('inUse') ? '/app' : '/register?ext=true');
-            } else {
-                ctx.body = `External login failed, reason: ${err || info.message}`;
-                log.warn(`Invalid external login, err: ${util.inspect(err || info.message)}`);
-            }
-        })(ctx);
-    };
+  return async ctx => {
+    await passport.authenticate(provider, async (err, user, info) => {
+      if (user) {
+        await createAuthSession(ctx, user);
+        ctx.redirect(user.get('inUse') ? '/app' : '/register?ext=true');
+      } else {
+        ctx.body = `External login failed, reason: ${err || info.message}`;
+        log.warn(`Invalid external login, err: ${util.inspect(err || info.message)}`);
+      }
+    })(ctx);
+  };
 };
 
 async function createAuthSession(ctx, user) {
-    const session = await authSesssionService.create(user.id, ctx.request.ip);
+  const session = await authSesssionService.create(user.id, ctx.request.ip);
 
-    ctx.cookies.set('mas', session.encodeToCookie(), {
-        maxAge: ONE_WEEK_IN_MS,
-        httpOnly: false
-    });
+  ctx.cookies.set('mas', session.encodeToCookie(), {
+    maxAge: ONE_WEEK_IN_MS,
+    httpOnly: false
+  });
 }

@@ -24,25 +24,30 @@ const mailer = require('../lib/mailer');
 const conf = require('../lib/conf');
 
 exports.create = async function create(ctx) {
-    const email = ctx.request.body.email;
-    const userRecord = await User.findFirst({ email: email.trim() });
+  const email = ctx.request.body.email;
+  const userRecord = await User.findFirst({ email: email.trim() });
 
-    if (userRecord) {
-        const token = uuid(30);
-        const link = `${conf.getComputed('site_url')}/reset-password/${token}`;
+  if (userRecord) {
+    const token = uuid(30);
+    const link = `${conf.getComputed('site_url')}/reset-password/${token}`;
 
-        mailer.send('emails/build/resetPassword.hbs', {
-            name: userRecord.get('name'),
-            url: link
-        }, userRecord.get('email'), 'Password reset link');
+    mailer.send(
+      'emails/build/resetPassword.hbs',
+      {
+        name: userRecord.get('name'),
+        url: link
+      },
+      userRecord.get('email'),
+      'Password reset link'
+    );
 
-        await redis.set(`frontend:password_reset_token:${token}`, userRecord.id);
-        await redis.expire(`frontend:password_reset_token:${token}`, 60 * 60 * 24); // 24 hours
+    await redis.set(`frontend:password_reset_token:${token}`, userRecord.id);
+    await redis.expire(`frontend:password_reset_token:${token}`, 60 * 60 * 24); // 24 hours
 
-        log.info(userRecord.id, `Password reset email sent, link is: ${link}`);
-    } else {
-        log.warn('Bogus password reset request received');
-    }
+    log.info(userRecord.id, `Password reset email sent, link is: ${link}`);
+  } else {
+    log.warn('Bogus password reset request received');
+  }
 
-    ctx.body = { success: true };
+  ctx.body = { success: true };
 };

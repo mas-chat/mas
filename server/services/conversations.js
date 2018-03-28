@@ -31,364 +31,376 @@ const windowsService = require('../services/windows');
 const MSG_BUFFER_SIZE = 200; // TODO: This should come from session:max_backlog setting
 
 exports.findOrCreate1on1 = async function findOrCreate1on1(user, peerUserGId, network) {
-    assert(user && peerUserGId && network);
+  assert(user && peerUserGId && network);
 
-    let conversation = null;
-    const userMembers = await ConversationMember.find({ userGId: user.gIdString });
-    const peerMembers = await ConversationMember.find({ userGId: peerUserGId.toString() });
+  let conversation = null;
+  const userMembers = await ConversationMember.find({ userGId: user.gIdString });
+  const peerMembers = await ConversationMember.find({ userGId: peerUserGId.toString() });
 
-    // Figure out 1on1 conversations where both users are members
-    const commonMembers = userMembers.filter(
-        member => peerMembers.find(
-            peer => peer.get('conversationId') === member.get('conversationId')));
+  // Figure out 1on1 conversations where both users are members
+  const commonMembers = userMembers.filter(member =>
+    peerMembers.find(peer => peer.get('conversationId') === member.get('conversationId'))
+  );
 
-    for (const commonMember of commonMembers) {
-        const candidate = await Conversation.fetch(commonMember.get('conversationId'));
+  for (const commonMember of commonMembers) {
+    const candidate = await Conversation.fetch(commonMember.get('conversationId'));
 
-        if (candidate.get('type') === '1on1' && candidate.get('network') === network) {
-            conversation = candidate;
-            break;
-        }
+    if (candidate.get('type') === '1on1' && candidate.get('network') === network) {
+      conversation = candidate;
+      break;
     }
+  }
 
-    if (!conversation) {
-        conversation = await Conversation.create({
-            owner: user.id,
-            type: '1on1',
-            name: null,
-            network
-        });
+  if (!conversation) {
+    conversation = await Conversation.create({
+      owner: user.id,
+      type: '1on1',
+      name: null,
+      network
+    });
 
-        await ConversationMember.create({
-            conversationId: conversation.id,
-            userGId: user.gIdString,
-            role: 'u'
-        });
+    await ConversationMember.create({
+      conversationId: conversation.id,
+      userGId: user.gIdString,
+      role: 'u'
+    });
 
-        await ConversationMember.create({
-            conversationId: conversation.id,
-            userGId: peerUserGId.toString(),
-            role: 'u'
-        });
-    }
+    await ConversationMember.create({
+      conversationId: conversation.id,
+      userGId: peerUserGId.toString(),
+      role: 'u'
+    });
+  }
 
-    return conversation;
+  return conversation;
 };
 
 exports.delete = async function deleteCoversation(conversation) {
-    const members = await ConversationMember.find({ conversationId: conversation.id });
+  const members = await ConversationMember.find({ conversationId: conversation.id });
 
-    for (const member of members) {
-        await member.delete();
-    }
+  for (const member of members) {
+    await member.delete();
+  }
 
-    const msgs = await ConversationMessage.find({ conversationId: conversation.id });
+  const msgs = await ConversationMessage.find({ conversationId: conversation.id });
 
-    for (const msg of msgs) {
-        await msg.delete();
-    }
+  for (const msg of msgs) {
+    await msg.delete();
+  }
 
-    await conversation.delete();
+  await conversation.delete();
 };
 
 exports.getAll = async function getAll(user) {
-    const conversations = [];
-    const members = await ConversationMember.find({ userGId: user.gIdString });
+  const conversations = [];
+  const members = await ConversationMember.find({ userGId: user.gIdString });
 
-    for (const member of members) {
-        const conversation = await Conversation.fetch(member.get('conversationId'));
-        conversations.push(conversation);
-    }
+  for (const member of members) {
+    const conversation = await Conversation.fetch(member.get('conversationId'));
+    conversations.push(conversation);
+  }
 
-    return conversations;
+  return conversations;
 };
 
 exports.getPeerMember = async function getPeerMember(conversation, userGId) {
-    const members = await ConversationMember.find({ conversationId: conversation.id });
+  const members = await ConversationMember.find({ conversationId: conversation.id });
 
-    return members.find(member => !member.gId.equals(userGId));
+  return members.find(member => !member.gId.equals(userGId));
 };
 
 exports.getMemberRole = async function getMemberRole(conversation, userGId) {
-    const targetMember = await ConversationMember.findFirst({
-        conversationId: conversation.id,
-        userGId: userGId.toString()
-    });
+  const targetMember = await ConversationMember.findFirst({
+    conversationId: conversation.id,
+    userGId: userGId.toString()
+  });
 
-    return targetMember ? targetMember.get('role') : null;
+  return targetMember ? targetMember.get('role') : null;
 };
 
 exports.updateMemberRole = async function updateMemberRole(conversation, userGId, role) {
-    const targetMember = await ConversationMember.findFirst({
-        conversationId: conversation.id,
-        userGId: userGId.toString()
-    });
+  const targetMember = await ConversationMember.findFirst({
+    conversationId: conversation.id,
+    userGId: userGId.toString()
+  });
 
-    if (targetMember) {
-        await targetMember.set({ role });
-        await broadcastAddMembers(conversation, userGId, role);
-    }
+  if (targetMember) {
+    await targetMember.set({ role });
+    await broadcastAddMembers(conversation, userGId, role);
+  }
 };
 
 exports.setGroupMembers = async function setGroupMembers(conversation, newMembersHash) {
-    const oldMembers = await ConversationMember.find({ conversationId: conversation.id });
+  const oldMembers = await ConversationMember.find({ conversationId: conversation.id });
 
-    for (const oldMember of oldMembers) {
-        if (!Object.keys(newMembersHash).some(newMember => newMember === oldMember.gIdString)) {
-            await deleteConversationMember(conversation, oldMember, { skipCleanUp: true });
-        }
+  for (const oldMember of oldMembers) {
+    if (!Object.keys(newMembersHash).some(newMember => newMember === oldMember.gIdString)) {
+      await deleteConversationMember(conversation, oldMember, { skipCleanUp: true });
     }
+  }
 
-    for (const newMember of Object.keys(newMembersHash)) {
-        if (!oldMembers.some(oldMember => oldMember.gIdString === newMember)) {
-            await ConversationMember.create({
-                conversationId: conversation.id,
-                userGId: newMember,
-                role: newMembersHash[newMember]
-            });
-        }
+  for (const newMember of Object.keys(newMembersHash)) {
+    if (!oldMembers.some(oldMember => oldMember.gIdString === newMember)) {
+      await ConversationMember.create({
+        conversationId: conversation.id,
+        userGId: newMember,
+        role: newMembersHash[newMember]
+      });
     }
+  }
 
-    await broadcastFullAddMembers(conversation);
+  await broadcastFullAddMembers(conversation);
 };
 
 exports.addGroupMember = async function addGroupMember(conversation, userGId, role, options = {}) {
-    assert(role === 'u' || role === '+' || role === '@' || role === '*',
-        `Unknown role ${role}, userGId: ${userGId}`);
+  assert(role === 'u' || role === '+' || role === '@' || role === '*', `Unknown role ${role}, userGId: ${userGId}`);
 
-    const targetMember = await ConversationMember.findFirst({
-        conversationId: conversation.id,
-        userGId: userGId.toString()
+  const targetMember = await ConversationMember.findFirst({
+    conversationId: conversation.id,
+    userGId: userGId.toString()
+  });
+
+  if (!targetMember) {
+    await ConversationMember.create({
+      conversationId: conversation.id,
+      userGId: userGId.toString(),
+      role
     });
 
-    if (!targetMember) {
-        await ConversationMember.create({
-            conversationId: conversation.id,
-            userGId: userGId.toString(),
-            role
-        });
-
-        if (!options.silent) {
-            await broadcastAddMessage(conversation, {
-                userGId: userGId.toString(),
-                cat: 'join'
-            });
-        }
-
-        await broadcastAddMembers(conversation, userGId, role, options);
-    } else {
-        await targetMember.set({ role });
+    if (!options.silent) {
+      await broadcastAddMessage(conversation, {
+        userGId: userGId.toString(),
+        cat: 'join'
+      });
     }
+
+    await broadcastAddMembers(conversation, userGId, role, options);
+  } else {
+    await targetMember.set({ role });
+  }
 };
 
 exports.removeGroupMember = async function removeGroupMember(conversation, userGId, options = {}) {
-    const targetMember = await ConversationMember.findFirst({
-        conversationId: conversation.id,
-        userGId: userGId.toString()
-    });
+  const targetMember = await ConversationMember.findFirst({
+    conversationId: conversation.id,
+    userGId: userGId.toString()
+  });
 
-    if (targetMember) {
-        await deleteConversationMember(conversation, targetMember, options);
-    }
+  if (targetMember) {
+    await deleteConversationMember(conversation, targetMember, options);
+  }
 };
 
-exports.addMessage = async function addMessage(conversation, { userGId = null, cat, body = '' },
-    excludeSession) {
-    return broadcastAddMessage(conversation, { userGId, cat, body }, excludeSession);
+exports.addMessage = async function addMessage(conversation, { userGId = null, cat, body = '' }, excludeSession) {
+  return broadcastAddMessage(conversation, { userGId, cat, body }, excludeSession);
 };
 
 exports.editMessage = async function editMessage(conversation, user, conversationMessageId, text) {
-    const message = await ConversationMessage.fetch(conversationMessageId);
+  const message = await ConversationMessage.fetch(conversationMessageId);
 
-    if (!message) {
-        return false;
-    }
+  if (!message) {
+    return false;
+  }
 
-    const userGId = UserGId.create(message.get('userGId'));
+  const userGId = UserGId.create(message.get('userGId'));
 
-    if (!userGId.equals(user.gId)) {
-        return false;
-    }
+  if (!userGId.equals(user.gId)) {
+    return false;
+  }
 
-    await message.set('body', text);
-    await message.set('updatedTs', new Date());
-    await message.set('status', text === '' ? 'deleted' : 'edited');
-    await message.set('updatedId', await ConversationMessage.currentId());
+  await message.set('body', text);
+  await message.set('updatedTs', new Date());
+  await message.set('status', text === '' ? 'deleted' : 'edited');
+  await message.set('updatedId', await ConversationMessage.currentId());
 
-    const ntf = message.convertToNtf();
-    ntf.type = 'ADD_MESSAGE';
+  const ntf = message.convertToNtf();
+  ntf.type = 'ADD_MESSAGE';
 
-    await broadcast(conversation, ntf);
+  await broadcast(conversation, ntf);
 
-    return true;
+  return true;
 };
 
 exports.sendFullAddMembers = async function sendFullAddMembers(conversation, user) {
-    return sendCompleteAddMembers(conversation, user);
+  return sendCompleteAddMembers(conversation, user);
 };
 
 exports.setTopic = async function setTopic(conversation, topic, nickName) {
-    const changes = await conversation.set({ topic });
+  const changes = await conversation.set({ topic });
 
-    if (changes === 0) {
-        return;
-    }
+  if (changes === 0) {
+    return;
+  }
 
-    await broadcast(conversation, { type: 'UPDATE_WINDOW', topic });
+  await broadcast(conversation, { type: 'UPDATE_WINDOW', topic });
 
-    await broadcastAddMessage(conversation, {
-        cat: 'info',
-        body: `${nickName} has changed the topic to: "${topic}".`
-    });
+  await broadcastAddMessage(conversation, {
+    cat: 'info',
+    body: `${nickName} has changed the topic to: "${topic}".`
+  });
 };
 
 exports.setPassword = async function setPassword(conversation, password) {
-    const changes = await conversation.set({ password });
+  const changes = await conversation.set({ password });
 
-    if (changes === 0) {
-        return;
-    }
+  if (changes === 0) {
+    return;
+  }
 
-    await broadcast(conversation, {
-        type: 'UPDATE_WINDOW',
-        password
-    });
+  await broadcast(conversation, {
+    type: 'UPDATE_WINDOW',
+    password
+  });
 
-    const text = password === '' ?
-        'Password protection has been removed from this channel.' :
-        `The password for this channel has been changed to ${password}.`;
+  const text =
+    password === ''
+      ? 'Password protection has been removed from this channel.'
+      : `The password for this channel has been changed to ${password}.`;
 
-    await broadcastAddMessage(conversation, {
-        cat: 'info',
-        body: text
-    });
+  await broadcastAddMessage(conversation, {
+    cat: 'info',
+    body: text
+  });
 };
 
-async function broadcastAddMessage(conversation, { userGId = null, cat, body = '' },
-    excludeSession) {
-    const message = await ConversationMessage.create({
-        userGId,
-        cat,
-        body,
-        conversationId: conversation.id
-    });
+async function broadcastAddMessage(conversation, { userGId = null, cat, body = '' }, excludeSession) {
+  const message = await ConversationMessage.create({
+    userGId,
+    cat,
+    body,
+    conversationId: conversation.id
+  });
 
-    const ids = await ConversationMessage.findIds({ conversationId: conversation.id });
+  const ids = await ConversationMessage.findIds({ conversationId: conversation.id });
 
-    while (ids.length - MSG_BUFFER_SIZE > 0) {
-        const expiredMessage = await ConversationMessage.fetch(ids.shift());
+  while (ids.length - MSG_BUFFER_SIZE > 0) {
+    const expiredMessage = await ConversationMessage.fetch(ids.shift());
 
-        if (expiredMessage) {
-            await expiredMessage.delete();
-        }
+    if (expiredMessage) {
+      await expiredMessage.delete();
     }
+  }
 
-    const ntf = message.convertToNtf();
-    ntf.type = 'ADD_MESSAGE';
+  const ntf = message.convertToNtf();
+  ntf.type = 'ADD_MESSAGE';
 
-    await windowsService.scanMentions(conversation, message);
+  await windowsService.scanMentions(conversation, message);
 
-    await broadcast(conversation, ntf, excludeSession);
-    search.storeMessage(conversation.id, ntf);
+  await broadcast(conversation, ntf, excludeSession);
+  search.storeMessage(conversation.id, ntf);
 
-    return ntf;
+  return ntf;
 }
 
 async function broadcastAddMembers(conversation, userGId, role, options) {
-    await broadcast(conversation, {
-        type: 'UPDATE_MEMBERS',
-        reset: false,
-        members: [ {
-            userId: userGId.toString(),
-            role
-        } ]
-    }, null, options);
+  await broadcast(
+    conversation,
+    {
+      type: 'UPDATE_MEMBERS',
+      reset: false,
+      members: [
+        {
+          userId: userGId.toString(),
+          role
+        }
+      ]
+    },
+    null,
+    options
+  );
 }
 
 async function broadcastFullAddMembers(conversation) {
-    const ntf = await createFullAddMemberNtf(conversation);
-    await broadcast(conversation, ntf);
+  const ntf = await createFullAddMemberNtf(conversation);
+  await broadcast(conversation, ntf);
 }
 
 async function sendCompleteAddMembers(conversation, user) {
-    const ntf = await createFullAddMemberNtf(conversation);
-    const window = await windowsService.findOrCreate(user, conversation);
+  const ntf = await createFullAddMemberNtf(conversation);
+  const window = await windowsService.findOrCreate(user, conversation);
 
-    ntf.windowId = window.id;
+  ntf.windowId = window.id;
 
-    await notification.broadcast(user, ntf);
+  await notification.broadcast(user, ntf);
 }
 
 async function broadcast(conversation, ntf, excludeSession, options = {}) {
-    const members = await ConversationMember.find({ conversationId: conversation.id });
+  const members = await ConversationMember.find({ conversationId: conversation.id });
 
-    for (const member of members) {
-        const userGId = UserGId.create(member.get('userGId'));
+  for (const member of members) {
+    const userGId = UserGId.create(member.get('userGId'));
 
-        if (!userGId.isMASUser) {
-            continue;
-        }
-
-        const user = await User.fetch(userGId.id);
-        let window;
-
-        if (options.silent) {
-            // Don't create 1on1 window if it doesn't exist. This is to prevent nick
-            // changes from opening old 1on1s
-            window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
-        } else {
-            window = await windowsService.findOrCreate(user, conversation);
-        }
-
-        if (window) {
-            ntf.windowId = window.id;
-            await notification.broadcast(user, ntf, excludeSession);
-        }
+    if (!userGId.isMASUser) {
+      continue;
     }
+
+    const user = await User.fetch(userGId.id);
+    let window;
+
+    if (options.silent) {
+      // Don't create 1on1 window if it doesn't exist. This is to prevent nick
+      // changes from opening old 1on1s
+      window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });
+    } else {
+      window = await windowsService.findOrCreate(user, conversation);
+    }
+
+    if (window) {
+      ntf.windowId = window.id;
+      await notification.broadcast(user, ntf, excludeSession);
+    }
+  }
 }
 
 async function createFullAddMemberNtf(conversation) {
-    const members = await ConversationMember.find({ conversationId: conversation.id });
+  const members = await ConversationMember.find({ conversationId: conversation.id });
 
-    const membersList = members.map(member => ({
-        userId: member.get('userGId'),
-        role: member.get('role')
-    }));
+  const membersList = members.map(member => ({
+    userId: member.get('userGId'),
+    role: member.get('role')
+  }));
 
-    return {
-        type: 'UPDATE_MEMBERS',
-        reset: true,
-        members: membersList
-    };
+  return {
+    type: 'UPDATE_MEMBERS',
+    reset: true,
+    members: membersList
+  };
 }
 
 async function deleteConversationMember(conversation, member, options) {
-    log.info(`User: ${member.get('userGId')} removed from conversation: ${conversation.id}`);
+  log.info(`User: ${member.get('userGId')} removed from conversation: ${conversation.id}`);
 
-    if (!options.silent && conversation.get('type') === 'group') {
-        await broadcastAddMessage(conversation, {
-            userGId: member.get('userGId'),
-            cat: options.wasKicked ? 'kick' : 'part',
-            body: options.wasKicked && options.reason ? options.reason : ''
-        });
-    }
+  if (!options.silent && conversation.get('type') === 'group') {
+    await broadcastAddMessage(conversation, {
+      userGId: member.get('userGId'),
+      cat: options.wasKicked ? 'kick' : 'part',
+      body: options.wasKicked && options.reason ? options.reason : ''
+    });
+  }
 
-    if (!options.skipCleanUp) {
-        await broadcast(conversation, {
-            type: 'DELETE_MEMBERS',
-            members: [ {
-                userId: member.get('userGId')
-            } ]
-        }, null, options);
-    }
+  if (!options.skipCleanUp) {
+    await broadcast(
+      conversation,
+      {
+        type: 'DELETE_MEMBERS',
+        members: [
+          {
+            userId: member.get('userGId')
+          }
+        ]
+      },
+      null,
+      options
+    );
+  }
 
-    const userGId = UserGId.create(member.get('userGId'));
+  const userGId = UserGId.create(member.get('userGId'));
 
-    if (!options.silent && userGId.isMASUser) {
-        // Never let window to exist alone without linked conversation
-        const user = await User.fetch(userGId.id);
-        await windowsService.remove(user, conversation);
-    }
+  if (!options.silent && userGId.isMASUser) {
+    // Never let window to exist alone without linked conversation
+    const user = await User.fetch(userGId.id);
+    await windowsService.remove(user, conversation);
+  }
 
-    await member.delete();
+  await member.delete();
 }

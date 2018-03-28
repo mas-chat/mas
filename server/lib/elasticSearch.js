@@ -23,18 +23,18 @@ const conf = require('./conf');
 let elasticSearchClient = null;
 
 exports.getClient = function getClient() {
-    if (!elasticSearchClient) {
-        const url = `${conf.get('elasticsearch:host')}:${conf.get('elasticsearch:port')}`;
+  if (!elasticSearchClient) {
+    const url = `${conf.get('elasticsearch:host')}:${conf.get('elasticsearch:port')}`;
 
-        log.info(`Connecting to elasticsearch: ${url}`);
+    log.info(`Connecting to elasticsearch: ${url}`);
 
-        elasticSearchClient = new elasticsearch.Client({
-            host: url,
-            keepAlive: true,
-            maxSockets: 15,
-            minSockets: 10
-        });
-    }
+    elasticSearchClient = new elasticsearch.Client({
+      host: url,
+      keepAlive: true,
+      maxSockets: 15,
+      minSockets: 10
+    });
+  }
 
-    return elasticSearchClient;
+  return elasticSearchClient;
 };

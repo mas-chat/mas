@@ -27,141 +27,141 @@ let processing = false;
 let resolveQuit = null;
 
 exports.create = function create() {
-    // Can only send messages and receive replies. Doesn't have a well known endpoint name.
-    return new Courier();
+  // Can only send messages and receive replies. Doesn't have a well known endpoint name.
+  return new Courier();
 };
 
 exports.createEndPoint = function createEndPoint(name) {
-    return new Courier(name);
+  return new Courier(name);
 };
 
 function Courier(name) {
-    this.name = name || uid2(32);
-    this.handlers = {};
-    this.isEndpoint = !!name;
+  this.name = name || uid2(32);
+  this.handlers = {};
+  this.isEndpoint = !!name;
 }
 
 Courier.prototype.listen = async function listen() {
-    assert(this.isEndpoint);
+  assert(this.isEndpoint);
 
-    for (;;) {
-        const result = (await rcvRedis.brpop(`inbox:${this.name}`, 0))[1];
+  for (;;) {
+    const result = (await rcvRedis.brpop(`inbox:${this.name}`, 0))[1];
 
-        processing = true;
+    processing = true;
 
-        const msg = JSON.parse(result);
-        const handler = this.handlers[msg.__type];
+    const msg = JSON.parse(result);
+    const handler = this.handlers[msg.__type];
 
-        log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}]`);
-        log.info(`Courier: Payload: ${result}`);
+    log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}]`);
+    log.info(`Courier: Payload: ${result}`);
 
-        assert(handler, `${this.name}: Missing message handler for: ${msg.__type}`);
+    assert(handler, `${this.name}: Missing message handler for: ${msg.__type}`);
 
-        try {
-            await this._reply(msg, await handler(msg));
-        } catch (e) {
-            log.warn(`Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
-        }
-
-        if (resolveQuit) {
-            resolveQuit();
-            break;
-        }
-
-        processing = false;
+    try {
+      await this._reply(msg, await handler(msg));
+    } catch (e) {
+      log.warn(`Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
     }
+
+    if (resolveQuit) {
+      resolveQuit();
+      break;
+    }
+
+    processing = false;
+  }
 };
 
 Courier.prototype.call = async function call(dest, type, params) {
-    if (resolveQuit) {
-        log.warn('Not delivering message, shutdown is in progress.');
-        return null;
-    }
+  if (resolveQuit) {
+    log.warn('Not delivering message, shutdown is in progress.');
+    return null;
+  }
 
-    const uid = Date.now() + uid2(10);
-    const data = this._convertToString(type, params, uid);
-    const reqRedis = redis.createClient();
+  const uid = Date.now() + uid2(10);
+  const data = this._convertToString(type, params, uid);
+  const reqRedis = redis.createClient();
 
-    await reqRedis.lpush(`inbox:${dest}`, data);
+  await reqRedis.lpush(`inbox:${dest}`, data);
 
-    let resp = await reqRedis.brpop(`inbox:${this.name}:${uid}`, 60);
-    await reqRedis.quit();
+  let resp = await reqRedis.brpop(`inbox:${this.name}:${uid}`, 60);
+  await reqRedis.quit();
 
-    if (resp === null) {
-        log.warn(`Courier: No reply received from ${dest}`);
-    }
+  if (resp === null) {
+    log.warn(`Courier: No reply received from ${dest}`);
+  }
 
-    resp = resp ? JSON.parse(resp[1]) : {};
-    delete resp.__sender;
+  resp = resp ? JSON.parse(resp[1]) : {};
+  delete resp.__sender;
 
-    return resp;
+  return resp;
 };
 
 Courier.prototype.callNoWait = async function callNoWait(dest, type, params, ttl) {
-    if (resolveQuit) {
-        log.warn('Not delivering message, shutdown is in progress.');
-        return;
-    }
+  if (resolveQuit) {
+    log.warn('Not delivering message, shutdown is in progress.');
+    return;
+  }
 
-    const data = this._convertToString(type, params);
-    const key = `inbox:${dest}`;
+  const data = this._convertToString(type, params);
+  const key = `inbox:${dest}`;
 
-    await redis.lpush(key, data);
+  await redis.lpush(key, data);
 
-    if (ttl) {
-        await redis.expire(key, ttl);
-    }
+  if (ttl) {
+    await redis.expire(key, ttl);
+  }
 };
 
 Courier.prototype.clearInbox = async function clearInbox(name) {
-    await redis.del(`inbox:${name}`);
+  await redis.del(`inbox:${name}`);
 };
 
 Courier.prototype.on = function on(type, callback) {
-    this.handlers[type] = callback;
+  this.handlers[type] = callback;
 };
 
 Courier.prototype.noop = function noop() {
-    return null;
+  return null;
 };
 
 Courier.prototype.quit = function quit() {
-    log.info('Closing courier instance.');
+  log.info('Closing courier instance.');
 
-    return new Promise(resolve => {
-        if (!processing) {
-            resolve();
-        } else {
-            resolveQuit = resolve;
-        }
-    });
+  return new Promise(resolve => {
+    if (!processing) {
+      resolve();
+    } else {
+      resolveQuit = resolve;
+    }
+  });
 };
 
 Courier.prototype._reply = function _reply(msg, resp) {
-    if (!msg.__uid) {
-        // Not a request.
-        return;
-    }
+  if (!msg.__uid) {
+    // Not a request.
+    return;
+  }
 
-    assert(resp);
+  assert(resp);
 
-    // It might have taken the target too much time to respond. It's therefore possible that the
-    // sender is not waiting anymore. Use TTL 60s to guarantee cleanup in that case.
-    this.callNoWait(`${msg.__sender}:${msg.__uid}`, null, resp, 60);
+  // It might have taken the target too much time to respond. It's therefore possible that the
+  // sender is not waiting anymore. Use TTL 60s to guarantee cleanup in that case.
+  this.callNoWait(`${msg.__sender}:${msg.__uid}`, null, resp, 60);
 };
 
 Courier.prototype._convertToString = function _convertToString(type, params, uid) {
-    const msg = params || {};
+  const msg = params || {};
 
-    msg.__sender = this.name;
+  msg.__sender = this.name;
 
-    if (type) {
-        msg.__type = type;
-    }
+  if (type) {
+    msg.__type = type;
+  }
 
-    if (uid) {
-        msg.__uid = uid;
-    }
+  if (uid) {
+    msg.__uid = uid;
+  }
 
-    return JSON.stringify(msg);
+  return JSON.stringify(msg);
 };

@@ -27,59 +27,58 @@ const stateChangeCallbacks = [];
 let shutdownInProgress = false;
 
 const shutdownOrder = {
-    beforeShutdown: 1,
-    shutdown: 2,
-    afterShutdown: 3
+  beforeShutdown: 1,
+  shutdown: 2,
+  afterShutdown: 3
 };
 
 process.on('unhandledRejection', (reason, p) => {
-    log.warn(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
-    throw reason;
+  log.warn(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
+  throw reason;
 });
 
 exports.configureProcess = function configureProcess(serverName) {
-    process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
-    process.title = `mas-${serverName}`;
+  process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
+  process.title = `mas-${serverName}`;
 
-    log.warn(`${serverName} starting...`);
+  log.warn(`${serverName} starting...`);
 
-    process.on('SIGINT', execShutdown);
-    process.on('SIGTERM', execShutdown);
+  process.on('SIGINT', execShutdown);
+  process.on('SIGTERM', execShutdown);
 };
 
 exports.on = function on(state, callback) {
-    assert(shutdownOrder[state]);
+  assert(shutdownOrder[state]);
 
-    stateChangeCallbacks.push({ state, cb: callback });
+  stateChangeCallbacks.push({ state, cb: callback });
 };
 
 exports.shutdown = function shutdown() {
-    execShutdown();
+  execShutdown();
 };
 
 async function execShutdown() {
-    if (shutdownInProgress) {
-        return;
-    }
+  if (shutdownInProgress) {
+    return;
+  }
 
-    shutdownInProgress = true;
+  shutdownInProgress = true;
 
-    log.warn('Shutdown sequence started.');
+  log.warn('Shutdown sequence started.');
 
-    const entries = stateChangeCallbacks.sort(
-        (a, b) => shutdownOrder[a.state] - shutdownOrder[b.state]);
+  const entries = stateChangeCallbacks.sort((a, b) => shutdownOrder[a.state] - shutdownOrder[b.state]);
 
-    for (const entry of entries) {
-        await entry.cb();
-    }
+  for (const entry of entries) {
+    await entry.cb();
+  }
 
-    console.log('Shutdown complete.'); // eslint-disable-line no-console
-    process.exit();
+  console.log('Shutdown complete.'); // eslint-disable-line no-console
+  process.exit();
 }
 
 function checkNodeVersion() {
-    if (semver.lt(process.version, 'v7.6.0')) {
-        console.error('ERROR: Installed Node.js version must be at least v7.6.0');
-        process.exit(1);
-    }
+  if (semver.lt(process.version, 'v7.6.0')) {
+    console.error('ERROR: Installed Node.js version must be at least v7.6.0');
+    process.exit(1);
+  }
 }

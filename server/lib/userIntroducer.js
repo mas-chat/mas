@@ -23,107 +23,107 @@ const User = require('../models/user');
 const nicksService = require('../services/nicks');
 const notification = require('../lib/notification');
 
-const networks = [ 'mas', ...Object.keys(conf.get('irc:networks')) ];
+const networks = ['mas', ...Object.keys(conf.get('irc:networks'))];
 
 exports.introduce = async function introduce(user, userGId, session) {
-    await introduceUsers(user, [ userGId ], session, null);
+  await introduceUsers(user, [userGId], session, null);
 };
 
 exports.scanAndIntroduce = async function scanAndIntroduce(user, msg, session, socket) {
-    await introduceUsers(user, scanUserGIds(msg), session, socket);
+  await introduceUsers(user, scanUserGIds(msg), session, socket);
 };
 
 async function introduceUsers(user, userGIds, session, socket) {
-    if (session) {
-        // If no session is given, force broadcast userGids without remembering them
-        session.knownUserGIds = session.knownUserGIds || {};
-    }
+  if (session) {
+    // If no session is given, force broadcast userGids without remembering them
+    session.knownUserGIds = session.knownUserGIds || {};
+  }
 
-    const newUsers = {};
+  const newUsers = {};
 
-    for (const userGId of userGIds) {
-        if (!session || !session.knownUserGIds[userGId.toString()]) {
-            if (session) {
-                session.knownUserGIds[userGId.toString()] = true;
-            }
+  for (const userGId of userGIds) {
+    if (!session || !session.knownUserGIds[userGId.toString()]) {
+      if (session) {
+        session.knownUserGIds[userGId.toString()] = true;
+      }
 
-            const entry = { nick: {} };
+      const entry = { nick: {} };
 
-            if (userGId.isMASUser) {
-                const foundUser = await User.fetch(userGId.id);
+      if (userGId.isMASUser) {
+        const foundUser = await User.fetch(userGId.id);
 
-                if (!foundUser) {
-                    log.warn(`User missing: ${userGId.id}`);
-                    entry.name = 'UNKNOWN';
-                    entry.gravatar = '';
+        if (!foundUser) {
+          log.warn(`User missing: ${userGId.id}`);
+          entry.name = 'UNKNOWN';
+          entry.gravatar = '';
 
-                    for (const network of networks) {
-                        entry.nick[network] = 'UNKNOWN';
-                    }
-                } else {
-                    entry.name = foundUser.get('name');
-                    entry.gravatar = foundUser.get('emailMD5');
-
-                    for (const network of networks) {
-                        const currentNick = await nicksService.getNick(foundUser.gId, network);
-
-                        // Fallback to default nick. This solves the situation where the user joins
-                        // a new IRC network during the session. In that case his own userGId is in
-                        // knownUserGIds table but with null nick for that IRC network. Fallback
-                        // works because if the user's nick changes for any reason from the default,
-                        // that is communicated separately to the client.
-                        entry.nick[network] = currentNick || foundUser.get('nick');
-                    }
-                }
-            } else {
-                entry.name = 'IRC User';
-                entry.gravatar = '';
-
-                for (const network of networks) {
-                    entry.nick[network] = await nicksService.getNick(userGId, network);
-                }
-            }
-
-            newUsers[userGId] = entry;
-        }
-    }
-
-    if (Object.keys(newUsers).length > 0) {
-        const ntf = {
-            type: 'ADD_USERS',
-            mapping: newUsers
-        };
-
-        log.info(user, `Emitted ADD_USERS ${JSON.stringify(ntf)}`);
-
-        if (socket) {
-            socket.emit('ntf', ntf);
-        } else if (session) {
-            await notification.send(user, session.id, ntf);
+          for (const network of networks) {
+            entry.nick[network] = 'UNKNOWN';
+          }
         } else {
-            await notification.broadcast(user, ntf);
+          entry.name = foundUser.get('name');
+          entry.gravatar = foundUser.get('emailMD5');
+
+          for (const network of networks) {
+            const currentNick = await nicksService.getNick(foundUser.gId, network);
+
+            // Fallback to default nick. This solves the situation where the user joins
+            // a new IRC network during the session. In that case his own userGId is in
+            // knownUserGIds table but with null nick for that IRC network. Fallback
+            // works because if the user's nick changes for any reason from the default,
+            // that is communicated separately to the client.
+            entry.nick[network] = currentNick || foundUser.get('nick');
+          }
         }
+      } else {
+        entry.name = 'IRC User';
+        entry.gravatar = '';
+
+        for (const network of networks) {
+          entry.nick[network] = await nicksService.getNick(userGId, network);
+        }
+      }
+
+      newUsers[userGId] = entry;
     }
+  }
+
+  if (Object.keys(newUsers).length > 0) {
+    const ntf = {
+      type: 'ADD_USERS',
+      mapping: newUsers
+    };
+
+    log.info(user, `Emitted ADD_USERS ${JSON.stringify(ntf)}`);
+
+    if (socket) {
+      socket.emit('ntf', ntf);
+    } else if (session) {
+      await notification.send(user, session.id, ntf);
+    } else {
+      await notification.broadcast(user, ntf);
+    }
+  }
 }
 
 function scanUserGIds(msg) {
-    return Object.keys(scan(msg))
-        .map(userGIdString => UserGId.create(userGIdString))
-        .filter(userGId => userGId && userGId.valid);
+  return Object.keys(scan(msg))
+    .map(userGIdString => UserGId.create(userGIdString))
+    .filter(userGId => userGId && userGId.valid);
 }
 
 function scan(msg) {
-    const res = {};
+  const res = {};
 
-    Object.keys(msg).forEach(key => {
-        const value = msg[key];
+  Object.keys(msg).forEach(key => {
+    const value = msg[key];
 
-        if (typeof value === 'object' && value !== null) {
-            Object.assign(res, scan(value));
-        } else if (key === 'userId' && value) {
-            res[value] = true;
-        }
-    });
+    if (typeof value === 'object' && value !== null) {
+      Object.assign(res, scan(value));
+    } else if (key === 'userId' && value) {
+      res[value] = true;
+    }
+  });
 
-    return res;
+  return res;
 }

@@ -24,14 +24,14 @@ const manifestFile = fs.readFileSync(path.join(__dirname, '../website/dist/manif
 const manifest = JSON.parse(manifestFile);
 
 module.exports = async function index(ctx) {
-    if (ctx.mas.user) {
-        ctx.redirect('/app');
-    } else {
-        ctx.set('Cache-control', 'private, max-age=0, no-cache');
+  if (ctx.mas.user) {
+    ctx.redirect('/app');
+  } else {
+    ctx.set('Cache-control', 'private, max-age=0, no-cache');
 
-        await ctx.render('index', {
-            config: JSON.stringify({ auth: authOptions }),
-            appJSFile: manifest['main.js']
-        });
-    }
+    await ctx.render('index', {
+      config: JSON.stringify({ auth: authOptions }),
+      appJSFile: manifest['main.js']
+    });
+  }
 };

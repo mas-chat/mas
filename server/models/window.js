@@ -19,33 +19,33 @@
 const Base = require('./base');
 
 module.exports = class Window extends Base {
-    static async create(props) {
-        const data = {
-            userId: props.userId,
-            conversationId: props.conversationId,
-            emailAlert: true,
-            notificationAlert: false,
-            soundAlert: false,
-            titleAlert: false,
-            minimizedNamesList: true,
-            desktop: props.desktop || 0,
-            row: 0,
-            column: 0
-        };
+  static async create(props) {
+    const data = {
+      userId: props.userId,
+      conversationId: props.conversationId,
+      emailAlert: true,
+      notificationAlert: false,
+      soundAlert: false,
+      titleAlert: false,
+      minimizedNamesList: true,
+      desktop: props.desktop || 0,
+      row: 0,
+      column: 0
+    };
 
-        return super.create(data);
-    }
+    return super.create(data);
+  }
 
-    static get mutableProperties() {
-        return [
-            'emailAlert',
-            'notificationAlert',
-            'soundAlert',
-            'titleAlert',
-            'minimizedNamesList',
-            'desktop',
-            'row',
-            'column'
-        ];
-    }
+  static get mutableProperties() {
+    return [
+      'emailAlert',
+      'notificationAlert',
+      'soundAlert',
+      'titleAlert',
+      'minimizedNamesList',
+      'desktop',
+      'row',
+      'column'
+    ];
+  }
 };

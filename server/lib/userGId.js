@@ -17,69 +17,69 @@
 'use strict';
 
 const TYPES = {
-    mas: 'm',
-    irc: 'i'
+  mas: 'm',
+  irc: 'i'
 };
 
 module.exports = class UserGId {
-    static create(params) {
-        if (!params) {
-            return null;
-        }
-
-        let userGId = null;
-
-        if (typeof params === 'string') {
-            const type = Object.keys(TYPES).find(validType => TYPES[validType] === params[0]);
-
-            if (!type) {
-                return null;
-            }
-
-            let id;
-
-            if (type === 'mas') {
-                id = parseInt(params.substring(1));
-            } else if (type === 'irc') {
-                id = params.substring(1);
-            }
-
-            userGId = new this({ id, type });
-        } else {
-            userGId = new this(params);
-        }
-
-        return userGId.valid ? userGId : null;
+  static create(params) {
+    if (!params) {
+      return null;
     }
 
-    constructor({ id, type }) {
-        this.id = id;
-        this.type = type;
+    let userGId = null;
+
+    if (typeof params === 'string') {
+      const type = Object.keys(TYPES).find(validType => TYPES[validType] === params[0]);
+
+      if (!type) {
+        return null;
+      }
+
+      let id;
+
+      if (type === 'mas') {
+        id = parseInt(params.substring(1));
+      } else if (type === 'irc') {
+        id = params.substring(1);
+      }
+
+      userGId = new this({ id, type });
+    } else {
+      userGId = new this(params);
     }
 
-    get valid() {
-        if (this.type === 'mas') {
-            return parseInt(this.id) === this.id && this.id > 0;
-        } else if (this.type === 'irc') {
-            return this.id === 0 || this.id.length > 0;
-        }
+    return userGId.valid ? userGId : null;
+  }
 
-        return false;
+  constructor({ id, type }) {
+    this.id = id;
+    this.type = type;
+  }
+
+  get valid() {
+    if (this.type === 'mas') {
+      return parseInt(this.id) === this.id && this.id > 0;
+    } else if (this.type === 'irc') {
+      return this.id === 0 || this.id.length > 0;
     }
 
-    get isMASUser() {
-        return this.type === 'mas';
-    }
+    return false;
+  }
 
-    get isIrcUser() {
-        return this.type === 'irc';
-    }
+  get isMASUser() {
+    return this.type === 'mas';
+  }
 
-    toString() {
-        return `${TYPES[this.type]}${this.id}`;
-    }
+  get isIrcUser() {
+    return this.type === 'irc';
+  }
 
-    equals(otherUserGId) {
-        return this.id === otherUserGId.id && this.type === otherUserGId.type;
-    }
+  toString() {
+    return `${TYPES[this.type]}${this.id}`;
+  }
+
+  equals(otherUserGId) {
+    return this.id === otherUserGId.id && this.type === otherUserGId.type;
+  }
 };
