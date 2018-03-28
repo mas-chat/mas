@@ -29,7 +29,7 @@ import { computed, observer } from '@ember/object';
 import { alias } from '@ember/object/computed';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
-import Ps from 'npm:perfect-scrollbar';
+import PerfectScrollbar from 'npm:perfect-scrollbar';
 import Favico from 'npm:favico.js';
 import isMobile from 'npm:ismobilejs';
 import { dispatch } from '../../../utils/dispatcher';
@@ -325,7 +325,7 @@ export default Component.extend({
         const network = this.get('content.network');
 
         if (membersEl) {
-            Ps.initialize(membersEl);
+            new PerfectScrollbar(membersEl);
         }
 
         this.$('.window-members').contextmenu({
