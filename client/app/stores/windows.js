@@ -162,6 +162,7 @@ const WindowsStore = Store.extend({
   fromJSON(data) {
     return; // TODO: Enable when missing user problem is solved.
 
+    // eslint-disable-next-line no-unreachable
     if (data.userId !== this.get('userId') || data.version !== 4) {
       console.log(`Corrupted windows snapshot.`);
     }
@@ -228,7 +229,7 @@ const WindowsStore = Store.extend({
     data.window = this._getWindow(data.windowId);
 
     if (!data.window) {
-      return;
+      return false;
     }
 
     delete window.windowId;
@@ -454,9 +455,9 @@ const WindowsStore = Store.extend({
     let commandParams;
 
     if (body.charAt(0) === '/') {
-      const data = /^(\S*)(.*)/.exec(body.substring(1));
-      command = data[1] ? data[1].toLowerCase() : '';
-      commandParams = data[2] ? data[2] : '';
+      const parts = /^(\S*)(.*)/.exec(body.substring(1));
+      command = parts[1] ? parts[1].toLowerCase() : '';
+      commandParams = parts[2] ? parts[2] : '';
     }
 
     const ircServer1on1 = data.window.get('type') === '1on1' && data.window.get('userId') === 'i0';
@@ -576,7 +577,7 @@ const WindowsStore = Store.extend({
     const props = ['column', 'row', 'desktop'];
 
     for (const prop of props) {
-      if (data.hasOwnProperty(prop)) {
+      if (Object.prototype.hasOwnProperty.call(data, prop)) {
         data.window.set(prop, data[prop]);
       }
     }
@@ -698,7 +699,9 @@ const WindowsStore = Store.extend({
         id: 'LOGOUT',
         allSessions
       },
-      () => (window.location = '/')
+      () => {
+        window.location = '/';
+      }
     );
   },
 

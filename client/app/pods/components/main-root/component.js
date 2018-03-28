@@ -29,8 +29,8 @@ export default Component.extend({
 
   draggedWindow: false,
 
-  init() {
-    this._super(...arguments);
+  init(...args) {
+    this._super(...args);
     socket.start(); // Let's get the show started.
   },
 

@@ -136,6 +136,8 @@ export default BaseModel.extend({
         return `${nick} has quit irc. Reason: ${body}`;
       case 'kick':
         return `${nick} was kicked from ${groupName}. Reason: ${body}`;
+      default:
+        return '';
     }
   }),
 
@@ -213,7 +215,7 @@ export default BaseModel.extend({
     const parts = [];
     let previousEnd = 0;
 
-    URI.withinString(text, (url, start, end, source) => {
+    URI.withinString(text, (url, start, end) => {
       if (previousEnd !== start) {
         parts.push({ type: 'txt', data: text.substring(previousEnd, start) });
       }
@@ -294,15 +296,15 @@ export default BaseModel.extend({
   },
 
   _parseCustomFormatting(text) {
-    const network = this.get('network');
+    let result;
 
     // Find @ character 1) after space, 2) in the beginning of string, 3) after HTML tag (>)
-    text = text.replace(/(^| |>)(@\S+)(?=( |$))/g, (match, p1, p2) => this._renderMention(p1, p2));
+    result = text.replace(/(^| |>)(@\S+)(?=( |$))/g, (match, p1, p2) => this._renderMention(p1, p2));
 
     // Convert Unicode emojis to :emojis:
-    text = emojione.toShort(text);
+    result = emojione.toShort(result);
 
-    text = text.replace(/:\S+?:/g, match => {
+    result = result.replace(/:\S+?:/g, match => {
       const emoji = emojione.emojioneList[match];
 
       if (emoji) {
@@ -312,16 +314,16 @@ export default BaseModel.extend({
       return match;
     });
 
-    const keywords = text.match(/<(p|br)>/g);
+    const keywords = result.match(/<(p|br)>/g);
 
     // Assumes that marked is used which inserts at least one <p>, <ol>, or <ul>
     const multiLine = !keywords || keywords.length > 1;
 
     if (!multiLine) {
-      text = text.replace(/(\s*<p>|<\/p>\s*)/g, '');
+      result = result.replace(/(\s*<p>|<\/p>\s*)/g, '');
     }
 
-    return text;
+    return result;
   },
 
   _renderLink(url, label) {

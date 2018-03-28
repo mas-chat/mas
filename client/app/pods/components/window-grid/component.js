@@ -490,5 +490,7 @@ export default Component.extend({
     } else if (!topOrRight && !bottomOrRight) {
       return 'left'; // l
     }
+
+    return null;
   }
 });

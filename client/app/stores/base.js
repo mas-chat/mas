@@ -42,6 +42,8 @@ export default EmberObject.extend({
     } catch (e) {
       console.log(`[${name}-store] Failed to load or validate snapshot, error: ${e}`);
     }
+
+    return true;
   },
 
   _saveSnapshot() {

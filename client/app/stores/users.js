@@ -14,8 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
-import Store from './base';
 import Cookies from 'npm:js-cookie';
+import Store from './base';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import User from '../models/user';
 import IndexArray from '../utils/index-array';
@@ -62,10 +62,10 @@ const UsersStore = Store.extend({
     // Always save user itself
     data.users[this.get('userId')] = true;
 
-    for (const userId in data.users) {
+    Object.keys(data.users).forEach(function(userId) {
       const user = this.get('users').getByIndex(userId);
       data.users[userId] = user.getProperties(['userId', 'name', 'nick', 'gravatar']);
-    }
+    });
 
     return data;
   },
@@ -75,20 +75,20 @@ const UsersStore = Store.extend({
       return;
     }
 
-    for (const userId in data.users) {
+    Object.keys(data.users).forEach(function(userId) {
       this.get('users').upsertModel(data.users[userId]);
-    }
+    });
 
     this.incrementProperty('isDirty');
   },
 
   handleAddUsersServer(data) {
-    for (const userId in data.mapping) {
+    Object.keys(data.mapping).forEach(function(userId) {
       const user = data.mapping[userId];
       user.userId = userId;
 
       this.get('users').upsertModel(user);
-    }
+    });
 
     this.incrementProperty('isDirty');
   }

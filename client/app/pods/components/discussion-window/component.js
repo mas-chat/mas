@@ -330,7 +330,7 @@ export default Component.extend({
     const network = this.get('content.network');
 
     if (membersEl) {
-      new PerfectScrollbar(membersEl);
+      new PerfectScrollbar(membersEl); // eslint-disable-line no-new
     }
 
     this.$('.window-members').contextmenu({
