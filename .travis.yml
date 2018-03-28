@@ -17,4 +17,7 @@ install:
   - cd newclient && yarn && cd ..
   - cd server/test/browser && yarn && cd ../../..
 script:
-  - cd server && npm test
+  - yarn install
+  - yarn run lint-server
+  - yarn run lint-client
+  - cd server && yarn test
