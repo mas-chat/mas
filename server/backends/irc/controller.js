@@ -1297,7 +1297,7 @@ async function bufferNames(names, user, network, conversation) {
 
 function parseCTCPMessage(text) {
     // Follow http://www.irchelp.org/irchelp/rfc/ctcpspec.html
-    const regex = /\u0001(.*?)\u0001/g;
+    const regex = /\u0001(.*?)\u0001/g; // eslint-disable-line no-control-regex
     let matches;
 
     while ((matches = regex.exec(text)) !== null) { // eslint-disable-line no-cond-assign

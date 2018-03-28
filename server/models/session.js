@@ -38,7 +38,7 @@ module.exports = class Session extends Base {
     }
 
     encodeToCookie() {
-        return new Buffer(JSON.stringify({
+        return Buffer.from(JSON.stringify({
             token: this.get('token'),
             userId: this.get('userId')
         })).toString('base64');

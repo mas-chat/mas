@@ -51,11 +51,6 @@
   },
   "devDependencies": {
     "chai": "^4.1.0",
-    "eslint": "^4.3.0",
-    "eslint-config-airbnb": "^15.1.0",
-    "eslint-plugin-import": "^2.7.0",
-    "eslint-plugin-jsx-a11y": "5.1.1",
-    "eslint-plugin-react": "^7.1.0",
     "foreman": "^2.0.0",
     "mocha": "^3.5.0",
     "proxyquire": "^1.8.0",
@@ -70,8 +65,6 @@
     "start-irc": "./bin/create-db && node ./backends/irc/server.js",
     "start-irc-scktmgr": "./bin/create-db && node ./backends/irc/connection-manager/server.js",
     "test": "mocha --recursive test/unit && ./test/browser/bin/run-tests saucelabs",
-    "lint-server": "eslint --env node --ignore-pattern website/dist --ignore-pattern node_modules .",
-    "lint-client": "eslint --env browser ../newclient/src",
     "test-server": "mocha server/test/**/*test.js"
   },
   "repository": {

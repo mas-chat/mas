@@ -51,7 +51,7 @@ exports.deleteAll = async function deleteAll(userId) {
 
 function decodeCookieValue(value) {
     try {
-        return JSON.parse(new Buffer(value, 'base64').toString('ascii'));
+        return JSON.parse(Buffer.from(value, 'base64').toString('ascii'));
     } catch (e) {
         return null;
     }

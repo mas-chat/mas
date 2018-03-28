@@ -37,7 +37,7 @@ exports.getNick = async function getNick(userGId, network) {
 
     assert(typeof encodedIrcNick === 'string', 'Expected base64 encoded IRC nick');
 
-    return new Buffer(encodedIrcNick, 'base64').toString('ascii');
+    return Buffer.from(encodedIrcNick, 'base64').toString('ascii');
 };
 
 exports.getUser = async function getUser(nick, network) {
@@ -59,7 +59,7 @@ exports.getUserGId = async function getUserGId(nick, network) {
     // network is not mas
     return UserGId.create({
         type: 'irc',
-        id: new Buffer(nick).toString('base64').replace(/=+$/, '')
+        id: Buffer.from(nick).toString('base64').replace(/=+$/, '')
     });
 };
 

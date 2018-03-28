@@ -139,7 +139,7 @@ function writeMetaDataFile(filePath, originalFileName, userId) {
     return new Promise((resolve, reject) => {
         fs.writeFile(filePath, JSON.stringify(metaData), err => {
             if (err) {
-                reject('File upload metadata file write error');
+                reject(new Error('File upload metadata file write error'));
             } else {
                 resolve();
             }
