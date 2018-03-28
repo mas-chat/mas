@@ -15,7 +15,6 @@
 //
 
 import { bind, later, cancel } from '@ember/runloop';
-
 import { A } from '@ember/array';
 import EmberObject from '@ember/object';
 import io from 'npm:socket.io-client';

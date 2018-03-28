@@ -17,7 +17,6 @@
 /* globals $ */
 
 import { A } from '@ember/array';
-
 import { computed, observer } from '@ember/object';
 import moment from 'npm:moment';
 import Cookies from 'npm:js-cookie';

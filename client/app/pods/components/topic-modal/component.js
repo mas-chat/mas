@@ -15,7 +15,6 @@
 //
 
 import { computed } from '@ember/object';
-
 import { oneWay } from '@ember/object/computed';
 import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';

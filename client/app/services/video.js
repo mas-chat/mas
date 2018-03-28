@@ -15,7 +15,6 @@
 //
 
 import { bind } from '@ember/runloop';
-
 import { computed } from '@ember/object';
 import Service from '@ember/service';
 

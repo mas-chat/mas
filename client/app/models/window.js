@@ -15,7 +15,6 @@
 //
 
 import EmberObject, { computed } from '@ember/object';
-
 import { A } from '@ember/array';
 import moment from 'npm:moment';
 import isMobile from 'npm:ismobilejs';

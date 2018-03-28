@@ -17,7 +17,6 @@
 /* globals $ */
 
 import { next } from '@ember/runloop';
-
 import { computed } from '@ember/object';
 import { gt } from '@ember/object/computed';
 import Component from '@ember/component';

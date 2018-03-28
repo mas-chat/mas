@@ -15,7 +15,6 @@
 //
 
 import { observer } from '@ember/object';
-
 import TextArea from '@ember/component/text-area';
 import emojione from 'npm:emojione';
 

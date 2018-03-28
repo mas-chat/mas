@@ -17,7 +17,6 @@
 /* globals Map */
 
 import { assert } from '@ember/debug';
-
 import { A } from '@ember/array';
 import ArrayProxy from '@ember/array/proxy';
 

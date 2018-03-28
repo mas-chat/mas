@@ -17,7 +17,6 @@
 /* global $ */
 
 import { observer } from '@ember/object';
-
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import socket from '../../../utils/socket';

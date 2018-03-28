@@ -15,7 +15,6 @@
 //
 
 import { bind } from '@ember/runloop';
-
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import captureVideoFrame from 'npm:capture-video-frame';

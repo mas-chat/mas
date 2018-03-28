@@ -17,7 +17,6 @@
 /* globals $ */
 
 import { A } from '@ember/array';
-
 import { next, scheduleOnce, bind } from '@ember/runloop';
 import { observer } from '@ember/object';
 import { alias } from '@ember/object/computed';

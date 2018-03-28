@@ -17,7 +17,6 @@
 /* globals $ */
 
 import { debounce, scheduleOnce, bind, cancel, throttle, run } from '@ember/runloop';
-
 import { computed, observer } from '@ember/object';
 import { alias } from '@ember/object/computed';
 import { inject as service } from '@ember/service';

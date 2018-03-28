@@ -15,7 +15,6 @@
 //
 
 import { computed } from '@ember/object';
-
 import { oneWay } from '@ember/object/computed';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';

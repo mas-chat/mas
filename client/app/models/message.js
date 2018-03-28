@@ -15,7 +15,6 @@
 //
 
 import { A } from '@ember/array';
-
 import EmberObject, { computed } from '@ember/object';
 import { alias } from '@ember/object/computed';
 import marked from 'npm:marked';
