@@ -19,15 +19,15 @@ import loadInitializers from 'ember-load-initializers';
 import Resolver from './resolver';
 import config from './config/environment';
 
-import './stores/alerts';
-import './stores/day-service';
-import './stores/friends';
-import './stores/modals';
-import './stores/networks';
-import './stores/profile';
-import './stores/settings';
-import './stores/users';
-import './stores/windows';
+import './legacy-stores/alerts';
+import './legacy-stores/day-service';
+import './legacy-stores/friends';
+import './legacy-stores/modals';
+import './legacy-stores/networks';
+import './legacy-stores/profile';
+import './legacy-stores/settings';
+import './legacy-stores/users';
+import './legacy-stores/windows';
 
 const App = Application.extend({
   modulePrefix: config.modulePrefix,
