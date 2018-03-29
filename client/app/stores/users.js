@@ -62,7 +62,7 @@ const UsersStore = Store.extend({
     // Always save user itself
     data.users[this.get('userId')] = true;
 
-    Object.keys(data.users).forEach(function(userId) {
+    Object.keys(data.users).forEach(userId => {
       const user = this.get('users').getByIndex(userId);
       data.users[userId] = user.getProperties(['userId', 'name', 'nick', 'gravatar']);
     });
@@ -75,7 +75,7 @@ const UsersStore = Store.extend({
       return;
     }
 
-    Object.keys(data.users).forEach(function(userId) {
+    Object.keys(data.users).forEach(userId => {
       this.get('users').upsertModel(data.users[userId]);
     });
 
@@ -83,7 +83,7 @@ const UsersStore = Store.extend({
   },
 
   handleAddUsersServer(data) {
-    Object.keys(data.mapping).forEach(function(userId) {
+    Object.keys(data.mapping).forEach(userId => {
       const user = data.mapping[userId];
       user.userId = userId;
 
