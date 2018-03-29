@@ -13,6 +13,9 @@ module.exports = function(defaults) {
     lessOptions: {
       paths: ['node_modules/bootstrap/less', 'node_modules/bootswatch/superhero', 'node_modules']
     },
+    babel: {
+      plugins: ['babel-plugin-transform-class-properties', 'babel-plugin-transform-decorators-legacy']
+    },
     autoprefixer: {
       browsers: ['last 2 versions'],
       cascade: false
