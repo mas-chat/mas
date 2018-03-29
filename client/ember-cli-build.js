@@ -14,7 +14,8 @@ module.exports = function(defaults) {
       paths: ['node_modules/bootstrap/less', 'node_modules/bootswatch/superhero', 'node_modules']
     },
     babel: {
-      plugins: ['babel-plugin-transform-class-properties', 'babel-plugin-transform-decorators-legacy']
+      // Order matters!
+      plugins: ['babel-plugin-transform-decorators-legacy', 'babel-plugin-transform-class-properties']
     },
     autoprefixer: {
       browsers: ['last 2 versions'],
