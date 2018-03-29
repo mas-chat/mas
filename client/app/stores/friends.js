@@ -16,7 +16,7 @@
 
 import Store from './base';
 import { dispatch } from '../utils/dispatcher';
-import Friend from '../models/friend';
+import Friend from '../legacy-models/friend';
 import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
 

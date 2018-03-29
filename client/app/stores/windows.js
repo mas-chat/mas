@@ -23,7 +23,7 @@ import Cookies from 'npm:js-cookie';
 import isMobile from 'npm:ismobilejs';
 import Store from './base';
 import { dispatch } from '../utils/dispatcher';
-import Window from '../models/window';
+import Window from '../legacy-models/window';
 import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';

@@ -4,7 +4,7 @@ import EmberObject from '@ember/object';
 import { expect } from 'chai';
 import { beforeEach, describe, it } from 'mocha';
 import indexArray from 'mas/utils/index-array';
-import Message from 'mas/models/message';
+import Message from 'mas/legacy-models/message';
 
 describe('indexArray', function() {
     beforeEach(function() {

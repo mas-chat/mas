@@ -16,7 +16,7 @@
 
 import Store from './base';
 import IndexArray from '../utils/index-array';
-import Alert from '../models/alert';
+import Alert from '../legacy-models/alert';
 import socket from '../utils/socket';
 
 const AlertsStore = Store.extend({

@@ -17,7 +17,7 @@
 import Cookies from 'npm:js-cookie';
 import Store from './base';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
-import User from '../models/user';
+import User from '../legacy-models/user';
 import IndexArray from '../utils/index-array';
 
 const UsersStore = Store.extend({
