@@ -1,3 +1,5 @@
+import alertStore from '../stores/AlertStore';
+
 const noopCb = () => {};
 
 export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) {
@@ -8,8 +10,12 @@ export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) 
     .join('');
   const handler = `handle${name}`;
 
-  for (const store of Object.keys(window.stores)) {
-    const storeObj = window.stores[store];
+  const stores = window.stores;
+
+  stores.alerts = alertStore;
+
+  for (const store of Object.keys(stores)) {
+    const storeObj = stores[store];
 
     if (storeObj[handler]) {
       consumed = true;

@@ -14,24 +14,27 @@
 //   governing permissions and limitations under the License.
 //
 
+import Mobx from 'npm:mobx';
 import { computed } from '@ember/object';
 import { oneWay } from '@ember/object/computed';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
+import alertStore from '../../../stores/AlertStore';
+
+const { autorun } = Mobx;
 
 export default Component.extend({
-  stores: service(),
+  init(...args) {
+    this._super(...args);
+
+    autorun(() => {
+      this.set('alerts', alertStore.alerts.slice());
+      this.set('currentAlert', alertStore.currentAlert);
+    });
+  },
 
   classNames: ['flex-row', 'announcement'],
-
-  alerts: oneWay('stores.alerts.alerts'),
-
-  currentAlert: computed('alerts.[]', function() {
-    const alerts = this.get('alerts');
-
-    return alerts.length === 0 ? null : alerts.get('firstObject');
-  }),
 
   actions: {
     close(result) {
