@@ -38,13 +38,6 @@ const TWO_DAYS_IN_MS = 1000 * 60 * 60 * 24 * 2;
 const fingerPrintRe = /^assets\/\S+-.{32}\.\w+$/;
 const devMode = process.env.NODE_ENV !== 'production';
 
-const newClientDevProxy = convert(
-  proxy({
-    host: 'http://localhost:8080',
-    map: urlPath => (urlPath === '/sector17' ? '/sector17/' : urlPath)
-  })
-);
-
 module.exports = function buildRouter() {
   log.info('Registering website routes');
 
@@ -117,21 +110,6 @@ module.exports = function buildRouter() {
     // Ember CLI Live Reload redirect hack
     router.get('/ember-cli-live-reload.js', ctx => ctx.redirect('http://localhost:4200/ember-cli-live-reload.js'));
   }
-
-  // New client
-  router.get(/\/sector17\/?(.*)/, async ctx => {
-    const subPath = ctx.params[0];
-
-    if (devMode) {
-      await newClientDevProxy(ctx);
-      ctx.set('Cache-control', 'private, max-age=0, no-cache');
-    } else {
-      await sendFile(ctx, 'newclient/dist/', subPath, {
-        index: 'index.html',
-        maxage: subPath === '' ? 0 : ONE_YEAR_IN_MS
-      });
-    }
-  });
 
   // Web site pages
   router.get(/^\/(about|home|tos|pricing|support|$)\/?$/, websiteController);

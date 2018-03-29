@@ -8,14 +8,6 @@ ENV NPM_CONFIG_LOGLEVEL warn
 
 MAINTAINER Ilkka Oksanen <iao@iki.fi>
 
-COPY client /app/client/
-WORKDIR /app/client/
-
-RUN yarn install \
-  && yarn run build  \
-  && rm -fr node_modules tmp \
-  && yarn cache clean
-
 COPY server /app/server/
 WORKDIR /app/server/
 
@@ -29,12 +21,12 @@ RUN cd website \
   && rm -fr node_modules \
   && yarn cache clean
 
-COPY newclient /app/newclient/
-WORKDIR /app/newclient
+COPY client /app/client/
+WORKDIR /app/client/
 
 RUN yarn install \
-  && yarn run prod \
-  && rm -fr node_modules \
+  && yarn run build  \
+  && rm -fr node_modules tmp \
   && yarn cache clean
 
 WORKDIR /app/server/
