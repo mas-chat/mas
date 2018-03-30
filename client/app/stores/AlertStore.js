@@ -5,15 +5,15 @@ import socket from '../utils/socket';
 const { observable, computed } = Mobx;
 
 class AlertStore {
-  @observable alerts = [];
+  @observable alerts = new Map();
 
   @computed
   get currentAlert() {
-    return this.alerts.length === 0 ? null : this.alerts[0];
+    return this.alerts.size === 0 ? null : this.oldestAlert();
   }
 
   handleShowAlert(data) {
-    this.alerts.push(new AlertModel(this, data));
+    this.alerts.set(data.alertId, new AlertModel(this, data));
   }
 
   handleShowAlertServer(data) {
@@ -30,17 +30,19 @@ class AlertStore {
       }
     };
 
-    this.alerts.push(new AlertModel(this, data));
+    this.alerts.set(data.alertId, new AlertModel(this, data));
   }
 
   handleCloseAlert(data) {
-    const callback = this.alerts[0].resultCallback;
-
-    if (callback) {
-      callback(data.result);
+    if (data.alert.resultCallback) {
+      data.alert.resultCallback(data.result);
     }
 
-    this.alerts.shift();
+    this.alerts.delete(data.alert.alertId);
+  }
+
+  oldestAlert() {
+    return this.alerts.values().next().value;
   }
 }
 

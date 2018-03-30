@@ -29,7 +29,6 @@ export default Component.extend({
     this._super(...args);
 
     autorun(() => {
-      this.set('alerts', alertStore.alerts.slice());
       this.set('currentAlert', alertStore.currentAlert);
     });
   },
@@ -38,7 +37,7 @@ export default Component.extend({
 
   actions: {
     close(result) {
-      dispatch('CLOSE_ALERT', { result });
+      dispatch('CLOSE_ALERT', { alert: this.get('currentAlert'), result });
     }
   }
 });
