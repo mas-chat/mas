@@ -23,7 +23,6 @@ import './legacy-stores/day-service';
 import './legacy-stores/friends';
 import './legacy-stores/modals';
 import './legacy-stores/networks';
-import './legacy-stores/profile';
 import './legacy-stores/users';
 import './legacy-stores/windows';
 

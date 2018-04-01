@@ -48,9 +48,13 @@ export default Component.extend({
   init(...args) {
     this._super(...args);
 
-    autorun(() => {
+    this.disposer = autorun(() => {
       this.set('activeDesktop', settingStore.settings.activeDesktop);
     });
+  },
+
+  didDestroyElement() {
+    this.disposer();
   },
 
   stores: service(),

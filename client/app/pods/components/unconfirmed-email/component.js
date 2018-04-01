@@ -26,10 +26,14 @@ export default Component.extend({
   init(...args) {
     this._super(...args);
 
-    autorun(() => {
+    this.disposer = autorun(() => {
       this.set('email', settingStore.settings.email);
       this.set('emailConfirmed', settingStore.settings.emailConfirmed);
     });
+  },
+
+  didDestroyElement() {
+    this.disposer();
   },
 
   stores: service(),

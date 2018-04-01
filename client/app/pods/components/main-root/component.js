@@ -29,11 +29,15 @@ export default Component.extend({
   init(...args) {
     this._super(...args);
 
-    autorun(() => {
+    this.disposer = autorun(() => {
       $('#theme-stylesheet').text(settingStore.settings.theme === 'dark' ? darkTheme : '');
     });
 
     socket.start(); // Let's get the show started.
+  },
+
+  didDestroyElement() {
+    this.disposer();
   },
 
   stores: service(),

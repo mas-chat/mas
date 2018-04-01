@@ -25,9 +25,13 @@ export default Component.extend({
   init(...args) {
     this._super(...args);
 
-    autorun(() => {
+    this.disposer = autorun(() => {
       this.set('currentAlert', alertStore.currentAlert);
     });
+  },
+
+  didDestroyElement() {
+    this.disposer();
   },
 
   classNames: ['flex-row', 'announcement'],

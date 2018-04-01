@@ -14,17 +14,27 @@
 //   governing permissions and limitations under the License.
 //
 
-import { alias } from '@ember/object/computed';
-import { inject as service } from '@ember/service';
+import Mobx from 'npm:mobx';
 import Component from '@ember/component';
+import profileStore from '../../../stores/ProfileStore';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Component.extend({
-  stores: service(),
+const { autorun } = Mobx;
 
-  name: alias('stores.profile.name'),
-  email: alias('stores.profile.email'),
-  nick: alias('stores.profile.nick'),
+export default Component.extend({
+  init(...args) {
+    this._super(...args);
+
+    this.disposer = autorun(() => {
+      this.set('name', profileStore.profile.name);
+      this.set('email', profileStore.profile.email);
+      this.set('nick', profileStore.profile.nick);
+    });
+  },
+
+  didDestroyElement() {
+    this.disposer();
+  },
 
   errorMsg: '',
 

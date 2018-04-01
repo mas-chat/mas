@@ -28,10 +28,14 @@ export default Component.extend({
   init(...args) {
     this._super(...args);
 
-    autorun(() => {
+    this.disposer = autorun(() => {
       this.set('canUseIRC', settingStore.settings.canUseIRC);
       this.set('darkTheme', settingStore.settings.theme === 'dark');
     });
+  },
+
+  didDestroyElement() {
+    this.disposer();
   },
 
   stores: service(),

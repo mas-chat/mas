@@ -36,10 +36,14 @@ export default Component.extend({
 
     this.set('windowComponents', A([]));
 
-    autorun(() => {
+    this.disposer = autorun(() => {
       this.set('theme', settingStore.settings.theme);
       this.set('emailConfirmed', settingStore.settings.emailConfirmed);
     });
+  },
+
+  didDestroyElement() {
+    this.disposer();
   },
 
   stores: service(),
