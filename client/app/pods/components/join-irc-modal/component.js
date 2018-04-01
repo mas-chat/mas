@@ -14,23 +14,31 @@
 //   governing permissions and limitations under the License.
 //
 
-import { computed } from '@ember/object';
-import { inject as service } from '@ember/service';
+import Mobx from 'npm:mobx';
 import Component from '@ember/component';
+import networkStore from '../../../stores/NetworkStore';
 import { dispatch } from '../../../utils/dispatcher';
 
+const { autorun } = Mobx;
+
 export default Component.extend({
-  stores: service(),
+  init(...args) {
+    this._super(...args);
+
+    this.disposer = autorun(() => {
+      this.set('ircNetworks', networkStore.networks.filter(network => network !== 'MAS'));
+    });
+  },
+
+  didDestroyElement() {
+    this.disposer();
+  },
 
   channel: '',
   password: '',
   errorMsg: '',
 
   selectedNetwork: null,
-
-  ircNetworks: computed('stores.networks.networks', function() {
-    return this.get('stores.networks.networks').removeObject('MAS');
-  }),
 
   actions: {
     joinIRC() {

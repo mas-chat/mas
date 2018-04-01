@@ -21,7 +21,6 @@ import config from './config/environment';
 
 import './legacy-stores/friends';
 import './legacy-stores/modals';
-import './legacy-stores/networks';
 import './legacy-stores/users';
 import './legacy-stores/windows';
 
