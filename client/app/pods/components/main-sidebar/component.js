@@ -14,51 +14,52 @@
 //   governing permissions and limitations under the License.
 //
 
+import Mobx from 'npm:mobx';
 import { computed } from '@ember/object';
 import { alias } from '@ember/object/computed';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
-// import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
+import settingStore from '../../../stores/SettingStore';
 import { dispatch } from '../../../utils/dispatcher';
 
-export default Component.extend(
-  /* KeyboardShortcuts, */ {
-    stores: service(),
+const { autorun } = Mobx;
 
-    classNames: ['sidebar', 'flex-grow-column'],
+export default Component.extend({
+  init(...args) {
+    this._super(...args);
 
-    draggedWindow: false,
-    friends: alias('stores.friends.friends'),
-    canUseIRC: alias('stores.settings.canUseIRC'),
+    autorun(() => {
+      this.set('canUseIRC', settingStore.settings.canUseIRC);
+      this.set('darkTheme', settingStore.settings.theme === 'dark');
+    });
+  },
 
-    actions: {
-      openModal(modal) {
-        dispatch('OPEN_MODAL', { name: modal });
-      },
+  stores: service(),
 
-      logout() {
-        dispatch('LOGOUT');
-      },
+  classNames: ['sidebar', 'flex-grow-column'],
 
-      logoutAll() {
-        dispatch('LOGOUT', { allSessions: true });
-      },
+  draggedWindow: false,
+  friends: alias('stores.friends.friends'),
 
-      toggleDarkTheme() {
-        dispatch('TOGGLE_THEME');
-      }
+  actions: {
+    openModal(modal) {
+      dispatch('OPEN_MODAL', { name: modal });
     },
 
-    keyboardShortcuts: {
-      'up up down down i o': 'toggleDarkTheme'
+    logout() {
+      dispatch('LOGOUT');
     },
 
-    friendsOnline: computed('friends.@each.online', function() {
-      return this.get('friends').filterBy('online', true).length;
-    }),
+    logoutAll() {
+      dispatch('LOGOUT', { allSessions: true });
+    },
 
-    darkTheme: computed('stores.settings.theme', function() {
-      return this.get('stores.settings.theme') === 'dark';
-    })
-  }
-);
+    toggleDarkTheme() {
+      dispatch('TOGGLE_THEME');
+    }
+  },
+
+  friendsOnline: computed('friends.@each.online', function() {
+    return this.get('friends').filterBy('online', true).length;
+  })
+});

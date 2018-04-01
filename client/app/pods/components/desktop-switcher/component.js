@@ -14,16 +14,27 @@
 //   governing permissions and limitations under the License.
 //
 
+import Mobx from 'npm:mobx';
 import { alias } from '@ember/object/computed';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
+import settingStore from '../../../stores/SettingStore';
+
+const { autorun } = Mobx;
 
 export default Component.extend({
+  init(...args) {
+    this._super(...args);
+
+    autorun(() => {
+      this.set('activeDesktop', settingStore.settings.activeDesktop);
+    });
+  },
+
   stores: service(),
 
   classNames: ['main-desktop-switcher'],
 
-  activeDesktop: alias('stores.settings.activeDesktop'),
   draggedWindow: false,
 
   desktops: alias('stores.windows.desktops')

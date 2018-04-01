@@ -16,6 +16,7 @@
 
 /* globals $ */
 
+import Mobx from 'npm:mobx';
 import { debounce, scheduleOnce, bind, cancel, throttle, run } from '@ember/runloop';
 import { computed, observer } from '@ember/object';
 import { alias } from '@ember/object/computed';
@@ -24,8 +25,11 @@ import Component from '@ember/component';
 import PerfectScrollbar from 'npm:perfect-scrollbar';
 import Favico from 'npm:favico.js';
 import isMobile from 'npm:ismobilejs';
+import settingStore from '../../../stores/SettingStore';
 import { dispatch } from '../../../utils/dispatcher';
 import { play } from '../../../utils/sound';
+
+const { autorun } = Mobx;
 
 let faviconCounter = 0;
 
@@ -41,6 +45,14 @@ document.addEventListener('visibilitychange', () => {
 });
 
 export default Component.extend({
+  init(...args) {
+    this._super(...args);
+
+    autorun(() => {
+      this.set('activeDesktop', settingStore.settings.activeDesktop);
+    });
+  },
+
   stores: service(),
 
   classNames: ['window'],
@@ -52,8 +64,6 @@ export default Component.extend({
     'ircServerWindow:irc-server-window:',
     'type'
   ],
-
-  activeDesktop: alias('stores.settings.activeDesktop'),
 
   expanded: false,
   animating: false,

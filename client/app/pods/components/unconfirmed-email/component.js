@@ -14,18 +14,27 @@
 //   governing permissions and limitations under the License.
 //
 
-import { alias } from '@ember/object/computed';
+import Mobx from 'npm:mobx';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
+import settingStore from '../../../stores/SettingStore';
 import { dispatch } from '../../../utils/dispatcher';
 
+const { autorun } = Mobx;
+
 export default Component.extend({
+  init(...args) {
+    this._super(...args);
+
+    autorun(() => {
+      this.set('email', settingStore.settings.email);
+      this.set('emailConfirmed', settingStore.settings.emailConfirmed);
+    });
+  },
+
   stores: service(),
 
   classNames: ['flex-row', 'unconfirmed-email'],
-
-  email: alias('stores.settings.email'),
-  emailConfirmed: alias('stores.settings.emailConfirmed'),
 
   actions: {
     requestConfirmation() {

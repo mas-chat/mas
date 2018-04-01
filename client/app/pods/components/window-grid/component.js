@@ -16,17 +16,32 @@
 
 /* globals $ */
 
+import Mobx from 'npm:mobx';
 import { A } from '@ember/array';
 import { next, scheduleOnce, bind } from '@ember/runloop';
 import { observer } from '@ember/object';
 import { alias } from '@ember/object/computed';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
+import settingStore from '../../../stores/SettingStore';
 import { dispatch } from '../../../utils/dispatcher';
+
+const { autorun } = Mobx;
 
 const CURSORWIDTH = 50;
 
 export default Component.extend({
+  init() {
+    this._super();
+
+    this.set('windowComponents', A([]));
+
+    autorun(() => {
+      this.set('theme', settingStore.settings.theme);
+      this.set('emailConfirmed', settingStore.settings.emailConfirmed);
+    });
+  },
+
   stores: service(),
 
   classNames: ['grid', 'flex-1', 'flex-grow-column'],
@@ -42,23 +57,17 @@ export default Component.extend({
 
   model: alias('stores.windows.windows'),
 
-  mustRelayout: observer('stores.windows.initDone', 'stores.settings.theme', function() {
+  mustRelayout: observer('stores.windows.initDone', 'theme', function() {
     next(this, function() {
       this._layoutWindows(false);
     });
   }),
 
-  mustRelayoutAfterRender: observer('stores.alerts.alerts.[]', 'stores.settings.emailConfirmed', function() {
+  mustRelayoutAfterRender: observer('stores.alerts.alerts.[]', 'emailConfirmed', function() {
     scheduleOnce('afterRender', this, function() {
       this._layoutWindows(false);
     });
   }),
-
-  init() {
-    this._super();
-
-    this.set('windowComponents', A([]));
-  },
 
   actions: {
     joinLobby() {

@@ -1,57 +1,25 @@
-//
-//   Copyright 2009-2015 Ilkka Oksanen <iao@iki.fi>
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing,
-//   software distributed under the License is distributed on an "AS
-//   IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-//   express or implied.  See the License for the specific language
-//   governing permissions and limitations under the License.
-//
-
+import Mobx from 'npm:mobx';
 import isMobile from 'npm:ismobilejs';
-import Store from './base';
+import SettingsModel from '../models/Settings';
 import { dispatch } from '../utils/dispatcher';
 import socket from '../utils/socket';
 
-const SettingsStore = Store.extend({
-  theme: 'default',
-  activeDesktop: 1,
-  email: '', // TODO: Remove from here, keep in profile
-  emailConfirmed: true,
-  canUseIRC: false,
+const { observable } = Mobx;
 
-  toJSON() {
-    return {
-      version: 1,
-      activeDesktop: this.get('activeDesktop')
-    };
-  },
-
-  fromJSON(data) {
-    if (data.version !== 1) {
-      return;
-    }
-
-    this.set('activeDesktop', data.activeDesktop);
-  },
+class SettingsStore {
+  @observable settings = new SettingsModel(this, {});
 
   handleToggleTheme() {
-    const newTheme = this.get('theme') === 'dark' ? 'default' : 'dark';
+    const newTheme = this.settings.theme === 'dark' ? 'default' : 'dark';
+    this.settings.theme = newTheme;
 
-    this.set('theme', newTheme);
     socket.send({
       id: 'SET',
       settings: {
         theme: newTheme
       }
     });
-  },
+  }
 
   handleConfirmEmail() {
     const msg = "Confirmation link sent. Check your spam folder if you don't see it in inbox.";
@@ -70,14 +38,14 @@ const SettingsStore = Store.extend({
         });
       }
     );
-  },
+  }
 
   handleSetEmailConfirmed() {
-    this.set('emailConfirmed', true);
-  },
+    this.settings.emailConfirmed = true;
+  }
 
   handleChangeActiveDesktop(data) {
-    this.set('activeDesktop', data.desktop);
+    this.settings.activeDesktop = data.desktop;
 
     if (!isMobile.any) {
       socket.send({
@@ -87,16 +55,15 @@ const SettingsStore = Store.extend({
         }
       });
     }
-  },
+  }
 
   handleUpdateSettingsServer(data) {
     if (isMobile.any) {
       delete data.settings.activeDesktop;
     }
 
-    this.setProperties(data.settings);
+    this.settings = new SettingsModel(this, data.settings);
   }
-});
+}
 
-window.stores = window.stores || {};
-window.stores.settings = SettingsStore.create();
+export default new SettingsStore();

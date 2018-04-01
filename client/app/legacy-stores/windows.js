@@ -24,6 +24,7 @@ import isMobile from 'npm:ismobilejs';
 import Store from './base';
 import { dispatch } from '../utils/dispatcher';
 import Window from '../legacy-models/window';
+import settingStore from '../stores/SettingStore';
 import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
@@ -82,7 +83,7 @@ const WindowsStore = Store.extend({
 
     const desktopIds = this.get('desktops').map(d => d.id);
 
-    if (desktopIds.indexOf(window.stores.settings.get('activeDesktop')) === -1) {
+    if (desktopIds.indexOf(settingStore.settings.activeDesktop) === -1) {
       dispatch('CHANGE_ACTIVE_DESKTOP', {
         desktop: this.get('desktops')
           .map(d => d.id)
@@ -605,7 +606,7 @@ const WindowsStore = Store.extend({
 
   handleSeekActiveDesktop(data) {
     const desktops = this.get('desktops');
-    const activeDesktop = window.settings.settings.get('activeDesktop');
+    const activeDesktop = settingStore.settings.activeDesktop;
     let index = desktops.indexOf(desktops.findBy('id', activeDesktop));
 
     index += data.direction;

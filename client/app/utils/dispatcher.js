@@ -1,4 +1,5 @@
 import alertStore from '../stores/AlertStore';
+import settingStore from '../stores/SettingStore';
 
 const noopCb = () => {};
 
@@ -13,6 +14,7 @@ export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) 
   const stores = window.stores;
 
   stores.alerts = alertStore;
+  stores.settings = settingStore;
 
   for (const store of Object.keys(stores)) {
     const storeObj = stores[store];

@@ -16,25 +16,29 @@
 
 /* global $ */
 
-import { observer } from '@ember/object';
+import Mobx from 'npm:mobx';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
+import settingStore from '../../../stores/SettingStore';
 import socket from '../../../utils/socket';
 import { darkTheme } from '../../../utils/theme-dark';
 
+const { autorun } = Mobx;
+
 export default Component.extend({
+  init(...args) {
+    this._super(...args);
+
+    autorun(() => {
+      $('#theme-stylesheet').text(settingStore.settings.theme === 'dark' ? darkTheme : '');
+    });
+
+    socket.start(); // Let's get the show started.
+  },
+
   stores: service(),
 
   classNames: ['flex-grow-column', 'flex-1'],
 
-  draggedWindow: false,
-
-  init(...args) {
-    this._super(...args);
-    socket.start(); // Let's get the show started.
-  },
-
-  changeTheme: observer('stores.settings.theme', function() {
-    $('#theme-stylesheet').text(this.get('stores.settings.theme') === 'dark' ? darkTheme : '');
-  })
+  draggedWindow: false
 });
