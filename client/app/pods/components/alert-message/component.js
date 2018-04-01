@@ -15,9 +15,6 @@
 //
 
 import Mobx from 'npm:mobx';
-import { computed } from '@ember/object';
-import { oneWay } from '@ember/object/computed';
-import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 import alertStore from '../../../stores/AlertStore';
