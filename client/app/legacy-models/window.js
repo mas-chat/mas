@@ -14,13 +14,17 @@
 //   governing permissions and limitations under the License.
 //
 
+import Mobx from 'npm:mobx';
 import EmberObject, { computed } from '@ember/object';
 import { A } from '@ember/array';
 import moment from 'npm:moment';
 import isMobile from 'npm:ismobilejs';
 import BaseModel from './base';
 import Message from './message';
+import daySeparatorStore from '../stores/DaySeparatorStore';
 import IndexArray from '../utils/index-array';
+
+const { autorun } = Mobx;
 
 let mobileDesktop = 1;
 
@@ -52,14 +56,12 @@ export default BaseModel.extend({
 
   _desktop: null,
 
-  _dayServiceStore: null,
   _windowsStore: null,
   _usersStore: null,
 
   init() {
     this._super();
 
-    this.set('_dayServiceStore', window.stores['day-service']);
     this.set('_windowsStore', window.stores.windows);
     this.set('_usersStore', window.stores.users);
 
@@ -81,6 +83,10 @@ export default BaseModel.extend({
         title: false
       })
     );
+
+    autorun(() => {
+      this.set('dayCounter', daySeparatorStore.dayCounter);
+    });
   },
 
   desktop: computed('_desktop', {
@@ -96,7 +102,7 @@ export default BaseModel.extend({
     }
   }),
 
-  sortedMessages: computed('messages.[]', '_dayServiceStore.dayCounter', function() {
+  sortedMessages: computed('messages.[]', 'dayCounter', function() {
     const result = this.get('messages').sortBy('gid');
 
     const addDayDivider = (array, dateString, index) => {

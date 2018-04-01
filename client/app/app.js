@@ -19,7 +19,6 @@ import loadInitializers from 'ember-load-initializers';
 import Resolver from './resolver';
 import config from './config/environment';
 
-import './legacy-stores/day-service';
 import './legacy-stores/friends';
 import './legacy-stores/modals';
 import './legacy-stores/networks';

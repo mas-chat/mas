@@ -1,4 +1,5 @@
 import alertStore from '../stores/AlertStore';
+import daySeparatorStore from '../stores/DaySeparatorStore';
 import profileStore from '../stores/ProfileStore';
 import settingStore from '../stores/SettingStore';
 
@@ -17,6 +18,7 @@ export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) 
   stores.alerts = alertStore;
   stores.profile = profileStore;
   stores.settings = settingStore;
+  stores.daySeparatorStore = daySeparatorStore;
 
   for (const store of Object.keys(stores)) {
     const storeObj = stores[store];
