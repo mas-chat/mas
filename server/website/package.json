@@ -23,18 +23,18 @@
   "devDependencies": {
     "autoprefixer": "~6.5.1",
     "babel-core": "~6.17.0",
-    "babel-loader": "~6.2.4",
+    "babel-loader": "7",
     "babel-preset-es2015": "~6.16.0",
     "babel-preset-react": "~6.16.0",
     "bulma": "~0.2.0",
     "css-loader": "~0.25.0",
     "file-loader": "~0.9.0",
-    "node-sass": "~3.10.0",
+    "node-sass": "^4.9.0",
     "postcss-loader": "~1.0.0",
-    "sass-loader": "~4.0.0",
+    "sass-loader": "~7.0.1",
     "style-loader": "~0.13.1",
     "url-loader": "~0.5.7",
-    "webpack": "~2.1.0-beta.22",
+    "webpack": "^3.0.0",
     "webpack-dashboard": "~0.2.0",
     "webpack-manifest-plugin": "~1.1.0"
   }
