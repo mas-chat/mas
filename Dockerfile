@@ -1,4 +1,4 @@
-FROM node:10.0
+FROM node:10.4.1
 
 RUN apt-get update && apt-get install -y \
   exiftran \
