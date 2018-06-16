@@ -1,5 +1,5 @@
 frontend: cd server && yarn run --silent start-frontend
 loopback: cd server && yarn run --silent start-loopback
 irc: cd server && yarn run --silent start-irc
-ircscktmgr: cd server && yarn run --silent start-irc-scktmgr
+#ircscktmgr: cd server && yarn run --silent start-irc-scktmgr
 redis: mkdir -p tmp && redis-server --dir tmp/ --save 600 1
