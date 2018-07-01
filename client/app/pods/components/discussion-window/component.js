@@ -16,15 +16,15 @@
 
 /* globals $ */
 
-import Mobx from 'npm:mobx';
+import Mobx from 'mobx';
 import { debounce, scheduleOnce, bind, cancel, throttle, run } from '@ember/runloop';
 import { computed, observer } from '@ember/object';
 import { alias } from '@ember/object/computed';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
-import PerfectScrollbar from 'npm:perfect-scrollbar';
-import Favico from 'npm:favico.js';
-import isMobile from 'npm:ismobilejs';
+import PerfectScrollbar from 'perfect-scrollbar';
+import Favico from 'favico.js';
+import isMobile from 'ismobilejs';
 import settingStore from '../../../stores/SettingStore';
 import { dispatch } from '../../../utils/dispatcher';
 import { play } from '../../../utils/sound';

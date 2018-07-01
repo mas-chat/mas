@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-import Mobx from 'npm:mobx';
+import Mobx from 'mobx';
 import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 import alertStore from '../../../stores/AlertStore';

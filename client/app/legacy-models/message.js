@@ -17,10 +17,10 @@
 import { A } from '@ember/array';
 import EmberObject, { computed } from '@ember/object';
 import { alias } from '@ember/object/computed';
-import marked from 'npm:marked';
-import emojione from 'npm:emojione';
-import moment from 'npm:moment';
-import URI from 'npm:urijs';
+import marked from 'marked';
+import emojione from 'emojione';
+import moment from 'moment';
+import URI from 'urijs';
 import BaseModel from './base';
 
 marked.setOptions({

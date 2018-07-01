@@ -1,5 +1,5 @@
-import Mobx from 'npm:mobx';
-import isMobile from 'npm:ismobilejs';
+import Mobx from 'mobx';
+import isMobile from 'ismobilejs';
 import SettingsModel from '../models/Settings';
 import { dispatch } from '../utils/dispatcher';
 import socket from '../utils/socket';

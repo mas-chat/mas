@@ -14,11 +14,11 @@
 //   governing permissions and limitations under the License.
 //
 
-import Mobx from 'npm:mobx';
+import Mobx from 'mobx';
 import EmberObject, { computed } from '@ember/object';
 import { A } from '@ember/array';
-import moment from 'npm:moment';
-import isMobile from 'npm:ismobilejs';
+import moment from 'moment';
+import isMobile from 'ismobilejs';
 import BaseModel from './base';
 import Message from './message';
 import daySeparatorStore from '../stores/DaySeparatorStore';

@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-import Cookies from 'npm:js-cookie';
+import Cookies from 'js-cookie';
 import Store from './base';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import User from '../legacy-models/user';

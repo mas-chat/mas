@@ -1,5 +1,5 @@
-import Mobx from 'npm:mobx';
-import moment from 'npm:moment';
+import Mobx from 'mobx';
+import moment from 'moment';
 
 const { observable } = Mobx;
 

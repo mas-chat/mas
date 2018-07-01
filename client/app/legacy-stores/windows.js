@@ -18,9 +18,9 @@
 
 import { A } from '@ember/array';
 import { computed, observer } from '@ember/object';
-import moment from 'npm:moment';
-import Cookies from 'npm:js-cookie';
-import isMobile from 'npm:ismobilejs';
+import moment from 'moment';
+import Cookies from 'js-cookie';
+import isMobile from 'ismobilejs';
 import Store from './base';
 import { dispatch } from '../utils/dispatcher';
 import Window from '../legacy-models/window';

@@ -20,7 +20,7 @@ import { next } from '@ember/runloop';
 import { computed } from '@ember/object';
 import { gt } from '@ember/object/computed';
 import Component from '@ember/component';
-import moment from 'npm:moment';
+import moment from 'moment';
 import { dispatch } from '../../../utils/dispatcher';
 
 export default Component.extend({

@@ -16,7 +16,7 @@
 
 import { observer } from '@ember/object';
 import TextArea from '@ember/component/text-area';
-import emojione from 'npm:emojione';
+import emojione from 'emojione';
 
 const emojisList = Object.keys(emojione.emojioneList)
   .sort()

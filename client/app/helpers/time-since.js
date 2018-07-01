@@ -15,7 +15,7 @@
 //
 
 import Helper from '@ember/component/helper';
-import moment from 'npm:moment';
+import moment from 'moment';
 
 export default Helper.extend({
   compute(params) {

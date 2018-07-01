@@ -17,8 +17,8 @@
 import { bind, later, cancel } from '@ember/runloop';
 import { A } from '@ember/array';
 import EmberObject from '@ember/object';
-import io from 'npm:socket.io-client';
-import Cookies from 'npm:js-cookie';
+import io from 'socket.io-client';
+import Cookies from 'js-cookie';
 import { calcMsgHistorySize } from './msg-history-sizer';
 import { dispatch } from './dispatcher';
 

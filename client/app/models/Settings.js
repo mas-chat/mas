@@ -1,4 +1,4 @@
-import Mobx from 'npm:mobx';
+import Mobx from 'mobx';
 
 const { observable } = Mobx;
 

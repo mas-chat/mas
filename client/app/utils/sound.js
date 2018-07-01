@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-import Howler from 'npm:howler';
+import Howler from 'howler';
 
 let playing = false;
 

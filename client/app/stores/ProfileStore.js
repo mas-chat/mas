@@ -1,4 +1,4 @@
-import Mobx from 'npm:mobx';
+import Mobx from 'mobx';
 import ProfileModel from '../models/Profile';
 import { dispatch } from '../utils/dispatcher';
 import socket from '../utils/socket';

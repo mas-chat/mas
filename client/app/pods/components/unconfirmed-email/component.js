@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-import Mobx from 'npm:mobx';
+import Mobx from 'mobx';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import settingStore from '../../../stores/SettingStore';

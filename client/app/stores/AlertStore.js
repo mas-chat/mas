@@ -1,4 +1,4 @@
-import Mobx from 'npm:mobx';
+import Mobx from 'mobx';
 import AlertModel from '../models/Alert';
 import socket from '../utils/socket';
 

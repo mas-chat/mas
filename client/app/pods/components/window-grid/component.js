@@ -16,7 +16,7 @@
 
 /* globals $ */
 
-import Mobx from 'npm:mobx';
+import Mobx from 'mobx';
 import { A } from '@ember/array';
 import { next, scheduleOnce, bind } from '@ember/runloop';
 import { observer } from '@ember/object';
