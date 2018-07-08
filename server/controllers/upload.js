@@ -34,13 +34,13 @@ if (dataDirectory.charAt(0) !== path.sep) {
 module.exports = async function handle(ctx) {
   const user = ctx.mas.user;
 
-  if (!user || !ctx.request.body || !ctx.request.body.files || !ctx.request.body.files.file) {
+  if (!user || !ctx.request.files || !ctx.request.files.file) {
     ctx.status = 400;
     return;
   }
 
   try {
-    const url = await upload(user, ctx.request.body.files.file);
+    const url = await upload(user, ctx.request.files.file);
 
     ctx.status = 200;
     ctx.body = { url: [url] };
