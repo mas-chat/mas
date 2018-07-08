@@ -24,7 +24,7 @@
     "broccoli-static-compiler": "^0.2.1",
     "ember-ajax": "^3.0.0",
     "ember-auto-import": "^1.0.1",
-    "ember-cli": "~3.1.4",
+    "ember-cli": "~3.2.0",
     "ember-cli-app-version": "^3.2.0",
     "ember-cli-autoprefixer": "0.8.1",
     "ember-cli-babel": "^6.14.1",
