@@ -57,7 +57,8 @@ const handlers = {
   333: handleNoop, // RPL_TOPICWHOTIME: No good place to show
   353: handle353,
   366: handle366,
-  376: handle376,
+  376: handle376or422,
+  422: handle376or422, // No MOTD
   401: handle401,
   482: handle482,
 
@@ -668,7 +669,7 @@ async function handle366(user, msg) {
   }
 }
 
-async function handle376(user, msg) {
+async function handle376or422(user, msg) {
   const networkInfo = await findOrCreateNetworkInfo(user, msg.network);
 
   await addSystemMessage(user, msg.network, 'server', msg.params.join(' '));
