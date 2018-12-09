@@ -23,15 +23,7 @@ const argv = require('minimist')(process.argv.slice(1));
 
 require('colors');
 
-const configFileOption = argv.configFile;
-let configFile;
-
-if (configFileOption && configFileOption.charAt(0) === path.sep) {
-  // Absolute path
-  configFile = path.normalize(configFileOption);
-} else {
-  configFile = path.join(__dirname, '..', configFileOption || 'mas.conf');
-}
+const rootPath = computeRoot();
 
 nconf
   .env({
@@ -40,11 +32,11 @@ nconf
   })
   .argv()
   .file('user_overrides', {
-    file: configFile,
+    file: path.join(rootPath, 'server', 'mas.conf'),
     format: nconf.formats.ini
   })
   .file('defaults', {
-    file: path.join(__dirname, '..', 'mas.conf.default'),
+    file: path.join(rootPath, 'server', 'mas.conf.default'),
     format: nconf.formats.ini
   });
 
@@ -71,6 +63,10 @@ exports.getComputed = function getComputed(key) {
   return ret;
 };
 
+exports.root = function root() {
+  return computeRoot();
+};
+
 function getValue(key) {
   const value = nconf.get(key);
 
@@ -81,4 +77,15 @@ function getValue(key) {
   }
 
   return value;
+}
+
+function computeRoot() {
+  const projectRootOption = process.env.PROJECT_ROOT;
+
+  if (projectRootOption && projectRootOption.charAt(0) !== path.sep) {
+    console.error('Root parameter must be absolute directory path'); // eslint-disable-line no-console
+    process.exit(1);
+  }
+
+  return projectRootOption || path.join(__dirname, '..');
 }

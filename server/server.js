@@ -125,8 +125,8 @@ function createFrontendApp() {
 
   app.use(
     hbs.middleware({
-      layoutsPath: path.join(__dirname, 'views/layouts'),
-      viewPath: path.join(__dirname, 'views'),
+      layoutsPath: path.join(conf.root(), 'server/views/layouts'),
+      viewPath: path.join(conf.root(), 'server/views'),
       defaultLayout: 'main'
     })
   );

@@ -50,20 +50,28 @@
     "winston-papertrail": "^1.0.5"
   },
   "devDependencies": {
+    "@types/koa": "^2.0.47",
+    "@types/node": "^10.12.12",
     "chai": "^4.2.0",
     "foreman": "^3.0.0",
     "mocha": "^5.2.0",
     "proxyquire": "^2.1.0",
     "sinon": "^6.0.0",
-    "sinon-chai": "^3.2.0"
+    "sinon-chai": "^3.2.0",
+    "ts-node-dev": "^1.0.0-pre.31",
+    "typescript": "^3.2.2"
   },
   "scripts": {
-    "prod": "./bin/build-emails",
+    "prod": "./bin/build-emails && tsc",
     "dev": "cd .. && nf --procfile Procfile.dev --env conf/env.dev start",
-    "start-frontend": "./bin/create-db && node ./server.js",
-    "start-loopback": "./bin/create-db && node ./backends/loopback/server.js",
-    "start-irc": "./bin/create-db && node ./backends/irc/server.js",
-    "start-irc-scktmgr": "./bin/create-db && node ./backends/irc/connection-manager/server.js",
+    "start-frontend": "./bin/create-db && cd build && node ./server.js",
+    "start-loopback": "./bin/create-db && cd build && node ./backends/loopback/server.js",
+    "start-irc": "./bin/create-db && cd build && node ./backends/irc/server.js",
+    "start-irc-scktmgr": "./bin/create-db && cd build && node ./backends/irc/connection-manager/server.js",
+    "start-frontend-dev": "./bin/create-db && ts-node-dev ./server.js",
+    "start-loopback-dev": "./bin/create-db && ts-node-dev ./backends/loopback/server.js",
+    "start-irc-dev": "./bin/create-db && ts-node-dev ./backends/irc/server.js",
+    "start-irc-scktmgr-dev": "./bin/create-db && ts-node-dev ./backends/irc/connection-manager/server.js",
     "test": "mocha --recursive test/unit && ./test/browser/bin/run-tests saucelabs",
     "test-server": "mocha server/test/**/*test.js"
   },

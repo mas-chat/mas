@@ -28,7 +28,7 @@ let dataDirectory = path.normalize(conf.get('files:upload_directory'));
 
 // TODO: move this to library.
 if (dataDirectory.charAt(0) !== path.sep) {
-  dataDirectory = path.join(__dirname, '..', '..', dataDirectory);
+  dataDirectory = path.join(conf.root(), dataDirectory);
 }
 
 module.exports = async function handle(ctx) {

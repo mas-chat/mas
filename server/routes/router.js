@@ -123,9 +123,9 @@ module.exports = function buildRouter() {
   return router;
 };
 
-async function sendFile(ctx, root, filePath, options = {}) {
+async function sendFile(ctx, prefix, filePath, options = {}) {
   const sendOptions = Object.assign({}, options, {
-    root: path.join(__dirname, `../../${root}`)
+    root: path.join(conf.root(), prefix)
   });
 
   await send(ctx, filePath === '' ? '/' : filePath, sendOptions);

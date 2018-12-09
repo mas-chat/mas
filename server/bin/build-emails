@@ -6,8 +6,9 @@ const fs = require('fs');
 const path = require('path');
 const juice = require('juice');
 const mkdirp = require('mkdirp');
+const conf = require('../lib/conf');
 
-const srcDir = path.join(__dirname, '..', 'emails');
+const srcDir = path.join(conf.root(), 'server/emails');
 const dstDir = path.join(srcDir, 'build');
 const files = fs.readdirSync(srcDir);
 const isHBSfile = /\.hbs$/;

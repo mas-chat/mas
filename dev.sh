@@ -4,6 +4,8 @@ set -e
 
 ROOT=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
 
+export PROJECT_ROOT=$ROOT
+
 cd $ROOT
 
 case "$1" in

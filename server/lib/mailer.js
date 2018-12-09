@@ -32,7 +32,7 @@ let senderAddress;
 setupTransporter();
 
 exports.send = function send(templateName, data, address, subject) {
-  const templatePath = path.join(__dirname, '..', templateName);
+  const templatePath = path.join(conf.root(), 'server', templateName);
   let template = templateCache[templatePath];
 
   if (!template) {

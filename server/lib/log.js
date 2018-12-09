@@ -70,7 +70,7 @@ function configTransports() {
     let logDirectory = path.normalize(conf.get('log:directory'));
 
     if (logDirectory.charAt(0) !== path.sep) {
-      logDirectory = path.join(__dirname, '..', '..', logDirectory);
+      logDirectory = path.join(conf.root(), logDirectory);
     }
 
     const fileName = path.join(logDirectory, `${process.title}.log`);
