@@ -11,6 +11,7 @@
 /server/test/browser/node_modules/
 /server/website/node_modules/
 
+/server/build/
 /server/website/dist/
 /server/emails/build/
 
