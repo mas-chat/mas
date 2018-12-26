@@ -24,7 +24,7 @@ export default Component.extend({
 
   actions: {
     newGroup() {
-      let password = this.get('password').trim();
+      let password = this.password.trim();
 
       if (password === '') {
         password = null;
@@ -33,7 +33,7 @@ export default Component.extend({
       dispatch(
         'CREATE_GROUP',
         {
-          name: this.get('group'),
+          name: this.group,
           password
         },
         () => this.sendAction('closeModal'), // Accept

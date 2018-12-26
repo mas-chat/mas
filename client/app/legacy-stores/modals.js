@@ -21,18 +21,18 @@ const ModalsStore = Store.extend({
   modals: A([]),
 
   handleOpenModal(data) {
-    this.get('modals').pushObject({
+    this.modals.pushObject({
       name: data.name,
       model: data.model
     });
   },
 
   handleCloseModal() {
-    this.get('modals').shiftObject();
+    this.modals.shiftObject();
   },
 
   handleOpenPriorityModal(data) {
-    this.get('modals').unshiftObject({
+    this.modals.unshiftObject({
       // Show immediately
       name: data.name,
       model: data.model
@@ -40,7 +40,7 @@ const ModalsStore = Store.extend({
   },
 
   handleClosePriorityModal() {
-    this.get('modals').shiftObject();
+    this.modals.shiftObject();
   }
 });
 

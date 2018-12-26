@@ -30,7 +30,7 @@ export default TextArea.extend({
     if (e.keyCode === 13 && !e.shiftKey) {
       e.preventDefault();
 
-      const value = this.get('value');
+      const value = this.value;
 
       if (value !== '') {
         this.sendAction('sendMessage', value);
@@ -45,7 +45,7 @@ export default TextArea.extend({
   },
 
   nickCompletion: observer('participants', function() {
-    const participants = this.get('participants') || [];
+    const participants = this.participants || [];
 
     this.$().atwho({
       at: '@',

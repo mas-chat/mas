@@ -33,17 +33,17 @@ export default Component.extend({
   }),
 
   didInitAttrs() {
-    this.set('passwordEnabled', this.get('password') !== '');
+    this.set('passwordEnabled', this.password !== '');
   },
 
   actions: {
     changePassword() {
-      const newPassword = this.get('passwordEnabled') ? this.get('password') : '';
+      const newPassword = this.passwordEnabled ? this.password : '';
 
       dispatch(
         'UPDATE_PASSWORD',
         {
-          window: this.get('model'),
+          window: this.model,
           password: newPassword
         },
         () => this.sendAction('closeModal'), // Accept

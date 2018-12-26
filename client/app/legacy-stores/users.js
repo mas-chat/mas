@@ -40,7 +40,7 @@ const UsersStore = Store.extend({
     const data = {
       version: 4,
       users: {},
-      userId: this.get('userId')
+      userId: this.userId
     };
 
     // Only persist users of recent messages
@@ -60,10 +60,10 @@ const UsersStore = Store.extend({
     });
 
     // Always save user itself
-    data.users[this.get('userId')] = true;
+    data.users[this.userId] = true;
 
     Object.keys(data.users).forEach(userId => {
-      const user = this.get('users').getByIndex(userId);
+      const user = this.users.getByIndex(userId);
       data.users[userId] = user.getProperties(['userId', 'name', 'nick', 'gravatar']);
     });
 
@@ -71,12 +71,12 @@ const UsersStore = Store.extend({
   },
 
   fromJSON(data) {
-    if (data.userId !== this.get('userId') || data.version !== 4) {
+    if (data.userId !== this.userId || data.version !== 4) {
       return;
     }
 
     Object.keys(data.users).forEach(userId => {
-      this.get('users').upsertModel(data.users[userId]);
+      this.users.upsertModel(data.users[userId]);
     });
 
     this.incrementProperty('isDirty');
@@ -87,7 +87,7 @@ const UsersStore = Store.extend({
       const user = data.mapping[userId];
       user.userId = userId;
 
-      this.get('users').upsertModel(user);
+      this.users.upsertModel(user);
     });
 
     this.incrementProperty('isDirty');

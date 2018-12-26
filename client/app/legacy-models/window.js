@@ -91,19 +91,19 @@ export default BaseModel.extend({
 
   desktop: computed('_desktop', {
     get() {
-      return this.get('_desktop');
+      return this._desktop;
     },
     set(key, value) {
       if (!isMobile.any) {
         this.set('_desktop', value);
       }
 
-      return this.get('_desktop');
+      return this._desktop;
     }
   }),
 
   sortedMessages: computed('messages.[]', 'dayCounter', function() {
-    const result = this.get('messages').sortBy('gid');
+    const result = this.messages.sortBy('gid');
 
     const addDayDivider = (array, dateString, index) => {
       array.splice(
@@ -137,7 +137,7 @@ export default BaseModel.extend({
     const userId = this.get('_windowsStore.userId');
     const nick = this.get('_usersStore.users')
       .getByIndex(userId)
-      .get('nick')[this.get('network')];
+      .get('nick')[this.network];
 
     return new RegExp(`(^|[@ ])${nick}[ :]`);
   }),
@@ -156,10 +156,10 @@ export default BaseModel.extend({
 
   decoratedTitle: computed('name', 'network', 'type', '_usersStore.isDirty', function() {
     let title;
-    const type = this.get('type');
-    const userId = this.get('userId');
-    const network = this.get('network');
-    const name = this.get('name');
+    const type = this.type;
+    const userId = this.userId;
+    const network = this.network;
+    const name = this.name;
 
     if (type === '1on1' && userId === 'i0') {
       title = `${network} Server Messages`;
@@ -179,18 +179,18 @@ export default BaseModel.extend({
   }),
 
   decoratedTopic: computed('topic', function() {
-    return this.get('topic') ? `- ${this.get('topic')}` : '';
+    return this.topic ? `- ${this.topic}` : '';
   }),
 
   simplifiedName: computed('name', function() {
-    let windowName = this.get('name');
-    const network = this.get('network');
-    const type = this.get('type');
+    let windowName = this.name;
+    const network = this.network;
+    const type = this.type;
 
     if (type === 'group') {
       windowName = windowName.replace(/[&/\\#,+()$~%.'":*?<>{}]/g, '');
     } else {
-      const userId = this.get('userId');
+      const userId = this.userId;
       const peerUser = this.get('_usersStore.users').getByIndex(userId);
 
       windowName = peerUser ? peerUser.get('nick')[network] : '1on1';
@@ -199,13 +199,13 @@ export default BaseModel.extend({
   }),
 
   tooltipTopic: computed('topic', function() {
-    const topic = this.get('topic');
+    const topic = this.topic;
     return topic ? `Topic: ${topic}` : 'Topic not set.';
   }),
 
   explainedType: computed('type', function() {
-    const type = this.get('type');
-    const network = this.get('network');
+    const type = this.type;
+    const network = this.network;
 
     if (type === 'group') {
       return network === 'MAS' ? 'group' : 'channel';
@@ -219,7 +219,7 @@ export default BaseModel.extend({
 
       return {
         userId,
-        nick: user.get('nick')[this.get('network')],
+        nick: user.get('nick')[this.network],
         gravatar: user.get('gravatar')
       };
     });

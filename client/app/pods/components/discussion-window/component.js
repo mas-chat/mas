@@ -96,11 +96,11 @@ export default Component.extend({
   desktop: alias('content.desktop'),
 
   visible: computed('activeDesktop', 'content.desktop', function() {
-    return this.get('activeDesktop') === this.get('content.desktop');
+    return this.activeDesktop === this.get('content.desktop');
   }),
 
   logOrMobileModeEnabled: computed('logModeEnabled', function() {
-    return this.get('logModeEnabled') || isMobile.any;
+    return this.logModeEnabled || isMobile.any;
   }),
 
   fullBackLog: computed('content.messages.[]', function() {
@@ -108,7 +108,7 @@ export default Component.extend({
   }),
 
   beginningReached: computed('fullBackLog', 'noOlderMessages', function() {
-    return !this.get('fullBackLog') || this.get('noOlderMessages');
+    return !this.fullBackLog || this.noOlderMessages;
   }),
 
   ircServerWindow: computed('content.userId', function() {
@@ -129,7 +129,7 @@ export default Component.extend({
   }),
 
   hiddenIfLogMode: computed('logModeEnabled', function() {
-    return this.get('logModeEnabled') ? 'hidden' : '';
+    return this.logModeEnabled ? 'hidden' : '';
   }),
 
   hiddenIfMinimizedUserNames: computed('content.minimizedNamesList', function() {
@@ -141,17 +141,17 @@ export default Component.extend({
   }),
 
   windowChanged: observer('row', 'column', 'desktop', function() {
-    if (this.get('elementInserted')) {
+    if (this.elementInserted) {
       this.sendAction('relayout', { animate: true });
     }
   }),
 
   visibilityChanged: function() {
-    if (this.get('visible') && !this.get('scrollLock')) {
+    if (this.visible && !this.scrollLock) {
       this.set('content.newMessagesCount', 0);
     }
 
-    if (this.get('elementInserted')) {
+    if (this.elementInserted) {
       this.sendAction('relayout', { animate: false });
     }
   }
@@ -182,7 +182,7 @@ export default Component.extend({
     const cat = message.cat;
     const importantMessage = cat === 'msg' || cat === 'action';
 
-    if ((!this.get('visible') || this.get('scrollLock')) && importantMessage) {
+    if ((!this.visible || this.scrollLock) && importantMessage) {
       this.incrementProperty('content.newMessagesCount');
     }
 
@@ -238,7 +238,7 @@ export default Component.extend({
 
     toggleMemberListWidth() {
       dispatch('TOGGLE_MEMBER_LIST_WIDTH', {
-        window: this.get('content')
+        window: this.content
       });
 
       scheduleOnce('afterRender', this, function() {
@@ -249,7 +249,7 @@ export default Component.extend({
     processLine(msg) {
       dispatch('PROCESS_LINE', {
         body: msg,
-        window: this.get('content')
+        window: this.content
       });
     },
 
@@ -257,7 +257,7 @@ export default Component.extend({
       dispatch('EDIT_MESSAGE', {
         body: msg,
         gid,
-        window: this.get('content')
+        window: this.content
       });
     },
 
@@ -265,20 +265,20 @@ export default Component.extend({
       dispatch('EDIT_MESSAGE', {
         body: '',
         gid,
-        window: this.get('content')
+        window: this.content
       });
     },
 
     close() {
       dispatch('CLOSE_WINDOW', {
-        window: this.get('content')
+        window: this.content
       });
     },
 
     menu(modalName) {
       dispatch('OPEN_MODAL', {
         name: modalName,
-        model: this.get('content')
+        model: this.content
       });
     },
 
@@ -294,7 +294,7 @@ export default Component.extend({
     upload(files) {
       dispatch('UPLOAD_FILES', {
         files,
-        window: this.get('content')
+        window: this.content
       });
 
       this.$('input[name="files"]').val('');
@@ -464,7 +464,7 @@ export default Component.extend({
   },
 
   _goToBottom(animate, callback) {
-    if (this.get('scrollLock') || !this.$messagesEndAnchor) {
+    if (this.scrollLock || !this.$messagesEndAnchor) {
       return;
     }
 
@@ -491,7 +491,7 @@ export default Component.extend({
 
   _addScrollHandler() {
     const handler = function() {
-      if (this.get('animating')) {
+      if (this.animating) {
         return;
       }
 
@@ -511,7 +511,7 @@ export default Component.extend({
       if (scrollPos + $panel.innerHeight() >= bottomPosition) {
         this.set('scrollLock', false);
 
-        if (this.get('visible')) {
+        if (this.visible) {
           // TODO: Mutates store
           this.set('content.newMessagesCount', 0);
         }
@@ -597,7 +597,7 @@ export default Component.extend({
   },
 
   _requestMoreMessages() {
-    if (this.get('fetchingMore') || this.get('noOlderMessages')) {
+    if (this.fetchingMore || this.noOlderMessages) {
       return;
     }
 
@@ -606,7 +606,7 @@ export default Component.extend({
     dispatch(
       'FETCH_OLDER_MESSAGES',
       {
-        window: this.get('content')
+        window: this.content
       },
       foundMessages => {
         if (foundMessages) {

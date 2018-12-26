@@ -27,20 +27,20 @@ export default Component.extend({
 
   name: computed('userId', function() {
     return this.get('stores.users.users')
-      .getByIndex(this.get('userId'))
+      .getByIndex(this.userId)
       .get('name');
   }),
 
   nick: computed('userId', function() {
     return this.get('stores.users.users')
-      .getByIndex(this.get('userId'))
+      .getByIndex(this.userId)
       .get('nick').MAS;
   }),
 
   actions: {
     remove() {
       dispatch('REMOVE_FRIEND', {
-        userId: this.get('userId')
+        userId: this.userId
       });
 
       this.sendAction('closeModal');

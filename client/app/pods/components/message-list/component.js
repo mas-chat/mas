@@ -37,7 +37,7 @@ export default Component.extend({
     },
 
     change(message) {
-      this.sendAction('editMessage', message.gid, this.get('editBody'));
+      this.sendAction('editMessage', message.gid, this.editBody);
       this._endEdit();
     },
 
@@ -52,7 +52,7 @@ export default Component.extend({
   },
 
   _endEdit() {
-    const previousEditedMessage = this.get('previousEditedMessage');
+    const previousEditedMessage = this.previousEditedMessage;
 
     if (previousEditedMessage) {
       previousEditedMessage.set('editing', false); // TODO: Mutates store

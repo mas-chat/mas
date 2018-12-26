@@ -44,7 +44,7 @@ export default Component.extend({
   },
 
   friendlyDate: computed('currentDate', function() {
-    return moment(this.get('currentDate')).format('dddd, MMMM Do YYYY');
+    return moment(this.currentDate).format('dddd, MMMM Do YYYY');
   }),
 
   actions: {
@@ -86,7 +86,7 @@ export default Component.extend({
   },
 
   _seek(days) {
-    const newDate = moment(this.get('currentDate'))
+    const newDate = moment(this.currentDate)
       .add(days, 'd')
       .toDate();
 
@@ -98,7 +98,7 @@ export default Component.extend({
 
   _fetchData() {
     // Beginning and end of the selected day in unix time format
-    const date = this.get('currentDate');
+    const date = this.currentDate;
     const epochTsStart = moment(date)
       .startOf('day')
       .unix();
@@ -111,7 +111,7 @@ export default Component.extend({
     dispatch(
       'FETCH_MESSAGE_RANGE',
       {
-        window: this.get('window'),
+        window: this.window,
         start: epochTsStart,
         end: epochTsEnd
       },

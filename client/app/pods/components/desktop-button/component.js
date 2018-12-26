@@ -22,17 +22,17 @@ export default Component.extend({
   draggedWindow: false,
 
   dropAreaCSSClass: computed('draggedWindow', function() {
-    return this.get('draggedWindow') ? 'main-desktop-droparea' : '';
+    return this.draggedWindow ? 'main-desktop-droparea' : '';
   }),
 
   selectedCSSClass: computed('selected', 'id', function() {
-    return this.get('id') === this.get('selected') ? 'main-desktop-button-selected' : '';
+    return this.id === this.selected ? 'main-desktop-button-selected' : '';
   }),
 
   actions: {
     switch() {
       dispatch('CHANGE_ACTIVE_DESKTOP', {
-        desktop: this.get('id')
+        desktop: this.id
       });
     },
 

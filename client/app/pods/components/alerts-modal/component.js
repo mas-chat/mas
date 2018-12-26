@@ -30,8 +30,8 @@ export default Component.extend({
       }
 
       dispatch('UPDATE_WINDOW_ALERTS', {
-        window: this.get('model'),
-        alerts: this.get('alerts')
+        window: this.model,
+        alerts: this.alerts
       });
 
       this.sendAction('closeModal');

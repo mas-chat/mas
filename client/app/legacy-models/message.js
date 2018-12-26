@@ -57,54 +57,54 @@ export default BaseModel.extend({
   ircMotd: false,
 
   edited: computed('status', function() {
-    return this.get('status') === 'edited';
+    return this.status === 'edited';
   }),
 
   deleted: computed('status', function() {
-    return this.get('status') === 'deleted';
+    return this.status === 'deleted';
   }),
 
   updatedTime: computed('updatedTs', function() {
-    const updatedTs = this.get('updatedTs');
+    const updatedTs = this.updatedTs;
 
     if (!updatedTs) {
       return '';
     }
 
-    const originalTime = moment.unix(this.get('ts'));
+    const originalTime = moment.unix(this.ts);
     const updatedTime = moment.unix(updatedTs);
 
     return `at ${updatedTime.format(originalTime.isSame(updatedTime, 'd') ? 'HH:mm' : 'MMM Do HH:mm')}`;
   }),
 
   updatedDate: computed('updatedTs', function() {
-    const updatedTs = this.get('updatedTs');
+    const updatedTs = this.updatedTs;
 
     return updatedTs ? `at ${moment.unix(updatedTs).format('MMM Do HH:mm')}` : '';
   }),
 
   updatedDateLong: computed('updatedTs', function() {
-    const updatedTs = this.get('updatedTs');
+    const updatedTs = this.updatedTs;
 
     return updatedTs ? `at ${moment.unix(updatedTs).format('dddd, MMMM D HH:mm')}` : '';
   }),
 
   nick: computed('userId', 'window', function() {
-    const user = this.get('_usersStore.users').getByIndex(this.get('userId'));
+    const user = this.get('_usersStore.users').getByIndex(this.userId);
     return user ? user.get('nick')[this.get('window.network')] : '';
   }),
 
   avatarUrl: computed('userId', function() {
-    const user = this.get('_usersStore.users').getByIndex(this.get('userId'));
+    const user = this.get('_usersStore.users').getByIndex(this.userId);
     return user ? `//gravatar.com/avatar/${user.get('gravatar')}?d=mm` : '';
   }),
 
   decoratedCat: computed('cat', 'nick', 'body', 'mentionedRegEx', function() {
-    const cat = this.get('cat');
-    const body = this.get('body');
-    const userId = this.get('userId');
-    const nick = this.get('nick');
-    const mentionedRegEx = this.get('mentionedRegEx');
+    const cat = this.cat;
+    const body = this.body;
+    const userId = this.userId;
+    const nick = this.nick;
+    const mentionedRegEx = this.mentionedRegEx;
 
     if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {
       return 'mention';
@@ -118,14 +118,14 @@ export default BaseModel.extend({
   }),
 
   decoratedTs: computed('ts', function() {
-    return moment.unix(this.get('ts')).format('HH:mm');
+    return moment.unix(this.ts).format('HH:mm');
   }),
 
   channelAction: computed('cat', function() {
-    const category = this.get('cat');
-    const nick = this.get('nick');
+    const category = this.cat;
+    const nick = this.nick;
     const groupName = this.get('window.name');
-    const body = this.get('body');
+    const body = this.body;
 
     switch (category) {
       case 'join':
@@ -142,12 +142,12 @@ export default BaseModel.extend({
   }),
 
   myNotDeletedMessage: computed('decoratedCat', function() {
-    return this.get('decoratedCat') === 'mymsg' && this.get('status') !== 'deleted';
+    return this.decoratedCat === 'mymsg' && this.status !== 'deleted';
   }),
 
   bodyParts: computed('body', function() {
-    let body = this.get('body');
-    const cat = this.get('cat');
+    let body = this.body;
+    const cat = this.cat;
 
     let parts = [];
 
@@ -167,27 +167,27 @@ export default BaseModel.extend({
   }),
 
   text: computed('bodyParts', function() {
-    return this.get('bodyParts').findBy('type', 'text').text;
+    return this.bodyParts.findBy('type', 'text').text;
   }),
 
   images: computed('bodyParts', function() {
-    return this.get('bodyParts').filterBy('type', 'image');
+    return this.bodyParts.filterBy('type', 'image');
   }),
 
   hasMedia: computed('bodyParts', function() {
-    return !this.get('bodyParts').isEvery('type', 'text');
+    return !this.bodyParts.isEvery('type', 'text');
   }),
 
   hasImages: computed('bodyParts', function() {
-    return this.get('bodyParts').isAny('type', 'image');
+    return this.bodyParts.isAny('type', 'image');
   }),
 
   hasYoutubeVideo: computed('bodyParts', function() {
-    return this.get('bodyParts').isAny('type', 'youtubelink');
+    return this.bodyParts.isAny('type', 'youtubelink');
   }),
 
   videoId: computed('bodyParts', function() {
-    const video = this.get('bodyParts').findBy('type', 'youtubelink');
+    const video = this.bodyParts.findBy('type', 'youtubelink');
 
     if (video) {
       const urlObj = new URI(video.url);
@@ -204,7 +204,7 @@ export default BaseModel.extend({
   }),
 
   videoParams: computed('bodyParts', function() {
-    const video = this.get('bodyParts').findBy('type', 'youtubelink');
+    const video = this.bodyParts.findBy('type', 'youtubelink');
 
     const start = video.start ? `&start=${video.start}` : '';
 

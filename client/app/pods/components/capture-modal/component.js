@@ -28,11 +28,11 @@ export default Component.extend({
 
   actions: {
     uploadPhoto() {
-      const file = this.get('shot');
+      const file = this.shot;
 
       dispatch('UPLOAD_FILES', {
         files: [file],
-        window: this.get('model')
+        window: this.model
       });
 
       this.sendAction('closeModal');
@@ -56,7 +56,7 @@ export default Component.extend({
 
     closeModal() {
       this.sendAction('closeModal');
-      this.get('video').closeStream();
+      this.video.closeStream();
     }
   },
 
@@ -65,11 +65,11 @@ export default Component.extend({
     this.$('.btn-capture').addClass('disabled');
     this.$('#webcam-snapshot').hide();
 
-    this.get('video').getStream(bind(this, this._getStreamSuccess), bind(this, this._getStreamError));
+    this.video.getStream(bind(this, this._getStreamSuccess), bind(this, this._getStreamError));
   },
 
   willDestroyElement() {
-    this.get('video').closeStream();
+    this.video.closeStream();
   },
 
   _getStreamSuccess(stream) {

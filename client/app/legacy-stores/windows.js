@@ -50,7 +50,7 @@ const WindowsStore = Store.extend({
     const desktops = {};
     const desktopsArray = A([]);
 
-    this.get('windows').forEach(masWindow => {
+    this.windows.forEach(masWindow => {
       const newMessages = masWindow.get('newMessagesCount');
       const desktop = masWindow.get('desktop');
       const initials = masWindow
@@ -77,15 +77,15 @@ const WindowsStore = Store.extend({
   }),
 
   deletedDesktopCheck: observer('desktops.[]', 'initDone', function() {
-    if (!this.get('initDone')) {
+    if (!this.initDone) {
       return;
     }
 
-    const desktopIds = this.get('desktops').map(d => d.id);
+    const desktopIds = this.desktops.map(d => d.id);
 
     if (desktopIds.indexOf(settingStore.settings.activeDesktop) === -1) {
       dispatch('CHANGE_ACTIVE_DESKTOP', {
-        desktop: this.get('desktops')
+        desktop: this.desktops
           .map(d => d.id)
           .sort()[0] // Oldest
       });
@@ -96,13 +96,13 @@ const WindowsStore = Store.extend({
     const data = {
       version: 4,
       windows: [],
-      userId: this.get('userId'),
+      userId: this.userId,
       cachedUpto: 0
     };
 
     const maxBacklogMsgs = calcMsgHistorySize();
 
-    this.get('windows').forEach(masWindow => {
+    this.windows.forEach(masWindow => {
       const messages = [];
 
       const sortedMessages = masWindow
@@ -164,7 +164,7 @@ const WindowsStore = Store.extend({
     return; // TODO: Enable when missing user problem is solved.
 
     // eslint-disable-next-line no-unreachable
-    if (data.userId !== this.get('userId') || data.version !== 4) {
+    if (data.userId !== this.userId || data.version !== 4) {
       console.log(`Corrupted windows snapshot.`);
     }
 
@@ -172,7 +172,7 @@ const WindowsStore = Store.extend({
       const messages = windowData.messages;
       delete windowData.messages;
 
-      const windowModel = this.get('windows').upsertModel(windowData);
+      const windowModel = this.windows.upsertModel(windowData);
       windowModel.get('messages').upsertModels(messages, { window: windowModel });
     }
 
@@ -217,7 +217,7 @@ const WindowsStore = Store.extend({
     data.window.messages.upsertModel({
       body: data.body,
       cat: 'msg',
-      userId: this.get('userId'),
+      userId: this.userId,
       ts: data.ts,
       gid: data.gid,
       window: data.window
@@ -235,7 +235,7 @@ const WindowsStore = Store.extend({
 
     delete window.windowId;
 
-    if (!this.get('initDone')) {
+    if (!this.initDone) {
       // Optimization: Avoid re-renders after every message
       this.msgBuffer.push(data);
     } else {
@@ -519,7 +519,7 @@ const WindowsStore = Store.extend({
     data.type = data.windowType;
     delete data.windowType;
 
-    this.get('windows').upsertModel(data, { generation: socket.sessionId });
+    this.windows.upsertModel(data, { generation: socket.sessionId });
   },
 
   handleCloseWindow(data) {
@@ -536,7 +536,7 @@ const WindowsStore = Store.extend({
 
   handleDeleteWindowServer(data) {
     const window = this._getWindow(data.windowId);
-    this.get('windows').removeModel(window);
+    this.windows.removeModel(window);
   },
 
   handleUpdatePassword(data, successCb, rejectCb) {
@@ -605,7 +605,7 @@ const WindowsStore = Store.extend({
   },
 
   handleSeekActiveDesktop(data) {
-    const desktops = this.get('desktops');
+    const desktops = this.desktops;
     const activeDesktop = settingStore.settings.activeDesktop;
     let index = desktops.indexOf(desktops.findBy('id', activeDesktop));
 
@@ -626,13 +626,13 @@ const WindowsStore = Store.extend({
     // Remove possible deleted windows.
     const deletedWindows = [];
 
-    this.get('windows').forEach(windowObject => {
+    this.windows.forEach(windowObject => {
       if (windowObject.get('generation') !== socket.sessionId) {
         deletedWindows.push(windowObject);
       }
     });
 
-    this.get('windows').removeModels(deletedWindows);
+    this.windows.removeModels(deletedWindows);
 
     // Insert buffered message in one go.
     console.log(`MsgBuffer processing started.`);
@@ -725,7 +725,7 @@ const WindowsStore = Store.extend({
   },
 
   _getWindow(windowId) {
-    return this.get('windows').getByIndex(windowId);
+    return this.windows.getByIndex(windowId);
   },
 
   _trimBacklog(messages) {

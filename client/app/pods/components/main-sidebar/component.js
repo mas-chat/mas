@@ -64,6 +64,6 @@ export default Component.extend({
   },
 
   friendsOnline: computed('friends.@each.online', function() {
-    return this.get('friends').filterBy('online', true).length;
+    return this.friends.filterBy('online', true).length;
   })
 });

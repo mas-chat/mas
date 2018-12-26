@@ -12,12 +12,12 @@ export default EmberObject.extend({
 
       setInterval(() => {
         next(this, this._saveSnapshot);
-      }, this.get('_snapshotInterval'));
+      }, this._snapshotInterval);
     }
   },
 
   _loadSnapshot() {
-    const name = this.get('_storeName');
+    const name = this._storeName;
     let data;
 
     console.log(`[${name}-store] Starting to load saved snapshot.`);
@@ -47,7 +47,7 @@ export default EmberObject.extend({
   },
 
   _saveSnapshot() {
-    const name = this.get('_storeName');
+    const name = this._storeName;
     const data = this.toJSON();
 
     try {

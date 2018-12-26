@@ -42,13 +42,13 @@ export default Component.extend({
 
   actions: {
     joinIRC() {
-      const password = this.get('password').trim();
+      const password = this.password.trim();
 
       dispatch(
         'JOIN_IRC_CHANNEL',
         {
-          name: this.get('channel'),
-          network: this.get('selectedNetwork'),
+          name: this.channel,
+          network: this.selectedNetwork,
           password
         },
         () => {

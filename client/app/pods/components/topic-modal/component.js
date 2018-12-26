@@ -29,8 +29,8 @@ export default Component.extend({
   actions: {
     changeTopic() {
       dispatch('UPDATE_TOPIC', {
-        topic: this.get('topic'),
-        window: this.get('model')
+        topic: this.topic,
+        window: this.model
       });
 
       // TODO: Handle error cases

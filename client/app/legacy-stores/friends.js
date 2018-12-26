@@ -25,10 +25,10 @@ const FriendsStore = Store.extend({
 
   handleAddFriendsServer(data) {
     if (data.reset) {
-      this.get('friends').clearModels();
+      this.friends.clearModels();
     }
 
-    this.get('friends').upsertModels(data.friends);
+    this.friends.upsertModels(data.friends);
   },
 
   handleConfirmRemoveFriend(data) {

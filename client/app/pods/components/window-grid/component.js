@@ -110,11 +110,11 @@ export default Component.extend({
     },
 
     registerWindow(discussionWindow) {
-      this.get('windowComponents').addObject(discussionWindow);
+      this.windowComponents.addObject(discussionWindow);
     },
 
     unregisterWindow(discussionWindow) {
-      this.get('windowComponents').removeObject(discussionWindow);
+      this.windowComponents.removeObject(discussionWindow);
     }
   },
 
@@ -255,7 +255,7 @@ export default Component.extend({
 
   _layoutWindows(animate) {
     const duration = animate ? 600 : 0;
-    const windowComponents = this.get('windowComponents');
+    const windowComponents = this.windowComponents;
     const container = this._containerDimensions();
     const expandedWindow = windowComponents.findBy('expanded', true);
 

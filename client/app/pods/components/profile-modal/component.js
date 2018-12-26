@@ -43,8 +43,8 @@ export default Component.extend({
       dispatch(
         'UPDATE_PROFILE',
         {
-          name: this.get('name'),
-          email: this.get('email')
+          name: this.name,
+          email: this.email
         },
         () => this.sendAction('closeModal'), // Accept
         reason => this.set('errorMsg', reason)

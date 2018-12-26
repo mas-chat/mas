@@ -22,11 +22,11 @@ export default Service.extend({
   stream: null,
 
   streamActive: computed('stream', function() {
-    return !!this.get('stream');
+    return !!this.stream;
   }),
 
   getStream(successCb, failureCb) {
-    const stream = this.get('stream');
+    const stream = this.stream;
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       failureCb();
@@ -55,7 +55,7 @@ export default Service.extend({
   },
 
   closeStream() {
-    const stream = this.get('stream');
+    const stream = this.stream;
 
     if (stream) {
       for (const track of stream.getTracks()) {

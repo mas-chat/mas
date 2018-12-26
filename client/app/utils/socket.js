@@ -153,7 +153,7 @@ const SocketService = EmberObject.extend({
     ioSocket.on(
       'reconnect',
       bind(this, function() {
-        const timer = this.get('_disconnectedTimer');
+        const timer = this._disconnectedTimer;
 
         if (timer) {
           cancel(timer);
@@ -172,7 +172,7 @@ const SocketService = EmberObject.extend({
       callback
     });
 
-    if (this._sendQueue.length === 1 && this.get('_connected')) {
+    if (this._sendQueue.length === 1 && this._connected) {
       this._emitReq();
     }
   },
@@ -180,7 +180,7 @@ const SocketService = EmberObject.extend({
   _emitInit() {
     const maxBacklogMsgs = calcMsgHistorySize();
     const cachedUpto = this.get('_windowsStore.cachedUpto');
-    const cookie = this.get('cookie');
+    const cookie = this.cookie;
 
     ioSocket.emit('init', {
       clientName: 'web',

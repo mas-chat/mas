@@ -51,7 +51,7 @@ export default ArrayProxy.extend({
   },
 
   getByIndex(index) {
-    return this.get('_lookupTable').get(index);
+    return this._lookupTable.get(index);
   },
 
   removeModel(model) {
@@ -63,25 +63,25 @@ export default ArrayProxy.extend({
   },
 
   clearModels() {
-    this.get('_lookupTable').clear();
+    this._lookupTable.clear();
     return this.clear();
   },
 
   _upsertObjects(objects, options) {
-    const primaryKeyName = this.get('index');
+    const primaryKeyName = this.index;
     let model;
 
     for (const object of objects) {
       const primaryKey = object[primaryKeyName];
       assert(`Primary key '${primaryKeyName}' must exist`, primaryKey !== undefined);
 
-      const existingModel = this.get('_lookupTable').get(primaryKey);
+      const existingModel = this._lookupTable.get(primaryKey);
 
       if (existingModel) {
         model = existingModel.setModelProperties(object);
       } else {
         model = this._createModel(object);
-        this.get('_lookupTable').set(primaryKey, model);
+        this._lookupTable.set(primaryKey, model);
 
         if (options.prepend) {
           this.unshiftObject(model);
@@ -101,18 +101,18 @@ export default ArrayProxy.extend({
   },
 
   _createModel(object) {
-    const model = this.get('factory').create();
+    const model = this.factory.create();
     model.setModelProperties(object); // Never set properties with create()
 
     return model;
   },
 
   _removeModels(models) {
-    const primaryKeyName = this.get('index');
+    const primaryKeyName = this.index;
 
     for (const model of models) {
       const primaryKey = model && model.get && model.get(primaryKeyName);
-      const found = this.get('_lookupTable').delete(primaryKey);
+      const found = this._lookupTable.delete(primaryKey);
 
       if (found) {
         this.removeObject(model);

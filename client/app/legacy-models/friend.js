@@ -28,7 +28,7 @@ export default BaseModel.extend({
   },
 
   name: computed('_usersStore.isDirty', function() {
-    const userId = this.get('userId');
+    const userId = this.userId;
     return this.get('_usersStore.users')
       .getByIndex(userId)
       .get('name');
