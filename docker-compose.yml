@@ -79,7 +79,7 @@ services:
     ports:
       - '113:113'
   elasticsearch:
-    image: 'docker.elastic.co/elasticsearch/elasticsearch:6.4.0'
+    image: 'docker.elastic.co/elasticsearch/elasticsearch:6.5.2'
     environment:
       - xpack.security.enabled=false
       - xpack.monitoring.enabled=false
@@ -96,7 +96,7 @@ services:
     ports:
       - '127.0.0.1:9100:9100'
   redis:
-    image: 'redis:5.0.0'
+    image: 'redis:5.0.3'
     volumes:
       - mas-redis-data:/data
     ports:
