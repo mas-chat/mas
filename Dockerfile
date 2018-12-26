@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
   && rm -rf /var/lib/apt/lists/*
 
 ENV NPM_CONFIG_LOGLEVEL warn
+ENV PROJECT_ROOT /app/
 
 MAINTAINER Ilkka Oksanen <iao@iki.fi>
 
