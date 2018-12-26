@@ -443,6 +443,11 @@ const WindowsStore = Store.extend({
       resp => {
         // Window messages are roughly sorted. First are old messages received by FETCH.
         // Then the messages received at startup and at runtime.
+        if (!resp.msgs) {
+          successCb(false);
+          return;
+        }
+
         data.window.get('messages').upsertModelsPrepend(resp.msgs, { window: data.window });
 
         successCb(resp.msgs.length !== 0);
