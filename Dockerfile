@@ -12,7 +12,7 @@ MAINTAINER Ilkka Oksanen <iao@iki.fi>
 COPY server /app/server/
 WORKDIR /app/server/
 
-RUN yarn install --production \
+RUN yarn install \
   && yarn run prod \
   && yarn cache clean
 
