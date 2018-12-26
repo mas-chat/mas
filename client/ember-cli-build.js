@@ -15,7 +15,14 @@ module.exports = function(defaults) {
     },
     babel: {
       // Order matters!
-      plugins: ['babel-plugin-transform-decorators-legacy', 'babel-plugin-transform-class-properties']
+      plugins: [
+        [
+          '@babel/plugin-proposal-decorators', { legacy: true }
+        ],
+        [
+          '@babel/plugin-proposal-class-properties', { loose: true }
+        ]
+      ]
     },
     autoprefixer: {
       browsers: ['last 2 versions'],
