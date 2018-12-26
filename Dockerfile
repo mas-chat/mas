@@ -1,5 +1,7 @@
 FROM node:11.5.0
 
+ARG REVISION=unknown
+
 RUN apt-get update && apt-get install -y \
   exiftran \
   && rm -rf /var/lib/apt/lists/*
