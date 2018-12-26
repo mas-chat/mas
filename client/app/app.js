@@ -24,6 +24,8 @@ import './legacy-stores/modals';
 import './legacy-stores/users';
 import './legacy-stores/windows';
 
+console.log(`MAS frontend version: ${config.APP.revision}`)
+
 const App = Application.extend({
   modulePrefix: config.modulePrefix,
   podModulePrefix: config.podModulePrefix,
