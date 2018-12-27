@@ -22,11 +22,17 @@ import isMobile from 'ismobilejs';
 import BaseModel from './base';
 import Message from './message';
 import daySeparatorStore from '../stores/DaySeparatorStore';
+import userStore from '../stores/UserStore';
 import IndexArray from '../utils/index-array';
 
 const { autorun } = Mobx;
 
 let mobileDesktop = 1;
+
+function monitor(name, ...args) {
+  autorun(() => this.set(name, args[args.length - 1].call(this)));
+  return computed(...args);
+}
 
 export default BaseModel.extend({
   windowId: 0,
@@ -57,13 +63,11 @@ export default BaseModel.extend({
   _desktop: null,
 
   _windowsStore: null,
-  _usersStore: null,
 
   init() {
     this._super();
 
     this.set('_windowsStore', window.stores.windows);
-    this.set('_usersStore', window.stores.users);
 
     this.set('_desktop', mobileDesktop++);
 
@@ -86,6 +90,9 @@ export default BaseModel.extend({
 
     autorun(() => {
       this.set('dayCounter', daySeparatorStore.dayCounter);
+
+      const nick = userStore.users.get(userStore.userId).nick[this.network];
+      this.set('userNickHighlightRegex', new RegExp(`(^|[@ ])${nick}[ :]`));
     });
   },
 
@@ -133,28 +140,19 @@ export default BaseModel.extend({
     return result;
   }),
 
-  userNickHighlightRegex: computed('_windowsStore.userId', '_usersStore.isDirty', function() {
-    const userId = this.get('_windowsStore.userId');
-    const nick = this.get('_usersStore.users')
-      .getByIndex(userId)
-      .get('nick')[this.network];
-
-    return new RegExp(`(^|[@ ])${nick}[ :]`);
+  operatorNames: monitor('operatorNames', 'operators.[]', function() {
+    return this._mapUserIdsToNicks('operators');
   }),
 
-  operatorNames: computed('operators.[]', '_usersStore.isDirty', function() {
-    return this._mapUserIdsToNicks('operators').sortBy('nick');
+  voiceNames: monitor('voiceNames', 'voices.[]', function() {
+    return this._mapUserIdsToNicks('voices');
   }),
 
-  voiceNames: computed('voices.[]', '_usersStore.isDirty', function() {
-    return this._mapUserIdsToNicks('voices').sortBy('nick');
+  userNames: monitor('userNames', 'users.[]', function() {
+    return this._mapUserIdsToNicks('users');
   }),
 
-  userNames: computed('users.[]', '_usersStore.isDirty', function() {
-    return this._mapUserIdsToNicks('users').sortBy('nick');
-  }),
-
-  decoratedTitle: computed('name', 'network', 'type', '_usersStore.isDirty', function() {
+  decoratedTitle: computed('name', 'network', 'type', function() {
     let title;
     const type = this.type;
     const userId = this.userId;
@@ -165,9 +163,9 @@ export default BaseModel.extend({
       title = `${network} Server Messages`;
     } else if (type === '1on1') {
       const ircNetwork = network === 'MAS' ? '' : `${network} `;
-      const peerUser = this.get('_usersStore.users').getByIndex(userId);
+      const peerUser = userStore.users.get(userId);
 
-      const target = peerUser ? peerUser.get('nick')[network] : 'person';
+      const target = peerUser ? peerUser.nick[network] : 'person';
       title = `Private ${ircNetwork} conversation with ${target}`;
     } else if (network === 'MAS') {
       title = `Group: ${name.charAt(0).toUpperCase()}${name.substr(1)}`;
@@ -191,9 +189,9 @@ export default BaseModel.extend({
       windowName = windowName.replace(/[&/\\#,+()$~%.'":*?<>{}]/g, '');
     } else {
       const userId = this.userId;
-      const peerUser = this.get('_usersStore.users').getByIndex(userId);
+      const peerUser = userStore.users.get(userId);
 
-      windowName = peerUser ? peerUser.get('nick')[network] : '1on1';
+      windowName = peerUser ? peerUser.nick[network] : '1on1';
     }
     return windowName;
   }),
@@ -214,14 +212,16 @@ export default BaseModel.extend({
   }),
 
   _mapUserIdsToNicks(role) {
-    return this.get(role).map(userId => {
-      const user = this.get('_usersStore.users').getByIndex(userId);
+    return this.get(role)
+      .map(userId => {
+        const user = userStore.users.get(userId);
 
-      return {
-        userId,
-        nick: user.get('nick')[this.network],
-        gravatar: user.get('gravatar')
-      };
-    });
+        return {
+          userId,
+          nick: user.nick[this.network],
+          gravatar: user.gravatar
+        };
+      })
+      .sort((a, b) => a.nick - b.nick);
   }
 });

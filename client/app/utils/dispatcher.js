@@ -3,6 +3,7 @@ import daySeparatorStore from '../stores/DaySeparatorStore';
 import networkStore from '../stores/NetworkStore';
 import profileStore from '../stores/ProfileStore';
 import settingStore from '../stores/SettingStore';
+import userStore from '../stores/UserStore';
 
 const noopCb = () => {};
 
@@ -21,6 +22,7 @@ export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) 
   stores.profile = profileStore;
   stores.settings = settingStore;
   stores.daySeparatorStore = daySeparatorStore;
+  stores.users = userStore;
 
   for (const store of Object.keys(stores)) {
     const storeObj = stores[store];

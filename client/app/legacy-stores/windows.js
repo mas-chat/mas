@@ -85,9 +85,7 @@ const WindowsStore = Store.extend({
 
     if (desktopIds.indexOf(settingStore.settings.activeDesktop) === -1) {
       dispatch('CHANGE_ACTIVE_DESKTOP', {
-        desktop: this.desktops
-          .map(d => d.id)
-          .sort()[0] // Oldest
+        desktop: this.desktops.map(d => d.id).sort()[0] // Oldest
       });
     }
   }),

@@ -14,23 +14,22 @@
 //   governing permissions and limitations under the License.
 //
 
+import Mobx from 'mobx';
 import { computed } from '@ember/object';
 import BaseModel from './base';
+import userStore from '../stores/UserStore';
+
+const { autorun } = Mobx;
+
+function monitor(name, ...args) {
+  autorun(() => this.set(name, args[args.length - 1].call(this)));
+  return computed(...args);
+}
 
 export default BaseModel.extend({
   userId: null,
 
-  _usersStore: null,
-
-  init() {
-    this._super();
-    this.set('_usersStore', window.stores.users);
-  },
-
-  name: computed('_usersStore.isDirty', function() {
-    const userId = this.userId;
-    return this.get('_usersStore.users')
-      .getByIndex(userId)
-      .get('name');
+  name: monitor('name', 'userId', function() {
+    return userStore.users.get(this.userId).name;
   })
 });

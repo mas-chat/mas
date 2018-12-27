@@ -22,6 +22,7 @@ import emojione from 'emojione';
 import moment from 'moment';
 import URI from 'urijs';
 import BaseModel from './base';
+import userStore from '../stores/UserStore';
 
 marked.setOptions({
   breaks: true,
@@ -43,13 +44,11 @@ export default BaseModel.extend({
 
   // Other stores
   _windowsStore: null,
-  _usersStore: null,
 
   init() {
     this._super();
 
     this.set('_windowsStore', window.stores.windows);
-    this.set('_usersStore', window.stores.users);
   },
 
   mentionedRegEx: alias('window.userNickHighlightRegex'),
@@ -90,13 +89,13 @@ export default BaseModel.extend({
   }),
 
   nick: computed('userId', 'window', function() {
-    const user = this.get('_usersStore.users').getByIndex(this.userId);
-    return user ? user.get('nick')[this.get('window.network')] : '';
+    const user = userStore.users.get(this.userId);
+    return user ? user.nick[this.get('window.network')] : '';
   }),
 
   avatarUrl: computed('userId', function() {
-    const user = this.get('_usersStore.users').getByIndex(this.userId);
-    return user ? `//gravatar.com/avatar/${user.get('gravatar')}?d=mm` : '';
+    const user = userStore.users.get(this.userId);
+    return user ? `//gravatar.com/avatar/${user.gravatar}?d=mm` : '';
   }),
 
   decoratedCat: computed('cat', 'nick', 'body', 'mentionedRegEx', function() {

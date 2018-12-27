@@ -18,6 +18,7 @@ import Store from './base';
 import { dispatch } from '../utils/dispatcher';
 import Friend from '../legacy-models/friend';
 import IndexArray from '../utils/index-array';
+import userStore from '../stores/UserStore';
 import socket from '../utils/socket';
 
 const FriendsStore = Store.extend({
@@ -62,14 +63,10 @@ const FriendsStore = Store.extend({
   },
 
   handleConfirmFriendsServer(data) {
-    const users = window.stores.users.get('users');
-
     for (const friendCandidate of data.friends) {
       const userId = friendCandidate.userId;
-      const user = users.getByIndex(userId);
-      const nick = user.get('nick').MAS;
-
-      const message = `Allow ${user.get('name')} (${nick}) to add you to his/her contacts list?`;
+      const user = userStore.users.get(userId);
+      const message = `Allow ${user.name} (${user.nick.mas}) to add you to his/her contacts list?`;
 
       dispatch('SHOW_ALERT', {
         alertId: friendCandidate.userId,
