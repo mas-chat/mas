@@ -103,7 +103,7 @@ function createFrontendApp() {
   const app = new Koa();
 
   app.on('error', err => {
-    if (err.status !== 404) {
+    if (err.status !== 404 && !error.errno === 'EPIPE') {
       log.warn(`Koa server error: ${util.inspect(err)}`);
     }
   });
