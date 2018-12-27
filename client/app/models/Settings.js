@@ -2,7 +2,7 @@ import Mobx from 'mobx';
 
 const { observable } = Mobx;
 
-export default class AlertModel {
+export default class SettingModel {
   @observable theme = 'default';
   @observable activeDesktop = 1;
   @observable email = ''; // TODO: Remove from here, keep in profile
