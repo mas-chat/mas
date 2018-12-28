@@ -1,43 +1,30 @@
-//
-//   Copyright 2009-2015 Ilkka Oksanen <iao@iki.fi>
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing,
-//   software distributed under the License is distributed on an "AS
-//   IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-//   express or implied.  See the License for the specific language
-//   governing permissions and limitations under the License.
-//
-
-import Store from './base';
+import Mobx from 'mobx';
 import { dispatch } from '../utils/dispatcher';
-import Friend from '../legacy-models/friend';
-import IndexArray from '../utils/index-array';
-import userStore from '../stores/UserStore';
+import userStore from './UserStore';
+import FriendModel from '../models/Friend';
 import socket from '../utils/socket';
 
-const FriendsStore = Store.extend({
-  friends: IndexArray.create({ index: 'userId', factory: Friend }),
+const { observable } = Mobx;
+
+class FriendStore {
+  @observable friends = new Map();
 
   handleAddFriendsServer(data) {
     if (data.reset) {
-      this.friends.clearModels();
+      this.friends.clear();
     }
 
-    this.friends.upsertModels(data.friends);
-  },
+    data.friends.forEach(friend => {
+      this.friends.set(friend.userId, new FriendModel(this, friend));
+    });
+  }
 
   handleConfirmRemoveFriend(data) {
     dispatch('OPEN_MODAL', {
       name: 'remove-friend-modal',
       model: data.userId
     });
-  },
+  }
 
   handleRequestFriend(data) {
     socket.send(
@@ -60,7 +47,7 @@ const FriendsStore = Store.extend({
         });
       }
     );
-  },
+  }
 
   handleConfirmFriendsServer(data) {
     for (const friendCandidate of data.friends) {
@@ -86,7 +73,7 @@ const FriendsStore = Store.extend({
         }
       });
     }
-  },
+  }
 
   handleRemoveFriend(data) {
     socket.send({
@@ -94,7 +81,6 @@ const FriendsStore = Store.extend({
       userId: data.userId
     });
   }
-});
+}
 
-window.stores = window.stores || {};
-window.stores.friends = FriendsStore.create();
+export default new FriendStore();

@@ -1,5 +1,6 @@
 import alertStore from '../stores/AlertStore';
 import daySeparatorStore from '../stores/DaySeparatorStore';
+import friendStore from '../stores/FriendStore';
 import networkStore from '../stores/NetworkStore';
 import profileStore from '../stores/ProfileStore';
 import settingStore from '../stores/SettingStore';
@@ -18,10 +19,11 @@ export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) 
   const stores = window.stores;
 
   stores.alerts = alertStore;
+  stores.daySeparatorStore = daySeparatorStore;
+  stores.friendStore = friendStore;
   stores.networks = networkStore;
   stores.profile = profileStore;
   stores.settings = settingStore;
-  stores.daySeparatorStore = daySeparatorStore;
   stores.users = userStore;
 
   for (const store of Object.keys(stores)) {

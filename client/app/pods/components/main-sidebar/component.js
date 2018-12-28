@@ -17,9 +17,9 @@
 import Mobx from 'mobx';
 import { computed } from '@ember/object';
 import { alias } from '@ember/object/computed';
-import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import settingStore from '../../../stores/SettingStore';
+import friendStore from '../../../stores/FriendStore';
 import { dispatch } from '../../../utils/dispatcher';
 
 const { autorun } = Mobx;
@@ -31,6 +31,7 @@ export default Component.extend({
     this.disposer = autorun(() => {
       this.set('canUseIRC', settingStore.settings.canUseIRC);
       this.set('darkTheme', settingStore.settings.theme === 'dark');
+      this.set('friends', Array.from(friendStore.friends.values()));
     });
   },
 
@@ -38,12 +39,9 @@ export default Component.extend({
     this.disposer();
   },
 
-  stores: service(),
-
   classNames: ['sidebar', 'flex-grow-column'],
 
   draggedWindow: false,
-  friends: alias('stores.friends.friends'),
 
   actions: {
     openModal(modal) {
