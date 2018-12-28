@@ -1,6 +1,7 @@
 import alertStore from '../stores/AlertStore';
 import daySeparatorStore from '../stores/DaySeparatorStore';
 import friendStore from '../stores/FriendStore';
+import modalStore from '../stores/ModalStore';
 import networkStore from '../stores/NetworkStore';
 import profileStore from '../stores/ProfileStore';
 import settingStore from '../stores/SettingStore';
@@ -21,6 +22,7 @@ export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) 
   stores.alerts = alertStore;
   stores.daySeparatorStore = daySeparatorStore;
   stores.friendStore = friendStore;
+  stores.modalStore = modalStore;
   stores.networks = networkStore;
   stores.profile = profileStore;
   stores.settings = settingStore;

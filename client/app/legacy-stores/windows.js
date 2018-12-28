@@ -17,11 +17,10 @@
 /* globals $ */
 
 import { A } from '@ember/array';
-import { computed, observer } from '@ember/object';
+import EmberObject, { computed, observer } from '@ember/object';
 import moment from 'moment';
 import Cookies from 'js-cookie';
 import isMobile from 'ismobilejs';
-import Store from './base';
 import { dispatch } from '../utils/dispatcher';
 import Window from '../legacy-models/window';
 import settingStore from '../stores/SettingStore';
@@ -29,7 +28,7 @@ import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 
-const WindowsStore = Store.extend({
+const WindowsStore = EmberObject.extend({
   windows: IndexArray.create({ index: 'windowId', factory: Window }),
   msgBuffer: null, // Only used during startup
   maxBacklogMsgs: 100000,
@@ -89,93 +88,6 @@ const WindowsStore = Store.extend({
       });
     }
   }),
-
-  toJSON() {
-    const data = {
-      version: 4,
-      windows: [],
-      userId: this.userId,
-      cachedUpto: 0
-    };
-
-    const maxBacklogMsgs = calcMsgHistorySize();
-
-    this.windows.forEach(masWindow => {
-      const messages = [];
-
-      const sortedMessages = masWindow
-        .get('messages')
-        .sortBy('gid')
-        .slice(-1 * maxBacklogMsgs);
-
-      sortedMessages.forEach(message => {
-        const messageData = message.getProperties([
-          'gid',
-          'body',
-          'cat',
-          'ts',
-          'updatedTs',
-          'userId',
-          'status',
-          'type',
-          'hideImages'
-        ]);
-
-        if (messageData.gid > data.cachedUpto) {
-          data.cachedUpto = messageData.gid;
-        }
-
-        if (!messageData.status || messageData.status === 'original') {
-          // Save space
-          delete messageData.status;
-          delete messageData.updatedTs;
-        }
-
-        messages.push(messageData);
-      });
-
-      const windowProperties = masWindow.getProperties([
-        'windowId',
-        'generation',
-        'name',
-        'userId',
-        'network',
-        'type',
-        'row',
-        'column',
-        'desktop',
-        'newMessagesCount',
-        'minimizedNamesList',
-        'alerts'
-      ]);
-
-      windowProperties.messages = messages;
-      data.windows.push(windowProperties);
-    });
-
-    this.set('cachedUpto', data.cachedUpto);
-
-    return data;
-  },
-
-  fromJSON(data) {
-    return; // TODO: Enable when missing user problem is solved.
-
-    // eslint-disable-next-line no-unreachable
-    if (data.userId !== this.userId || data.version !== 4) {
-      console.log(`Corrupted windows snapshot.`);
-    }
-
-    for (const windowData of data.windows) {
-      const messages = windowData.messages;
-      delete windowData.messages;
-
-      const windowModel = this.windows.upsertModel(windowData);
-      windowModel.get('messages').upsertModels(messages, { window: windowModel });
-    }
-
-    this.set('cachedUpto', data.cachedUpto);
-  },
 
   handleUploadFiles(data) {
     if (data.files.length === 0) {

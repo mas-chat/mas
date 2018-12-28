@@ -14,19 +14,23 @@
 //   governing permissions and limitations under the License.
 //
 
-import { computed } from '@ember/object';
-import { inject as service } from '@ember/service';
+import Mobx from 'mobx';
 import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
+import modalStore from '../../../stores/ModalStore';
+
+const { autorun } = Mobx;
 
 export default Component.extend({
-  stores: service(),
+  init(...args) {
+    this._super(...args);
 
-  activeModal: computed('stores.modals.modals.[]', function() {
-    const modalQueue = this.get('stores.modals.modals');
+    autorun(() => {
+      const modals = modalStore.modals;
 
-    return modalQueue.length === 0 ? { model: null, name: 'empty-modal' } : modalQueue.get('firstObject');
-  }),
+      this.set('activeModal', modals.length === 0 ? { model: null, name: 'empty-modal' } : modals[0]);
+    });
+  },
 
   actions: {
     closeModal() {

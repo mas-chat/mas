@@ -19,7 +19,6 @@ import loadInitializers from 'ember-load-initializers';
 import Resolver from './resolver';
 import config from './config/environment';
 
-import './legacy-stores/modals';
 import './legacy-stores/windows';
 
 console.log(`MAS frontend version: ${config.APP.revision}`);
