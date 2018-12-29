@@ -20,12 +20,12 @@ import Mobx from 'mobx';
 import { debounce, scheduleOnce, bind, cancel, throttle, run } from '@ember/runloop';
 import { computed, observer } from '@ember/object';
 import { alias } from '@ember/object/computed';
-import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import PerfectScrollbar from 'perfect-scrollbar';
 import Favico from 'favico.js';
 import isMobile from 'ismobilejs';
 import settingStore from '../../../stores/SettingStore';
+import windowStore from '../../../stores/WindowStore';
 import { dispatch } from '../../../utils/dispatcher';
 import { play } from '../../../utils/sound';
 
@@ -56,8 +56,6 @@ export default Component.extend({
   didDestroyElement() {
     this.disposer();
   },
-
-  stores: service(),
 
   classNames: ['window'],
 
@@ -104,7 +102,7 @@ export default Component.extend({
   }),
 
   fullBackLog: computed('content.messages.[]', function() {
-    return this.get('content.messages.length') >= this.get('stores.windows.maxBacklogMsgs');
+    return this.get('content.messages.length') >= windowStore.maxBacklogMsgs;
   }),
 
   beginningReached: computed('fullBackLog', 'noOlderMessages', function() {
@@ -421,7 +419,7 @@ export default Component.extend({
   arrayWillChange() {},
 
   arrayDidChange(array, offset, removeCount, addCount) {
-    if (addCount > 0 && this.get('stores.windows.initDone') && offset === array.get('length') - 1) {
+    if (addCount > 0 && windowStore.initDone && offset === array.get('length') - 1) {
       // Infinity scrolling adds the old messages to the beginning of the array. The offset
       // check above makes sure that _lineAdded() is not called then (FETCH case).
       this._lineAdded(array);
@@ -439,9 +437,7 @@ export default Component.extend({
     cancel(this.scrollTimer);
     cancel(this.lazyImageTimer);
 
-    scheduleOnce('afterRender', this, function() {
-      this.sendAction('relayout', { animate: true });
-    });
+    this.sendAction('relayoutAfterRender', { animate: true });
   },
 
   willRender() {

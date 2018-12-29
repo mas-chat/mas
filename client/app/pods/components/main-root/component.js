@@ -17,9 +17,9 @@
 /* global $ */
 
 import Mobx from 'mobx';
-import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import settingStore from '../../../stores/SettingStore';
+import windowStore from '../../../stores/WindowStore';
 import socket from '../../../utils/socket';
 import { darkTheme } from '../../../utils/theme-dark';
 
@@ -31,6 +31,7 @@ export default Component.extend({
 
     this.disposer = autorun(() => {
       $('#theme-stylesheet').text(settingStore.settings.theme === 'dark' ? darkTheme : '');
+      this.set('initDone', windowStore.initDone);
     });
 
     socket.start(); // Let's get the show started.
@@ -39,8 +40,6 @@ export default Component.extend({
   didDestroyElement() {
     this.disposer();
   },
-
-  stores: service(),
 
   classNames: ['flex-grow-column', 'flex-1'],
 

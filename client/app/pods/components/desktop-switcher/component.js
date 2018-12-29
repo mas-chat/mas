@@ -15,10 +15,9 @@
 //
 
 import Mobx from 'mobx';
-import { alias } from '@ember/object/computed';
-import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import settingStore from '../../../stores/SettingStore';
+import windowStore from '../../../stores/WindowStore';
 
 const { autorun } = Mobx;
 
@@ -26,20 +25,13 @@ export default Component.extend({
   init(...args) {
     this._super(...args);
 
-    this.disposer = autorun(() => {
+    autorun(() => {
       this.set('activeDesktop', settingStore.settings.activeDesktop);
+      this.set('desktops', windowStore.desktops);
     });
   },
 
-  didDestroyElement() {
-    this.disposer();
-  },
-
-  stores: service(),
-
   classNames: ['main-desktop-switcher'],
 
-  draggedWindow: false,
-
-  desktops: alias('stores.windows.desktops')
+  draggedWindow: false
 });

@@ -15,7 +15,6 @@
 //
 
 import Mobx from 'mobx';
-import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import settingStore from '../../../stores/SettingStore';
 import { dispatch } from '../../../utils/dispatcher';
@@ -35,8 +34,6 @@ export default Component.extend({
   didDestroyElement() {
     this.disposer();
   },
-
-  stores: service(),
 
   classNames: ['flex-row', 'unconfirmed-email'],
 

@@ -1,61 +1,35 @@
-//
-//   Copyright 2009-2014 Ilkka Oksanen <iao@iki.fi>
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing,
-//   software distributed under the License is distributed on an "AS
-//   IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-//   express or implied.  See the License for the specific language
-//   governing permissions and limitations under the License.
-//
-
-/* globals $ */
-
-import { A } from '@ember/array';
-import EmberObject, { computed, observer } from '@ember/object';
+import Mobx, { autorun } from 'mobx';
 import moment from 'moment';
 import Cookies from 'js-cookie';
 import isMobile from 'ismobilejs';
 import { dispatch } from '../utils/dispatcher';
 import Window from '../legacy-models/window';
 import settingStore from '../stores/SettingStore';
-import IndexArray from '../utils/index-array';
 import socket from '../utils/socket';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 
-const WindowsStore = EmberObject.extend({
-  windows: IndexArray.create({ index: 'windowId', factory: Window }),
-  msgBuffer: null, // Only used during startup
-  maxBacklogMsgs: 100000,
-  cachedUpto: 0,
+const { observable, computed } = Mobx;
 
-  // TODO: Re-factor leftovers
-  userId: null,
+class WindowStore {
+  @observable windows = new Map();
+  msgBuffer = []; // Only used during startup
+  maxBacklogMsgs = 100000;
+  cachedUpto = 0;
+  @observable initDone = false;
 
-  initDone: false,
+  userId = null; // TODO: Re-factor (set from socket.js)
 
-  init() {
-    this.msgBuffer = [];
-
-    this._super();
-  },
-
-  desktops: computed('windows.@each.desktop', 'windows.@each.newMessagesCount', function() {
+  @computed
+  get desktops() {
     const desktops = {};
-    const desktopsArray = A([]);
+    const desktopsArray = [];
+
+    console.log('computed desktops');
 
     this.windows.forEach(masWindow => {
-      const newMessages = masWindow.get('newMessagesCount');
-      const desktop = masWindow.get('desktop');
-      const initials = masWindow
-        .get('simplifiedName')
-        .substr(0, 2)
-        .toUpperCase();
+      const newMessages = masWindow.newMessagesCount;
+      const desktop = masWindow.desktop;
+      const initials = masWindow.simplifiedName.substr(0, 2).toUpperCase();
 
       if (desktops[desktop]) {
         desktops[desktop].messages += newMessages;
@@ -73,21 +47,23 @@ const WindowsStore = EmberObject.extend({
     });
 
     return desktopsArray;
-  }),
+  }
 
-  deletedDesktopCheck: observer('desktops.[]', 'initDone', function() {
-    if (!this.initDone) {
-      return;
-    }
+  constructor() {
+    autorun(() => {
+      if (!this.initDone) {
+        return;
+      }
 
-    const desktopIds = this.desktops.map(d => d.id);
+      const desktopIds = this.desktops.map(d => d.id);
 
-    if (desktopIds.indexOf(settingStore.settings.activeDesktop) === -1) {
-      dispatch('CHANGE_ACTIVE_DESKTOP', {
-        desktop: this.desktops.map(d => d.id).sort()[0] // Oldest
-      });
-    }
-  }),
+      if (desktopIds.indexOf(settingStore.settings.activeDesktop) === -1) {
+        dispatch('CHANGE_ACTIVE_DESKTOP', {
+          desktop: this.desktops.map(d => d.id).sort()[0] // Oldest
+        });
+      }
+    });
+  }
 
   handleUploadFiles(data) {
     if (data.files.length === 0) {
@@ -121,7 +97,7 @@ const WindowsStore = EmberObject.extend({
           window: data.window
         })
     });
-  },
+  }
 
   handleAddMessage(data) {
     data.window.messages.upsertModel({
@@ -134,10 +110,10 @@ const WindowsStore = EmberObject.extend({
     });
 
     this._trimBacklog(data.window.messages);
-  },
+  }
 
   handleAddMessageServer(data) {
-    data.window = this._getWindow(data.windowId);
+    data.window = this.windows.get(data.windowId);
 
     if (!data.window) {
       return false;
@@ -154,11 +130,11 @@ const WindowsStore = EmberObject.extend({
     }
 
     return true;
-  },
+  }
 
   handleAddMessagesServer(data) {
     data.messages.forEach(windowMessages => {
-      const windowObject = this._getWindow(windowMessages.windowId);
+      const windowObject = this.windows.get(windowMessages.windowId);
 
       if (windowObject) {
         windowMessages.messages.forEach(message => {
@@ -172,7 +148,7 @@ const WindowsStore = EmberObject.extend({
     });
 
     return true;
-  },
+  }
 
   handleAddError(data) {
     data.window.messages.upsertModel({
@@ -183,7 +159,7 @@ const WindowsStore = EmberObject.extend({
       gid: 'error', // TODO: Not optimal, there's never second error message
       window: data.window
     });
-  },
+  }
 
   handleSendText(data) {
     let sent = false;
@@ -222,7 +198,7 @@ const WindowsStore = EmberObject.extend({
         }
       }
     );
-  },
+  }
 
   handleSendCommand(data) {
     socket.send(
@@ -244,7 +220,7 @@ const WindowsStore = EmberObject.extend({
         }
       }
     );
-  },
+  }
 
   handleCreateGroup(data, acceptCb, rejectCb) {
     socket.send(
@@ -261,7 +237,7 @@ const WindowsStore = EmberObject.extend({
         }
       }
     );
-  },
+  }
 
   handleJoinGroup(data, acceptCb, rejectCb) {
     socket.send(
@@ -279,7 +255,7 @@ const WindowsStore = EmberObject.extend({
         }
       }
     );
-  },
+  }
 
   handleJoinIrcChannel(data, acceptCb, rejectCb) {
     socket.send(
@@ -297,7 +273,7 @@ const WindowsStore = EmberObject.extend({
         }
       }
     );
-  },
+  }
 
   handleStartChat(data) {
     socket.send(
@@ -318,7 +294,7 @@ const WindowsStore = EmberObject.extend({
         }
       }
     );
-  },
+  }
 
   handleFetchMessageRange(data, successCb) {
     socket.send(
@@ -336,7 +312,7 @@ const WindowsStore = EmberObject.extend({
         successCb();
       }
     );
-  },
+  }
 
   handleFetchOlderMessages(data, successCb) {
     socket.send(
@@ -363,7 +339,7 @@ const WindowsStore = EmberObject.extend({
         successCb(resp.msgs.length !== 0);
       }
     );
-  },
+  }
 
   handleProcessLine(data) {
     const body = data.body;
@@ -406,7 +382,7 @@ const WindowsStore = EmberObject.extend({
       text: body,
       window: data.window
     });
-  },
+  }
 
   handleEditMessage(data) {
     socket.send(
@@ -428,31 +404,34 @@ const WindowsStore = EmberObject.extend({
         }
       }
     );
-  },
+  }
 
   handleAddWindowServer(data) {
     data.type = data.windowType;
     delete data.windowType;
+    data.generation = socket.sessionId;
 
-    this.windows.upsertModel(data, { generation: socket.sessionId });
-  },
+    const model = Window.create();
+    model.setModelProperties(data);
+
+    this.windows.set(data.windowId, model);
+  }
 
   handleCloseWindow(data) {
     socket.send({
       id: 'CLOSE',
       windowId: data.window.get('windowId')
     });
-  },
+  }
 
   handleUpdateWindowServer(data) {
-    const window = this._getWindow(data.windowId);
+    const window = this.windows.get(data.windowId);
     window.setModelProperties(data);
-  },
+  }
 
   handleDeleteWindowServer(data) {
-    const window = this._getWindow(data.windowId);
-    this.windows.removeModel(window);
-  },
+    this.windows.delete(data.windowId);
+  }
 
   handleUpdatePassword(data, successCb, rejectCb) {
     socket.send(
@@ -469,7 +448,7 @@ const WindowsStore = EmberObject.extend({
         }
       }
     );
-  },
+  }
 
   handleUpdateTopic(data) {
     socket.send({
@@ -477,7 +456,7 @@ const WindowsStore = EmberObject.extend({
       windowId: data.window.get('windowId'),
       topic: data.topic
     });
-  },
+  }
 
   handleUpdateWindowAlerts(data) {
     data.window.set('alerts', data.alerts);
@@ -487,7 +466,7 @@ const WindowsStore = EmberObject.extend({
       windowId: data.window.get('windowId'),
       alerts: data.alerts
     });
-  },
+  }
 
   handleMoveWindow(data) {
     const props = ['column', 'row', 'desktop'];
@@ -507,7 +486,7 @@ const WindowsStore = EmberObject.extend({
         row: data.row
       });
     }
-  },
+  }
 
   handleToggleMemberListWidth(data) {
     const newValue = data.window.toggleProperty('minimizedNamesList');
@@ -517,7 +496,7 @@ const WindowsStore = EmberObject.extend({
       windowId: data.window.get('windowId'),
       minimizedNamesList: newValue
     });
-  },
+  }
 
   handleSeekActiveDesktop(data) {
     const desktops = this.desktops;
@@ -535,19 +514,15 @@ const WindowsStore = EmberObject.extend({
     dispatch('CHANGE_ACTIVE_DESKTOP', {
       desktop: desktops[index].id
     });
-  },
+  }
 
   handleFinishStartupServer() {
     // Remove possible deleted windows.
-    const deletedWindows = [];
-
     this.windows.forEach(windowObject => {
-      if (windowObject.get('generation') !== socket.sessionId) {
-        deletedWindows.push(windowObject);
+      if (windowObject.generation !== socket.sessionId) {
+        this.windows.delete(windowObject.windowId);
       }
     });
-
-    this.windows.removeModels(deletedWindows);
 
     // Insert buffered message in one go.
     console.log(`MsgBuffer processing started.`);
@@ -560,11 +535,11 @@ const WindowsStore = EmberObject.extend({
     console.log(`MsgBuffer processing ended.`);
 
     this.msgBuffer = [];
-    this.set('initDone', true);
-  },
+    this.initDone = true;
+  }
 
   handleAddMembersServer(data) {
-    const window = this._getWindow(data.windowId);
+    const window = this.windows.get(data.windowId);
 
     if (data.reset) {
       window.operators.clear();
@@ -591,15 +566,15 @@ const WindowsStore = EmberObject.extend({
           break;
       }
     });
-  },
+  }
 
   handleDeleteMembersServer(data) {
-    const window = this._getWindow(data.windowId);
+    const window = this.windows.get(data.windowId);
 
     data.members.forEach(member => {
       this._removeUser(member.userId, window);
     });
-  },
+  }
 
   // TODO: Move these handlers somewhere else
 
@@ -619,7 +594,7 @@ const WindowsStore = EmberObject.extend({
         window.location = '/';
       }
     );
-  },
+  }
 
   handleDestroyAccount() {
     socket.send(
@@ -631,17 +606,13 @@ const WindowsStore = EmberObject.extend({
         window.location = '/';
       }
     );
-  },
+  }
 
   _removeUser(userId, window) {
     window.operators.removeObject(userId);
     window.voices.removeObject(userId);
     window.users.removeObject(userId);
-  },
-
-  _getWindow(windowId) {
-    return this.windows.getByIndex(windowId);
-  },
+  }
 
   _trimBacklog(messages) {
     // Remove the oldest message if the optimal history is visible
@@ -649,7 +620,6 @@ const WindowsStore = EmberObject.extend({
       messages.removeModel(messages.sortBy('gid')[0]);
     }
   }
-});
+}
 
-window.stores = window.stores || {};
-window.stores.windows = WindowsStore.create();
+export default new WindowStore();

@@ -14,28 +14,25 @@
 //   governing permissions and limitations under the License.
 //
 
-import { computed } from '@ember/object';
+import Mobx from 'mobx';
 import { alias } from '@ember/object/computed';
-import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
+import userStore from '../../../stores/UserStore';
+
+const { autorun } = Mobx;
 
 export default Component.extend({
-  stores: service(),
-
   userId: alias('model'),
 
-  name: computed('userId', function() {
-    return this.get('stores.users.users')
-      .getByIndex(this.userId)
-      .get('name');
-  }),
+  init(...args) {
+    this._super(...args);
 
-  nick: computed('userId', function() {
-    return this.get('stores.users.users')
-      .getByIndex(this.userId)
-      .get('nick').MAS;
-  }),
+    autorun(() => {
+      this.set('name', userStore.users.get(userStore.userId).name);
+      this.set('nick', userStore.users.get(userStore.userId).nick.mas);
+    });
+  },
 
   actions: {
     remove() {

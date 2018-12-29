@@ -30,7 +30,11 @@ const { autorun } = Mobx;
 let mobileDesktop = 1;
 
 function monitor(name, ...args) {
-  autorun(() => this.set(name, args[args.length - 1].call(this)));
+  autorun(() => {
+    if (this) {
+      this.set(name, args[args.length - 1].call(this));
+    }
+  });
   return computed(...args);
 }
 
@@ -62,12 +66,8 @@ export default BaseModel.extend({
 
   _desktop: null,
 
-  _windowsStore: null,
-
   init() {
     this._super();
-
-    this.set('_windowsStore', window.stores.windows);
 
     this.set('_desktop', mobileDesktop++);
 

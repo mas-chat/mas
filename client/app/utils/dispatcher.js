@@ -6,6 +6,7 @@ import networkStore from '../stores/NetworkStore';
 import profileStore from '../stores/ProfileStore';
 import settingStore from '../stores/SettingStore';
 import userStore from '../stores/UserStore';
+import windowStore from '../stores/WindowStore';
 
 const noopCb = () => {};
 
@@ -17,16 +18,17 @@ export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) 
     .join('');
   const handler = `handle${name}`;
 
-  const stores = window.stores;
-
-  stores.alerts = alertStore;
-  stores.daySeparatorStore = daySeparatorStore;
-  stores.friendStore = friendStore;
-  stores.modalStore = modalStore;
-  stores.networks = networkStore;
-  stores.profile = profileStore;
-  stores.settings = settingStore;
-  stores.users = userStore;
+  const stores = {
+    alerts: alertStore,
+    daySeparator: daySeparatorStore,
+    friend: friendStore,
+    modal: modalStore,
+    networks: networkStore,
+    profile: profileStore,
+    settings: settingStore,
+    users: userStore,
+    window: windowStore
+  };
 
   for (const store of Object.keys(stores)) {
     const storeObj = stores[store];

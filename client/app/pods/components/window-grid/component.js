@@ -20,10 +20,10 @@ import Mobx from 'mobx';
 import { A } from '@ember/array';
 import { next, scheduleOnce, bind } from '@ember/runloop';
 import { observer } from '@ember/object';
-import { alias } from '@ember/object/computed';
-import { inject as service } from '@ember/service';
 import Component from '@ember/component';
+import alertStore from '../../../stores/AlertStore';
 import settingStore from '../../../stores/SettingStore';
+import windowStore from '../../../stores/WindowStore';
 import { dispatch } from '../../../utils/dispatcher';
 
 const { autorun } = Mobx;
@@ -39,14 +39,15 @@ export default Component.extend({
     this.disposer = autorun(() => {
       this.set('theme', settingStore.settings.theme);
       this.set('emailConfirmed', settingStore.settings.emailConfirmed);
+      this.set('initDone', windowStore.initDone);
+      this.set('model', Array.from(windowStore.windows.values()));
+      this.set('alerts', alertStore.alerts);
     });
   },
 
   didDestroyElement() {
     this.disposer();
   },
-
-  stores: service(),
 
   classNames: ['grid', 'flex-1', 'flex-grow-column'],
 
@@ -59,15 +60,13 @@ export default Component.extend({
 
   windowComponents: null,
 
-  model: alias('stores.windows.windows'),
-
-  mustRelayout: observer('stores.windows.initDone', 'theme', function() {
+  mustRelayout: observer('initDone', 'theme', function() {
     next(this, function() {
       this._layoutWindows(false);
     });
   }),
 
-  mustRelayoutAfterRender: observer('stores.alerts.alerts.[]', 'emailConfirmed', function() {
+  mustRelayoutAfterRender: observer('alerts', 'emailConfirmed', function() {
     scheduleOnce('afterRender', this, function() {
       this._layoutWindows(false);
     });
@@ -82,8 +81,14 @@ export default Component.extend({
       });
     },
 
+    relayoutAfterRender(options) {
+      scheduleOnce('afterRender', this, function() {
+        this.send('relayout', options);
+      });
+    },
+
     relayout(options) {
-      if (!this.get('stores.windows.initDone')) {
+      if (!this.initDone) {
         return;
       }
 

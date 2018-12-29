@@ -23,6 +23,7 @@ import moment from 'moment';
 import URI from 'urijs';
 import BaseModel from './base';
 import userStore from '../stores/UserStore';
+import windowStore from '../stores/WindowStore';
 
 marked.setOptions({
   breaks: true,
@@ -42,13 +43,8 @@ export default BaseModel.extend({
   hideImages: false,
   editing: false,
 
-  // Other stores
-  _windowsStore: null,
-
   init() {
     this._super();
-
-    this.set('_windowsStore', window.stores.windows);
   },
 
   mentionedRegEx: alias('window.userNickHighlightRegex'),
@@ -107,7 +103,7 @@ export default BaseModel.extend({
 
     if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {
       return 'mention';
-    } else if (userId === this.get('_windowsStore.userId') && cat === 'msg') {
+    } else if (userId === windowStore.userId && cat === 'msg') {
       return 'mymsg';
     } else if (nick === 'ruuskanen') {
       return 'service';

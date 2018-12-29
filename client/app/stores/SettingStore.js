@@ -6,7 +6,7 @@ import socket from '../utils/socket';
 
 const { observable } = Mobx;
 
-class SettingsStore {
+class SettingStore {
   @observable settings = new SettingsModel(this, {});
 
   handleToggleTheme() {
@@ -66,4 +66,4 @@ class SettingsStore {
   }
 }
 
-export default new SettingsStore();
+export default new SettingStore();

@@ -21,6 +21,7 @@ import io from 'socket.io-client';
 import Cookies from 'js-cookie';
 import { calcMsgHistorySize } from './msg-history-sizer';
 import { dispatch } from './dispatcher';
+import windowStore from '../stores/WindowStore';
 
 const serverIdToEventMap = {
   UPDATE_MEMBERS: 'ADD_MEMBERS_SERVER',
@@ -49,8 +50,6 @@ const SocketService = EmberObject.extend({
   _sendQueue: null,
   _disconnectedTimer: null,
 
-  _windowsStore: null,
-
   init() {
     this._super();
 
@@ -64,9 +63,8 @@ const SocketService = EmberObject.extend({
   },
 
   start() {
-    this.set('_windowsStore', window.stores.windows);
-
-    this.set('_windowsStore.initDone', false);
+    // TODO: DOn't mutate store from here, trigger events instead!
+    windowStore.initDone = false;
     this._emitInit();
 
     ioSocket.on(
@@ -76,8 +74,8 @@ const SocketService = EmberObject.extend({
 
         this.set('sessionId', data.sessionId); // TODO: Should not needed, use cookie always
 
-        this.set('_windowsStore.userId', `m${data.userId}`);
-        this.set('_windowsStore.maxBacklogMsgs', data.maxBacklogMsgs);
+        windowStore.userId = `m${data.userId}`;
+        windowStore.maxBacklogMsgs = data.maxBacklogMsgs;
 
         // TODO: Delete oldest messages for windows that have more messages than
         // maxBacklogMsgs. They can be stale, when editing becomes possible.
@@ -179,7 +177,7 @@ const SocketService = EmberObject.extend({
 
   _emitInit() {
     const maxBacklogMsgs = calcMsgHistorySize();
-    const cachedUpto = this.get('_windowsStore.cachedUpto');
+    const cachedUpto = windowStore.cachedUpto;
     const cookie = this.cookie;
 
     ioSocket.emit('init', {
