@@ -34,7 +34,7 @@ class SettingsStore {
           message: msg,
           postponeLabel: false,
           ackLabel: 'Okay',
-          resultCallback: () => this.set('emailConfirmed', true)
+          resultCallback: () => this.settings.emailConfirmed = true
         });
       }
     );
