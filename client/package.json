@@ -59,7 +59,7 @@
     "js-cookie": "^2.1.3",
     "magnific-popup": "^1.1.0",
     "marked": "~0.5.2",
-    "mobx": "^4.2.0",
+    "mobx": "^5.8.0",
     "moment": "^2.23.0",
     "mousetrap": "^1.6.2",
     "perfect-scrollbar": "1.4.0",

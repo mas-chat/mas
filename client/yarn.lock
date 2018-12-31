@@ -6190,10 +6190,10 @@ mktemp@~0.4.0:
   resolved "https://registry.yarnpkg.com/mktemp/-/mktemp-0.4.0.tgz#6d0515611c8a8c84e484aa2000129b98e981ff0b"
   integrity sha1-bQUVYRyKjITkhKogABKbmOmB/ws=
 
-mobx@^4.2.0:
-  version "4.8.0"
-  resolved "https://registry.yarnpkg.com/mobx/-/mobx-4.8.0.tgz#6059feb9e0d3440acca5ae192daad63198b1180f"
-  integrity sha512-uR6FnrK50UEbV+zTXkOI+R0pAMb7xA5mkAWnKTMBcN6hAh57qAa9r0XMvsiPgpb8dS3Kw1x0sNhrrUNUcM+Pug==
+mobx@^5.8.0:
+  version "5.8.0"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-5.8.0.tgz#cf59eae4baa2fde4387ffb6462b7ccf3b497b03c"
+  integrity sha512-NsZB+9bF5j+nv9Qwk6bNeE3np26a4TbTGkMpOLf6o1zXoM9BtHPQn/00px4uZ2AXJXtQML5P4MEWdMm6icMIfQ==
 
 moment@^2.23.0:
   version "2.23.0"
