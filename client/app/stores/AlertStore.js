@@ -1,6 +1,7 @@
 import Mobx from 'mobx';
 import AlertModel from '../models/Alert';
 import socket from '../utils/socket';
+import mandatory from '../utils/parameters';
 
 const { observable, computed } = Mobx;
 
@@ -9,40 +10,54 @@ class AlertStore {
 
   @computed
   get currentAlert() {
-    return this.alerts.size === 0 ? null : this.oldestAlert();
+    // values() returns values in the insertion order
+    return this.alerts.values().next().value || false;
   }
 
-  handleShowAlert(data) {
-    this.alerts.set(data.alertId, new AlertModel(this, data));
+  handleShowAlert({
+    alertId = mandatory(),
+    message = mandatory(),
+    ackLabel = mandatory(),
+    resultCallback,
+    postponeLabel,
+    nackLabel
+  }) {
+    this.alerts.set(
+      alertId,
+      new AlertModel(this, { alertId, resultCallback, message, postponeLabel, ackLabel, nackLabel })
+    );
   }
 
-  handleShowAlertServer(data) {
-    // Default labels for alerts
-    data.postponeLabel = 'Show again later';
-    data.ackLabel = 'Dismiss';
-
-    data.resultCallback = result => {
+  handleShowAlertServer({
+    alertId = mandatory(),
+    message = mandatory(),
+    ackLabel = 'Dismiss',
+    postponeLabel = 'Show again later',
+    nackLabel
+  }) {
+    const resultCallback = result => {
       if (result === 'ack') {
         socket.send({
           id: 'ACKALERT',
-          alertId: data.alertId
+          alertId
         });
       }
     };
 
-    this.alerts.set(data.alertId, new AlertModel(this, data));
+    this.alerts.set(
+      alertId,
+      new AlertModel(this, { alertId, resultCallback, message, postponeLabel, ackLabel, nackLabel })
+    );
   }
 
-  handleCloseAlert(data) {
-    if (data.alert.resultCallback) {
-      data.alert.resultCallback(data.result);
+  handleCloseAlert({ alertId = mandatory(), result = mandatory() }) {
+    const alert = this.alerts.get(alertId);
+
+    if (alert.resultCallback) {
+      alert.resultCallback(result);
     }
 
-    this.alerts.delete(data.alert.alertId);
-  }
-
-  oldestAlert() {
-    return this.alerts.values().next().value;
+    this.alerts.delete(alertId);
   }
 }
 

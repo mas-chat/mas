@@ -1,12 +1,15 @@
-import Mobx, { autorun } from 'mobx';
+import Mobx from 'mobx';
 import moment from 'moment';
 import Cookies from 'js-cookie';
 import isMobile from 'ismobilejs';
 import { dispatch } from '../utils/dispatcher';
-import Window from '../legacy-models/window';
-import settingStore from '../stores/SettingStore';
+import Message from '../models/Message';
+import Window from '../models/Window';
+import settingStore from './SettingStore';
+import userStore from './UserStore';
 import socket from '../utils/socket';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
+import { mandatory } from '../utils/parameters';
 
 const { observable, computed } = Mobx;
 
@@ -17,19 +20,15 @@ class WindowStore {
   cachedUpto = 0;
   @observable initDone = false;
 
-  userId = null; // TODO: Re-factor (set from socket.js)
-
   @computed
   get desktops() {
     const desktops = {};
     const desktopsArray = [];
 
-    console.log('computed desktops');
-
-    this.windows.forEach(masWindow => {
-      const newMessages = masWindow.newMessagesCount;
-      const desktop = masWindow.desktop;
-      const initials = masWindow.simplifiedName.substr(0, 2).toUpperCase();
+    this.windows.forEach(window => {
+      const newMessages = window.newMessagesCount;
+      const desktop = window.desktop;
+      const initials = window.simplifiedName.substr(0, 2).toUpperCase();
 
       if (desktops[desktop]) {
         desktops[desktop].messages += newMessages;
@@ -49,36 +48,21 @@ class WindowStore {
     return desktopsArray;
   }
 
-  constructor() {
-    autorun(() => {
-      if (!this.initDone) {
-        return;
-      }
-
-      const desktopIds = this.desktops.map(d => d.id);
-
-      if (desktopIds.indexOf(settingStore.settings.activeDesktop) === -1) {
-        dispatch('CHANGE_ACTIVE_DESKTOP', {
-          desktop: this.desktops.map(d => d.id).sort()[0] // Oldest
-        });
-      }
-    });
-  }
-
-  handleUploadFiles(data) {
-    if (data.files.length === 0) {
+  handleUploadFiles({ files = mandatory(), window = mandatory() }) {
+    if (files.length === 0) {
       return;
     }
 
     const formData = new FormData();
-    const files = Array.from(data.files);
+    const uploadedFiles = Array.from(files);
 
-    for (const file of files) {
+    for (const file of uploadedFiles) {
       formData.append('file', file, file.name || 'webcam-upload.jpg');
     }
 
     formData.append('sessionId', socket.get('sessionId'));
 
+    // eslint-disable-next-line no-undef
     $.ajax({
       url: '/api/v1/upload',
       type: 'POST',
@@ -89,96 +73,107 @@ class WindowStore {
       success: resp =>
         dispatch('SEND_TEXT', {
           text: resp.url.join(' '),
-          window: data.window
+          window
         }),
       error: () =>
         dispatch('ADD_ERROR', {
           body: 'File upload failed.',
-          window: data.window
+          window
         })
     });
   }
 
-  handleAddMessage(data) {
-    data.window.messages.upsertModel({
-      body: data.body,
-      cat: 'msg',
-      userId: this.userId,
-      ts: data.ts,
-      gid: data.gid,
-      window: data.window
-    });
+  handleAddMessage({ gid = mandatory(), ts = mandatory(), window = mandatory(), body = mandatory() }) {
+    window.messages.set(gid, new Message(this, { body, cat: 'msg', userId: userStore.userId, ts, gid, window }));
 
-    this._trimBacklog(data.window.messages);
+    this._trimBacklog(window.messages);
+    this._notifyLineAdded(window);
   }
 
-  handleAddMessageServer(data) {
-    data.window = this.windows.get(data.windowId);
+  handleAddMessageServer({
+    gid = mandatory(),
+    userId = mandatory(),
+    ts = mandatory(),
+    windowId = mandatory(),
+    cat = mandatory(),
+    updatedTs,
+    status,
+    body
+  }) {
+    const window = this.windows.get(windowId);
 
-    if (!data.window) {
+    if (!window) {
       return false;
     }
 
-    delete window.windowId;
-
     if (!this.initDone) {
       // Optimization: Avoid re-renders after every message
-      this.msgBuffer.push(data);
+      this.msgBuffer.push({ gid, userId, ts, windowId, cat, body, updatedTs, status, window });
     } else {
-      data.window.messages.upsertModel(data);
-      this._trimBacklog(data.window.messages);
+      window.messages.set(gid, new Message(this, { gid, userId, ts, windowId, cat, body, updatedTs, status, window }));
+
+      this._trimBacklog(window.messages);
+      this._notifyLineAdded(window);
     }
 
     return true;
   }
 
-  handleAddMessagesServer(data) {
-    data.messages.forEach(windowMessages => {
-      const windowObject = this.windows.get(windowMessages.windowId);
+  handleAddMessagesServer({ messages = mandatory() }) {
+    messages.forEach(({ windowId, messages: windowMessages }) => {
+      const window = this.windows.get(windowId);
 
-      if (windowObject) {
-        windowMessages.messages.forEach(message => {
-          message.window = windowObject;
+      if (window) {
+        windowMessages.forEach(({ gid, userId, ts, cat, body, updatedTs, status }) => {
+          window.messages.set(
+            gid,
+            new Message(this, { gid, userId, ts, windowId, cat, body, updatedTs, status, window })
+          );
         });
 
-        windowObject.messages.upsertModels(windowMessages.messages);
-
-        this._trimBacklog(windowObject.messages);
+        this._trimBacklog(window.messages);
+        this._notifyLineAdded(window);
       }
     });
 
     return true;
   }
 
-  handleAddError(data) {
-    data.window.messages.upsertModel({
-      body: data.body,
-      cat: 'error',
-      userId: null,
-      ts: moment().unix(),
-      gid: 'error', // TODO: Not optimal, there's never second error message
-      window: data.window
-    });
+  handleAddError({ window = mandatory(), body = mandatory() }) {
+    // TODO: Not optimal to use error gid, there's never second error message
+    window.messages.set(
+      'error',
+      new Message(this, {
+        body,
+        cat: 'error',
+        userId: null,
+        ts: moment().unix(),
+        gid: 'error',
+        window
+      })
+    );
+
+    this._notifyLineAdded(window);
   }
 
-  handleSendText(data) {
+  handleSendText({ window = mandatory(), text = mandatory() }) {
     let sent = false;
 
     setTimeout(() => {
       if (!sent) {
-        data.window.set('notDelivered', true);
+        window.set('notDelivered', true);
       }
     }, 2500);
 
     socket.send(
       {
         id: 'SEND',
-        text: data.text,
-        windowId: data.window.get('windowId')
+        text,
+        windowId: window.windowId
       },
       resp => {
         sent = true;
-        data.window.set('notDelivered', false);
+        window.notDelivered = false;
 
         if (resp.status !== 'OK') {
           dispatch('OPEN_MODAL', {
@@ -190,23 +185,23 @@ class WindowStore {
           });
         } else {
           dispatch('ADD_MESSAGE', {
-            body: data.text,
+            body: text,
             ts: resp.ts,
             gid: resp.gid,
-            window: data.window
+            window
           });
         }
       }
     );
   }
 
-  handleSendCommand(data) {
+  handleSendCommand({ window = mandatory(), command = mandatory(), params = mandatory() }) {
     socket.send(
       {
         id: 'COMMAND',
-        command: data.command,
-        params: data.params,
-        windowId: data.window.get('windowId')
+        command,
+        params,
+        windowId: window.windowId
       },
       resp => {
         if (resp.status !== 'OK') {
@@ -222,12 +217,12 @@ class WindowStore {
     );
   }
 
-  handleCreateGroup(data, acceptCb, rejectCb) {
+  handleCreateGroup({ name = mandatory(), password, acceptCb = mandatory(), rejectCb = mandatory() }) {
     socket.send(
       {
         id: 'CREATE',
-        name: data.name,
-        password: data.password
+        name,
+        password
       },
       resp => {
         if (resp.status === 'OK') {
@@ -239,13 +234,13 @@ class WindowStore {
     );
   }
 
-  handleJoinGroup(data, acceptCb, rejectCb) {
+  handleJoinGroup({ name = mandatory(), password, acceptCb = mandatory(), rejectCb = mandatory() }) {
     socket.send(
       {
         id: 'JOIN',
-        name: data.name,
         network: 'MAS',
-        password: data.password
+        name,
+        password
       },
       resp => {
         if (resp.status === 'OK') {
@@ -257,13 +252,19 @@ class WindowStore {
     );
   }
 
-  handleJoinIrcChannel(data, acceptCb, rejectCb) {
+  handleJoinIrcChannel({
+    name = mandatory(),
+    network = mandatory(),
+    password,
+    acceptCb = mandatory(),
+    rejectCb = mandatory()
+  }) {
     socket.send(
       {
         id: 'JOIN',
-        name: data.name,
-        network: data.network,
-        password: data.password
+        name,
+        network,
+        password
       },
       resp => {
         if (resp.status === 'OK') {
@@ -275,12 +276,12 @@ class WindowStore {
     );
   }
 
-  handleStartChat(data) {
+  handleStartChat({ userId = mandatory(), network = mandatory() }) {
     socket.send(
       {
         id: 'CHAT',
-        userId: data.userId,
-        network: data.network
+        userId,
+        network
       },
       resp => {
         if (resp.status !== 'OK') {
@@ -296,34 +297,32 @@ class WindowStore {
     );
   }
 
-  handleFetchMessageRange(data, successCb) {
+  handleFetchMessageRange({ window = mandatory(), start = mandatory(), end = mandatory(), successCb = mandatory() }) {
     socket.send(
       {
         id: 'FETCH',
-        windowId: data.window.get('windowId'),
-        start: data.start,
-        end: data.end
+        windowId: window.windowId,
+        start,
+        end
       },
       resp => {
-        data.window.get('logMessages').clearModels();
-        data.window.get('logMessages').upsertModels(resp.msgs.reverse(), {
-          window: data.window
+        window.logMessages.clear();
+
+        resp.msgs.forEach(({ gid, userId, ts, cat, body, updatedTs, status }) => {
+          window.logMessages.set(gid, new Message(this, { gid, userId, ts, cat, body, updatedTs, status, window }));
         });
+
         successCb();
       }
     );
   }
 
-  handleFetchOlderMessages(data, successCb) {
+  handleFetchOlderMessages({ window = mandatory(), successCb = mandatory() }) {
     socket.send(
       {
         id: 'FETCH',
-        windowId: data.window.get('windowId'),
-        end: data.window
-          .get('messages')
-          .sortBy('gid')
-          .get('firstObject')
-          .get('ts'),
+        windowId: window.windowId,
+        end: Array.from(window.messages.values()).sort((a, b) => a.gid > b.gid)[0].ts,
         limit: 50
       },
       resp => {
@@ -334,15 +333,16 @@ class WindowStore {
           return;
         }
 
-        data.window.get('messages').upsertModelsPrepend(resp.msgs, { window: data.window });
+        resp.msgs.forEach(({ gid, userId, ts, cat, body, updatedTs, status }) => {
+          window.messages.set(gid, new Message(this, { gid, userId, ts, cat, body, updatedTs, status, window }));
+        });
 
         successCb(resp.msgs.length !== 0);
       }
     );
   }
 
-  handleProcessLine(data) {
-    const body = data.body;
+  handleProcessLine({ window = mandatory(), body = mandatory() }) {
     let command = false;
     let commandParams;
 
@@ -352,12 +352,12 @@ class WindowStore {
       commandParams = parts[2] ? parts[2] : '';
     }
 
-    const ircServer1on1 = data.window.get('type') === '1on1' && data.window.get('userId') === 'i0';
+    const ircServer1on1 = window.type === '1on1' && window.userId === 'i0';
 
     if (ircServer1on1 && !command) {
       dispatch('ADD_ERROR', {
         body: 'Only commands allowed, e.g. /whois john',
-        window: data.window
+        window
       });
       return;
     }
@@ -373,24 +373,24 @@ class WindowStore {
       dispatch('SEND_COMMAND', {
         command,
         params: commandParams.trim(),
-        window: data.window
+        window
       });
       return;
     }
 
     dispatch('SEND_TEXT', {
       text: body,
-      window: data.window
+      window
     });
   }
 
-  handleEditMessage(data) {
+  handleEditMessage({ window = mandatory(), gid = mandatory(), body = mandatory() }) {
     socket.send(
       {
         id: 'EDIT',
-        windowId: data.window.get('windowId'),
-        gid: data.gid,
-        text: data.body
+        windowId: window.windowId,
+        gid,
+        text: body
       },
       resp => {
         if (resp.status !== 'OK') {
@@ -406,39 +406,85 @@ class WindowStore {
     );
   }
 
-  handleAddWindowServer(data) {
-    data.type = data.windowType;
-    delete data.windowType;
-    data.generation = socket.sessionId;
-
-    const model = Window.create();
-    model.setModelProperties(data);
-
-    this.windows.set(data.windowId, model);
+  handleAddWindowServer({
+    windowId = mandatory(),
+    userId,
+    network = mandatory(),
+    windowType = mandatory(),
+    name,
+    row = mandatory(),
+    column = mandatory(),
+    password,
+    alerts = mandatory(),
+    desktop = mandatory()
+  }) {
+    this.windows.set(
+      windowId,
+      new Window(this, {
+        windowId,
+        userId,
+        network,
+        type: windowType,
+        name,
+        row,
+        column,
+        password,
+        alerts,
+        desktop,
+        generation: socket.sessionId
+      })
+    );
   }
 
-  handleCloseWindow(data) {
-    socket.send({
-      id: 'CLOSE',
-      windowId: data.window.get('windowId')
+  handleUpdateWindowServer({
+    windowId = mandatory(),
+    userId,
+    network,
+    windowType,
+    name,
+    row,
+    column,
+    desktop,
+    password,
+    alerts
+  }) {
+    const window = this.windows.get(windowId);
+
+    Object.assign(window, {
+      ...(userId ? { userId } : {}),
+      ...(network ? { network } : {}),
+      ...(windowType ? { type: windowType } : {}),
+      ...(name ? { name } : {}),
+      ...(row ? { row } : {}),
+      ...(desktop ? { desktop } : {}),
+      ...(column ? { column } : {}),
+      ...(password ? { password } : {}),
+      ...(alerts ? { alerts } : {})
     });
   }
 
-  handleUpdateWindowServer(data) {
-    const window = this.windows.get(data.windowId);
-    window.setModelProperties(data);
+  handleCloseWindow({ window = mandatory() }) {
+    socket.send({
+      id: 'CLOSE',
+      windowId: window.windowId
+    });
   }
 
-  handleDeleteWindowServer(data) {
-    this.windows.delete(data.windowId);
+  handleDeleteWindowServer({ windowId = mandatory() }) {
+    this.windows.delete(windowId);
   }
 
-  handleUpdatePassword(data, successCb, rejectCb) {
+  handleUpdatePassword({
+    window = mandatory(),
+    password = mandatory(),
+    successCb = mandatory(),
+    rejectCb = mandatory()
+  }) {
     socket.send(
       {
         id: 'UPDATE_PASSWORD',
-        windowId: data.window.get('windowId'),
-        password: data.password
+        windowId: window.windowId,
+        password
       },
       resp => {
         if (resp.status === 'OK') {
@@ -450,60 +496,62 @@ class WindowStore {
     );
   }
 
-  handleUpdateTopic(data) {
+  handleUpdateTopic({ window = mandatory(), topic = mandatory() }) {
     socket.send({
       id: 'UPDATE_TOPIC',
-      windowId: data.window.get('windowId'),
-      topic: data.topic
+      windowId: window.windowId,
+      topic
     });
   }
 
-  handleUpdateWindowAlerts(data) {
-    data.window.set('alerts', data.alerts);
+  handleUpdateWindowAlerts({ window = mandatory(), alerts = mandatory() }) {
+    window.alerts = alerts;
 
     socket.send({
       id: 'UPDATE',
-      windowId: data.window.get('windowId'),
-      alerts: data.alerts
+      windowId: window.windowId,
+      alerts
     });
   }
 
-  handleMoveWindow(data) {
-    const props = ['column', 'row', 'desktop'];
+  handleMoveWindow({ windowId = mandatory(), column, row, desktop }) {
+    const window = this.windows.get(windowId);
 
-    for (const prop of props) {
-      if (Object.prototype.hasOwnProperty.call(data, prop)) {
-        data.window.set(prop, data[prop]);
-      }
-    }
+    Object.assign(window, {
+      ...(column ? { column } : {}),
+      ...(row ? { row } : {}),
+      ...(desktop ? { type: desktop } : {})
+    });
 
     if (!isMobile.any) {
       socket.send({
         id: 'UPDATE',
-        windowId: data.window.get('windowId'),
-        desktop: data.desktop,
-        column: data.column,
-        row: data.row
+        windowId,
+        desktop,
+        column,
+        row
       });
     }
   }
 
-  handleToggleMemberListWidth(data) {
-    const newValue = data.window.toggleProperty('minimizedNamesList');
+  handleToggleMemberListWidth({ window = mandatory() }) {
+    window.minimizedNamesList = !window.minimizedNamesList;
+
+    console.log(window.minimizedNamesList);
 
     socket.send({
       id: 'UPDATE',
-      windowId: data.window.get('windowId'),
-      minimizedNamesList: newValue
+      windowId: window.windowId,
+      minimizedNamesList: window.minimizedNamesList
     });
   }
 
-  handleSeekActiveDesktop(data) {
+  handleSeekActiveDesktop({ direction = mandatory() }) {
     const desktops = this.desktops;
     const activeDesktop = settingStore.settings.activeDesktop;
-    let index = desktops.indexOf(desktops.findBy('id', activeDesktop));
+    let index = desktops.indexOf(desktops.find(desktop => desktop.id === activeDesktop));
 
-    index += data.direction;
+    index += direction;
 
     if (index === desktops.length) {
       index = 0;
@@ -512,7 +560,7 @@ class WindowStore {
     }
 
     dispatch('CHANGE_ACTIVE_DESKTOP', {
-      desktop: desktops[index].id
+      desktopId: desktops[index].id
     });
   }
 
@@ -529,28 +577,29 @@ class WindowStore {
 
     for (let i = 0; i < this.msgBuffer.length; i++) {
       const item = this.msgBuffer[i];
-      item.window.messages.upsertModel(item);
+      item.window.messages.set(item.gid, new Message(this, item));
     }
 
+    this._notifyLineAdded(window);
     console.log(`MsgBuffer processing ended.`);
 
     this.msgBuffer = [];
     this.initDone = true;
   }
 
-  handleAddMembersServer(data) {
-    const window = this.windows.get(data.windowId);
+  handleAddMembersServer({ windowId = mandatory(), members = mandatory(), reset }) {
+    const window = this.windows.get(windowId);
 
-    if (data.reset) {
+    if (reset) {
       window.operators.clear();
       window.voices.clear();
       window.users.clear();
     }
 
-    data.members.forEach(member => {
+    members.forEach(member => {
       const userId = member.userId;
 
-      if (!data.reset) {
+      if (!reset) {
         this._removeUser(userId, window);
       }
 
@@ -568,17 +617,17 @@ class WindowStore {
     });
   }
 
-  handleDeleteMembersServer(data) {
-    const window = this.windows.get(data.windowId);
+  handleDeleteMembersServer({ windowId = mandatory(), members = mandatory() }) {
+    const window = this.windows.get(windowId);
 
-    data.members.forEach(member => {
+    members.forEach(member => {
       this._removeUser(member.userId, window);
     });
   }
 
   // TODO: Move these handlers somewhere else
 
-  handleLogout({ allSessions = false } = {}) {
+  handleLogout({ allSessions }) {
     Cookies.remove('mas', { path: '/' });
 
     if (typeof Storage !== 'undefined') {
@@ -588,7 +637,7 @@ class WindowStore {
     socket.send(
       {
         id: 'LOGOUT',
-        allSessions
+        allSessions: !!allSessions
       },
       () => {
         window.location = '/';
@@ -609,15 +658,27 @@ class WindowStore {
   }
 
   _removeUser(userId, window) {
-    window.operators.removeObject(userId);
-    window.voices.removeObject(userId);
-    window.users.removeObject(userId);
+    window.operators.delete(userId);
+    window.voices.delete(userId);
+    window.users.delete(userId);
   }
 
   _trimBacklog(messages) {
-    // Remove the oldest message if the optimal history is visible
-    if (messages.get('length') > calcMsgHistorySize()) {
-      messages.removeModel(messages.sortBy('gid')[0]);
+    const limit = calcMsgHistorySize();
+    const messageArray = Array.from(messages.values()).sort((a, b) => a.ts > b.ts);
+
+    for (const message of messageArray) {
+      if (messages.size > limit) {
+        messages.delete(message.gid);
+      } else {
+        break;
+      }
+    }
+  }
+
+  _notifyLineAdded(window) {
+    if (window.lineAddedCb) {
+      window.lineAddedCb();
     }
   }
 }

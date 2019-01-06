@@ -18,7 +18,7 @@
 
 import Mobx from 'mobx';
 import { debounce, scheduleOnce, bind, cancel, throttle, run } from '@ember/runloop';
-import { computed, observer } from '@ember/object';
+import EmberObject, { computed, observer } from '@ember/object';
 import { alias } from '@ember/object/computed';
 import Component from '@ember/component';
 import PerfectScrollbar from 'perfect-scrollbar';
@@ -45,11 +45,42 @@ document.addEventListener('visibilitychange', () => {
 });
 
 export default Component.extend({
-  init(...args) {
-    this._super(...args);
+  init(args) {
+    this._super(args);
+
+    this.content = EmberObject.create();
+
+    const window = windowStore.windows.get(args.attrs.windowId);
+    this.window = window;
+
+    window.lineAddedCb = () => {
+      if (windowStore.initDone) {
+        this._lineAdded();
+      }
+    };
 
     this.disposer = autorun(() => {
       this.set('activeDesktop', settingStore.settings.activeDesktop);
+      this.set('content.windowId', window.windowId);
+      this.set('content.userId', window.userId);
+      this.set('content.network', window.network);
+      this.set('content.type', window.type);
+      this.set('content.name', window.name);
+      this.set('content.row', window.row);
+      this.set('content.column', window.column);
+      this.set('content.password', window.password);
+      this.set('content.alerts', window.alerts); // TODO: This is object!
+      this.set('content.desktop', window.desktop);
+      this.set('content.operatorNames', window.operatorNames);
+      this.set('content.voiceNames', window.voiceNames);
+      this.set('content.userNames', window.userNames);
+      this.set('content.sortedMessages', window.sortedMessages);
+      this.set('content.minimizedNamesList', window.minimizedNamesList);
+      this.set('content.decoratedTitle', window.decoratedTitle);
+      this.set('content.decoratedTopic', window.decoratedTopic);
+      this.set('content.simplifiedName', window.simplifiedName);
+      this.set('content.tooltipTopic', window.tooltipTopic);
+      this.set('content.explainedType', window.explainedType);
     });
   },
 
@@ -75,7 +106,6 @@ export default Component.extend({
   notDelivered: false,
 
   linesAmount: null,
-  deletedLine: false,
   prependPosition: 0,
 
   $messagePanel: null,
@@ -171,11 +201,8 @@ export default Component.extend({
     .observes('content.userNames.[]', 'content.voiceNames.[]', 'content.operatorNames.[]')
     .on('init'),
 
-  _lineAdded(messages) {
-    // Get the message that was added. Note: .get('lastObject') would work only after this
-    // run loop. Also note that messages is IndexArray and everything must be accessed using
-    // .get()
-    const message = messages.content[messages.get('length') - 1];
+  _lineAdded() {
+    const message = this.get('content.sortedMessages')[this.get('content.sortedMessages').length - 1];
 
     const cat = message.cat;
     const importantMessage = cat === 'msg' || cat === 'action';
@@ -236,7 +263,7 @@ export default Component.extend({
 
     toggleMemberListWidth() {
       dispatch('TOGGLE_MEMBER_LIST_WIDTH', {
-        window: this.content
+        window: this.window
       });
 
       scheduleOnce('afterRender', this, function() {
@@ -247,7 +274,7 @@ export default Component.extend({
     processLine(msg) {
       dispatch('PROCESS_LINE', {
         body: msg,
-        window: this.content
+        window: this.window
       });
     },
 
@@ -255,7 +282,7 @@ export default Component.extend({
       dispatch('EDIT_MESSAGE', {
         body: msg,
         gid,
-        window: this.content
+        window: this.window
       });
     },
 
@@ -263,20 +290,20 @@ export default Component.extend({
       dispatch('EDIT_MESSAGE', {
         body: '',
         gid,
-        window: this.content
+        window: this.window
       });
     },
 
     close() {
       dispatch('CLOSE_WINDOW', {
-        window: this.content
+        window: this.window
       });
     },
 
     menu(modalName) {
       dispatch('OPEN_MODAL', {
         name: modalName,
-        model: this.content
+        model: this.window
       });
     },
 
@@ -292,7 +319,7 @@ export default Component.extend({
     upload(files) {
       dispatch('UPLOAD_FILES', {
         files,
-        window: this.content
+        window: this.window
       });
 
       this.$('input[name="files"]').val('');
@@ -314,6 +341,12 @@ export default Component.extend({
           });
         })
       });
+  },
+
+  lineAdded() {
+    if (windowStore.initDone) {
+      this._lineAdded();
+    }
   },
 
   mouseDown(event) {
@@ -412,20 +445,6 @@ export default Component.extend({
     this.$('.btn-file input').change(e => this.send('upload', e.target.files));
 
     this.sendAction('relayout', { animate: false });
-
-    this.get('content.messages').addArrayObserver(this);
-  },
-
-  arrayWillChange() {},
-
-  arrayDidChange(array, offset, removeCount, addCount) {
-    if (addCount > 0 && windowStore.initDone && offset === array.get('length') - 1) {
-      // Infinity scrolling adds the old messages to the beginning of the array. The offset
-      // check above makes sure that _lineAdded() is not called then (FETCH case).
-      this._lineAdded(array);
-    } else if (removeCount > 0) {
-      this.deletedLine = true;
-    }
   },
 
   willDestroyElement() {
@@ -513,13 +532,7 @@ export default Component.extend({
         }
 
         console.log('scrollock off');
-      } else if (!this.deletedLine) {
-        this.set('scrollLock', true);
-
-        console.log('scrollock on');
       }
-
-      this.deletedLine = false;
     };
 
     this.$messagePanel.on('scroll', () => {
@@ -599,12 +612,9 @@ export default Component.extend({
 
     this.set('fetchingMore', true);
 
-    dispatch(
-      'FETCH_OLDER_MESSAGES',
-      {
-        window: this.content
-      },
-      foundMessages => {
+    dispatch('FETCH_OLDER_MESSAGES', {
+      window: this.window,
+      successCb: foundMessages => {
         if (foundMessages) {
           this.didPrepend = true;
         } else {
@@ -613,6 +623,6 @@ export default Component.extend({
 
         this.set('fetchingMore', false);
       }
-    );
+    });
   }
 });

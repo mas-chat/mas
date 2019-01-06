@@ -14,109 +14,82 @@
 //   governing permissions and limitations under the License.
 //
 
-import Mobx from 'mobx';
-import EmberObject, { computed } from '@ember/object';
-import { A } from '@ember/array';
+import Mobx, { observable } from 'mobx';
 import moment from 'moment';
 import isMobile from 'ismobilejs';
-import BaseModel from './base';
-import Message from './message';
+import Message from './Message';
 import daySeparatorStore from '../stores/DaySeparatorStore';
 import userStore from '../stores/UserStore';
-import IndexArray from '../utils/index-array';
 
-const { autorun } = Mobx;
+const { computed } = Mobx;
 
 let mobileDesktop = 1;
 
-function monitor(name, ...args) {
-  autorun(() => {
-    if (this) {
-      this.set(name, args[args.length - 1].call(this));
-    }
-  });
-  return computed(...args);
-}
+export default class WindowModel {
+  windowId = 0;
+  userId = null;
+  network = null;
+  type = null;
+  @observable name = null;
+  @observable row = 0;
+  @observable column = 0;
+  @observable password = null;
 
-export default BaseModel.extend({
-  windowId: 0,
-  generation: '',
-  name: null,
-  userId: null,
-  network: null,
-  type: null,
+  @observable
+  alerts = {
+    email: false,
+    notification: false,
+    sound: false,
+    title: false
+  };
+  @observable desktop;
 
-  row: 0,
-  column: 0,
+  @observable messages = new Map();
+  @observable logMessages = new Map();
 
-  messages: null,
-  didPrepend: false,
-  logMessages: null,
+  generation = '';
+  didPrepend = false;
+  newMessagesCount = 0;
 
-  newMessagesCount: 0,
-  alerts: null,
+  operators = [];
+  voices = [];
+  users = [];
 
-  operators: null,
-  voices: null,
-  users: null,
+  @observable minimizedNamesList = false;
 
-  minimizedNamesList: false,
+  @observable Internaldesktop = mobileDesktop++;
 
-  password: null,
+  constructor(store, props) {
+    // delete props.desktop;
 
-  _desktop: null,
+    Object.assign(this, props);
+  }
 
-  init() {
-    this._super();
+  // @computed
+  // get desktop() {
+  //   return this.Internaldesktop;
+  // }
 
-    this.set('_desktop', mobileDesktop++);
+  // @computed
+  // set desktop(value) {
+  //   if (!isMobile.any) {
+  //     this.Internaldesktop = value;
+  //   }
+  // }
 
-    this.set('messages', IndexArray.create({ index: 'gid', factory: Message }));
-    this.set('logMessages', IndexArray.create({ index: 'gid', factory: Message }));
-
-    this.set('operators', A([]));
-    this.set('voices', A([]));
-    this.set('users', A([]));
-
-    this.set(
-      'alerts',
-      EmberObject.create({
-        email: false,
-        notification: false,
-        sound: false,
-        title: false
-      })
-    );
-
-    autorun(() => {
-      this.set('dayCounter', daySeparatorStore.dayCounter);
-
-      const nick = userStore.users.get(userStore.userId).nick[this.network];
-      this.set('userNickHighlightRegex', new RegExp(`(^|[@ ])${nick}[ :]`));
-    });
-  },
-
-  desktop: computed('_desktop', {
-    get() {
-      return this._desktop;
-    },
-    set(key, value) {
-      if (!isMobile.any) {
-        this.set('_desktop', value);
-      }
-
-      return this._desktop;
-    }
-  }),
-
-  sortedMessages: computed('messages.[]', 'dayCounter', function() {
-    const result = this.messages.sortBy('gid');
+  @computed
+  get sortedMessages() {
+    const result = Array.from(this.messages.values()).sort((a, b) => a.gid > b.gid);
 
     const addDayDivider = (array, dateString, index) => {
+      // TODO:
+      // this.set('dayCounter', daySeparatorStore.dayCounter);
+
       array.splice(
         index,
         0,
-        Message.create({
+        new Message(this, {
+          // TODO: This is wrong
           body: dateString,
           cat: 'day-divider',
           gid: 0,
@@ -128,7 +101,7 @@ export default BaseModel.extend({
     let dayOfNextMsg = moment().format('dddd, MMMM D');
 
     for (let i = result.length - 1; i >= 0; i--) {
-      const ts = moment.unix(result[i].get('ts'));
+      const ts = moment.unix(result[i].ts);
       const day = ts.format('dddd, MMMM D');
 
       if (day !== dayOfNextMsg) {
@@ -138,21 +111,25 @@ export default BaseModel.extend({
     }
 
     return result;
-  }),
+  }
 
-  operatorNames: monitor('operatorNames', 'operators.[]', function() {
+  @computed
+  get operatorNames() {
     return this._mapUserIdsToNicks('operators');
-  }),
+  }
 
-  voiceNames: monitor('voiceNames', 'voices.[]', function() {
+  @computed
+  get voiceNames() {
     return this._mapUserIdsToNicks('voices');
-  }),
+  }
 
-  userNames: monitor('userNames', 'users.[]', function() {
+  @computed
+  get userNames() {
     return this._mapUserIdsToNicks('users');
-  }),
+  }
 
-  decoratedTitle: computed('name', 'network', 'type', function() {
+  @computed
+  get decoratedTitle() {
     let title;
     const type = this.type;
     const userId = this.userId;
@@ -174,13 +151,15 @@ export default BaseModel.extend({
     }
 
     return title;
-  }),
+  }
 
-  decoratedTopic: computed('topic', function() {
+  @computed
+  get decoratedTopic() {
     return this.topic ? `- ${this.topic}` : '';
-  }),
+  }
 
-  simplifiedName: computed('name', function() {
+  @computed
+  get simplifiedName() {
     let windowName = this.name;
     const network = this.network;
     const type = this.type;
@@ -194,14 +173,16 @@ export default BaseModel.extend({
       windowName = peerUser ? peerUser.nick[network] : '1on1';
     }
     return windowName;
-  }),
+  }
 
-  tooltipTopic: computed('topic', function() {
+  @computed
+  get tooltipTopic() {
     const topic = this.topic;
     return topic ? `Topic: ${topic}` : 'Topic not set.';
-  }),
+  }
 
-  explainedType: computed('type', function() {
+  @computed
+  get explainedType() {
     const type = this.type;
     const network = this.network;
 
@@ -209,10 +190,10 @@ export default BaseModel.extend({
       return network === 'MAS' ? 'group' : 'channel';
     }
     return '1on1';
-  }),
+  }
 
   _mapUserIdsToNicks(role) {
-    return this.get(role)
+    return this[role]
       .map(userId => {
         const user = userStore.users.get(userId);
 
@@ -224,4 +205,4 @@ export default BaseModel.extend({
       })
       .sort((a, b) => a.nick - b.nick);
   }
-});
+}

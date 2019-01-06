@@ -30,15 +30,12 @@ export default Component.extend({
         password = null;
       }
 
-      dispatch(
-        'CREATE_GROUP',
-        {
-          name: this.group,
-          password
-        },
-        () => this.sendAction('closeModal'), // Accept
-        reason => this.set('errorMsg', reason)
-      ); // Reject
+      dispatch('CREATE_GROUP', {
+        name: this.group,
+        password,
+        acceptCb: () => this.sendAction('closeModal'),
+        rejectCb: reason => this.set('errorMsg', reason)
+      });
     },
 
     closeModal() {

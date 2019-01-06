@@ -2,18 +2,19 @@ import Mobx from 'mobx';
 import ProfileModel from '../models/Profile';
 import { dispatch } from '../utils/dispatcher';
 import socket from '../utils/socket';
+import { mandatory } from '../utils/parameters';
 
 const { observable } = Mobx;
 
 class ProfileStore {
   @observable profile = new ProfileModel(this, {});
 
-  handleUpdateProfile(data, successCb, rejectCb) {
+  handleUpdateProfile({ name = mandatory(), email = mandatory(), successCb = mandatory(), rejectCb = mandatory() }) {
     socket.send(
       {
         id: 'UPDATE_PROFILE',
-        name: data.name,
-        email: data.email
+        name,
+        email
       },
       resp => {
         if (resp.status === 'OK') {

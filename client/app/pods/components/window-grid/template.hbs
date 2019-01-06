@@ -2,8 +2,8 @@
     <div id="window-cursor-inner"><i class="fa fa-plus"></i></div>
 </div>
 
-{{#each model key="windowId" as |window|}}
-    {{discussion-window register="registerWindow" unregister="unregisterWindow" content=window
+{{#each windowIds as |windowId|}}
+    {{discussion-window register="registerWindow" unregister="unregisterWindow" windowId=windowId
 relayoutAfterRender="relayoutAfterRender" relayout="relayout" dragWindowStart="dragWindowStart"}}
 {{else}}
     <div class="flex-grow-row flex-1 flex-align-center">

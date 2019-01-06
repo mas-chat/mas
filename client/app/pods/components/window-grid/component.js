@@ -40,7 +40,7 @@ export default Component.extend({
       this.set('theme', settingStore.settings.theme);
       this.set('emailConfirmed', settingStore.settings.emailConfirmed);
       this.set('initDone', windowStore.initDone);
-      this.set('model', Array.from(windowStore.windows.values()));
+      this.set('windowIds', Array.from(windowStore.windows.keys()));
       this.set('alerts', alertStore.alerts);
     });
   },
@@ -77,7 +77,9 @@ export default Component.extend({
       dispatch('JOIN_GROUP', {
         name: 'lobby',
         network: 'MAS',
-        password: ''
+        password: '',
+        acceptCb: () => {},
+        rejectCb: () => {}
       });
     },
 
@@ -204,11 +206,11 @@ export default Component.extend({
         column: 0,
         row: 0,
         desktop: desktopId,
-        window: this.movingWindow.get('content')
+        windowId: this.movingWindow.get('content.windowId')
       });
 
       dispatch('CHANGE_ACTIVE_DESKTOP', {
-        desktop: desktopId
+        desktopId
       });
       return;
     }
@@ -242,7 +244,7 @@ export default Component.extend({
           dispatch('MOVE_WINDOW', {
             column: newColumn,
             row: newRow,
-            window: masWindow.component.get('content')
+            windowId: masWindow.component.get('content.windowId')
           });
         }
       }
@@ -254,7 +256,7 @@ export default Component.extend({
     dispatch('MOVE_WINDOW', {
       column: newColumn,
       row: newRow,
-      window: this.movingWindow.get('content')
+      windowId: this.movingWindow.get('content.windowId')
     });
   },
 

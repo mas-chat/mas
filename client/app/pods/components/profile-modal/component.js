@@ -40,15 +40,12 @@ export default Component.extend({
 
   actions: {
     edit() {
-      dispatch(
-        'UPDATE_PROFILE',
-        {
-          name: this.name,
-          email: this.email
-        },
-        () => this.sendAction('closeModal'), // Accept
-        reason => this.set('errorMsg', reason)
-      ); // Reject
+      dispatch('UPDATE_PROFILE', {
+        name: this.name,
+        email: this.email,
+        successCb: () => this.sendAction('closeModal'),
+        rejectCb: reason => this.set('errorMsg', reason)
+      });
     },
 
     terminate() {

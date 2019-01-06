@@ -32,7 +32,7 @@ export default Component.extend({
   actions: {
     switch() {
       dispatch('CHANGE_ACTIVE_DESKTOP', {
-        desktop: this.id
+        desktopId: this.id
       });
     },
 

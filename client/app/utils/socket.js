@@ -73,8 +73,6 @@ const SocketService = EmberObject.extend({
         this.set('_connected', true);
 
         this.set('sessionId', data.sessionId); // TODO: Should not needed, use cookie always
-
-        windowStore.userId = `m${data.userId}`;
         windowStore.maxBacklogMsgs = data.maxBacklogMsgs;
 
         // TODO: Delete oldest messages for windows that have more messages than

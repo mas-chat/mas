@@ -1,65 +1,49 @@
-//
-//   Copyright 2009-2014 Ilkka Oksanen <iao@iki.fi>
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing,
-//   software distributed under the License is distributed on an "AS
-//   IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-//   express or implied.  See the License for the specific language
-//   governing permissions and limitations under the License.
-//
-
-import { A } from '@ember/array';
-import EmberObject, { computed } from '@ember/object';
-import { alias } from '@ember/object/computed';
+import Mobx from 'mobx';
 import marked from 'marked';
 import emojione from 'emojione';
 import moment from 'moment';
 import URI from 'urijs';
-import BaseModel from './base';
 import userStore from '../stores/UserStore';
 import windowStore from '../stores/WindowStore';
+
+const { computed } = Mobx;
 
 marked.setOptions({
   breaks: true,
   tables: false
 });
 
-export default BaseModel.extend({
-  gid: 0,
-  body: null,
-  cat: null,
-  ts: null,
-  userId: null,
-  window: null,
-  status: 'original',
-  updatedTs: null,
+export default class MessageModel {
+  gid = 0;
+  body = null;
+  cat = null;
+  ts = null;
+  userId = null;
+  window = null;
+  status = 'original';
+  updatedTs = null;
 
-  hideImages: false,
-  editing: false,
+  hideImages = false;
+  editing = false;
 
-  init() {
-    this._super();
-  },
+  ircMotd = false;
 
-  mentionedRegEx: alias('window.userNickHighlightRegex'),
+  constructor(store, props) {
+    Object.assign(this, props);
+  }
 
-  ircMotd: false,
-
-  edited: computed('status', function() {
+  @computed
+  get edited() {
     return this.status === 'edited';
-  }),
+  }
 
-  deleted: computed('status', function() {
+  @computed
+  get deleted() {
     return this.status === 'deleted';
-  }),
+  }
 
-  updatedTime: computed('updatedTs', function() {
+  @computed
+  get updatedTime() {
     const updatedTs = this.updatedTs;
 
     if (!updatedTs) {
@@ -70,36 +54,43 @@ export default BaseModel.extend({
     const updatedTime = moment.unix(updatedTs);
 
     return `at ${updatedTime.format(originalTime.isSame(updatedTime, 'd') ? 'HH:mm' : 'MMM Do HH:mm')}`;
-  }),
+  }
 
-  updatedDate: computed('updatedTs', function() {
+  @computed
+  get updatedDate() {
     const updatedTs = this.updatedTs;
 
     return updatedTs ? `at ${moment.unix(updatedTs).format('MMM Do HH:mm')}` : '';
-  }),
+  }
 
-  updatedDateLong: computed('updatedTs', function() {
+  @computed
+  get updatedDateLong() {
     const updatedTs = this.updatedTs;
 
     return updatedTs ? `at ${moment.unix(updatedTs).format('dddd, MMMM D HH:mm')}` : '';
-  }),
+  }
 
-  nick: computed('userId', 'window', function() {
+  @computed
+  get nick() {
     const user = userStore.users.get(this.userId);
-    return user ? user.nick[this.get('window.network')] : '';
-  }),
+    return user ? user.nick[this.window.network] : '';
+  }
 
-  avatarUrl: computed('userId', function() {
+  @computed
+  get avatarUrl() {
     const user = userStore.users.get(this.userId);
     return user ? `//gravatar.com/avatar/${user.gravatar}?d=mm` : '';
-  }),
+  }
 
-  decoratedCat: computed('cat', 'nick', 'body', 'mentionedRegEx', function() {
+  @computed
+  get decoratedCat() {
     const cat = this.cat;
     const body = this.body;
     const userId = this.userId;
     const nick = this.nick;
-    const mentionedRegEx = this.mentionedRegEx;
+
+    const myNick = userStore.users.get(userStore.userId).nick[this.window.network];
+    const mentionedRegEx = new RegExp(`(^|[@ ])${myNick}[ :]`);
 
     if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {
       return 'mention';
@@ -110,16 +101,18 @@ export default BaseModel.extend({
     }
 
     return cat;
-  }),
+  }
 
-  decoratedTs: computed('ts', function() {
+  @computed
+  get decoratedTs() {
     return moment.unix(this.ts).format('HH:mm');
-  }),
+  }
 
-  channelAction: computed('cat', function() {
+  @computed
+  get channelAction() {
     const category = this.cat;
     const nick = this.nick;
-    const groupName = this.get('window.name');
+    const groupName = this.window.name;
     const body = this.body;
 
     switch (category) {
@@ -134,13 +127,15 @@ export default BaseModel.extend({
       default:
         return '';
     }
-  }),
+  }
 
-  myNotDeletedMessage: computed('decoratedCat', function() {
+  @computed
+  get myNotDeletedMessage() {
     return this.decoratedCat === 'mymsg' && this.status !== 'deleted';
-  }),
+  }
 
-  bodyParts: computed('body', function() {
+  @computed
+  get bodyParts() {
     let body = this.body;
     const cat = this.cat;
 
@@ -158,31 +153,39 @@ export default BaseModel.extend({
 
     parts.push({ type: 'text', text: body });
 
-    return A(parts.map(item => EmberObject.create(item)));
-  }),
+    return parts;
+  }
 
-  text: computed('bodyParts', function() {
-    return this.bodyParts.findBy('type', 'text').text;
-  }),
+  // //redo
 
-  images: computed('bodyParts', function() {
-    return this.bodyParts.filterBy('type', 'image');
-  }),
+  @computed
+  get text() {
+    return this.bodyParts.find(part => part.type === 'text').text;
+  }
 
-  hasMedia: computed('bodyParts', function() {
-    return !this.bodyParts.isEvery('type', 'text');
-  }),
+  @computed
+  get images() {
+    return this.bodyParts.filter(part => part.type === 'image');
+  }
 
-  hasImages: computed('bodyParts', function() {
-    return this.bodyParts.isAny('type', 'image');
-  }),
+  @computed
+  get hasMedia() {
+    return !this.bodyParts.every(part => part.type === 'text');
+  }
 
-  hasYoutubeVideo: computed('bodyParts', function() {
-    return this.bodyParts.isAny('type', 'youtubelink');
-  }),
+  @computed
+  get hasImages() {
+    return this.bodyParts.some(part => part.type === 'image');
+  }
 
-  videoId: computed('bodyParts', function() {
-    const video = this.bodyParts.findBy('type', 'youtubelink');
+  @computed
+  get hasYoutubeVideo() {
+    return this.bodyParts.some('type', 'youtubelink');
+  }
+
+  @computed
+  get videoId() {
+    const video = this.bodyParts.find(part => part.type === 'youtubelink');
 
     if (video) {
       const urlObj = new URI(video.url);
@@ -196,15 +199,15 @@ export default BaseModel.extend({
       );
     }
     return null;
-  }),
+  }
 
-  videoParams: computed('bodyParts', function() {
-    const video = this.bodyParts.findBy('type', 'youtubelink');
-
+  @computed
+  get videoParams() {
+    const video = this.bodyParts.find(part => part.type === 'youtubelink');
     const start = video.start ? `&start=${video.start}` : '';
 
     return `showinfo=0&autohide=1${start}`;
-  }),
+  }
 
   _splitByLinks(text) {
     const parts = [];
@@ -224,7 +227,7 @@ export default BaseModel.extend({
     }
 
     return parts;
-  },
+  }
 
   _parseLinks(text) {
     const imgSuffixes = ['png', 'jpg', 'jpeg', 'gif'];
@@ -284,11 +287,11 @@ export default BaseModel.extend({
     }
 
     return { body, parts: media };
-  },
+  }
 
   _parseWhiteSpace(text) {
     return text.replace(/ {2}/g, ' &nbsp;'); // Preserve whitespace.
-  },
+  }
 
   _parseCustomFormatting(text) {
     let result;
@@ -319,21 +322,21 @@ export default BaseModel.extend({
     }
 
     return result;
-  },
+  }
 
   _renderLink(url, label) {
     return `<a href="${url}" target="_blank">${label}</a>`;
-  },
+  }
 
   _renderEmoji(name, src) {
     return `<img align="absmiddle" alt="${name}" title="${name}" class="emoji" src="${src}"/>`;
-  },
+  }
 
   _renderMention(beforeCharacter, nick) {
     return `${beforeCharacter}<span class="nick-mention">${nick}</span>`;
-  },
+  }
 
   _escapeHTMLStartTag(text) {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   }
-});
+}

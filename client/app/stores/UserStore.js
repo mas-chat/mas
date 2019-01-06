@@ -1,6 +1,7 @@
 import Mobx from 'mobx';
 import Cookies from 'js-cookie';
 import UserModel from '../models/User';
+import { mandatory } from '../utils/parameters';
 
 const { observable } = Mobx;
 
@@ -11,13 +12,16 @@ class UserStore {
   constructor() {
     try {
       // TODO: Should read this from initok request but that's too late
-      this.userId = `m${JSON.parse(window.atob(Cookies.get('mas'))).userId}`;
-    } catch {}
+      const cookie = JSON.parse(window.atob(Cookies.get('mas')));
+      this.userId = `m${cookie.userId}`;
+    } catch (e) {
+      // eslint-disable-next-line no-alert
+      alert('Failed to read the cookie.');
+    }
   }
 
-  handleAddUsersServer(data) {
-    Object.keys(data.mapping).forEach(userId => {
-      const user = data.mapping[userId];
+  handleAddUsersServer({ mapping = mandatory() }) {
+    Object.entries(mapping).forEach(([userId, user]) => {
       this.users.set(userId, new UserModel(this, user));
     });
   }

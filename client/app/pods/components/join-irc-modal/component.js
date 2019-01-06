@@ -44,20 +44,16 @@ export default Component.extend({
     joinIRC() {
       const password = this.password.trim();
 
-      dispatch(
-        'JOIN_IRC_CHANNEL',
-        {
-          name: this.channel,
-          network: this.selectedNetwork,
-          password
-        },
-        () => {
-          // Accept
+      dispatch('JOIN_IRC_CHANNEL', {
+        name: this.channel,
+        network: this.selectedNetwork,
+        password,
+        acceptCb: () => {
           this.sendAction('closeModal');
           this.set('selectedNetwork', null);
         },
-        reason => this.set('errorMsg', reason)
-      ); // Reject
+        rejectCb: reason => this.set('errorMsg', reason)
+      });
     },
 
     changeNetwork() {

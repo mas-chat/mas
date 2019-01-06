@@ -108,18 +108,15 @@ export default Component.extend({
 
     this.set('loading', true);
 
-    dispatch(
-      'FETCH_MESSAGE_RANGE',
-      {
-        window: this.window,
-        start: epochTsStart,
-        end: epochTsEnd
-      },
-      () => {
+    dispatch('FETCH_MESSAGE_RANGE', {
+      window: this.window,
+      start: epochTsStart,
+      end: epochTsEnd,
+      successCB: () => {
         this.set('loading', false);
         this._loadImages();
       }
-    ); // Success);
+    });
   },
 
   _loadImages() {

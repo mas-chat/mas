@@ -40,15 +40,12 @@ export default Component.extend({
     changePassword() {
       const newPassword = this.passwordEnabled ? this.password : '';
 
-      dispatch(
-        'UPDATE_PASSWORD',
-        {
-          window: this.model,
-          password: newPassword
-        },
-        () => this.sendAction('closeModal'), // Accept
-        reason => this.set('errorMsg', reason)
-      ); // Reject
+      dispatch('UPDATE_PASSWORD', {
+        window: this.model,
+        password: newPassword,
+        successCb: () => this.sendAction('closeModal'),
+        rejectCb: reason => this.set('errorMsg', reason)
+      });
     },
 
     closeModal() {

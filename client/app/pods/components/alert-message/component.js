@@ -38,7 +38,7 @@ export default Component.extend({
 
   actions: {
     close(result) {
-      dispatch('CLOSE_ALERT', { alert: this.currentAlert, result });
+      dispatch('CLOSE_ALERT', { alertId: this.currentAlert.alertId, result });
     }
   }
 });

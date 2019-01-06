@@ -3,6 +3,8 @@ import isMobile from 'ismobilejs';
 import SettingsModel from '../models/Settings';
 import { dispatch } from '../utils/dispatcher';
 import socket from '../utils/socket';
+import windowStore from './WindowStore';
+import { mandatory } from '../utils/parameters';
 
 const { observable } = Mobx;
 
@@ -34,7 +36,9 @@ class SettingStore {
           message: msg,
           postponeLabel: false,
           ackLabel: 'Okay',
-          resultCallback: () => this.settings.emailConfirmed = true
+          resultCallback: () => {
+            this.settings.emailConfirmed = true;
+          }
         });
       }
     );
@@ -44,25 +48,31 @@ class SettingStore {
     this.settings.emailConfirmed = true;
   }
 
-  handleChangeActiveDesktop(data) {
-    this.settings.activeDesktop = data.desktop;
+  handleChangeActiveDesktop({ desktopId = mandatory() }) {
+    if (!windowStore.initDone) {
+      return;
+    }
+
+    const valid = windowStore.desktops.some(existingDesktop => existingDesktop.id === desktopId);
+
+    this.settings.activeDesktop = valid ? desktopId : windowStore.desktops.values().next().value.desktopId;
 
     if (!isMobile.any) {
       socket.send({
         id: 'SET',
         settings: {
-          activeDesktop: data.desktop
+          activeDesktop: desktopId
         }
       });
     }
   }
 
-  handleUpdateSettingsServer(data) {
+  handleUpdateSettingsServer({ settings = mandatory() }) {
     if (isMobile.any) {
-      delete data.settings.activeDesktop;
+      delete settings.activeDesktop;
     }
 
-    this.settings = new SettingsModel(this, data.settings);
+    this.settings = new SettingsModel(this, settings);
   }
 }
 

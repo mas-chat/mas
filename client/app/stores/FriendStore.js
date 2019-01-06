@@ -3,34 +3,35 @@ import { dispatch } from '../utils/dispatcher';
 import userStore from './UserStore';
 import FriendModel from '../models/Friend';
 import socket from '../utils/socket';
+import { mandatory } from '../utils/parameters';
 
 const { observable } = Mobx;
 
 class FriendStore {
   @observable friends = new Map();
 
-  handleAddFriendsServer(data) {
-    if (data.reset) {
+  handleAddFriendsServer({ reset, friends = mandatory() }) {
+    if (reset) {
       this.friends.clear();
     }
 
-    data.friends.forEach(friend => {
+    friends.forEach(friend => {
       this.friends.set(friend.userId, new FriendModel(this, friend));
     });
   }
 
-  handleConfirmRemoveFriend(data) {
+  handleConfirmRemoveFriend({ userId = mandatory() }) {
     dispatch('OPEN_MODAL', {
       name: 'remove-friend-modal',
-      model: data.userId
+      model: userId
     });
   }
 
-  handleRequestFriend(data) {
+  handleRequestFriend({ userId = mandatory() }) {
     socket.send(
       {
         id: 'REQUEST_FRIEND',
-        userId: data.userId
+        userId
       },
       resp => {
         const message =
@@ -49,8 +50,8 @@ class FriendStore {
     );
   }
 
-  handleConfirmFriendsServer(data) {
-    for (const friendCandidate of data.friends) {
+  handleConfirmFriendsServer({ friends = mandatory() }) {
+    for (const friendCandidate of friends) {
       const userId = friendCandidate.userId;
       const user = userStore.users.get(userId);
       const message = `Allow ${user.name} (${user.nick.mas}) to add you to his/her contacts list?`;
@@ -75,10 +76,10 @@ class FriendStore {
     }
   }
 
-  handleRemoveFriend(data) {
+  handleRemoveFriend({ userId = mandatory() }) {
     socket.send({
       id: 'REMOVE_FRIEND',
-      userId: data.userId
+      userId
     });
   }
 }

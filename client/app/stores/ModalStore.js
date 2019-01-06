@@ -1,27 +1,22 @@
 import Mobx from 'mobx';
+import { mandatory } from '../utils/parameters';
 
 const { observable } = Mobx;
 
 class ModalStore {
   @observable modals = [];
 
-  handleOpenModal(data) {
-    this.modals.push({
-      name: data.name,
-      model: data.model
-    });
+  handleOpenModal({ name = mandatory(), model = mandatory() }) {
+    this.modals.push({ name, model });
+  }
+
+  handleOpenPriorityModal({ name = mandatory(), model = mandatory() }) {
+    // Show immediately
+    this.modals.unshift({ name, model });
   }
 
   handleCloseModal() {
     this.modals.shift();
-  }
-
-  handleOpenPriorityModal(data) {
-    this.modals.unshift({
-      // Show immediately
-      name: data.name,
-      model: data.model
-    });
   }
 
   handleClosePriorityModal() {
