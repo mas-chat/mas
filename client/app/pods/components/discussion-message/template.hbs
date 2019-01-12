@@ -1,0 +1,60 @@
+<div class="line {{decoratedCat}}">
+  {{~#if myNotDeletedMessage~}}
+  <i {{action "edit" message}} class="edit-message-button fa fa-pencil"></i>
+  {{~/if~}}
+  <div class="timestamp">
+    {{decoratedTs}}
+  </div>
+  <div class="body">
+    <span class="nick">
+      {{~nick~}}
+    </span>
+    {{~#if channelAction}}
+    {{channelAction}}
+    {{~else}}
+    {{#if editing}}
+      {{textarea value=editBody}}
+      <button {{action "change" message}} type="button" class="btn btn-default btn-xs">Change</button>
+      <button {{action "cancel" message}} type="button" class="btn btn-default btn-xs">Cancel</button>
+      <button {{action "delete" message}} type="button" class="btn btn-danger btn-xs">Delete</button>
+    {{else}}
+      {{{text}}}
+      {{~#if edited~}}
+      <span class="msg-edited-label" data-toggle="tooltip" data-delay='{"show": 200, "hide": 200}' title="Last edited {{updatedDateLong}}"><i
+          class="fa fa-pencil"></i> {{updatedTime}}</span>
+      {{~/if~}}
+      {{~#if deleted~}}
+      <span class="msg-deleted-label">Deleted {{updatedDate}}</span>
+      {{~/if~}}
+    {{/if}}
+    {{#if hideImages}}
+      <i {{action "toggleImages" message}} class="user-img-restore fa fa-picture-o"></i>
+    {{/if}}
+    {{~#if hasMedia}}
+    <ul class="user-media" data-gid="{{gid}}" data-has-images="{{hasImages}}">
+      {{#if hasYoutubeVideo}}
+        <li>
+          <iframe class="youtube-preview" src="https://www.youtube.com/embed/{{videoId}}?{{videoParams}}"
+            allowfullscreen frameborder="0"></iframe>
+        </li>
+      {{/if}}
+      {{#unless hideImages}}
+        {{#each images as |image|}}
+          <li>
+            <a href="{{image.url}}" class="user-img">
+              <div class="user-img-container">
+                <img src="{{image.source}}">
+                <span {{action "toggleImages" message on="mouseDown" bubbles=false}} class="user-img-close fa-stack">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-times fa-stack-1x fa-inverse"></i>
+                </span>
+              </div>
+            </a>
+          </li>
+        {{/each}}
+      {{/unless}}
+    </ul>
+    {{~/if}}
+    {{~/if}}
+  </div>
+</div>

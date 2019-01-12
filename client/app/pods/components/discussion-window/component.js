@@ -50,7 +50,7 @@ export default Component.extend({
 
     this.content = EmberObject.create();
 
-    const window = windowStore.windows.get(args.attrs.windowId);
+    const window = windowStore.windows.get(this.windowId);
     this.window = window;
 
     window.lineAddedCb = () => {
@@ -228,11 +228,11 @@ export default Component.extend({
         Notification.permission !== 'denied' &&
         cat === 'msg'
       ) {
-        const src = message.get('type') === 'group' ? message.get('simplifiedName') : '1on1';
+        const src = message.type === 'group' ? message.simplifiedName : '1on1';
 
-        const ntf = new Notification(`${message.get('nick')} (${src})`, {
-          body: message.get('body'),
-          icon: message.get('avatarUrl')
+        const ntf = new Notification(`${message.nick} (${src})`, {
+          body: message.body,
+          icon: message.avatarUrl
         });
 
         setTimeout(() => ntf.close(), 5000);
@@ -532,6 +532,10 @@ export default Component.extend({
         }
 
         console.log('scrollock off');
+      } else {
+        this.set('scrollLock', true);
+
+        console.log('scrollock on');
       }
     };
 
@@ -567,18 +571,25 @@ export default Component.extend({
 
       if (pos + placeHolderHeight >= 0 && pos <= panelHeight) {
         // Images of this message are in view port. Start to lazy load images.
-        const message = that.get('content.messages').findBy('gid', $imgContainer.data('gid'));
 
-        if (!message) {
+        const componentId = $imgContainer
+          .parent()
+          .parent()
+          .parent()
+          .prop('id');
+
+        const component = window.MasApp.__container__.lookup('-view-registry:main')[componentId];
+
+        if (!component) {
           return;
         }
 
-        const images = message.get('images') || [];
+        const images = component.images || [];
 
         for (let i = 0; i < images.length; i++) {
           const image = images[i];
 
-          if (!image.get('source')) {
+          if (!image.source) {
             // Image hasn't been already loaded
             that._loadImage(image, $imgContainer, i);
           }
@@ -588,7 +599,7 @@ export default Component.extend({
   },
 
   _loadImage(image, $container, index) {
-    image.set('source', image.get('url'));
+    image.set('source', image.url);
 
     const $image = $container.find('img').eq(index);
     const that = this;

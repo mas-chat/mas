@@ -110,7 +110,8 @@ class WindowStore {
       // Optimization: Avoid re-renders after every message
       this.msgBuffer.push({ gid, userId, ts, windowId, cat, body, updatedTs, status, window });
     } else {
-      window.messages.set(gid, new Message(this, { gid, userId, ts, windowId, cat, body, updatedTs, status, window }));
+      const message = window.messages.get(gid) || new Message(this, {});
+      Object.assign(message, { gid, userId, ts, windowId, cat, body, updatedTs, status, window });
 
       this._trimBacklog(window.messages);
       this._notifyLineAdded(window);
@@ -412,6 +413,7 @@ class WindowStore {
     network = mandatory(),
     windowType = mandatory(),
     name,
+    topic,
     row = mandatory(),
     column = mandatory(),
     password,
@@ -426,6 +428,7 @@ class WindowStore {
         network,
         type: windowType,
         name,
+        topic,
         row,
         column,
         password,
@@ -442,6 +445,7 @@ class WindowStore {
     network,
     windowType,
     name,
+    topic,
     row,
     column,
     desktop,
@@ -455,9 +459,10 @@ class WindowStore {
       ...(network ? { network } : {}),
       ...(windowType ? { type: windowType } : {}),
       ...(name ? { name } : {}),
-      ...(row ? { row } : {}),
-      ...(desktop ? { desktop } : {}),
-      ...(column ? { column } : {}),
+      ...(topic ? { topic } : {}),
+      ...(Number.isInteger(column) ? { column } : {}),
+      ...(Number.isInteger(row) ? { row } : {}),
+      ...(Number.isInteger(desktop) ? { desktop } : {}),
       ...(password ? { password } : {}),
       ...(alerts ? { alerts } : {})
     });
@@ -518,9 +523,9 @@ class WindowStore {
     const window = this.windows.get(windowId);
 
     Object.assign(window, {
-      ...(column ? { column } : {}),
-      ...(row ? { row } : {}),
-      ...(desktop ? { type: desktop } : {})
+      ...(Number.isInteger(column) ? { column } : {}),
+      ...(Number.isInteger(row) ? { row } : {}),
+      ...(Number.isInteger(desktop) ? { desktop } : {})
     });
 
     if (!isMobile.any) {
@@ -536,8 +541,6 @@ class WindowStore {
 
   handleToggleMemberListWidth({ window = mandatory() }) {
     window.minimizedNamesList = !window.minimizedNamesList;
-
-    console.log(window.minimizedNamesList);
 
     socket.send({
       id: 'UPDATE',

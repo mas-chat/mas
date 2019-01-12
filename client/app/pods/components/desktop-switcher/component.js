@@ -16,6 +16,7 @@
 
 import Mobx from 'mobx';
 import Component from '@ember/component';
+import EmberObject from '@ember/object';
 import settingStore from '../../../stores/SettingStore';
 import windowStore from '../../../stores/WindowStore';
 
@@ -27,7 +28,7 @@ export default Component.extend({
 
     autorun(() => {
       this.set('activeDesktop', settingStore.settings.activeDesktop);
-      this.set('desktops', windowStore.desktops);
+      this.set('desktops', windowStore.desktops.map(desktop => EmberObject.create(desktop)));
     });
   },
 

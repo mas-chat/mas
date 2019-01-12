@@ -1,124 +1,131 @@
 <div class="window-inner flex-grow-column">
-<div class="window-title flex-row {{ircServerWindow}}">
-    <div class="window-caption flex-1" data-toggle="tooltip" data-placement="bottom" data-delay='{"show": 1500, "hide": 300}' title={{content.tooltipTopic}}>
-        {{content.decoratedTitle}} {{content.decoratedTopic}}
-    </div>
-
-    <div class="window-title-buttons">
-        {{#unless logOrMobileModeEnabled}}
-            <i class="window-title-button fa fa-arrows" data-toggle="tooltip" data-placement="bottom" title="Drag the arrow to move this window to a different place or desktop."></i>
-            {{#if expanded}}
-                <i {{action "compress"}} class="window-title-button fa fa-compress" data-toggle="tooltip" data-placement="bottom" title="Maximize the size of this window."></i>
-            {{else}}
-                <i {{action "expand"}} class="window-title-button fa fa-expand"></i>
-            {{/if}}
-        {{/unless}}
-    </div>
-</div>
-
-<div class="flex-row flex-1 window-content">
-    {{#if logModeEnabled}}
-        {{log-panel enabled=logModeEnabled window=content compress="compress"}}
-    {{/if}}
-
-    <div class="window-messages flex-1 {{hiddenIfLogMode}}">
-        {{#if fetchingMore}}
-           <div class="window-upper-label">Loading older messages…</div>
-        {{else if beginningReached}}
-           <div class="window-start-label">Start of discussion.</div>
-        {{else}}
-           <div {{action "fetchMore"}} class="window-upper-label window-fetch-more">Click to see older messages</div>
-        {{/if}}
-        {{message-list messages=content.sortedMessages editMessage="editMessage" deleteMessage="deleteMessage"}}
-        <div class="window-upload">
-            <div class="js-upload">
-                <div class="progress progress-success">
-                    <div class="js-progress bar"></div>
-                </div>
-                <span class="btn-txt">Uploading (<span class="js-size"></span>)</span>
-            </div>
+    <div class="window-title flex-row {{ircServerWindow}}">
+        <div class="window-caption flex-1" data-toggle="tooltip" data-placement="bottom" data-delay='{"show": 1500, "hide": 300}'
+            title={{content.tooltipTopic}}>
+            {{content.decoratedTitle}} {{content.decoratedTopic}}
         </div>
-        <div class="window-messages-end"></div>
-    </div>
 
-    {{#if isGroup}}
-        <div class="window-members-list {{hiddenIfLogMode}} {{wideUnlessminimizedNamesList}} flex-column">
-            <div class="window-members flex-1">
-                {{#each content.operatorNames key="userId" as |name|}}
-                    <div class="member-row" data-toggle="tooltip" title="{{name.nick}}" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                        <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                        <div class="member-name window-operator {{hiddenIfMinimizedUserNames}}">
-                            {{name.nick}}
-                        </div>
-                    </div>
-                {{/each}}
-                {{#each content.voiceNames key="userId" as |name|}}
-                    <div class="member-row" data-toggle="tooltip" title="{{name.nick}}" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                        <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                        <div class="member-name window-voice {{hiddenIfMinimizedUserNames}}">
-                            {{name.nick}}
-                        </div>
-                    </div>
-                {{/each}}
-                {{#each content.userNames key="userId" as |name|}}
-                    <div class="member-row" data-toggle="tooltip" title="{{name.nick}}" data-userid="{{name.userId}}" data-nick="{{name.nick}}">
-                        <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
-                        <div class="member-name window-user {{hiddenIfMinimizedUserNames}}">
-                            {{name.nick}}
-                        </div>
-                    </div>
-                {{/each}}
-            </div>
-            <div {{action "toggleMemberListWidth"}} class="window-members-resize">
-                {{if content.minimizedNamesList '«' '»'}}
-            </div>
-        </div>
-    {{/if}}
-</div>
-
-<div class="window-toolbar flex-row {{hiddenIfLogMode}}">
-    <div class="window-add-text-container flex-1">
-        {{#if content.notDelivered}}
-            <div class="connection-error">
-                <i class="fa fa-exclamation-circle" aria-hidden="true"></i> Message not delivered. Trying to resume connection…
-            </div>
-        {{/if}}
-        {{message-input placeholder="Write here…" rows=1 maxlength="500" class="form-control" participants=participants sendMessage="processLine"}}
-        {{#if scrollLock}}
-            {{#if content.newMessagesCount}}
-                <div {{action "jumpToBottom"}} class="window-new-messages">
-                    <span class="fa fa-chevron-down"></span> New messages
-                </div>
-            {{/if}}
-        {{/if}}
-    </div>
-
-    <div class="window-buttons flex-row">
-        <button type="button" class="btn btn-file" data-toggle="tooltip" data-placement="top" title="Upload an image or other file to the discussion.">
-            <i class="fa fa-cloud-upload"></i>
-            <input name="files" type="file" multiple>
-        </button>
-
-        <div class="btn-group dropup">
-            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                <i class="fa fa-bars"></i>
-                <span class="sr-only">Toggle Dropdown</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-right">
-                {{#if isGroup}}
-                    <li {{action "menu" "password-modal"}}><a href="#">Change password&hellip;</a></li>
-                    <li {{action "menu" "topic-modal"}}><a href="#">Edit topic&hellip;</a></li>
+        <div class="window-title-buttons">
+            {{#unless logOrMobileModeEnabled}}
+                <i class="window-title-button fa fa-arrows" data-toggle="tooltip" data-placement="bottom" title="Drag the arrow to move this window to a different place or desktop."></i>
+                {{#if expanded}}
+                    <i {{action "compress"}} class="window-title-button fa fa-compress" data-toggle="tooltip"
+                        data-placement="bottom" title="Maximize the size of this window."></i>
+                {{else}}
+                    <i {{action "expand"}} class="window-title-button fa fa-expand"></i>
                 {{/if}}
-                <li {{action "menu" "alerts-modal"}}><a href="#">Configure alerts&hellip;</a></li>
-                <li class="divider"></li>
-                <li {{action "browse"}}><a href="#">Browse history&hellip;</a></li>
-                <li class="divider"></li>
-                <li {{action "menu" "capture-modal"}}><a href="#">Take and upload photo&hellip;</a></li>
-                <li class="divider"></li>
-                <li {{action "close"}}><a href="#">Close window and exit this {{content.explainedType}}</a></li>
-            </ul>
+            {{/unless}}
+        </div>
+    </div>
+
+    <div class="flex-row flex-1 window-content">
+        {{#if logModeEnabled}}
+            {{log-panel enabled=logModeEnabled window=content compress="compress"}}
+        {{/if}}
+
+        <div class="window-messages flex-1 {{hiddenIfLogMode}}">
+            {{#if fetchingMore}}
+                <div class="window-upper-label">Loading older messages…</div>
+            {{else if beginningReached}}
+                <div class="window-start-label">Start of discussion.</div>
+            {{else}}
+                <div {{action "fetchMore"}} class="window-upper-label window-fetch-more">Click to see older messages</div>
+            {{/if}}
+            {{#each content.sortedMessages key="gid" as |message|}}
+                {{discussion-message message=message editMessage="editMessage" deleteMessage="deleteMessage"}}
+            {{/each}}
+            <div class="window-upload">
+                <div class="js-upload">
+                    <div class="progress progress-success">
+                        <div class="js-progress bar"></div>
+                    </div>
+                    <span class="btn-txt">Uploading (<span class="js-size"></span>)</span>
+                </div>
+            </div>
+            <div class="window-messages-end"></div>
+        </div>
+
+        {{#if isGroup}}
+            <div class="window-members-list {{hiddenIfLogMode}} {{wideUnlessminimizedNamesList}} flex-column">
+                <div class="window-members flex-1">
+                    {{#each content.operatorNames key="userId" as |name|}}
+                        <div class="member-row" data-toggle="tooltip" title="{{name.nick}}" data-userid="{{name.userId}}"
+                            data-nick="{{name.nick}}">
+                            <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                            <div class="member-name window-operator {{hiddenIfMinimizedUserNames}}">
+                                {{name.nick}}
+                            </div>
+                        </div>
+                    {{/each}}
+                    {{#each content.voiceNames key="userId" as |name|}}
+                        <div class="member-row" data-toggle="tooltip" title="{{name.nick}}" data-userid="{{name.userId}}"
+                            data-nick="{{name.nick}}">
+                            <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                            <div class="member-name window-voice {{hiddenIfMinimizedUserNames}}">
+                                {{name.nick}}
+                            </div>
+                        </div>
+                    {{/each}}
+                    {{#each content.userNames key="userId" as |name|}}
+                        <div class="member-row" data-toggle="tooltip" title="{{name.nick}}" data-userid="{{name.userId}}"
+                            data-nick="{{name.nick}}">
+                            <img class="gravatar" width="21" height="21" src="//gravatar.com/avatar/{{name.gravatar}}?d=mm" />
+                            <div class="member-name window-user {{hiddenIfMinimizedUserNames}}">
+                                {{name.nick}}
+                            </div>
+                        </div>
+                    {{/each}}
+                </div>
+                <div {{action "toggleMemberListWidth"}} class="window-members-resize">
+                    {{if content.minimizedNamesList '«' '»'}}
+                </div>
+            </div>
+        {{/if}}
+    </div>
+
+    <div class="window-toolbar flex-row {{hiddenIfLogMode}}">
+        <div class="window-add-text-container flex-1">
+            {{#if content.notDelivered}}
+                <div class="connection-error">
+                    <i class="fa fa-exclamation-circle" aria-hidden="true"></i> Message not delivered. Trying to resume
+                    connection…
+                </div>
+            {{/if}}
+            {{message-input placeholder="Write here…" rows=1 maxlength="500" class="form-control" participants=participants sendMessage="processLine"}}
+            {{#if scrollLock}}
+                {{#if content.newMessagesCount}}
+                    <div {{action "jumpToBottom"}} class="window-new-messages">
+                        <span class="fa fa-chevron-down"></span> New messages
+                    </div>
+                {{/if}}
+            {{/if}}
+        </div>
+
+        <div class="window-buttons flex-row">
+            <button type="button" class="btn btn-file" data-toggle="tooltip" data-placement="top" title="Upload an image or other file to the discussion.">
+                <i class="fa fa-cloud-upload"></i>
+                <input name="files" type="file" multiple>
+            </button>
+
+            <div class="btn-group dropup">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    {{#if isGroup}}
+                        <li {{action "menu" "password-modal"}}><a href="#">Change password&hellip;</a></li>
+                        <li {{action "menu" "topic-modal"}}><a href="#">Edit topic&hellip;</a></li>
+                    {{/if}}
+                    <li {{action "menu" "alerts-modal"}}><a href="#">Configure alerts&hellip;</a></li>
+                    <li class="divider"></li>
+                    <li {{action "browse"}}><a href="#">Browse history&hellip;</a></li>
+                    <li class="divider"></li>
+                    <li {{action "menu" "capture-modal"}}><a href="#">Take and upload photo&hellip;</a></li>
+                    <li class="divider"></li>
+                    <li {{action "close"}}><a href="#">Close window and exit this {{content.explainedType}}</a></li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
-</div>
-

@@ -4,9 +4,8 @@ import emojione from 'emojione';
 import moment from 'moment';
 import URI from 'urijs';
 import userStore from '../stores/UserStore';
-import windowStore from '../stores/WindowStore';
 
-const { computed } = Mobx;
+const { computed, observable } = Mobx;
 
 marked.setOptions({
   breaks: true,
@@ -15,16 +14,16 @@ marked.setOptions({
 
 export default class MessageModel {
   gid = 0;
-  body = null;
+  @observable body = null;
   cat = null;
   ts = null;
   userId = null;
   window = null;
-  status = 'original';
-  updatedTs = null;
+  @observable status = 'original';
+  @observable updatedTs = null;
 
-  hideImages = false;
-  editing = false;
+  @observable hideImages = false;
+  @observable editing = false;
 
   ircMotd = false;
 
@@ -94,7 +93,7 @@ export default class MessageModel {
 
     if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {
       return 'mention';
-    } else if (userId === windowStore.userId && cat === 'msg') {
+    } else if (userId === userStore.userId && cat === 'msg') {
       return 'mymsg';
     } else if (nick === 'ruuskanen') {
       return 'service';
@@ -180,7 +179,7 @@ export default class MessageModel {
 
   @computed
   get hasYoutubeVideo() {
-    return this.bodyParts.some('type', 'youtubelink');
+    return this.bodyParts.some(part => part.type === 'youtubelink');
   }
 
   @computed
@@ -204,7 +203,7 @@ export default class MessageModel {
   @computed
   get videoParams() {
     const video = this.bodyParts.find(part => part.type === 'youtubelink');
-    const start = video.start ? `&start=${video.start}` : '';
+    const start = video && (video.start ? `&start=${video.start}` : '');
 
     return `showinfo=0&autohide=1${start}`;
   }

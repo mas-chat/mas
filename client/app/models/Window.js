@@ -30,6 +30,7 @@ export default class WindowModel {
   userId = null;
   network = null;
   type = null;
+  @observable topic = '';
   @observable name = null;
   @observable row = 0;
   @observable column = 0;
