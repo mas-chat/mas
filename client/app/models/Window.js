@@ -52,9 +52,9 @@ export default class WindowModel {
   didPrepend = false;
   newMessagesCount = 0;
 
-  operators = [];
-  voices = [];
-  users = [];
+  @observable operators = [];
+  @observable voices = [];
+  @observable users = [];
 
   @observable minimizedNamesList = false;
 

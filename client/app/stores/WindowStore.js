@@ -604,9 +604,9 @@ class WindowStore {
     const window = this.windows.get(windowId);
 
     if (reset) {
-      window.operators.clear();
-      window.voices.clear();
-      window.users.clear();
+      window.operators = [];
+      window.voices = [];
+      window.users = [];
     }
 
     members.forEach(member => {
@@ -618,13 +618,13 @@ class WindowStore {
 
       switch (member.role) {
         case '@':
-          window.operators.pushObject(userId);
+          window.operators.push(userId);
           break;
         case '+':
-          window.voices.pushObject(userId);
+          window.voices.push(userId);
           break;
         default:
-          window.users.pushObject(userId);
+          window.users.push(userId);
           break;
       }
     });
@@ -671,9 +671,9 @@ class WindowStore {
   }
 
   _removeUser(userId, window) {
-    window.operators.delete(userId);
-    window.voices.delete(userId);
-    window.users.delete(userId);
+    window.operators = window.operators.filter(existingUserId => userId !== existingUserId);
+    window.voices = window.voices.filter(existingUserId => userId !== existingUserId);
+    window.users = window.users.filter(existingUserId => userId !== existingUserId);
   }
 
   _trimBacklog(messages) {
