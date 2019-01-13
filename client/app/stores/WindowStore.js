@@ -603,7 +603,7 @@ class WindowStore {
       window => window.desktop === settingStore.activeDesktop
     );
 
-    if (!validActiveDesktop && WindowStore.windows.size > 0) {
+    if (!validActiveDesktop && this.windows.size > 0) {
       this.settingStore.activeDesktop = this.windows.values().next().value.desktop;
     }
   }
