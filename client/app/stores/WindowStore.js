@@ -598,6 +598,10 @@ class WindowStore {
 
     this.msgBuffer = [];
     this.initDone = true;
+
+    if (isMobile.any) {
+      settingStore.settings.activeDesktop = 0; // TODO: This is hacky
+    }
   }
 
   handleAddMembersServer({ windowId = mandatory(), members = mandatory(), reset }) {

@@ -53,9 +53,7 @@ class SettingStore {
       return;
     }
 
-    const valid = windowStore.desktops.some(existingDesktop => existingDesktop.id === desktopId);
-
-    this.settings.activeDesktop = valid ? desktopId : windowStore.desktops.values().next().value.desktopId;
+    this.settings.activeDesktop = desktopId;
 
     if (!isMobile.any) {
       socket.send({
@@ -68,11 +66,7 @@ class SettingStore {
   }
 
   handleUpdateSettingsServer({ settings = mandatory() }) {
-    if (isMobile.any) {
-      delete settings.activeDesktop;
-    }
-
-    this.settings = new SettingsModel(this, settings);
+    Object.assign(this.settings, settings);
   }
 }
 

@@ -23,8 +23,6 @@ import userStore from '../stores/UserStore';
 
 const { computed } = Mobx;
 
-let mobileDesktop = 1;
-
 export default class WindowModel {
   windowId = 0;
   userId = null;
@@ -43,7 +41,6 @@ export default class WindowModel {
     sound: false,
     title: false
   };
-  @observable desktop;
 
   @observable messages = new Map();
   @observable logMessages = new Map();
@@ -58,25 +55,20 @@ export default class WindowModel {
 
   @observable minimizedNamesList = false;
 
-  @observable Internaldesktop = mobileDesktop++;
+  actualDesktop = 0;
 
   constructor(store, props) {
-    // delete props.desktop;
-
     Object.assign(this, props);
   }
 
-  // @computed
-  // get desktop() {
-  //   return this.Internaldesktop;
-  // }
+  @computed
+  get desktop() {
+    return this.actualDesktop;
+  }
 
-  // @computed
-  // set desktop(value) {
-  //   if (!isMobile.any) {
-  //     this.Internaldesktop = value;
-  //   }
-  // }
+  set desktop(value) {
+    this.actualDesktop = isMobile.any ? Math.floor(Math.random() * 10000000) : value;
+  }
 
   @computed
   get sortedMessages() {
