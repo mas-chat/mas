@@ -600,11 +600,11 @@ class WindowStore {
     this.initDone = true;
 
     const validActiveDesktop = Array.from(this.windows.values()).some(
-      window => window.desktop === settingStore.activeDesktop
+      window => window.desktop === settingStore.settings.activeDesktop
     );
 
     if (!validActiveDesktop && this.windows.size > 0) {
-      this.settingStore.activeDesktop = this.windows.values().next().value.desktop;
+      settingStore.settings.activeDesktop = this.windows.values().next().value.desktop;
     }
   }
 
