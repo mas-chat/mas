@@ -172,7 +172,7 @@ class WindowStore {
 
     setTimeout(() => {
       if (!sent) {
-        window.set('notDelivered', true);
+        window.notDelivered = true;
       }
     }, 2500);
 
