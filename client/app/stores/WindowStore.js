@@ -110,8 +110,18 @@ class WindowStore {
       // Optimization: Avoid re-renders after every message
       this.msgBuffer.push({ gid, userId, ts, windowId, cat, body, updatedTs, status, window });
     } else {
-      const message = window.messages.get(gid) || new Message(this, {});
+      let message = window.messages.get(gid);
+      const newMessage = !message;
+
+      if (newMessage) {
+        message = new Message(this, {});
+      }
+
       Object.assign(message, { gid, userId, ts, windowId, cat, body, updatedTs, status, window });
+
+      if (newMessage) {
+        window.messages.set(gid, message);
+      }
 
       this._trimBacklog(window.messages);
       this._notifyLineAdded(window);
