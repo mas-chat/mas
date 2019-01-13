@@ -599,8 +599,12 @@ class WindowStore {
     this.msgBuffer = [];
     this.initDone = true;
 
-    if (isMobile.any) {
-      settingStore.settings.activeDesktop = 0; // TODO: This is hacky
+    const validActiveDesktop = Array.from(this.windows.values()).some(
+      window => window.desktop === settingStore.activeDesktop
+    );
+
+    if (!validActiveDesktop && WindowStore.windows.size > 0) {
+      this.settingStore.activeDesktop = this.windows.values().next().value.desktop;
     }
   }
 
