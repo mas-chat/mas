@@ -6,11 +6,11 @@ const { observable } = Mobx;
 class ModalStore {
   @observable modals = [];
 
-  handleOpenModal({ name = mandatory(), model = mandatory() }) {
+  handleOpenModal({ name = mandatory(), model }) {
     this.modals.push({ name, model });
   }
 
-  handleOpenPriorityModal({ name = mandatory(), model = mandatory() }) {
+  handleOpenPriorityModal({ name = mandatory(), model }) {
     // Show immediately
     this.modals.unshift({ name, model });
   }
