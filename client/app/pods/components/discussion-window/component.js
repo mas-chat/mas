@@ -204,6 +204,10 @@ export default Component.extend({
   _lineAdded() {
     const message = this.get('content.sortedMessages')[this.get('content.sortedMessages').length - 1];
 
+    if (!message) {
+      return;
+    }
+
     const cat = message.cat;
     const importantMessage = cat === 'msg' || cat === 'action';
 
