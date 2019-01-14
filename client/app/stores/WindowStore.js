@@ -333,7 +333,7 @@ class WindowStore {
       {
         id: 'FETCH',
         windowId: window.windowId,
-        end: Array.from(window.messages.values()).sort((a, b) => a.gid > b.gid)[0].ts,
+        end: Array.from(window.messages.values()).sort((a, b) => a.gid - b.gid)[0].ts,
         limit: 50
       },
       resp => {
