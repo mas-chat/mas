@@ -106,6 +106,11 @@ export default class WindowModel {
   }
 
   @computed
+  get sortedLogMessages() {
+    return Array.from(this.logMessages.values()).sort((a, b) => a.ts - b.ts);
+  }
+
+  @computed
   get operatorNames() {
     return this._mapUserIdsToNicks('operators');
   }

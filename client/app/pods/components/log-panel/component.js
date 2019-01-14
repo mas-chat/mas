@@ -112,7 +112,7 @@ export default Component.extend({
       window: this.window,
       start: epochTsStart,
       end: epochTsEnd,
-      successCB: () => {
+      successCb: () => {
         this.set('loading', false);
         this._loadImages();
       }

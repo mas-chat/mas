@@ -18,7 +18,9 @@
 </div>
 
 <div class="flex-1 logs-channel window-messages">
-    {{message-list messages=window.logMessages}}
+    {{#each window.sortedLogMessages key="gid" as |message|}}
+        {{discussion-message message=message}}
+    {{/each}}
 
     {{#unless window.logMessages}}
         <div class='logs-no-messages flex-1'>
