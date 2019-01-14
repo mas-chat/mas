@@ -45,9 +45,10 @@ export default class WindowModel {
   @observable messages = new Map();
   @observable logMessages = new Map();
 
-  generation = '';
-  didPrepend = false;
-  newMessagesCount = 0;
+  @observable generation = '';
+  @observable newMessagesCount = 0;
+
+  @observable notDelivered = false;
 
   @observable operators = [];
   @observable voices = [];
