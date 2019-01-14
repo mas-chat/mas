@@ -73,18 +73,19 @@ export default class WindowModel {
 
   @computed
   get sortedMessages() {
-    const result = Array.from(this.messages.values()).sort((a, b) => a.gid - b.gid);
+    console.log(daySeparatorStore.dayCounter);
+
+    const result = Array.from(this.messages.values()).sort((a, b) => a.ts - b.ts);
+    let gid = -1;
 
     const addDayDivider = (array, dateString, index) => {
-      console.log(daySeparatorStore.dayCounter);
-
       array.splice(
         index,
         0,
         new Message(this, {
           body: dateString,
           cat: 'day-divider',
-          gid: 0,
+          gid: gid--,
           window: this
         })
       );
@@ -93,8 +94,7 @@ export default class WindowModel {
     let dayOfNextMsg = moment().format('dddd, MMMM D');
 
     for (let i = result.length - 1; i >= 0; i--) {
-      const ts = moment.unix(result[i].ts);
-      const day = ts.format('dddd, MMMM D');
+      const day = moment.unix(result[i].ts).format('dddd, MMMM D');
 
       if (day !== dayOfNextMsg) {
         addDayDivider(result, dayOfNextMsg, i + 1);
