@@ -73,17 +73,15 @@ export default class WindowModel {
 
   @computed
   get sortedMessages() {
-    const result = Array.from(this.messages.values()).sort((a, b) => a.gid > b.gid);
+    const result = Array.from(this.messages.values()).sort((a, b) => a.gid - b.gid);
 
     const addDayDivider = (array, dateString, index) => {
-      // TODO:
-      // this.set('dayCounter', daySeparatorStore.dayCounter);
+      console.log(daySeparatorStore.dayCounter);
 
       array.splice(
         index,
         0,
         new Message(this, {
-          // TODO: This is wrong
           body: dateString,
           cat: 'day-divider',
           gid: 0,
