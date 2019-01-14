@@ -20,7 +20,6 @@ import Mobx from 'mobx';
 import Component from '@ember/component';
 import settingStore from '../../../stores/SettingStore';
 import windowStore from '../../../stores/WindowStore';
-import socket from '../../../utils/socket';
 import { darkTheme } from '../../../utils/theme-dark';
 
 const { autorun } = Mobx;
@@ -33,8 +32,6 @@ export default Component.extend({
       $('#theme-stylesheet').text(settingStore.settings.theme === 'dark' ? darkTheme : '');
       this.set('initDone', windowStore.initDone);
     });
-
-    socket.start(); // Let's get the show started.
   },
 
   didDestroyElement() {

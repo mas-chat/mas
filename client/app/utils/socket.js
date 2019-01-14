@@ -14,9 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-import { bind, later, cancel } from '@ember/runloop';
-import { A } from '@ember/array';
-import EmberObject from '@ember/object';
 import io from 'socket.io-client';
 import Cookies from 'js-cookie';
 import { calcMsgHistorySize } from './msg-history-sizer';
@@ -42,125 +39,89 @@ const serverIdToEventMap = {
 
 const ioSocket = io.connect(); // Start connection as early as possible.
 
-const SocketService = EmberObject.extend({
-  sessionId: 0,
-  cookie: null,
+class Socket {
+  sessionId = 0;
+  cookie = Cookies.get('mas');
 
-  _connected: false,
-  _sendQueue: null,
-  _disconnectedTimer: null,
+  _connected = false;
+  _sendQueue = [];
+  _disconnectedTimer = null;
 
-  init() {
-    this._super();
-
-    this.cookie = Cookies.get('mas') || '';
-    this._sendQueue = A([]);
-
+  constructor() {
     if (!this.cookie) {
       console.error(`Session cookie not found or corrupted. Exiting.`);
       this._logout();
     }
-  },
 
-  start() {
-    // TODO: DOn't mutate store from here, trigger events instead!
-    windowStore.initDone = false;
     this._emitInit();
 
-    ioSocket.on(
-      'initok',
-      bind(this, function(data) {
-        this.set('_connected', true);
+    ioSocket.on('initok', data => {
+      this._connected = true;
 
-        this.set('sessionId', data.sessionId); // TODO: Should not needed, use cookie always
-        windowStore.maxBacklogMsgs = data.maxBacklogMsgs;
+      this.sessionId = data.sessionId; // TODO: Should not needed, use cookie always
+      windowStore.maxBacklogMsgs = data.maxBacklogMsgs;
 
-        // TODO: Delete oldest messages for windows that have more messages than
-        // maxBacklogMsgs. They can be stale, when editing becomes possible.
+      // TODO: Delete oldest messages for windows that have more messages than
+      // maxBacklogMsgs. They can be stale, when editing becomes possible.
 
-        this._emitReq(); // In case there are items in sendQueue from previous session
-      })
-    );
+      this._emitReq(); // In case there are items in sendQueue from previous session
+    });
 
-    ioSocket.on(
-      'terminate',
-      bind(this, function() {
-        this._logout();
-      })
-    );
+    ioSocket.on('terminate', () => this._logout());
 
-    ioSocket.on(
-      'refresh_session',
-      bind(this, function(data) {
-        this.set('cookie', data.refreshCookie);
-        Cookies.set('mas', data.refreshCookie, { expires: 7 });
-        ioSocket.emit('refresh_done');
-      })
-    );
+    ioSocket.on('refresh_session', data => {
+      this.cookie = data.refreshCookie;
+      Cookies.set('mas', data.refreshCookie, { expires: 7 });
+      ioSocket.emit('refresh_done');
+    });
 
-    ioSocket.on(
-      'ntf',
-      bind(this, notification => {
-        const type = notification.type;
-        delete notification.type;
+    ioSocket.on('ntf', notification => {
+      const type = notification.type;
+      delete notification.type;
 
-        if (type !== 'ADD_MESSAGE') {
-          console.log(`← NTF: ${type}`);
-        }
+      if (type !== 'ADD_MESSAGE') {
+        console.log(`← NTF: ${type}`);
+      }
 
-        const event = serverIdToEventMap[type];
+      const event = serverIdToEventMap[type];
 
-        if (event) {
-          dispatch(event, notification);
-        } else {
-          console.warn(`Unknown notification received: ${type}`);
-        }
-      })
-    );
+      if (event) {
+        dispatch(event, notification);
+      } else {
+        console.warn(`Unknown notification received: ${type}`);
+      }
+    });
 
-    ioSocket.on(
-      'disconnect',
-      bind(this, function() {
-        console.log('Socket.io connection lost.');
+    ioSocket.on('disconnect', () => {
+      console.log('Socket.io connection lost.');
 
-        this.set('_connected', false);
+      this._connected = false;
 
-        this.set(
-          '_disconnectedTimer',
-          later(
-            this,
-            function() {
-              dispatch('OPEN_PRIORITY_MODAL', {
-                name: 'non-interactive-modal',
-                model: {
-                  title: 'Connection error',
-                  body: 'Connection to server lost. Trying to reconnect…'
-                }
-              });
+      this._disconnectedTimer = setTimeout(() => {
+        dispatch('OPEN_PRIORITY_MODAL', {
+          name: 'non-interactive-modal',
+          model: {
+            title: 'Connection error',
+            body: 'Connection to server lost. Trying to reconnect…'
+          }
+        });
 
-              this.set('_disconnectedTimer', null);
-            },
-            5000
-          )
-        );
-      })
-    );
+        this._disconnectedTimer = null;
+      }, 5000);
+    });
 
-    ioSocket.on(
-      'reconnect',
-      bind(this, function() {
-        const timer = this._disconnectedTimer;
+    ioSocket.on('reconnect', () => {
+      const timer = this._disconnectedTimer;
 
-        if (timer) {
-          cancel(timer);
-        } else {
-          dispatch('CLOSE_PRIORITY_MODAL');
-        }
+      if (timer) {
+        clearTimeout(timer);
+      } else {
+        dispatch('CLOSE_PRIORITY_MODAL');
+      }
 
-        this._emitInit();
-      })
-    );
-  },
+      this._emitInit();
+    });
+  }
 
   send(command, callback) {
     this._sendQueue.push({
@@ -171,11 +132,11 @@ const SocketService = EmberObject.extend({
     if (this._sendQueue.length === 1 && this._connected) {
       this._emitReq();
     }
-  },
+  }
 
   _emitInit() {
     const maxBacklogMsgs = calcMsgHistorySize();
-    const cachedUpto = windowStore.cachedUpto;
+    const cachedUpto = 0; // TODO: Decide what to do, was: windowStore.cachedUpto;
     const cookie = this.cookie;
 
     ioSocket.emit('init', {
@@ -188,7 +149,7 @@ const SocketService = EmberObject.extend({
     });
 
     console.log(`→ INIT: cachedUpto: ${cachedUpto}, maxBacklogMsgs: ${maxBacklogMsgs}`);
-  },
+  }
 
   _emitReq() {
     if (this._sendQueue.length === 0) {
@@ -208,12 +169,12 @@ const SocketService = EmberObject.extend({
     });
 
     console.log(`→ REQ: ${req.request.id}`);
-  },
+  }
 
   _logout() {
     Cookies.remove('mas', { path: '/' });
     window.location = '/';
   }
-});
+}
 
-export default SocketService.create();
+export default new Socket();
