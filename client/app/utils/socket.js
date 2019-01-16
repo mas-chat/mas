@@ -40,7 +40,7 @@ const serverIdToEventMap = {
 const ioSocket = io.connect(); // Start connection as early as possible.
 
 class Socket {
-  sessionId = 0;
+  sessionId = null;
   cookie = Cookies.get('mas');
 
   _connected = false;
@@ -58,7 +58,7 @@ class Socket {
     ioSocket.on('initok', data => {
       this._connected = true;
 
-      this.sessionId = data.sessionId; // TODO: Should not needed, use cookie always
+      this.sessionId = data.sessionId;
       windowStore.maxBacklogMsgs = data.maxBacklogMsgs;
 
       // TODO: Delete oldest messages for windows that have more messages than
@@ -95,6 +95,7 @@ class Socket {
     ioSocket.on('disconnect', () => {
       console.log('Socket.io connection lost.');
 
+      this.sessionId = null;
       this._connected = false;
 
       this._disconnectedTimer = setTimeout(() => {
@@ -136,7 +137,6 @@ class Socket {
 
   _emitInit() {
     const maxBacklogMsgs = calcMsgHistorySize();
-    const cachedUpto = 0; // TODO: Decide what to do, was: windowStore.cachedUpto;
     const cookie = this.cookie;
 
     ioSocket.emit('init', {
@@ -145,10 +145,10 @@ class Socket {
       cookie,
       version: '1.0',
       maxBacklogMsgs,
-      cachedUpto
+      cachedUpto: 0
     });
 
-    console.log(`→ INIT: cachedUpto: ${cachedUpto}, maxBacklogMsgs: ${maxBacklogMsgs}`);
+    console.log(`→ INIT: maxBacklogMsgs: ${maxBacklogMsgs}`);
   }
 
   _emitReq() {

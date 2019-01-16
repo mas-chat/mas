@@ -60,7 +60,7 @@ class WindowStore {
       formData.append('file', file, file.name || 'webcam-upload.jpg');
     }
 
-    formData.append('sessionId', socket.get('sessionId'));
+    formData.append('sessionId', socket.sessionId);
 
     // eslint-disable-next-line no-undef
     $.ajax({
@@ -111,17 +111,13 @@ class WindowStore {
       this.msgBuffer.push({ gid, userId, ts, windowId, cat, body, updatedTs, status, window });
     } else {
       let message = window.messages.get(gid);
-      const newMessage = !message;
 
-      if (newMessage) {
+      if (!message) {
         message = new Message(this, {});
+        window.messages.set(gid, message);
       }
 
       Object.assign(message, { gid, userId, ts, windowId, cat, body, updatedTs, status, window });
-
-      if (newMessage) {
-        window.messages.set(gid, message);
-      }
 
       this._trimBacklog(window.messages);
       this._notifyLineAdded(window);
@@ -136,10 +132,14 @@ class WindowStore {
 
       if (window) {
         windowMessages.forEach(({ gid, userId, ts, cat, body, updatedTs, status }) => {
-          window.messages.set(
-            gid,
-            new Message(this, { gid, userId, ts, windowId, cat, body, updatedTs, status, window })
-          );
+          let message = window.messages.get(gid);
+
+          if (!message) {
+            message = new Message(this, {});
+            window.messages.set(gid, message);
+          }
+
+          Object.assign(message, { gid, userId, ts, windowId, cat, body, updatedTs, status, window });
         });
 
         this._trimBacklog(window.messages);
