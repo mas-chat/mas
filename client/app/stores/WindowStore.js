@@ -426,6 +426,7 @@ class WindowStore {
     topic,
     row = mandatory(),
     column = mandatory(),
+    minimizedNamesList = mandatory(),
     password,
     alerts = mandatory(),
     desktop = mandatory()
@@ -441,6 +442,7 @@ class WindowStore {
         topic,
         row,
         column,
+        minimizedNamesList,
         password,
         alerts,
         desktop,
@@ -458,6 +460,7 @@ class WindowStore {
     topic,
     row,
     column,
+    minimizedNamesList,
     desktop,
     password,
     alerts
@@ -473,6 +476,7 @@ class WindowStore {
       ...(Number.isInteger(column) ? { column } : {}),
       ...(Number.isInteger(row) ? { row } : {}),
       ...(Number.isInteger(desktop) ? { desktop } : {}),
+      ...(typeof minimizedNamesList === 'boolean' ? { minimizedNamesList } : {}),
       ...(password ? { password } : {}),
       ...(alerts ? { alerts } : {})
     });
