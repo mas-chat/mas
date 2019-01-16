@@ -61,6 +61,7 @@ export default Component.extend({
 
     this.disposer = autorun(() => {
       this.set('activeDesktop', settingStore.settings.activeDesktop);
+      this.set('content.notDelivered', window.notDelivered);
       this.set('content.windowId', window.windowId);
       this.set('content.userId', window.userId);
       this.set('content.network', window.network);
@@ -103,7 +104,6 @@ export default Component.extend({
   scrollLock: false,
   fetchingMore: false,
   noOlderMessages: false,
-  notDelivered: false,
 
   linesAmount: null,
   prependPosition: 0,
@@ -122,6 +122,7 @@ export default Component.extend({
   row: alias('content.row'),
   column: alias('content.column'),
   desktop: alias('content.desktop'),
+  notDelivered: alias('content.notDelivered'),
 
   visible: computed('activeDesktop', 'content.desktop', function() {
     return this.activeDesktop === this.get('content.desktop');
