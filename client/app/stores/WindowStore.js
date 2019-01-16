@@ -431,24 +431,28 @@ class WindowStore {
     alerts = mandatory(),
     desktop = mandatory()
   }) {
-    this.windows.set(
+    let window = this.windows.get(windowId);
+
+    if (!window) {
+      window = new Window(this, {});
+      this.windows.set(windowId, window);
+    }
+
+    Object.assign(window, {
       windowId,
-      new Window(this, {
-        windowId,
-        userId,
-        network,
-        type: windowType,
-        name,
-        topic,
-        row,
-        column,
-        minimizedNamesList,
-        password,
-        alerts,
-        desktop,
-        generation: socket.sessionId
-      })
-    );
+      userId,
+      network,
+      type: windowType,
+      name,
+      topic,
+      row,
+      column,
+      minimizedNamesList,
+      password,
+      alerts,
+      desktop,
+      generation: socket.sessionId
+    });
   }
 
   handleUpdateWindowServer({
