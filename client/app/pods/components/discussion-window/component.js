@@ -54,9 +54,7 @@ export default Component.extend({
     this.window = window;
 
     window.lineAddedCb = () => {
-      if (windowStore.initDone) {
-        this._lineAdded();
-      }
+      this._lineAdded();
     };
 
     this.disposer = autorun(() => {
@@ -203,6 +201,10 @@ export default Component.extend({
     .on('init'),
 
   _lineAdded() {
+    if (!windowStore.initDone) {
+      return;
+    }
+
     const message = this.get('content.sortedMessages')[this.get('content.sortedMessages').length - 1];
 
     if (!message) {
@@ -349,9 +351,7 @@ export default Component.extend({
   },
 
   lineAdded() {
-    if (windowStore.initDone) {
-      this._lineAdded();
-    }
+    this._lineAdded();
   },
 
   mouseDown(event) {
