@@ -79,9 +79,7 @@ class Socket {
       const type = notification.type;
       delete notification.type;
 
-      if (type !== 'ADD_MESSAGE') {
-        console.log(`← NTF: ${type}`);
-      }
+      console.log(`← NTF: ${type}`);
 
       const event = serverIdToEventMap[type];
 
@@ -112,6 +110,8 @@ class Socket {
     });
 
     ioSocket.on('reconnect', () => {
+      console.log('Socket.io connection resumed.');
+
       const timer = this._disconnectedTimer;
 
       if (timer) {
