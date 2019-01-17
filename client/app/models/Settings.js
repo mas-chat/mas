@@ -1,7 +1,6 @@
 import Mobx from 'mobx';
-import WindowStore from '../stores/WindowStore';
 
-const { computed, observable } = Mobx;
+const { observable } = Mobx;
 
 export default class SettingModel {
   @observable theme = 'default';
