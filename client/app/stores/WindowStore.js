@@ -83,13 +83,6 @@ class WindowStore {
     });
   }
 
-  handleAddMessage({ gid = mandatory(), ts = mandatory(), window = mandatory(), body = mandatory() }) {
-    window.messages.set(gid, new Message(this, { body, cat: 'msg', userId: userStore.userId, ts, gid, window }));
-
-    this._trimBacklog(window.messages);
-    this._notifyLineAdded(window);
-  }
-
   handleAddMessageServer({
     gid = mandatory(),
     userId = mandatory(),
@@ -110,17 +103,22 @@ class WindowStore {
       // Optimization: Avoid re-renders after every message
       this.msgBuffer.push({ gid, userId, ts, windowId, cat, body, updatedTs, status, window });
     } else {
-      let message = window.messages.get(gid);
+      const newMessage = this._upsertMessaage(window, {
+        gid,
+        userId,
+        ts,
+        windowId,
+        cat,
+        body,
+        updatedTs,
+        status,
+        window
+      });
 
-      if (!message) {
-        message = new Message(this, {});
-        window.messages.set(gid, message);
+      if (newMessage) {
+        this._trimBacklog(window.messages);
+        this._notifyLineAdded(window);
       }
-
-      Object.assign(message, { gid, userId, ts, windowId, cat, body, updatedTs, status, window });
-
-      this._trimBacklog(window.messages);
-      this._notifyLineAdded(window);
     }
 
     return true;
@@ -129,21 +127,31 @@ class WindowStore {
   handleAddMessagesServer({ messages = mandatory() }) {
     messages.forEach(({ windowId, messages: windowMessages }) => {
       const window = this.windows.get(windowId);
+      let newMessages;
 
       if (window) {
         windowMessages.forEach(({ gid, userId, ts, cat, body, updatedTs, status }) => {
-          let message = window.messages.get(gid);
+          const newMessage = this._upsertMessaage(window, {
+            gid,
+            userId,
+            ts,
+            windowId,
+            cat,
+            body,
+            updatedTs,
+            status,
+            window
+          });
 
-          if (!message) {
-            message = new Message(this, {});
-            window.messages.set(gid, message);
+          if (newMessage) {
+            newMessages = true;
           }
-
-          Object.assign(message, { gid, userId, ts, windowId, cat, body, updatedTs, status, window });
         });
 
-        this._trimBacklog(window.messages);
-        this._notifyLineAdded(window);
+        if (newMessages) {
+          this._trimBacklog(window.messages);
+          this._notifyLineAdded(window);
+        }
       }
     });
 
@@ -195,12 +203,16 @@ class WindowStore {
             }
           });
         } else {
-          dispatch('ADD_MESSAGE', {
+          this._upsertMessaage(window, {
             body: text,
+            cat: 'msg',
+            userId: userStore.userId,
             ts: resp.ts,
             gid: resp.gid,
             window
           });
+          this._trimBacklog(window.messages);
+          this._notifyLineAdded(window);
         }
       }
     );
@@ -595,13 +607,20 @@ class WindowStore {
 
     // Insert buffered message in one go.
     console.log(`MsgBuffer processing started.`);
+    let newMessages = false;
 
-    for (let i = 0; i < this.msgBuffer.length; i++) {
-      const item = this.msgBuffer[i];
-      item.window.messages.set(item.gid, new Message(this, item));
+    this.msgBuffer.forEach(bufferedMessage => {
+      const newMessage = this._upsertMessaage(bufferedMessage.window, bufferedMessage);
+
+      if (newMessage) {
+        newMessages = true;
+      }
+    });
+
+    if (newMessages) {
+      this._notifyLineAdded(window);
     }
 
-    this._notifyLineAdded(window);
     console.log(`MsgBuffer processing ended.`);
 
     this.msgBuffer = [];
@@ -684,6 +703,21 @@ class WindowStore {
         window.location = '/';
       }
     );
+  }
+
+  _upsertMessaage(window, message) {
+    let newMessage = false;
+    let existingMessage = window.messages.get(message.gid);
+
+    if (!existingMessage) {
+      newMessage = true;
+      existingMessage = new Message(this, {});
+      window.messages.set(message.gid, existingMessage);
+    }
+
+    Object.assign(existingMessage, message);
+
+    return newMessage;
   }
 
   _removeUser(userId, window) {

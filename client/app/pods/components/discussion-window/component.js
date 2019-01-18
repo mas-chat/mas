@@ -350,10 +350,6 @@ export default Component.extend({
       });
   },
 
-  lineAdded() {
-    this._lineAdded();
-  },
-
   mouseDown(event) {
     if ($(event.target).hasClass('fa-arrows')) {
       event.preventDefault();
