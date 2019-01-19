@@ -46,9 +46,7 @@ export default Component.extend({
 
     this.set('currentDate', new Date());
 
-    const window = windowStore.windows.get(this.windowId);
-
-    autorun(() => this.set('logMessages', window.sortedLogMessages));
+    autorun(() => this.set('logMessages', this.window.sortedLogMessages));
   },
 
   friendlyDate: computed('currentDate', function() {
