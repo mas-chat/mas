@@ -18,11 +18,11 @@
 </div>
 
 <div class="flex-1 logs-channel window-messages">
-    {{#each window.sortedLogMessages key="gid" as |message|}}
+    {{#each logMessages key="gid" as |message|}}
         {{discussion-message message=message}}
     {{/each}}
 
-    {{#unless window.logMessages}}
+    {{#unless logMessages}}
         <div class='logs-no-messages flex-1'>
             <div>
                 {{#if loading}}
