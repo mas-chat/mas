@@ -706,18 +706,15 @@ class WindowStore {
   }
 
   _upsertMessaage(window, message) {
-    let newMessage = false;
-    let existingMessage = window.messages.get(message.gid);
+    const existingMessage = window.messages.get(message.gid);
 
-    if (!existingMessage) {
-      newMessage = true;
-      existingMessage = new Message(this, {});
-      window.messages.set(message.gid, existingMessage);
+    if (existingMessage) {
+      Object.assign(existingMessage, message);
+      return false;
     }
 
-    Object.assign(existingMessage, message);
-
-    return newMessage;
+    window.messages.set(message.gid, new Message(this, message));
+    return true;
   }
 
   _removeUser(userId, window) {
