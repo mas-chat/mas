@@ -28,14 +28,14 @@ export default Component.extend({
   init(...args) {
     this._super(...args);
 
-    this.disposer = autorun(() => {
-      $('#theme-stylesheet').text(settingStore.settings.theme === 'dark' ? darkTheme : '');
-      this.set('initDone', windowStore.initDone);
-    });
+    this.disposers = [
+      autorun(() => $('#theme-stylesheet').text(settingStore.settings.theme === 'dark' ? darkTheme : '')),
+      autorun(() => this.set('initDone', windowStore.initDone))
+    ];
   },
 
   didDestroyElement() {
-    this.disposer();
+    this.disposers.forEach(element => element());
   },
 
   classNames: ['flex-grow-column', 'flex-1'],

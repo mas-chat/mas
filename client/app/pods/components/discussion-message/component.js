@@ -17,7 +17,6 @@
 import Mobx from 'mobx';
 import Component from '@ember/component';
 import EmberObject from '@ember/object';
-import { A } from '@ember/array';
 
 const { autorun } = Mobx;
 
@@ -32,42 +31,46 @@ export default Component.extend({
 
     const message = this.message;
 
-    this.disposer = autorun(() => {
-      this.set('gid', message.gid);
-      this.set('body', message.body);
-      this.set('cat', message.cat);
-      this.set('ts', message.ts);
-      this.set('userId', message.userId);
-      this.set('status', message.status);
-      this.set('updatedTs', message.updatedTs);
-      this.set('hideImages', message.hideImages);
-      this.set('editing', message.editing);
-      this.set('ircMotd', message.ircMotd);
-      this.set('edited', message.edited);
-      this.set('editing', message.editing);
-      this.set('deleted', message.deleted);
-      this.set('updatedTime', message.updatedTime);
-      this.set('updatedDate', message.updatedDate);
-      this.set('updatedDateLong', message.updatedDateLong);
-      this.set('nick', message.nick);
-      this.set('avatarUrl', message.avatarUrl);
-      this.set('decoratedCat', message.decoratedCat);
-      this.set('decoratedTs', message.decoratedTs);
-      this.set('channelAction', message.channelAction);
-      this.set('myNotDeletedMessage', message.myNotDeletedMessage);
-      this.set('bodyParts', message.bodyParts);
-      this.set('text', message.text);
-      this.set('images', message.images.map(image => EmberObject.create(image)));
-      this.set('hasMedia', message.hasMedia);
-      this.set('hasImages', message.hasImages);
-      this.set('hasYoutubeVideo', message.hasYoutubeVideo);
-      this.set('videoId', message.videoId);
-      this.set('videoParams', message.videoParams);
-    });
+    this.disposers = [
+      autorun(() => this.set('gid', message.gid)),
+      autorun(() => this.set('body', message.body)),
+      autorun(() => this.set('cat', message.cat)),
+      autorun(() => this.set('ts', message.ts)),
+      autorun(() => this.set('userId', message.userId)),
+      autorun(() => this.set('status', message.status)),
+      autorun(() => this.set('updatedTs', message.updatedTs)),
+      autorun(() => this.set('hideImages', message.hideImages)),
+      autorun(() => this.set('editing', message.editing)),
+      autorun(() => this.set('ircMotd', message.ircMotd)),
+      autorun(() => this.set('edited', message.edited)),
+      autorun(() => this.set('editing', message.editing)),
+      autorun(() => this.set('deleted', message.deleted)),
+      autorun(() => this.set('updatedTime', message.updatedTime)),
+      autorun(() => this.set('updatedDate', message.updatedDate)),
+      autorun(() => this.set('updatedDateLong', message.updatedDateLong)),
+      autorun(() => this.set('nick', message.nick)),
+      autorun(() => this.set('avatarUrl', message.avatarUrl)),
+      autorun(() => this.set('decoratedCat', message.decoratedCat)),
+      autorun(() => this.set('decoratedTs', message.decoratedTs)),
+      autorun(() => this.set('channelAction', message.channelAction)),
+      autorun(() => this.set('myNotDeletedMessage', message.myNotDeletedMessage)),
+      autorun(() => this.set('bodyParts', message.bodyParts)),
+      autorun(() => this.set('text', message.text)),
+      autorun(() => this.set('images', message.images.map(image => EmberObject.create(image)))),
+      autorun(() => this.set('hasMedia', message.hasMedia)),
+      autorun(() => this.set('hasImages', message.hasImages)),
+      autorun(() => this.set('hasYoutubeVideo', message.hasYoutubeVideo)),
+      autorun(() => this.set('videoId', message.videoId)),
+      autorun(() => this.set('videoParams', message.videoParams))
+    ];
+  },
+
+  didDestroyElement() {
+    this.disposers.forEach(element => element());
   },
 
   actions: {
-    toggleImages(message) {
+    toggleImages() {
       this.toggleProperty('hideImages');
     },
 

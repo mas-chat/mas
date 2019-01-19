@@ -36,17 +36,17 @@ export default Component.extend({
 
     this.set('windowComponents', A([]));
 
-    this.disposer = autorun(() => {
-      this.set('theme', settingStore.settings.theme);
-      this.set('emailConfirmed', settingStore.settings.emailConfirmed);
-      this.set('initDone', windowStore.initDone);
-      this.set('windowIds', Array.from(windowStore.windows.keys()));
-      this.set('alerts', alertStore.alerts);
-    });
+    this.disposers = [
+      autorun(() => this.set('theme', settingStore.settings.theme)),
+      autorun(() => this.set('emailConfirmed', settingStore.settings.emailConfirmed)),
+      autorun(() => this.set('initDone', windowStore.initDone)),
+      autorun(() => this.set('windowIds', Array.from(windowStore.windows.keys()))),
+      autorun(() => this.set('alerts', alertStore.alerts))
+    ];
   },
 
   didDestroyElement() {
-    this.disposer();
+    this.disposers.forEach(element => element());
   },
 
   classNames: ['grid', 'flex-1', 'flex-grow-column'],

@@ -57,34 +57,35 @@ export default Component.extend({
       this._lineAdded();
     };
 
-    this.disposer = autorun(() => {
-      this.set('activeDesktop', settingStore.settings.activeDesktop);
-      this.set('content.notDelivered', window.notDelivered);
-      this.set('content.windowId', window.windowId);
-      this.set('content.userId', window.userId);
-      this.set('content.network', window.network);
-      this.set('content.type', window.type);
-      this.set('content.name', window.name);
-      this.set('content.row', window.row);
-      this.set('content.column', window.column);
-      this.set('content.password', window.password);
-      this.set('content.alerts', window.alerts); // TODO: This is object!
-      this.set('content.desktop', window.desktop);
-      this.set('content.operatorNames', window.operatorNames);
-      this.set('content.voiceNames', window.voiceNames);
-      this.set('content.userNames', window.userNames);
-      this.set('content.sortedMessages', window.sortedMessages);
-      this.set('content.minimizedNamesList', window.minimizedNamesList);
-      this.set('content.decoratedTitle', window.decoratedTitle);
-      this.set('content.decoratedTopic', window.decoratedTopic);
-      this.set('content.simplifiedName', window.simplifiedName);
-      this.set('content.tooltipTopic', window.tooltipTopic);
-      this.set('content.explainedType', window.explainedType);
-    });
+    this.disposers = [
+      autorun(() => this.set('activeDesktop', settingStore.settings.activeDesktop)),
+      autorun(() => this.set('content.notDelivered', window.notDelivered)),
+      autorun(() => this.set('content.windowId', window.windowId)),
+      autorun(() => this.set('content.userId', window.userId)),
+      autorun(() => this.set('content.network', window.network)),
+      autorun(() => this.set('content.type', window.type)),
+      autorun(() => this.set('content.name', window.name)),
+      autorun(() => this.set('content.row', window.row)),
+      autorun(() => this.set('content.column', window.column)),
+      autorun(() => this.set('content.password', window.password)),
+      autorun(() => this.set('content.alerts', window.alerts)), // TODO: This is object!
+      autorun(() => this.set('content.desktop', window.desktop)),
+      autorun(() => this.set('content.operatorNames', window.operatorNames)),
+      autorun(() => this.set('content.voiceNames', window.voiceNames)),
+      autorun(() => this.set('content.userNames', window.userNames)),
+      autorun(() => this.set('content.sortedMessages', window.sortedMessages)),
+      autorun(() => this.set('content.minimizedNamesList', window.minimizedNamesList)),
+      autorun(() => this.set('content.decoratedTitle', window.decoratedTitle)),
+      autorun(() => this.set('content.decoratedTopic', window.decoratedTopic)),
+      autorun(() => this.set('content.simplifiedName', window.simplifiedName)),
+      autorun(() => this.set('content.tooltipTopic', window.tooltipTopic)),
+      autorun(() => this.set('content.explainedType', window.explainedType))
+    ];
   },
 
   didDestroyElement() {
-    this.disposer();
+    console.log('DELETE');
+    this.disposers.forEach(element => element());
   },
 
   classNames: ['window'],

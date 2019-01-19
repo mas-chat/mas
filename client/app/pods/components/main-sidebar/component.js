@@ -27,15 +27,15 @@ export default Component.extend({
   init(...args) {
     this._super(...args);
 
-    this.disposer = autorun(() => {
-      this.set('canUseIRC', settingStore.settings.canUseIRC);
-      this.set('darkTheme', settingStore.settings.theme === 'dark');
-      this.set('friends', Array.from(friendStore.friends.values()));
-    });
+    this.disposers = [
+      autorun(() => this.set('canUseIRC', settingStore.settings.canUseIRC)),
+      autorun(() => this.set('darkTheme', settingStore.settings.theme === 'dark')),
+      autorun(() => this.set('friends', Array.from(friendStore.friends.values())))
+    ];
   },
 
   didDestroyElement() {
-    this.disposer();
+    this.disposers.forEach(element => element());
   },
 
   classNames: ['sidebar', 'flex-grow-column'],
