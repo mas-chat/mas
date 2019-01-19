@@ -48,7 +48,7 @@ export default Component.extend({
       this.$('#webcam-snapshot').show();
 
       const video = this.$('#webcam-viewfinder video')[0];
-      const { blob, dataUri } = captureVideoFrame.captureVideoFrame(video, 'jpeg');
+      const { blob, dataUri } = captureVideoFrame(video, 'jpeg');
 
       this.$('#webcam-snapshot').attr('src', dataUri);
       this.set('shot', blob);
@@ -76,9 +76,9 @@ export default Component.extend({
     this.set('note', '');
     this.$('.btn-capture').removeClass('disabled');
 
-    this.$('#webcam-viewfinder video').attr('src', window.URL.createObjectURL(stream));
-
     const el = this.$('#webcam-viewfinder video')[0];
+
+    el.srcObject = stream;
     el.onloadedmetadata = () => el.play();
   },
 
