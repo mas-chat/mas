@@ -120,17 +120,7 @@ export default Component.extend({
       end: epochTsEnd,
       successCb: () => {
         this.set('loading', false);
-        this._loadImages();
       }
-    });
-  },
-
-  _loadImages() {
-    next(this, function() {
-      this.$('img[data-src]').each(function() {
-        const $img = $(this);
-        $img.attr('src', $img.data('src'));
-      });
     });
   }
 });
