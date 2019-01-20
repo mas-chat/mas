@@ -1,6 +1,6 @@
 module.exports = {
   extends: [
-    'airbnb-base',
+    'airbnb',
     'prettier'
   ],
   parser: 'babel-eslint',
@@ -20,11 +20,12 @@ module.exports = {
     'class-methods-use-this': ['off'],
     'radix': ['error', 'as-needed'],
     'prefer-destructuring': ['off'],
-    'import/no-extraneous-dependencies': ['error', {'devDependencies': true, 'optionalDependencies': false}],
+    'import/no-extraneous-dependencies': ['error', { 'devDependencies': true, 'optionalDependencies': false }],
     'no-console': ['error', { allow: ['warn', 'error'] }],
     'no-continue': ['off'],
     'jsx-a11y/no-static-element-interactions': ['off'], // TODO: Consider
-    'arrow-parens': ['off']
+    'arrow-parens': ['off'],
+    'react/jsx-filename-extension': [1, { "extensions": [".js", ".jsx"] }],
   },
   parserOptions: {
     ecmaVersion: 2018,
