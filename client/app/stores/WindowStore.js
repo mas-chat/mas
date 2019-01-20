@@ -1,4 +1,4 @@
-import Mobx from 'mobx';
+import { observable, computed } from 'mobx';
 import moment from 'moment';
 import Cookies from 'js-cookie';
 import isMobile from 'ismobilejs';
@@ -10,8 +10,6 @@ import userStore from './UserStore';
 import socket from '../utils/socket';
 import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import { mandatory } from '../utils/parameters';
-
-const { observable, computed } = Mobx;
 
 class WindowStore {
   @observable windows = new Map();

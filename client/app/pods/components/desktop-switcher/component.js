@@ -14,13 +14,11 @@
 //   governing permissions and limitations under the License.
 //
 
-import Mobx from 'mobx';
+import { autorun } from 'mobx';
 import Component from '@ember/component';
 import EmberObject from '@ember/object';
 import settingStore from '../../../stores/SettingStore';
 import windowStore from '../../../stores/WindowStore';
-
-const { autorun } = Mobx;
 
 export default Component.extend({
   init(...args) {

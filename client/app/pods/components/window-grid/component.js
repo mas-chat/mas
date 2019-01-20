@@ -16,7 +16,7 @@
 
 /* globals $ */
 
-import Mobx from 'mobx';
+import { autorun } from 'mobx';
 import { A } from '@ember/array';
 import { next, scheduleOnce, bind } from '@ember/runloop';
 import { observer } from '@ember/object';
@@ -25,8 +25,6 @@ import alertStore from '../../../stores/AlertStore';
 import settingStore from '../../../stores/SettingStore';
 import windowStore from '../../../stores/WindowStore';
 import { dispatch } from '../../../utils/dispatcher';
-
-const { autorun } = Mobx;
 
 const CURSORWIDTH = 50;
 

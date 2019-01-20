@@ -16,7 +16,7 @@
 
 /* globals $ */
 
-import Mobx from 'mobx';
+import { autorun } from 'mobx';
 import { debounce, scheduleOnce, bind, cancel, throttle, run } from '@ember/runloop';
 import EmberObject, { computed, observer } from '@ember/object';
 import { alias } from '@ember/object/computed';
@@ -28,8 +28,6 @@ import settingStore from '../../../stores/SettingStore';
 import windowStore from '../../../stores/WindowStore';
 import { dispatch } from '../../../utils/dispatcher';
 import { play } from '../../../utils/sound';
-
-const { autorun } = Mobx;
 
 let faviconCounter = 0;
 

@@ -1,10 +1,8 @@
-import Mobx from 'mobx';
+import { observable } from 'mobx';
 import ProfileModel from '../models/Profile';
 import { dispatch } from '../utils/dispatcher';
 import socket from '../utils/socket';
 import { mandatory } from '../utils/parameters';
-
-const { observable } = Mobx;
 
 class ProfileStore {
   @observable profile = new ProfileModel(this, {});

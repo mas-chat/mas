@@ -16,13 +16,11 @@
 
 /* global $ */
 
-import Mobx from 'mobx';
+import { autorun } from 'mobx';
 import Component from '@ember/component';
 import settingStore from '../../../stores/SettingStore';
 import windowStore from '../../../stores/WindowStore';
 import { darkTheme } from '../../../utils/theme-dark';
-
-const { autorun } = Mobx;
 
 export default Component.extend({
   init(...args) {

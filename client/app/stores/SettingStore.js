@@ -1,12 +1,10 @@
-import Mobx from 'mobx';
+import { observable } from 'mobx';
 import isMobile from 'ismobilejs';
 import SettingsModel from '../models/Settings';
 import { dispatch } from '../utils/dispatcher';
 import socket from '../utils/socket';
 import windowStore from './WindowStore';
 import { mandatory } from '../utils/parameters';
-
-const { observable } = Mobx;
 
 class SettingStore {
   @observable settings = new SettingsModel(this, {});

@@ -1,11 +1,9 @@
-import Mobx from 'mobx';
+import { computed, observable } from 'mobx';
 import marked from 'marked';
 import emojione from 'emojione';
 import moment from 'moment';
 import URI from 'urijs';
 import userStore from '../stores/UserStore';
-
-const { computed, observable } = Mobx;
 
 marked.setOptions({
   breaks: true,

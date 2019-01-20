@@ -1,7 +1,5 @@
-import Mobx from 'mobx';
+import { computed, observable } from 'mobx';
 import userStore from '../stores/UserStore';
-
-const { computed, observable } = Mobx;
 
 export default class FriendModel {
   store;

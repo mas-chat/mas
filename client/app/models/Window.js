@@ -14,14 +14,12 @@
 //   governing permissions and limitations under the License.
 //
 
-import Mobx, { observable } from 'mobx';
+import { computed, observable } from 'mobx';
 import moment from 'moment';
 import isMobile from 'ismobilejs';
 import Message from './Message';
 import daySeparatorStore from '../stores/DaySeparatorStore';
 import userStore from '../stores/UserStore';
-
-const { computed } = Mobx;
 
 export default class WindowModel {
   windowId = 0;

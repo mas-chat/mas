@@ -1,7 +1,5 @@
-import Mobx from 'mobx';
+import { observable } from 'mobx';
 import moment from 'moment';
-
-const { observable } = Mobx;
 
 class DaySeparatorStore {
   @observable dayCounter = 0;

@@ -1,9 +1,7 @@
-import Mobx from 'mobx';
+import { observable } from 'mobx';
 import Cookies from 'js-cookie';
 import UserModel from '../models/User';
 import { mandatory } from '../utils/parameters';
-
-const { observable } = Mobx;
 
 class UserStore {
   @observable users = new Map();

@@ -14,14 +14,12 @@
 //   governing permissions and limitations under the License.
 //
 
-import Mobx from 'mobx';
+import { autorun } from 'mobx';
 import { computed } from '@ember/object';
 import Component from '@ember/component';
 import settingStore from '../../../stores/SettingStore';
 import friendStore from '../../../stores/FriendStore';
 import { dispatch } from '../../../utils/dispatcher';
-
-const { autorun } = Mobx;
 
 export default Component.extend({
   init(...args) {

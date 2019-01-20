@@ -1,9 +1,7 @@
-import Mobx from 'mobx';
+import { observable, computed } from 'mobx';
 import AlertModel from '../models/Alert';
 import socket from '../utils/socket';
 import mandatory from '../utils/parameters';
-
-const { observable, computed } = Mobx;
 
 class AlertStore {
   @observable alerts = new Map();

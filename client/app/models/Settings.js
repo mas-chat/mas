@@ -1,6 +1,4 @@
-import Mobx from 'mobx';
-
-const { observable } = Mobx;
+import { observable } from 'mobx';
 
 export default class SettingModel {
   @observable theme = 'default';

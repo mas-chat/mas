@@ -16,16 +16,12 @@
 
 /* globals $ */
 
-import Mobx from 'mobx';
-import { next } from '@ember/runloop';
+import { autorun } from 'mobx';
 import { computed } from '@ember/object';
 import { gt } from '@ember/object/computed';
 import Component from '@ember/component';
 import moment from 'moment';
-import windowStore from '../../../stores/WindowStore';
 import { dispatch } from '../../../utils/dispatcher';
-
-const { autorun } = Mobx;
 
 export default Component.extend({
   classNames: ['flex-column', 'flex-1'],

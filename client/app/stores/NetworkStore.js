@@ -1,7 +1,5 @@
-import Mobx from 'mobx';
+import { observable } from 'mobx';
 import { mandatory } from '../utils/parameters';
-
-const { observable } = Mobx;
 
 class NetworkStore {
   @observable networks = [];

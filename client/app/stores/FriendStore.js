@@ -1,11 +1,9 @@
-import Mobx from 'mobx';
+import { observable } from 'mobx';
 import { dispatch } from '../utils/dispatcher';
 import userStore from './UserStore';
 import FriendModel from '../models/Friend';
 import socket from '../utils/socket';
 import { mandatory } from '../utils/parameters';
-
-const { observable } = Mobx;
 
 class FriendStore {
   @observable friends = new Map();

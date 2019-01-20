@@ -14,12 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-import Mobx from 'mobx';
+import { autorun } from 'mobx';
 import Component from '@ember/component';
 import { dispatch } from '../../../utils/dispatcher';
 import modalStore from '../../../stores/ModalStore';
-
-const { autorun } = Mobx;
 
 export default Component.extend({
   init(...args) {
