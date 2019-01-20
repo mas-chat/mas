@@ -26,6 +26,10 @@ export default TextArea.extend({
   participants: null,
   pendingClear: false,
 
+  attributeBindings: ['autocomplete'],
+
+  autocomplete: 'off',
+
   keyPress(e) {
     if (e.keyCode === 13 && !e.shiftKey) {
       e.preventDefault();
