@@ -154,7 +154,8 @@ export default Component.extend({
   type: computed('content.type', function() {
     if (this.get('content.type') === 'group') {
       return 'group';
-    } else if (this.get('content.userId') === 'i0') {
+    }
+    if (this.get('content.userId') === 'i0') {
       return 'server-1on1';
     }
     return 'private-1on1';

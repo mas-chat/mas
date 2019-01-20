@@ -501,11 +501,17 @@ export default Component.extend({
 
     if (topOrRight && !bottomOrRight) {
       return 'top'; // t
-    } else if (topOrRight && bottomOrRight) {
+    }
+
+    if (topOrRight && bottomOrRight) {
       return 'right'; // r
-    } else if (!topOrRight && bottomOrRight) {
+    }
+
+    if (!topOrRight && bottomOrRight) {
       return 'bottom'; // b
-    } else if (!topOrRight && !bottomOrRight) {
+    }
+
+    if (!topOrRight && !bottomOrRight) {
       return 'left'; // l
     }
 

@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-/* globals $ */
-
 import { autorun } from 'mobx';
 import { computed } from '@ember/object';
 import { gt } from '@ember/object/computed';

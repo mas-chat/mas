@@ -91,9 +91,13 @@ export default class MessageModel {
 
     if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {
       return 'mention';
-    } else if (userId === userStore.userId && cat === 'msg') {
+    }
+
+    if (userId === userStore.userId && cat === 'msg') {
       return 'mymsg';
-    } else if (nick === 'ruuskanen') {
+    }
+
+    if (nick === 'ruuskanen') {
       return 'service';
     }
 
