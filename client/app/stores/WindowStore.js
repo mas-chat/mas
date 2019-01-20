@@ -117,7 +117,6 @@ class WindowStore {
 
       if (newMessage) {
         this._trimBacklog(window.messages);
-        this._notifyLineAdded(window);
       }
     }
 
@@ -150,7 +149,6 @@ class WindowStore {
 
         if (newMessages) {
           this._trimBacklog(window.messages);
-          this._notifyLineAdded(window);
         }
       }
     });
@@ -171,8 +169,6 @@ class WindowStore {
         window
       })
     );
-
-    this._notifyLineAdded(window);
   }
 
   handleSendText({ window = mandatory(), text = mandatory() }) {
@@ -212,7 +208,6 @@ class WindowStore {
             window
           });
           this._trimBacklog(window.messages);
-          this._notifyLineAdded(window);
         }
       }
     );
@@ -606,21 +601,7 @@ class WindowStore {
     });
 
     // Insert buffered message in one go.
-    console.log(`MsgBuffer processing started.`);
-    let newMessages = false;
-
-    this.msgBuffer.forEach(bufferedMessage => {
-      const newMessage = this._upsertMessaage(bufferedMessage.window, bufferedMessage);
-
-      if (newMessage) {
-        newMessages = true;
-      }
-    });
-
-    if (newMessages) {
-      this._notifyLineAdded(window);
-    }
-
+    this.msgBuffer.forEach(bufferedMessage => this._upsertMessaage(bufferedMessage.window, bufferedMessage));
     console.log(`MsgBuffer processing ended.`);
 
     this.msgBuffer = [];
@@ -733,12 +714,6 @@ class WindowStore {
       } else {
         break;
       }
-    }
-  }
-
-  _notifyLineAdded(window) {
-    if (window.lineAddedCb) {
-      window.lineAddedCb();
     }
   }
 }

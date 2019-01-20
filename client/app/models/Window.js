@@ -75,7 +75,7 @@ export default class WindowModel {
   get sortedMessages() {
     console.log(daySeparatorStore.dayCounter);
 
-    const result = Array.from(this.messages.values()).sort((a, b) => a.ts - b.ts);
+    const result = Array.from(this.messages.values()).sort((a, b) => (a.ts === b.ts ? a.gid - b.gid : a.ts - b.ts));
     let gid = -1;
 
     const addDayDivider = (array, dateString, index) => {

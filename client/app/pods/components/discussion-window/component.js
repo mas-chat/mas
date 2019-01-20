@@ -53,11 +53,17 @@ export default Component.extend({
     const window = windowStore.windows.get(this.windowId);
     this.window = window;
 
-    window.lineAddedCb = () => {
-      this._lineAdded();
-    };
-
     this.disposers = [
+      autorun(() => {
+        const newMostRecentMessage = window.sortedMessages[window.sortedMessages.length - 1];
+
+        if (newMostRecentMessage.gid > this.mostRecentGid) {
+          this.mostRecentGid = newMostRecentMessage.gid;
+          this._lineAdded(newMostRecentMessage);
+        }
+
+        this.set('content.sortedMessages', window.sortedMessages);
+      }),
       autorun(() => this.set('activeDesktop', settingStore.settings.activeDesktop)),
       autorun(() => this.set('content.notDelivered', window.notDelivered)),
       autorun(() => this.set('content.windowId', window.windowId)),
@@ -73,7 +79,6 @@ export default Component.extend({
       autorun(() => this.set('content.operatorNames', window.operatorNames)),
       autorun(() => this.set('content.voiceNames', window.voiceNames)),
       autorun(() => this.set('content.userNames', window.userNames)),
-      autorun(() => this.set('content.sortedMessages', window.sortedMessages)),
       autorun(() => this.set('content.minimizedNamesList', window.minimizedNamesList)),
       autorun(() => this.set('content.decoratedTitle', window.decoratedTitle)),
       autorun(() => this.set('content.decoratedTopic', window.decoratedTopic)),
@@ -113,6 +118,7 @@ export default Component.extend({
   scrollHandlersAdded: false,
   elementInserted: false,
 
+  mostRecentGid: 0,
   scrollTimer: null,
   lazyImageTimer: null,
 
@@ -201,14 +207,8 @@ export default Component.extend({
     .observes('content.userNames.[]', 'content.voiceNames.[]', 'content.operatorNames.[]')
     .on('init'),
 
-  _lineAdded() {
-    if (!windowStore.initDone) {
-      return;
-    }
-
-    const message = this.get('content.sortedMessages')[this.get('content.sortedMessages').length - 1];
-
-    if (!message) {
+  _lineAdded(message) {
+    if (!message || !windowStore.initDone) {
       return;
     }
 
