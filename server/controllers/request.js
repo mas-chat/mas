@@ -264,7 +264,8 @@ async function handleUpdate({ user, command, window, session }) {
     const value = command[prop];
 
     if (typeof value !== 'undefined') {
-      update = !!await window.set({ [prop]: value });
+      await window.set({ [prop]: value });
+      update = Object.keys(window.errors).length == 0;
     }
   }
 
@@ -345,7 +346,7 @@ async function handleSet({ user, command }) {
 
     switch (prop) {
       case 'activeDesktop':
-        if (!await windowsService.isValidDesktop(user, value)) {
+        if (!(await windowsService.isValidDesktop(user, value))) {
           return { status: 'ERROR', errorMsg: `Desktop '${value}' doesn't exist` };
         }
         break;
