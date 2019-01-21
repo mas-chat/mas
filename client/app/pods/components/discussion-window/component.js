@@ -242,6 +242,12 @@ export default Component.extend({
           icon: message.avatarUrl
         });
 
+        ntf.onclick = function() {
+          parent.focus();
+          window.focus(); //just in case, older browsers
+          this.close();
+        };
+
         setTimeout(() => ntf.close(), 5000);
       }
     }
