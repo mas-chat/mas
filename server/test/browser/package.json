@@ -7,6 +7,6 @@
   "dependencies": {
     "irc": "^0.5.2",
     "nightwatch": "^0.9.12",
-    "superagent": "^2.2.0"
+    "superagent": "4.1.0"
   }
 }
