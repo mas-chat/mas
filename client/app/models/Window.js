@@ -53,8 +53,7 @@ export default class WindowModel {
   @observable users = [];
 
   @observable minimizedNamesList = false;
-
-  actualDesktop = 0;
+  @observable actualDesktop = 0;
 
   constructor(store, props) {
     Object.assign(this, props);
