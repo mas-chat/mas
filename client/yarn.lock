@@ -1921,10 +1921,10 @@ bootstrap@^3.4.0:
   resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-3.4.0.tgz#f8d77540dd3062283d2ae7687e21c1e691961640"
   integrity sha512-F1yTDO9OHKH0xjl03DsOe8Nu1OWBIeAugGMhy3UTIYDdbbIPesQIhCEbj+HEr6wqlwweGAlP8F3OBC6kEuhFuw==
 
-bootswatch@3.3.2:
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/bootswatch/-/bootswatch-3.3.2.tgz#adacda752f4702048bbb54c201515217ef4ced2d"
-  integrity sha1-razadS9HAgSLu1TCAVFSF+9M7S0=
+bootswatch@3.3.5:
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/bootswatch/-/bootswatch-3.3.5.tgz#ac10c14e921008a51d957c03f9514e2305279fc9"
+  integrity sha1-rBDBTpIQCKUdlXwD+VFOIwUnn8k=
 
 bower-config@^1.3.0:
   version "1.4.1"
