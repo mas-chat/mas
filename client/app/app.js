@@ -16,10 +16,12 @@
 
 import Application from '@ember/application';
 import loadInitializers from 'ember-load-initializers';
+import isMobile from 'ismobilejs';
 import Resolver from './resolver';
 import config from './config/environment';
 
 console.log(`MAS frontend version: ${config.APP.revision}`);
+console.log(`isMobile: ${isMobile.any}`);
 
 const App = Application.extend({
   modulePrefix: config.modulePrefix,
