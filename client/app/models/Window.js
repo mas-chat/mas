@@ -19,6 +19,7 @@ import moment from 'moment';
 import isMobile from 'ismobilejs';
 import Message from './Message';
 import daySeparatorStore from '../stores/DaySeparatorStore';
+import settingStore from '../stores/SettingStore';
 import userStore from '../stores/UserStore';
 
 export default class WindowModel {
@@ -66,6 +67,11 @@ export default class WindowModel {
 
   set desktop(value) {
     this.actualDesktop = isMobile.any ? Math.floor(Math.random() * 10000000) : value;
+  }
+
+  @computed
+  get visible() {
+    return settingStore.settings.activeDesktop === this.actualDesktop;
   }
 
   @computed

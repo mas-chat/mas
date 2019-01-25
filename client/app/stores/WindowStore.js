@@ -114,6 +114,10 @@ class WindowStore {
       });
 
       if (newMessage) {
+        if (!window.visible && (cat === 'msg' || cat === 'action')) {
+          window.newMessagesCount++;
+        }
+
         this._trimBacklog(window.messages);
       }
     }

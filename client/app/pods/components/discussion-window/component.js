@@ -24,7 +24,6 @@ import Component from '@ember/component';
 import PerfectScrollbar from 'perfect-scrollbar';
 import Favico from 'favico.js';
 import isMobile from 'ismobilejs';
-import settingStore from '../../../stores/SettingStore';
 import windowStore from '../../../stores/WindowStore';
 import { dispatch } from '../../../utils/dispatcher';
 import { play } from '../../../utils/sound';
@@ -62,7 +61,7 @@ export default Component.extend({
 
         this.set('content.sortedMessages', window.sortedMessages);
       }),
-      autorun(() => this.set('activeDesktop', settingStore.settings.activeDesktop)),
+      autorun(() => this.set('content.visible', window.visible)),
       autorun(() => this.set('content.notDelivered', window.notDelivered)),
       autorun(() => this.set('content.windowId', window.windowId)),
       autorun(() => this.set('content.userId', window.userId)),
@@ -82,7 +81,8 @@ export default Component.extend({
       autorun(() => this.set('content.decoratedTopic', window.decoratedTopic)),
       autorun(() => this.set('content.simplifiedName', window.simplifiedName)),
       autorun(() => this.set('content.tooltipTopic', window.tooltipTopic)),
-      autorun(() => this.set('content.explainedType', window.explainedType))
+      autorun(() => this.set('content.explainedType', window.explainedType)),
+      autorun(() => this.set('content.newMessagesCount', window.newMessagesCount))
     ];
   },
 
@@ -126,10 +126,7 @@ export default Component.extend({
   column: alias('content.column'),
   desktop: alias('content.desktop'),
   notDelivered: alias('content.notDelivered'),
-
-  visible: computed('activeDesktop', 'content.desktop', function() {
-    return this.activeDesktop === this.get('content.desktop');
-  }),
+  visible: alias('content.visible'),
 
   logOrMobileModeEnabled: computed('logModeEnabled', function() {
     return this.logModeEnabled || isMobile.any;
@@ -180,10 +177,6 @@ export default Component.extend({
   }),
 
   visibilityChanged: function() {
-    if (this.visible && !this.scrollLock) {
-      this.set('content.newMessagesCount', 0);
-    }
-
     if (this.elementInserted) {
       this.sendAction('relayout', { animate: false });
     }
@@ -214,10 +207,6 @@ export default Component.extend({
     const cat = message.cat;
     const importantMessage = cat === 'msg' || cat === 'action';
 
-    if ((!this.visible || this.scrollLock) && importantMessage) {
-      this.incrementProperty('content.newMessagesCount');
-    }
-
     if (document.hidden && importantMessage) {
       // Browser title notification
       if (this.get('content.alerts.title')) {
@@ -244,7 +233,7 @@ export default Component.extend({
 
         ntf.onclick = function() {
           parent.focus();
-          window.focus(); //just in case, older browsers
+          window.focus(); // just in case, older browsers
           this.close();
         };
 
@@ -532,18 +521,11 @@ export default Component.extend({
 
       if (scrollPos + $panel.innerHeight() >= bottomPosition) {
         this.set('scrollLock', false);
-
-        if (this.visible) {
-          // TODO: Mutates store
-          this.set('content.newMessagesCount', 0);
-        }
-
-        console.log('scrollock off');
       } else {
         this.set('scrollLock', true);
-
-        console.log('scrollock on');
       }
+
+      console.log(`scrollLock: ${this.scrollLock}`);
     };
 
     this.$messagePanel.on('scroll', () => {
