@@ -436,14 +436,8 @@ class WindowStore {
     alerts = mandatory(),
     desktop = mandatory()
   }) {
-    let window = this.windows.get(windowId);
-
-    if (!window) {
-      window = new Window(this, {});
-      this.windows.set(windowId, window);
-    }
-
-    Object.assign(window, {
+    const window = this.windows.get(windowId);
+    const windowProperties = {
       windowId,
       userId,
       network,
@@ -457,7 +451,13 @@ class WindowStore {
       alerts,
       desktop,
       generation: socket.sessionId
-    });
+    };
+
+    if (window) {
+      Object.assign(window, windowProperties);
+    } else {
+      this.windows.set(windowId, new Window(this, windowProperties));
+    }
   }
 
   handleUpdateWindowServer({
