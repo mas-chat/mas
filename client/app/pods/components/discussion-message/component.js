@@ -18,11 +18,13 @@ import { autorun } from 'mobx';
 import Component from '@ember/component';
 import EmberObject from '@ember/object';
 
+let previousEditedMessage = null;
+
 export default Component.extend({
   classNames: ['message-list'],
 
+  editing: false,
   editBody: null,
-  previousEditedMessage: null,
 
   init(args) {
     this._super(args);
@@ -72,17 +74,17 @@ export default Component.extend({
       this.toggleProperty('hideImages');
     },
 
-    edit(message) {
+    edit() {
       this._endEdit();
 
-      this.set('editBody', message.body);
-      message.editing = true; // TODO: Mutates store
+      this.set('editBody', this.body);
+      this.set('editing', true);
 
-      this.set('previousEditedMessage', message);
+      previousEditedMessage = this;
     },
 
-    change(message) {
-      this.sendAction('editMessage', message.gid, this.editBody);
+    change() {
+      this.sendAction('editMessage', gid, this.editBody);
       this._endEdit();
     },
 
@@ -90,18 +92,16 @@ export default Component.extend({
       this._endEdit();
     },
 
-    delete(message) {
-      this.sendAction('deleteMessage', message.gid);
+    delete() {
+      this.sendAction('deleteMessage', this.gid);
       this._endEdit();
     }
   },
 
   _endEdit() {
-    const previousEditedMessage = this.previousEditedMessage;
-
     if (previousEditedMessage) {
-      previousEditedMessage.editing = false; // TODO: Mutates store
-      this.set('previousEditedMessage', null);
+      previousEditedMessage.set('editing', false);
+      previousEditedMessage = null;
     }
   }
 });

@@ -14,9 +14,9 @@
     {{~else}}
     {{#if editing}}
       {{textarea value=editBody}}
-      <button {{action "change" message}} type="button" class="btn btn-default btn-xs">Change</button>
-      <button {{action "cancel" message}} type="button" class="btn btn-default btn-xs">Cancel</button>
-      <button {{action "delete" message}} type="button" class="btn btn-danger btn-xs">Delete</button>
+      <button {{action "change"}} type="button" class="btn btn-default btn-xs">Change</button>
+      <button {{action "cancel"}} type="button" class="btn btn-default btn-xs">Cancel</button>
+      <button {{action "delete"}} type="button" class="btn btn-danger btn-xs">Delete</button>
     {{else}}
       {{{text}}}
       {{~#if edited~}}
