@@ -14,7 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-import { computed, observable } from 'mobx';
+import { computed, observable, autorun } from 'mobx';
 import moment from 'moment';
 import isMobile from 'ismobilejs';
 import Message from './Message';
@@ -58,6 +58,12 @@ export default class WindowModel {
 
   constructor(store, props) {
     Object.assign(this, props);
+
+    autorun(() => {
+      if (this.visible) {
+        this.newMessagesCount = 0;
+      }
+    });
   }
 
   @computed
