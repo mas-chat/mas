@@ -1,7 +1,7 @@
 /* global require, module */
 
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
-const pickFiles = require('broccoli-static-compiler');
+const Funnel = require('broccoli-funnel');
 const mergeTrees = require('broccoli-merge-trees');
 
 module.exports = function(defaults) {
@@ -55,18 +55,15 @@ module.exports = function(defaults) {
   app.import('node_modules/velocity-animate/velocity.js');
 
   // Copy only the relevant files:
-  const fontsFontAwesome = pickFiles('node_modules/font-awesome/fonts', {
-    srcDir: '/',
+  const fontsFontAwesome = new Funnel('node_modules/font-awesome/fonts', {
     destDir: '/assets/fonts'
   });
 
-  const fontsBootstrap = pickFiles('node_modules/bootstrap/dist/fonts', {
-    srcDir: '/',
+  const fontsBootstrap = new Funnel('node_modules/bootstrap/dist/fonts', {
     destDir: '/assets/fonts'
   });
 
-  const emojify = pickFiles('node_modules/emojione/assets/png', {
-    srcDir: '/',
+  const emojify = new Funnel('node_modules/emojione/assets/png', {
     destDir: '/assets/images/emoji'
   });
 
