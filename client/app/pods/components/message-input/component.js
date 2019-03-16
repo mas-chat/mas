@@ -28,7 +28,7 @@ export default TextArea.extend({
 
   attributeBindings: ['autocomplete'],
 
-  autocomplete: 'off',
+  autocomplete: 'nope',
 
   keyPress(e) {
     if (e.keyCode === 13 && !e.shiftKey) {
