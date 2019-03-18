@@ -84,7 +84,7 @@ export default Component.extend({
     },
 
     change() {
-      this.sendAction('editMessage', gid, this.editBody);
+      this.sendAction('editMessage', this.gid, this.editBody);
       this._endEdit();
     },
 
