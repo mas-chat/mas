@@ -185,13 +185,12 @@ export default Component.extend({
     .on('init'),
 
   nickCompletion: function() {
+    const operators = this.get('content.operatorNames') || [];
+
     debounce(
       this,
       function() {
-        this.set(
-          'participants',
-          this.get('content.operatorNames').concat(this.get('content.voiceNames'), this.get('content.userNames'))
-        );
+        this.set('participants', operators.concat(this.get('content.voiceNames'), this.get('content.userNames')));
       },
       1000
     );
