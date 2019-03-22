@@ -31,7 +31,7 @@
     "mkdirp": "~0.5.0",
     "nconf": "~0.10.0",
     "node-cron": "^2.0.3",
-    "nodemailer": "^4.7.0",
+    "nodemailer": "^5.1.1",
     "nodemailer-html-to-text": "~3.0.0",
     "nodemailer-mailgun-transport": "^1.4.0",
     "nodemailer-smtp-transport": "^2.7.4",
@@ -45,13 +45,14 @@
     "statuses": "~1.5.0",
     "uid2": "~0.0.3",
     "utf-8-validate": "^5.0.2",
-    "winston": "^2.4.2",
+    "winston": "^3.2.1",
     "winston-daily-rotate-file": "^3.2.1",
-    "winston-papertrail": "^1.0.5"
+    "winston-papertrail": "^1.0.5",
+    "winston-transport": "^4.3.0"
   },
   "devDependencies": {
     "@types/koa": "^2.0.48",
-    "@types/node": "^11.11.3",
+    "@types/node": "^11.11.5",
     "chai": "^4.2.0",
     "foreman": "^3.0.0",
     "mocha": "^6.0.2",

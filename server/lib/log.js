@@ -19,8 +19,8 @@
 const path = require('path');
 const fs = require('fs');
 const winston = require('winston');
-const MasTransport = require('./winstonMasTransport');
 const DailyRotateFile = require('winston-daily-rotate-file');
+const MasTransport = require('./winstonMasTransport');
 const init = require('./init');
 const conf = require('./conf');
 
@@ -30,17 +30,17 @@ require('winston-papertrail');
 let logger = null;
 
 exports.info = function info(user, msg) {
-  logEntry('info', user, msg, () => {});
+  logEntry('info', user, msg);
 };
 
 exports.warn = function warn(user, msg) {
-  logEntry('warn', user, msg, () => {});
+  logEntry('warn', user, msg);
 };
 
 exports.error = function error(user, msg) {
-  logEntry('error', user, msg, () => {
-    init.shutdown();
-  });
+  logEntry('error', user, msg);
+  logger.on('finish', () => init.shutdown());
+  logger.end();
 };
 
 exports.quit = function quit() {
@@ -49,18 +49,18 @@ exports.quit = function quit() {
   }
 };
 
-function logEntry(type, user, msg, callback) {
+function logEntry(type, user, msg) {
   // user is an optional parameter
   const parsedMessage = user && msg ? `[u: ${user.id}] ${msg}` : user;
 
   if (!logger) {
     // Delay configuration as long as possible to be sure that process.title is set.
-    logger = new winston.Logger({
+    logger = winston.createLogger({
       transports: configTransports()
     });
   }
 
-  logger.log(type, parsedMessage, callback);
+  logger.log(type, parsedMessage);
 }
 
 function configTransports() {
@@ -93,7 +93,6 @@ function configTransports() {
 
     const fileTransportOptions = {
       filename: fileName,
-      colorize: false,
       handleExceptions: true
     };
 
@@ -119,7 +118,8 @@ function configTransports() {
       level: conf.get('papertrail:level'),
       hostname: 'mas',
       program: process.title,
-      logFormat: (level, message) => `[${level}] ${message}`
+      logFormat: (level, message) => `[${level}] ${message}`,
+      handleExceptions: true
     });
 
     transports.push(papertrailTransport);
