@@ -109,9 +109,17 @@ courier.on('connect', ({ network, userId, nick, delay }) => {
     rateLimitDelay = nextNetworkConnectionSlot[network] - Date.now();
   }
 
-  setTimeout(() => connect(userId, nick, network), rateLimitDelay + delay);
+  setTimeout(
+    () =>
+      connect(
+        userId,
+        nick,
+        network
+      ),
+    rateLimitDelay + delay
+  );
 
-  nextNetworkConnectionSlot[network] += Math.round(60 / rateLimit * 1000);
+  nextNetworkConnectionSlot[network] += Math.round((60 / rateLimit) * 1000);
 });
 
 // Disconnect
@@ -235,19 +243,17 @@ function write(options, data) {
 
 // Minimal parser to handle server sent PING command at this layer
 function handlePing(socket, line) {
-  const parts = line.split(' ');
+  const parts = line.split(' ').slice(line.startsWith(':') ? 1 : 0);
+  const [command, parameter] = parts;
 
-  if (parts[0].charAt(0) === ':') {
-    parts.shift();
-  }
-
-  const command = parts.shift();
-
-  if (command === 'PING') {
-    socket.write(`PONG :${socket.ircServerName}\r\n`);
-    return false;
-  } else if (command === '004') {
-    socket.ircServerName = parts[1]; // RFC 2812, reply 004
+  switch (command) {
+    case 'PING':
+      socket.write(`PONG :${socket.ircServerName}\r\n`);
+      return false;
+    case '004':
+      socket.ircServerName = parameter; // RFC 2812, reply 004
+      break;
+    default:
   }
 
   return true;
