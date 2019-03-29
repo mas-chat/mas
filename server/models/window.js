@@ -26,8 +26,8 @@ module.exports = class Window extends Base {
       emailAlert: true,
       notificationAlert: false,
       soundAlert: false,
-      titleAlert: false,
-      minimizedNamesList: true,
+      titleAlert: true,
+      minimizedNamesList: false,
       desktop: props.desktop || 0,
       row: 0,
       column: 0
