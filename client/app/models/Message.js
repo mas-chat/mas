@@ -244,7 +244,7 @@ export default class MessageModel {
         const domain = urlObj.domain();
 
         if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
-          visibleLink = urlObj.filename();
+          visibleLink = decodeURIComponent(urlObj.filename());
           media.push({ type: 'image', url: urlObj.toString() });
         } else if ((domain === 'youtube.com' && urlObj.search(true).v) || domain === 'youtu.be') {
           visibleLink = urlObj.toString();
@@ -326,7 +326,7 @@ export default class MessageModel {
   }
 
   _renderLink(url, label) {
-    return `<a href="${url}" target="_blank">${decodeURIComponent(label)}</a>`;
+    return `<a href="${url}" target="_blank">${label}</a>`;
   }
 
   _renderEmoji(name, src) {
