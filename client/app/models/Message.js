@@ -326,7 +326,7 @@ export default class MessageModel {
   }
 
   _renderLink(url, label) {
-    return `<a href="${url}" target="_blank">${label}</a>`;
+    return `<a href="${url}" target="_blank">${decodeURIComponent(label)}</a>`;
   }
 
   _renderEmoji(name, src) {
