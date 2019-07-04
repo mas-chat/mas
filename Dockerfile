@@ -1,4 +1,4 @@
-FROM node:12.4.0
+FROM node:12.6.0
 
 ARG REVISION=unknown
 
