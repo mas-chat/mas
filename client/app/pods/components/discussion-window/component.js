@@ -19,6 +19,7 @@
 import { autorun } from 'mobx';
 import { debounce, scheduleOnce, bind, cancel, throttle, run } from '@ember/runloop';
 import EmberObject, { computed, observer } from '@ember/object';
+import { on } from '@ember/object/evented';
 import { alias } from '@ember/object/computed';
 import Component from '@ember/component';
 import PerfectScrollbar from 'perfect-scrollbar';
@@ -176,27 +177,29 @@ export default Component.extend({
     }
   }),
 
-  visibilityChanged: function() {
-    if (this.elementInserted) {
-      this.sendAction('relayout', { animate: false });
-    }
-  }
-    .observes('visible')
-    .on('init'),
+  visibilityObserver: on(
+    'init',
+    observer('visible', function() {
+      if (this.elementInserted) {
+        this.sendAction('relayout', { animate: false });
+      }
+    })
+  ),
 
-  nickCompletion: function() {
-    const operators = this.get('content.operatorNames') || [];
+  nickCompletionObserver: on(
+    'init',
+    observer('content.userNames.[]', 'content.voiceNames.[]', 'content.operatorNames.[]', function() {
+      const operators = this.get('content.operatorNames') || [];
 
-    debounce(
-      this,
-      function() {
-        this.set('participants', operators.concat(this.get('content.voiceNames'), this.get('content.userNames')));
-      },
-      1000
-    );
-  }
-    .observes('content.userNames.[]', 'content.voiceNames.[]', 'content.operatorNames.[]')
-    .on('init'),
+      debounce(
+        this,
+        function() {
+          this.set('participants', operators.concat(this.get('content.voiceNames'), this.get('content.userNames')));
+        },
+        1000
+      );
+    })
+  ),
 
   _lineAdded(message) {
     if (!message || !windowStore.initDone) {
