@@ -24,7 +24,7 @@ let elasticSearchClient = null;
 
 exports.getClient = function getClient() {
   if (!elasticSearchClient) {
-    const url = `${conf.get('elasticsearch:host')}:${conf.get('elasticsearch:port')}`;
+    const url = `http://${conf.get('elasticsearch:host')}:${conf.get('elasticsearch:port')}`;
 
     log.info(`Connecting to elasticsearch: ${url}`);
 
