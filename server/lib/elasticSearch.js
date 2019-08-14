@@ -16,7 +16,7 @@
 
 'use strict';
 
-const elasticsearch = require('elasticsearch');
+const { Client } = require('@elastic/elasticsearch');
 const log = require('./log');
 const conf = require('./conf');
 
@@ -28,12 +28,7 @@ exports.getClient = function getClient() {
 
     log.info(`Connecting to elasticsearch: ${url}`);
 
-    elasticSearchClient = new elasticsearch.Client({
-      host: url,
-      keepAlive: true,
-      maxSockets: 15,
-      minSockets: 10
-    });
+    elasticSearchClient = new Client({ node: url });
   }
 
   return elasticSearchClient;

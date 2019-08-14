@@ -122,7 +122,9 @@ function convertToMsgs(hits) {
 function elasticSearchAvailable() {
   if (!conf.get('elasticsearch:enabled')) {
     return false;
-  } else if (!elasticSearchClient) {
+  }
+
+  if (!elasticSearchClient) {
     elasticSearchClient = require('./elasticSearch').getClient(); // Module is slow to require
   }
 
