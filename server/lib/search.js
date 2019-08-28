@@ -102,9 +102,9 @@ exports.getMessageRange = async function getMessageRange(conversationId, start, 
       }
     });
 
-    return convertToMsgs(response.hits.hits);
+    return convertToMsgs(response.body.hits.hits);
   } catch (e) {
-    log.warn(`Elasticsearch error. Failed to search messsage: ${e}`);
+    log.warn(`Elasticsearch error. Failed to search messsage: ${e}: ${JSON.stringify(response)}`);
     return [];
   }
 };
