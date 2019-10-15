@@ -244,6 +244,7 @@ Add several message lines to windows.
 }
 
 See `ADD_MESSAGE` for description
+```
 
 ### DELETE_WINDOW
 
