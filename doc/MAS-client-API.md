@@ -24,16 +24,19 @@ Response:
 
 ```JSON
 200 OK
-
+Set-Cookie: mas=eyAidG9rZW4iOiAiZm9vYmFyIiwgInVzZXJJZCI6IDAgfQo=; Expires=Wed, 21 Oct 2015 07:28:00 GMT
 {
     "success": true,
-    "userId": "m453353",
-    "secret": "O1BgcLMBBEFC2etpjsRo",
-    "expires": 1420488608
+    "msg":"set in case of failure"
 }
 ```
 
-UserId and secret and are needed to initiate a new client session. Expires property informs when the secret expires. The value is seconds since epoch.
+`mas` cookie is base64 encoded JSON string in format:
+```JSON
+"{ "token": "foobar", "userId": 0 }"
+```
+
+UserId and token are needed to initiate a new client session. `token`expires when the cookie expires.
 
 # Session
 
