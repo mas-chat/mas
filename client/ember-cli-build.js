@@ -18,11 +18,7 @@ module.exports = function(defaults) {
     },
     babel: {
       // Order matters!
-      plugins: [
-        ['@babel/plugin-proposal-decorators', { legacy: true }],
-        ['@babel/plugin-proposal-class-properties', { loose: true }],
-        '@babel/plugin-transform-react-jsx'
-      ]
+      plugins: [['@babel/plugin-proposal-decorators', { legacy: true }], '@babel/plugin-transform-react-jsx']
     },
     autoprefixer: {
       browsers: ['last 2 versions'],
