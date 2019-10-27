@@ -53,7 +53,7 @@ class SettingStore {
 
     this.settings.activeDesktop = desktopId;
 
-    if (!isMobile.any) {
+    if (!isMobile().any) {
       socket.send({
         id: 'SET',
         settings: {

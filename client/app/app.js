@@ -21,7 +21,7 @@ import Resolver from './resolver';
 import config from './config/environment';
 
 console.log(`MAS frontend version: ${config.APP.revision}`);
-console.log(`isMobile: ${isMobile.any}`);
+console.log(`isMobile: ${isMobile().any}`);
 
 const App = Application.extend({
   modulePrefix: config.modulePrefix,

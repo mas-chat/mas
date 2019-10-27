@@ -130,7 +130,7 @@ export default Component.extend({
   visible: alias('content.visible'),
 
   logOrMobileModeEnabled: computed('logModeEnabled', function() {
-    return this.logModeEnabled || isMobile.any;
+    return this.logModeEnabled || isMobile().any;
   }),
 
   fullBackLog: computed('content.messages.[]', function() {

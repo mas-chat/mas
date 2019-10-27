@@ -555,7 +555,7 @@ class WindowStore {
       ...(Number.isInteger(desktop) ? { desktop } : {})
     });
 
-    if (!isMobile.any) {
+    if (!isMobile().any) {
       socket.send({
         id: 'UPDATE',
         windowId,

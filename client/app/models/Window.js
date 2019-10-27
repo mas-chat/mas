@@ -72,7 +72,7 @@ export default class WindowModel {
   }
 
   set desktop(value) {
-    this.actualDesktop = isMobile.any ? Math.floor(Math.random() * 10000000) : value;
+    this.actualDesktop = isMobile().any ? Math.floor(Math.random() * 10000000) : value;
   }
 
   @computed
