@@ -19,7 +19,7 @@
 const path = require('path');
 const fs = require('fs');
 const conf = require('../lib/conf');
-const authOptions = require('../lib/authOptions');
+import authOptions from '../lib/authOptions';
 
 const manifestFile = fs.readFileSync(path.join(conf.root(), 'server/website/dist/manifest.json'));
 const manifest = JSON.parse(manifestFile);
