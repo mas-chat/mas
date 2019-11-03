@@ -19,7 +19,7 @@
 const assert = require('assert');
 const util = require('util');
 const Rigiddb = require('rigiddb');
-const redis = require('../lib/redis');
+import redis from '../lib/redis';
 const conf = require('../lib/conf');
 
 const db = new Rigiddb(

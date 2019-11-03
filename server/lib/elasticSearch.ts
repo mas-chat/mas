@@ -1,5 +1,5 @@
 //
-//   Copyright 2009-2014 Ilkka Oksanen <iao@iki.fi>
+//   Copyright 2015 Ilkka Oksanen <iao@iki.fi>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,17 +16,20 @@
 
 'use strict';
 
-const conf = require('./conf');
+import { Client } from '@elastic/elasticsearch';
+import { info } from './log';
+import { get } from './conf';
 
-const password = conf.get('passwordauth:enabled');
-const google = conf.get('googleauth:enabled');
-const yahoo = conf.get('yahooauth:enabled');
-const cloudron = conf.get('cloudronauth:enabled');
+let elasticSearchClient = null;
 
-module.exports = {
-  password,
-  google,
-  yahoo,
-  cloudron,
-  ext: google || yahoo || cloudron
-};
+export function getClient() {
+  if (!elasticSearchClient) {
+    const url = `http://${get('elasticsearch:host')}:${get('elasticsearch:port')}`;
+
+    info(`Connecting to elasticsearch: ${url}`);
+
+    elasticSearchClient = new Client({ node: url });
+  }
+
+  return elasticSearchClient;
+}

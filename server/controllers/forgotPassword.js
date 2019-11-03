@@ -17,7 +17,7 @@
 'use strict';
 
 const uuid = require('uid2');
-const redis = require('../lib/redis');
+import redis from '../lib/redis';
 const User = require('../models/user');
 const log = require('../lib/log');
 const mailer = require('../lib/mailer');

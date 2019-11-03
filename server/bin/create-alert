@@ -19,90 +19,90 @@
 
 const readline = require('readline');
 const log = require('../lib/log');
-const redis = require('../lib/redis');
+import redis from '../lib/redis';
 const User = require('../models/user');
 const Ipm = require('../models/ipm');
 const PendingIpm = require('../models/pendingIpm');
 const notification = require('../lib/notification');
 
 const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
+  input: process.stdin,
+  output: process.stdout
 });
 
 (async function main() {
-    const body = await question('Message: ');
-    const expiresInHours = await question('Expires in (hours): ');
+  const body = await question('Message: ');
+  const expiresInHours = await question('Expires in (hours): ');
 
-    const expiresAt = now();
-    expiresAt.setHours(expiresAt.getHours() + expiresInHours);
+  const expiresAt = now();
+  expiresAt.setHours(expiresAt.getHours() + expiresInHours);
 
-    const ipm = await Ipm.create({ body, expiresAt });
+  const ipm = await Ipm.create({ body, expiresAt });
 
-    await deliverIpm(ipm);
-    await deleteExpiredIpms();
+  await deliverIpm(ipm);
+  await deleteExpiredIpms();
 
-    redis.shutdown();
-    log.quit();
+  redis.shutdown();
+  log.quit();
 
-    console.log('Done. All OK.'); // eslint-disable-line no-console
+  console.log('Done. All OK.'); // eslint-disable-line no-console
 
-    rl.close();
-}());
+  rl.close();
+})();
 
 async function deleteExpiredIpms() {
-    const allIpms = await Ipm.fetchAll();
+  const allIpms = await Ipm.fetchAll();
 
-    for (const ipm of allIpms) {
-        if (ipm.get('expiresAt') < now()) {
-            const pendingIpms = await PendingIpm.find({ ipmId: ipm.id });
+  for (const ipm of allIpms) {
+    if (ipm.get('expiresAt') < now()) {
+      const pendingIpms = await PendingIpm.find({ ipmId: ipm.id });
 
-            for (const pendingIpm of pendingIpms) {
-                await pendingIpm.delete();
-            }
+      for (const pendingIpm of pendingIpms) {
+        await pendingIpm.delete();
+      }
 
-            await ipm.delete();
-        }
+      await ipm.delete();
     }
+  }
 }
 
 async function deliverIpm(ipm) {
-    console.log('Delivering the alert to all users...'); // eslint-disable-line no-console
+  console.log('Delivering the alert to all users...'); // eslint-disable-line no-console
 
-    const allUsers = await User.fetchAll();
+  const allUsers = await User.fetchAll();
 
-    const alertNtf = {
-        type: 'ADD_ALERT',
-        alertId: ipm.id,
-        message: ipm.get('body')
-    };
+  const alertNtf = {
+    type: 'ADD_ALERT',
+    alertId: ipm.id,
+    message: ipm.get('body')
+  };
 
-    for (const user of allUsers) {
-        await PendingIpm.create({ userId: user.id, ipmId: ipm.id })
-        await notification.broadcast(user, alertNtf);
-    }
+  for (const user of allUsers) {
+    await PendingIpm.create({ userId: user.id, ipmId: ipm.id });
+    await notification.broadcast(user, alertNtf);
+  }
 }
 
 async function question(label) {
-    return new Promise(resolve => rl.question(label, answer => resolve(answer)));
+  return new Promise(resolve => rl.question(label, answer => resolve(answer)));
 }
 
 async function yesOrNo(label) {
-    let result = null;
+  let result = null;
 
-    while (result === null) {
-        const response = await question(`${label} [yes/no]: `);
+  while (result === null) {
+    const response = await question(`${label} [yes/no]: `);
 
-        if (response === 'yes') {
-            result = true;
-        } else if (response === 'no') {
-            result = false;
-        }
+    if (response === 'yes') {
+      result = true;
+    } else if (response === 'no') {
+      result = false;
     }
+  }
 
-    return result;
+  return result;
 }
 
 function now() {
-    return new Date();
+  return new Date();
 }

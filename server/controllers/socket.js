@@ -16,9 +16,9 @@
 
 'use strict';
 
-const redis = require('../lib/redis');
 const socketIo = require('socket.io');
 const uuid = require('uid2');
+import redis from '../lib/redis';
 const requestController = require('./request');
 const log = require('../lib/log');
 const UserGId = require('../lib/userGId');
@@ -235,9 +235,11 @@ function checkBacklogParameterBounds(value) {
 
   if (!isInteger(value)) {
     return maxAllowedBacklog;
-  } else if (value < minAllowedBacklog) {
+  }
+  if (value < minAllowedBacklog) {
     return minAllowedBacklog;
-  } else if (value > maxAllowedBacklog) {
+  }
+  if (value > maxAllowedBacklog) {
     return maxAllowedBacklog;
   }
 

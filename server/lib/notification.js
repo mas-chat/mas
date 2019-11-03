@@ -18,7 +18,7 @@
 
 const assert = require('assert');
 const util = require('util');
-const redis = require('./redis');
+import redis from './redis';
 
 exports.send = async function send(user, sessionId, ntfs) {
   await sendNotifications(user, sessionId, null, ntfs);
@@ -31,8 +31,8 @@ exports.broadcast = async function broadcast(user, ntfs, excludeSessionId) {
 async function sendNotifications(user, sessionId, excludeSessionId, ntfs) {
   assert(ntfs);
 
-  const ntfsArray = (util.isArray(ntfs) ? ntfs : [ntfs]).map(
-    ntf => (typeof ntf === 'string' ? ntf : JSON.stringify(ntf))
+  const ntfsArray = (util.isArray(ntfs) ? ntfs : [ntfs]).map(ntf =>
+    typeof ntf === 'string' ? ntf : JSON.stringify(ntf)
   );
 
   for (const ntf of ntfsArray) {

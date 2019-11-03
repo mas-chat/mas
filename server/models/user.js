@@ -19,7 +19,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const md5 = require('md5');
-const redis = require('../lib/redis');
+import redis from '../lib/redis';
 const UserGId = require('../lib/userGId');
 const Base = require('./base');
 

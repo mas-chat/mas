@@ -20,7 +20,7 @@ const init = require('../../lib/init');
 
 init.configureProcess('loopback');
 
-const redis = require('../../lib/redis');
+import redis from '../../lib/redis';
 const conf = require('../../lib/conf');
 const log = require('../../lib/log');
 const courier = require('../../lib/courier').createEndPoint('loopbackparser');

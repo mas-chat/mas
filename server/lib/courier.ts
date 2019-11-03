@@ -16,26 +16,26 @@
 
 'use strict';
 
-const assert = require('assert');
-const uid2 = require('uid2');
-const redis = require('./redis');
-const log = require('./log');
+import assert from 'assert';
+import uid2 from 'uid2';
+import redis from './redis';
+import { info, warn } from './log';
 
 const rcvRedis = redis.createClient();
 
 let processing = false;
 let resolveQuit = null;
 
-exports.create = function create() {
+export function create() {
   // Can only send messages and receive replies. Doesn't have a well known endpoint name.
   return new Courier();
-};
+}
 
-exports.createEndPoint = function createEndPoint(name) {
+export function createEndPoint(name: string) {
   return new Courier(name);
-};
+}
 
-function Courier(name) {
+function Courier(name?: string) {
   this.name = name || uid2(32);
   this.handlers = {};
   this.isEndpoint = !!name;
@@ -52,15 +52,15 @@ Courier.prototype.listen = async function listen() {
     const msg = JSON.parse(result);
     const handler = this.handlers[msg.__type];
 
-    log.info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}]`);
-    log.info(`Courier: Payload: ${result}`);
+    info(`Courier: MSG RCVD [${msg.__sender} → ${this.name}]`);
+    info(`Courier: Payload: ${result}`);
 
     assert(handler, `${this.name}: Missing message handler for: ${msg.__type}`);
 
     try {
       await this._reply(msg, await handler(msg));
     } catch (e) {
-      log.warn(`Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
+      warn(`Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
     }
 
     if (resolveQuit) {
@@ -74,7 +74,7 @@ Courier.prototype.listen = async function listen() {
 
 Courier.prototype.call = async function call(dest, type, params) {
   if (resolveQuit) {
-    log.warn('Not delivering message, shutdown is in progress.');
+    warn('Not delivering message, shutdown is in progress.');
     return null;
   }
 
@@ -88,7 +88,7 @@ Courier.prototype.call = async function call(dest, type, params) {
   await reqRedis.quit();
 
   if (resp === null) {
-    log.warn(`Courier: No reply received from ${dest}`);
+    warn(`Courier: No reply received from ${dest}`);
   }
 
   resp = resp ? JSON.parse(resp[1]) : {};
@@ -99,7 +99,7 @@ Courier.prototype.call = async function call(dest, type, params) {
 
 Courier.prototype.callNoWait = async function callNoWait(dest, type, params, ttl) {
   if (resolveQuit) {
-    log.warn('Not delivering message, shutdown is in progress.');
+    warn('Not delivering message, shutdown is in progress.');
     return;
   }
 
@@ -126,7 +126,7 @@ Courier.prototype.noop = function noop() {
 };
 
 Courier.prototype.quit = function quit() {
-  log.info('Closing courier instance.');
+  info('Closing courier instance.');
 
   return new Promise(resolve => {
     if (!processing) {

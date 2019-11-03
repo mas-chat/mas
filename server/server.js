@@ -31,7 +31,7 @@ const error = require('koa-error');
 const compress = require('koa-compress');
 const logger = require('koa-logger');
 const log = require('./lib/log');
-const redis = require('./lib/redis');
+import redis from './lib/redis';
 const passport = require('./lib/passport');
 const authSessionChecker = require('./lib/authSessionChecker');
 const router = require('./routes/router')();

@@ -24,7 +24,7 @@ init.configureProcess('irc');
 const assert = require('assert');
 const conf = require('../../lib/conf');
 const log = require('../../lib/log');
-const redis = require('../../lib/redis');
+import redis from '../../lib/redis';
 const courier = require('../../lib/courier').createEndPoint('ircparser');
 const UserGId = require('../../lib/userGId');
 const userIntroducer = require('../../lib/userIntroducer');
@@ -205,7 +205,10 @@ async function processJoin({ userId, network, name, password }) {
   if (networkInfo.get('state') === 'connected') {
     sendJoin(user, network, channelName, password);
   } else if (networkInfo.get('state') !== 'connecting') {
-    await connect(user, network);
+    await connect(
+      user,
+      network
+    );
   }
 
   return { status: 'OK' };
@@ -291,7 +294,10 @@ async function processReconnectIfInactive({ userId }) {
           'Welcome back! Reconnecting...'
       );
 
-      await connect(user, network);
+      await connect(
+        user,
+        network
+      );
     }
   }
 }
@@ -321,7 +327,10 @@ async function processRestarted() {
             ' server enabled. Next connect will be slow.'
         );
 
-        await connect(user, network);
+        await connect(
+          user,
+          network
+        );
       }
     } catch (e) {
       log.warn(user, `Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
@@ -421,7 +430,12 @@ async function processDisconnected({ userId, network, reason }) {
   }
 
   await addSystemMessage(user, network, 'error', msg);
-  await connect(user, network, true, delay);
+  await connect(
+    user,
+    network,
+    true,
+    delay
+  );
 }
 
 async function parseIrcMessage({ userId, line, network }) {
@@ -881,9 +895,7 @@ async function handleError(user, msg) {
       user,
       msg.network,
       'error',
-      `${
-        msg.network
-      } IRC network doesn't allow more connections. Close all windows related to this IRC network and rejoin another day to try again.`
+      `${msg.network} IRC network doesn't allow more connections. Close all windows related to this IRC network and rejoin another day to try again.`
     ); // eslint-disable-line max-len
   }
 }

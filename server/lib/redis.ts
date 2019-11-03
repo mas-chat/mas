@@ -16,23 +16,23 @@
 
 'use strict';
 
-const assert = require('assert');
-const Redis = require('ioredis');
-const log = require('./log');
-const conf = require('./conf');
+import assert from 'assert';
+import Redis from 'ioredis';
+import { info, warn } from './log';
+import { get } from './conf';
 
 const activeClients = [];
 let shutdownDone = false;
 
-module.exports = createRedisClient();
+export default createRedisClient();
 
 function createRedisClient({ autoClose = true } = {}) {
-  const connType = conf.get('redis:connection_type');
+  const connType = get('redis:connection_type');
   const client = new Redis({
-    port: conf.get('redis:port'),
-    host: conf.get('redis:host'),
-    password: conf.get('redis:password') || null,
-    path: connType === 'socket' ? null : conf.get('redis:unix_socket_path'),
+    port: get('redis:port'),
+    host: get('redis:host'),
+    password: get('redis:password') || null,
+    path: connType === 'socket' ? null : get('redis:unix_socket_path'),
     retryStrategy
   });
 
@@ -54,7 +54,7 @@ function createRedisClient({ autoClose = true } = {}) {
     assert(!shutdownDone, 'Call shutdown() only once');
 
     shutdownDone = true;
-    log.info(`Closing ${activeClients.length} redis connections`);
+    info(`Closing ${activeClients.length} redis connections`);
 
     activeClients.forEach(activeClient => activeClient.quit());
   };
@@ -74,11 +74,11 @@ function createRedisClient({ autoClose = true } = {}) {
 function retryStrategy(times) {
   const delay = Math.min(times * 1000 + 1000, 5000);
 
-  log.info(`Trying to connect to Redis in ${delay}ms...`);
+  info(`Trying to connect to Redis in ${delay}ms...`);
 
   return delay;
 }
 
 function errorHandler(error) {
-  log.warn(`Connection to Redis failed, reason: ${error}`);
+  warn(`Connection to Redis failed, reason: ${error}`);
 }
