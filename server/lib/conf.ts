@@ -16,12 +16,10 @@
 
 'use strict';
 
-const path = require('path');
-const assert = require('assert');
-const nconf = require('nconf');
-const argv = require('minimist')(process.argv.slice(1));
-
-require('colors');
+import path from 'path';
+import assert from 'assert';
+import nconf from 'nconf';
+import 'colors';
 
 const rootPath = computeRoot();
 
@@ -40,11 +38,11 @@ nconf
     format: nconf.formats.ini
   });
 
-exports.get = function get(key) {
+export function get(key: string) {
   return getValue(key);
-};
+}
 
-exports.getComputed = function getComputed(key) {
+export function getComputed(key: string) {
   let ret = '';
 
   switch (key) {
@@ -61,13 +59,13 @@ exports.getComputed = function getComputed(key) {
   }
 
   return ret;
-};
+}
 
-exports.root = function root() {
+export function root() {
   return computeRoot();
-};
+}
 
-function getValue(key) {
+function getValue(key: string) {
   const value = nconf.get(key);
 
   if (value === undefined) {
