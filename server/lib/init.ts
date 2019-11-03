@@ -16,12 +16,12 @@
 
 'use strict';
 
-const assert = require('assert');
-const semver = require('semver');
+import assert from 'assert';
+import semver from 'semver';
 
 checkNodeVersion();
 
-const log = require('./log');
+import { warn } from './log';
 
 const stateChangeCallbacks = [];
 let shutdownInProgress = false;
@@ -33,29 +33,29 @@ const shutdownOrder = {
 };
 
 process.on('unhandledRejection', (reason, p) => {
-  log.warn(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
+  warn(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
   throw reason;
 });
 
-exports.configureProcess = function configureProcess(serverName) {
+export function configureProcess(serverName: string) {
   process.umask(18); // file: rw-r--r-- directory: rwxr-xr-x
   process.title = `mas-${serverName}`;
 
-  log.warn(`${serverName} starting...`);
+  warn(`${serverName} starting...`);
 
   process.on('SIGINT', execShutdown);
   process.on('SIGTERM', execShutdown);
-};
+}
 
-exports.on = function on(state, callback) {
+export function on(state: string, callback: () => any) {
   assert(shutdownOrder[state]);
 
   stateChangeCallbacks.push({ state, cb: callback });
-};
+}
 
-exports.shutdown = function shutdown() {
+export function shutdown() {
   execShutdown();
-};
+}
 
 async function execShutdown() {
   if (shutdownInProgress) {
@@ -64,7 +64,7 @@ async function execShutdown() {
 
   shutdownInProgress = true;
 
-  log.warn('Shutdown sequence started.');
+  warn('Shutdown sequence started.');
 
   const entries = stateChangeCallbacks.sort((a, b) => shutdownOrder[a.state] - shutdownOrder[b.state]);
 
