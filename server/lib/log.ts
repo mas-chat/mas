@@ -16,40 +16,40 @@
 
 'use strict';
 
-const path = require('path');
-const fs = require('fs');
-const winston = require('winston');
-const DailyRotateFile = require('winston-daily-rotate-file');
-const MasTransport = require('./winstonMasTransport');
-const init = require('./init');
-const conf = require('./conf');
+import path from 'path';
+import fs from 'fs';
+import winston from 'winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
+import MasTransport from './winstonMasTransport';
+import { shutdown } from './init';
+import { get, root } from './conf';
 
-require('colors');
-require('winston-papertrail');
+import 'colors';
+import 'winston-papertrail';
 
 let logger = null;
 
-exports.info = function info(user, msg) {
+export function info(user, msg?: string) {
   logEntry('info', user, msg);
-};
+}
 
-exports.warn = function warn(user, msg) {
+export function warn(user, msg?: string) {
   logEntry('warn', user, msg);
-};
+}
 
-exports.error = function error(user, msg) {
+export function error(user, msg?: string) {
   logEntry('error', user, msg);
-  logger.on('finish', () => init.shutdown());
+  logger.on('finish', () => shutdown());
   logger.end();
-};
+}
 
-exports.quit = function quit() {
+export function quit() {
   if (logger) {
     logger.clear();
   }
-};
+}
 
-function logEntry(type, user, msg) {
+function logEntry(type, user, msg?: string) {
   // user is an optional parameter
   const parsedMessage = user && msg ? `[u: ${user.id}] ${msg}` : user;
 
@@ -66,11 +66,11 @@ function logEntry(type, user, msg) {
 function configTransports() {
   const transports = [];
 
-  if (conf.get('log:file')) {
-    let logDirectory = path.normalize(conf.get('log:directory'));
+  if (get('log:file')) {
+    let logDirectory = path.normalize(get('log:directory'));
 
     if (logDirectory.charAt(0) !== path.sep) {
-      logDirectory = path.join(conf.root(), logDirectory);
+      logDirectory = path.join(root(), logDirectory);
     }
 
     const fileName = path.join(logDirectory, `${process.title}.log`);
@@ -80,7 +80,7 @@ function configTransports() {
       process.exit(1);
     }
 
-    if (conf.get('log:clear_at_startup') && fs.existsSync(fileName)) {
+    if (get('log:clear_at_startup') && fs.existsSync(fileName)) {
       try {
         fs.unlinkSync(fileName);
       } catch (e) {
@@ -96,14 +96,14 @@ function configTransports() {
       handleExceptions: true
     };
 
-    const fileTransport = conf.get('log:rotate_daily')
+    const fileTransport = get('log:rotate_daily')
       ? new DailyRotateFile(fileTransportOptions)
       : new winston.transports.File(fileTransportOptions);
 
     transports.push(fileTransport);
   }
 
-  if (conf.get('log:console')) {
+  if (get('log:console')) {
     const consoleTransport = new MasTransport({
       handleExceptions: true
     });
@@ -111,11 +111,11 @@ function configTransports() {
     transports.push(consoleTransport);
   }
 
-  if (conf.get('papertrail:enabled')) {
-    const papertrailTransport = new winston.transports.Papertrail({
-      host: conf.get('papertrail:host'),
-      port: conf.get('papertrail:port'),
-      level: conf.get('papertrail:level'),
+  if (get('papertrail:enabled')) {
+    const papertrailTransport = new (winston.transports as any).Papertrail({
+      host: get('papertrail:host'),
+      port: get('papertrail:port'),
+      level: get('papertrail:level'),
       hostname: 'mas',
       program: process.title,
       logFormat: (level, message) => `[${level}] ${message}`,
