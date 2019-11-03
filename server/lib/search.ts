@@ -16,12 +16,12 @@
 
 'use strict';
 
-const log = require('./log');
-const conf = require('./conf');
+import { warn } from './log';
+import { get } from './conf';
 
 let elasticSearchClient = null;
 
-exports.storeMessage = async function storeMessage(conversationId, msg) {
+export async function storeMessage(conversationId, msg) {
   if (!elasticSearchAvailable()) {
     return false;
   }
@@ -40,14 +40,14 @@ exports.storeMessage = async function storeMessage(conversationId, msg) {
       }
     });
   } catch (e) {
-    log.warn(`Elasticsearch error. Failed to index messsage: ${e}`);
+    warn(`Elasticsearch error. Failed to index messsage: ${e}`);
     return false;
   }
 
   return true;
-};
+}
 
-exports.updateMessage = async function updateMessage(gid, msg) {
+export async function updateMessage(gid, msg) {
   if (!elasticSearchAvailable()) {
     return false;
   }
@@ -64,28 +64,29 @@ exports.updateMessage = async function updateMessage(gid, msg) {
       }
     });
   } catch (e) {
-    log.warn(`Elasticsearch error. Failed to index messsage: ${e}`);
+    warn(`Elasticsearch error. Failed to index messsage: ${e}`);
     return false;
   }
 
   return true;
-};
+}
 
-exports.getMessageRange = async function getMessageRange(conversationId, start, end, amount) {
+export async function getMessageRange(conversationId, start, end, amount) {
   if (!elasticSearchAvailable()) {
     return [];
   }
 
   // TODO: If there are multiple messages at the boundary start/end ts, part of them can be lost.
   // Theoretical problem mostly. Solution is not lte.
-  const range = { lt: end * 1000 };
+  const range: { [key: string]: any } = { lt: end * 1000 };
+  let response;
 
   if (start) {
     range.gte = start * 1000;
   }
 
   try {
-    const response = await elasticSearchClient.search({
+    response = await elasticSearchClient.search({
       index: 'messages',
       body: {
         size: amount || 1000,
@@ -104,10 +105,10 @@ exports.getMessageRange = async function getMessageRange(conversationId, start, 
 
     return convertToMsgs(response.body.hits.hits);
   } catch (e) {
-    log.warn(`Elasticsearch error. Failed to search messsage: ${e}: ${JSON.stringify(response)}`);
+    warn(`Elasticsearch error. Failed to search messsage: ${e}: ${JSON.stringify(response)}`);
     return [];
   }
-};
+}
 
 function convertToMsgs(hits) {
   return hits.map(hit => ({
@@ -120,7 +121,7 @@ function convertToMsgs(hits) {
 }
 
 function elasticSearchAvailable() {
-  if (!conf.get('elasticsearch:enabled')) {
+  if (!get('elasticsearch:enabled')) {
     return false;
   }
 

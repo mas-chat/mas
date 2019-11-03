@@ -17,7 +17,7 @@
 'use strict';
 
 const assert = require('assert');
-const UserGId = require('../lib/userGId');
+import UserGId from '../lib/userGId';
 const NetworkInfo = require('../models/networkInfo');
 const User = require('../models/user');
 

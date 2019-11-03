@@ -21,7 +21,7 @@ const uuid = require('uid2');
 import redis from '../lib/redis';
 const requestController = require('./request');
 const log = require('../lib/log');
-const UserGId = require('../lib/userGId');
+import UserGId from '../lib/userGId';
 const conf = require('../lib/conf');
 const userIntroducer = require('../lib/userIntroducer');
 const authSessionService = require('../services/authSession');

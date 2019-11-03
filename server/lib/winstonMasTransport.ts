@@ -16,11 +16,10 @@
 
 'use strict';
 
-const Transport = require('winston-transport');
+import Transport from 'winston-transport';
+import 'colors';
 
-require('colors');
-
-module.exports = class MasConsoleLogger extends Transport {
+export default class MasConsoleLogger extends Transport {
   log({ level, message, ...meta }, callback) {
     const [, processName, processExtension] = process.title.split('-');
     let processColumn;
@@ -68,4 +67,4 @@ module.exports = class MasConsoleLogger extends Transport {
 
     callback();
   }
-};
+}

@@ -16,14 +16,15 @@
 
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const nodemailer = require('nodemailer');
-const htmlToText = require('nodemailer-html-to-text').htmlToText;
-const handlebars = require('handlebars');
-const conf = require('../lib/conf');
-const log = require('../lib/log');
+import fs from 'fs';
+import path from 'path';
+import nodemailer from 'nodemailer';
+import nodeMaileHtmlToText from 'nodemailer-html-to-text';
+import handlebars from 'handlebars';
+import { get, root } from '../lib/conf';
+import { info, warn } from '../lib/log';
 
+const htmlToText = nodeMaileHtmlToText.htmlToText;
 const templateCache = {};
 let transporter;
 let fromAddress;
@@ -32,7 +33,7 @@ let senderAddress;
 setupTransporter();
 
 exports.send = function send(templateName, data, address, subject) {
-  const templatePath = path.join(conf.root(), 'server', templateName);
+  const templatePath = path.join(root(), 'server', templateName);
   let template = templateCache[templatePath];
 
   if (!template) {
@@ -40,7 +41,7 @@ exports.send = function send(templateName, data, address, subject) {
     templateCache[templatePath] = template;
   }
 
-  log.info(`Sending email to: ${address}`);
+  info(`Sending email to: ${address}`);
 
   transporter.sendMail(
     {
@@ -52,47 +53,47 @@ exports.send = function send(templateName, data, address, subject) {
     },
     error => {
       if (error) {
-        log.warn(`Failed to send email: ${error}`);
+        warn(`Failed to send email: ${error}`);
       }
     }
   );
 };
 
 function setupTransporter() {
-  if (conf.get('mailgun:enabled')) {
+  if (get('mailgun:enabled')) {
     const mailgun = require('nodemailer-mailgun-transport'); // Slow module to require
     const mailgunAuth = {
       auth: {
-        api_key: conf.get('mailgun:api_key'), // eslint-disable-line camelcase
-        domain: conf.get('mailgun:domain')
+        api_key: get('mailgun:api_key'), // eslint-disable-line camelcase
+        domain: get('mailgun:domain')
       }
     };
 
     transporter = nodemailer.createTransport(mailgun(mailgunAuth));
-    fromAddress = conf.get('mailgun:from');
-    senderAddress = conf.get('mailgun:sender');
-  } else if (conf.get('smtp:enabled')) {
+    fromAddress = get('mailgun:from');
+    senderAddress = get('mailgun:sender');
+  } else if (get('smtp:enabled')) {
     const smtpTransport = require('nodemailer-smtp-transport');
-    const smtpOptions = {
-      host: conf.get('smtp:server'),
-      port: conf.get('smtp:port')
+    const smtpOptions: { [key: string]: any } = {
+      host: get('smtp:server'),
+      port: get('smtp:port')
     };
 
-    if (conf.get('smtp:user').length !== 0) {
+    if (get('smtp:user').length !== 0) {
       smtpOptions.auth = {
-        user: conf.get('smtp:user'),
-        pass: conf.get('smtp:password')
+        user: get('smtp:user'),
+        pass: get('smtp:password')
       };
     }
 
     transporter = nodemailer.createTransport(smtpTransport(smtpOptions));
-    fromAddress = conf.get('site:admin_email');
+    fromAddress = get('site:admin_email');
     senderAddress = fromAddress;
   } else {
     transporter = nodemailer.createTransport({
       sendmail: true
     });
-    fromAddress = conf.get('site:admin_email');
+    fromAddress = get('site:admin_email');
     senderAddress = fromAddress;
   }
 

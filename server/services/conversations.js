@@ -20,7 +20,7 @@ const assert = require('assert');
 const log = require('../lib/log');
 const search = require('../lib/search');
 const notification = require('../lib/notification');
-const UserGId = require('../lib/userGId');
+import UserGId from '../lib/userGId';
 const User = require('../models/user');
 const Window = require('../models/window');
 const Conversation = require('../models/conversation');

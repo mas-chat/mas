@@ -16,7 +16,7 @@
 
 'use strict';
 
-const UserGId = require('../lib/userGId');
+import UserGId from '../lib/userGId';
 const notification = require('../lib/notification');
 const User = require('../models/user');
 const Friend = require('../models/friend');

@@ -16,7 +16,7 @@
 
 'use strict';
 
-const UserGId = require('./userGId');
+import UserGId from './userGId';
 const log = require('./log');
 const conf = require('./conf');
 const User = require('../models/user');

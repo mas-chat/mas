@@ -18,7 +18,7 @@
 
 const assert = require('assert');
 const notification = require('../lib/notification');
-const UserGId = require('../lib/userGId');
+import UserGId from '../lib/userGId';
 const log = require('../lib/log');
 const conf = require('../lib/conf');
 const User = require('../models/user');

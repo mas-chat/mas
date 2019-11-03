@@ -18,7 +18,7 @@
 
 const cron = require('node-cron');
 const mailer = require('./mailer');
-const UserGId = require('./userGId');
+import UserGId from './userGId';
 const User = require('../models/user');
 const MissedMessage = require('../models/missedMessage');
 const Conversation = require('../models/conversation');
@@ -46,7 +46,7 @@ async function deliverEmails() {
     const formattedMessages = await processUserMissedMessages(missedPerConversations, user);
 
     // TODO: Better would be to clear pending notifications during login
-    if (!await user.isOnline() && Object.keys(formattedMessages).length > 0) {
+    if (!(await user.isOnline()) && Object.keys(formattedMessages).length > 0) {
       mailer.send(
         'emails/build/mentioned.hbs',
         {

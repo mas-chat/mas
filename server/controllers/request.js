@@ -25,7 +25,7 @@ const search = require('../lib/search');
 const conf = require('../lib/conf');
 const courier = require('../lib/courier').create();
 const mailer = require('../lib/mailer');
-const UserGId = require('../lib/userGId');
+import UserGId from '../lib/userGId';
 const authSessionService = require('../services/authSession');
 const conversationsService = require('../services/conversations');
 const windowsService = require('../services/windows');

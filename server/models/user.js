@@ -20,7 +20,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const md5 = require('md5');
 import redis from '../lib/redis';
-const UserGId = require('../lib/userGId');
+import UserGId from '../lib/userGId';
 const Base = require('./base');
 
 module.exports = class User extends Base {

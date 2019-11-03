@@ -26,7 +26,7 @@ const conf = require('../../lib/conf');
 const log = require('../../lib/log');
 import redis from '../../lib/redis';
 const courier = require('../../lib/courier').createEndPoint('ircparser');
-const UserGId = require('../../lib/userGId');
+import UserGId from '../../lib/userGId';
 const userIntroducer = require('../../lib/userIntroducer');
 const User = require('../../models/user');
 const IrcSubscription = require('../../models/ircSubscription');

@@ -4,7 +4,7 @@
 
 const readline = require('readline');
 const RigidDB = require('rigiddb');
-const UserGId = require('../lib/userGId');
+import UserGId from '../lib/userGId';
 const User = require('../models/user');
 const Conversation = require('../models/conversation');
 const ConversationMember = require('../models/conversationMember');
@@ -24,415 +24,420 @@ const conversations = [];
 let fix = false;
 
 const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
+  input: process.stdin,
+  output: process.stdout
 });
 
 process.on('unhandledRejection', (reason, p) => {
-    log(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
-    throw reason;
+  log(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
+  throw reason;
 });
 
 (async function main() {
-    log('');
-    log('*** Last line of defence, only needed in special cases ***');
-    log('');
+  log('');
+  log('*** Last line of defence, only needed in special cases ***');
+  log('');
 
-    fix = await question('Fix issues in addition to reporting them [yes/NO]? ') === 'yes';
+  fix = (await question('Fix issues in addition to reporting them [yes/NO]? ')) === 'yes';
 
-    const { val: userIds } = await store.list('users');
+  const { val: userIds } = await store.list('users');
 
-    log(`${userIds.length} users found.`);
+  log(`${userIds.length} users found.`);
 
-    for (const userId of userIds) {
-        const user = await User.fetch(userId);
-        allUserIds.push(userId);
+  for (const userId of userIds) {
+    const user = await User.fetch(userId);
+    allUserIds.push(userId);
 
-        if (!user.get('deleted')) {
-            activeUserIds.push(userId);
-        }
+    if (!user.get('deleted')) {
+      activeUserIds.push(userId);
     }
+  }
 
-    log(`${activeUserIds.length} active users found.`);
+  log(`${activeUserIds.length} active users found.`);
 
-    await checkConversations();
-    await checkWindows();
-    await checkConversationMembers();
-    await checkSettings();
-    await checkFriends();
-    await checkConversationMessages();
-    await checkNetworkInfos();
-    await checkIRCSubscriptions();
+  await checkConversations();
+  await checkWindows();
+  await checkConversationMembers();
+  await checkSettings();
+  await checkFriends();
+  await checkConversationMessages();
+  await checkNetworkInfos();
+  await checkIRCSubscriptions();
 
-    log('Done.');
-    await store.quit();
-}());
+  log('Done.');
+  await store.quit();
+})();
 
 async function question(label) {
-    return new Promise(resolve => rl.question(label, answer => resolve(answer)));
+  return new Promise(resolve => rl.question(label, answer => resolve(answer)));
 }
 
 const uniqGroups = {};
 
 async function checkConversations() {
-    const { val: conversationIds } = await store.list('conversations');
+  const { val: conversationIds } = await store.list('conversations');
 
-    log('Checking that conversations have active user as an owner...');
-    log(`${conversationIds.length} conversations found.`);
+  log('Checking that conversations have active user as an owner...');
+  log(`${conversationIds.length} conversations found.`);
 
-    for (const conversationId of conversationIds) {
-        conversations.push(conversationId);
+  for (const conversationId of conversationIds) {
+    conversations.push(conversationId);
 
-        const conversation = await Conversation.fetch(conversationId);
-        const ownerUserId = conversation.get('owner');
+    const conversation = await Conversation.fetch(conversationId);
+    const ownerUserId = conversation.get('owner');
 
-        if (ownerUserId && !activeUserIds.find(activeUserId => activeUserId === ownerUserId)) {
-            log(`!!! Conversation has deleted user as an owner: ${JSON.stringify(conversation._props)}`);
-        }
-
-        if (conversation.get('type') === '1on1') {
-            const members = await ConversationMember.find({ conversationId: conversation.id });
-
-            if (members.length !== 2) {
-                log(`!!! 1on1 conversation has invalid amount of members: ${members.length}`);
-                members.forEach(member => {
-                    log(`    - ${member.get('userGId')}`);
-                });
-
-                if (fix) {
-                    await members[0].delete();
-                    await conversation.delete();
-                }
-            } else if (members[0].get('userGId')[0] === 'm' && members[1].get('userGId')[0] === 'm') {
-                if (conversation.get('network') !== 'mas') {
-                    log(`!! Two MAS users talking via IRC ${members[0].get('userGId')} and ${members[1].get('userGId')}`);
-
-                    if (fix) {
-                        await conversation.delete();
-                        await members[0].delete();
-                        await members[1].delete();
-                    }
-                }
-            } else if (members[0].get('userGId') === members[1].get('userGId')) {
-                log('!!! 1on1 conversation where user is talking with himself');
-            } else if (members[0].get('userGId')[0] === 'i' && members[1].get('userGId')[0] === 'i') {
-                log('!!! 1on1 conversation where two irc users are talking');
-            }
-        } else {
-            const key = `${conversation.get('network')}:${conversation.get('name')}`;
-
-            if (uniqGroups[key]) {
-                log(`!!! Duplicate group ${key}, id: ${conversation.id} found`);
-
-                if (fix) {
-                    await conversation.delete();
-                }
-            }
-
-            uniqGroups[key] = true;
-        }
+    if (ownerUserId && !activeUserIds.find(activeUserId => activeUserId === ownerUserId)) {
+      log(`!!! Conversation has deleted user as an owner: ${JSON.stringify(conversation._props)}`);
     }
+
+    if (conversation.get('type') === '1on1') {
+      const members = await ConversationMember.find({ conversationId: conversation.id });
+
+      if (members.length !== 2) {
+        log(`!!! 1on1 conversation has invalid amount of members: ${members.length}`);
+        members.forEach(member => {
+          log(`    - ${member.get('userGId')}`);
+        });
+
+        if (fix) {
+          await members[0].delete();
+          await conversation.delete();
+        }
+      } else if (members[0].get('userGId')[0] === 'm' && members[1].get('userGId')[0] === 'm') {
+        if (conversation.get('network') !== 'mas') {
+          log(`!! Two MAS users talking via IRC ${members[0].get('userGId')} and ${members[1].get('userGId')}`);
+
+          if (fix) {
+            await conversation.delete();
+            await members[0].delete();
+            await members[1].delete();
+          }
+        }
+      } else if (members[0].get('userGId') === members[1].get('userGId')) {
+        log('!!! 1on1 conversation where user is talking with himself');
+      } else if (members[0].get('userGId')[0] === 'i' && members[1].get('userGId')[0] === 'i') {
+        log('!!! 1on1 conversation where two irc users are talking');
+      }
+    } else {
+      const key = `${conversation.get('network')}:${conversation.get('name')}`;
+
+      if (uniqGroups[key]) {
+        log(`!!! Duplicate group ${key}, id: ${conversation.id} found`);
+
+        if (fix) {
+          await conversation.delete();
+        }
+      }
+
+      uniqGroups[key] = true;
+    }
+  }
 }
 
 async function checkWindows() {
-    const { val: windowIds } = await store.list('windows');
+  const { val: windowIds } = await store.list('windows');
 
-    log('Checking windows...');
-    log(`${windowIds.length} windows found.`);
+  log('Checking windows...');
+  log(`${windowIds.length} windows found.`);
 
-    for (const windowId of windowIds) {
-        const window = await Window.fetch(windowId);
-        const userId = window.get('userId');
-        const conversationId = window.get('conversationId');
+  for (const windowId of windowIds) {
+    const window = await Window.fetch(windowId);
+    const userId = window.get('userId');
+    const conversationId = window.get('conversationId');
 
-        if (!activeUserIds.find(activeUserId => activeUserId === userId)) {
-            log('!!! Found window that belongs to deleted user');
+    if (!activeUserIds.find(activeUserId => activeUserId === userId)) {
+      log('!!! Found window that belongs to deleted user');
 
-            if (fix) {
-                log('Fixing by deleting');
-                await window.delete();
-            }
-        }
-
-        if (!conversations.find(
-            existingConversationId => existingConversationId === conversationId)) {
-            log('!!! Found window without conversation');
-
-            if (fix) {
-                log('Fixing by deleting');
-                await window.delete();
-            }
-        }
+      if (fix) {
+        log('Fixing by deleting');
+        await window.delete();
+      }
     }
+
+    if (!conversations.find(existingConversationId => existingConversationId === conversationId)) {
+      log('!!! Found window without conversation');
+
+      if (fix) {
+        log('Fixing by deleting');
+        await window.delete();
+      }
+    }
+  }
 }
 
 async function checkConversationMembers() {
-    const { val: conversationMemberIds } = await store.list('conversationMembers');
+  const { val: conversationMemberIds } = await store.list('conversationMembers');
 
-    log('Checking conversationMembers...');
-    log(`${conversationMemberIds.length} conversationMembers found.`);
+  log('Checking conversationMembers...');
+  log(`${conversationMemberIds.length} conversationMembers found.`);
 
-    for (const conversationMemberId of conversationMemberIds) {
-        const conversationMember = await ConversationMember.fetch(conversationMemberId);
+  for (const conversationMemberId of conversationMemberIds) {
+    const conversationMember = await ConversationMember.fetch(conversationMemberId);
 
-        if (!conversationMember) {
-            // Active user, has parted already
-            continue;
-        }
-
-        const role = conversationMember.get('role');
-
-        const userGId = UserGId.create(conversationMember.get('userGId'));
-        const conversationId = conversationMember.get('conversationId');
-
-        if (!(role === 'u' || role === '+' || role === '@' || role === '*')) {
-            log(`!!! Unknown role ${role}, userGId: ${userGId}`);
-
-            if (fix) {
-                await conversationMember.set('role', 'u');
-            }
-        }
-
-        if (!(role === 'u' || role === '+' || role === '@' || role === '*')) {
-            log(`!!! Unknown role ${role}, userGId: ${userGId}`);
-
-            if (fix) {
-                await conversationMember.set('role', 'u');
-            }
-        }
-
-        if (userGId.type === 'mas') {
-            if (!activeUserIds.find(activeUserId => activeUserId === userGId.id)) {
-                log('!!! Found conversationMember that is a deleted user.');
-
-                if (fix) {
-                    log('Fixing');
-                    await conversationMember.delete();
-                }
-            }
-        }
-
-        if (!conversations.find(
-            existingConversationId => existingConversationId === conversationId)) {
-            log('!!! Found conversationMember that points to non-existent conversation');
-
-            if (fix) {
-                log('Fixing by deleting');
-                await conversationMember.delete();
-            }
-        }
+    if (!conversationMember) {
+      // Active user, has parted already
+      continue;
     }
+
+    const role = conversationMember.get('role');
+
+    const userGId = UserGId.create(conversationMember.get('userGId'));
+    const conversationId = conversationMember.get('conversationId');
+
+    if (!(role === 'u' || role === '+' || role === '@' || role === '*')) {
+      log(`!!! Unknown role ${role}, userGId: ${userGId}`);
+
+      if (fix) {
+        await conversationMember.set('role', 'u');
+      }
+    }
+
+    if (!(role === 'u' || role === '+' || role === '@' || role === '*')) {
+      log(`!!! Unknown role ${role}, userGId: ${userGId}`);
+
+      if (fix) {
+        await conversationMember.set('role', 'u');
+      }
+    }
+
+    if (userGId.type === 'mas') {
+      if (!activeUserIds.find(activeUserId => activeUserId === userGId.id)) {
+        log('!!! Found conversationMember that is a deleted user.');
+
+        if (fix) {
+          log('Fixing');
+          await conversationMember.delete();
+        }
+      }
+    }
+
+    if (!conversations.find(existingConversationId => existingConversationId === conversationId)) {
+      log('!!! Found conversationMember that points to non-existent conversation');
+
+      if (fix) {
+        log('Fixing by deleting');
+        await conversationMember.delete();
+      }
+    }
+  }
 }
 
 async function checkSettings() {
-    log('Checking that all users have settings...');
+  log('Checking that all users have settings...');
 
-    for (const userId of activeUserIds) {
-        const settings = await Settings.findFirst({ userId });
+  for (const userId of activeUserIds) {
+    const settings = await Settings.findFirst({ userId });
 
-        if (!settings) {
-            log(`!!! User ${userId} doesn't have settings.`);
+    if (!settings) {
+      log(`!!! User ${userId} doesn't have settings.`);
 
-            if (fix) {
-                log('Fixing by creating');
-                await Settings.create({ userId });
-            }
-        }
+      if (fix) {
+        log('Fixing by creating');
+        await Settings.create({ userId });
+      }
     }
+  }
 
-    log('Checking that settings belong to active users...');
+  log('Checking that settings belong to active users...');
 
-    const { val: settingIds } = await store.list('settings');
+  const { val: settingIds } = await store.list('settings');
 
-    log(`${settingIds.length} settings found.`);
+  log(`${settingIds.length} settings found.`);
 
-    for (const settingId of settingIds) {
-        const settings = await Settings.fetch(settingId);
+  for (const settingId of settingIds) {
+    const settings = await Settings.fetch(settingId);
 
-        const userId = settings.get('userId');
+    const userId = settings.get('userId');
 
-        if (!activeUserIds.find(activeUserId => activeUserId === userId)) {
-            log('!!! Found settings that belongs to deleted user');
+    if (!activeUserIds.find(activeUserId => activeUserId === userId)) {
+      log('!!! Found settings that belongs to deleted user');
 
-            if (fix) {
-                log('Fixing by deleting');
-                await settings.delete();
-            }
-        }
+      if (fix) {
+        log('Fixing by deleting');
+        await settings.delete();
+      }
     }
+  }
 }
 
 async function checkFriends() {
-    log('Checking friend objects are valid...');
+  log('Checking friend objects are valid...');
 
-    const { val: friendIds } = await store.list('friends');
+  const { val: friendIds } = await store.list('friends');
 
-    log(`${friendIds.length} friend objects found.`);
+  log(`${friendIds.length} friend objects found.`);
 
-    const srcFriends = [];
-    const dstFriends = [];
+  const srcFriends = [];
+  const dstFriends = [];
 
-    for (const friendId of friendIds) {
-        const friend = await Friend.fetch(friendId);
+  for (const friendId of friendIds) {
+    const friend = await Friend.fetch(friendId);
 
-        const srcUserId = friend.get('srcUserId');
-        srcFriends.push(srcUserId);
+    const srcUserId = friend.get('srcUserId');
+    srcFriends.push(srcUserId);
 
-        const dstUserId = friend.get('dstUserId');
-        dstFriends.push(dstUserId);
+    const dstUserId = friend.get('dstUserId');
+    dstFriends.push(dstUserId);
 
-        if (!activeUserIds.find(activeUserId => activeUserId === srcUserId)) {
-            log('!!! Found friendUserId that belongs to deleted user');
-        }
-
-        if (!activeUserIds.find(activeUserId => activeUserId === dstUserId)) {
-            log('!!! Found friendUserId that belongs to deleted user');
-        }
-
-        const counterFried = await Friend.findFirst({ srcUserId: dstUserId, dstUserId: srcUserId });
-
-        if (!counterFried) {
-            log(`!!! Friendship ${JSON.stringify(friend._props)} doesn't have counter friend object.`);
-
-            if (fix) {
-                log('Fixing by deleting.');
-                await friend.delete();
-            }
-        }
+    if (!activeUserIds.find(activeUserId => activeUserId === srcUserId)) {
+      log('!!! Found friendUserId that belongs to deleted user');
     }
+
+    if (!activeUserIds.find(activeUserId => activeUserId === dstUserId)) {
+      log('!!! Found friendUserId that belongs to deleted user');
+    }
+
+    const counterFried = await Friend.findFirst({ srcUserId: dstUserId, dstUserId: srcUserId });
+
+    if (!counterFried) {
+      log(`!!! Friendship ${JSON.stringify(friend._props)} doesn't have counter friend object.`);
+
+      if (fix) {
+        log('Fixing by deleting.');
+        await friend.delete();
+      }
+    }
+  }
 }
 
 async function checkConversationMessages() {
-    log('Checking conversationMessage objects are valid...');
+  log('Checking conversationMessage objects are valid...');
 
-    const { val: conversationMessageIds } = await store.list('conversationMessages');
+  const { val: conversationMessageIds } = await store.list('conversationMessages');
 
-    log(`${conversationMessageIds.length} conversationMessage objects found.`);
+  log(`${conversationMessageIds.length} conversationMessage objects found.`);
 
-    for (const conversationMessageId of conversationMessageIds) {
-        const conversationMessage = await ConversationMessage.fetch(conversationMessageId);
+  for (const conversationMessageId of conversationMessageIds) {
+    const conversationMessage = await ConversationMessage.fetch(conversationMessageId);
 
-        if (!conversationMessage) {
-            // Active group, old message was just deleted
-            continue;
-        }
+    if (!conversationMessage) {
+      // Active group, old message was just deleted
+      continue;
+    }
 
-        const conversationId = conversationMessage.get('conversationId');
-        const userGIdString = conversationMessage.get('userGId');
+    const conversationId = conversationMessage.get('conversationId');
+    const userGIdString = conversationMessage.get('userGId');
 
-        const status = conversationMessage.get('status');
+    const status = conversationMessage.get('status');
 
-        if (status !== 'original' && status !== 'edited' && status !== 'deleted') {
-            log(`!!! Bad message state: ${status}`);
+    if (status !== 'original' && status !== 'edited' && status !== 'deleted') {
+      log(`!!! Bad message state: ${status}`);
 
-            if (fix) {
-                log('Fixing by setting state to \'original\'.');
-                await conversationMessage.set({ status: 'original' });
-            }
-        }
+      if (fix) {
+        log("Fixing by setting state to 'original'.");
+        await conversationMessage.set({ status: 'original' });
+      }
+    }
 
-        if (!conversations.find(
-            existingConversationId => existingConversationId === conversationId)) {
-            log(`Found conversationMessage ${JSON.stringify(conversationMessage._props)} that points to non-existent conversation. Fixing by deleting.`);
+    if (!conversations.find(existingConversationId => existingConversationId === conversationId)) {
+      log(
+        `Found conversationMessage ${JSON.stringify(
+          conversationMessage._props
+        )} that points to non-existent conversation. Fixing by deleting.`
+      );
+      await conversationMessage.delete();
+      continue;
+    }
+
+    if (userGIdString) {
+      const userGId = UserGId.create(userGIdString);
+
+      if (userGId.type === 'mas') {
+        if (!allUserIds.find(userId => userId === userGId.id)) {
+          log(`Found message ${JSON.stringify(conversationMessage._props)} that belongs to non-existent user.`);
+
+          if (fix) {
+            log('Fixing by deleting');
             await conversationMessage.delete();
-            continue;
+          }
         }
+      } else {
+        const decoded = new Buffer(userGId.id, 'base64').toString('ascii');
 
-        if (userGIdString) {
-            const userGId = UserGId.create(userGIdString);
-
-            if (userGId.type === 'mas') {
-                if (!allUserIds.find(userId => userId === userGId.id)) {
-                    log(`Found message ${JSON.stringify(conversationMessage._props)} that belongs to non-existent user.`);
-
-                    if (fix) {
-                        log('Fixing by deleting');
-                        await conversationMessage.delete();
-                    }
-                }
-            } else {
-                const decoded = new Buffer(userGId.id, 'base64').toString('ascii');
-
-                if (decoded.indexOf('!') === -1) {
-                    log(`Found corrupted IRC userGId: ${userGId.id}, decoded: ${decoded}`);
-                }
-            }
+        if (decoded.indexOf('!') === -1) {
+          log(`Found corrupted IRC userGId: ${userGId.id}, decoded: ${decoded}`);
         }
+      }
     }
+  }
 
-    log('Checking conversations don\'t have too many messages');
-    const { val: conversationIds } = await store.list('conversations');
+  log("Checking conversations don't have too many messages");
+  const { val: conversationIds } = await store.list('conversations');
 
-    for (const conversationId of conversationIds) {
-        const messages = await ConversationMessage.find({ conversationId });
+  for (const conversationId of conversationIds) {
+    const messages = await ConversationMessage.find({ conversationId });
 
-        if (messages.length === 0) {
-            log('!!! Found conversation with zero messages');
-        } else if (messages.length > 200) {
-            log(`!!! Found conversation with >200 messages, amount: ${messages.length}`);
-        }
+    if (messages.length === 0) {
+      log('!!! Found conversation with zero messages');
+    } else if (messages.length > 200) {
+      log(`!!! Found conversation with >200 messages, amount: ${messages.length}`);
     }
+  }
 }
 
 async function checkNetworkInfos() {
-    log('Checking networkInfo objects are valid...');
+  log('Checking networkInfo objects are valid...');
 
-    const { val: networkInfoIds } = await store.list('networkInfos');
+  const { val: networkInfoIds } = await store.list('networkInfos');
 
-    for (const networkInfoId of networkInfoIds) {
-        const networkInfo = await NetworkInfo.fetch(networkInfoId);
+  for (const networkInfoId of networkInfoIds) {
+    const networkInfo = await NetworkInfo.fetch(networkInfoId);
 
-        if (!allUserIds.find(userId => userId === networkInfo.get('userId'))) {
-            log('!!! Found networkInfo that belongs to non-existent user.');
-        }
+    if (!allUserIds.find(userId => userId === networkInfo.get('userId'))) {
+      log('!!! Found networkInfo that belongs to non-existent user.');
     }
+  }
 
-    log('Checking that all users have MAS networkInfo...');
+  log('Checking that all users have MAS networkInfo...');
 
-    for (const userId of activeUserIds) {
-        const nwInfo = await NetworkInfo.findFirst({ userId, network: 'mas' });
+  for (const userId of activeUserIds) {
+    const nwInfo = await NetworkInfo.findFirst({ userId, network: 'mas' });
 
-        if (!nwInfo) {
-            log(`!!! User ${userId} doesn't have MAS networkInfo.`);
+    if (!nwInfo) {
+      log(`!!! User ${userId} doesn't have MAS networkInfo.`);
 
-            if (fix) {
-                log('Fixing by creating');
+      if (fix) {
+        log('Fixing by creating');
 
-                const user = await User.fetch(userId);
+        const user = await User.fetch(userId);
 
-                await NetworkInfo.create({
-                    userId,
-                    network: 'mas',
-                    nick: user.get('nick'),
-                    state: 'connected'
-                });
-            }
-        } else {
-            const user = await User.fetch(userId);
+        await NetworkInfo.create({
+          userId,
+          network: 'mas',
+          nick: user.get('nick'),
+          state: 'connected'
+        });
+      }
+    } else {
+      const user = await User.fetch(userId);
 
-            if (user.get('nick') !== nwInfo.get('nick') || nwInfo.get('state') !== 'connected') {
-                log(`!! Bad networkInfo for MAS network, state: ${nwInfo.get('state')}, n1: ${user.get('nick')}, n2: ${nwInfo.get('nick')}`);
-            }
-        }
+      if (user.get('nick') !== nwInfo.get('nick') || nwInfo.get('state') !== 'connected') {
+        log(
+          `!! Bad networkInfo for MAS network, state: ${nwInfo.get('state')}, n1: ${user.get('nick')}, n2: ${nwInfo.get(
+            'nick'
+          )}`
+        );
+      }
     }
+  }
 }
 
 async function checkIRCSubscriptions() {
-    log('Checking ircSubscription objects are valid...');
+  log('Checking ircSubscription objects are valid...');
 
-    const { val: ircSubscriptionIds } = await store.list('ircSubscriptions');
+  const { val: ircSubscriptionIds } = await store.list('ircSubscriptions');
 
-    const validNetworks = [ 'mas', 'ircnet', 'freenode', 'w3c' ];
+  const validNetworks = ['mas', 'ircnet', 'freenode', 'w3c'];
 
-    for (const ircSubscriptionId of ircSubscriptionIds) {
-        const subscription = await IRCSubscription.fetch(ircSubscriptionId);
+  for (const ircSubscriptionId of ircSubscriptionIds) {
+    const subscription = await IRCSubscription.fetch(ircSubscriptionId);
 
-        if (!validNetworks.includes(subscription.get('network'))) {
-            log(`!!! Invalid network ${subscription.get('network')} found`);
-        }
+    if (!validNetworks.includes(subscription.get('network'))) {
+      log(`!!! Invalid network ${subscription.get('network')} found`);
     }
+  }
 }
 
 function log(msg) {
-    console.log(msg); // eslint-disable-line no-console
+  console.log(msg); // eslint-disable-line no-console
 }

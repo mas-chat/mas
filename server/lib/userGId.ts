@@ -21,7 +21,7 @@ const TYPES = {
   irc: 'i'
 };
 
-module.exports = class UserGId {
+export default class UserGId {
   static create(params) {
     if (!params) {
       return null;
@@ -52,6 +52,9 @@ module.exports = class UserGId {
     return userGId.valid ? userGId : null;
   }
 
+  id: any;
+  type: string;
+
   constructor({ id, type }) {
     this.id = id;
     this.type = type;
@@ -60,7 +63,8 @@ module.exports = class UserGId {
   get valid() {
     if (this.type === 'mas') {
       return parseInt(this.id) === this.id && this.id > 0;
-    } else if (this.type === 'irc') {
+    }
+    if (this.type === 'irc') {
       return this.id === 0 || this.id.length > 0;
     }
 
@@ -82,4 +86,4 @@ module.exports = class UserGId {
   equals(otherUserGId) {
     return this.id === otherUserGId.id && this.type === otherUserGId.type;
   }
-};
+}
