@@ -90,6 +90,8 @@ function handleIdentConnection(socket) {
 
       socket.write(`${prefix} : ${resp}\r\n`);
       log.info(`Ident request from ${socket.remoteAddress}, req: ${line}, resp: ${resp}`);
+    } else {
+      log.info(`Ident request from ${socket.remoteAddress} is invalid, req: ${line}`);
     }
 
     clearTimeout(timer);
