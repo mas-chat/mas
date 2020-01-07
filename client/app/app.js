@@ -15,6 +15,7 @@
 //
 
 import Application from '@ember/application';
+import { registerDeprecationHandler } from '@ember/debug';
 import loadInitializers from 'ember-load-initializers';
 import isMobile from 'ismobilejs';
 import Resolver from './resolver';
@@ -27,6 +28,14 @@ const App = Application.extend({
   modulePrefix: config.modulePrefix,
   podModulePrefix: config.podModulePrefix,
   Resolver
+});
+
+const ignoredDeprecations = ['ember-views.curly-components.jquery-element', 'ember-component.send-action'];
+
+registerDeprecationHandler((message, options, next) => {
+  if (!ignoredDeprecations.includes(options.id)) {
+    next(message, options);
+  }
 });
 
 loadInitializers(App, config.modulePrefix);
