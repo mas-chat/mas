@@ -18,7 +18,6 @@ import io from 'socket.io-client';
 import Cookies from 'js-cookie';
 import { calcMsgHistorySize } from './msg-history-sizer';
 import { dispatch } from './dispatcher';
-import windowStore from '../stores/WindowStore';
 
 const serverIdToEventMap = {
   UPDATE_MEMBERS: 'ADD_MEMBERS_SERVER',
@@ -41,6 +40,8 @@ const ioSocket = io.connect(); // Start connection as early as possible.
 
 class Socket {
   sessionId = null;
+  maxBacklogMsgs = 100000;
+
   cookie = Cookies.get('mas');
 
   _connected = false;
@@ -59,7 +60,7 @@ class Socket {
       this._connected = true;
 
       this.sessionId = data.sessionId;
-      windowStore.maxBacklogMsgs = data.maxBacklogMsgs;
+      this.maxBacklogMsgs = data.maxBacklogMsgs;
 
       // TODO: Delete oldest messages for windows that have more messages than
       // maxBacklogMsgs. They can be stale, when editing becomes possible.

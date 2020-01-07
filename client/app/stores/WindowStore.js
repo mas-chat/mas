@@ -14,7 +14,6 @@ import { mandatory } from '../utils/parameters';
 class WindowStore {
   @observable windows = new Map();
   msgBuffer = []; // Only used during startup
-  maxBacklogMsgs = 100000;
   cachedUpto = 0;
   @observable initDone = false;
 

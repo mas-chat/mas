@@ -25,6 +25,7 @@ import Component from '@ember/component';
 import PerfectScrollbar from 'perfect-scrollbar';
 import Favico from 'favico.js';
 import isMobile from 'ismobilejs';
+import socket from '../../../utils/socket';
 import windowStore from '../../../stores/WindowStore';
 import { dispatch } from '../../../utils/dispatcher';
 import { play } from '../../../utils/sound';
@@ -134,7 +135,7 @@ export default Component.extend({
   }),
 
   fullBackLog: computed('content.messages.[]', function() {
-    return this.get('content.messages.length') >= windowStore.maxBacklogMsgs;
+    return this.get('content.messages.length') >= socket.maxBacklogMsgs;
   }),
 
   beginningReached: computed('fullBackLog', 'noOlderMessages', function() {
