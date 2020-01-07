@@ -23,7 +23,12 @@ export default Component.extend({
   init(...args) {
     this._super(...args);
 
-    this.disposer = autorun(() => this.set('ircNetworks', networkStore.networks.filter(network => network !== 'MAS')));
+    this.disposer = autorun(() =>
+      this.set(
+        'ircNetworks',
+        networkStore.networks.filter(network => network !== 'MAS')
+      )
+    );
   },
 
   didDestroyElement() {

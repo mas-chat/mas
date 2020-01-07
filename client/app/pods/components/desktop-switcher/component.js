@@ -25,7 +25,12 @@ export default Component.extend({
     this._super(...args);
 
     autorun(() => this.set('activeDesktop', settingStore.settings.activeDesktop));
-    autorun(() => this.set('desktops', windowStore.desktops.map(desktop => EmberObject.create(desktop))));
+    autorun(() =>
+      this.set(
+        'desktops',
+        windowStore.desktops.map(desktop => EmberObject.create(desktop))
+      )
+    );
   },
 
   classNames: ['main-desktop-switcher'],

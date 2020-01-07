@@ -56,7 +56,12 @@ export default Component.extend({
       autorun(() => this.set('myNotDeletedMessage', message.myNotDeletedMessage)),
       autorun(() => this.set('bodyParts', message.bodyParts)),
       autorun(() => this.set('text', message.text)),
-      autorun(() => this.set('images', message.images.map(image => EmberObject.create(image)))),
+      autorun(() =>
+        this.set(
+          'images',
+          message.images.map(image => EmberObject.create(image))
+        )
+      ),
       autorun(() => this.set('hasMedia', message.hasMedia)),
       autorun(() => this.set('hasImages', message.hasImages)),
       autorun(() => this.set('hasYoutubeVideo', message.hasYoutubeVideo)),

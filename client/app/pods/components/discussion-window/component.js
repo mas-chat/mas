@@ -234,7 +234,7 @@ export default Component.extend({
         });
 
         ntf.onclick = function() {
-          parent.focus();
+          parent.focus(); // eslint-disable-line no-restricted-globals
           window.focus(); // just in case, older browsers
           this.close();
         };
