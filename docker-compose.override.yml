@@ -11,6 +11,8 @@ services:
       - '443:3201'
     volumes:
       - mas-data:/data
+    environment:
+      - SOCKET_HOST=false
   mas-loopback:
     image: 'mas:latest'
     build: .

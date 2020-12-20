@@ -19,7 +19,8 @@ module.exports = function(environment) {
     },
 
     APP: {
-      revision: process.env.REVISION
+      revision: process.env.REVISION,
+      socketHost: process.env.SOCKET_HOST
     }
   };
 
