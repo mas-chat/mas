@@ -1,0 +1,4 @@
+volumes:
+  mas-frontend-data:
+  mas-elasticsearch-data:
+  mas-redis-data:

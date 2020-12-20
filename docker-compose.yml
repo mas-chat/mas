@@ -1,8 +1,4 @@
 version: '3'
-volumes:
-  mas-frontend-data:
-  mas-elasticsearch-data:
-  mas-redis-data:
 services:
   mas-frontend:
     image: 'mas:latest'
