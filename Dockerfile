@@ -20,10 +20,9 @@ RUN yarn install \
   && yarn cache clean
 
 COPY website /app/website/
-WORKDIR /app/server/
+WORKDIR /app/website/
 
-RUN cd website \
-  && yarn install \
+RUN yarn install \
   && yarn run prod \
   && rm -fr node_modules \
   && yarn cache clean
