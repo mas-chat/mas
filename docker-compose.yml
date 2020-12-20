@@ -89,6 +89,11 @@ services:
       - '127.0.0.1:9300:9300'
   elasticsearch-head:
     image: 'mobz/elasticsearch-head:5'
+    restart: always
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     ports:
       - '127.0.0.1:9100:9100'
   redis:
