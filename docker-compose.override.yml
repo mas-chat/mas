@@ -6,6 +6,9 @@ services:
   mas-frontend:
     image: 'mas:latest'
     build: .
+    ports:
+      - '80:3200'
+      - '443:3201'
     volumes:
       - mas-data:/data
   mas-loopback:

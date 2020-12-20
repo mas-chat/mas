@@ -15,9 +15,6 @@ services:
       - ELASTICSEARCH__ENABLED=true
       - ELASTICSEARCH__HOST=elasticsearch
     command: yarn run start-frontend
-    ports:
-      - '80:3200'
-      - '443:3201'
   mas-loopback:
     depends_on:
       - elasticsearch
