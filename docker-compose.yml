@@ -1,8 +1,6 @@
 version: '3'
 services:
   mas-frontend:
-    image: 'mas:latest'
-    build: .
     depends_on:
       - elasticsearch
       - redis
@@ -21,8 +19,6 @@ services:
       - '80:3200'
       - '443:3201'
   mas-loopback:
-    image: 'mas:latest'
-    build: .
     depends_on:
       - elasticsearch
       - redis
@@ -38,8 +34,6 @@ services:
       - ELASTICSEARCH__HOST=elasticsearch
     command: yarn run start-loopback
   mas-irc:
-    image: 'mas:latest'
-    build: .
     depends_on:
       - elasticsearch
       - redis
@@ -55,8 +49,6 @@ services:
       - ELASTICSEARCH__HOST=elasticsearch
     command: yarn run start-irc
   mas-irc-scktmgr:
-    image: 'mas:latest'
-    build: .
     depends_on:
       - elasticsearch
       - redis

@@ -4,15 +4,23 @@ volumes:
   mas-redis-data:
 services:
   mas-frontend:
+    image: 'mas:latest'
+    build: .
     volumes:
       - mas-data:/data
   mas-loopback:
+    image: 'mas:latest'
+    build: .
     volumes:
       - mas-data:/data
   mas-irc:
+    image: 'mas:latest'
+    build: .
     volumes:
       - mas-data:/data
   mas-irc-scktmgr:
+    image: 'mas:latest'
+    build: .
     volumes:
       - mas-data:/data
   elasticsearch:
