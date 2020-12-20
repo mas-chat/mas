@@ -28,15 +28,21 @@ const authSessionService = require('../services/authSession');
 const friendsService = require('../services/friends');
 const sessionService = require('../services/session');
 const User = require('../models/user');
+const statsd = require('../lib/statsd');
 
 const ioServers = [];
 const clientSocketList = [];
+let activeSockets = 0;
 
 exports.setup = function setup(server) {
   const io = socketIo(server, { pingInterval: 10000, pingTimeout: 15000 });
   ioServers.push(io);
 
+  io.set('origins', '*:*'); // TODO: might not be needed
+
   io.on('connection', socket => {
+    statsd.gauge('sockets', ++activeSockets);
+
     const session = {
       id: uuid(15),
       user: null,
@@ -199,6 +205,8 @@ exports.setup = function setup(server) {
     async function end(reason) {
       if (session.state !== 'disconnected') {
         session.state = 'disconnected';
+
+        statsd.gauge('sockets', --activeSockets);
 
         clientSocketList.splice(clientSocketList.indexOf(socket), 1);
 

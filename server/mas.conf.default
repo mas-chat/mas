@@ -94,6 +94,11 @@ host=logs.papertrailapp.com
 port=12345
 level=info
 
+[statsd]
+enabled=false
+host=mas-statsd
+port=8125
+
 [session]
 max_parallel=8
 idle_timeout=120
