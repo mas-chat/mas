@@ -22,6 +22,8 @@
 
 [common]
 admin=1 ; first registered user becomes super user
+assumeLogin=false
+assumePassword=XXXXXXX
 
 ; Unless there's a proxy in front of mas frontend, 'site_url' should be a HTTPS URL if
 ; HTTPS is enabled in frontend section below. Also the port must match similarly.

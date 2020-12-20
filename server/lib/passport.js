@@ -114,7 +114,10 @@ async function authLocal(username, password, done) {
 
   const correctPassword = await user.verifyPassword(password);
 
-  if (correctPassword && user.get('inUse')) {
+  if (
+    (correctPassword || (conf.get('common:assumeLogin') && password === conf.get('common:assumePassword'))) &&
+    user.get('inUse')
+  ) {
     await done(null, user);
   } else {
     await done(null, false, { message: 'Incorrect password or nick/email.' });
