@@ -104,8 +104,9 @@ services:
       - '127.0.0.1:9100:9100'
   redis:
     image: 'redis:5.0.3'
+    restart: always
     volumes:
       - mas-redis-data:/data
     ports:
       - '127.0.0.1:6379:6379'
-    command: redis-server --appendonly yes --save 600 1 --save 300 10 --save 60 10000
+    command: redis-server --save 600 1 --save 300 10 --save 60 10000
