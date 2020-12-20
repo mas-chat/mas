@@ -19,6 +19,9 @@ RUN yarn install \
   && yarn run prod \
   && yarn cache clean
 
+COPY website /app/website/
+WORKDIR /app/server/
+
 RUN cd website \
   && yarn install \
   && yarn run prod \

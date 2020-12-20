@@ -23,7 +23,7 @@ case "$1" in
         cd ../server
         yarn
         yarn run prod
-        cd website
+        cd ../website
         yarn
         yarn run prod
         set +x
@@ -34,7 +34,7 @@ case "$1" in
         set -x
         rm -fr client/node_modules client/tmp client/dist
         rm -fr server/node_modules
-        rm -fr server/website/node_modules server/website/dist
+        rm -fr website/node_modules website-dist
         rm -fr server/emails/build
         rm -fr server/test/browser/node_modules
         find . -name npm-debug.log | xargs rm

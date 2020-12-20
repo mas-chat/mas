@@ -1,4 +1,4 @@
 .git
 client/node_modules
 server/node_modules
-server/website/node_modules
+website/node_modules

@@ -117,16 +117,14 @@ module.exports = function buildRouter() {
   // Web site assets
   router.get(/^\/website-assets\/(.+)/, async ctx => {
     const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
-    await sendFile(ctx, 'server/website/dist/', ctx.params[0], { maxage });
+    await sendFile(ctx, 'website-dist/', ctx.params[0], { maxage });
   });
 
   return router;
 };
 
 async function sendFile(ctx, prefix, filePath, options = {}) {
-  const sendOptions = Object.assign({}, options, {
-    root: path.join(conf.root(), prefix)
-  });
+  const sendOptions = { ...options, root: path.join(conf.root(), prefix) };
 
   await send(ctx, filePath === '' ? '/' : filePath, sendOptions);
 }

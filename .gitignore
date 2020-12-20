@@ -9,10 +9,10 @@
 /node_modules/
 /server/node_modules/
 /server/test/browser/node_modules/
-/server/website/node_modules/
+/website/node_modules/
 
 /server/build/
-/server/website/dist/
+/website-dist/
 /server/emails/build/
 
 /client/dist/

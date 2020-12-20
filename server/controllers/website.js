@@ -21,7 +21,7 @@ const fs = require('fs');
 const conf = require('../lib/conf');
 import authOptions from '../lib/authOptions';
 
-const manifestFile = fs.readFileSync(path.join(conf.root(), 'server/website/dist/manifest.json'));
+const manifestFile = fs.readFileSync(path.join(conf.root(), 'website-dist/manifest.json'));
 const manifest = JSON.parse(manifestFile);
 
 module.exports = async function index(ctx) {
