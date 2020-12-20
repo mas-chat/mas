@@ -28,7 +28,7 @@
     "bulma": "~0.2.0",
     "css-loader": "~0.25.0",
     "file-loader": "~0.9.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.1",
     "postcss-loader": "~1.0.0",
     "sass-loader": "~7.0.1",
     "style-loader": "~0.13.1",
