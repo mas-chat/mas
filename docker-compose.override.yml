@@ -1,4 +1,24 @@
 volumes:
-  mas-frontend-data:
+  mas-data:
   mas-elasticsearch-data:
   mas-redis-data:
+services:
+  mas-frontend:
+    volumes:
+      - mas-data:/data
+  mas-loopback:
+    volumes:
+      - mas-data:/data
+  mas-irc:
+    volumes:
+      - mas-data:/data
+  mas-irc-scktmgr:
+    volumes:
+      - mas-data:/data
+  elasticsearch:
+    volumes:
+      - mas-elasticsearch-data:/usr/share/elasticsearch/data
+  elasticsearch-head:
+  redis:
+    volumes:
+      - mas-redis-data:/data

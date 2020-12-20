@@ -20,8 +20,6 @@ services:
     ports:
       - '80:3200'
       - '443:3201'
-    volumes:
-      - mas-frontend-data:/data
   mas-loopback:
     image: 'mas:latest'
     build: .
@@ -88,8 +86,6 @@ services:
       - xpack.graph.enabled=false
       - xpack.watcher.enabled=false
       - xpack.ml.enabled=false
-    volumes:
-      - mas-elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - '127.0.0.1:9200:9200'
       - '127.0.0.1:9300:9300'
@@ -105,8 +101,6 @@ services:
   redis:
     image: 'redis:5.0.3'
     restart: always
-    volumes:
-      - mas-redis-data:/data
     ports:
       - '127.0.0.1:6379:6379'
     command: redis-server --save 600 1 --save 300 10 --save 60 10000
