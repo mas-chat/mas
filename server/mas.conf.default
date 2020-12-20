@@ -63,8 +63,8 @@ enabled=false
 http_port=3200
 https=false
 https_port=443
-https_key=ssl/privkey.pem
-https_cert=ssl/fullchain.pem
+https_key=ssl/server.key
+https_cert=ssl/server.crt
 https_ca=false
 
 [mailgun]
