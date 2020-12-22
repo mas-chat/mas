@@ -5,7 +5,7 @@ on:
     branches: master
 
 jobs:
-  build-image:
+  build-and-publish-image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
