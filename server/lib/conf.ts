@@ -26,7 +26,8 @@ const rootPath = computeRoot();
 nconf
   .env({
     separator: '__',
-    lowerCase: true
+    lowerCase: true,
+    parseValues: true
   })
   .argv()
   .file('user_overrides', {
