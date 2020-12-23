@@ -117,7 +117,7 @@ module.exports = function buildRouter() {
   // Web site assets
   router.get(/^\/website-assets\/(.+)/, async ctx => {
     const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
-    await sendFile(ctx, 'website-dist/', ctx.params[0], { maxage });
+    await sendFile(ctx, 'website-dist/website-assets/', ctx.params[0], { maxage });
   });
 
   return router;
