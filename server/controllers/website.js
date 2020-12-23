@@ -16,13 +16,7 @@
 
 'use strict';
 
-const path = require('path');
-const fs = require('fs');
-const conf = require('../lib/conf');
 import authOptions from '../lib/authOptions';
-
-const manifestFile = fs.readFileSync(path.join(conf.root(), 'website-dist/manifest.json'));
-const manifest = JSON.parse(manifestFile);
 
 module.exports = async function index(ctx) {
   if (ctx.mas.user) {
@@ -30,9 +24,9 @@ module.exports = async function index(ctx) {
   } else {
     ctx.set('Cache-control', 'private, max-age=0, no-cache');
 
-    await ctx.render('index', {
+    await ctx.render('../../website-dist/index', {
       config: JSON.stringify({ auth: authOptions }),
-      appJSFile: manifest['main.js']
+      layout: false
     });
   }
 };
