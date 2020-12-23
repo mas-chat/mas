@@ -1,63 +1,71 @@
 import React, { Component } from 'react';
-import { HOC } from 'formsy-react';
+import PropTypes from 'prop-types';
+import { withFormsy } from 'formsy-react';
 
 let idCounter = 0;
 
 class RegisterModalPassword extends Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.changeValue = this.changeValue.bind(this);
+    this.state = { id: `password-${idCounter++}` };
+    this.changeValue = this.changeValue.bind(this);
+  }
+
+  changeValue(event) {
+    this.props.setValue(event.currentTarget.value);
+  }
+
+  render() {
+    const error = this.props.showError;
+    const errorMessage = this.props.errorMessage;
+    const inputClass = `input ${error ? 'is-danger' : 'is-success'}`;
+    const value = this.props.value;
+    const id = this.state.id;
+    let icon = null;
+
+    if (error && value) {
+      icon = <i className="fa fa-warning" />;
+    } else if (value) {
+      icon = <i className="fa fa-check" />;
     }
 
-    componentWillMount() {
-        this.setState({ id: `checkbox-${idCounter++}` });
-    }
-
-    changeValue(event) {
-        this.props.setValue(event.currentTarget.value);
-    }
-
-    render() {
-        const error = this.props.showError();
-        const errorMessage = this.props.getErrorMessage();
-        const inputClass = `input ${error ? 'is-danger' : 'is-success'}`;
-        const value = this.props.getValue();
-        const id = this.state.id;
-        let icon = null;
-
-        if (error && value) {
-            icon = <i className="fa fa-warning" />;
-        } else if (value) {
-            icon = <i className="fa fa-check" />;
-        }
-
-        return (
-            <span>
-                <label htmlFor={id} className="label">{this.props.label}</label>
-                <p className="control has-icon has-icon-right">
-                    <input id={id} className={inputClass} type="password" value={value} autoComplete={this.props.autocomplete} onChange={this.changeValue} />
-                    {icon}
-                    {this.props.showErrorMessage ? <span className="help is-danger">{errorMessage}</span> : null}
-                </p>
-            </span>
-        );
-    }
+    return (
+      <span>
+        <label htmlFor={id} className="label">
+          {this.props.label}
+        </label>
+        <p className="control has-icon has-icon-right">
+          <input
+            id={id}
+            className={inputClass}
+            type="password"
+            value={value}
+            autoComplete={this.props.autocomplete}
+            onChange={this.changeValue}
+          />
+          {icon}
+          {this.props.showErrorMessage ? <span className="help is-danger">{errorMessage}</span> : null}
+        </p>
+      </span>
+    );
+  }
 }
 
 RegisterModalPassword.propTypes = {
-    showErrorMessage: React.PropTypes.bool,
-    label: React.PropTypes.string.isRequired,
-    autocomplete: React.PropTypes.string,
-    getErrorMessage: React.PropTypes.func.isRequired, // formsy
-    getValue: React.PropTypes.func.isRequired, // formsy
-    setValue: React.PropTypes.func.isRequired, // formsy
-    showError: React.PropTypes.func.isRequired // formsy
+  showErrorMessage: PropTypes.bool,
+  label: PropTypes.string.isRequired,
+  autocomplete: PropTypes.string,
+  errorMessage: PropTypes.string, // formsy
+  value: PropTypes.string, // formsy
+  setValue: PropTypes.func.isRequired, // formsy
+  showError: PropTypes.bool.isRequired // formsy
 };
 
 RegisterModalPassword.defaultProps = {
-    showErrorMessage: false,
-    autocomplete: false
+  value: '',
+  showErrorMessage: false,
+  autocomplete: false
 };
 
-export default HOC(RegisterModalPassword); // eslint-disable-line new-cap
+export default withFormsy(RegisterModalPassword); // eslint-disable-line new-cap

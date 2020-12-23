@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { HOC } from 'formsy-react';
+import PropTypes from 'prop-types';
+import { withFormsy } from 'formsy-react';
 import classNames from 'classnames/bind';
 import styles from './index.css';
 
@@ -7,41 +8,42 @@ const cx = classNames.bind(styles);
 let idCounter = 0;
 
 class RegisterModalCheckbox extends Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.changeValue = this.changeValue.bind(this);
-    }
+    this.state = { id: `checkbox-${idCounter++}` };
+    this.changeValue = this.changeValue.bind(this);
+  }
 
-    componentWillMount() {
-        this.setState({ id: `checkbox-${idCounter++}` });
-    }
+  changeValue(event) {
+    this.props.setValue(event.currentTarget.checked);
+  }
 
-    changeValue(event) {
-        this.props.setValue(event.currentTarget.value);
-    }
+  render() {
+    const value = this.props.value;
+    const id = this.state.id;
 
-    render() {
-        const value = this.props.getValue();
-        const id = this.state.id;
-
-        return (
-            <span>
-                <p className={cx('m-wrapper', 'control')}>
-                    <label htmlFor={id} className="checkbox">
-                        <input id={id} className={cx('m-checkbox')} type="checkbox" value={value} onChange={this.changeValue} />
-                        {this.props.label}
-                    </label>
-                </p>
-            </span>
-        );
-    }
+    return (
+      <span>
+        <p className={cx('m-wrapper', 'control')}>
+          <label htmlFor={id} className="checkbox">
+            <input id={id} className={cx('tos')} type="checkbox" value={this.props.value} onChange={this.changeValue} />
+            {this.props.label}
+          </label>
+        </p>
+      </span>
+    );
+  }
 }
 
 RegisterModalCheckbox.propTypes = {
-    label: React.PropTypes.string.isRequired,
-    getValue: React.PropTypes.func.isRequired, // formsy
-    setValue: React.PropTypes.func.isRequired // formsy
+  label: PropTypes.string.isRequired,
+  value: PropTypes.bool, // formsy
+  setValue: PropTypes.func.isRequired // formsy
 };
 
-export default HOC(RegisterModalCheckbox); // eslint-disable-line new-cap
+RegisterModalCheckbox.defaultProps = {
+  value: false
+};
+
+export default withFormsy(RegisterModalCheckbox); // eslint-disable-line new-cap

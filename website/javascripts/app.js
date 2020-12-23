@@ -16,7 +16,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Router, Route, IndexRoute, browserHistory } from 'react-router';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import '../stylesheets/pages.scss';
 
@@ -24,12 +24,15 @@ import Layout from './components/layout';
 import AboutPage from './components/pages/about';
 import HomePage from './components/pages/home';
 
-render((
-    <Router history={browserHistory}>
-        <Route path="/" component={Layout}>
-            <IndexRoute component={HomePage} />
-            <Route path="home" component={HomePage} />
-            <Route path="about" component={AboutPage} />
-        </Route>
-    </Router>
-), document.getElementById('main'));
+render(
+  <Router>
+    <Layout>
+      <Switch>
+        <Route path="home" component={HomePage} />
+        <Route path="about" component={AboutPage} />
+        <Route path="/" component={HomePage} />
+      </Switch>
+    </Layout>
+  </Router>,
+  document.getElementById('main')
+);
