@@ -16,13 +16,19 @@
 
 'use strict';
 
-const conf = require('../lib/conf');
+const fs = require('fs');
+const path = require('path');
+const handlebars = require('handlebars');
+import { get, root } from '../lib/conf';
+
+const templatePath = path.join(root(), 'client/dist/index.html');
+const template = handlebars.compile(fs.readFileSync(templatePath, 'utf8'));
 
 module.exports = async function index(ctx) {
   ctx.set('Cache-control', 'private, max-age=0, no-cache');
 
-  await ctx.render('../../client/dist/index', {
-    config: JSON.stringify({ socketHost: conf.get('session:socket_host') }),
-    layout: false
+  // koa-hbs can't take client/dist/index.html as a template
+  ctx.body = template({
+    config: JSON.stringify({ socketHost: get('session:socket_host') })
   });
 };
