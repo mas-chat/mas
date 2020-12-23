@@ -6,11 +6,6 @@ const mergeTrees = require('broccoli-merge-trees');
 
 module.exports = function(defaults) {
   const app = new EmberApp(defaults, {
-    outputPaths: {
-      app: {
-        html: 'index.hbs'
-      }
-    },
     sourcemaps: {
       enabled: true
     },
