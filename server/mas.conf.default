@@ -100,10 +100,9 @@ host=mas-statsd
 port=8125
 
 [session]
-max_parallel=8
-idle_timeout=120
 max_backlog=160
 min_backlog=20
+socket_host=false
 
 ; 'redis:connection_type' can be socket or unix_socket
 

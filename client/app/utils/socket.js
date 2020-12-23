@@ -18,7 +18,6 @@ import io from 'socket.io-client';
 import Cookies from 'js-cookie';
 import { calcMsgHistorySize } from './msg-history-sizer';
 import { dispatch } from './dispatcher';
-import config from '../config/environment';
 
 const serverIdToEventMap = {
   UPDATE_MEMBERS: 'ADD_MEMBERS_SERVER',
@@ -37,8 +36,7 @@ const serverIdToEventMap = {
   ADD_USERS: 'ADD_USERS_SERVER'
 };
 
-const socketHost = config.APP.socketHost === 'false' ? undefined : config.APP.socketHost;
-const ioSocket = io.connect(socketHost); // Start connection as early as possible.
+const ioSocket = io.connect(config.socketHost || undefined); // Start connection as early as possible.
 
 class Socket {
   sessionId = null;

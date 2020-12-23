@@ -1,7 +1,5 @@
-'use strict';
-
-module.exports = function(environment) {
-  let ENV = {
+module.exports = function (environment) {
+  const ENV = {
     modulePrefix: 'mas',
     podModulePrefix: 'mas/pods',
     environment,
@@ -19,8 +17,7 @@ module.exports = function(environment) {
     },
 
     APP: {
-      revision: process.env.REVISION,
-      socketHost: process.env.SOCKET_HOST
+      revision: process.env.REVISION
     }
   };
 

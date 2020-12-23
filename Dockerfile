@@ -1,7 +1,6 @@
 FROM node:14.5.0
 
 ARG REVISION=unknown
-ARG SOCKET_HOST
 
 RUN apt-get update && apt-get install -y \
   exiftran \

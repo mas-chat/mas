@@ -28,6 +28,7 @@ const passport = require('../lib/passport');
 const registerController = require('../controllers/register');
 const loginController = require('../controllers/login');
 const websiteController = require('../controllers/website');
+const clientController = require('../controllers/client');
 const uploadController = require('../controllers/upload');
 const userFilesController = require('../controllers/userFiles');
 const forgotPasswordController = require('../controllers/forgotPassword');
@@ -87,10 +88,7 @@ module.exports = function buildRouter() {
   router.get('/files/:uuid/:slug*', userFilesController);
 
   // Client
-  router.get('/app', async ctx => {
-    ctx.set('Cache-control', 'private, max-age=0, no-cache');
-    await sendFile(ctx, 'client/dist/', 'index.html');
-  });
+  router.get('/app', clientController);
 
   // Client assets
   router.get(/^\/app\/(.+)/, async ctx => {
