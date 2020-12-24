@@ -16,7 +16,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: ilkkao
           password: ${{ secrets.ILKKA_PAT_FOR_PUBLISH }}
       - name: Build and push
         id: docker_build
@@ -26,3 +26,5 @@ jobs:
           tags: ghcr.io/mas-chat/${{ github.repository }}:latest
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+      - name: Deploy meetandspeak.com
+        run: 'curl -XPOST -u ''ilkkao:${{ secrets.ILKKA_PAT_FOR_PUBLISH }}'' -H ''Accept: application/vnd.github.v3+json'' -H ''Content-Type: application/json'' https://api.github.com/repos/mas-chat/meetandspeak-deploy/actions/workflows/4499707/dispatches -d ''{"ref":"master"}'''
