@@ -4,6 +4,11 @@ module.exports = {
     browser: false
   },
   parserOptions: {
-    sourceType: 'script'
+    sourceType: 'module'
   },
+  rules: {
+    strict: [2, 'global'],
+    'import/no-unresolved': 'off',
+    'import/extensions': 'off'
+  }
 };

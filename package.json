@@ -5,7 +5,7 @@
   "author": "Ilkka Oksanen <iao@iki.fi>",
   "license": "Apache-2.0",
   "scripts": {
-    "lint-server": "eslint server",
+    "lint-server": "eslint --ignore-pattern server/build server",
     "lint-client": "eslint client/app"
   },
   "dependencies": {},
