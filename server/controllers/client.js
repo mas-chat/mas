@@ -14,21 +14,34 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import { get, root } from '../lib/conf';
 
 const fs = require('fs');
 const path = require('path');
 const handlebars = require('handlebars');
-import { get, root } from '../lib/conf';
 
 const templatePath = path.join(root(), 'client/dist/index.html');
 const template = handlebars.compile(fs.readFileSync(templatePath, 'utf8'));
+
+const revisionPath = path.join(root(), 'server/REVISION');
+let revision;
+
+try {
+  revision = fs.readFileSync(revisionPath, 'utf8'));
+} catch (e) {
+  revision = 'unknown'
+}
 
 module.exports = async function index(ctx) {
   ctx.set('Cache-control', 'private, max-age=0, no-cache');
 
   // koa-hbs can't take client/dist/index.html as a template
   ctx.body = template({
-    config: JSON.stringify({ socketHost: get('session:socket_host') })
+    jsConfig: JSON.stringify({
+      socketHost: get('session:socket_host'),
+      revision
+    }),
+    extraHTML: get('snippets:extra_html') || '',
+    revision
   });
 };
