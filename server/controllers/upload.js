@@ -19,7 +19,6 @@
 const spawn = require('child_process').spawn;
 const path = require('path');
 const fs = require('fs');
-const mkdirp = require('mkdirp');
 const uuid = require('uid2');
 const conf = require('../lib/conf');
 const log = require('../lib/log');
@@ -72,23 +71,11 @@ async function upload(user, fileObject) {
     await autoRotateJPEGFile(filePath, extension);
   }
 
-  await ensureUploadDirExists(targetDirectory);
+  fs.mkdirSync(targetDirectory, { recursive: true });
   await copy(filePath, path.join(targetDirectory, fileUUID + extension));
   await writeMetaDataFile(path.join(targetDirectory, `${fileUUID}.json`), fileName, user.id);
 
   return `${conf.getComputed('site_url')}/files/${fileUUID}/${encodeURIComponent(fileName)}`;
-}
-
-function ensureUploadDirExists(targetDirectory) {
-  return new Promise((resolve, reject) =>
-    mkdirp(targetDirectory, err => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    })
-  );
 }
 
 function autoRotateJPEGFile(fileName, extension) {

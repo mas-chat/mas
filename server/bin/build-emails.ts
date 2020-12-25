@@ -5,7 +5,6 @@
 import fs from 'fs';
 import path from 'path';
 import juice from 'juice';
-import mkdirp from 'mkdirp';
 import { root } from '../lib/conf';
 
 const srcDir = path.join(root(), 'server/emails');
@@ -13,7 +12,7 @@ const dstDir = path.join(srcDir, 'build');
 const files = fs.readdirSync(srcDir);
 const isHBSfile = /\.hbs$/;
 
-mkdirp.sync(dstDir);
+fs.mkdirSync(dstDir, { recursive: true });
 
 files
   .filter(fileName => isHBSfile.test(fileName))
