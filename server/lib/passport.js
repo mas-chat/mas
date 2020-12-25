@@ -113,7 +113,7 @@ async function authLocal(username, password, done) {
   const correctPassword = await user.verifyPassword(password);
 
   if (
-    (correctPassword || (conf.get('common:assumeLogin') && password === conf.get('common:assumePassword'))) &&
+    (correctPassword || (conf.get('common:assume_login') && password === conf.get('common:assume_password'))) &&
     user.get('inUse')
   ) {
     await done(null, user);
