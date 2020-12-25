@@ -110,7 +110,7 @@ class Socket {
       }, 5000);
     });
 
-    ioSocket.on('reconnect', () => {
+    ioSocket.io.on('reconnect', () => {
       console.log('Socket.io connection resumed.');
 
       const timer = this._disconnectedTimer;
