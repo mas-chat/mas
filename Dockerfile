@@ -34,6 +34,6 @@ RUN yarn install \
   && rm -fr node_modules tmp \
   && yarn cache clean
 
-RUN echo $REVISION > /app/server/REVISION
+RUN echo -n $REVISION > /app/server/REVISION
 
 WORKDIR /app/server/
