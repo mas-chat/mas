@@ -56,7 +56,7 @@ export default Component.extend({
       autorun(() => {
         const newMostRecentMessage = window.sortedMessages[window.sortedMessages.length - 1];
 
-        if (newMostRecentMessage.gid > this.mostRecentGid) {
+        if (newMostRecentMessage && newMostRecentMessage.gid > this.mostRecentGid) {
           this.mostRecentGid = newMostRecentMessage.gid;
           this._lineAdded(newMostRecentMessage);
         }

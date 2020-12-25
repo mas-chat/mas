@@ -21,7 +21,6 @@ module.exports = function(defaults) {
       plugins: [['@babel/plugin-proposal-decorators', { legacy: true }], '@babel/plugin-transform-react-jsx']
     },
     autoprefixer: {
-      browsers: ['last 2 versions'],
       cascade: false
     },
     vendorFiles: {
