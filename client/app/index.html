@@ -11,6 +11,8 @@
 
     <link rel="manifest" href="/app/assets/manifest.json">
 
+    {{{ extraClientHead }}}
+
     <title>Mas</title>
 
     <script>config = {{{ jsConfig }}}</script>
@@ -30,7 +32,7 @@
   <body>
     {{content-for "body"}}
 
-    {{{ extraHTML }}}
+    {{{ extraClientBody }}}
 
     <script src="/app/assets/vendor.js"></script>
     <script src="/app/assets/mas.js"></script>

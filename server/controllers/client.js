@@ -41,7 +41,8 @@ module.exports = async function index(ctx) {
       socketHost: get('session:socket_host'),
       revision
     }),
-    extraHTML: get('snippets:extra_html') || '',
+    extraClientHead: get('snippets:extra_client_head') || '',
+    extraClientBody: get('snippets:extra_client_body') || '',
     revision
   });
 };

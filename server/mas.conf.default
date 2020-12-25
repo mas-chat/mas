@@ -120,7 +120,8 @@ host=localhost
 password=
 
 [snippets]
-extra_html=false
+extra_client_head=false
+extra_client_body=false
 
 ; OPTIONS FOR THE LOOPBACK BACKEND
 
