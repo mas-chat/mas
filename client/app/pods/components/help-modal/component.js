@@ -15,10 +15,9 @@
 //
 
 import Component from '@ember/component';
-import config from '../../../config/environment';
 
 export default Component.extend({
-  version: config.APP.revision || 'unknown',
+  version: config && config.revision || 'unknown',
 
   actions: {
     closeModal() {

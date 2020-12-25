@@ -15,10 +15,6 @@ module.exports = function (environment) {
         Date: false
       }
     },
-
-    APP: {
-      revision: process.env.REVISION
-    }
   };
 
   if (environment === 'development') {

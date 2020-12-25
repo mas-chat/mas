@@ -17,7 +17,7 @@
 
     {{content-for "head"}}
 
-    <!-- MAS frontent version: {{content-for 'config.APP.revision'}} -->
+    <!-- MAS frontent version: {{{ revision }}} -->
 
     <link rel="stylesheet" href="/app/assets/vendor.css">
     <link rel="stylesheet" href="/app/assets/mas.css">
@@ -29,6 +29,8 @@
   </head>
   <body>
     {{content-for "body"}}
+
+    {{{ extraHTML }}}
 
     <script src="/app/assets/vendor.js"></script>
     <script src="/app/assets/mas.js"></script>
