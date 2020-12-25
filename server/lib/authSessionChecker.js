@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const User = require('../models/user');
 const authSessionService = require('../services/authSession');
 

@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const User = require('../models/user');
 const NetworkInfo = require('../models/networkInfo');
 const Settings = require('../models/settings');

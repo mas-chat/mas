@@ -14,11 +14,9 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const Ipm = require('../models/ipm.js');
 const PendingIpm = require('../models/pendingIpm');
-const notification = require('../lib/notification');
+const notification = require('./notification');
 
 exports.sendAlerts = async function sendAlerts(user, sessionId) {
   const now = new Date();

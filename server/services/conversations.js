@@ -14,19 +14,18 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import UserGId from '../lib/userGId';
 
 const assert = require('assert');
 const log = require('../lib/log');
 const search = require('../lib/search');
 const notification = require('../lib/notification');
-import UserGId from '../lib/userGId';
 const User = require('../models/user');
 const Window = require('../models/window');
 const Conversation = require('../models/conversation');
 const ConversationMember = require('../models/conversationMember');
 const ConversationMessage = require('../models/conversationMessage');
-const windowsService = require('../services/windows');
+const windowsService = require('./windows');
 
 const MSG_BUFFER_SIZE = 200; // TODO: This should come from session:max_backlog setting
 

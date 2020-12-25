@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 // exports.transaction = function(tr) {
 //
 // }
@@ -24,4 +22,3 @@
 //     user.set('foo', 42, tr);
 //     friend.set('bar', 1, tr);
 // });
-

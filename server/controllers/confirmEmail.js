@@ -14,9 +14,8 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 import redis from '../lib/redis';
+
 const User = require('../models/user');
 const settingsService = require('../services/settings');
 

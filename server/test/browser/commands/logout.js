@@ -1,5 +1,3 @@
-'use strict';
-
 exports.command = function command() {
   const browser = this;
 

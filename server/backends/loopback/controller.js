@@ -14,13 +14,11 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import redis from '../../lib/redis';
 
 const init = require('../../lib/init');
 
 init.configureProcess('loopback');
-
-import redis from '../../lib/redis';
 const conf = require('../../lib/conf');
 const log = require('../../lib/log');
 const courier = require('../../lib/courier').createEndPoint('loopbackparser');
@@ -117,7 +115,8 @@ async function processJoin({ userId, name, password }) {
 
   if (!conversation) {
     return { status: 'NOT_FOUND', errorMsg: "Group doesn't exist." };
-  } else if (conversation.get('password') && conversation.get('password') !== password) {
+  }
+  if (conversation.get('password') && conversation.get('password') !== password) {
     return { status: 'INCORRECT_PASSWORD', errorMsg: 'Incorrect password.' };
   }
 

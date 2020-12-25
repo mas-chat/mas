@@ -14,12 +14,11 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import redis from '../lib/redis';
 
 const assert = require('assert');
 const util = require('util');
 const Rigiddb = require('rigiddb');
-import redis from '../lib/redis';
 const conf = require('../lib/conf');
 
 const db = new Rigiddb(

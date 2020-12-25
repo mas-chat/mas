@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const Session = require('../models/session');
 
 exports.create = async function create(userId, ip) {

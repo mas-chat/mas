@@ -1,5 +1,3 @@
-'use strict';
-
 const StatsD = require('hot-shots');
 const conf = require('./conf');
 

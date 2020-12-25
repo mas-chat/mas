@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const passport = require('koa-passport');
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user');

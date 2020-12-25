@@ -14,10 +14,9 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import redis from '../lib/redis';
 
 const uuid = require('uid2');
-import redis from '../lib/redis';
 const User = require('../models/user');
 const log = require('../lib/log');
 const mailer = require('../lib/mailer');

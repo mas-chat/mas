@@ -14,10 +14,9 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import UserGId from '../lib/userGId';
 
 const assert = require('assert');
-import UserGId from '../lib/userGId';
 const NetworkInfo = require('../models/networkInfo');
 const User = require('../models/user');
 
@@ -29,7 +28,8 @@ exports.getNick = async function getNick(userGId, network) {
   if (userGId.isMASUser) {
     const nwInfo = await NetworkInfo.findFirst({ userId: userGId.id, network });
     return nwInfo ? nwInfo.get('nick') : null;
-  } else if (userGId.toString() === 'i0') {
+  }
+  if (userGId.toString() === 'i0') {
     return 'IRC server';
   }
 
@@ -59,9 +59,7 @@ exports.getUserGId = async function getUserGId(nick, network) {
   // network is not mas
   return UserGId.create({
     type: 'irc',
-    id: Buffer.from(nick)
-      .toString('base64')
-      .replace(/=+$/, '')
+    id: Buffer.from(nick).toString('base64').replace(/=+$/, '')
   });
 };
 

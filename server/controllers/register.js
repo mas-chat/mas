@@ -14,12 +14,11 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import redis from '../lib/redis';
+import authOptions from '../lib/authOptions';
 
 const forms = require('forms');
 const httpStatus = require('statuses');
-import redis from '../lib/redis';
-import authOptions from '../lib/authOptions';
 const User = require('../models/user');
 const usersService = require('../services/users');
 const authSessionService = require('../services/authSession');
@@ -230,7 +229,8 @@ exports.createExt = async function createExt(ctx) {
   if (!form.isValid()) {
     await renderForm();
     return;
-  } else if (!user.valid) {
+  }
+  if (!user.valid) {
     Object.keys(user.errors).forEach(field => {
       form.fields[field].error = user.errors[field];
     });

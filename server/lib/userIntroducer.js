@@ -14,14 +14,13 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 import UserGId from './userGId';
+
 const log = require('./log');
 const conf = require('./conf');
 const User = require('../models/user');
 const nicksService = require('../services/nicks');
-const notification = require('../lib/notification');
+const notification = require('./notification');
 
 const networks = ['mas', ...Object.keys(conf.get('irc:networks'))];
 

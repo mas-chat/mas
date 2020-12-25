@@ -14,18 +14,17 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
-const log = require('../lib/log');
-const uid2 = require('uid2');
 import redis from '../lib/redis';
+import UserGId from '../lib/userGId';
+
+const uid2 = require('uid2');
+const log = require('../lib/log');
 const init = require('../lib/init');
 const notification = require('../lib/notification');
 const search = require('../lib/search');
 const conf = require('../lib/conf');
 const courier = require('../lib/courier').create();
 const mailer = require('../lib/mailer');
-import UserGId from '../lib/userGId';
 const authSessionService = require('../services/authSession');
 const conversationsService = require('../services/conversations');
 const windowsService = require('../services/windows');
@@ -114,9 +113,11 @@ async function handleSend({ command, conversation, user, session, backend }) {
 
   if (!conversation) {
     return { status: 'ERROR', errorMsg: 'Protocol error: Invalid windowId.' };
-  } else if (typeof text !== 'string') {
+  }
+  if (typeof text !== 'string') {
     return { status: 'ERROR', errorMsg: 'Protocol error: text prop missing or not a string.' };
-  } else if (text.length > 500) {
+  }
+  if (text.length > 500) {
     return { status: 'ERROR', errorMsg: 'Message too long. Maximum length is 500 characters.' };
   }
 
@@ -144,7 +145,8 @@ async function handleEdit({ command, conversation, user }) {
 
   if (!conversation) {
     return { status: 'ERROR', errorMsg: 'Protocol error: Invalid windowId.' };
-  } else if (!gid) {
+  }
+  if (!gid) {
     return { status: 'ERROR', errorMsg: 'Protocol error: Missing gid.' };
   }
 
@@ -173,7 +175,8 @@ async function handleCommand({ command, conversation, user, backend }) {
     }
 
     return start1on1(user, targetUser.gId, 'mas');
-  } else if (name === 'ircquery') {
+  }
+  if (name === 'ircquery') {
     if (backend === 'loopbackparser') {
       return { status: 'ERROR', errorMsg: 'You can only use /ircquery on IRC window' };
     }
@@ -265,7 +268,7 @@ async function handleUpdate({ user, command, window, session }) {
 
     if (typeof value !== 'undefined') {
       await window.set({ [prop]: value });
-      update = Object.keys(window.errors).length == 0;
+      update = Object.keys(window.errors).length === 0;
     }
   }
 
@@ -308,9 +311,11 @@ async function handleUpdatePassword({ user, command, conversation, backend }) {
 
   if (!conversation) {
     return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
-  } else if (typeof password !== 'string') {
+  }
+  if (typeof password !== 'string') {
     return { status: 'ERROR', errorMsg: 'New password is invalid.' };
-  } else if (conversation.get('type') === '1on1') {
+  }
+  if (conversation.get('type') === '1on1') {
     return { status: 'ERROR', errorMsg: "Can't set password for 1on1." };
   }
 
@@ -378,9 +383,11 @@ async function start1on1(user, targetUserGId, network) {
 
   if (!targetUserGId || !targetUserGId.valid) {
     return { status: 'ERROR', errorMsg: 'Malformed request.' };
-  } else if (targetUserGId.equals(user.gId)) {
+  }
+  if (targetUserGId.equals(user.gId)) {
     return { status: 'ERROR', errorMsg: "You can't chat with yourself." };
-  } else if (targetUserGId.type === 'mas') {
+  }
+  if (targetUserGId.type === 'mas') {
     const targetUser = await User.fetch(targetUserGId.id);
 
     if (!userExists(targetUser)) {
@@ -441,7 +448,8 @@ async function handleLogout({ user, command, session }) {
 async function handleFetch({ command, conversation }) {
   if (!conversation) {
     return { status: 'ERROR', errorMsg: 'Invalid windowId.' };
-  } else if (!Number.isInteger(command.end)) {
+  }
+  if (!Number.isInteger(command.end)) {
     return { status: 'ERROR', errorMsg: 'Invalid end parameter.' };
   }
 
@@ -461,7 +469,8 @@ async function handleRequestFriend({ user, command }) {
 
   if (!friendUser) {
     return { status: 'ERROR', errorMsg: 'Unknown userId.' };
-  } else if (user.id === friendUser.id) {
+  }
+  if (user.id === friendUser.id) {
     return { status: 'ERROR', errorMsg: "You can't add yourself as a friend, sorry." };
   }
 

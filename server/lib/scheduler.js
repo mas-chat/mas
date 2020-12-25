@@ -14,11 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import UserGId from './userGId';
 
 const cron = require('node-cron');
 const mailer = require('./mailer');
-import UserGId from './userGId';
 const User = require('../models/user');
 const MissedMessage = require('../models/missedMessage');
 const Conversation = require('../models/conversation');

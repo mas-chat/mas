@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const fs = require('fs');
 const path = require('path');
 const send = require('koa-send');

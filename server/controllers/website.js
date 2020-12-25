@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 import authOptions from '../lib/authOptions';
 
 module.exports = async function index(ctx) {

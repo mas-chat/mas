@@ -14,10 +14,9 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import UserGId from '../lib/userGId';
 
 const Base = require('./base');
-import UserGId from '../lib/userGId';
 
 module.exports = class ConversationMember extends Base {
   static get mutableProperties() {

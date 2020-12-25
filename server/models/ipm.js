@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const Base = require('./base');
 
 module.exports = class Ipm extends Base {};

@@ -1,7 +1,5 @@
 /* globals describe, it, beforeEach */
 
-'use strict';
-
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const chai = require('chai');

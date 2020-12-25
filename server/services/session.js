@@ -14,15 +14,13 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const notification = require('../lib/notification');
 const alerts = require('../lib/alert');
 const courier = require('../lib/courier').create();
 const conf = require('../lib/conf');
 const log = require('../lib/log');
-const friendsService = require('../services/friends');
-const settingsService = require('../services/settings');
+const friendsService = require('./friends');
+const settingsService = require('./settings');
 const Conversation = require('../models/conversation');
 const ConversationMember = require('../models/conversationMember');
 const ConversationMessage = require('../models/conversationMessage');

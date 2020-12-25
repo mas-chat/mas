@@ -15,18 +15,18 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import redis from '../../lib/redis';
+import UserGId from '../../lib/userGId';
+
+const assert = require('assert');
 
 const init = require('../../lib/init');
 
 init.configureProcess('irc');
 
-const assert = require('assert');
 const conf = require('../../lib/conf');
 const log = require('../../lib/log');
-import redis from '../../lib/redis';
 const courier = require('../../lib/courier').createEndPoint('ircparser');
-import UserGId from '../../lib/userGId';
 const userIntroducer = require('../../lib/userIntroducer');
 const User = require('../../models/user');
 const IrcSubscription = require('../../models/ircSubscription');
@@ -205,10 +205,7 @@ async function processJoin({ userId, network, name, password }) {
   if (networkInfo.get('state') === 'connected') {
     sendJoin(user, network, channelName, password);
   } else if (networkInfo.get('state') !== 'connecting') {
-    await connect(
-      user,
-      network
-    );
+    await connect(user, network);
   }
 
   return { status: 'OK' };
@@ -294,10 +291,7 @@ async function processReconnectIfInactive({ userId }) {
           'Welcome back! Reconnecting...'
       );
 
-      await connect(
-        user,
-        network
-      );
+      await connect(user, network);
     }
   }
 }
@@ -327,10 +321,7 @@ async function processRestarted() {
             ' server enabled. Next connect will be slow.'
         );
 
-        await connect(
-          user,
-          network
-        );
+        await connect(user, network);
       }
     } catch (e) {
       log.warn(user, `Exception: ${e}, stack: ${e.stack.replace(/\n/g, ',')}`);
@@ -430,12 +421,7 @@ async function processDisconnected({ userId, network, reason }) {
   }
 
   await addSystemMessage(user, network, 'error', msg);
-  await connect(
-    user,
-    network,
-    true,
-    delay
-  );
+  await connect(user, network, true, delay);
 }
 
 async function parseIrcMessage({ userId, line, network }) {
@@ -1239,11 +1225,7 @@ async function addMessageUnlessDuplicate(conversation, user, { userGId = null, c
   const key = `irc:duplicates_check:${conversation.id}:${msgFingerPrint(body)}:${userGId}`;
   const reporter = user.id;
 
-  const [setexResult, getResult] = await redis
-    .multi()
-    .setnx(key, reporter)
-    .get(key)
-    .exec();
+  const [setexResult, getResult] = await redis.multi().setnx(key, reporter).get(key).exec();
 
   if (setexResult[1] === 1) {
     // the key was set

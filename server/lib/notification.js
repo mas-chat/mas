@@ -14,11 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import redis from './redis';
 
 const assert = require('assert');
 const util = require('util');
-import redis from './redis';
 
 exports.send = async function send(user, sessionId, ntfs) {
   await sendNotifications(user, sessionId, null, ntfs);

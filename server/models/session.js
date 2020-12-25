@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const uuid = require('uid2');
 const Base = require('./base');
 

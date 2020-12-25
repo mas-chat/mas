@@ -15,6 +15,4 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 require('./controller');

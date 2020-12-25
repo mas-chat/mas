@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const cron = require('node-cron');
 const log = require('../../lib/log');
 const conf = require('../../lib/conf');

@@ -14,14 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const path = require('path');
 const Router = require('koa-router');
 const send = require('koa-send');
-const proxy = require('koa-proxy');
 const body = require('koa-body');
-const convert = require('koa-convert');
 const conf = require('../lib/conf');
 const log = require('../lib/log');
 const passport = require('../lib/passport');

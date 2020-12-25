@@ -14,14 +14,13 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import redis from '../lib/redis';
+import UserGId from '../lib/userGId';
 
 const socketIo = require('socket.io');
 const uuid = require('uid2');
-import redis from '../lib/redis';
 const requestController = require('./request');
 const log = require('../lib/log');
-import UserGId from '../lib/userGId';
 const conf = require('../lib/conf');
 const userIntroducer = require('../lib/userIntroducer');
 const authSessionService = require('../services/authSession');
@@ -41,7 +40,7 @@ exports.setup = function setup(server) {
     pingTimeout: 15000,
     cors: {
       origin: true,
-      methods: ["GET", "POST"],
+      methods: ['GET', 'POST'],
       credentials: true
     }
   });

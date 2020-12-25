@@ -14,9 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
-const init = require('./lib/init');
+import redis from './lib/redis';
 
 init.configureProcess('frontend');
 
@@ -30,8 +28,8 @@ const hbs = require('koa-hbs');
 const error = require('koa-error');
 const compress = require('koa-compress');
 const logger = require('koa-logger');
+const init = require('./lib/init');
 const log = require('./lib/log');
-import redis from './lib/redis';
 const passport = require('./lib/passport');
 const authSessionChecker = require('./lib/authSessionChecker');
 const router = require('./routes/router')();

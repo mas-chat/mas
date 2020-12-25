@@ -15,8 +15,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 // Minimal connection manager that keeps TCP sockets alive even if
 // rest of the system is restarted. Allows nondistruptive updates.
 
@@ -111,15 +109,7 @@ courier.on('connect', ({ network, userId, nick, delay }) => {
     rateLimitDelay = nextNetworkConnectionSlot[network] - Date.now();
   }
 
-  setTimeout(
-    () =>
-      connect(
-        userId,
-        nick,
-        network
-      ),
-    rateLimitDelay + delay
-  );
+  setTimeout(() => connect(userId, nick, network), rateLimitDelay + delay);
 
   nextNetworkConnectionSlot[network] += Math.round((60 / rateLimit) * 1000);
 });

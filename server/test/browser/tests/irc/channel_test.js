@@ -1,5 +1,3 @@
-'use strict';
-
 const irc = require('irc'); // eslint-disable-line import/no-unresolved
 const utils = require('../../utils');
 

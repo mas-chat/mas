@@ -14,8 +14,6 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 const util = require('util');
 const passport = require('../lib/passport');
 const log = require('../lib/log');

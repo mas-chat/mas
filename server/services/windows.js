@@ -14,11 +14,10 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import UserGId from '../lib/userGId';
 
 const assert = require('assert');
 const notification = require('../lib/notification');
-import UserGId from '../lib/userGId';
 const log = require('../lib/log');
 const conf = require('../lib/conf');
 const User = require('../models/user');
@@ -28,8 +27,8 @@ const Conversation = require('../models/conversation');
 const ConversationMember = require('../models/conversationMember');
 const ConversationMessage = require('../models/conversationMessage');
 const MissedMessage = require('../models/missedMessage');
-const nicksService = require('../services/nicks');
-const conversaionsService = require('../services/conversations');
+const nicksService = require('./nicks');
+const conversaionsService = require('./conversations');
 
 exports.findOrCreate = async function findOrCreate(user, conversation) {
   let window = await Window.findFirst({ userId: user.id, conversationId: conversation.id });

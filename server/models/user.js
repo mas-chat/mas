@@ -14,13 +14,12 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
+import redis from '../lib/redis';
+import UserGId from '../lib/userGId';
 
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const md5 = require('md5');
-import redis from '../lib/redis';
-import UserGId from '../lib/userGId';
 const Base = require('./base');
 
 module.exports = class User extends Base {
@@ -90,11 +89,14 @@ module.exports = class User extends Base {
       nick: function nick(nickName) {
         if (!nickName) {
           return { valid: false, error: 'Please enter a nick' };
-        } else if (nickName.length < 3 || nickName.length > 15) {
+        }
+        if (nickName.length < 3 || nickName.length > 15) {
           return { valid: false, error: 'Nick has to be 3-15 characters long.' };
-        } else if (/[0-9]/.test(nickName.charAt(0))) {
+        }
+        if (/[0-9]/.test(nickName.charAt(0))) {
           return { valid: false, error: "Nick can't start with digit" };
-        } else if (!/^[A-Z`a-z0-9[\]\\_^{|}]+$/.test(nickName)) {
+        }
+        if (!/^[A-Z`a-z0-9[\]\\_^{|}]+$/.test(nickName)) {
           const valid = ['a-z', '0-9', '[', ']', '\\', '`', '_', '^', '{', '|', '}'];
           return {
             valid: false,
@@ -194,10 +196,7 @@ module.exports = class User extends Base {
     }
 
     if (encryptionMethod === 'sha256') {
-      const expectedSha = crypto
-        .createHash('sha256')
-        .update(password, 'utf8')
-        .digest('hex');
+      const expectedSha = crypto.createHash('sha256').update(password, 'utf8').digest('hex');
 
       if (encryptedPassword === expectedSha) {
         // Migrate to bcrypt
