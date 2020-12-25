@@ -35,10 +35,17 @@ const clientSocketList = [];
 let activeSockets = 0;
 
 exports.setup = function setup(server) {
-  const io = socketIo(server, { pingInterval: 10000, pingTimeout: 15000 });
+  const io = socketIo(server, {
+    maxHttpBufferSize: 1e8,
+    pingInterval: 10000,
+    pingTimeout: 15000,
+    cors: {
+      origin: true,
+      methods: ["GET", "POST"],
+      credentials: true
+    }
+  });
   ioServers.push(io);
-
-  io.set('origins', '*:*'); // TODO: might not be needed
 
   io.on('connection', socket => {
     statsd.gauge('sockets', ++activeSockets);

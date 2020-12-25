@@ -130,7 +130,7 @@ Courier.prototype.quit = function quit() {
 
   return new Promise(resolve => {
     if (!processing) {
-      resolve();
+      resolve(null);
     } else {
       resolveQuit = resolve;
     }
