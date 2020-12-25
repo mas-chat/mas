@@ -28,7 +28,7 @@ export default Component.extend({
   passwordEnabled: false,
   passwordDisabled: not('passwordEnabled'),
 
-  passwordTitle: computed('model.name', function() {
+  passwordTitle: computed('model.name', function () {
     return `Change Password for '${this.get('model.name')}'`;
   }),
 

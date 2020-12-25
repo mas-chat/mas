@@ -21,11 +21,11 @@ import { dispatch } from '../../../utils/dispatcher';
 export default Component.extend({
   draggedWindow: false,
 
-  dropAreaCSSClass: computed('draggedWindow', function() {
+  dropAreaCSSClass: computed('draggedWindow', function () {
     return this.draggedWindow ? 'main-desktop-droparea' : '';
   }),
 
-  selectedCSSClass: computed('selected', 'id', function() {
+  selectedCSSClass: computed('selected', 'id', function () {
     return this.id === this.selected ? 'main-desktop-button-selected' : '';
   }),
 

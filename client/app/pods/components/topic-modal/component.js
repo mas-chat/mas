@@ -22,7 +22,7 @@ import { dispatch } from '../../../utils/dispatcher';
 export default Component.extend({
   topic: oneWay('model.topic'),
 
-  topicTitle: computed('model.name', function() {
+  topicTitle: computed('model.name', function () {
     return `Edit topic for '${this.get('model.name')}'`;
   }),
 

@@ -42,7 +42,7 @@ export default Component.extend({
     }
   },
 
-  alertsTitle: computed('model.name', function() {
+  alertsTitle: computed('model.name', function () {
     return `Configure alerts for '${this.get('model.simplifiedName')}'`;
   })
 });

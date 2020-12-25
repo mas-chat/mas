@@ -14,6 +14,6 @@ const Wrapper = Component.extend({
   }
 });
 
-export default function(component) {
+export default function (component) {
   return Wrapper.extend({ reactComponent: component });
 }

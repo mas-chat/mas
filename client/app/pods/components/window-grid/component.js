@@ -58,14 +58,14 @@ export default Component.extend({
 
   windowComponents: null,
 
-  mustRelayout: observer('initDone', 'theme', function() {
-    next(this, function() {
+  mustRelayout: observer('initDone', 'theme', function () {
+    next(this, function () {
       this._layoutWindows(false);
     });
   }),
 
-  mustRelayoutAfterRender: observer('alerts', 'emailConfirmed', function() {
-    scheduleOnce('afterRender', this, function() {
+  mustRelayoutAfterRender: observer('alerts', 'emailConfirmed', function () {
+    scheduleOnce('afterRender', this, function () {
       this._layoutWindows(false);
     });
   }),
@@ -82,7 +82,7 @@ export default Component.extend({
     },
 
     relayoutAfterRender(options) {
-      scheduleOnce('afterRender', this, function() {
+      scheduleOnce('afterRender', this, function () {
         this.send('relayout', options);
       });
     },
@@ -103,7 +103,7 @@ export default Component.extend({
 
       this.relayoutScheduled = true;
 
-      next(this, function() {
+      next(this, function () {
         this.relayoutScheduled = false;
         this._layoutWindows(this.relayoutAnimate);
         this.relayoutAnimate = null;
@@ -126,7 +126,7 @@ export default Component.extend({
   didInsertElement() {
     $(window).on(
       'resize',
-      bind(this, function() {
+      bind(this, function () {
         this._layoutWindows(false);
       })
     );
@@ -136,10 +136,7 @@ export default Component.extend({
     this.movingWindow = discussionWindow;
     this.set('draggedWindow', discussionWindow);
 
-    this.movingWindow
-      .$()
-      .addClass('moving')
-      .css('z-index', 200);
+    this.movingWindow.$().addClass('moving').css('z-index', 200);
     $('#window-cursor').show();
 
     this._dragWindow(event);
@@ -189,10 +186,7 @@ export default Component.extend({
     const cursor = this.cursor;
 
     this.set('draggedWindow', false);
-    this.movingWindow
-      .$()
-      .removeClass('moving')
-      .css('z-index', '');
+    this.movingWindow.$().removeClass('moving').css('z-index', '');
     $('#window-cursor').hide();
 
     const desktop = $(event.target).data('desktop-id');
@@ -278,10 +272,7 @@ export default Component.extend({
     }
 
     const visibleWindows = windowComponents.filterBy('visible');
-    const rowNumbers = visibleWindows
-      .mapBy('row')
-      .uniq()
-      .sort();
+    const rowNumbers = visibleWindows.mapBy('row').uniq().sort();
     const rowHeight = Math.round(container.height / rowNumbers.length);
 
     const dimensions = [];

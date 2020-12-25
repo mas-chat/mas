@@ -5,10 +5,7 @@ class DaySeparatorStore {
   @observable dayCounter = 0;
 
   constructor() {
-    const timeToTomorrow =
-      moment()
-        .endOf('day')
-        .diff(moment()) + 1;
+    const timeToTomorrow = moment().endOf('day').diff(moment()) + 1;
 
     const changeDay = () => {
       this.dayCounter++;

@@ -43,7 +43,7 @@ export default Component.extend({
     autorun(() => this.set('logMessages', this.window.sortedLogMessages));
   },
 
-  friendlyDate: computed('currentDate', function() {
+  friendlyDate: computed('currentDate', function () {
     return moment(this.currentDate).format('dddd, MMMM Do YYYY');
   }),
 
@@ -86,9 +86,7 @@ export default Component.extend({
   },
 
   _seek(days) {
-    const newDate = moment(this.currentDate)
-      .add(days, 'd')
-      .toDate();
+    const newDate = moment(this.currentDate).add(days, 'd').toDate();
 
     this.set('currentDate', newDate);
     this.$dateInput.datepicker('update', newDate);
@@ -99,12 +97,8 @@ export default Component.extend({
   _fetchData() {
     // Beginning and end of the selected day in unix time format
     const date = this.currentDate;
-    const epochTsStart = moment(date)
-      .startOf('day')
-      .unix();
-    const epochTsEnd = moment(date)
-      .endOf('day')
-      .unix();
+    const epochTsStart = moment(date).startOf('day').unix();
+    const epochTsEnd = moment(date).endOf('day').unix();
 
     this.set('loading', true);
 

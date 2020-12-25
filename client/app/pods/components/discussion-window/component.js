@@ -130,27 +130,27 @@ export default Component.extend({
   notDelivered: alias('content.notDelivered'),
   visible: alias('content.visible'),
 
-  logOrMobileModeEnabled: computed('logModeEnabled', function() {
+  logOrMobileModeEnabled: computed('logModeEnabled', function () {
     return this.logModeEnabled || isMobile().any;
   }),
 
-  fullBackLog: computed('content.messages.[]', function() {
+  fullBackLog: computed('content.messages.[]', function () {
     return this.get('content.messages.length') >= socket.maxBacklogMsgs;
   }),
 
-  beginningReached: computed('fullBackLog', 'noOlderMessages', function() {
+  beginningReached: computed('fullBackLog', 'noOlderMessages', function () {
     return !this.fullBackLog || this.noOlderMessages;
   }),
 
-  ircServerWindow: computed('content.userId', function() {
+  ircServerWindow: computed('content.userId', function () {
     return this.get('content.userId') === 'i0' ? 'irc-server-window' : '';
   }),
 
-  isGroup: computed('content.type', function() {
+  isGroup: computed('content.type', function () {
     return this.get('content.type') === 'group';
   }),
 
-  type: computed('content.type', function() {
+  type: computed('content.type', function () {
     if (this.get('content.type') === 'group') {
       return 'group';
     }
@@ -160,19 +160,19 @@ export default Component.extend({
     return 'private-1on1';
   }),
 
-  hiddenIfLogMode: computed('logModeEnabled', function() {
+  hiddenIfLogMode: computed('logModeEnabled', function () {
     return this.logModeEnabled ? 'hidden' : '';
   }),
 
-  hiddenIfMinimizedUserNames: computed('content.minimizedNamesList', function() {
+  hiddenIfMinimizedUserNames: computed('content.minimizedNamesList', function () {
     return this.get('content.minimizedNamesList') ? 'hidden' : '';
   }),
 
-  wideUnlessminimizedNamesList: computed('content.minimizedNamesList', function() {
+  wideUnlessminimizedNamesList: computed('content.minimizedNamesList', function () {
     return this.get('content.minimizedNamesList') ? '' : 'window-members-wide';
   }),
 
-  windowChanged: observer('row', 'column', 'desktop', function() {
+  windowChanged: observer('row', 'column', 'desktop', function () {
     if (this.elementInserted) {
       this.sendAction('relayout', { animate: true });
     }
@@ -180,7 +180,7 @@ export default Component.extend({
 
   visibilityObserver: on(
     'init',
-    observer('visible', function() {
+    observer('visible', function () {
       if (this.elementInserted) {
         this.sendAction('relayout', { animate: false });
       }
@@ -189,12 +189,12 @@ export default Component.extend({
 
   nickCompletionObserver: on(
     'init',
-    observer('content.userNames.[]', 'content.voiceNames.[]', 'content.operatorNames.[]', function() {
+    observer('content.userNames.[]', 'content.voiceNames.[]', 'content.operatorNames.[]', function () {
       const operators = this.get('content.operatorNames') || [];
 
       debounce(
         this,
-        function() {
+        function () {
           this.set('participants', operators.concat(this.get('content.voiceNames'), this.get('content.userNames')));
         },
         1000
@@ -234,7 +234,7 @@ export default Component.extend({
           icon: message.avatarUrl
         });
 
-        ntf.onclick = function() {
+        ntf.onclick = function () {
           parent.focus(); // eslint-disable-line no-restricted-globals
           window.focus(); // just in case, older browsers
           this.close();
@@ -244,7 +244,7 @@ export default Component.extend({
       }
     }
 
-    scheduleOnce('afterRender', this, function() {
+    scheduleOnce('afterRender', this, function () {
       this._goToBottom(true);
     });
   },
@@ -271,7 +271,7 @@ export default Component.extend({
         window: this.window
       });
 
-      scheduleOnce('afterRender', this, function() {
+      scheduleOnce('afterRender', this, function () {
         this._goToBottom(true);
       });
     },
@@ -339,7 +339,7 @@ export default Component.extend({
       .velocity(dim, {
         duration,
         visibility: 'visible',
-        complete: bind(this, function() {
+        complete: bind(this, function () {
           this.set('animating', false);
           this._goToBottom(false, () => {
             this._showImages(); // Make sure window shows the images after scrolling
@@ -393,10 +393,7 @@ export default Component.extend({
         const avatar = $row.find('.gravatar').attr('src');
         selectedUserId = $row.data('userid');
 
-        this.getMenu()
-          .find('li')
-          .eq(0)
-          .html(`<img class="menu-avatar" src="${avatar}">${selectedNick}`);
+        this.getMenu().find('li').eq(0).html(`<img class="menu-avatar" src="${avatar}">${selectedNick}`);
 
         // Only MAS users can be added to a contacts list.
         $('.window-contexMenu-request-friend').toggle(selectedUserId.charAt(0) === 'm');
@@ -421,7 +418,7 @@ export default Component.extend({
       }
     });
 
-    this.$('.window-members').click(function(e) {
+    this.$('.window-members').click(function (e) {
       $(this).contextmenu('show', e);
       e.preventDefault();
       return false;
@@ -489,7 +486,7 @@ export default Component.extend({
       duration,
       easing: 'spring',
       offset: -1 * this.$messagePanel.innerHeight() + 15, // 5px padding plus some extra
-      complete: bind(this, function() {
+      complete: bind(this, function () {
         if (callback) {
           callback();
         }
@@ -504,7 +501,7 @@ export default Component.extend({
   },
 
   _addScrollHandler() {
-    const handler = function() {
+    const handler = function () {
       if (this.animating) {
         return;
       }
@@ -554,7 +551,7 @@ export default Component.extend({
     const panelHeight = this.$messagePanel.height();
     const that = this;
 
-    $imgContainers.each(function() {
+    $imgContainers.each(function () {
       const $imgContainer = $(this);
       // We want to know image's position in .window-messages container div. For position()
       // to work correctly, .window-messages has to have position set to 'relative'. See
@@ -564,11 +561,7 @@ export default Component.extend({
       if (pos + placeHolderHeight >= 0 && pos <= panelHeight) {
         // Images of this message are in view port. Start to lazy load images.
 
-        const componentId = $imgContainer
-          .parent()
-          .parent()
-          .parent()
-          .prop('id');
+        const componentId = $imgContainer.parent().parent().parent().prop('id');
 
         const component = window.MasApp.__container__.lookup('-view-registry:main')[componentId];
 

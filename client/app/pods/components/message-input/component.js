@@ -48,7 +48,7 @@ export default TextArea.extend({
     this._updateHeight();
   },
 
-  nickCompletion: observer('participants', function() {
+  nickCompletion: observer('participants', function () {
     const participants = this.participants || [];
 
     this.$().atwho({

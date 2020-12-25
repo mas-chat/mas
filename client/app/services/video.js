@@ -21,7 +21,7 @@ import Service from '@ember/service';
 export default Service.extend({
   stream: null,
 
-  streamActive: computed('stream', function() {
+  streamActive: computed('stream', function () {
     return !!this.stream;
   }),
 
@@ -46,7 +46,7 @@ export default Service.extend({
         }
       })
       .then(
-        bind(this, function(newStream) {
+        bind(this, function (newStream) {
           this.set('stream', newStream);
           successCb(newStream);
         })
