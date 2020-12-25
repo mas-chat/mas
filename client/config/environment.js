@@ -15,6 +15,7 @@ module.exports = function (environment) {
         Date: false
       }
     },
+    APP: {}
   };
 
   if (environment === 'development') {

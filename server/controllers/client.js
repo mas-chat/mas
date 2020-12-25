@@ -27,7 +27,7 @@ const revisionPath = path.join(root(), 'server/REVISION');
 let revision;
 
 try {
-  revision = fs.readFileSync(revisionPath, 'utf8'));
+  revision = fs.readFileSync(revisionPath, 'utf8');
 } catch (e) {
   revision = 'unknown'
 }

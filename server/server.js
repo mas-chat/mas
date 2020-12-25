@@ -16,6 +16,8 @@
 
 import redis from './lib/redis';
 
+const init = require('./lib/init');
+
 init.configureProcess('frontend');
 
 const fs = require('fs');
@@ -28,7 +30,6 @@ const hbs = require('koa-hbs');
 const error = require('koa-error');
 const compress = require('koa-compress');
 const logger = require('koa-logger');
-const init = require('./lib/init');
 const log = require('./lib/log');
 const passport = require('./lib/passport');
 const authSessionChecker = require('./lib/authSessionChecker');

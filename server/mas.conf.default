@@ -119,6 +119,9 @@ port=9200
 host=localhost
 password=
 
+[snippets]
+extra_html=false
+
 ; OPTIONS FOR THE LOOPBACK BACKEND
 
 [loopback]
