@@ -19,6 +19,8 @@
 /client/tmp/
 /client/node_modules/
 
+/new-client/node_modules/
+
 npm-debug.log
 /logs/
 /run/
