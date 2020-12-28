@@ -1,8 +1,14 @@
-import { observable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 import { mandatory } from '../utils/parameters';
 
 class ModalStore {
-  @observable modals = [];
+  modals = [];
+
+  constructor() {
+    makeObservable(this, {
+      modals: observable
+    });
+  }
 
   handleOpenModal({ name = mandatory(), model }) {
     this.modals.push({ name, model });

@@ -1,4 +1,4 @@
-import { observable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 import isMobile from 'ismobilejs';
 import SettingsModel from '../models/Settings';
 import { dispatch } from '../utils/dispatcher';
@@ -7,7 +7,13 @@ import windowStore from './WindowStore';
 import { mandatory } from '../utils/parameters';
 
 class SettingStore {
-  @observable settings = new SettingsModel(this, {});
+  settings = new SettingsModel(this, {});
+
+  constructor() {
+    makeObservable(this, {
+      settings: observable
+    });
+  }
 
   handleToggleTheme() {
     const newTheme = this.settings.theme === 'dark' ? 'default' : 'dark';

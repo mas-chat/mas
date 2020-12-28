@@ -1,4 +1,4 @@
-import { computed, observable } from 'mobx';
+import { computed, observable, makeObservable } from 'mobx';
 import marked from 'marked';
 import emojione from 'emojione';
 import moment from 'moment';
@@ -12,34 +12,58 @@ marked.setOptions({
 
 export default class MessageModel {
   gid = 0;
-  @observable body = null;
+  body = null;
   cat = null;
   ts = null;
   userId = null;
   window = null;
-  @observable status = 'original';
-  @observable updatedTs = null;
+  status = 'original';
+  updatedTs = null;
 
-  @observable hideImages = false;
-  @observable editing = false;
+  hideImages = false;
+  editing = false;
 
   ircMotd = false;
 
   constructor(store, props) {
+    makeObservable(this, {
+      body: observable,
+      status: observable,
+      updatedTs: observable,
+      hideImages: observable,
+      editing: observable,
+      edited: computed,
+      deleted: computed,
+      updatedTime: computed,
+      updatedDate: computed,
+      updatedDateLong: computed,
+      nick: computed,
+      avatarUrl: computed,
+      decoratedCat: computed,
+      decoratedTs: computed,
+      channelAction: computed,
+      myNotDeletedMessage: computed,
+      bodyParts: computed,
+      text: computed,
+      images: computed,
+      hasMedia: computed,
+      hasImages: computed,
+      hasYoutubeVideo: computed,
+      videoId: computed,
+      videoParams: computed
+    });
+
     Object.assign(this, props);
   }
 
-  @computed
   get edited() {
     return this.status === 'edited';
   }
 
-  @computed
   get deleted() {
     return this.status === 'deleted';
   }
 
-  @computed
   get updatedTime() {
     const updatedTs = this.updatedTs;
 
@@ -53,33 +77,28 @@ export default class MessageModel {
     return `at ${updatedTime.format(originalTime.isSame(updatedTime, 'd') ? 'HH:mm' : 'MMM Do HH:mm')}`;
   }
 
-  @computed
   get updatedDate() {
     const updatedTs = this.updatedTs;
 
     return updatedTs ? `at ${moment.unix(updatedTs).format('MMM Do HH:mm')}` : '';
   }
 
-  @computed
   get updatedDateLong() {
     const updatedTs = this.updatedTs;
 
     return updatedTs ? `at ${moment.unix(updatedTs).format('dddd, MMMM D HH:mm')}` : '';
   }
 
-  @computed
   get nick() {
     const user = userStore.users.get(this.userId);
     return user ? user.nick[this.window.network] : '';
   }
 
-  @computed
   get avatarUrl() {
     const user = userStore.users.get(this.userId);
     return user ? `//gravatar.com/avatar/${user.gravatar}?d=mm` : '';
   }
 
-  @computed
   get decoratedCat() {
     const cat = this.cat;
     const body = this.body;
@@ -104,12 +123,10 @@ export default class MessageModel {
     return cat;
   }
 
-  @computed
   get decoratedTs() {
     return moment.unix(this.ts).format('HH:mm');
   }
 
-  @computed
   get channelAction() {
     const category = this.cat;
     const nick = this.nick;
@@ -130,12 +147,10 @@ export default class MessageModel {
     }
   }
 
-  @computed
   get myNotDeletedMessage() {
     return this.decoratedCat === 'mymsg' && this.status !== 'deleted';
   }
 
-  @computed
   get bodyParts() {
     let body = this.body;
     const cat = this.cat;
@@ -159,32 +174,26 @@ export default class MessageModel {
 
   // //redo
 
-  @computed
   get text() {
     return this.bodyParts.find(part => part.type === 'text').text;
   }
 
-  @computed
   get images() {
     return this.bodyParts.filter(part => part.type === 'image');
   }
 
-  @computed
   get hasMedia() {
     return !this.bodyParts.every(part => part.type === 'text');
   }
 
-  @computed
   get hasImages() {
     return this.bodyParts.some(part => part.type === 'image');
   }
 
-  @computed
   get hasYoutubeVideo() {
     return this.bodyParts.some(part => part.type === 'youtubelink');
   }
 
-  @computed
   get videoId() {
     const video = this.bodyParts.find(part => part.type === 'youtubelink');
 
@@ -196,7 +205,6 @@ export default class MessageModel {
     return null;
   }
 
-  @computed
   get videoParams() {
     const video = this.bodyParts.find(part => part.type === 'youtubelink');
     const start = video && (video.start ? `&start=${video.start}` : '');

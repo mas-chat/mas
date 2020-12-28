@@ -1,13 +1,17 @@
-import { observable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 import Cookies from 'js-cookie';
 import UserModel from '../models/User';
 import { mandatory } from '../utils/parameters';
 
 class UserStore {
-  @observable users = new Map();
+  users = new Map();
   userId = null;
 
   constructor() {
+    makeObservable(this, {
+      users: observable
+    });
+
     try {
       // TODO: Should read this from initok request but that's too late
       const cookie = JSON.parse(window.atob(Cookies.get('mas')));

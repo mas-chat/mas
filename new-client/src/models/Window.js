@@ -1,4 +1,4 @@
-import { computed, observable, autorun } from 'mobx';
+import { computed, observable, autorun, makeObservable } from 'mobx';
 import moment from 'moment';
 import isMobile from 'ismobilejs';
 import Message from './Message';
@@ -11,13 +11,12 @@ export default class WindowModel {
   userId = null;
   network = null;
   type = null;
-  @observable topic = '';
-  @observable name = null;
-  @observable row = 0;
-  @observable column = 0;
-  @observable password = null;
+  topic = '';
+  name = null;
+  row = 0;
+  column = 0;
+  password = null;
 
-  @observable
   alerts = {
     email: false,
     notification: false,
@@ -25,22 +24,53 @@ export default class WindowModel {
     title: false
   };
 
-  @observable messages = new Map();
-  @observable logMessages = new Map();
+  messages = new Map();
+  logMessages = new Map();
 
-  @observable generation = '';
-  @observable newMessagesCount = 0;
+  generation = '';
+  newMessagesCount = 0;
 
-  @observable notDelivered = false;
+  notDelivered = false;
 
-  @observable operators = [];
-  @observable voices = [];
-  @observable users = [];
+  operators = [];
+  voices = [];
+  users = [];
 
-  @observable minimizedNamesList = false;
-  @observable actualDesktop = 0;
+  minimizedNamesList = false;
+  actualDesktop = 0;
 
   constructor(store, props) {
+    makeObservable(this, {
+      topic: observable,
+      name: observable,
+      row: observable,
+      column: observable,
+      password: observable,
+      alerts: observable,
+      messages: observable,
+      logMessages: observable,
+      generation: observable,
+      newMessagesCount: observable,
+      notDelivered: observable,
+      operators: observable,
+      voices: observable,
+      users: observable,
+      minimizedNamesList: observable,
+      actualDesktop: observable,
+      desktop: computed,
+      visible: computed,
+      sortedMessages: computed,
+      sortedLogMessages: computed,
+      operatorNames: computed,
+      voiceNames: computed,
+      userNames: computed,
+      decoratedTitle: computed,
+      decoratedTopic: computed,
+      simplifiedName: computed,
+      tooltipTopic: computed,
+      explainedType: computed
+    });
+
     Object.assign(this, props);
 
     autorun(() => {
@@ -50,7 +80,6 @@ export default class WindowModel {
     });
   }
 
-  @computed
   get desktop() {
     return this.actualDesktop;
   }
@@ -59,12 +88,10 @@ export default class WindowModel {
     this.actualDesktop = isMobile().any ? Math.floor(Math.random() * 10000000) : value;
   }
 
-  @computed
   get visible() {
     return settingStore.settings.activeDesktop === this.actualDesktop;
   }
 
-  @computed
   get sortedMessages() {
     const result = Array.from(this.messages.values()).sort((a, b) => (a.ts === b.ts ? a.gid - b.gid : a.ts - b.ts));
     let gid = -1;
@@ -96,27 +123,22 @@ export default class WindowModel {
     return result;
   }
 
-  @computed
   get sortedLogMessages() {
     return Array.from(this.logMessages.values()).sort((a, b) => a.ts - b.ts);
   }
 
-  @computed
   get operatorNames() {
     return this._mapUserIdsToNicks('operators');
   }
 
-  @computed
   get voiceNames() {
     return this._mapUserIdsToNicks('voices');
   }
 
-  @computed
   get userNames() {
     return this._mapUserIdsToNicks('users');
   }
 
-  @computed
   get decoratedTitle() {
     let title;
     const type = this.type;
@@ -141,12 +163,10 @@ export default class WindowModel {
     return title;
   }
 
-  @computed
   get decoratedTopic() {
     return this.topic ? `- ${this.topic}` : '';
   }
 
-  @computed
   get simplifiedName() {
     let windowName = this.name;
     const network = this.network;
@@ -163,13 +183,11 @@ export default class WindowModel {
     return windowName;
   }
 
-  @computed
   get tooltipTopic() {
     const topic = this.topic;
     return topic ? `Topic: ${topic}` : 'Topic not set.';
   }
 
-  @computed
   get explainedType() {
     const type = this.type;
     const network = this.network;

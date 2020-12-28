@@ -1,4 +1,4 @@
-import { observable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 import { dispatch } from '../utils/dispatcher';
 import userStore from './UserStore';
 import FriendModel from '../models/Friend';
@@ -6,7 +6,13 @@ import socket from '../utils/socket';
 import { mandatory } from '../utils/parameters';
 
 class FriendStore {
-  @observable friends = new Map();
+  friends = new Map();
+
+  constructor() {
+    makeObservable(this, {
+      friends: observable
+    });
+  }
 
   handleAddFriendsServer({ reset, friends = mandatory() }) {
     if (reset) {

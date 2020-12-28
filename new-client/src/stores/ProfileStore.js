@@ -1,11 +1,17 @@
-import { observable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 import ProfileModel from '../models/Profile';
 import { dispatch } from '../utils/dispatcher';
 import socket from '../utils/socket';
 import { mandatory } from '../utils/parameters';
 
 class ProfileStore {
-  @observable profile = new ProfileModel(this, {});
+  profile = new ProfileModel(this, {});
+
+  constructor() {
+    makeObservable(this, {
+      profile: observable
+    });
+  }
 
   handleUpdateProfile({ name = mandatory(), email = mandatory(), successCb = mandatory(), rejectCb = mandatory() }) {
     socket.send(

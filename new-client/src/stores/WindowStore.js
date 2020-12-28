@@ -1,4 +1,4 @@
-import { observable, computed } from 'mobx';
+import { observable, computed, makeObservable } from 'mobx';
 import moment from 'moment';
 import Cookies from 'js-cookie';
 import isMobile from 'ismobilejs';
@@ -12,12 +12,19 @@ import { calcMsgHistorySize } from '../utils/msg-history-sizer';
 import { mandatory } from '../utils/parameters';
 
 class WindowStore {
-  @observable windows = new Map();
+  windows = new Map();
   msgBuffer = []; // Only used during startup
   cachedUpto = 0;
-  @observable initDone = false;
+  initDone = false;
 
-  @computed
+  constructor() {
+    makeObservable(this, {
+      windows: observable,
+      initDone: observable,
+      desktops: computed
+    });
+  }
+
   get desktops() {
     const desktops = {};
     const desktopsArray = [];

@@ -1,8 +1,14 @@
-import { observable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 import { mandatory } from '../utils/parameters';
 
 class NetworkStore {
-  @observable networks = [];
+  networks = [];
+
+  constructor() {
+    makeObservable(this, {
+      networks: observable
+    });
+  }
 
   handleUpdateNetworksServer({ networks = mandatory() }) {
     this.networks = networks;

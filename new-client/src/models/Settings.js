@@ -1,13 +1,21 @@
-import { observable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 
 export default class SettingModel {
-  @observable theme = 'default';
-  @observable activeDesktop = 0;
-  @observable email = ''; // TODO: Remove from here, keep in profile
-  @observable emailConfirmed = true;
-  @observable canUseIRC = false;
+  theme = 'default';
+  activeDesktop = 0;
+  email = ''; // TODO: Remove from here, keep in profile
+  emailConfirmed = true;
+  canUseIRC = false;
 
   constructor(store, props) {
+    makeObservable(this, {
+      theme: observable,
+      activeDesktop: observable,
+      email: observable,
+      emailConfirmed: observable,
+      canUseIRC: observable
+    });
+
     Object.assign(this, props);
   }
 }

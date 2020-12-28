@@ -1,11 +1,16 @@
-import { observable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 
 export default class UserModel {
   store;
-  @observable gravatar = null;
-  @observable nick = {};
+  gravatar = null;
+  nick = {};
 
   constructor(store, props) {
+    makeObservable(this, {
+      gravatar: observable,
+      nick: observable
+    });
+
     this.store = store;
     Object.assign(this, props);
   }

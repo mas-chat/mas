@@ -1,12 +1,18 @@
-import { observable, computed } from 'mobx';
+import { observable, computed, makeObservable } from 'mobx';
 import AlertModel from '../models/Alert';
 import socket from '../utils/socket';
 import mandatory from '../utils/parameters';
 
 class AlertStore {
-  @observable alerts = new Map();
+  alerts = new Map();
 
-  @computed
+  constructor() {
+    makeObservable(this, {
+      alerts: observable,
+      currentAlert: computed
+    });
+  }
+
   get currentAlert() {
     // values() returns values in the insertion order
     return this.alerts.values().next().value || false;

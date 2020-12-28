@@ -1,10 +1,14 @@
-import { observable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 import moment from 'moment';
 
 class DaySeparatorStore {
-  @observable dayCounter = 0;
+  dayCounter = 0;
 
   constructor() {
+    makeObservable(this, {
+      dayCounter: observable
+    });
+
     const timeToTomorrow = moment().endOf('day').diff(moment()) + 1;
 
     const changeDay = () => {
