@@ -1,0 +1,16 @@
+{
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "globals": {
+    "document": false,
+    "fetch": false,
+    "window": false
+  },
+  "rules": {
+    "max-len": ["error", 120]
+  }
+}

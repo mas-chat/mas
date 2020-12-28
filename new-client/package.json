@@ -1,0 +1,38 @@
+{
+  "name": "mas-client",
+  "version": "0.0.1",
+  "description": "Mas React frontend",
+  "main": "index.js",
+  "repository": "https://github.com/mas-chat/mas",
+  "author": "Ilkka Oksanen <iao@iki.fi>",
+  "license": "Apache-2.0",
+  "private": false,
+  "scripts": {
+    "prod": "webpack --config webpack.prod.js",
+    "dev": "webpack serve --open --config webpack.dev.js"
+  },
+  "dependencies": {
+    "grommet": "^2.16.2",
+    "mobx": "^6.0.4",
+    "polished": "^4.0.5",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-is": "^17.0.1",
+    "styled-components": "^5.2.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.10",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/preset-env": "^7.12.11",
+    "@babel/preset-react": "^7.12.10",
+    "babel-loader": "^8.2.2",
+    "clean-webpack-plugin": "^3.0.0",
+    "handlebars": "^4.7.6",
+    "handlebars-loader": "^1.7.1",
+    "html-webpack-plugin": "^4.5.0",
+    "webpack": "^5.11.0",
+    "webpack-cli": "^4.3.0",
+    "webpack-dev-server": "^4.0.0-beta.0",
+    "webpack-merge": "^5.7.3"
+  }
+}
