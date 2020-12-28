@@ -1,10 +1,15 @@
 module.exports = {
+  entry: './src/index.ts',
   module: {
     rules: [
       {
+        test: /\.tsx?$/,
+        loader: 'babel-loader',
+      },
+      {
         test: /\.js$/,
-        exclude: /(node_modules)/,
-        use: 'babel-loader'
+        use: 'source-map-loader',
+        enforce: "pre"
       },
       {
         test: /\.scss$/,
