@@ -9,7 +9,7 @@ module.exports = merge(common, {
     new HtmlWebpackPlugin({
       template: '!!handlebars-loader!html/index.hbs',
       templateParameters: {
-        config: '{ auth: { google: true, yahoo: true } }'
+        jsConfig: '{ auth: { google: true, yahoo: true } }'
       },
       historyApiFallback: true
     })
