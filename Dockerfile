@@ -9,8 +9,6 @@ RUN apt-get update && apt-get install -y \
 ENV NPM_CONFIG_LOGLEVEL warn
 ENV PROJECT_ROOT /app/
 
-MAINTAINER Ilkka Oksanen <iao@iki.fi>
-
 COPY server /app/server/
 WORKDIR /app/server/
 
@@ -32,6 +30,14 @@ WORKDIR /app/client/
 RUN yarn install \
   && yarn run build  \
   && rm -fr node_modules tmp \
+  && yarn cache clean
+
+COPY new-clint /app/new-client/
+WORKDIR /app/new-client/
+
+RUN yarn install \
+  && yarn run prod  \
+  && rm -fr node_modules \
   && yarn cache clean
 
 RUN echo -n $REVISION > /app/server/REVISION
