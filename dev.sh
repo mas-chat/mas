@@ -20,6 +20,9 @@ case "$1" in
         cd client
         yarn
         yarn run build-dev
+        cd ../new-client
+        yarn
+        yarn run prod
         cd ../server
         yarn
         yarn run prod
@@ -33,6 +36,7 @@ case "$1" in
     c|clean)
         set -x
         rm -fr client/node_modules client/tmp client/dist
+        rm -fr new-client/node_modules new-client/dist
         rm -fr server/node_modules
         rm -fr website/node_modules website-dist
         rm -fr server/emails/build
