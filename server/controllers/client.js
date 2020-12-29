@@ -20,8 +20,8 @@ const fs = require('fs');
 const path = require('path');
 const handlebars = require('handlebars');
 
-const templatePath = path.join(root(), 'client/dist/index.html');
-const template = handlebars.compile(fs.readFileSync(templatePath, 'utf8'));
+const templateV1 = handlebars.compile(fs.readFileSync(path.join(root(), 'client/dist/index.html'), 'utf8'));
+const templateV2 = handlebars.compile(fs.readFileSync(path.join(root(), 'new-client/dist/index.html'), 'utf8'));
 
 const revisionPath = path.join(root(), 'server/REVISION');
 let revision;
@@ -35,7 +35,8 @@ try {
 module.exports = async function index(ctx) {
   ctx.set('Cache-control', 'private, max-age=0, no-cache');
 
-  // koa-hbs can't take client/dist/index.html as a template
+  const template = 'v2' in ctx.query ? templateV2 : templateV1;
+
   ctx.body = template({
     jsConfig: JSON.stringify({
       socketHost: get('session:socket_host'),

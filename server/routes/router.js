@@ -86,7 +86,7 @@ module.exports = function buildRouter() {
   // Client
   router.get('/app', clientController);
 
-  // Client assets
+  // V1 Client assets
   router.get(/^\/app\/(.+)/, async ctx => {
     const subPath = ctx.params[0];
     let maxage = TWO_DAYS_IN_MS;
@@ -101,9 +101,15 @@ module.exports = function buildRouter() {
   });
 
   if (devMode) {
-    // Ember CLI Live Reload redirect hack
+    // V1 Client Ember CLI Live Reload redirect hack
     router.get('/ember-cli-live-reload.js', ctx => ctx.redirect('http://localhost:4200/ember-cli-live-reload.js'));
   }
+
+  // V2 Client assets
+  router.get(/^\/client-assets\/(.+)/, async ctx => {
+    const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
+    await sendFile(ctx, 'new-client/dist/client-assets/', ctx.params[0], { maxage });
+  });
 
   // Web site pages
   router.get(/^\/(about|home|tos|pricing|support|$)\/?$/, websiteController);

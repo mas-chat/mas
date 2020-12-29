@@ -9,16 +9,17 @@ module.exports = merge(common, {
   mode: 'production',
   output: {
     filename: '[name]-[contenthash].bundle.js',
-    publicPath: '/website-assets/',
-    path: path.resolve(__dirname, '../website-dist/website-assets')
+    publicPath: '/client-assets/',
+    path: path.resolve(__dirname, 'dist/client-assets')
   },
   plugins: [
     new webpack.ProgressPlugin(),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       inject: 'body',
-      filename: '../index.hbs',
-      template: 'html/index.hbs'
+      filename: '../index.html',
+      template: 'html/index.html',
+      minify: false // It's small in any case. This preservers the revision comment
     })
   ]
 });

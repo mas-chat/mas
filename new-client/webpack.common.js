@@ -1,5 +1,8 @@
 module.exports = {
-  entry: './src/index.ts',
+  entry: './src/index.tsx',
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js', '.json']
+  },
   module: {
     rules: [
       {
