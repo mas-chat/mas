@@ -32,7 +32,7 @@ RUN yarn install \
   && rm -fr node_modules tmp \
   && yarn cache clean
 
-COPY new-clint /app/new-client/
+COPY new-client /app/new-client/
 WORKDIR /app/new-client/
 
 RUN yarn install \
