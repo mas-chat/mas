@@ -1,10 +1,16 @@
 export default class AlertModel {
   store;
+
   alertId;
+
   resultCallback;
+
   message;
+
   postponeLabel;
+
   ackLabel;
+
   nackLabel;
 
   constructor(store, props) {

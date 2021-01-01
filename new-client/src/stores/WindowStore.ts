@@ -11,8 +11,11 @@ import socket from '../lib/socket';
 
 class WindowStore {
   windows = new Map();
+
   msgBuffer = []; // Only used during startup
+
   cachedUpto = 0;
+
   initDone = false;
 
   constructor() {

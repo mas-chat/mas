@@ -2,7 +2,9 @@ import { observable, makeObservable } from 'mobx';
 
 export default class UserModel {
   store;
+
   gravatar = null;
+
   nick = {};
 
   constructor(store, props) {

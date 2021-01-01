@@ -4,6 +4,7 @@ import UserModel from '../models/User';
 
 class UserStore {
   users = new Map();
+
   userId = null;
 
   constructor() {

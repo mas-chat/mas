@@ -7,13 +7,21 @@ import userStore from '../stores/UserStore';
 
 export default class WindowModel {
   windowId = 0;
+
   userId = null;
+
   network = null;
+
   type = null;
+
   topic = '';
+
   name = null;
+
   row = 0;
+
   column = 0;
+
   password = null;
 
   alerts = {
@@ -24,18 +32,23 @@ export default class WindowModel {
   };
 
   messages = new Map();
+
   logMessages = new Map();
 
   generation = '';
+
   newMessagesCount = 0;
 
   notDelivered = false;
 
   operators = [];
+
   voices = [];
+
   users = [];
 
   minimizedNamesList = false;
+
   actualDesktop = 0;
 
   constructor(store, props) {

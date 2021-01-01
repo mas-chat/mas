@@ -12,15 +12,23 @@ marked.setOptions({
 
 export default class MessageModel {
   gid = 0;
+
   body = null;
+
   cat = null;
+
   ts = null;
+
   userId = null;
+
   window = null;
+
   status = 'original';
+
   updatedTs = null;
 
   hideImages = false;
+
   editing = false;
 
   ircMotd = false;

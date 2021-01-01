@@ -23,12 +23,15 @@ const ioSocket = io.connect(config.socketHost || undefined); // Start connection
 
 class Socket {
   sessionId = null;
+
   maxBacklogMsgs = 100000;
 
   cookie = Cookies.get('mas');
 
   _connected = false;
+
   _sendQueue = [];
+
   _disconnectedTimer = null;
 
   constructor() {

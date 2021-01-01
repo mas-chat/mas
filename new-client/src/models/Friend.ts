@@ -3,8 +3,11 @@ import userStore from '../stores/UserStore';
 
 export default class FriendModel {
   store;
+
   userId;
+
   last;
+
   online;
 
   get name() {

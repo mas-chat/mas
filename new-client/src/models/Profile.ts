@@ -2,7 +2,9 @@ import { observable, makeObservable } from 'mobx';
 
 export default class ProfileModel {
   nick = '';
+
   name = '';
+
   email = '';
 
   constructor(store, props) {

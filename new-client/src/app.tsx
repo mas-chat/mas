@@ -32,7 +32,7 @@ const App = () => (
               </Nav>
             </Sidebar>
           </Box>
-          <Box flex overflow={'hidden'}>
+          <Box flex overflow="hidden">
             <Box flex align="center" justify="center">
               app body
             </Box>
