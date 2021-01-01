@@ -5,6 +5,9 @@ console.timeLog('1')
 module.exports = merge(common, {
   mode: 'development',
   devtool: 'inline-source-map',
+  output: {
+    publicPath: '/app/'
+  },
   plugins: [
     new HtmlWebpackPlugin({
       template: '!!handlebars-loader!html/index.html',
@@ -14,5 +17,22 @@ module.exports = merge(common, {
       historyApiFallback: true
     })
   ],
-  devServer: {}
+  devServer: {
+    host: 'localhost',
+    open: true,
+    openPage: 'app/',
+    overlay: true,
+    dev: {
+      publicPath: '/app/'
+    },
+    proxy: {
+      '/socket.io': {
+        target: 'http://localhost:3200',
+        ws: true
+      },
+      '/': {
+        target: 'http://localhost:3200',
+      }
+    }
+  }
 });

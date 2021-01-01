@@ -9,7 +9,7 @@
   "private": false,
   "scripts": {
     "prod": "webpack --config webpack.prod.js",
-    "dev": "webpack serve --open --config webpack.dev.js",
+    "dev": "webpack serve --config webpack.dev.js",
     "lint": "eslint '*/**/*.{js,ts,tsx}'"
   },
   "dependencies": {
