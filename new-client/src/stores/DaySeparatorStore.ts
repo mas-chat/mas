@@ -1,5 +1,5 @@
 import { observable, makeObservable } from 'mobx';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 class DaySeparatorStore {
   dayCounter = 0;
@@ -9,7 +9,7 @@ class DaySeparatorStore {
       dayCounter: observable
     });
 
-    const timeToTomorrow = moment().endOf('day').diff(moment()) + 1;
+    const timeToTomorrow = dayjs().endOf('day').diff(dayjs()) + 1;
 
     const changeDay = () => {
       this.dayCounter++;

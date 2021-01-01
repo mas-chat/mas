@@ -13,7 +13,9 @@
     "lint": "eslint '*/**/*.{js,ts,tsx}'"
   },
   "dependencies": {
+    "dayjs": "^1.9.8",
     "grommet": "^2.16.2",
+    "ismobilejs": "^1.1.1",
     "mobx": "^6.0.4",
     "polished": "^4.0.5",
     "react": "^17.0.1",

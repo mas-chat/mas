@@ -1,7 +1,7 @@
 import { computed, observable, makeObservable } from 'mobx';
 import marked from 'marked';
 import emojione from 'emojione';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import URI from 'urijs';
 import userStore from '../stores/UserStore';
 
@@ -71,8 +71,8 @@ export default class MessageModel {
       return '';
     }
 
-    const originalTime = moment.unix(this.ts);
-    const updatedTime = moment.unix(updatedTs);
+    const originalTime = dayjs.unix(this.ts);
+    const updatedTime = dayjs.unix(updatedTs);
 
     return `at ${updatedTime.format(originalTime.isSame(updatedTime, 'd') ? 'HH:mm' : 'MMM Do HH:mm')}`;
   }
@@ -80,13 +80,13 @@ export default class MessageModel {
   get updatedDate() {
     const updatedTs = this.updatedTs;
 
-    return updatedTs ? `at ${moment.unix(updatedTs).format('MMM Do HH:mm')}` : '';
+    return updatedTs ? `at ${dayjs.unix(updatedTs).format('MMM Do HH:mm')}` : '';
   }
 
   get updatedDateLong() {
     const updatedTs = this.updatedTs;
 
-    return updatedTs ? `at ${moment.unix(updatedTs).format('dddd, MMMM D HH:mm')}` : '';
+    return updatedTs ? `at ${dayjs.unix(updatedTs).format('dddd, MMMM D HH:mm')}` : '';
   }
 
   get nick() {
@@ -124,7 +124,7 @@ export default class MessageModel {
   }
 
   get decoratedTs() {
-    return moment.unix(this.ts).format('HH:mm');
+    return dayjs.unix(this.ts).format('HH:mm');
   }
 
   get channelAction() {

@@ -1,5 +1,5 @@
 import { observable, computed, makeObservable } from 'mobx';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import Cookies from 'js-cookie';
 import isMobile from 'ismobilejs';
 import { dispatch } from '../utils/dispatcher';
@@ -172,7 +172,7 @@ class WindowStore {
         body,
         cat: 'error',
         userId: null,
-        ts: moment().unix(),
+        ts: dayjs().unix(),
         gid: 'error',
         window
       })

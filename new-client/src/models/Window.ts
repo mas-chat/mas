@@ -1,5 +1,5 @@
 import { computed, observable, autorun, makeObservable } from 'mobx';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import isMobile from 'ismobilejs';
 import Message from './Message';
 import daySeparatorStore from '../stores/DaySeparatorStore';
@@ -109,10 +109,10 @@ export default class WindowModel {
       );
     };
 
-    let dayOfNextMsg = moment().format('dddd, MMMM D');
+    let dayOfNextMsg = dayjs().format('dddd, MMMM D');
 
     for (let i = result.length - 1; i >= 0; i--) {
-      const day = moment.unix(result[i].ts).format('dddd, MMMM D');
+      const day = dayjs.unix(result[i].ts).format('dddd, MMMM D');
 
       if (day !== dayOfNextMsg) {
         addDayDivider(result, dayOfNextMsg, i + 1);
