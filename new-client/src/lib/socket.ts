@@ -111,7 +111,7 @@ class Socket {
     });
   }
 
-  send(command, callback) {
+  send(command, callback?: (result: string) => void) {
     this._sendQueue.push({
       request: command,
       callback
