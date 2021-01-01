@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Grommet, ResponsiveContext, Sidebar, Avatar, Nav } from 'grommet';
+import { Box, Button, Grommet, Sidebar, Avatar, Nav } from 'grommet';
 import { Help, Projects, Clock } from 'grommet-icons';
 
 const theme = {
@@ -15,7 +15,7 @@ const theme = {
   }
 };
 
-const App = () => (
+const App: React.FunctionComponent<Record<string, never>> = () => (
   <Grommet theme={theme} full>
     <Box fill direction="row">
       <Box>
