@@ -1,7 +1,6 @@
 import { observable, computed, makeObservable } from 'mobx';
 import AlertModel from '../models/Alert';
-import socket from '../utils/socket';
-import mandatory from '../utils/parameters';
+import socket from '../lib/socket';
 
 class AlertStore {
   alerts = new Map();
@@ -18,27 +17,14 @@ class AlertStore {
     return this.alerts.values().next().value || false;
   }
 
-  handleShowAlert({
-    alertId = mandatory(),
-    message = mandatory(),
-    ackLabel = mandatory(),
-    resultCallback,
-    postponeLabel,
-    nackLabel
-  }) {
+  handleShowAlert({ alertId, message, ackLabel, resultCallback, postponeLabel, nackLabel }) {
     this.alerts.set(
       alertId,
       new AlertModel(this, { alertId, resultCallback, message, postponeLabel, ackLabel, nackLabel })
     );
   }
 
-  handleShowAlertServer({
-    alertId = mandatory(),
-    message = mandatory(),
-    ackLabel = 'Dismiss',
-    postponeLabel = 'Show again later',
-    nackLabel
-  }) {
+  handleShowAlertServer({ alertId, message, ackLabel = 'Dismiss', postponeLabel = 'Show again later', nackLabel }) {
     const resultCallback = result => {
       if (result === 'ack') {
         socket.send({
@@ -54,7 +40,7 @@ class AlertStore {
     );
   }
 
-  handleCloseAlert({ alertId = mandatory(), result = mandatory() }) {
+  handleCloseAlert({ alertId, result }) {
     const alert = this.alerts.get(alertId);
 
     if (alert.resultCallback) {

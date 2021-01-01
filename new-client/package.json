@@ -14,14 +14,19 @@
   },
   "dependencies": {
     "dayjs": "^1.9.8",
+    "emojione": "2",
     "grommet": "^2.16.2",
     "ismobilejs": "^1.1.1",
+    "js-cookie": "^2.2.1",
+    "marked": "^1.2.7",
     "mobx": "^6.0.4",
     "polished": "^4.0.5",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-is": "^17.0.1",
-    "styled-components": "^5.2.1"
+    "socket.io-client": "^3.0.4",
+    "styled-components": "^5.2.1",
+    "urijs": "^1.19.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
@@ -29,6 +34,7 @@
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-react": "^7.12.10",
     "@babel/preset-typescript": "^7.12.7",
+    "@types/js-cookie": "^2.2.6",
     "@typescript-eslint/eslint-plugin": "^4.11.0",
     "@typescript-eslint/parser": "^4.11.0",
     "babel-loader": "^8.2.2",

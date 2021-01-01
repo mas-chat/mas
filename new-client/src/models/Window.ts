@@ -2,7 +2,6 @@ import { computed, observable, autorun, makeObservable } from 'mobx';
 import dayjs from 'dayjs';
 import isMobile from 'ismobilejs';
 import Message from './Message';
-import daySeparatorStore from '../stores/DaySeparatorStore';
 import settingStore from '../stores/SettingStore';
 import userStore from '../stores/UserStore';
 

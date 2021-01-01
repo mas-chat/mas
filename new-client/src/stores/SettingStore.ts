@@ -1,10 +1,9 @@
 import { observable, makeObservable } from 'mobx';
 import isMobile from 'ismobilejs';
 import SettingsModel from '../models/Settings';
-import { dispatch } from '../utils/dispatcher';
-import socket from '../utils/socket';
+import { dispatch } from '../lib/dispatcher';
+import socket from '../lib/socket';
 import windowStore from './WindowStore';
-import { mandatory } from '../utils/parameters';
 
 class SettingStore {
   settings = new SettingsModel(this, {});
@@ -52,7 +51,7 @@ class SettingStore {
     this.settings.emailConfirmed = true;
   }
 
-  handleChangeActiveDesktop({ desktopId = mandatory() }) {
+  handleChangeActiveDesktop({ desktopId }) {
     if (!windowStore.initDone) {
       return;
     }
@@ -69,7 +68,7 @@ class SettingStore {
     }
   }
 
-  handleUpdateSettingsServer({ settings = mandatory() }) {
+  handleUpdateSettingsServer({ settings }) {
     Object.assign(this.settings, settings);
   }
 }

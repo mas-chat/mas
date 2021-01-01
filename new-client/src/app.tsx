@@ -37,6 +37,8 @@ const AppBar = (props) => (
   />
 );
 
+import './lib/socket';
+
 class App extends Component {
   state = {
     showSidebar: false,

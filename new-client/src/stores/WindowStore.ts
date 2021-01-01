@@ -2,14 +2,12 @@ import { observable, computed, makeObservable } from 'mobx';
 import dayjs from 'dayjs';
 import Cookies from 'js-cookie';
 import isMobile from 'ismobilejs';
-import { dispatch } from '../utils/dispatcher';
+import { dispatch } from '../lib/dispatcher';
 import Message from '../models/Message';
 import Window from '../models/Window';
 import settingStore from './SettingStore';
 import userStore from './UserStore';
-import socket from '../utils/socket';
-import { calcMsgHistorySize } from '../utils/msg-history-sizer';
-import { mandatory } from '../utils/parameters';
+import socket from '../lib/socket';
 
 class WindowStore {
   windows = new Map();
@@ -52,7 +50,7 @@ class WindowStore {
     return desktopsArray;
   }
 
-  handleUploadFiles({ files = mandatory(), window = mandatory() }) {
+  handleUploadFiles({ files, window }) {
     if (files.length === 0) {
       return;
     }
@@ -87,16 +85,7 @@ class WindowStore {
     });
   }
 
-  handleAddMessageServer({
-    gid = mandatory(),
-    userId = mandatory(),
-    ts = mandatory(),
-    windowId = mandatory(),
-    cat = mandatory(),
-    updatedTs,
-    status,
-    body
-  }) {
+  handleAddMessageServer({ gid, userId, ts, windowId, cat, updatedTs, status, body }) {
     const window = this.windows.get(windowId);
 
     if (!window) {
@@ -131,7 +120,7 @@ class WindowStore {
     return true;
   }
 
-  handleAddMessagesServer({ messages = mandatory() }) {
+  handleAddMessagesServer({ messages }) {
     messages.forEach(({ windowId, messages: windowMessages }) => {
       const window = this.windows.get(windowId);
       let newMessages;
@@ -164,7 +153,7 @@ class WindowStore {
     return true;
   }
 
-  handleAddError({ window = mandatory(), body = mandatory() }) {
+  handleAddError({ window, body }) {
     // TODO: Not optimal to use error gid, there's never second error message
     window.messages.set(
       'error',
@@ -179,7 +168,7 @@ class WindowStore {
     );
   }
 
-  handleSendText({ window = mandatory(), text = mandatory() }) {
+  handleSendText({ window, text }) {
     let sent = false;
 
     setTimeout(() => {
@@ -221,7 +210,7 @@ class WindowStore {
     );
   }
 
-  handleSendCommand({ window = mandatory(), command = mandatory(), params = mandatory() }) {
+  handleSendCommand({ window, command, params }) {
     socket.send(
       {
         id: 'COMMAND',
@@ -243,7 +232,7 @@ class WindowStore {
     );
   }
 
-  handleCreateGroup({ name = mandatory(), password, acceptCb = mandatory(), rejectCb = mandatory() }) {
+  handleCreateGroup({ name, password, acceptCb, rejectCb }) {
     socket.send(
       {
         id: 'CREATE',
@@ -260,7 +249,7 @@ class WindowStore {
     );
   }
 
-  handleJoinGroup({ name = mandatory(), password, acceptCb = mandatory(), rejectCb = mandatory() }) {
+  handleJoinGroup({ name, password, acceptCb, rejectCb }) {
     socket.send(
       {
         id: 'JOIN',
@@ -278,13 +267,7 @@ class WindowStore {
     );
   }
 
-  handleJoinIrcChannel({
-    name = mandatory(),
-    network = mandatory(),
-    password,
-    acceptCb = mandatory(),
-    rejectCb = mandatory()
-  }) {
+  handleJoinIrcChannel({ name, network, password, acceptCb, rejectCb }) {
     socket.send(
       {
         id: 'JOIN',
@@ -302,7 +285,7 @@ class WindowStore {
     );
   }
 
-  handleStartChat({ userId = mandatory(), network = mandatory() }) {
+  handleStartChat({ userId, network }) {
     socket.send(
       {
         id: 'CHAT',
@@ -323,7 +306,7 @@ class WindowStore {
     );
   }
 
-  handleFetchMessageRange({ window = mandatory(), start = mandatory(), end = mandatory(), successCb = mandatory() }) {
+  handleFetchMessageRange({ window, start, end, successCb }) {
     socket.send(
       {
         id: 'FETCH',
@@ -343,7 +326,7 @@ class WindowStore {
     );
   }
 
-  handleFetchOlderMessages({ window = mandatory(), successCb = mandatory() }) {
+  handleFetchOlderMessages({ window, successCb }) {
     socket.send(
       {
         id: 'FETCH',
@@ -368,7 +351,7 @@ class WindowStore {
     );
   }
 
-  handleProcessLine({ window = mandatory(), body = mandatory() }) {
+  handleProcessLine({ window, body }) {
     let command = false;
     let commandParams;
 
@@ -410,7 +393,7 @@ class WindowStore {
     });
   }
 
-  handleEditMessage({ window = mandatory(), gid = mandatory(), body = mandatory() }) {
+  handleEditMessage({ window, gid, body }) {
     socket.send(
       {
         id: 'EDIT',
@@ -433,18 +416,18 @@ class WindowStore {
   }
 
   handleAddWindowServer({
-    windowId = mandatory(),
+    windowId,
     userId,
-    network = mandatory(),
-    windowType = mandatory(),
+    network,
+    windowType,
     name,
     topic,
-    row = mandatory(),
-    column = mandatory(),
-    minimizedNamesList = mandatory(),
+    row,
+    column,
+    minimizedNamesList,
     password,
-    alerts = mandatory(),
-    desktop = mandatory()
+    alerts,
+    desktop
   }) {
     const window = this.windows.get(windowId);
     const windowProperties = {
@@ -471,7 +454,7 @@ class WindowStore {
   }
 
   handleUpdateWindowServer({
-    windowId = mandatory(),
+    windowId,
     userId,
     network,
     windowType,
@@ -501,23 +484,18 @@ class WindowStore {
     });
   }
 
-  handleCloseWindow({ window = mandatory() }) {
+  handleCloseWindow({ window }) {
     socket.send({
       id: 'CLOSE',
       windowId: window.windowId
     });
   }
 
-  handleDeleteWindowServer({ windowId = mandatory() }) {
+  handleDeleteWindowServer({ windowId }) {
     this.windows.delete(windowId);
   }
 
-  handleUpdatePassword({
-    window = mandatory(),
-    password = mandatory(),
-    successCb = mandatory(),
-    rejectCb = mandatory()
-  }) {
+  handleUpdatePassword({ window, password, successCb, rejectCb }) {
     socket.send(
       {
         id: 'UPDATE_PASSWORD',
@@ -534,7 +512,7 @@ class WindowStore {
     );
   }
 
-  handleUpdateTopic({ window = mandatory(), topic = mandatory() }) {
+  handleUpdateTopic({ window, topic }) {
     socket.send({
       id: 'UPDATE_TOPIC',
       windowId: window.windowId,
@@ -542,7 +520,7 @@ class WindowStore {
     });
   }
 
-  handleUpdateWindowAlerts({ window = mandatory(), alerts = mandatory() }) {
+  handleUpdateWindowAlerts({ window, alerts }) {
     window.alerts = alerts;
 
     socket.send({
@@ -552,7 +530,7 @@ class WindowStore {
     });
   }
 
-  handleMoveWindow({ windowId = mandatory(), column, row, desktop }) {
+  handleMoveWindow({ windowId, column, row, desktop }) {
     const window = this.windows.get(windowId);
 
     Object.assign(window, {
@@ -572,7 +550,7 @@ class WindowStore {
     }
   }
 
-  handleToggleMemberListWidth({ window = mandatory() }) {
+  handleToggleMemberListWidth({ window }) {
     window.minimizedNamesList = !window.minimizedNamesList;
 
     socket.send({
@@ -582,7 +560,7 @@ class WindowStore {
     });
   }
 
-  handleSeekActiveDesktop({ direction = mandatory() }) {
+  handleSeekActiveDesktop({ direction }) {
     const desktops = this.desktops;
     const activeDesktop = settingStore.settings.activeDesktop;
     let index = desktops.indexOf(desktops.find(desktop => desktop.id === activeDesktop));
@@ -624,7 +602,7 @@ class WindowStore {
     }
   }
 
-  handleAddMembersServer({ windowId = mandatory(), members = mandatory(), reset }) {
+  handleAddMembersServer({ windowId, members, reset }) {
     const window = this.windows.get(windowId);
 
     if (reset) {
@@ -654,7 +632,7 @@ class WindowStore {
     });
   }
 
-  handleDeleteMembersServer({ windowId = mandatory(), members = mandatory() }) {
+  handleDeleteMembersServer({ windowId, members }) {
     const window = this.windows.get(windowId);
 
     members.forEach(member => {
@@ -713,7 +691,7 @@ class WindowStore {
   }
 
   _trimBacklog(messages) {
-    const limit = calcMsgHistorySize();
+    const limit = 120; // TODO: Replace with virtualized scrolling
     const messageArray = Array.from(messages.values()).sort((a, b) => a.ts > b.ts);
 
     for (const message of messageArray) {

@@ -1,5 +1,4 @@
 import { observable, makeObservable } from 'mobx';
-import { mandatory } from '../utils/parameters';
 
 class ModalStore {
   modals = [];
@@ -10,11 +9,11 @@ class ModalStore {
     });
   }
 
-  handleOpenModal({ name = mandatory(), model }) {
+  handleOpenModal({ name, model }) {
     this.modals.push({ name, model });
   }
 
-  handleOpenPriorityModal({ name = mandatory(), model }) {
+  handleOpenPriorityModal({ name, model }) {
     // Show immediately
     this.modals.unshift({ name, model });
   }

@@ -1,7 +1,6 @@
 import { observable, makeObservable } from 'mobx';
 import Cookies from 'js-cookie';
 import UserModel from '../models/User';
-import { mandatory } from '../utils/parameters';
 
 class UserStore {
   users = new Map();
@@ -22,7 +21,7 @@ class UserStore {
     }
   }
 
-  handleAddUsersServer({ mapping = mandatory() }) {
+  handleAddUsersServer({ mapping }) {
     Object.entries(mapping).forEach(([userId, user]) => {
       this.users.set(userId, new UserModel(this, user));
     });

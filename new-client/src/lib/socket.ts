@@ -1,6 +1,5 @@
 import io from 'socket.io-client';
 import Cookies from 'js-cookie';
-import { calcMsgHistorySize } from './msg-history-sizer';
 import { dispatch } from './dispatcher';
 
 const serverIdToEventMap = {
@@ -121,7 +120,7 @@ class Socket {
   }
 
   _emitInit() {
-    const maxBacklogMsgs = calcMsgHistorySize();
+    const maxBacklogMsgs = 120;
     const cookie = this.cookie;
 
     ioSocket.emit('init', {

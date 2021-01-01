@@ -1,9 +1,8 @@
 import { observable, makeObservable } from 'mobx';
-import { dispatch } from '../utils/dispatcher';
+import { dispatch } from '../lib/dispatcher';
 import userStore from './UserStore';
 import FriendModel from '../models/Friend';
-import socket from '../utils/socket';
-import { mandatory } from '../utils/parameters';
+import socket from '../lib/socket';
 
 class FriendStore {
   friends = new Map();
@@ -14,7 +13,7 @@ class FriendStore {
     });
   }
 
-  handleAddFriendsServer({ reset, friends = mandatory() }) {
+  handleAddFriendsServer({ reset, friends }) {
     if (reset) {
       this.friends.clear();
     }
@@ -24,14 +23,14 @@ class FriendStore {
     });
   }
 
-  handleConfirmRemoveFriend({ userId = mandatory() }) {
+  handleConfirmRemoveFriend({ userId }) {
     dispatch('OPEN_MODAL', {
       name: 'remove-friend-modal',
       model: userId
     });
   }
 
-  handleRequestFriend({ userId = mandatory() }) {
+  handleRequestFriend({ userId }) {
     socket.send(
       {
         id: 'REQUEST_FRIEND',
@@ -54,7 +53,7 @@ class FriendStore {
     );
   }
 
-  handleConfirmFriendsServer({ friends = mandatory() }) {
+  handleConfirmFriendsServer({ friends }) {
     for (const friendCandidate of friends) {
       const userId = friendCandidate.userId;
       const user = userStore.users.get(userId);
@@ -80,7 +79,7 @@ class FriendStore {
     }
   }
 
-  handleRemoveFriend({ userId = mandatory() }) {
+  handleRemoveFriend({ userId }) {
     socket.send({
       id: 'REMOVE_FRIEND',
       userId
