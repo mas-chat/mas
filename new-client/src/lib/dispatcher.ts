@@ -8,10 +8,12 @@ import settingStore from '../stores/SettingStore';
 import userStore from '../stores/UserStore';
 import windowStore from '../stores/WindowStore';
 
-const noopCb = () => {};
-const capitalize = string => string[0].toUpperCase() + string.slice(1).toLowerCase();
+const noopCb = (): void => {
+  /* do nothing. */
+};
+const capitalize = (text: string) => text[0].toUpperCase() + text.slice(1).toLowerCase();
 
-export function dispatch(type, data = {}, acceptCb = noopCb, rejectCb = noopCb) {
+export function dispatch(type: string, data = {}, acceptCb = noopCb, rejectCb = noopCb): void {
   let consumed = false;
   const name = type.split('_').map(capitalize).join('');
   const handler = `handle${name}`;
