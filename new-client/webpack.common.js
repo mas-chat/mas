@@ -7,12 +7,12 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        loader: 'babel-loader',
+        loader: 'babel-loader'
       },
       {
         test: /\.js$/,
         use: 'source-map-loader',
-        enforce: "pre"
+        enforce: 'pre'
       },
       {
         test: /\.scss$/,

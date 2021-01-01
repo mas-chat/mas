@@ -1,7 +1,9 @@
+/* eslint  @typescript-eslint/no-var-requires: off */
+
 const { merge } = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const common = require('./webpack.common.js');
-console.timeLog('1')
+
 module.exports = merge(common, {
   mode: 'development',
   devtool: 'inline-source-map',
@@ -31,7 +33,7 @@ module.exports = merge(common, {
         ws: true
       },
       '/': {
-        target: 'http://localhost:3200',
+        target: 'http://localhost:3200'
       }
     }
   }
