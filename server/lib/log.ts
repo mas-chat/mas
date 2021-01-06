@@ -25,7 +25,7 @@ import { shutdown } from './init';
 import { get, root } from './conf';
 
 import 'colors';
-import 'winston-papertrail';
+import 'winston-syslog';
 
 let logger = null;
 
@@ -112,7 +112,7 @@ function configTransports() {
   }
 
   if (get('papertrail:enabled')) {
-    const papertrailTransport = new (winston.transports as any).Papertrail({
+    const papertrailTransport = new (winston.transports as any).Syslog({
       host: get('papertrail:host'),
       port: get('papertrail:port'),
       level: get('papertrail:level'),

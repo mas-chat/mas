@@ -4019,6 +4019,14 @@ underscore@~1.7.0:
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.7.0.tgz#6bbaf0877500d36be34ecaa584e0db9fef035209"
   integrity sha1-a7rwh3UA02vjTsqlhODbn+8DUgk=
 
+unix-dgram@2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/unix-dgram/-/unix-dgram-2.0.3.tgz#511fc1f8ed94ffe40e0dfeacdae1bf8b06533296"
+  integrity sha512-Bay5CkSLcdypcBCsxvHEvaG3mftzT5FlUnRToPWEAVxwYI8NI/8zSJ/Gknlp86MPhV6hBA8I8TBsETj2tssoHQ==
+  dependencies:
+    bindings "^1.3.0"
+    nan "^2.13.2"
+
 unix-dgram@2.0.x:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/unix-dgram/-/unix-dgram-2.0.4.tgz#14d4fc21e539742b8fb027de16eccd4e5503a344"
@@ -4113,12 +4121,14 @@ winston-daily-rotate-file@^4.5.0:
     triple-beam "^1.3.0"
     winston-transport "^4.2.0"
 
-winston-papertrail@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/winston-papertrail/-/winston-papertrail-1.0.5.tgz#54a23b16e5046652bf687b37dc802714bfd462c9"
-  integrity sha1-VKI7FuUEZlK/aHs33IAnFL/UYsk=
+winston-syslog@^2.4.4:
+  version "2.4.4"
+  resolved "https://registry.yarnpkg.com/winston-syslog/-/winston-syslog-2.4.4.tgz#855a518851c42cb7ebc54b67f5b44a3cde161e4a"
+  integrity sha512-zDjoKO932Yszvzq8WtbIFMXHwAT2MOxpWC9s6djw2tvjdRESWw3au6l+0xDMatMhNWVoVaVNkDXF+r/eyoBUVA==
   dependencies:
     glossy "^0.1.7"
+  optionalDependencies:
+    unix-dgram "2.0.3"
 
 winston-transport@^4.2.0:
   version "4.3.0"
