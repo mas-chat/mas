@@ -225,7 +225,7 @@ export default class MessageModel {
   }
 
   _parseLinks(text) {
-    const imgSuffixes = ['png', 'jpg', 'jpeg', 'gif'];
+    const imgSuffixes = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
     const media = [];
     let body = '';
 
