@@ -1,14 +1,19 @@
-import { observable, computed, makeObservable } from 'mobx';
-import AlertModel from '../models/Alert';
+import { observable, computed, makeObservable, action } from 'mobx';
+import AlertModel from '../models/alert';
 import socket from '../lib/socket';
+import { Notification } from '../types/notifications';
+
+let nextLocalAlertId = 0;
 
 class AlertStore {
-  alerts = new Map();
+  alerts = new Map<string, AlertModel>();
 
   constructor() {
     makeObservable(this, {
       alerts: observable,
-      currentAlert: computed
+      currentAlert: computed,
+      showAlert: action,
+      closeAlert: action
     });
   }
 
@@ -17,37 +22,52 @@ class AlertStore {
     return this.alerts.values().next().value || false;
   }
 
-  handleShowAlert({ alertId, message, ackLabel, resultCallback, postponeLabel, nackLabel }) {
-    this.alerts.set(
-      alertId,
-      new AlertModel(this, { alertId, resultCallback, message, postponeLabel, ackLabel, nackLabel })
-    );
+  handlerServerNotification(ntf: Notification): boolean {
+    switch (ntf.type) {
+      case 'ADD_ALERT':
+        this.showAlertWithAck(ntf.alertId, ntf.message, ntf.ackLabel, ntf.nackLabel, ntf.postponeLabel);
+        break;
+      default:
+        return false;
+    }
+
+    return true;
   }
 
-  handleShowAlertServer({ alertId, message, ackLabel = 'Dismiss', postponeLabel = 'Show again later', nackLabel }) {
-    const resultCallback = result => {
+  showAlertWithAck(
+    alertId: number,
+    message: string,
+    ackLabel?: string,
+    nackLabel?: false | string,
+    postponeLabel?: false | string
+  ) {
+    const resultCallback = (result: string) => {
       if (result === 'ack') {
-        socket.send({
-          id: 'ACKALERT',
-          alertId
-        });
+        socket.send({ id: 'ACKALERT', alertId: alertId });
       }
     };
 
-    this.alerts.set(
-      alertId,
-      new AlertModel(this, { alertId, resultCallback, message, postponeLabel, ackLabel, nackLabel })
-    );
+    this.showAlert(alertId, message, ackLabel, nackLabel, postponeLabel, resultCallback);
   }
 
-  handleCloseAlert({ alertId, result }) {
-    const alert = this.alerts.get(alertId);
+  showAlert(
+    alertId: number | null,
+    message = '',
+    ackLabel?: string,
+    nackLabel?: false | string,
+    postponeLabel?: false | string,
+    resultCallback?: (result: string) => void
+  ) {
+    const id = alertId === null ? `local:${nextLocalAlertId++}` : alertId.toString();
 
-    if (alert.resultCallback) {
-      alert.resultCallback(result);
-    }
+    this.alerts.set(id, new AlertModel(id, message, ackLabel, nackLabel, postponeLabel, resultCallback));
+  }
 
-    this.alerts.delete(alertId);
+  closeAlert(alertId: number, result: string) {
+    const alert = this.alerts.get(alertId.toString());
+
+    alert?.resultCallback(result);
+    this.alerts.delete(alertId.toString());
   }
 }
 

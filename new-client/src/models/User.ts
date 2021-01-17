@@ -1,19 +1,15 @@
 import { observable, makeObservable } from 'mobx';
 
 export default class UserModel {
-  store;
-
-  gravatar = null;
-
-  nick = {};
-
-  constructor(store, props) {
+  constructor(
+    public readonly nick: { mas: string; IRCNet?: string; FreeNode?: string; W3C?: string },
+    public readonly name: string,
+    public readonly gravatar: string
+  ) {
     makeObservable(this, {
-      gravatar: observable,
-      nick: observable
+      nick: observable,
+      name: observable,
+      gravatar: observable
     });
-
-    this.store = store;
-    Object.assign(this, props);
   }
 }

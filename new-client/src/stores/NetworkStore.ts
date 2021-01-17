@@ -1,15 +1,29 @@
-import { observable, makeObservable } from 'mobx';
+import { observable, makeObservable, action } from 'mobx';
+import { Notification } from '../types/notifications';
 
 class NetworkStore {
-  networks = [];
+  networks: Array<string> = [];
 
   constructor() {
     makeObservable(this, {
-      networks: observable
+      networks: observable,
+      updateNetworks: action
     });
   }
 
-  handleUpdateNetworksServer({ networks }) {
+  handlerServerNotification(ntf: Notification): boolean {
+    switch (ntf.type) {
+      case 'UPDATE_NETWORKS':
+        this.updateNetworks(ntf.networks);
+        break;
+      default:
+        return false;
+    }
+
+    return true;
+  }
+
+  updateNetworks(networks: Array<string>) {
     this.networks = networks;
   }
 }

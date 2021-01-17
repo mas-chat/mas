@@ -4,54 +4,34 @@ import isMobile from 'ismobilejs';
 import Message from './Message';
 import settingStore from '../stores/SettingStore';
 import userStore from '../stores/UserStore';
+import { AlertsRecord, Network, WindowType } from '../types/notifications';
 
 export default class WindowModel {
-  windowId = 0;
-
-  userId = null;
-
-  network = null;
-
-  type = null;
-
-  topic = '';
-
-  name = null;
-
-  row = 0;
-
-  column = 0;
-
-  password = null;
-
-  alerts = {
-    email: false,
-    notification: false,
-    sound: false,
-    title: false
-  };
-
-  messages = new Map();
-
-  logMessages = new Map();
+  messages = new Map<number, Message>();
+  logMessages = new Map<number, Message>();
 
   generation = '';
-
+  actualDesktop = 0;
   newMessagesCount = 0;
-
   notDelivered = false;
-
-  operators = [];
-
-  voices = [];
-
-  users = [];
-
   minimizedNamesList = false;
 
-  actualDesktop = 0;
+  operators: Array<string> = [];
+  voices: Array<string> = [];
+  users: Array<string> = [];
 
-  constructor(store, props) {
+  constructor(
+    public readonly windowId: number,
+    public readonly userId: string | null,
+    public readonly network: Network,
+    public readonly type: WindowType,
+    public topic: string | null,
+    public name: string | null,
+    public row: number,
+    public column: number,
+    public password: string | null,
+    public alerts: AlertsRecord
+  ) {
     makeObservable(this, {
       topic: observable,
       name: observable,
@@ -83,8 +63,6 @@ export default class WindowModel {
       explainedType: computed
     });
 
-    Object.assign(this, props);
-
     autorun(() => {
       if (this.visible) {
         this.newMessagesCount = 0;
@@ -108,17 +86,8 @@ export default class WindowModel {
     const result = Array.from(this.messages.values()).sort((a, b) => (a.ts === b.ts ? a.gid - b.gid : a.ts - b.ts));
     let gid = -1;
 
-    const addDayDivider = (array, dateString, index) => {
-      array.splice(
-        index,
-        0,
-        new Message(this, {
-          body: dateString,
-          cat: 'day-divider',
-          gid: gid--,
-          window: this
-        })
-      );
+    const addDayDivider = (array: Array<Message>, dateString: string, index: number) => {
+      array.splice(index, 0, new Message(gid--, dateString, 'day-divider', 0, null, this));
     };
 
     let dayOfNextMsg = dayjs().format('dddd, MMMM D');
@@ -152,7 +121,7 @@ export default class WindowModel {
   }
 
   get decoratedTitle() {
-    let title;
+    let title = '';
     const type = this.type;
     const userId = this.userId;
     const network = this.network;
@@ -160,14 +129,13 @@ export default class WindowModel {
 
     if (type === '1on1' && userId === 'i0') {
       title = `${network} Server Messages`;
-    } else if (type === '1on1') {
-      const ircNetwork = network === 'MAS' ? '' : `${network} `;
+    } else if (type === '1on1' && userId) {
+      const ircNetwork = network === 'mas' ? '' : `${network} `;
       const peerUser = userStore.users.get(userId);
-
       const target = peerUser ? peerUser.nick[network] : 'person';
       title = `Private ${ircNetwork} conversation with ${target}`;
-    } else if (network === 'MAS') {
-      title = `Group: ${name.charAt(0).toUpperCase()}${name.substr(1)}`;
+    } else if (network === 'mas') {
+      title = `Group: ${name?.charAt(0).toUpperCase()}${name?.substr(1)}`;
     } else {
       title = `${network}: ${name}`;
     }
@@ -181,6 +149,11 @@ export default class WindowModel {
 
   get simplifiedName() {
     let windowName = this.name;
+
+    if (!windowName) {
+      return null;
+    }
+
     const network = this.network;
     const type = this.type;
 
@@ -188,9 +161,9 @@ export default class WindowModel {
       windowName = windowName.replace(/[&/\\#,+()$~%.'":*?<>{}]/g, '');
     } else {
       const userId = this.userId;
-      const peerUser = userStore.users.get(userId);
+      const peerUser = userId && userStore.users.get(userId);
 
-      windowName = peerUser ? peerUser.nick[network] : '1on1';
+      windowName = peerUser ? peerUser.nick[network] || null : '1on1';
     }
     return windowName;
   }
@@ -205,22 +178,22 @@ export default class WindowModel {
     const network = this.network;
 
     if (type === 'group') {
-      return network === 'MAS' ? 'group' : 'channel';
+      return network === 'mas' ? 'group' : 'channel';
     }
     return '1on1';
   }
 
-  _mapUserIdsToNicks(role) {
+  _mapUserIdsToNicks(role: 'operators' | 'voices' | 'users') {
     return this[role]
       .map(userId => {
         const user = userStore.users.get(userId);
 
         return {
           userId,
-          nick: user.nick[this.network],
-          gravatar: user.gravatar
+          nick: user?.nick[this.network] || 'unkown',
+          gravatar: user?.gravatar
         };
       })
-      .sort((a, b) => a.nick - b.nick);
+      .sort((a, b) => a.nick.localeCompare(b.nick));
   }
 }

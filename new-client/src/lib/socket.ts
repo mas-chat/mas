@@ -1,28 +1,17 @@
 import io from 'socket.io-client';
 import Cookies from 'js-cookie';
 import { dispatch } from './dispatcher';
+import { RequestReturn } from '../types/requests';
+import { Notification } from '../types/notifications';
+import modalStore from '../stores/ModalStore';
 
-const serverIdToEventMap = {
-  UPDATE_MEMBERS: 'ADD_MEMBERS_SERVER',
-  ADD_ALERT: 'SHOW_ALERT_SERVER',
-  DELETE_WINDOW: 'DELETE_WINDOW_SERVER',
-  ADD_WINDOW: 'ADD_WINDOW_SERVER',
-  DELETE_MEMBERS: 'DELETE_MEMBERS_SERVER',
-  UPDATE_FRIENDS: 'ADD_FRIENDS_SERVER',
-  CONFIRM_FRIENDS: 'CONFIRM_FRIENDS_SERVER',
-  FINISH_INIT: 'FINISH_STARTUP_SERVER',
-  ADD_MESSAGE: 'ADD_MESSAGE_SERVER',
-  ADD_MESSAGES: 'ADD_MESSAGES_SERVER',
-  UPDATE_NETWORKS: 'UPDATE_NETWORKS_SERVER',
-  UPDATE_SETTINGS: 'UPDATE_SETTINGS_SERVER',
-  UPDATE_WINDOW: 'UPDATE_WINDOW_SERVER',
-  ADD_USERS: 'ADD_USERS_SERVER'
-};
+declare const config: { socketHost: string | false };
 
-const ioSocket = io.connect(config.socketHost || undefined); // Start connection as early as possible.
+// Start the connection as early as possible.
+const ioSocket = config.socketHost ? io.connect(config.socketHost) : io.connect();
 
 class Socket {
-  sessionId = null;
+  sessionId: string | null = null;
 
   maxBacklogMsgs = 100000;
 
@@ -30,9 +19,9 @@ class Socket {
 
   _connected = false;
 
-  _sendQueue = [];
+  _sendQueue: Array<{ request: any; callback: any }> = [];
 
-  _disconnectedTimer = null;
+  _disconnectedTimer?: number;
 
   constructor() {
     if (!this.cookie) {
@@ -42,11 +31,11 @@ class Socket {
 
     this._emitInit();
 
-    ioSocket.on('initok', data => {
+    ioSocket.on('initok', ({ sessionId, maxBacklogMsgs }: { sessionId: string; maxBacklogMsgs: number }) => {
       this._connected = true;
 
-      this.sessionId = data.sessionId;
-      this.maxBacklogMsgs = data.maxBacklogMsgs;
+      this.sessionId = sessionId;
+      this.maxBacklogMsgs = maxBacklogMsgs;
 
       // TODO: Delete oldest messages for windows that have more messages than
       // maxBacklogMsgs. They can be stale, when editing becomes possible.
@@ -56,25 +45,15 @@ class Socket {
 
     ioSocket.on('terminate', () => this._logout());
 
-    ioSocket.on('refresh_session', data => {
-      this.cookie = data.refreshCookie;
-      Cookies.set('mas', data.refreshCookie, { expires: 7 });
+    ioSocket.on('refresh_session', ({ refreshCookie }: { refreshCookie: string }) => {
+      this.cookie = refreshCookie;
+      Cookies.set('mas', refreshCookie, { expires: 7 });
       ioSocket.emit('refresh_done');
     });
 
-    ioSocket.on('ntf', notification => {
-      const type = notification.type;
-      delete notification.type;
-
-      console.log(`← NTF: ${type}`);
-
-      const event = serverIdToEventMap[type];
-
-      if (event) {
-        dispatch(event, notification);
-      } else {
-        console.warn(`Unknown notification received: ${type}`);
-      }
+    ioSocket.on('ntf', (notification: Notification) => {
+      console.log(`← NTF: ${notification.type}`);
+      dispatch(notification);
     });
 
     ioSocket.on('disconnect', () => {
@@ -83,16 +62,13 @@ class Socket {
       this.sessionId = null;
       this._connected = false;
 
-      this._disconnectedTimer = setTimeout(() => {
-        dispatch('OPEN_PRIORITY_MODAL', {
-          name: 'non-interactive-modal',
-          model: {
-            title: 'Connection error',
-            body: 'Connection to server lost. Trying to reconnect…'
-          }
+      this._disconnectedTimer = window.setTimeout(() => {
+        modalStore.openPriorityModal('non-interactive-modal', {
+          title: 'Connection error',
+          body: 'Connection to server lost. Trying to reconnect…'
         });
 
-        this._disconnectedTimer = null;
+        this._disconnectedTimer = undefined;
       }, 5000);
     });
 
@@ -104,22 +80,21 @@ class Socket {
       if (timer) {
         clearTimeout(timer);
       } else {
-        dispatch('CLOSE_PRIORITY_MODAL');
+        modalStore.closeModal();
       }
 
       this._emitInit();
     });
   }
 
-  send(command, callback?: (result: string) => void) {
-    this._sendQueue.push({
-      request: command,
-      callback
-    });
+  send<T>(request: T): Promise<RequestReturn<T>> {
+    return new Promise((resolve, reject) => {
+      this._sendQueue.push({ request, callback: { resolve, reject } });
 
-    if (this._sendQueue.length === 1 && this._connected) {
-      this._emitReq();
-    }
+      if (this._sendQueue.length === 1 && this._connected) {
+        this._emitReq();
+      }
+    });
   }
 
   _emitInit() {
@@ -145,10 +120,10 @@ class Socket {
 
     const req = this._sendQueue[0];
 
-    ioSocket.emit('req', req.request, data => {
+    ioSocket.emit('req', req.request, (data: Record<string, any>) => {
       if (req.callback) {
         console.log('← RESP');
-        req.callback(data);
+        req.callback.resolve(data);
       }
 
       this._sendQueue.shift();
@@ -160,7 +135,7 @@ class Socket {
 
   _logout() {
     Cookies.remove('mas', { path: '/' });
-    window.location = '/';
+    window.location.pathname = '/';
   }
 }
 

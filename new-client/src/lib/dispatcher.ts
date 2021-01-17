@@ -7,18 +7,12 @@ import profileStore from '../stores/ProfileStore';
 import settingStore from '../stores/SettingStore';
 import userStore from '../stores/UserStore';
 import windowStore from '../stores/WindowStore';
+import { Notification } from '../types/notifications';
 
-const noopCb = (): void => {
-  /* do nothing. */
-};
-const capitalize = (text: string) => text[0].toUpperCase() + text.slice(1).toLowerCase();
-
-export function dispatch(type: string, data = {}, acceptCb = noopCb, rejectCb = noopCb): void {
+export function dispatch(ntf: Notification): void {
   let consumed = false;
-  const name = type.split('_').map(capitalize).join('');
-  const handler = `handle${name}`;
 
-  const stores = {
+  const stores: Record<string, any> = {
     alerts: alertStore,
     daySeparator: daySeparatorStore,
     friend: friendStore,
@@ -31,20 +25,14 @@ export function dispatch(type: string, data = {}, acceptCb = noopCb, rejectCb = 
   };
 
   for (const store of Object.keys(stores)) {
-    const storeObj = stores[store];
+    consumed = stores[store].handlerServerNotification(ntf);
 
-    if (storeObj[handler]) {
-      consumed = true;
-
-      const noLog = storeObj[handler].call(storeObj, data, acceptCb, rejectCb);
-
-      if (!noLog) {
-        console.log(`[${store.name}-store] Consumed action ${type}.`);
-      }
+    if (consumed) {
+      break;
     }
   }
 
   if (!consumed) {
-    console.error(`No store handled action: ${type}`);
+    console.error(`No store handled action: ${ntf.type}`);
   }
 }

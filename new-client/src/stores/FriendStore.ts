@@ -1,89 +1,90 @@
-import { observable, makeObservable } from 'mobx';
-import { dispatch } from '../lib/dispatcher';
+import { observable, makeObservable, action } from 'mobx';
 import userStore from './UserStore';
+import alertStore from './AlertStore';
+import modalStore from './ModalStore';
 import FriendModel from '../models/Friend';
 import socket from '../lib/socket';
+import { Notification } from '../types/notifications';
+import { FriendVerdictRequest, RequestFriendRequest } from '../types/requests';
 
 class FriendStore {
-  friends = new Map();
+  friends = new Map<string, FriendModel>();
 
   constructor() {
     makeObservable(this, {
-      friends: observable
+      friends: observable,
+      updateFriends: action
     });
   }
 
-  handleAddFriendsServer({ reset, friends }) {
+  handlerServerNotification(ntf: Notification): boolean {
+    switch (ntf.type) {
+      case 'UPDATE_FRIENDS':
+        this.updateFriends(ntf.reset, ntf.friends);
+        break;
+      case 'CONFIRM_FRIENDS':
+        this.confirmFriends(ntf.friends);
+        break;
+      default:
+        return false;
+    }
+
+    return true;
+  }
+
+  updateFriends(reset: boolean, friends: Array<{ userId: string; online: boolean; last?: number }>) {
     if (reset) {
       this.friends.clear();
     }
 
     friends.forEach(friend => {
-      this.friends.set(friend.userId, new FriendModel(this, friend));
+      this.friends.set(friend.userId, new FriendModel(friend.userId, friend.online, friend.last));
     });
   }
 
-  handleConfirmRemoveFriend({ userId }) {
-    dispatch('OPEN_MODAL', {
-      name: 'remove-friend-modal',
-      model: userId
-    });
-  }
-
-  handleRequestFriend({ userId }) {
-    socket.send(
-      {
-        id: 'REQUEST_FRIEND',
-        userId
-      },
-      resp => {
-        const message =
-          resp.status === 'OK'
-            ? 'Request sent. Contact will added to your list when he or she approves.'
-            : resp.errorMsg;
-
-        dispatch('SHOW_ALERT', {
-          alertId: `internal:${Date.now()}`,
-          message,
-          report: false,
-          postponeLabel: false,
-          ackLabel: 'Okay'
-        });
-      }
-    );
-  }
-
-  handleConfirmFriendsServer({ friends }) {
+  confirmFriends(friends: Array<{ userId: string }>) {
     for (const friendCandidate of friends) {
       const userId = friendCandidate.userId;
       const user = userStore.users.get(userId);
+
+      if (!user) {
+        return;
+      }
+
       const message = `Allow ${user.name} (${user.nick.mas}) to add you to his/her contacts list?`;
 
-      dispatch('SHOW_ALERT', {
-        alertId: friendCandidate.userId,
-        message,
-        report: false,
-        postponeLabel: 'Decide later',
-        nackLabel: 'Ignore',
-        ackLabel: 'Allow',
-        resultCallback: result => {
-          if (result === 'ack' || result === 'nack') {
-            socket.send({
-              id: 'FRIEND_VERDICT',
-              userId,
-              allow: result === 'ack'
-            });
-          }
+      alertStore.showAlert(null, message, 'Allow', 'Ignore', 'Decide later', result => {
+        if (result === 'ack' || result === 'nack') {
+          socket.send<FriendVerdictRequest>({
+            id: 'FRIEND_VERDICT',
+            userId,
+            allow: result === 'ack'
+          });
         }
       });
     }
   }
 
-  handleRemoveFriend({ userId }) {
-    socket.send({
-      id: 'REMOVE_FRIEND',
+  confirmRemoveFriend(userId: string) {
+    modalStore.openModal('remove-friend-modal', { userId });
+  }
+
+  async requestFriend(userId: string) {
+    const response = await socket.send<RequestFriendRequest>({
+      id: 'REQUEST_FRIEND',
       userId
     });
+
+    const message =
+      response.status === 'OK'
+        ? 'Request sent. Contact will added to your list when he or she approves.'
+        : response.errorMsg;
+
+    alertStore.showAlert(null, message, 'Okay', false, false);
+  }
+
+  removeFriend(userId: string) {
+    socket.send({ id: 'REMOVE_FRIEND', userId });
   }
 }
 

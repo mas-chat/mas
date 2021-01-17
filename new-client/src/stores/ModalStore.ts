@@ -1,28 +1,27 @@
-import { observable, makeObservable } from 'mobx';
+import { observable, makeObservable, action } from 'mobx';
 
 class ModalStore {
-  modals = [];
+  modals: Array<{ name: string; model: Record<string, any> }> = [];
 
   constructor() {
     makeObservable(this, {
-      modals: observable
+      modals: observable,
+      openModal: action,
+      openPriorityModal: action,
+      closeModal: action
     });
   }
 
-  handleOpenModal({ name, model }) {
+  openModal(name: string, model: Record<string, string | number | undefined> = {}) {
     this.modals.push({ name, model });
   }
 
-  handleOpenPriorityModal({ name, model }) {
+  openPriorityModal(name: string, model: Record<string, string | number>) {
     // Show immediately
     this.modals.unshift({ name, model });
   }
 
-  handleCloseModal() {
-    this.modals.shift();
-  }
-
-  handleClosePriorityModal() {
+  closeModal() {
     this.modals.shift();
   }
 }

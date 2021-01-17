@@ -1,20 +1,12 @@
 export default class AlertModel {
-  store;
-
-  alertId;
-
-  resultCallback;
-
-  message;
-
-  postponeLabel;
-
-  ackLabel;
-
-  nackLabel;
-
-  constructor(store, props) {
-    this.store = store;
-    Object.assign(this, props);
-  }
+  constructor(
+    public readonly alertId: number | string,
+    public readonly message: string,
+    public readonly ackLabel: string = 'Dismiss',
+    public readonly nackLabel: false | string = 'Reject',
+    public readonly postponeLabel: false | string = 'Show again later',
+    public readonly resultCallback: (result: string) => void = () => {
+      // do nothing
+    }
+  ) {}
 }

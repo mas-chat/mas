@@ -1,39 +1,41 @@
 import { computed, observable, makeObservable } from 'mobx';
 import marked from 'marked';
-import emojione from 'emojione';
 import dayjs from 'dayjs';
 import URI from 'urijs';
+import emoticons from '../lib/emoticons';
+import WindowModel from './Window';
 import userStore from '../stores/UserStore';
+import { MessageCategory } from '../types/notifications';
 
 marked.setOptions({
-  breaks: true,
-  tables: false
+  breaks: true
 });
 
 export default class MessageModel {
-  gid = 0;
-
-  body = null;
-
-  cat = null;
-
-  ts = null;
-
-  userId = null;
-
-  window = null;
-
-  status = 'original';
-
-  updatedTs = null;
-
-  hideImages = false;
-
-  editing = false;
-
-  ircMotd = false;
-
-  constructor(store, props) {
+  constructor(
+    public readonly gid: number,
+    public readonly body: string | undefined = undefined,
+    public readonly cat:
+      | 'msg'
+      | 'join'
+      | 'part'
+      | 'quit'
+      | 'kick'
+      | 'day-divider'
+      | 'error'
+      | 'info'
+      | 'server'
+      | 'banner'
+      | 'action',
+    public readonly ts: number,
+    public readonly userId: string | null,
+    public readonly window: WindowModel,
+    public readonly status: 'original' | 'deleted' | 'edited' = 'original',
+    public readonly updatedTs: number | null = null,
+    public readonly hideImages: boolean = false,
+    public readonly editing: boolean = false,
+    public readonly ircMotd: boolean = false
+  ) {
     makeObservable(this, {
       body: observable,
       status: observable,
@@ -60,8 +62,6 @@ export default class MessageModel {
       videoId: computed,
       videoParams: computed
     });
-
-    Object.assign(this, props);
   }
 
   get edited() {
@@ -98,25 +98,30 @@ export default class MessageModel {
   }
 
   get nick() {
-    const user = userStore.users.get(this.userId);
-    return user ? user.nick[this.window.network] : '';
+    const user = this.userId && userStore.users.get(this.userId);
+
+    if (!user || !this.window.network) {
+      return null;
+    }
+
+    return user.nick[this.window.network];
   }
 
   get avatarUrl() {
-    const user = userStore.users.get(this.userId);
+    const user = this.userId && userStore.users.get(this.userId);
     return user ? `//gravatar.com/avatar/${user.gravatar}?d=mm` : '';
   }
 
-  get decoratedCat() {
+  get decoratedCat(): MessageCategory | 'mention' | 'mymsg' | 'service' | 'day-divider' {
     const cat = this.cat;
     const body = this.body;
     const userId = this.userId;
     const nick = this.nick;
 
-    const myNick = userStore.users.get(userStore.userId).nick[this.window.network];
+    const myNick = userStore.myNick(this.window.network);
     const mentionedRegEx = new RegExp(`(^|[@ ])${myNick}[ :]`);
 
-    if (mentionedRegEx && mentionedRegEx.test(body) && cat === 'msg') {
+    if (body && mentionedRegEx.test(body) && cat === 'msg') {
       return 'mention';
     }
 
@@ -136,12 +141,11 @@ export default class MessageModel {
   }
 
   get channelAction() {
-    const category = this.cat;
     const nick = this.nick;
     const groupName = this.window.name;
     const body = this.body;
 
-    switch (category) {
+    switch (this.cat) {
       case 'join':
         return `${nick} has joined ${groupName}.`;
       case 'part':
@@ -163,17 +167,19 @@ export default class MessageModel {
     let body = this.body;
     const cat = this.cat;
 
-    let parts = [];
+    let parts: Array<{ type: string; text?: string; url?: string; start?: number }> = [];
 
-    if (cat === 'msg') {
+    if (cat === 'msg' && body) {
       ({ body, parts } = this._parseLinks(body));
       body = marked(body);
       body = this._parseCustomFormatting(body);
-    } else {
+    } else if (body) {
       body = this._escapeHTMLStartTag(body);
     }
 
-    body = this._parseWhiteSpace(body);
+    if (body) {
+      body = this._parseWhiteSpace(body);
+    }
 
     parts.push({ type: 'text', text: body });
 
@@ -183,7 +189,7 @@ export default class MessageModel {
   // //redo
 
   get text() {
-    return this.bodyParts.find(part => part.type === 'text').text;
+    return this.bodyParts.find(part => part.type === 'text')?.text;
   }
 
   get images() {
@@ -220,17 +226,19 @@ export default class MessageModel {
     return `showinfo=0&autohide=1${start}`;
   }
 
-  _splitByLinks(text) {
+  _splitByLinks(text: string) {
     const parts = [];
     let previousEnd = 0;
 
-    URI.withinString(text, (url, start, end) => {
+    URI.withinString(text, (url, start: number, end: number) => {
       if (previousEnd !== start) {
         parts.push({ type: 'txt', data: text.substring(previousEnd, start) });
       }
 
       parts.push({ type: 'url', data: url });
       previousEnd = end;
+
+      return '';
     });
 
     if (previousEnd !== text.length) {
@@ -240,7 +248,7 @@ export default class MessageModel {
     return parts;
   }
 
-  _parseLinks(text) {
+  _parseLinks(text: string) {
     const imgSuffixes = ['png', 'jpg', 'jpeg', 'gif'];
     const media = [];
     let body = '';
@@ -259,14 +267,19 @@ export default class MessageModel {
         } else if ((domain === 'youtube.com' && urlObj.search(true).v) || domain === 'youtu.be') {
           visibleLink = urlObj.toString();
 
-          const startTime = urlObj.search(true).t;
+          let startTime = urlObj.search(true).t;
+
+          if (Array.isArray(startTime)) {
+            startTime = startTime[0];
+          }
+
           let inSeconds = 0;
 
           if (startTime) {
             const re = startTime.match(/^(?:(\d{1,2})h)?(?:(\d{1,2})m)?(?:(\d{1,2})s)?$/);
 
             if (re) {
-              inSeconds = parseInt(re[1] || 0) * 3600 + parseInt(re[2] || 0) * 60 + parseInt(re[3] || 0);
+              inSeconds = parseInt(re[1] || '0') * 3600 + parseInt(re[2] || '0') * 60 + parseInt(re[3] || '0');
             }
           }
 
@@ -300,25 +313,21 @@ export default class MessageModel {
     return { body, parts: media };
   }
 
-  _parseWhiteSpace(text) {
+  _parseWhiteSpace(text: string) {
     return text.replace(/ {2}/g, ' &nbsp;'); // Preserve whitespace.
   }
 
-  _parseCustomFormatting(text) {
+  _parseCustomFormatting(text: string) {
     let result;
 
     // Find @ character 1) after space, 2) in the beginning of string, 3) after HTML tag (>)
     result = text.replace(/(^| |>)(@\S+)(?=( |$))/g, (match, p1, p2) => this._renderMention(p1, p2));
 
-    // Convert Unicode emojis to :emojis:
-    result = emojione.toShort(result);
-
     result = result.replace(/:\S+?:/g, match => {
-      const emoji = emojione.emojioneList[match];
+      const emoji = emoticons[match];
 
       if (emoji) {
-        const unicode = emoji.unicode[emoji.unicode.length - 1];
-        return this._renderEmoji(match, `/app/assets/images/emoji/${unicode}.png`);
+        return this._renderEmoji(match, emoji);
       }
       return match;
     });
@@ -335,19 +344,19 @@ export default class MessageModel {
     return result;
   }
 
-  _renderLink(url, label) {
+  _renderLink(url: string, label: string) {
     return `<a href="${url}" target="_blank">${label}</a>`;
   }
 
-  _renderEmoji(name, src) {
-    return `<img align="absmiddle" alt="${name}" title="${name}" class="emoji" src="${src}"/>`;
+  _renderEmoji(name: string, src: string) {
+    return `<img align="absmiddle" alt="${name}" title="${name}" class="emoji" src="https://twemoji.maxcdn.com/v/latest/72x72/${src}.png"/>`;
   }
 
-  _renderMention(beforeCharacter, nick) {
+  _renderMention(beforeCharacter: string, nick: string) {
     return `${beforeCharacter}<span class="nick-mention">${nick}</span>`;
   }
 
-  _escapeHTMLStartTag(text) {
+  _escapeHTMLStartTag(text: string) {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   }
 }

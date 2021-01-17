@@ -1,45 +1,38 @@
-import { observable, makeObservable } from 'mobx';
+import { observable, makeObservable, action } from 'mobx';
 import ProfileModel from '../models/Profile';
-import { dispatch } from '../lib/dispatcher';
 import socket from '../lib/socket';
+import settingStore from '../stores/SettingStore';
+import { UpdateProfileRequest, GetProfileRequest } from '../types/requests';
 
 class ProfileStore {
-  profile = new ProfileModel(this, {});
+  profile: ProfileModel = new ProfileModel();
 
   constructor() {
     makeObservable(this, {
-      profile: observable
+      profile: observable,
+      updateProfile: action,
+      fetchProfile: action
     });
   }
 
-  handleUpdateProfile({ name, email, successCb, rejectCb }) {
-    socket.send(
-      {
-        id: 'UPDATE_PROFILE',
-        name,
-        email
-      },
-      resp => {
-        if (resp.status === 'OK') {
-          // Don't nag about unconfirmed email address anymore in this session
-          dispatch('SET_EMAIL_CONFIRMED');
-          successCb();
-        } else {
-          rejectCb(resp.errorMsg);
-        }
-      }
-    );
+  async updateProfile(name: string, email: string, successCb: () => void, rejectCb: (errorMsg?: string) => void) {
+    const response = await socket.send<UpdateProfileRequest>({ id: 'UPDATE_PROFILE', name, email });
+
+    if (response.status === 'OK') {
+      // Don't nag about unconfirmed email address anymore in this session
+      settingStore.setEmailConfirmed();
+
+      this.profile = new ProfileModel(this.profile.nick, name, email);
+      successCb();
+    } else {
+      rejectCb(response.errorMsg);
+    }
   }
 
-  handleFetchProfile() {
-    socket.send(
-      {
-        id: 'GET_PROFILE'
-      },
-      resp => {
-        this.profile = new ProfileModel(this, resp);
-      }
-    );
+  async fetchProfile() {
+    const response = await socket.send<GetProfileRequest>({ id: 'GET_PROFILE' });
+
+    this.profile = new ProfileModel(response.nick, response.name, response.email);
   }
 }
 
