@@ -15,6 +15,10 @@ class ProfileStore {
     });
   }
 
+  handlerServerNotification() {
+    return false;
+  }
+
   async updateProfile(name: string, email: string, successCb: () => void, rejectCb: (errorMsg?: string) => void) {
     const response = await socket.send<UpdateProfileRequest>({ id: 'UPDATE_PROFILE', name, email });
 

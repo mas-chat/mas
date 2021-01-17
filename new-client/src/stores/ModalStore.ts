@@ -12,6 +12,10 @@ class ModalStore {
     });
   }
 
+  handlerServerNotification() {
+    return false;
+  }
+
   openModal(name: string, model: Record<string, string | number | undefined> = {}) {
     this.modals.push({ name, model });
   }

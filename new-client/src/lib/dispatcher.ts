@@ -9,30 +9,28 @@ import userStore from '../stores/UserStore';
 import windowStore from '../stores/WindowStore';
 import { Notification } from '../types/notifications';
 
+interface Store {
+  handlerServerNotification(ntf: Notification): boolean;
+}
+
+const stores: Record<string, Store> = {
+  alerts: alertStore,
+  daySeparator: daySeparatorStore,
+  friend: friendStore,
+  modal: modalStore,
+  networks: networkStore,
+  profile: profileStore,
+  settings: settingStore,
+  users: userStore,
+  window: windowStore
+};
+
 export function dispatch(ntf: Notification): void {
-  let consumed = false;
-
-  const stores: Record<string, any> = {
-    alerts: alertStore,
-    daySeparator: daySeparatorStore,
-    friend: friendStore,
-    modal: modalStore,
-    networks: networkStore,
-    profile: profileStore,
-    settings: settingStore,
-    users: userStore,
-    window: windowStore
-  };
-
-  for (const store of Object.keys(stores)) {
-    consumed = stores[store].handlerServerNotification(ntf);
-
-    if (consumed) {
-      break;
+  for (const store of Object.values(stores)) {
+    if (store.handlerServerNotification(ntf)) {
+      return;
     }
   }
 
-  if (!consumed) {
-    console.error(`No store handled action: ${ntf.type}`);
-  }
+  console.error(`No store handled action: ${ntf.type}`);
 }

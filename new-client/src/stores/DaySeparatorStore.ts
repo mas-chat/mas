@@ -18,6 +18,10 @@ class DaySeparatorStore {
 
     setTimeout(changeDay, timeToTomorrow);
   }
+
+  handlerServerNotification() {
+    return false;
+  }
 }
 
 export default new DaySeparatorStore();

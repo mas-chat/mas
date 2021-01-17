@@ -9,8 +9,7 @@ class UserStore {
 
   constructor() {
     makeObservable(this, {
-      users: observable,
-      myNick: computed
+      users: observable
     });
 
     // TODO: Should read this from initok request but that's too late
