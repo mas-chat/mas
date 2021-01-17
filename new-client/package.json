@@ -10,11 +10,10 @@
   "scripts": {
     "prod": "webpack --config webpack.prod.js",
     "dev": "webpack serve --config webpack.dev.js",
-    "lint": "eslint '*/**/*.{js,ts,tsx}'"
+    "lint": "eslint 'src/**/*.{js,ts,tsx}'"
   },
   "dependencies": {
     "dayjs": "^1.9.8",
-    "emojione": "2",
     "grommet": "^2.16.2",
     "ismobilejs": "^1.1.1",
     "js-cookie": "^2.2.1",
@@ -38,9 +37,9 @@
     "@types/marked": "^1.2.1",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "@types/socket.io-client": "^1.4.34",
+    "@types/socket.io-client": "^1.4.35",
     "@types/styled-components": "^5.1.7",
-    "@types/urijs": "^1.19.13",
+    "@types/urijs": "^1.19.14",
     "@typescript-eslint/eslint-plugin": "^4.11.0",
     "@typescript-eslint/parser": "^4.11.0",
     "babel-loader": "^8.2.2",

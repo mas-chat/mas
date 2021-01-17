@@ -12,6 +12,7 @@ module.exports = {
     'prettier/@typescript-eslint'
   ],
   rules: {
+    '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^_' }]
   },
   settings: {
     'import/extensions': ['.js', '.jsx'],
