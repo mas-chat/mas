@@ -8,8 +8,6 @@ import { AlertsRecord, Network, WindowType, UpdatableWindowRecord } from '../typ
 export default class WindowModel {
   messages = new Map<number, MessageModel>();
   logMessages = new Map<number, MessageModel>();
-
-  generation = '';
   actualDesktop = 0;
   newMessagesCount = 0;
   notDelivered = false;
@@ -24,6 +22,7 @@ export default class WindowModel {
     public readonly peerUser: UserModel | null,
     public readonly network: Network,
     public readonly type: WindowType,
+    public generation: string,
     public topic: string | null,
     public name: string | null,
     public row: number,

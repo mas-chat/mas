@@ -1,4 +1,4 @@
-import { observable, computed, makeObservable } from 'mobx';
+import { observable, computed, makeObservable, action } from 'mobx';
 import dayjs from 'dayjs';
 import isMobile from 'ismobilejs';
 import Message from '../models/Message';
@@ -51,7 +51,9 @@ class WindowStore {
     makeObservable(this, {
       windows: observable,
       initDone: observable,
-      desktops: computed
+      desktops: computed,
+      addWindow: action,
+      finishStartup: action
     });
   }
 
@@ -383,6 +385,7 @@ class WindowStore {
           user,
           windowRecord.network,
           windowRecord.windowType,
+          this.socket.sessionId,
           windowRecord.topic,
           windowRecord.name,
           windowRecord.row,
@@ -478,7 +481,7 @@ class WindowStore {
     });
   }
 
-  seekActiveDesktop(direction: number) {
+  seekActiveDesktop(direction: number): void {
     const desktops = this.desktops;
     const activeDesktopId = this.rootStore.settingStore.settings.activeDesktop;
     const activeDesktop = desktops.find(desktop => desktop.id === activeDesktopId);
@@ -500,7 +503,7 @@ class WindowStore {
     this.rootStore.settingStore.changeActiveDesktop(desktops[index].id);
   }
 
-  finishStartup() {
+  finishStartup(): void {
     // Remove possible deleted windows.
     this.windows.forEach(windowObject => {
       if (windowObject.generation !== this.socket.sessionId) {

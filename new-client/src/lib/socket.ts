@@ -11,7 +11,7 @@ const ioSocket = config.socketHost ? io.connect(config.socketHost) : io.connect(
 
 class Socket {
   rootStore: RootStore;
-  sessionId: string | null = null;
+  sessionId = '';
   maxBacklogMsgs = 100000;
   private connected = false;
   private sendQueue: Array<{ request: any; callback: any }> = [];
@@ -49,7 +49,6 @@ class Socket {
     ioSocket.on('disconnect', () => {
       console.log('Socket.io connection lost.');
 
-      this.sessionId = null;
       this.connected = false;
 
       this.disconnectedTimer = window.setTimeout(() => {
