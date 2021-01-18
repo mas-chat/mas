@@ -1,5 +1,5 @@
 import { observable, computed, makeObservable, action } from 'mobx';
-import AlertModel from '../models/alert';
+import AlertModel from '../models/Alert';
 import { Notification } from '../types/notifications';
 import RootStore from './RootStore';
 import Socket from '../lib/socket';
