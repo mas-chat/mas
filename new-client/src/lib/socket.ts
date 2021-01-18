@@ -6,8 +6,12 @@ import { logout, setCookie, cookie } from '../lib/cookie';
 
 declare const config: { socketHost: string | false };
 
+const socketIOOptions = {
+  transports: ['websocket', 'polling']
+};
+
 // Start the connection as early as possible.
-const ioSocket = config.socketHost ? io.connect(config.socketHost) : io.connect();
+const ioSocket = config.socketHost ? io.connect(config.socketHost, socketIOOptions) : io.connect(socketIOOptions);
 
 class Socket {
   rootStore: RootStore;
