@@ -47,7 +47,7 @@ export type WindowRecord = {
   network: Network;
   password: string;
   alerts: AlertsRecord;
-  topic: string;
+  topic: string | null;
   role: Role;
   minimizedNamesList: boolean;
   desktop: number;

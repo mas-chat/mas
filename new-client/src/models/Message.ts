@@ -2,19 +2,21 @@ import { computed, observable, makeObservable } from 'mobx';
 import marked from 'marked';
 import dayjs from 'dayjs';
 import URI from 'urijs';
-import emoticons from '../lib/emoticons';
 import WindowModel from './Window';
-import userStore from '../stores/UserStore';
-import { MessageCategory } from '../types/notifications';
+import UserModel, { me } from './User';
+import emoticons from '../lib/emoticons';
+import { MessageCategory, MessageRecord } from '../types/notifications';
 
 marked.setOptions({
   breaks: true
 });
 
 export default class MessageModel {
+  me: UserModel;
+
   constructor(
     public readonly gid: number,
-    public readonly body: string | undefined = undefined,
+    public body: string | undefined = undefined,
     public readonly cat:
       | 'msg'
       | 'join'
@@ -28,14 +30,16 @@ export default class MessageModel {
       | 'banner'
       | 'action',
     public readonly ts: number,
-    public readonly userId: string | null,
+    public readonly user: UserModel,
     public readonly window: WindowModel,
-    public readonly status: 'original' | 'deleted' | 'edited' = 'original',
-    public readonly updatedTs: number | null = null,
+    public status: 'original' | 'deleted' | 'edited' = 'original',
+    public updatedTs: number | null = null,
     public readonly hideImages: boolean = false,
     public readonly editing: boolean = false,
     public readonly ircMotd: boolean = false
   ) {
+    this.me = me;
+
     makeObservable(this, {
       body: observable,
       status: observable,
@@ -98,34 +102,30 @@ export default class MessageModel {
   }
 
   get nick() {
-    const user = this.userId && userStore.users.get(this.userId);
-
-    if (!user || !this.window.network) {
+    if (!this.window.network) {
       return null;
     }
 
-    return user.nick[this.window.network];
+    return this.user.nick[this.window.network];
   }
 
   get avatarUrl() {
-    const user = this.userId && userStore.users.get(this.userId);
-    return user ? `//gravatar.com/avatar/${user.gravatar}?d=mm` : '';
+    return `//gravatar.com/avatar/${this.user.gravatar}?d=mm`;
   }
 
   get decoratedCat(): MessageCategory | 'mention' | 'mymsg' | 'service' | 'day-divider' {
     const cat = this.cat;
     const body = this.body;
-    const userId = this.userId;
     const nick = this.nick;
 
-    const myNick = userStore.myNick(this.window.network);
+    const myNick = this.me.nick[this.window.network];
     const mentionedRegEx = new RegExp(`(^|[@ ])${myNick}[ :]`);
 
     if (body && mentionedRegEx.test(body) && cat === 'msg') {
       return 'mention';
     }
 
-    if (userId === userStore.userId && cat === 'msg') {
+    if (this.user === this.me && cat === 'msg') {
       return 'mymsg';
     }
 
@@ -170,15 +170,15 @@ export default class MessageModel {
     let parts: Array<{ type: string; text?: string; url?: string; start?: number }> = [];
 
     if (cat === 'msg' && body) {
-      ({ body, parts } = this._parseLinks(body));
+      ({ body, parts } = this.parseLinks(body));
       body = marked(body);
-      body = this._parseCustomFormatting(body);
+      body = this.parseCustomFormatting(body);
     } else if (body) {
-      body = this._escapeHTMLStartTag(body);
+      body = this.escapeHTMLStartTag(body);
     }
 
     if (body) {
-      body = this._parseWhiteSpace(body);
+      body = this.parseWhiteSpace(body);
     }
 
     parts.push({ type: 'text', text: body });
@@ -226,7 +226,13 @@ export default class MessageModel {
     return `showinfo=0&autohide=1${start}`;
   }
 
-  _splitByLinks(text: string) {
+  updateFromRecord(message: MessageRecord): void {
+    this.body = message.body;
+    this.status = message.status;
+    this.updatedTs = typeof message.updatedTs !== 'undefined' ? message.updatedTs : this.updatedTs;
+  }
+
+  private splitByLinks(text: string) {
     const parts = [];
     let previousEnd = 0;
 
@@ -248,12 +254,12 @@ export default class MessageModel {
     return parts;
   }
 
-  _parseLinks(text: string) {
+  private parseLinks(text: string) {
     const imgSuffixes = ['png', 'jpg', 'jpeg', 'gif'];
     const media = [];
     let body = '';
 
-    const parts = this._splitByLinks(text);
+    const parts = this.splitByLinks(text);
 
     for (const part of parts) {
       if (part.type === 'url') {
@@ -304,30 +310,30 @@ export default class MessageModel {
           normalized = urlObj;
         }
 
-        body += this._renderLink(normalized.toString(), this._escapeHTMLStartTag(visibleLink));
+        body += this.renderLink(normalized.toString(), this.escapeHTMLStartTag(visibleLink));
       } else {
-        body += this._escapeHTMLStartTag(part.data);
+        body += this.escapeHTMLStartTag(part.data);
       }
     }
 
     return { body, parts: media };
   }
 
-  _parseWhiteSpace(text: string) {
+  private parseWhiteSpace(text: string) {
     return text.replace(/ {2}/g, ' &nbsp;'); // Preserve whitespace.
   }
 
-  _parseCustomFormatting(text: string) {
+  private parseCustomFormatting(text: string) {
     let result;
 
     // Find @ character 1) after space, 2) in the beginning of string, 3) after HTML tag (>)
-    result = text.replace(/(^| |>)(@\S+)(?=( |$))/g, (match, p1, p2) => this._renderMention(p1, p2));
+    result = text.replace(/(^| |>)(@\S+)(?=( |$))/g, (match, p1, p2) => this.renderMention(p1, p2));
 
     result = result.replace(/:\S+?:/g, match => {
       const emoji = emoticons[match];
 
       if (emoji) {
-        return this._renderEmoji(match, emoji);
+        return this.renderEmoji(match, emoji);
       }
       return match;
     });
@@ -344,19 +350,19 @@ export default class MessageModel {
     return result;
   }
 
-  _renderLink(url: string, label: string) {
+  private renderLink(url: string, label: string) {
     return `<a href="${url}" target="_blank">${label}</a>`;
   }
 
-  _renderEmoji(name: string, src: string) {
+  private renderEmoji(name: string, src: string) {
     return `<img align="absmiddle" alt="${name}" title="${name}" class="emoji" src="https://twemoji.maxcdn.com/v/latest/72x72/${src}.png"/>`;
   }
 
-  _renderMention(beforeCharacter: string, nick: string) {
+  private renderMention(beforeCharacter: string, nick: string) {
     return `${beforeCharacter}<span class="nick-mention">${nick}</span>`;
   }
 
-  _escapeHTMLStartTag(text: string) {
+  private escapeHTMLStartTag(text: string) {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   }
 }

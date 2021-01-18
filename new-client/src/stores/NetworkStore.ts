@@ -1,10 +1,17 @@
 import { observable, makeObservable, action } from 'mobx';
 import { Notification } from '../types/notifications';
+import RootStore from './RootStore';
+import Socket from '../lib/socket';
 
 class NetworkStore {
+  rootStore: RootStore;
+  socket: Socket;
   networks: Array<string> = [];
 
-  constructor() {
+  constructor(rootStore: RootStore, socket: Socket) {
+    this.rootStore = rootStore;
+    this.socket = socket;
+
     makeObservable(this, {
       networks: observable,
       updateNetworks: action
@@ -28,4 +35,4 @@ class NetworkStore {
   }
 }
 
-export default new NetworkStore();
+export default NetworkStore;

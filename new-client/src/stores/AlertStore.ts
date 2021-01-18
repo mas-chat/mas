@@ -1,14 +1,20 @@
 import { observable, computed, makeObservable, action } from 'mobx';
 import AlertModel from '../models/alert';
-import socket from '../lib/socket';
 import { Notification } from '../types/notifications';
+import RootStore from './RootStore';
+import Socket from '../lib/socket';
 
 let nextLocalAlertId = 0;
 
 class AlertStore {
+  rootStore: RootStore;
+  socket: Socket;
   alerts = new Map<string, AlertModel>();
 
-  constructor() {
+  constructor(rootStore: RootStore, socket: Socket) {
+    this.rootStore = rootStore;
+    this.socket = socket;
+
     makeObservable(this, {
       alerts: observable,
       currentAlert: computed,
@@ -43,7 +49,7 @@ class AlertStore {
   ) {
     const resultCallback = (result: string) => {
       if (result === 'ack') {
-        socket.send({ id: 'ACKALERT', alertId: alertId });
+        this.socket.send({ id: 'ACKALERT', alertId: alertId });
       }
     };
 
@@ -71,4 +77,4 @@ class AlertStore {
   }
 }
 
-export default new AlertStore();
+export default AlertStore;

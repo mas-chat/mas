@@ -1,16 +1,20 @@
 import { observable, makeObservable } from 'mobx';
 import isMobile from 'ismobilejs';
 import SettingsModel from '../models/Settings';
-import socket from '../lib/socket';
-import windowStore from './WindowStore';
-import alertStore from './AlertStore';
 import { Notification } from '../types/notifications';
 import { SendConfirmEmailRequest } from '../types/requests';
+import RootStore from './RootStore';
+import Socket from '../lib/socket';
 
 class SettingStore {
+  rootStore: RootStore;
+  socket: Socket;
   settings = new SettingsModel();
 
-  constructor() {
+  constructor(rootStore: RootStore, socket: Socket) {
+    this.rootStore = rootStore;
+    this.socket = socket;
+
     makeObservable(this, {
       settings: observable
     });
@@ -47,7 +51,7 @@ class SettingStore {
     const newTheme = this.settings.theme === 'dark' ? 'default' : 'dark';
     this.updateSettings(newTheme);
 
-    socket.send({
+    this.socket.send({
       id: 'SET',
       settings: {
         theme: newTheme
@@ -58,9 +62,9 @@ class SettingStore {
   async handleConfirmEmail() {
     const msg = "Confirmation link sent. Check your spam folder if you don't see it in inbox.";
 
-    await socket.send<SendConfirmEmailRequest>({ id: 'SEND_CONFIRM_EMAIL' });
+    await this.socket.send<SendConfirmEmailRequest>({ id: 'SEND_CONFIRM_EMAIL' });
 
-    alertStore.showAlert(null, msg, 'Okay', false, false, () => {
+    this.rootStore.alertStore.showAlert(null, msg, 'Okay', false, false, () => {
       this.setEmailConfirmed();
     });
   }
@@ -70,16 +74,16 @@ class SettingStore {
   }
 
   changeActiveDesktop(activeDesktop: number) {
-    if (!windowStore.initDone) {
+    if (!this.rootStore.windowStore.initDone) {
       return;
     }
 
     this.updateSettings(undefined, activeDesktop);
 
     if (!isMobile().any) {
-      socket.send({ id: 'SET', settings: { activeDesktop } });
+      this.socket.send({ id: 'SET', settings: { activeDesktop } });
     }
   }
 }
 
-export default new SettingStore();
+export default SettingStore;

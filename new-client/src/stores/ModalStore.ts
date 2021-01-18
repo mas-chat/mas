@@ -1,9 +1,16 @@
 import { observable, makeObservable, action } from 'mobx';
+import RootStore from './RootStore';
+import Socket from '../lib/socket';
 
 class ModalStore {
+  rootStore: RootStore;
+  socket: Socket;
   modals: Array<{ name: string; model: Record<string, any> }> = [];
 
-  constructor() {
+  constructor(rootStore: RootStore, socket: Socket) {
+    this.rootStore = rootStore;
+    this.socket = socket;
+
     makeObservable(this, {
       modals: observable,
       openModal: action,
@@ -30,4 +37,4 @@ class ModalStore {
   }
 }
 
-export default new ModalStore();
+export default ModalStore;

@@ -1,10 +1,17 @@
 import { observable, makeObservable } from 'mobx';
 import dayjs from 'dayjs';
+import RootStore from './RootStore';
+import Socket from '../lib/socket';
 
 class DaySeparatorStore {
+  rootStore: RootStore;
+  socket: Socket;
   dayCounter = 0;
 
-  constructor() {
+  constructor(rootStore: RootStore, socket: Socket) {
+    this.rootStore = rootStore;
+    this.socket = socket;
+
     makeObservable(this, {
       dayCounter: observable
     });
@@ -19,9 +26,9 @@ class DaySeparatorStore {
     setTimeout(changeDay, timeToTomorrow);
   }
 
-  handlerServerNotification() {
+  handlerServerNotification(): boolean {
     return false;
   }
 }
 
-export default new DaySeparatorStore();
+export default DaySeparatorStore;

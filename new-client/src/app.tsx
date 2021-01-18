@@ -1,6 +1,10 @@
 import React from 'react';
 import { Box, Button, Grommet, Sidebar, Avatar, Nav } from 'grommet';
 import { Help, Projects, Clock } from 'grommet-icons';
+import Desktop from './components/Desktop';
+import RootStore from './stores/RootStore';
+
+const rootStore = new RootStore();
 
 const theme = {
   global: {
@@ -33,6 +37,7 @@ const App: React.FunctionComponent<Record<string, never>> = () => (
       <Box flex overflow="hidden">
         <Box flex align="center" justify="center">
           app body
+          <Desktop rootStore={rootStore}></Desktop>
         </Box>
       </Box>
     </Box>

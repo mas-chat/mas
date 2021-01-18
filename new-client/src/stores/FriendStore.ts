@@ -1,16 +1,19 @@
 import { observable, makeObservable, action } from 'mobx';
-import userStore from './UserStore';
-import alertStore from './AlertStore';
-import modalStore from './ModalStore';
 import FriendModel from '../models/Friend';
-import socket from '../lib/socket';
 import { Notification } from '../types/notifications';
 import { FriendVerdictRequest, RequestFriendRequest } from '../types/requests';
+import RootStore from './RootStore';
+import Socket from '../lib/socket';
 
 class FriendStore {
+  rootStore: RootStore;
+  socket: Socket;
   friends = new Map<string, FriendModel>();
 
-  constructor() {
+  constructor(rootStore: RootStore, socket: Socket) {
+    this.rootStore = rootStore;
+    this.socket = socket;
+
     makeObservable(this, {
       friends: observable,
       updateFriends: action
@@ -38,14 +41,18 @@ class FriendStore {
     }
 
     friends.forEach(friend => {
-      this.friends.set(friend.userId, new FriendModel(friend.userId, friend.online, friend.last));
+      const user = this.rootStore.userStore.users.get(friend.userId);
+
+      if (user) {
+        this.friends.set(friend.userId, new FriendModel(user, friend.online, friend.last));
+      }
     });
   }
 
   confirmFriends(friends: Array<{ userId: string }>) {
     for (const friendCandidate of friends) {
       const userId = friendCandidate.userId;
-      const user = userStore.users.get(userId);
+      const user = this.rootStore.userStore.users.get(userId);
 
       if (!user) {
         return;
@@ -53,9 +60,9 @@ class FriendStore {
 
       const message = `Allow ${user.name} (${user.nick.mas}) to add you to his/her contacts list?`;
 
-      alertStore.showAlert(null, message, 'Allow', 'Ignore', 'Decide later', result => {
+      this.rootStore.alertStore.showAlert(null, message, 'Allow', 'Ignore', 'Decide later', result => {
         if (result === 'ack' || result === 'nack') {
-          socket.send<FriendVerdictRequest>({
+          this.socket.send<FriendVerdictRequest>({
             id: 'FRIEND_VERDICT',
             userId,
             allow: result === 'ack'
@@ -66,11 +73,11 @@ class FriendStore {
   }
 
   confirmRemoveFriend(userId: string) {
-    modalStore.openModal('remove-friend-modal', { userId });
+    this.rootStore.modalStore.openModal('remove-friend-modal', { userId });
   }
 
   async requestFriend(userId: string) {
-    const response = await socket.send<RequestFriendRequest>({
+    const response = await this.socket.send<RequestFriendRequest>({
       id: 'REQUEST_FRIEND',
       userId
     });
@@ -80,12 +87,12 @@ class FriendStore {
         ? 'Request sent. Contact will added to your list when he or she approves.'
         : response.errorMsg;
 
-    alertStore.showAlert(null, message, 'Okay', false, false);
+    this.rootStore.alertStore.showAlert(null, message, 'Okay', false, false);
   }
 
   removeFriend(userId: string) {
-    socket.send({ id: 'REMOVE_FRIEND', userId });
+    this.socket.send({ id: 'REMOVE_FRIEND', userId });
   }
 }
 
-export default new FriendStore();
+export default FriendStore;

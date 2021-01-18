@@ -1,13 +1,18 @@
 import { observable, makeObservable, action } from 'mobx';
 import ProfileModel from '../models/Profile';
-import socket from '../lib/socket';
-import settingStore from '../stores/SettingStore';
 import { UpdateProfileRequest, GetProfileRequest } from '../types/requests';
+import RootStore from './RootStore';
+import Socket from '../lib/socket';
 
 class ProfileStore {
+  rootStore: RootStore;
+  socket: Socket;
   profile: ProfileModel = new ProfileModel();
 
-  constructor() {
+  constructor(rootStore: RootStore, socket: Socket) {
+    this.rootStore = rootStore;
+    this.socket = socket;
+
     makeObservable(this, {
       profile: observable,
       updateProfile: action,
@@ -20,11 +25,11 @@ class ProfileStore {
   }
 
   async updateProfile(name: string, email: string, successCb: () => void, rejectCb: (errorMsg?: string) => void) {
-    const response = await socket.send<UpdateProfileRequest>({ id: 'UPDATE_PROFILE', name, email });
+    const response = await this.socket.send<UpdateProfileRequest>({ id: 'UPDATE_PROFILE', name, email });
 
     if (response.status === 'OK') {
       // Don't nag about unconfirmed email address anymore in this session
-      settingStore.setEmailConfirmed();
+      this.rootStore.settingStore.setEmailConfirmed();
 
       this.profile = new ProfileModel(this.profile.nick, name, email);
       successCb();
@@ -34,10 +39,10 @@ class ProfileStore {
   }
 
   async fetchProfile() {
-    const response = await socket.send<GetProfileRequest>({ id: 'GET_PROFILE' });
+    const response = await this.socket.send<GetProfileRequest>({ id: 'GET_PROFILE' });
 
     this.profile = new ProfileModel(response.nick, response.name, response.email);
   }
 }
 
-export default new ProfileStore();
+export default ProfileStore;

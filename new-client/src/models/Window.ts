@@ -1,14 +1,13 @@
-import { computed, observable, autorun, makeObservable } from 'mobx';
+import { computed, observable, makeObservable } from 'mobx';
 import dayjs from 'dayjs';
 import isMobile from 'ismobilejs';
-import Message from './Message';
-import settingStore from '../stores/SettingStore';
-import userStore from '../stores/UserStore';
-import { AlertsRecord, Network, WindowType } from '../types/notifications';
+import MessageModel from './Message';
+import UserModel, { systemUser, ircSystemUser } from './User';
+import { AlertsRecord, Network, WindowType, UpdatableWindowRecord } from '../types/notifications';
 
 export default class WindowModel {
-  messages = new Map<number, Message>();
-  logMessages = new Map<number, Message>();
+  messages = new Map<number, MessageModel>();
+  logMessages = new Map<number, MessageModel>();
 
   generation = '';
   actualDesktop = 0;
@@ -16,13 +15,13 @@ export default class WindowModel {
   notDelivered = false;
   minimizedNamesList = false;
 
-  operators: Array<string> = [];
-  voices: Array<string> = [];
-  users: Array<string> = [];
+  operators: Array<UserModel> = [];
+  voices: Array<UserModel> = [];
+  users: Array<UserModel> = [];
 
   constructor(
     public readonly windowId: number,
-    public readonly userId: string | null,
+    public readonly peerUser: UserModel | null,
     public readonly network: Network,
     public readonly type: WindowType,
     public topic: string | null,
@@ -30,7 +29,8 @@ export default class WindowModel {
     public row: number,
     public column: number,
     public password: string | null,
-    public alerts: AlertsRecord
+    public alerts: AlertsRecord,
+    public role: string
   ) {
     makeObservable(this, {
       topic: observable,
@@ -50,7 +50,6 @@ export default class WindowModel {
       minimizedNamesList: observable,
       actualDesktop: observable,
       desktop: computed,
-      visible: computed,
       sortedMessages: computed,
       sortedLogMessages: computed,
       operatorNames: computed,
@@ -62,12 +61,6 @@ export default class WindowModel {
       tooltipTopic: computed,
       explainedType: computed
     });
-
-    autorun(() => {
-      if (this.visible) {
-        this.newMessagesCount = 0;
-      }
-    });
   }
 
   get desktop() {
@@ -78,16 +71,12 @@ export default class WindowModel {
     this.actualDesktop = isMobile().any ? Math.floor(Math.random() * 10000000) : value;
   }
 
-  get visible() {
-    return settingStore.settings.activeDesktop === this.actualDesktop;
-  }
-
   get sortedMessages() {
     const result = Array.from(this.messages.values()).sort((a, b) => (a.ts === b.ts ? a.gid - b.gid : a.ts - b.ts));
     let gid = -1;
 
-    const addDayDivider = (array: Array<Message>, dateString: string, index: number) => {
-      array.splice(index, 0, new Message(gid--, dateString, 'day-divider', 0, null, this));
+    const addDayDivider = (array: Array<MessageModel>, dateString: string, index: number) => {
+      array.splice(index, 0, new MessageModel(gid--, dateString, 'day-divider', 0, systemUser, this));
     };
 
     let dayOfNextMsg = dayjs().format('dddd, MMMM D');
@@ -109,30 +98,28 @@ export default class WindowModel {
   }
 
   get operatorNames() {
-    return this._mapUserIdsToNicks('operators');
+    return this._mapUserToNicks('operators');
   }
 
   get voiceNames() {
-    return this._mapUserIdsToNicks('voices');
+    return this._mapUserToNicks('voices');
   }
 
   get userNames() {
-    return this._mapUserIdsToNicks('users');
+    return this._mapUserToNicks('users');
   }
 
   get decoratedTitle() {
     let title = '';
     const type = this.type;
-    const userId = this.userId;
     const network = this.network;
     const name = this.name;
 
-    if (type === '1on1' && userId === 'i0') {
+    if (type === '1on1' && this.peerUser === ircSystemUser) {
       title = `${network} Server Messages`;
-    } else if (type === '1on1' && userId) {
+    } else if (type === '1on1' && this.peerUser) {
       const ircNetwork = network === 'mas' ? '' : `${network} `;
-      const peerUser = userStore.users.get(userId);
-      const target = peerUser ? peerUser.nick[network] : 'person';
+      const target = this.peerUser.nick[network];
       title = `Private ${ircNetwork} conversation with ${target}`;
     } else if (network === 'mas') {
       title = `Group: ${name?.charAt(0).toUpperCase()}${name?.substr(1)}`;
@@ -160,10 +147,7 @@ export default class WindowModel {
     if (type === 'group') {
       windowName = windowName.replace(/[&/\\#,+()$~%.'":*?<>{}]/g, '');
     } else {
-      const userId = this.userId;
-      const peerUser = userId && userStore.users.get(userId);
-
-      windowName = peerUser ? peerUser.nick[network] || null : '1on1';
+      windowName = this.peerUser ? this.peerUser.nick[network] || null : '1on1';
     }
     return windowName;
   }
@@ -183,17 +167,31 @@ export default class WindowModel {
     return '1on1';
   }
 
-  _mapUserIdsToNicks(role: 'operators' | 'voices' | 'users') {
-    return this[role]
-      .map(userId => {
-        const user = userStore.users.get(userId);
+  updateGeneration(generation: string): void {
+    this.generation = generation;
+  }
 
-        return {
-          userId,
-          nick: user?.nick[this.network] || 'unkown',
-          gravatar: user?.gravatar
-        };
-      })
+  updateFromRecord(record: UpdatableWindowRecord): void {
+    this.password = typeof record.password !== 'undefined' ? record.password : this.password;
+    this.topic = typeof record.topic !== 'undefined' ? record.topic : this.topic;
+    this.row = typeof record.row !== 'undefined' ? record.row : this.row;
+    this.column = typeof record.column !== 'undefined' ? record.column : this.column;
+    this.desktop = typeof record.desktop !== 'undefined' ? record.desktop : this.desktop;
+    this.minimizedNamesList =
+      typeof record.minimizedNamesList !== 'undefined' ? record.minimizedNamesList : this.minimizedNamesList;
+    this.alerts.email = typeof record.alerts?.email !== 'undefined' ? record.alerts.email : this.alerts.email;
+    this.alerts.notification =
+      typeof record.alerts?.notification !== 'undefined' ? record.alerts.notification : this.alerts.notification;
+    this.alerts.sound = typeof record.alerts?.sound !== 'undefined' ? record.alerts.sound : this.alerts.sound;
+    this.alerts.title = typeof record.alerts?.title !== 'undefined' ? record.alerts.title : this.alerts.title;
+  }
+
+  _mapUserToNicks(role: 'operators' | 'voices' | 'users') {
+    return this[role]
+      .map(user => ({
+        nick: user.nick[this.network] || 'unknown',
+        gravatar: user.gravatar
+      }))
       .sort((a, b) => a.nick.localeCompare(b.nick));
   }
 }

@@ -1,33 +1,35 @@
 import { observable, makeObservable, computed } from 'mobx';
-import Cookies from 'js-cookie';
-import UserModel from '../models/User';
+import UserModel, { systemUser, me, ircSystemUser } from '../models/User';
 import { Notification } from '../types/notifications';
+import { userId } from '../lib/cookie';
+import RootStore from './RootStore';
+import Socket from '../lib/socket';
 
 class UserStore {
-  users = new Map<string, UserModel>();
-  userId: string;
+  rootStore: RootStore;
+  socket: Socket;
+  users = new Map<string, UserModel>([
+    [userId, me],
+    ['m0', systemUser],
+    ['i0', ircSystemUser]
+  ]);
 
-  constructor() {
+  constructor(rootStore: RootStore, socket: Socket) {
+    this.rootStore = rootStore;
+    this.socket = socket;
+
     makeObservable(this, {
-      users: observable
+      users: observable,
+      me: computed
     });
-
-    // TODO: Should read this from initok request but that's too late
-    const encodedUserId = Cookies.get('mas');
-
-    if (!encodedUserId) {
-      throw 'Cookie not found.';
-    }
-
-    this.userId = `m${JSON.parse(window.atob(encodedUserId)).userId}`;
   }
 
   myNick(network: 'mas' | 'IRCNet' | 'FreeNode' | 'W3C') {
-    if (!this.userId) {
-      return null;
-    }
+    this.me.nick[network];
+  }
 
-    this.users.get(this.userId)?.nick[network];
+  get me() {
+    return this.users.get(userId) as UserModel;
   }
 
   upsertUsers(
@@ -54,4 +56,4 @@ class UserStore {
   }
 }
 
-export default new UserStore();
+export default UserStore;

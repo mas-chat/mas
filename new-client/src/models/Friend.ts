@@ -1,8 +1,8 @@
 import { computed, observable, makeObservable } from 'mobx';
-import userStore from '../stores/UserStore';
+import UserModel from './User';
 
 export default class FriendModel {
-  constructor(public readonly userId: string, public readonly online: boolean, public readonly last?: number) {
+  constructor(public readonly user: UserModel, public readonly online: boolean, public readonly last?: number) {
     makeObservable(this, {
       last: observable,
       online: observable,
@@ -10,7 +10,7 @@ export default class FriendModel {
     });
   }
 
-  get name(): string | null {
-    return userStore.users.get(this.userId)?.name || null;
+  get name(): string {
+    return this.user.name;
   }
 }
