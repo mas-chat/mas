@@ -20,8 +20,20 @@ const fs = require('fs');
 const path = require('path');
 const handlebars = require('handlebars');
 
-const templateV1 = handlebars.compile(fs.readFileSync(path.join(root(), 'client/dist/index.html'), 'utf8'));
-const templateV2 = handlebars.compile(fs.readFileSync(path.join(root(), 'new-client/dist/index.html'), 'utf8'));
+let templateV1;
+let templateV2;
+
+try {
+  templateV1 = handlebars.compile(fs.readFileSync(path.join(root(), 'client/dist/index.html'), 'utf8'));
+} catch (e) {
+  templateV1 = null;
+}
+
+try {
+  templateV2 = handlebars.compile(fs.readFileSync(path.join(root(), 'new-client/dist/index.html'), 'utf8'));
+} catch (e) {
+  templateV2 = null;
+}
 
 const revisionPath = path.join(root(), 'server/REVISION');
 let revision;
@@ -29,13 +41,18 @@ let revision;
 try {
   revision = fs.readFileSync(revisionPath, 'utf8');
 } catch (e) {
-  revision = 'unknown'
+  revision = 'unknown';
 }
 
 module.exports = async function index(ctx) {
   ctx.set('Cache-control', 'private, max-age=0, no-cache');
 
   const template = 'v2' in ctx.query ? templateV2 : templateV1;
+
+  if (!template) {
+    ctx.body = 'Generated index.html file is missing.';
+    return;
+  }
 
   ctx.body = template({
     jsConfig: JSON.stringify({
