@@ -57,7 +57,7 @@ class WindowStore {
     });
   }
 
-  get desktops() {
+  get desktops(): { id: number; initials: string; messages: number }[] {
     const desktops: { [key: number]: { initials: string; messages: number } } = {};
 
     this.windows.forEach(window => {
@@ -123,7 +123,7 @@ class WindowStore {
     return true;
   }
 
-  async uploadFiles({ files, window }: { files: FileList; window: Window }) {
+  async uploadFiles({ files, window }: { files: FileList; window: Window }): Promise<void> {
     if (files.length === 0) {
       return;
     }
@@ -156,11 +156,11 @@ class WindowStore {
     }
   }
 
-  addMessage(windowId: number, messageRecord: MessageRecord) {
+  addMessage(windowId: number, messageRecord: MessageRecord): void {
     const window = this.windows.get(windowId);
 
     if (!window) {
-      return false;
+      return;
     }
 
     const newMessage = this.upsertMessage(window, messageRecord, 'messages');
@@ -172,7 +172,7 @@ class WindowStore {
     }
   }
 
-  addError(window: WindowModel, body: string) {
+  addError(window: WindowModel, body: string): void {
     window.messages.set(
       nextLocalGid,
       new Message(nextLocalGid, body, 'error', dayjs().unix(), systemUser, window, 'original')
@@ -181,7 +181,7 @@ class WindowStore {
     nextLocalGid--;
   }
 
-  async sendText(window: WindowModel, text: string) {
+  async sendText(window: WindowModel, text: string): Promise<void> {
     let sent = false;
 
     setTimeout(() => {
@@ -209,7 +209,7 @@ class WindowStore {
     }
   }
 
-  async sendCommand(window: WindowModel, command: string, params?: string) {
+  async sendCommand(window: WindowModel, command: string, params?: string): Promise<void> {
     const response = await this.socket.send<CommandRequest>({
       id: 'COMMAND',
       command,
@@ -222,53 +222,42 @@ class WindowStore {
     }
   }
 
-  async createGroup(name: string, password: string, acceptCb: () => void, rejectCb: (reason?: string) => void) {
+  async createGroup(name: string, password: string): Promise<{ success: boolean; errorMsg?: string }> {
     const response = await this.socket.send<CreateRequest>({ id: 'CREATE', name, password });
+    const success = response.status === 'OK';
 
-    if (response.status === 'OK') {
-      acceptCb();
-    } else {
-      rejectCb(response.errorMsg);
-    }
+    return { success, ...(success ? {} : { errorMsg: response.errorMsg }) };
   }
 
-  async joinGroup(name: string, password: string, acceptCb: () => void, rejectCb: (reason?: string) => void) {
+  async joinGroup(name: string, password: string): Promise<{ success: boolean; errorMsg?: string }> {
     const response = await this.socket.send<JoinRequest>({
       id: 'JOIN',
       network: 'mas',
       name,
       password
     });
+    const success = response.status === 'OK';
 
-    if (response.status === 'OK') {
-      acceptCb();
-    } else {
-      rejectCb(response.errorMsg);
-    }
+    return { success, ...(success ? {} : { errorMsg: response.errorMsg }) };
   }
 
   async joinIrcChannel(
     name: string,
     network: Network,
-    password: string,
-    acceptCb: () => void,
-    rejectCb: (reason?: string) => void
-  ) {
+    password: string
+  ): Promise<{ success: boolean; errorMsg?: string }> {
     const response = await this.socket.send<JoinRequest>({
       id: 'JOIN',
       name,
       network,
       password
     });
+    const success = response.status === 'OK';
 
-    if (response.status === 'OK') {
-      acceptCb();
-    } else {
-      rejectCb(response.errorMsg);
-    }
+    return { success, ...(success ? {} : { errorMsg: response.errorMsg }) };
   }
 
-  async startChat(userId: string, network: Network) {
+  async startChat(userId: string, network: Network): Promise<void> {
     const response = await this.socket.send<ChatRequest>({
       id: 'CHAT',
       userId,
@@ -283,7 +272,7 @@ class WindowStore {
     }
   }
 
-  async fetchMessageRange(window: WindowModel, start: number, end: number, successCb: () => void) {
+  async fetchMessageRange(window: WindowModel, start: number, end: number): Promise<void> {
     const response = await this.socket.send<FetchRequest>({
       id: 'FETCH',
       windowId: window.windowId,
@@ -296,11 +285,9 @@ class WindowStore {
     response.msgs.forEach(message => {
       this.upsertMessage(window, message, 'logMessages');
     });
-
-    successCb();
   }
 
-  async fetchOlderMessages(window: WindowModel, successCb: (success: boolean) => void) {
+  async fetchOlderMessages(window: WindowModel): Promise<boolean> {
     const response = await this.socket.send<FetchRequest>({
       id: 'FETCH',
       windowId: window.windowId,
@@ -311,18 +298,17 @@ class WindowStore {
     // Window messages are roughly sorted. First are old messages received by FETCH.
     // Then the messages received at startup and at runtime.
     if (!response.msgs) {
-      successCb(false);
-      return;
+      return false;
     }
 
     response.msgs.forEach(message => {
       this.upsertMessage(window, message, 'messages');
     });
 
-    successCb(response.msgs.length !== 0);
+    return response.msgs.length !== 0;
   }
 
-  processLine(window: WindowModel, body: string) {
+  processLine(window: WindowModel, body: string): void {
     let command;
     let commandParams;
 
@@ -354,7 +340,7 @@ class WindowStore {
     this.sendText(window, body);
   }
 
-  async editMessage(window: WindowModel, gid: number, body: string) {
+  async editMessage(window: WindowModel, gid: number, body: string): Promise<void> {
     const response = await this.socket.send<EditRequest>({
       id: 'EDIT',
       windowId: window.windowId,
@@ -370,7 +356,7 @@ class WindowStore {
     }
   }
 
-  addWindow(windowRecord: WindowRecord) {
+  addWindow(windowRecord: WindowRecord): void {
     const window = this.windows.get(windowRecord.windowId);
     const user = windowRecord.userId ? this.rootStore.userStore.users.get(windowRecord.userId) || null : null;
 
@@ -398,7 +384,7 @@ class WindowStore {
     }
   }
 
-  updateWindow(windowRecord: UpdatableWindowRecord) {
+  updateWindow(windowRecord: UpdatableWindowRecord): void {
     const window = this.windows.get(windowRecord.windowId);
 
     if (window) {
@@ -406,32 +392,29 @@ class WindowStore {
     }
   }
 
-  async closeWindow(windowId: number) {
+  async closeWindow(windowId: number): Promise<void> {
     await this.socket.send<CloseRequest>({
       id: 'CLOSE',
       windowId
     });
   }
 
-  deleteWindow(windowId: number) {
+  deleteWindow(windowId: number): void {
     this.windows.delete(windowId);
   }
 
-  async updatePassword(window: Window, password: string, successCb: () => void, rejectCb: (reason?: string) => void) {
+  async updatePassword(window: Window, password: string): Promise<{ success: boolean; errorMsg?: string }> {
     const response = await this.socket.send<UpdatePasswordRequest>({
       id: 'UPDATE_PASSWORD',
       windowId: window.windowId,
       password
     });
+    const success = response.status === 'OK';
 
-    if (response.status === 'OK') {
-      successCb();
-    } else {
-      rejectCb(response.errorMsg);
-    }
+    return { success, ...(success ? {} : { errorMsg: response.errorMsg }) };
   }
 
-  async updateTopic(window: Window, topic: string) {
+  async updateTopic(window: Window, topic: string): Promise<void> {
     await this.socket.send<UpdateTopicRequest>({
       id: 'UPDATE_TOPIC',
       windowId: window.windowId,
@@ -439,7 +422,7 @@ class WindowStore {
     });
   }
 
-  async updateWindowAlerts(window: Window, alerts: AlertsRecord) {
+  async updateWindowAlerts(window: Window, alerts: AlertsRecord): Promise<void> {
     window.alerts = alerts;
 
     await this.socket.send<UpdateRequest>({
@@ -449,7 +432,7 @@ class WindowStore {
     });
   }
 
-  async moveWindow(windowId: number, column: number, row: number, desktop: number) {
+  async moveWindow(windowId: number, column: number, row: number, desktop: number): Promise<void> {
     const window = this.windows.get(windowId);
 
     if (!window) {
@@ -471,7 +454,7 @@ class WindowStore {
     }
   }
 
-  async handleToggleMemberListWidth(window: Window) {
+  async handleToggleMemberListWidth(window: Window): Promise<void> {
     window.minimizedNamesList = !window.minimizedNamesList;
 
     await this.socket.send<UpdateRequest>({
@@ -522,7 +505,7 @@ class WindowStore {
     }
   }
 
-  updateMembers(windowId: number, members: Array<{ userId: string; role: Role }>, reset: boolean) {
+  updateMembers(windowId: number, members: Array<{ userId: string; role: Role }>, reset: boolean): void {
     const window = this.windows.get(windowId);
 
     if (!window) {
@@ -559,7 +542,7 @@ class WindowStore {
     });
   }
 
-  deleteMembers(windowId: number, members: Array<{ userId: string }>) {
+  deleteMembers(windowId: number, members: Array<{ userId: string }>): void {
     const window = this.windows.get(windowId);
 
     if (!window) {
