@@ -3,12 +3,13 @@ import Cookies from 'js-cookie';
 export const cookie = Cookies.get('mas');
 
 if (!cookie) {
-  logout();
+  logout('Cookie does not exist');
 }
 
 export const userId = `m${JSON.parse(window.atob(cookie)).userId}`;
 
-export function logout(): never {
+export function logout(reason?: string): never {
+  alert(reason);
   Cookies.remove('mas', { path: '/' });
   window.location.pathname = '/';
   throw new Error('Logging out');
