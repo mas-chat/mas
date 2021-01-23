@@ -7,6 +7,8 @@ import UserModel, { me } from './User';
 import emoticons from '../lib/emoticons';
 import { MessageCategory, MessageRecord } from '../types/notifications';
 
+type BodyPart = { type: string; text?: string; url?: string; start?: number };
+
 marked.setOptions({
   breaks: true
 });
@@ -68,15 +70,15 @@ export default class MessageModel {
     });
   }
 
-  get edited() {
+  get edited(): boolean {
     return this.status === 'edited';
   }
 
-  get deleted() {
+  get deleted(): boolean {
     return this.status === 'deleted';
   }
 
-  get updatedTime() {
+  get updatedTime(): string {
     const updatedTs = this.updatedTs;
 
     if (!updatedTs) {
@@ -89,27 +91,27 @@ export default class MessageModel {
     return `at ${updatedTime.format(originalTime.isSame(updatedTime, 'd') ? 'HH:mm' : 'MMM Do HH:mm')}`;
   }
 
-  get updatedDate() {
+  get updatedDate(): string {
     const updatedTs = this.updatedTs;
 
     return updatedTs ? `at ${dayjs.unix(updatedTs).format('MMM Do HH:mm')}` : '';
   }
 
-  get updatedDateLong() {
+  get updatedDateLong(): string {
     const updatedTs = this.updatedTs;
 
     return updatedTs ? `at ${dayjs.unix(updatedTs).format('dddd, MMMM D HH:mm')}` : '';
   }
 
-  get nick() {
+  get nick(): string | undefined {
     if (!this.window.network) {
-      return null;
+      return undefined;
     }
 
     return this.user.nick[this.window.network];
   }
 
-  get avatarUrl() {
+  get avatarUrl(): string {
     return `//gravatar.com/avatar/${this.user.gravatar}?d=mm`;
   }
 
@@ -136,11 +138,11 @@ export default class MessageModel {
     return cat;
   }
 
-  get decoratedTs() {
+  get decoratedTs(): string {
     return dayjs.unix(this.ts).format('HH:mm');
   }
 
-  get channelAction() {
+  get channelAction(): string {
     const nick = this.nick;
     const groupName = this.window.name;
     const body = this.body;
@@ -159,15 +161,15 @@ export default class MessageModel {
     }
   }
 
-  get myNotDeletedMessage() {
+  get myNotDeletedMessage(): boolean {
     return this.decoratedCat === 'mymsg' && this.status !== 'deleted';
   }
 
-  get bodyParts() {
+  get bodyParts(): Array<BodyPart> {
     let body = this.body;
     const cat = this.cat;
 
-    let parts: Array<{ type: string; text?: string; url?: string; start?: number }> = [];
+    let parts: Array<BodyPart> = [];
 
     if (cat === 'msg' && body) {
       ({ body, parts } = this.parseLinks(body));
@@ -186,40 +188,43 @@ export default class MessageModel {
     return parts;
   }
 
-  // //redo
-
-  get text() {
+  get text(): string | undefined {
     return this.bodyParts.find(part => part.type === 'text')?.text;
   }
 
-  get images() {
+  get images(): BodyPart[] {
     return this.bodyParts.filter(part => part.type === 'image');
   }
 
-  get hasMedia() {
+  get hasMedia(): boolean {
     return !this.bodyParts.every(part => part.type === 'text');
   }
 
-  get hasImages() {
+  get hasImages(): boolean {
     return this.bodyParts.some(part => part.type === 'image');
   }
 
-  get hasYoutubeVideo() {
+  get hasYoutubeVideo(): boolean {
     return this.bodyParts.some(part => part.type === 'youtubelink');
   }
 
-  get videoId() {
+  get videoId(): string | undefined {
     const video = this.bodyParts.find(part => part.type === 'youtubelink');
 
     if (video) {
       const urlObj = new URI(video.url);
       // Format is https://www.youtube.com/watch?v=0P7O69GuCII or https://youtu.be/0P7O69GuCII
-      return urlObj.search(true).v || urlObj.pathname().substring(1).split('/')[0];
+      const vParam = urlObj.search(true).v;
+
+      if (vParam) {
+        return Array.isArray(vParam) ? vParam[0] || undefined : vParam;
+      } else {
+        return urlObj.pathname().substring(1).split('/')[0];
+      }
     }
-    return null;
   }
 
-  get videoParams() {
+  get videoParams(): string {
     const video = this.bodyParts.find(part => part.type === 'youtubelink');
     const start = video && (video.start ? `&start=${video.start}` : '');
 

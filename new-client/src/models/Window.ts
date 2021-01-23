@@ -62,15 +62,15 @@ export default class WindowModel {
     });
   }
 
-  get desktop() {
+  get desktop(): number {
     return this.actualDesktop;
   }
 
-  set desktop(value) {
+  set desktop(value: number) {
     this.actualDesktop = isMobile().any ? Math.floor(Math.random() * 10000000) : value;
   }
 
-  get sortedMessages() {
+  get sortedMessages(): Array<MessageModel> {
     const result = Array.from(this.messages.values()).sort((a, b) => (a.ts === b.ts ? a.gid - b.gid : a.ts - b.ts));
     let gid = -1;
 
@@ -92,23 +92,23 @@ export default class WindowModel {
     return result;
   }
 
-  get sortedLogMessages() {
+  get sortedLogMessages(): Array<MessageModel> {
     return Array.from(this.logMessages.values()).sort((a, b) => a.ts - b.ts);
   }
 
-  get operatorNames() {
+  get operatorNames(): { nick: string; gravatar: string }[] {
     return this._mapUserToNicks('operators');
   }
 
-  get voiceNames() {
+  get voiceNames(): { nick: string; gravatar: string }[] {
     return this._mapUserToNicks('voices');
   }
 
-  get userNames() {
+  get userNames(): { nick: string; gravatar: string }[] {
     return this._mapUserToNicks('users');
   }
 
-  get decoratedTitle() {
+  get decoratedTitle(): string {
     let title = '';
     const type = this.type;
     const network = this.network;
@@ -129,15 +129,15 @@ export default class WindowModel {
     return title;
   }
 
-  get decoratedTopic() {
+  get decoratedTopic(): string {
     return this.topic ? `- ${this.topic}` : '';
   }
 
-  get simplifiedName() {
-    let windowName = this.name;
+  get simplifiedName(): string | undefined {
+    let windowName = this.name || undefined;
 
     if (!windowName) {
-      return null;
+      return;
     }
 
     const network = this.network;
@@ -146,17 +146,17 @@ export default class WindowModel {
     if (type === 'group') {
       windowName = windowName.replace(/[&/\\#,+()$~%.'":*?<>{}]/g, '');
     } else {
-      windowName = this.peerUser ? this.peerUser.nick[network] || null : '1on1';
+      windowName = this.peerUser ? this.peerUser.nick[network] || undefined : '1on1';
     }
     return windowName;
   }
 
-  get tooltipTopic() {
+  get tooltipTopic(): string {
     const topic = this.topic;
     return topic ? `Topic: ${topic}` : 'Topic not set.';
   }
 
-  get explainedType() {
+  get explainedType(): string {
     const type = this.type;
     const network = this.network;
 
@@ -185,7 +185,7 @@ export default class WindowModel {
     this.alerts.title = typeof record.alerts?.title !== 'undefined' ? record.alerts.title : this.alerts.title;
   }
 
-  _mapUserToNicks(role: 'operators' | 'voices' | 'users') {
+  _mapUserToNicks(role: 'operators' | 'voices' | 'users'): { nick: string; gravatar: string }[] {
     return this[role]
       .map(user => ({
         nick: user.nick[this.network] || 'unknown',

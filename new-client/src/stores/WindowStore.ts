@@ -27,7 +27,7 @@ import {
   UpdateTopicRequest,
   UpdateRequest,
   LogoutRequest,
-  DestroyAccount
+  DestroyAccountRequest
 } from '../types/requests';
 import RootStore from './RootStore';
 import Socket from '../lib/socket';
@@ -574,7 +574,7 @@ class WindowStore {
   }
 
   async handleDestroyAccount(): Promise<void> {
-    await this.socket.send<DestroyAccount>({
+    await this.socket.send<DestroyAccountRequest>({
       id: 'DESTROY_ACCOUNT'
     });
 

@@ -2,10 +2,12 @@ import { observable, makeObservable, action } from 'mobx';
 import RootStore from './RootStore';
 import Socket from '../lib/socket';
 
+type ModalModelValue = string | number | undefined;
+
 class ModalStore {
   rootStore: RootStore;
   socket: Socket;
-  modals: Array<{ name: string; model: Record<string, any> }> = [];
+  modals: Array<{ name: string; model: Record<string, ModalModelValue> }> = [];
 
   constructor(rootStore: RootStore, socket: Socket) {
     this.rootStore = rootStore;
@@ -23,11 +25,11 @@ class ModalStore {
     return false;
   }
 
-  openModal(name: string, model: Record<string, string | number | undefined> = {}): void {
+  openModal(name: string, model: Record<string, ModalModelValue> = {}): void {
     this.modals.push({ name, model });
   }
 
-  openPriorityModal(name: string, model: Record<string, string | number>): void {
+  openPriorityModal(name: string, model: Record<string, ModalModelValue>): void {
     // Show immediately
     this.modals.unshift({ name, model });
   }

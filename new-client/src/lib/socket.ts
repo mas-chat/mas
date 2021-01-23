@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import { RequestReturn } from '../types/requests';
+import { Request, RequestReturn, Acknowledgement } from '../types/requests';
 import { Notification } from '../types/notifications';
 import RootStore from '../stores/RootStore';
 import { logout, getCookie, setCookie } from '../lib/cookie';
@@ -18,7 +18,14 @@ class Socket {
   sessionId = '';
   maxBacklogMsgs = 100000;
   private connected = false;
-  private sendQueue: Array<{ request: any; callback: any }> = [];
+  private sendQueue: Array<{
+    request: Request;
+    callback: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      resolve: (value: any) => void;
+      reject: () => void;
+    };
+  }> = [];
   private disconnectedTimer?: number;
 
   constructor(rootStore: RootStore) {
@@ -82,7 +89,7 @@ class Socket {
     });
   }
 
-  send<T>(request: T): Promise<RequestReturn<T>> {
+  send<T extends Request>(request: T): Promise<RequestReturn<T>> {
     return new Promise((resolve, reject) => {
       this.sendQueue.push({ request, callback: { resolve, reject } });
 
@@ -114,7 +121,7 @@ class Socket {
 
     const req = this.sendQueue[0];
 
-    ioSocket.emit('req', req.request, (data: Record<string, any>) => {
+    ioSocket.emit('req', req.request, (data: Acknowledgement) => {
       if (req.callback) {
         console.log('← RESP');
         req.callback.resolve(data);

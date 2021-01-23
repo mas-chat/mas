@@ -6,7 +6,7 @@ export interface CreateRequest {
   password: string;
 }
 
-export interface CreateAcknowledgment {
+export interface CreateAcknowledgement {
   status: 'OK' | 'ERROR_NAME_MISSING' | 'ERROR_EXISTS';
   errorMsg?: string;
 }
@@ -151,7 +151,7 @@ export interface LogoutRequest {
   allSessions: boolean;
 }
 
-export interface DestroyAccount {
+export interface DestroyAccountRequest {
   id: 'DESTROY_ACCOUNT';
 }
 
@@ -180,8 +180,83 @@ export interface SendConfirmEmailRequest {
   id: 'SEND_CONFIRM_EMAIL';
 }
 
-export type RequestReturn<T> = T extends CreateRequest
-  ? CreateAcknowledgment
+export interface SetRequest {
+  id: 'SET';
+  settings: {
+    theme?: string;
+    activeDesktop?: number;
+  };
+}
+
+export interface SetAcknowledgement {
+  status: 'OK' | 'ERROR';
+  errorMsg?: string;
+}
+
+export interface AckAlertRequest {
+  id: 'ACKALERT';
+  alertId: number;
+}
+
+export interface AckAlertAcknowledgement {
+  status: 'OK' | 'ERROR';
+  errorMsg?: string;
+}
+
+export interface RemoveFriendRequest {
+  id: 'REMOVE_FRIEND';
+  userId: string;
+}
+
+export interface RemoveFriendAcknowledgement {
+  status: 'OK' | 'ERROR';
+  errorMsg?: string;
+}
+
+export type Request =
+  | CreateRequest
+  | SendRequest
+  | CommandRequest
+  | JoinRequest
+  | ChatRequest
+  | FetchRequest
+  | EditRequest
+  | CloseRequest
+  | UpdatePasswordRequest
+  | UpdateTopicRequest
+  | FriendVerdictRequest
+  | RequestFriendRequest
+  | UpdateRequest
+  | LogoutRequest
+  | DestroyAccountRequest
+  | UpdateProfileRequest
+  | GetProfileRequest
+  | SendConfirmEmailRequest
+  | SetRequest
+  | AckAlertRequest
+  | RemoveFriendRequest;
+
+export type Acknowledgement =
+  | CreateAcknowledgement
+  | SendAcknowledgement
+  | CommandAcknowledgement
+  | JoinAcknowledgement
+  | ChatAcknowledgement
+  | FetchAcknowledgement
+  | EditAcknowledgement
+  | CloseAcknowledgement
+  | UpdatePasswordAcknowledgement
+  | UpdateTopicAcknowledgement
+  | RequestFriendAcknowledgement
+  | UpdateAcknowledgement
+  | UpdateProfileAcknowledgement
+  | GetProfileAcknowledgement
+  | SetAcknowledgement
+  | AckAlertAcknowledgement
+  | RemoveFriendAcknowledgement;
+
+export type RequestReturn<T extends Request> = T extends CreateRequest
+  ? CreateAcknowledgement
   : T extends SendRequest
   ? SendAcknowledgement
   : T extends CommandRequest
@@ -200,12 +275,18 @@ export type RequestReturn<T> = T extends CreateRequest
   ? UpdatePasswordAcknowledgement
   : T extends UpdateTopicRequest
   ? UpdateTopicAcknowledgement
-  : T extends UpdateRequest
-  ? UpdateAcknowledgement
   : T extends RequestFriendRequest
   ? RequestFriendAcknowledgement
+  : T extends UpdateRequest
+  ? UpdateAcknowledgement
   : T extends UpdateProfileRequest
   ? UpdateProfileAcknowledgement
   : T extends GetProfileRequest
   ? GetProfileAcknowledgement
+  : T extends SetRequest
+  ? SetAcknowledgement
+  : T extends AckAlertRequest
+  ? AckAlertAcknowledgement
+  : T extends RemoveFriendRequest
+  ? RemoveFriendAcknowledgement
   : never;
