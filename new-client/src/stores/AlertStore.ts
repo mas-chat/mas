@@ -23,9 +23,9 @@ class AlertStore {
     });
   }
 
-  get currentAlert() {
+  get currentAlert(): AlertModel | undefined {
     // values() returns values in the insertion order
-    return this.alerts.values().next().value || false;
+    return this.alerts.values().next().value || undefined;
   }
 
   handlerServerNotification(ntf: Notification): boolean {
@@ -46,7 +46,7 @@ class AlertStore {
     ackLabel?: string,
     nackLabel?: false | string,
     postponeLabel?: false | string
-  ) {
+  ): void {
     const resultCallback = (result: string) => {
       if (result === 'ack') {
         this.socket.send({ id: 'ACKALERT', alertId: alertId });
@@ -63,13 +63,13 @@ class AlertStore {
     nackLabel?: false | string,
     postponeLabel?: false | string,
     resultCallback?: (result: string) => void
-  ) {
+  ): void {
     const id = alertId === null ? `local:${nextLocalAlertId++}` : alertId.toString();
 
     this.alerts.set(id, new AlertModel(id, message, ackLabel, nackLabel, postponeLabel, resultCallback));
   }
 
-  closeAlert(alertId: number, result: string) {
+  closeAlert(alertId: number, result: string): void {
     const alert = this.alerts.get(alertId.toString());
 
     alert?.resultCallback(result);

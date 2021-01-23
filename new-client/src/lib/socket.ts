@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 import { RequestReturn } from '../types/requests';
 import { Notification } from '../types/notifications';
 import RootStore from '../stores/RootStore';
-import { logout, setCookie, cookie } from '../lib/cookie';
+import { logout, getCookie, setCookie } from '../lib/cookie';
 
 declare const config: { socketHost: string | false };
 
@@ -98,7 +98,7 @@ class Socket {
     ioSocket.emit('init', {
       clientName: 'web',
       clientOS: navigator.platform,
-      cookie,
+      cookie: getCookie(),
       version: '1.0',
       maxBacklogMsgs,
       cachedUpto: 0

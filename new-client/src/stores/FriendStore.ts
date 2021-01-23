@@ -35,7 +35,7 @@ class FriendStore {
     return true;
   }
 
-  updateFriends(reset: boolean, friends: Array<{ userId: string; online: boolean; last?: number }>) {
+  updateFriends(reset: boolean, friends: Array<{ userId: string; online: boolean; last?: number }>): void {
     if (reset) {
       this.friends.clear();
     }
@@ -49,7 +49,7 @@ class FriendStore {
     });
   }
 
-  confirmFriends(friends: Array<{ userId: string }>) {
+  confirmFriends(friends: Array<{ userId: string }>): void {
     for (const friendCandidate of friends) {
       const userId = friendCandidate.userId;
       const user = this.rootStore.userStore.users.get(userId);
@@ -72,11 +72,11 @@ class FriendStore {
     }
   }
 
-  confirmRemoveFriend(userId: string) {
+  confirmRemoveFriend(userId: string): void {
     this.rootStore.modalStore.openModal('remove-friend-modal', { userId });
   }
 
-  async requestFriend(userId: string) {
+  async requestFriend(userId: string): Promise<void> {
     const response = await this.socket.send<RequestFriendRequest>({
       id: 'REQUEST_FRIEND',
       userId
@@ -90,7 +90,7 @@ class FriendStore {
     this.rootStore.alertStore.showAlert(null, message, 'Okay', false, false);
   }
 
-  removeFriend(userId: string) {
+  removeFriend(userId: string): void {
     this.socket.send({ id: 'REMOVE_FRIEND', userId });
   }
 }

@@ -38,7 +38,7 @@ class SettingStore {
     activeDesktop?: number | undefined,
     emailConfirmed?: boolean | undefined,
     canUseIRC?: boolean | undefined
-  ) {
+  ): void {
     this.settings = new SettingsModel(
       theme === undefined ? this.settings.theme : theme,
       activeDesktop === undefined ? this.settings.activeDesktop : activeDesktop,
@@ -47,7 +47,7 @@ class SettingStore {
     );
   }
 
-  toggleTheme() {
+  toggleTheme(): void {
     const newTheme = this.settings.theme === 'dark' ? 'default' : 'dark';
     this.updateSettings(newTheme);
 
@@ -59,7 +59,7 @@ class SettingStore {
     });
   }
 
-  async handleConfirmEmail() {
+  async handleConfirmEmail(): Promise<void> {
     const msg = "Confirmation link sent. Check your spam folder if you don't see it in inbox.";
 
     await this.socket.send<SendConfirmEmailRequest>({ id: 'SEND_CONFIRM_EMAIL' });
@@ -69,11 +69,11 @@ class SettingStore {
     });
   }
 
-  setEmailConfirmed() {
+  setEmailConfirmed(): void {
     this.updateSettings(undefined, undefined, true);
   }
 
-  changeActiveDesktop(activeDesktop: number) {
+  changeActiveDesktop(activeDesktop: number): void {
     if (!this.rootStore.windowStore.initDone) {
       return;
     }

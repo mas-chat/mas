@@ -1,7 +1,7 @@
 import { observable, makeObservable, computed } from 'mobx';
 import UserModel, { systemUser, me, ircSystemUser } from '../models/User';
 import { Notification } from '../types/notifications';
-import { userId } from '../lib/cookie';
+import { getUserId } from '../lib/cookie';
 import RootStore from './RootStore';
 import Socket from '../lib/socket';
 
@@ -9,7 +9,7 @@ class UserStore {
   rootStore: RootStore;
   socket: Socket;
   users = new Map<string, UserModel>([
-    [userId, me],
+    [getUserId(), me],
     ['m0', systemUser],
     ['i0', ircSystemUser]
   ]);
@@ -24,12 +24,12 @@ class UserStore {
     });
   }
 
-  myNick(network: 'mas' | 'IRCNet' | 'FreeNode' | 'W3C') {
-    this.me.nick[network];
+  myNick(network: 'mas' | 'IRCNet' | 'FreeNode' | 'W3C'): string | undefined {
+    return this.me.nick[network];
   }
 
-  get me() {
-    return this.users.get(userId) as UserModel;
+  get me(): UserModel {
+    return this.users.get(getUserId()) as UserModel;
   }
 
   upsertUsers(
@@ -37,7 +37,7 @@ class UserStore {
       string,
       { name: string; gravatar: string; nick: { mas: string; IRCNet?: string; FreeNode?: string; W3C?: string } }
     >
-  ) {
+  ): void {
     Object.entries(mapping).forEach(([userId, user]) => {
       this.users.set(userId, new UserModel(user.nick, user.name, user.gravatar));
     });

@@ -19,20 +19,20 @@ class ModalStore {
     });
   }
 
-  handlerServerNotification() {
+  handlerServerNotification(): boolean {
     return false;
   }
 
-  openModal(name: string, model: Record<string, string | number | undefined> = {}) {
+  openModal(name: string, model: Record<string, string | number | undefined> = {}): void {
     this.modals.push({ name, model });
   }
 
-  openPriorityModal(name: string, model: Record<string, string | number>) {
+  openPriorityModal(name: string, model: Record<string, string | number>): void {
     // Show immediately
     this.modals.unshift({ name, model });
   }
 
-  closeModal() {
+  closeModal(): void {
     this.modals.shift();
   }
 }

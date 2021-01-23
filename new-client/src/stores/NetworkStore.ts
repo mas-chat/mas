@@ -30,7 +30,7 @@ class NetworkStore {
     return true;
   }
 
-  updateNetworks(networks: Array<string>) {
+  updateNetworks(networks: Array<string>): void {
     this.networks = networks;
   }
 }

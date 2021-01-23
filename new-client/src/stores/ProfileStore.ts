@@ -20,11 +20,11 @@ class ProfileStore {
     });
   }
 
-  handlerServerNotification() {
+  handlerServerNotification(): boolean {
     return false;
   }
 
-  async updateProfile(name: string, email: string, successCb: () => void, rejectCb: (errorMsg?: string) => void) {
+  async updateProfile(name: string, email: string): Promise<{ success: boolean; errorMsg?: string }> {
     const response = await this.socket.send<UpdateProfileRequest>({ id: 'UPDATE_PROFILE', name, email });
 
     if (response.status === 'OK') {
@@ -32,13 +32,13 @@ class ProfileStore {
       this.rootStore.settingStore.setEmailConfirmed();
 
       this.profile = new ProfileModel(this.profile.nick, name, email);
-      successCb();
+      return { success: true };
     } else {
-      rejectCb(response.errorMsg);
+      return { success: false, errorMsg: response.errorMsg };
     }
   }
 
-  async fetchProfile() {
+  async fetchProfile(): Promise<void> {
     const response = await this.socket.send<GetProfileRequest>({ id: 'GET_PROFILE' });
 
     this.profile = new ProfileModel(response.nick, response.name, response.email);
