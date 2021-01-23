@@ -577,7 +577,7 @@ class WindowStore {
 
   // TODO: Move these handlers somewhere else
 
-  async handleLogout(allSessions: boolean) {
+  async handleLogout(allSessions: boolean): Promise<void> {
     if (typeof Storage !== 'undefined') {
       window.localStorage.removeItem('data');
     }
@@ -587,18 +587,18 @@ class WindowStore {
       allSessions: !!allSessions
     });
 
-    logout();
+    logout('User logged out');
   }
 
-  async handleDestroyAccount() {
+  async handleDestroyAccount(): Promise<void> {
     await this.socket.send<DestroyAccount>({
       id: 'DESTROY_ACCOUNT'
     });
 
-    logout();
+    logout('User destroyed the account');
   }
 
-  upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages') {
+  upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): boolean {
     const existingMessage = window[type].get(message.gid);
 
     if (existingMessage) {
