@@ -1,47 +1,29 @@
 import React from 'react';
-import { Box, Button, Grommet, Sidebar, Avatar, Nav } from 'grommet';
-import { Help, Projects, Clock } from 'grommet-icons';
+import { ChakraProvider, extendTheme, Flex, Box, Center } from '@chakra-ui/react';
 import Desktop from './components/Desktop';
+import Sidebar from './components/Sidebar';
 import RootStore from './stores/RootStore';
 
 const rootStore = new RootStore();
 
-const theme = {
-  global: {
-    colors: {
-      brand: '#228BE6'
-    },
-    font: {
-      family: 'Roboto',
-      size: '14px',
-      height: '20px'
-    }
-  }
+const config = {
+  initialColorMode: 'dark',
+  useSystemColorMode: false
 };
 
+const theme = extendTheme(config);
+
 const App: React.FunctionComponent<Record<string, never>> = () => (
-  <Grommet theme={theme} full>
-    <Box fill direction="row">
-      <Box>
-        <Sidebar
-          background="brand"
-          header={<Avatar src="//s.gravatar.com/avatar/b7fb138d53ba0f573212ccce38a7c43b?s=80" />}
-          footer={<Button icon={<Help />} hoverIndicator />}
-        >
-          <Nav gap="small">
-            <Button icon={<Projects />} hoverIndicator />
-            <Button icon={<Clock />} hoverIndicator />
-          </Nav>
-        </Sidebar>
+  <ChakraProvider theme={theme}>
+    <Flex color="white">
+      <Center w="100px" bg="green.500">
+        <Sidebar rootStore={rootStore} />
+      </Center>
+      <Box flex="1">
+        <Desktop rootStore={rootStore}></Desktop>
       </Box>
-      <Box flex overflow="hidden">
-        <Box flex align="center" justify="center">
-          app body
-          <Desktop rootStore={rootStore}></Desktop>
-        </Box>
-      </Box>
-    </Box>
-  </Grommet>
+    </Flex>
+  </ChakraProvider>
 );
 
 export default App;

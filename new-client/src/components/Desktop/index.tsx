@@ -2,11 +2,11 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import type RootStore from '../../stores/RootStore';
 
-interface IProps {
+interface DesktopProps {
   rootStore: RootStore;
 }
 
-const Desktop: React.FunctionComponent<IProps> = observer(({ rootStore }) => {
+const Desktop: React.FunctionComponent<DesktopProps> = observer(({ rootStore }) => {
   const windows = rootStore.windowStore.windows;
 
   return (
