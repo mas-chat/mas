@@ -38,7 +38,9 @@ class Socket {
       this.emitRequest(); // In case there are items in sendQueue from previous session
     });
 
-    ioSocket.on('terminate', () => logout());
+    ioSocket.on('terminate', ({ code, reason }: { code: string; reason: string }) => {
+      logout(`Server sent TERMINATE message: ${code} (${reason})`);
+    });
 
     ioSocket.on('refresh_session', ({ refreshCookie }: { refreshCookie: string }) => {
       setCookie(refreshCookie);
