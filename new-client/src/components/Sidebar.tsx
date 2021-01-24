@@ -1,21 +1,29 @@
 import React from 'react';
+import { Box, Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
-import type RootStore from '../../stores/RootStore';
+import type WindowStore from '../stores/WindowStore';
 
 interface SidebarProps {
-  rootStore: RootStore;
+  windowStore: WindowStore;
 }
 
-const Sidebar: React.FunctionComponent<SidebarProps> = observer(({ rootStore }) => {
-  const windows = rootStore.windowStore.windows;
+const Sidebar: React.FunctionComponent<SidebarProps> = ({ windowStore }: SidebarProps) => {
+  const { desktops } = windowStore;
 
   return (
-    <span>
-      {Array.from(windows.entries()).map(([windowKey, window]) => {
-        return <p key={windowKey}>Group: {window.name}</p>;
+    <Box width="100px">
+      {desktops.map(desktop => {
+        return (
+          <Box key={desktop.id}>
+            <p>D: {desktop.initials}</p>
+            {desktop.windows.map(window => {
+              <Text key={window.windowId}>{window.simplifiedName}</Text>;
+            })}
+          </Box>
+        );
       })}
-    </span>
+    </Box>
   );
-});
+};
 
-export default Sidebar;
+export default observer(Sidebar);
