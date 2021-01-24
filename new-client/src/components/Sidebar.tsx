@@ -18,19 +18,20 @@ const Sidebar: React.FunctionComponent<SidebarProps> = ({ windowStore, settingsS
 
   return (
     <Box width="140px">
-      {desktops.map(desktop => {
+      {desktops.map((desktop, index) => {
         return (
           <Box key={desktop.id} p="8px">
             <Heading
               as="button"
               onClick={() => switchDesktop(desktop.id)}
               size="s"
+              width="100%"
               _hover={{
-                background: 'white',
                 color: 'teal.500'
               }}
+              bgColor={desktop.id === settingsStore.settings.activeDesktop ? 'blue.100' : 'transparent'}
             >
-              {desktop.initials}
+              Desktop #{index}
             </Heading>
             {desktop.windows.map(window => {
               return (

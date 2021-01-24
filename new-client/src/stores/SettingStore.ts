@@ -1,4 +1,4 @@
-import { observable, makeObservable } from 'mobx';
+import { action, observable, makeObservable } from 'mobx';
 import isMobile from 'ismobilejs';
 import SettingsModel from '../models/Settings';
 import { Notification } from '../types/notifications';
@@ -16,7 +16,8 @@ class SettingStore {
     this.socket = socket;
 
     makeObservable(this, {
-      settings: observable
+      settings: observable,
+      updateSettings: action
     });
   }
 

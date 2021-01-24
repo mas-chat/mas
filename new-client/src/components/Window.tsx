@@ -39,9 +39,11 @@ const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage }:
   };
 
   return (
-    <Flex flex="1" flexDirection="column" bg="smokewhite" color="black" margin="4px" border="1px">
-      <Heading size="s">{window.simplifiedName}</Heading>
-      <Box flex="1">
+    <Flex flex="1" flexDirection="column" bg="gray.50" color="black" margin="4px" border="1px">
+      <Heading size="s" padding="2px" bg="green.100">
+        {window.simplifiedName}
+      </Heading>
+      <Box flex="1" margin="4px">
         <Virtuoso
           ref={virtuoso}
           initialTopMostItemIndex={messages.length - 1}
@@ -59,7 +61,7 @@ const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage }:
         placeholder="Write here…"
         value={message}
         size="sm"
-        margin="4px"
+        padding="6px"
       />
     </Flex>
   );
