@@ -13,7 +13,7 @@ const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage }:
   const virtuoso = useRef(null);
   const [_, setAtBottom] = useState(false);
   const [message, setMessage] = useState('');
-  const messages = Array.from(window.messages.values());
+  const messages = Array.from(window.messages.values()).sort((a, b) => a.ts - b.ts);
 
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
@@ -45,7 +45,6 @@ const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage }:
         <Virtuoso
           ref={virtuoso}
           initialTopMostItemIndex={messages.length - 1}
-          style={{ height: '100%' }}
           atBottomStateChange={bottom => {
             setAtBottom(bottom);
           }}
