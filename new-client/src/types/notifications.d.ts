@@ -14,7 +14,7 @@ export type MessageStatus = 'original' | 'edited';
 
 export type Theme = 'default' | 'dark';
 
-export type Network = 'IRCNet' | 'FreeNode' | 'W3C' | 'mas';
+export type Network = 'ircnet' | 'freenode' | 'w3c' | 'mas';
 
 export type IRCNetwork = Exclude<Network, 'mas'>;
 

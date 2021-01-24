@@ -24,7 +24,7 @@ class UserStore {
     });
   }
 
-  myNick(network: 'mas' | 'IRCNet' | 'FreeNode' | 'W3C'): string | undefined {
+  myNick(network: 'mas' | 'ircnet' | 'freenode' | 'w3c'): string | undefined {
     return this.me.nick[network];
   }
 
@@ -47,7 +47,7 @@ class UserStore {
   upsertUsers(
     mapping: Record<
       string,
-      { name: string; gravatar: string; nick: { mas: string; IRCNet?: string; FreeNode?: string; W3C?: string } }
+      { name: string; gravatar: string; nick: { mas: string; ircnet?: string; freenode?: string; w3c?: string } }
     >
   ): void {
     Object.entries(mapping).forEach(([userId, user]) => {
