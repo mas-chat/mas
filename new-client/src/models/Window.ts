@@ -133,22 +133,12 @@ export default class WindowModel {
     return this.topic ? `- ${this.topic}` : '';
   }
 
-  get simplifiedName(): string | undefined {
-    let windowName = this.name || undefined;
-
-    if (!windowName) {
-      return;
-    }
-
-    const network = this.network;
-    const type = this.type;
-
-    if (type === 'group') {
-      windowName = windowName.replace(/[&/\\#,+()$~%.'":*?<>{}]/g, '');
+  get simplifiedName(): string {
+    if (this.type === 'group') {
+      return this?.name?.replace(/[&/\\#,+()$~%.'":*?<>{}]/g, '') || 'group';
     } else {
-      windowName = this.peerUser ? this.peerUser.nick[network] || undefined : '1on1';
+      return this.peerUser ? this.peerUser.nick[this.network] || '1on1' : '1on1';
     }
-    return windowName;
   }
 
   get tooltipTopic(): string {
