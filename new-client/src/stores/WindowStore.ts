@@ -53,22 +53,26 @@ class WindowStore {
       initDone: observable,
       desktops: computed,
       addWindow: action,
+      addMessage: action,
       finishStartup: action
     });
   }
 
-  get desktops(): { id: number; initials: string; messages: number }[] {
-    const desktops: { [key: number]: { initials: string; messages: number } } = {};
+  get desktops(): { id: number; initials: string; messages: number; windows: Window[] }[] {
+    const desktops: { [key: number]: { initials: string; messages: number; windows: Window[] } } = {};
 
     this.windows.forEach(window => {
-      const newMessages = window.newMessagesCount;
-      const desktop = window.desktop;
-      const initials = window?.simplifiedName?.substr(0, 2).toUpperCase() || window.windowId.toString();
+      const { newMessagesCount, desktop } = window;
 
       if (desktops[desktop]) {
-        desktops[desktop].messages += newMessages;
+        desktops[desktop].messages += newMessagesCount;
+        desktops[desktop].windows.push(window);
       } else {
-        desktops[desktop] = { messages: newMessages, initials };
+        desktops[desktop] = {
+          messages: newMessagesCount,
+          initials: window.simplifiedName.substr(0, 2).toUpperCase(),
+          windows: [window]
+        };
       }
     });
 
