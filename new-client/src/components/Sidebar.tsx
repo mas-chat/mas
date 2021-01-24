@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Heading, Text } from '@chakra-ui/react';
+import { Box, Flex, Heading, Spacer, Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import type WindowStore from '../stores/WindowStore';
 import type SettingStore from '../stores/SettingStore';
@@ -17,7 +17,7 @@ const Sidebar: React.FunctionComponent<SidebarProps> = ({ windowStore, settingsS
   };
 
   return (
-    <Box width="140px">
+    <Flex width="140px" flexDirection="column">
       {desktops.map((desktop, index) => {
         return (
           <Box key={desktop.id} p="8px">
@@ -43,7 +43,18 @@ const Sidebar: React.FunctionComponent<SidebarProps> = ({ windowStore, settingsS
           </Box>
         );
       })}
-    </Box>
+      <Spacer />
+      <Box p="8px">
+        <Heading as="button" size="s" width="100%">
+          Search
+        </Heading>
+      </Box>
+      <Box p="8px">
+        <Heading as="button" size="s" width="100%">
+          Profile
+        </Heading>
+      </Box>
+    </Flex>
   );
 };
 
