@@ -39,7 +39,7 @@ const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage }:
   };
 
   return (
-    <Flex flex="1" flexDirection="column" bg="white" color="black">
+    <Flex flex="1" flexDirection="column" bg="smokewhite" color="black" margin="4px" border="1px">
       <Heading size="s">{window.simplifiedName}</Heading>
       <Box flex="1">
         <Virtuoso
@@ -60,6 +60,7 @@ const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage }:
         placeholder="Write here…"
         value={message}
         size="sm"
+        margin="4px"
       />
     </Flex>
   );
