@@ -1,6 +1,5 @@
 import { computed, observable, makeObservable } from 'mobx';
 import dayjs from 'dayjs';
-import isMobile from 'ismobilejs';
 import MessageModel from './Message';
 import UserModel, { systemUser, ircSystemUser } from './User';
 import { AlertsRecord, Network, WindowType, UpdatableWindowRecord } from '../types/notifications';
@@ -8,7 +7,6 @@ import { AlertsRecord, Network, WindowType, UpdatableWindowRecord } from '../typ
 export default class WindowModel {
   messages = new Map<number, MessageModel>();
   logMessages = new Map<number, MessageModel>();
-  actualDesktop = 0;
   newMessagesCount = 0;
   notDelivered = false;
   minimizedNamesList = false;
@@ -18,10 +16,11 @@ export default class WindowModel {
   users: Array<UserModel> = [];
 
   constructor(
-    public readonly windowId: number,
+    public readonly id: number,
     public readonly peerUser: UserModel | null,
     public readonly network: Network,
     public readonly type: WindowType,
+    public desktopId: number,
     public generation: string,
     public topic: string | null,
     public name: string | null,
@@ -32,6 +31,7 @@ export default class WindowModel {
     public role: string
   ) {
     makeObservable(this, {
+      desktopId: observable,
       topic: observable,
       name: observable,
       row: observable,
@@ -47,8 +47,6 @@ export default class WindowModel {
       voices: observable,
       users: observable,
       minimizedNamesList: observable,
-      actualDesktop: observable,
-      desktop: computed,
       sortedMessages: computed,
       sortedLogMessages: computed,
       operatorNames: computed,
@@ -60,14 +58,6 @@ export default class WindowModel {
       tooltipTopic: computed,
       explainedType: computed
     });
-  }
-
-  get desktop(): number {
-    return this.actualDesktop;
-  }
-
-  set desktop(value: number) {
-    this.actualDesktop = isMobile().any ? Math.floor(Math.random() * 10000000) : value;
   }
 
   get sortedMessages(): Array<MessageModel> {
@@ -165,7 +155,7 @@ export default class WindowModel {
     this.topic = typeof record.topic !== 'undefined' ? record.topic : this.topic;
     this.row = typeof record.row !== 'undefined' ? record.row : this.row;
     this.column = typeof record.column !== 'undefined' ? record.column : this.column;
-    this.desktop = typeof record.desktop !== 'undefined' ? record.desktop : this.desktop;
+    this.desktopId = typeof record.desktop !== 'undefined' ? record.desktop : this.desktopId;
     this.minimizedNamesList =
       typeof record.minimizedNamesList !== 'undefined' ? record.minimizedNamesList : this.minimizedNamesList;
     this.alerts.email = typeof record.alerts?.email !== 'undefined' ? record.alerts.email : this.alerts.email;

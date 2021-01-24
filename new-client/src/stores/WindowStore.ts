@@ -62,13 +62,13 @@ class WindowStore {
     const desktops: { [key: number]: { initials: string; messages: number; windows: Window[] } } = {};
 
     this.windows.forEach(window => {
-      const { newMessagesCount, desktop } = window;
+      const { newMessagesCount, desktopId } = window;
 
-      if (desktops[desktop]) {
-        desktops[desktop].messages += newMessagesCount;
-        desktops[desktop].windows.push(window);
+      if (desktops[desktopId]) {
+        desktops[desktopId].messages += newMessagesCount;
+        desktops[desktopId].windows.push(window);
       } else {
-        desktops[desktop] = {
+        desktops[desktopId] = {
           messages: newMessagesCount,
           initials: window.simplifiedName.substr(0, 2).toUpperCase(),
           windows: [window]
@@ -197,7 +197,7 @@ class WindowStore {
     const response = await this.socket.send<SendRequest>({
       id: 'SEND',
       text,
-      windowId: window.windowId
+      windowId: window.id
     });
 
     sent = true;
@@ -218,7 +218,7 @@ class WindowStore {
       id: 'COMMAND',
       command,
       params: params || '',
-      windowId: window.windowId
+      windowId: window.id
     });
 
     if (response.status !== 'OK') {
@@ -279,7 +279,7 @@ class WindowStore {
   async fetchMessageRange(window: WindowModel, start: number, end: number): Promise<void> {
     const response = await this.socket.send<FetchRequest>({
       id: 'FETCH',
-      windowId: window.windowId,
+      windowId: window.id,
       start,
       end
     });
@@ -294,7 +294,7 @@ class WindowStore {
   async fetchOlderMessages(window: WindowModel): Promise<boolean> {
     const response = await this.socket.send<FetchRequest>({
       id: 'FETCH',
-      windowId: window.windowId,
+      windowId: window.id,
       end: Array.from(window.messages.values()).sort((a, b) => a.gid - b.gid)[0].ts,
       limit: 50
     });
@@ -347,7 +347,7 @@ class WindowStore {
   async editMessage(window: WindowModel, gid: number, body: string): Promise<void> {
     const response = await this.socket.send<EditRequest>({
       id: 'EDIT',
-      windowId: window.windowId,
+      windowId: window.id,
       gid,
       text: body
     });
@@ -375,6 +375,7 @@ class WindowStore {
           user,
           windowRecord.network,
           windowRecord.windowType,
+          windowRecord.desktop,
           this.socket.sessionId,
           windowRecord.topic,
           windowRecord.name,
@@ -396,21 +397,21 @@ class WindowStore {
     }
   }
 
-  async closeWindow(windowId: number): Promise<void> {
+  async closeWindow(id: number): Promise<void> {
     await this.socket.send<CloseRequest>({
       id: 'CLOSE',
-      windowId
+      windowId: id
     });
   }
 
-  deleteWindow(windowId: number): void {
-    this.windows.delete(windowId);
+  deleteWindow(id: number): void {
+    this.windows.delete(id);
   }
 
   async updatePassword(window: Window, password: string): Promise<{ success: boolean; errorMsg?: string }> {
     const response = await this.socket.send<UpdatePasswordRequest>({
       id: 'UPDATE_PASSWORD',
-      windowId: window.windowId,
+      windowId: window.id,
       password
     });
     const success = response.status === 'OK';
@@ -421,7 +422,7 @@ class WindowStore {
   async updateTopic(window: Window, topic: string): Promise<void> {
     await this.socket.send<UpdateTopicRequest>({
       id: 'UPDATE_TOPIC',
-      windowId: window.windowId,
+      windowId: window.id,
       topic
     });
   }
@@ -431,13 +432,13 @@ class WindowStore {
 
     await this.socket.send<UpdateRequest>({
       id: 'UPDATE',
-      windowId: window.windowId,
+      windowId: window.id,
       alerts
     });
   }
 
-  async moveWindow(windowId: number, column: number, row: number, desktop: number): Promise<void> {
-    const window = this.windows.get(windowId);
+  async moveWindow(id: number, column: number, row: number, desktopId: number): Promise<void> {
+    const window = this.windows.get(id);
 
     if (!window) {
       return;
@@ -445,13 +446,13 @@ class WindowStore {
 
     window.column = column;
     window.row = row;
-    window.desktop = desktop;
+    window.desktopId = desktopId;
 
     if (!isMobile().any) {
       await this.socket.send<UpdateRequest>({
         id: 'UPDATE',
-        windowId,
-        desktop,
+        windowId: id,
+        desktop: desktopId,
         column,
         row
       });
@@ -463,7 +464,7 @@ class WindowStore {
 
     await this.socket.send<UpdateRequest>({
       id: 'UPDATE',
-      windowId: window.windowId,
+      windowId: window.id,
       minimizedNamesList: window.minimizedNamesList
     });
   }
@@ -494,14 +495,14 @@ class WindowStore {
     // Remove possible deleted windows.
     this.windows.forEach(windowObject => {
       if (windowObject.generation !== this.socket.sessionId) {
-        this.windows.delete(windowObject.windowId);
+        this.windows.delete(windowObject.id);
       }
     });
 
     this.initDone = true;
 
     const validActiveDesktop = Array.from(this.windows.values()).some(
-      window => window.desktop === this.rootStore.settingStore.settings.activeDesktop
+      window => window.desktopId === this.rootStore.settingStore.settings.activeDesktop
     );
 
     if (!validActiveDesktop && this.windows.size > 0) {
@@ -509,8 +510,8 @@ class WindowStore {
     }
   }
 
-  updateMembers(windowId: number, members: Array<{ userId: string; role: Role }>, reset: boolean): void {
-    const window = this.windows.get(windowId);
+  updateMembers(id: number, members: Array<{ userId: string; role: Role }>, reset: boolean): void {
+    const window = this.windows.get(id);
 
     if (!window) {
       return;
