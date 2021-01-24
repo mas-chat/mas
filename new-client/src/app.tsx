@@ -1,7 +1,6 @@
 import React from 'react';
 import { ChakraProvider, extendTheme, Flex, Box, Center } from '@chakra-ui/react';
-import Desktop from './components/Desktop';
-import Sidebar from './components/Sidebar';
+import { Desktop, Sidebar } from './components';
 import RootStore from './stores/RootStore';
 
 const rootStore = new RootStore();
