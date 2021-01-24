@@ -11,7 +11,7 @@ interface RootContainerProps {
 const RootContainer: React.FunctionComponent<RootContainerProps> = ({ rootStore }: RootContainerProps) => {
   return (
     <Flex width="100vw" height="100vh" bgColor="white">
-      <Sidebar windowStore={rootStore.windowStore} />
+      <Sidebar windowStore={rootStore.windowStore} settingsStore={rootStore.settingStore} />
       <Desktop flex="1" rootStore={rootStore}></Desktop>
     </Flex>
   );
