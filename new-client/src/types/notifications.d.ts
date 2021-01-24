@@ -67,6 +67,16 @@ export type UpdatableWindowProperties =
 
 export type UpdatableWindowRecord = Partial<Pick<WindowRecord, UpdatableWindowProperties>> & { windowId: number };
 
+export type UserRecord = {
+  name: string;
+  gravatar: string;
+  nick: {
+    mas: string;
+  } & {
+    [key in IRCNetwork]?: string;
+  };
+};
+
 export interface AddAlert {
   type: 'ADD_ALERT';
   alertId: number;
@@ -110,18 +120,7 @@ export interface UpdateSettings {
 
 export interface AddUsers {
   type: 'ADD_USERS';
-  mapping: Record<
-    string,
-    {
-      name: string;
-      gravatar: string;
-      nick: {
-        mas: string;
-      } & {
-        [key in IRCNetwork]?: string;
-      };
-    }
-  >;
+  mapping: Record<string, UserRecord>;
 }
 
 export interface AddMessage extends MessageRecord {

@@ -32,17 +32,6 @@ class UserStore {
     return this.users.get(getUserId()) as UserModel;
   }
 
-  upsertUsers(
-    mapping: Record<
-      string,
-      { name: string; gravatar: string; nick: { mas: string; IRCNet?: string; FreeNode?: string; W3C?: string } }
-    >
-  ): void {
-    Object.entries(mapping).forEach(([userId, user]) => {
-      this.users.set(userId, new UserModel(user.nick, user.name, user.gravatar));
-    });
-  }
-
   handlerServerNotification(ntf: Notification): boolean {
     switch (ntf.type) {
       case 'ADD_USERS':
@@ -53,6 +42,23 @@ class UserStore {
     }
 
     return true;
+  }
+
+  upsertUsers(
+    mapping: Record<
+      string,
+      { name: string; gravatar: string; nick: { mas: string; IRCNet?: string; FreeNode?: string; W3C?: string } }
+    >
+  ): void {
+    Object.entries(mapping).forEach(([userId, user]) => {
+      const existingUser = this.users.get(userId);
+
+      if (existingUser) {
+        existingUser.updateFromRecord(user);
+      } else {
+        this.users.set(userId, new UserModel(user.nick, user.name, user.gravatar));
+      }
+    });
   }
 }
 

@@ -1,17 +1,26 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Box, Heading, Flex, Input, Text } from '@chakra-ui/react';
 import { Virtuoso } from 'react-virtuoso';
 import WindowModel from '../models/Window';
 
 interface WindowProps {
+  onSendMessage: (message: string) => void;
   window: WindowModel;
 }
 
-const Window: React.FunctionComponent<WindowProps> = ({ window }: WindowProps) => {
+const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage }: WindowProps) => {
   const virtuoso = useRef(null);
-  const [atBottom, setAtBottom] = useState(false);
+  const [_, setAtBottom] = useState(false);
+  const [message, setMessage] = useState('');
   const messages = Array.from(window.messages.values());
+
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      onSendMessage(message);
+      setMessage('');
+    }
+  };
 
   const Row = ({ index }: { index: number }) => {
     const message = messages[index];
@@ -30,7 +39,7 @@ const Window: React.FunctionComponent<WindowProps> = ({ window }: WindowProps) =
   };
 
   return (
-    <Flex key={window.id} flexDirection="column" bg="white" color="black">
+    <Flex flex="1" flexDirection="column" bg="white" color="black">
       <Heading size="s">{window.simplifiedName}</Heading>
       <Box flex="1">
         <Virtuoso
@@ -45,7 +54,13 @@ const Window: React.FunctionComponent<WindowProps> = ({ window }: WindowProps) =
           followOutput="smooth"
         />
       </Box>
-      <Input placeholder="small size" size="sm" />
+      <Input
+        onKeyDown={onKeyDown}
+        onChange={e => setMessage(e.target.value)}
+        placeholder="Write here…"
+        value={message}
+        size="sm"
+      />
     </Flex>
   );
 };
