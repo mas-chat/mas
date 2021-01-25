@@ -1,19 +1,32 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Box, Heading, Flex, Input, Text } from '@chakra-ui/react';
-import { Virtuoso } from 'react-virtuoso';
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import WindowModel from '../models/Window';
+import { usePageVisibility } from '../hooks/pageVisibility';
 
 interface WindowProps {
   onSendMessage: (message: string) => void;
   window: WindowModel;
+  initDone: boolean;
 }
 
-const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage }: WindowProps) => {
-  const virtuoso = useRef(null);
+const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage, initDone }: WindowProps) => {
+  const virtuoso = useRef<VirtuosoHandle>(null);
   const [_, setAtBottom] = useState(false);
   const [message, setMessage] = useState('');
   const messages = Array.from(window.messages.values()).sort((a, b) => a.ts - b.ts);
+  const isVisible = usePageVisibility();
+
+  useEffect(() => {
+    if (initDone && isVisible) {
+      virtuoso.current?.scrollToIndex({
+        index: messages.length,
+        align: 'end',
+        behavior: 'auto'
+      });
+    }
+  }, [isVisible]);
 
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {

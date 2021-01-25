@@ -28,7 +28,12 @@ const Desktop: React.FunctionComponent<DesktopProps> = ({ rootStore, flex }: Des
               .filter(window => window.row === row)
               .map(window => {
                 return (
-                  <Window key={window.id} onSendMessage={message => onSendMessage(window, message)} window={window} />
+                  <Window
+                    key={window.id}
+                    onSendMessage={message => onSendMessage(window, message)}
+                    window={window}
+                    initDone={rootStore.windowStore.initDone}
+                  />
                 );
               })}
           </Flex>
