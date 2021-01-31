@@ -314,8 +314,8 @@ describe('Message model', () => {
     });
   });
 
-  describe('Youtube URLs', () => {
-    it('Decodes full Youtube URL', async () => {
+  describe('YouTube URLs', () => {
+    it('Decodes full YouTube URL', async () => {
       const message = MessageModelFactory.build({
         body: 'hello https://www.youtube.com/watch?v=SHNOyMsKCBE&t=77 there',
         window,
@@ -329,7 +329,7 @@ describe('Message model', () => {
       ]);
     });
 
-    it('Decodes short Youtube URL', async () => {
+    it('Decodes short YouTube URL', async () => {
       const message = MessageModelFactory.build({
         body: 'hello http://youtu.be/dDCfXJ50P3k there',
         window,
@@ -343,7 +343,7 @@ describe('Message model', () => {
       ]);
     });
 
-    it('Decodes short Youtube URL with start time in seconds', async () => {
+    it('Decodes short YouTube URL with start time in seconds', async () => {
       const message = MessageModelFactory.build({
         body: 'hello https://youtu.be/dDCfXJ50P3k?t=77 there',
         window,
@@ -357,7 +357,7 @@ describe('Message model', () => {
       ]);
     });
 
-    it('Decodes short Youtube URL with start time in seconds, minutes, and hours', async () => {
+    it('Decodes short YouTube URL with start time in seconds, minutes, and hours', async () => {
       const message = MessageModelFactory.build({
         body: 'hello https://youtu.be/dDCfXJ50P3k?t=2h12m6s there',
         window,
