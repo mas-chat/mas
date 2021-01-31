@@ -65,7 +65,7 @@ export default class MessageModel {
       nick: computed,
       avatarUrl: computed,
       channelActionText: computed,
-      bodyParts: computed,
+      bodyTokens: computed,
       images: computed,
       hasImages: computed,
       videos: computed,
@@ -129,7 +129,7 @@ export default class MessageModel {
   }
 
   get mentionsMe(): boolean {
-    return this.bodyParts.some(part => part.type === 'mention' && part.userId === me.id);
+    return this.bodyTokens.some(part => part.type === 'mention' && part.userId === me.id);
   }
 
   get isChannelAction(): boolean {
@@ -155,7 +155,7 @@ export default class MessageModel {
     }
   }
 
-  get bodyParts(): Array<BodyPart> {
+  get bodyTokens(): Array<BodyPart> {
     let parts: Array<BodyPart> = [{ type: 'text', text: this.body }];
 
     if (this.body !== '') {
@@ -172,23 +172,23 @@ export default class MessageModel {
   }
 
   get images(): ImageUrlPart[] {
-    return this.bodyParts.filter(
+    return this.bodyTokens.filter(
       (part: BodyPart): part is ImageUrlPart => part.type === 'url' && part.class === 'image'
     );
   }
 
   get hasImages(): boolean {
-    return this.bodyParts.some(part => part.type === 'url' && part.class === 'image');
+    return this.bodyTokens.some(part => part.type === 'url' && part.class === 'image');
   }
 
   get videos(): VideoUrlPart[] {
-    return this.bodyParts.filter(
+    return this.bodyTokens.filter(
       (part: BodyPart): part is VideoUrlPart => part.type === 'url' && part.class === 'video'
     );
   }
 
   get hasVideos(): boolean {
-    return this.bodyParts.some(part => part.type === 'url' && part.class === 'video');
+    return this.bodyTokens.some(part => part.type === 'url' && part.class === 'video');
   }
 
   private extractLinks(parts: Array<BodyPart>): Array<BodyPart> {

@@ -17,7 +17,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'url', class: 'generic', url: expect.any(URI) },
         { type: 'text', text: ' two' }
       ]);
@@ -30,7 +30,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'one ' },
         { type: 'url', class: 'generic', url: expect.any(URI) },
         { type: 'text', text: ' two' }
@@ -44,7 +44,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'one ' },
         { type: 'url', class: 'generic', url: expect.any(URI) }
       ]);
@@ -57,7 +57,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'url', class: 'generic', url: expect.any(URI) },
         { type: 'text', text: ' one ' },
         { type: 'url', class: 'generic', url: expect.any(URI) },
@@ -75,7 +75,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'mention', text: 'user:', userId: user.id },
         { type: 'text', text: ' hello there' }
       ]);
@@ -88,7 +88,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'mention', text: '@user', userId: user.id },
         { type: 'text', text: ' hello there' }
       ]);
@@ -101,7 +101,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hi ' },
         { type: 'mention', text: '@user', userId: user.id },
         { type: 'text', text: ' hello there' }
@@ -115,7 +115,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hi ' },
         { type: 'mention', text: '@user', userId: user.id }
       ]);
@@ -128,7 +128,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'mention', text: '@user', userId: user.id },
         { type: 'text', text: ' hi ' },
         { type: 'mention', text: '@user', userId: user.id },
@@ -144,7 +144,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'mention', text: 'user:', userId: user.id },
         { type: 'text', text: ' hi ' },
         { type: 'mention', text: '@user', userId: user.id }
@@ -158,7 +158,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([{ type: 'text', text: 'hi foo@example.com there' }]);
+      expect(message.bodyTokens).toEqual([{ type: 'text', text: 'hi foo@example.com there' }]);
     });
 
     it('Does not decode two mentions without a space', async () => {
@@ -168,7 +168,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([{ type: 'text', text: 'hi @foo@bar there' }]);
+      expect(message.bodyTokens).toEqual([{ type: 'text', text: 'hi @foo@bar there' }]);
     });
 
     it('Does not decode unknown nicks', async () => {
@@ -178,7 +178,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'unknown:' },
         { type: 'text', text: ' hi ' },
         { type: 'text', text: '@stranger' },
@@ -195,7 +195,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'emoji', emoji: '😃', shortCode: ':smiley:' },
         { type: 'text', text: ' hello there' }
       ]);
@@ -208,7 +208,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
         { type: 'emoji', emoji: '😃', shortCode: ':smiley:' },
         { type: 'text', text: ' there' }
@@ -222,7 +222,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello there ' },
         { type: 'emoji', emoji: '😃', shortCode: ':smiley:' }
       ]);
@@ -235,7 +235,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'emoji', emoji: '😃', shortCode: ':smiley:' },
         { type: 'emoji', emoji: '😃', shortCode: ':smiley:' },
         { type: 'emoji', emoji: '😃', shortCode: ':smiley:' }
@@ -249,7 +249,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello there ' },
         { type: 'text', text: ':brokensmiley:' }
       ]);
@@ -264,7 +264,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'emoji', emoji: '👩🏿', shortCode: ':woman_tone5:' },
         { type: 'text', text: ' hello there' }
       ]);
@@ -277,7 +277,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
         { type: 'emoji', emoji: '👩🏿', shortCode: ':woman_tone5:' },
         { type: 'text', text: ' there' }
@@ -291,7 +291,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello there ' },
         { type: 'emoji', emoji: '👩🏿', shortCode: ':woman_tone5:' }
       ]);
@@ -306,7 +306,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
         { type: 'url', class: 'image', url: expect.any(URI) },
         { type: 'text', text: ' there' }
@@ -322,7 +322,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
         { type: 'url', class: 'video', url: expect.any(URI), startTime: 77, videoId: 'SHNOyMsKCBE' },
         { type: 'text', text: ' there' }
@@ -336,7 +336,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
         { type: 'url', class: 'video', url: expect.any(URI), startTime: 0, videoId: 'dDCfXJ50P3k' },
         { type: 'text', text: ' there' }
@@ -350,7 +350,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
         { type: 'url', class: 'video', url: expect.any(URI), startTime: 77, videoId: 'dDCfXJ50P3k' },
         { type: 'text', text: ' there' }
@@ -364,7 +364,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
         {
           type: 'url',
@@ -386,7 +386,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyParts).toEqual([
+      expect(message.bodyTokens).toEqual([
         { text: 'user:', type: 'mention', userId: 'm1' },
         { text: ' ', type: 'text' },
         { text: '@user', type: 'mention', userId: 'm1' },
