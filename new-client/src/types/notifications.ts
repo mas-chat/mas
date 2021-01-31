@@ -1,26 +1,47 @@
-export type MessageCategory =
-  | 'msg'
-  | 'info'
-  | 'server'
-  | 'banner'
-  | 'error'
-  | 'join'
-  | 'part'
-  | 'quit'
-  | 'kick'
-  | 'action';
+export enum MessageCategory {
+  Message = 'msg',
+  Info = 'info',
+  Server = 'server',
+  Banner = 'banner',
+  Error = 'error',
+  Join = 'join',
+  Part = 'part',
+  Quit = 'quit',
+  Kick = 'kick',
+  Action = 'action'
+}
 
-export type MessageStatus = 'original' | 'edited';
+export enum MessageStatus {
+  Original = 'original',
+  Edited = 'edited',
+  Deleted = 'deleted'
+}
 
-export type Theme = 'default' | 'dark';
+export enum Theme {
+  Default = 'default',
+  Dark = 'dark'
+}
 
-export type Network = 'ircnet' | 'freenode' | 'w3c' | 'mas';
+export enum Network {
+  IRCNet = 'ircnet',
+  Freenode = 'freenode',
+  W3C = 'w3c',
+  Mas = 'mas'
+}
 
 export type IRCNetwork = Exclude<Network, 'mas'>;
 
-export type Role = 'u' | 'v' | '@' | '*';
+export enum Role {
+  User = 'u',
+  Voice = 'v',
+  Operator = '@',
+  Owner = '*'
+}
 
-export type WindowType = 'group' | '1on1';
+export enum WindowType {
+  Group = 'group',
+  OneOnOne = '1on1'
+}
 
 export type AlertsRecord = {
   email: boolean;
