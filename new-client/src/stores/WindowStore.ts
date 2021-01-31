@@ -11,7 +11,9 @@ import {
   UpdatableWindowRecord,
   Network,
   AlertsRecord,
-  Role
+  Role,
+  MessageCategory,
+  MessageStatus
 } from '../types/notifications';
 import WindowModel from '../models/Window';
 import {
@@ -179,7 +181,15 @@ class WindowStore {
   addError(window: WindowModel, body: string): void {
     window.messages.set(
       nextLocalGid,
-      new Message(nextLocalGid, body, 'error', dayjs().unix(), systemUser, window, 'original')
+      new Message({
+        gid: nextLocalGid,
+        body,
+        category: MessageCategory.Error,
+        ts: dayjs().unix(),
+        user: systemUser,
+        window,
+        status: MessageStatus.Original
+      })
     );
 
     nextLocalGid--;
@@ -209,7 +219,18 @@ class WindowStore {
       const gid = response.gid as number;
       const ts = response.ts as number;
 
-      window.messages.set(gid, new Message(gid, text, 'msg', ts, me, window, 'original'));
+      window.messages.set(
+        gid,
+        new Message({
+          gid,
+          body: text,
+          category: MessageCategory.Message,
+          ts,
+          user: me,
+          window,
+          status: MessageStatus.Original
+        })
+      );
     }
   }
 
@@ -236,7 +257,7 @@ class WindowStore {
   async joinGroup(name: string, password: string): Promise<{ success: boolean; errorMsg?: string }> {
     const response = await this.socket.send<JoinRequest>({
       id: 'JOIN',
-      network: 'mas',
+      network: Network.Mas,
       name,
       password
     });
@@ -362,7 +383,7 @@ class WindowStore {
 
   addWindow(windowRecord: WindowRecord): void {
     const window = this.windows.get(windowRecord.windowId);
-    const user = windowRecord.userId ? this.rootStore.userStore.users.get(windowRecord.userId) || null : null;
+    const user = windowRecord.userId ? this.rootStore.userStore.users.get(windowRecord.userId) || undefined : undefined;
 
     if (window) {
       window.updateGeneration(this.socket.sessionId as string);
@@ -370,21 +391,21 @@ class WindowStore {
     } else {
       this.windows.set(
         windowRecord.windowId,
-        new Window(
-          windowRecord.windowId,
-          user,
-          windowRecord.network,
-          windowRecord.windowType,
-          windowRecord.desktop,
-          this.socket.sessionId,
-          windowRecord.topic,
-          windowRecord.name,
-          windowRecord.row,
-          windowRecord.column,
-          windowRecord.password,
-          windowRecord.alerts,
-          windowRecord.role
-        )
+        new Window({
+          id: windowRecord.windowId,
+          peerUser: user,
+          network: windowRecord.network,
+          type: windowRecord.windowType,
+          desktopId: windowRecord.desktop,
+          generation: this.socket.sessionId,
+          topic: windowRecord.topic,
+          name: windowRecord.name,
+          row: windowRecord.row,
+          column: windowRecord.column,
+          password: windowRecord.password,
+          alerts: windowRecord.alerts,
+          role: windowRecord.role
+        })
       );
     }
   }
@@ -602,7 +623,16 @@ class WindowStore {
 
     window[type].set(
       message.gid,
-      new Message(message.gid, message.body, message.cat, message.ts, user, window, message.status, message.updatedTs)
+      new Message({
+        gid: message.gid,
+        body: message.body,
+        category: message.cat,
+        ts: message.ts,
+        user,
+        window,
+        status: message.status,
+        updatedTs: message.updatedTs
+      })
     );
 
     return true;

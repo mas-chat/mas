@@ -1,5 +1,4 @@
 import AlertStore from './AlertStore';
-import DaySeparatorStore from './DaySeparatorStore';
 import FriendStore from './FriendStore';
 import ModalStore from './ModalStore';
 import NetworkStore from './NetworkStore';
@@ -16,7 +15,6 @@ interface Store {
 
 class RootStore {
   alertStore: AlertStore;
-  daySeparatorStore: DaySeparatorStore;
   friendStore: FriendStore;
   modalStore: ModalStore;
   networkStore: NetworkStore;
@@ -31,7 +29,6 @@ class RootStore {
     const socket = new Socket(this);
 
     this.alertStore = new AlertStore(this, socket);
-    this.daySeparatorStore = new DaySeparatorStore(this, socket);
     this.friendStore = new FriendStore(this, socket);
     this.modalStore = new ModalStore(this, socket);
     this.networkStore = new NetworkStore(this, socket);
@@ -42,7 +39,6 @@ class RootStore {
 
     this.stores = [
       this.alertStore,
-      this.daySeparatorStore,
       this.friendStore,
       this.modalStore,
       this.networkStore,

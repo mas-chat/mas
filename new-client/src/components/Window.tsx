@@ -13,15 +13,14 @@ interface WindowProps {
 
 const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage, initDone }: WindowProps) => {
   const virtuoso = useRef<VirtuosoHandle>(null);
-  const [_, setAtBottom] = useState(false);
   const [message, setMessage] = useState('');
-  const messages = Array.from(window.messages.values()).sort((a, b) => a.ts - b.ts);
+  const messages = window.sortedMessages;
   const isVisible = usePageVisibility();
 
   useEffect(() => {
     if (initDone && isVisible) {
       virtuoso.current?.scrollToIndex({
-        index: messages.length,
+        index: messages.length - 1,
         align: 'end',
         behavior: 'auto'
       });
@@ -35,12 +34,24 @@ const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage, i
     }
   };
 
+  // private renderLink(url: string, label: string) {
+  //   return `<a href="${url}" target="_blank">${label}</a>`;
+  // }
+
+  // private renderEmoji(name: string, src: string) {
+  //   return `<img align="absmiddle" alt="${name}" title="${name}" class="emoji" src="https://twemoji.maxcdn.com/v/latest/72x72/${src}.png"/>`;
+  // }
+
+  // private renderMention(beforeCharacter: string, nick: string) {
+  //   return `${beforeCharacter}<span class="nick-mention">${nick}</span>`;
+  // }
+
   const Row = ({ index }: { index: number }) => {
     const message = messages[index];
 
     return (
       <Flex flexDirection="row">
-        <Box minWidth="50px">{message.decoratedTs}</Box>
+        <Box minWidth="50px">{message.createdTime}</Box>
         <Box flex="1">
           <Text as="b" flex="1">
             {message.nick}:
@@ -60,9 +71,6 @@ const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage, i
         <Virtuoso
           ref={virtuoso}
           initialTopMostItemIndex={messages.length - 1}
-          atBottomStateChange={bottom => {
-            setAtBottom(bottom);
-          }}
           totalCount={messages.length}
           itemContent={index => <Row index={index} />}
           followOutput="smooth"

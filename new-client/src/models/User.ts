@@ -1,16 +1,30 @@
 import { observable, makeObservable } from 'mobx';
+import { getUserId } from '../lib/cookie';
 import { UserRecord } from '../types/notifications';
 
 const SYSTEM_USER_NICK = 'system';
 const SYSTEM_USER_NAME = 'System User';
-const SYSTEM_USER_GRAVATAR = 'https://www.gravatar.com/avatar/00000000000000000000000000000000';
+const DEFAULT_GRAVATAR = 'https://www.gravatar.com/avatar/00000000000000000000000000000000';
+
+export type UserModelProps = {
+  id: string;
+  nick: { mas: string; ircnet?: string; freenode?: string; w3c?: string };
+  name?: string;
+  gravatar?: string;
+};
 
 export default class UserModel {
-  constructor(
-    public nick: { mas: string; ircnet?: string; freenode?: string; w3c?: string },
-    public name: string,
-    public gravatar: string
-  ) {
+  public readonly id: string;
+  public nick: { mas: string; ircnet?: string; freenode?: string; w3c?: string };
+  public name: string;
+  public gravatar: string;
+
+  constructor({ id, nick, name, gravatar }: UserModelProps) {
+    this.id = id;
+    this.nick = nick;
+    this.name = name || 'anonymous';
+    this.gravatar = gravatar || DEFAULT_GRAVATAR;
+
     makeObservable(this, {
       nick: observable,
       name: observable,
@@ -19,41 +33,44 @@ export default class UserModel {
   }
 
   updateFromRecord(record: UserRecord): void {
-    this.name = typeof record.name !== 'undefined' ? record.name : this.name;
-    this.gravatar = typeof record.gravatar !== 'undefined' ? record.gravatar : this.gravatar;
-    this.nick.mas = typeof record.nick.mas !== 'undefined' ? record.nick.mas : this.nick.mas;
-    this.nick.ircnet = typeof record.nick.ircnet !== 'undefined' ? record.nick.ircnet : this.nick.ircnet;
-    this.nick.freenode = typeof record.nick.freenode !== 'undefined' ? record.nick.freenode : this.nick.freenode;
-    this.nick.w3c = typeof record.nick.w3c !== 'undefined' ? record.nick.w3c : this.nick.w3c;
+    this.name = record.name ?? this.name;
+    this.gravatar = record.gravatar ?? this.gravatar;
+    this.nick.mas = record.nick.mas ?? this.nick.mas;
+    this.nick.ircnet = record.nick.ircnet ?? this.nick.ircnet;
+    this.nick.freenode = record.nick.freenode ?? this.nick.freenode;
+    this.nick.w3c = record.nick.w3c ?? this.nick.w3c;
   }
 }
 
-export const systemUser = new UserModel(
-  {
+export const systemUser = new UserModel({
+  id: 'm0',
+  nick: {
     mas: SYSTEM_USER_NICK,
     ircnet: SYSTEM_USER_NICK,
     freenode: SYSTEM_USER_NICK,
     w3c: SYSTEM_USER_NICK
   },
-  SYSTEM_USER_NAME,
-  SYSTEM_USER_GRAVATAR
-);
+  name: SYSTEM_USER_NAME,
+  gravatar: DEFAULT_GRAVATAR
+});
 
-export const ircSystemUser = new UserModel(
-  {
+export const ircSystemUser = new UserModel({
+  id: 'i0',
+  nick: {
     mas: SYSTEM_USER_NICK,
     ircnet: SYSTEM_USER_NICK,
     freenode: SYSTEM_USER_NICK,
     w3c: SYSTEM_USER_NICK
   },
-  SYSTEM_USER_NAME,
-  SYSTEM_USER_GRAVATAR
-);
+  name: SYSTEM_USER_NAME,
+  gravatar: DEFAULT_GRAVATAR
+});
 
-export const me = new UserModel(
-  {
+export const me = new UserModel({
+  id: getUserId(),
+  nick: {
     mas: 'loading'
   },
-  'Loading...',
-  'Loading...'
-);
+  name: 'Loading...',
+  gravatar: DEFAULT_GRAVATAR
+});

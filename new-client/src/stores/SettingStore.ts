@@ -1,7 +1,7 @@
 import { action, observable, makeObservable } from 'mobx';
 import isMobile from 'ismobilejs';
 import SettingsModel from '../models/Settings';
-import { Notification } from '../types/notifications';
+import { Notification, Theme } from '../types/notifications';
 import { SendConfirmEmailRequest } from '../types/requests';
 import RootStore from './RootStore';
 import Socket from '../lib/socket';
@@ -35,21 +35,19 @@ class SettingStore {
   }
 
   updateSettings(
-    theme?: 'default' | 'dark' | undefined,
+    theme?: Theme | undefined,
     activeDesktop?: number | undefined,
     emailConfirmed?: boolean | undefined,
     canUseIRC?: boolean | undefined
   ): void {
-    this.settings = new SettingsModel(
-      theme === undefined ? this.settings.theme : theme,
-      activeDesktop === undefined ? this.settings.activeDesktop : activeDesktop,
-      emailConfirmed === undefined ? this.settings.emailConfirmed : emailConfirmed,
-      canUseIRC === undefined ? this.settings.canUseIRC : canUseIRC
-    );
+    this.settings.theme = theme === undefined ? this.settings.theme : theme;
+    this.settings.activeDesktop = activeDesktop === undefined ? this.settings.activeDesktop : activeDesktop;
+    this.settings.emailConfirmed = emailConfirmed === undefined ? this.settings.emailConfirmed : emailConfirmed;
+    this.settings.canUseIRC = canUseIRC === undefined ? this.settings.canUseIRC : canUseIRC;
   }
 
   toggleTheme(): void {
-    const newTheme = this.settings.theme === 'dark' ? 'default' : 'dark';
+    const newTheme = this.settings.theme === Theme.Dark ? Theme.Default : Theme.Default;
     this.updateSettings(newTheme);
 
     this.socket.send({

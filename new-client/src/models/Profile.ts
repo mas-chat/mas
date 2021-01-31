@@ -1,9 +1,19 @@
 import { observable, makeObservable } from 'mobx';
 
+type ProfileModelProps = {
+  name: string;
+  email: string;
+};
+
 export default class ProfileModel {
-  constructor(public readonly nick?: string, public readonly name?: string, public readonly email?: string) {
+  public name: string;
+  public email: string;
+
+  constructor({ name, email }: ProfileModelProps) {
+    this.name = name;
+    this.email = email;
+
     makeObservable(this, {
-      nick: observable,
       name: observable,
       email: observable
     });

@@ -1,35 +1,87 @@
 import { computed, observable, makeObservable } from 'mobx';
-import dayjs from 'dayjs';
 import MessageModel from './Message';
-import UserModel, { systemUser, ircSystemUser } from './User';
-import { AlertsRecord, Network, WindowType, UpdatableWindowRecord } from '../types/notifications';
+import UserModel, { ircSystemUser } from './User';
+import { AlertsRecord, Network, Role, WindowType, UpdatableWindowRecord } from '../types/notifications';
+
+export type WindowModelProps = {
+  id: number;
+  peerUser?: UserModel;
+  network: Network;
+  operators?: Array<UserModel>;
+  voices?: Array<UserModel>;
+  users?: Array<UserModel>;
+  type: WindowType;
+  desktopId: number;
+  generation: string;
+  topic?: string | null;
+  name?: string;
+  row: number;
+  column: number;
+  password?: string;
+  alerts: AlertsRecord;
+  role: Role;
+};
 
 export default class WindowModel {
+  public readonly id: number;
+  public readonly peerUser?: UserModel;
+  public readonly network: Network;
+  public readonly type: WindowType;
+  public desktopId: number;
+  public generation: string;
+  public topic?: string | null;
+  public name?: string;
+  public row: number;
+  public column: number;
+  public password?: string;
+  public alerts: AlertsRecord;
+  public role: Role;
+
   messages = new Map<number, MessageModel>();
   logMessages = new Map<number, MessageModel>();
   newMessagesCount = 0;
   notDelivered = false;
   minimizedNamesList = false;
 
-  operators: Array<UserModel> = [];
-  voices: Array<UserModel> = [];
-  users: Array<UserModel> = [];
+  operators: Array<UserModel>;
+  voices: Array<UserModel>;
+  users: Array<UserModel>;
 
-  constructor(
-    public readonly id: number,
-    public readonly peerUser: UserModel | null,
-    public readonly network: Network,
-    public readonly type: WindowType,
-    public desktopId: number,
-    public generation: string,
-    public topic: string | null,
-    public name: string | null,
-    public row: number,
-    public column: number,
-    public password: string | null,
-    public alerts: AlertsRecord,
-    public role: string
-  ) {
+  constructor({
+    id,
+    peerUser,
+    network,
+    operators,
+    voices,
+    users,
+    type,
+    desktopId,
+    generation,
+    topic,
+    name,
+    row,
+    column,
+    password,
+    alerts,
+    role
+  }: WindowModelProps) {
+    this.id = id;
+    this.peerUser = peerUser;
+    this.network = network;
+    this.operators = operators || [];
+    this.voices = voices || [];
+    this.users = users || [];
+    this.type = type;
+    this.desktopId = desktopId;
+    this.generation = generation;
+    this.topic = topic;
+    this.name = name;
+    this.row = row;
+    this.column = column;
+    this.password = password;
+    this.alerts = alerts;
+    this.role = role;
+
     makeObservable(this, {
       desktopId: observable,
       topic: observable,
@@ -49,9 +101,7 @@ export default class WindowModel {
       minimizedNamesList: observable,
       sortedMessages: computed,
       sortedLogMessages: computed,
-      operatorNames: computed,
-      voiceNames: computed,
-      userNames: computed,
+      participants: computed,
       decoratedTitle: computed,
       decoratedTopic: computed,
       simplifiedName: computed,
@@ -60,42 +110,34 @@ export default class WindowModel {
     });
   }
 
+  updateFromRecord(record: UpdatableWindowRecord): void {
+    this.password = record.password ?? this.password;
+    this.topic = record.topic ?? this.topic;
+    this.row = record.row ?? this.row;
+    this.column = record.column ?? this.column;
+    this.desktopId = record.desktop ?? this.desktopId;
+    this.minimizedNamesList = record.minimizedNamesList ?? this.minimizedNamesList;
+    this.alerts.email = record.alerts?.email ?? this.alerts.email;
+    this.alerts.notification = record.alerts?.notification ?? this.alerts.notification;
+    this.alerts.sound = record.alerts?.sound ?? this.alerts.sound;
+    this.alerts.title = record.alerts?.title ?? this.alerts.title;
+  }
+
   get sortedMessages(): Array<MessageModel> {
-    const result = Array.from(this.messages.values()).sort((a, b) => (a.ts === b.ts ? a.gid - b.gid : a.ts - b.ts));
-    let gid = -1;
-
-    const addDayDivider = (array: Array<MessageModel>, dateString: string, index: number) => {
-      array.splice(index, 0, new MessageModel(gid--, dateString, 'day-divider', 0, systemUser, this));
-    };
-
-    let dayOfNextMsg = dayjs().format('dddd, MMMM D');
-
-    for (let i = result.length - 1; i >= 0; i--) {
-      const day = dayjs.unix(result[i].ts).format('dddd, MMMM D');
-
-      if (day !== dayOfNextMsg) {
-        addDayDivider(result, dayOfNextMsg, i + 1);
-        dayOfNextMsg = day;
-      }
-    }
-
-    return result;
+    return Array.from(this.messages.values()).sort((a, b) => (a.ts === b.ts ? a.gid - b.gid : a.ts - b.ts));
   }
 
   get sortedLogMessages(): Array<MessageModel> {
     return Array.from(this.logMessages.values()).sort((a, b) => a.ts - b.ts);
   }
 
-  get operatorNames(): { nick: string; gravatar: string }[] {
-    return this._mapUserToNicks('operators');
-  }
+  get participants(): Map<string, UserModel> {
+    const participants = [...this.operators, ...this.voices, ...this.users];
+    const sortedParticipantsByNick: Array<[string, UserModel]> = participants
+      .sort((a, b) => a.nick[this.network]?.localeCompare(b.nick[this.network] as string) || 0)
+      .map(user => [user.nick[this.network] as string, user]);
 
-  get voiceNames(): { nick: string; gravatar: string }[] {
-    return this._mapUserToNicks('voices');
-  }
-
-  get userNames(): { nick: string; gravatar: string }[] {
-    return this._mapUserToNicks('users');
+    return new Map<string, UserModel>(sortedParticipantsByNick);
   }
 
   get decoratedTitle(): string {
@@ -148,29 +190,5 @@ export default class WindowModel {
 
   updateGeneration(generation: string): void {
     this.generation = generation;
-  }
-
-  updateFromRecord(record: UpdatableWindowRecord): void {
-    this.password = typeof record.password !== 'undefined' ? record.password : this.password;
-    this.topic = typeof record.topic !== 'undefined' ? record.topic : this.topic;
-    this.row = typeof record.row !== 'undefined' ? record.row : this.row;
-    this.column = typeof record.column !== 'undefined' ? record.column : this.column;
-    this.desktopId = typeof record.desktop !== 'undefined' ? record.desktop : this.desktopId;
-    this.minimizedNamesList =
-      typeof record.minimizedNamesList !== 'undefined' ? record.minimizedNamesList : this.minimizedNamesList;
-    this.alerts.email = typeof record.alerts?.email !== 'undefined' ? record.alerts.email : this.alerts.email;
-    this.alerts.notification =
-      typeof record.alerts?.notification !== 'undefined' ? record.alerts.notification : this.alerts.notification;
-    this.alerts.sound = typeof record.alerts?.sound !== 'undefined' ? record.alerts.sound : this.alerts.sound;
-    this.alerts.title = typeof record.alerts?.title !== 'undefined' ? record.alerts.title : this.alerts.title;
-  }
-
-  _mapUserToNicks(role: 'operators' | 'voices' | 'users'): { nick: string; gravatar: string }[] {
-    return this[role]
-      .map(user => ({
-        nick: user.nick[this.network] || 'unknown',
-        gravatar: user.gravatar
-      }))
-      .sort((a, b) => a.nick.localeCompare(b.nick));
   }
 }

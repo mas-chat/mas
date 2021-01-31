@@ -66,7 +66,17 @@ class AlertStore {
   ): void {
     const id = alertId === null ? `local:${nextLocalAlertId++}` : alertId.toString();
 
-    this.alerts.set(id, new AlertModel(id, message, ackLabel, nackLabel, postponeLabel, resultCallback));
+    this.alerts.set(
+      id,
+      new AlertModel({
+        alertId: id,
+        message,
+        ackLabel,
+        nackLabel,
+        postponeLabel,
+        resultCallback
+      })
+    );
   }
 
   closeAlert(alertId: number, result: string): void {

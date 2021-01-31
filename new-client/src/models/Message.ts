@@ -1,73 +1,82 @@
 import { computed, observable, makeObservable } from 'mobx';
-import marked from 'marked';
 import dayjs from 'dayjs';
 import URI from 'urijs';
+import buildEmojiRegex from 'emoji-regex';
 import WindowModel from './Window';
 import UserModel, { me } from './User';
 import emoticons from '../lib/emoticons';
-import { MessageCategory, MessageRecord } from '../types/notifications';
+import { MessageCategory, MessageRecord, MessageStatus } from '../types/notifications';
 
-type BodyPart = { type: string; text?: string; url?: string; start?: number };
+const MENTION_REGEX = /(?:(?<=(?: |^))(@[^\s@]+)(?=(?: |$))|^([^\s@]+:))/g;
+const EMOTICON_REGEX = /(:[^\s:]+:)/;
+const EMOJI_REGEX = new RegExp(`(${buildEmojiRegex().source})`);
+const IMAGE_SUFFIXES = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
 
-marked.setOptions({
-  breaks: true
-});
+type TextPart = { type: 'text'; text: string };
+type GenericUrlPart = { type: 'url'; url: URI; class: 'generic' };
+type ImageUrlPart = { type: 'url'; url: URI; class: 'image' };
+type VideoUrlPart = { type: 'url'; url: URI; class: 'video'; videoId: string; startTime: number };
+type EmojiPart = { type: 'emoji'; shortCode?: string; emoji: string };
+type MentionPart = { type: 'mention'; text: string; userId: string };
+
+type BodyPart = TextPart | GenericUrlPart | ImageUrlPart | VideoUrlPart | EmojiPart | MentionPart;
+
+export type MessageModelProps = {
+  gid: number;
+  body?: string;
+  category: MessageCategory;
+  ts: number;
+  updatedTs?: number;
+  user: UserModel;
+  window: WindowModel;
+  status: MessageStatus;
+};
 
 export default class MessageModel {
-  me: UserModel;
+  public readonly gid: number;
+  public body = '';
+  private readonly category: MessageCategory;
+  public readonly ts: number;
+  public updatedTs?: number;
+  public readonly user: UserModel;
+  public readonly window: WindowModel;
+  public status: MessageStatus;
 
-  constructor(
-    public readonly gid: number,
-    public body: string | undefined = undefined,
-    public readonly cat:
-      | 'msg'
-      | 'join'
-      | 'part'
-      | 'quit'
-      | 'kick'
-      | 'day-divider'
-      | 'error'
-      | 'info'
-      | 'server'
-      | 'banner'
-      | 'action',
-    public readonly ts: number,
-    public readonly user: UserModel,
-    public readonly window: WindowModel,
-    public status: 'original' | 'deleted' | 'edited' = 'original',
-    public updatedTs: number | null = null,
-    public readonly hideImages: boolean = false,
-    public readonly editing: boolean = false,
-    public readonly ircMotd: boolean = false
-  ) {
-    this.me = me;
+  constructor({ gid, body, category, ts, updatedTs, user, window, status }: MessageModelProps) {
+    this.gid = gid;
+    this.body = body || '';
+    this.category = category;
+    this.ts = ts;
+    this.updatedTs = updatedTs;
+    this.user = user;
+    this.window = window;
+    this.status = status;
 
     makeObservable(this, {
       body: observable,
-      status: observable,
       updatedTs: observable,
-      hideImages: observable,
-      editing: observable,
+      status: observable,
       edited: computed,
       deleted: computed,
+      createdTime: computed,
       updatedTime: computed,
       updatedDate: computed,
       updatedDateLong: computed,
       nick: computed,
       avatarUrl: computed,
-      decoratedCat: computed,
-      decoratedTs: computed,
-      channelAction: computed,
-      myNotDeletedMessage: computed,
+      channelActionText: computed,
       bodyParts: computed,
-      text: computed,
       images: computed,
-      hasMedia: computed,
       hasImages: computed,
-      hasYoutubeVideo: computed,
-      videoId: computed,
-      videoParams: computed
+      videos: computed,
+      hasVideos: computed
     });
+  }
+
+  updateFromRecord(message: MessageRecord): void {
+    this.body = message.body;
+    this.status = message.status;
+    this.updatedTs = message.updatedTs ?? this.updatedTs;
   }
 
   get edited(): boolean {
@@ -76,6 +85,10 @@ export default class MessageModel {
 
   get deleted(): boolean {
     return this.status === 'deleted';
+  }
+
+  get createdTime(): string {
+    return dayjs.unix(this.ts).format('HH:mm');
   }
 
   get updatedTime(): string {
@@ -88,26 +101,22 @@ export default class MessageModel {
     const originalTime = dayjs.unix(this.ts);
     const updatedTime = dayjs.unix(updatedTs);
 
-    return `at ${updatedTime.format(originalTime.isSame(updatedTime, 'd') ? 'HH:mm' : 'MMM Do HH:mm')}`;
+    return updatedTime.format(originalTime.isSame(updatedTime, 'd') ? 'HH:mm' : 'MMM Do HH:mm');
   }
 
   get updatedDate(): string {
     const updatedTs = this.updatedTs;
 
-    return updatedTs ? `at ${dayjs.unix(updatedTs).format('MMM Do HH:mm')}` : '';
+    return updatedTs ? dayjs.unix(updatedTs).format('MMM Do HH:mm') : '';
   }
 
   get updatedDateLong(): string {
     const updatedTs = this.updatedTs;
 
-    return updatedTs ? `at ${dayjs.unix(updatedTs).format('dddd, MMMM D HH:mm')}` : '';
+    return updatedTs ? dayjs.unix(updatedTs).format('dddd, MMMM D HH:mm') : '';
   }
 
   get nick(): string | undefined {
-    if (!this.window.network) {
-      return undefined;
-    }
-
     return this.user.nick[this.window.network];
   }
 
@@ -115,39 +124,24 @@ export default class MessageModel {
     return `//gravatar.com/avatar/${this.user.gravatar}?d=mm`;
   }
 
-  get decoratedCat(): MessageCategory | 'mention' | 'mymsg' | 'service' | 'day-divider' {
-    const cat = this.cat;
-    const body = this.body;
-    const nick = this.nick;
-
-    const myNick = this.me.nick[this.window.network];
-    const mentionedRegEx = new RegExp(`(^|[@ ])${myNick}[ :]`);
-
-    if (body && mentionedRegEx.test(body) && cat === 'msg') {
-      return 'mention';
-    }
-
-    if (this.user === this.me && cat === 'msg') {
-      return 'mymsg';
-    }
-
-    if (nick === 'ruuskanen') {
-      return 'service';
-    }
-
-    return cat;
+  get fromMe(): boolean {
+    return this.user === me;
   }
 
-  get decoratedTs(): string {
-    return dayjs.unix(this.ts).format('HH:mm');
+  get mentionsMe(): boolean {
+    return this.bodyParts.some(part => part.type === 'mention' && part.userId === me.id);
   }
 
-  get channelAction(): string {
+  get isChannelAction(): boolean {
+    return ['join', 'part', 'quit', 'kick'].includes(this.category);
+  }
+
+  get channelActionText(): string {
     const nick = this.nick;
     const groupName = this.window.name;
     const body = this.body;
 
-    switch (this.cat) {
+    switch (this.category) {
       case 'join':
         return `${nick} has joined ${groupName}.`;
       case 'part':
@@ -161,213 +155,207 @@ export default class MessageModel {
     }
   }
 
-  get myNotDeletedMessage(): boolean {
-    return this.decoratedCat === 'mymsg' && this.status !== 'deleted';
-  }
-
   get bodyParts(): Array<BodyPart> {
-    let body = this.body;
-    const cat = this.cat;
+    let parts: Array<BodyPart> = [{ type: 'text', text: this.body }];
 
-    let parts: Array<BodyPart> = [];
+    if (this.body !== '') {
+      parts = this.extractLinks(parts);
+      parts = this.extractEmojis(parts);
 
-    if (cat === 'msg' && body) {
-      ({ body, parts } = this.parseLinks(body));
-      body = marked(body);
-      body = this.parseCustomFormatting(body);
-    } else if (body) {
-      body = this.escapeHTMLStartTag(body);
+      if (this.category === MessageCategory.Message) {
+        parts = this.extractImageAndVideoUrls(parts);
+        parts = this.extractMentions(parts);
+      }
     }
-
-    if (body) {
-      body = this.parseWhiteSpace(body);
-    }
-
-    parts.push({ type: 'text', text: body });
 
     return parts;
   }
 
-  get text(): string | undefined {
-    return this.bodyParts.find(part => part.type === 'text')?.text;
-  }
-
-  get images(): BodyPart[] {
-    return this.bodyParts.filter(part => part.type === 'image');
-  }
-
-  get hasMedia(): boolean {
-    return !this.bodyParts.every(part => part.type === 'text');
+  get images(): ImageUrlPart[] {
+    return this.bodyParts.filter(
+      (part: BodyPart): part is ImageUrlPart => part.type === 'url' && part.class === 'image'
+    );
   }
 
   get hasImages(): boolean {
-    return this.bodyParts.some(part => part.type === 'image');
+    return this.bodyParts.some(part => part.type === 'url' && part.class === 'image');
   }
 
-  get hasYoutubeVideo(): boolean {
-    return this.bodyParts.some(part => part.type === 'youtubelink');
+  get videos(): VideoUrlPart[] {
+    return this.bodyParts.filter(
+      (part: BodyPart): part is VideoUrlPart => part.type === 'url' && part.class === 'video'
+    );
   }
 
-  get videoId(): string | undefined {
-    const video = this.bodyParts.find(part => part.type === 'youtubelink');
-
-    if (video) {
-      const urlObj = new URI(video.url);
-      // Format is https://www.youtube.com/watch?v=0P7O69GuCII or https://youtu.be/0P7O69GuCII
-      const vParam = urlObj.search(true).v;
-
-      if (vParam) {
-        return Array.isArray(vParam) ? vParam[0] || undefined : vParam;
-      } else {
-        return urlObj.pathname().substring(1).split('/')[0];
-      }
-    }
+  get hasVideos(): boolean {
+    return this.bodyParts.some(part => part.type === 'url' && part.class === 'video');
   }
 
-  get videoParams(): string {
-    const video = this.bodyParts.find(part => part.type === 'youtubelink');
-    const start = video && (video.start ? `&start=${video.start}` : '');
+  private extractLinks(parts: Array<BodyPart>): Array<BodyPart> {
+    return parts.flatMap(part => {
+      if (part.type === 'text') {
+        let urlLocations: Array<number> = [];
 
-    return `showinfo=0&autohide=1${start}`;
-  }
+        URI.withinString(part.text, (url, start, end) => {
+          urlLocations.push(start, end);
+          return url;
+        });
 
-  updateFromRecord(message: MessageRecord): void {
-    this.body = message.body;
-    this.status = message.status;
-    this.updatedTs = typeof message.updatedTs !== 'undefined' ? message.updatedTs : this.updatedTs;
-  }
+        if (urlLocations.length === 0) {
+          return part;
+        }
 
-  private splitByLinks(text: string) {
-    const parts = [];
-    let previousEnd = 0;
+        urlLocations = [0, ...urlLocations, part.text.length];
+        const subParts: Array<BodyPart> = [];
 
-    URI.withinString(text, (url, start: number, end: number) => {
-      if (previousEnd !== start) {
-        parts.push({ type: 'txt', data: text.substring(previousEnd, start) });
-      }
+        for (let i = 0; i < urlLocations.length - 1; i++) {
+          const type = i % 2 === 0 ? 'text' : 'url';
+          const sub = part.text.substring(urlLocations[i], urlLocations[i + 1]);
 
-      parts.push({ type: 'url', data: url });
-      previousEnd = end;
-
-      return '';
-    });
-
-    if (previousEnd !== text.length) {
-      parts.push({ type: 'txt', data: text.substring(previousEnd) });
-    }
-
-    return parts;
-  }
-
-  private parseLinks(text: string) {
-    const imgSuffixes = ['png', 'jpg', 'jpeg', 'gif'];
-    const media = [];
-    let body = '';
-
-    const parts = this.splitByLinks(text);
-
-    for (const part of parts) {
-      if (part.type === 'url') {
-        const urlObj = new URI(part.data);
-        let visibleLink;
-        const domain = urlObj.domain();
-
-        if (imgSuffixes.indexOf(urlObj.suffix().toLowerCase()) !== -1) {
-          visibleLink = decodeURIComponent(urlObj.filename());
-          media.push({ type: 'image', url: urlObj.toString() });
-        } else if ((domain === 'youtube.com' && urlObj.search(true).v) || domain === 'youtu.be') {
-          visibleLink = urlObj.toString();
-
-          let startTime = urlObj.search(true).t;
-
-          if (Array.isArray(startTime)) {
-            startTime = startTime[0];
+          if (type === 'text' && sub !== '') {
+            subParts.push({ type, text: sub });
+          } else if (type === 'url') {
+            subParts.push({ type, url: new URI(sub), class: 'generic' });
           }
+        }
 
-          let inSeconds = 0;
+        return subParts;
+      }
 
-          if (startTime) {
-            const re = startTime.match(/^(?:(\d{1,2})h)?(?:(\d{1,2})m)?(?:(\d{1,2})s)?$/);
+      return part;
+    });
+  }
 
-            if (re) {
-              inSeconds = parseInt(re[1] || '0') * 3600 + parseInt(re[2] || '0') * 60 + parseInt(re[3] || '0');
+  private extractEmojis(parts: Array<BodyPart>): Array<BodyPart> {
+    return parts
+      .flatMap(part => {
+        if (part.type === 'text') {
+          const subParts: Array<BodyPart> = [];
+
+          part.text.split(EMOTICON_REGEX).forEach((emojiOrText, index) => {
+            const maybeEmoticon = index % 2 === 1;
+            const emoji = emoticons[emojiOrText.substring(1, emojiOrText.length - 1)];
+            const isEmoticon = maybeEmoticon && emoji;
+
+            if (isEmoticon) {
+              subParts.push({ type: 'emoji', shortCode: emojiOrText, emoji });
+            } else if (emojiOrText !== '') {
+              subParts.push({ type: 'text', text: emojiOrText });
             }
-          }
-
-          media.push({
-            type: 'youtubelink',
-            url: urlObj.toString(),
-            start: inSeconds
           });
+
+          return subParts;
+        }
+
+        return part;
+      })
+      .flatMap(part => {
+        if (part.type === 'text') {
+          const subParts: Array<BodyPart> = [];
+
+          part.text.split(EMOJI_REGEX).forEach((emojiOrText, index, parts) => {
+            const isEmoji = parts.length > 1 && index % 2 === 1;
+
+            if (isEmoji) {
+              const shortCode = Object.keys(emoticons).find(key => emoticons[key] === emojiOrText);
+
+              subParts.push({
+                type: 'emoji',
+                emoji: emojiOrText,
+                ...(shortCode ? { shortCode: `:${shortCode}:` } : {})
+              });
+            } else if (emojiOrText !== '') {
+              subParts.push({ type: 'text', text: emojiOrText });
+            }
+          });
+
+          return subParts;
+        }
+
+        return part;
+      });
+  }
+
+  private decodeYouTubeTimeParameter(url: URI): number {
+    const startTimeParameter = url.search(true).t;
+    const startTime = Array.isArray(startTimeParameter) ? startTimeParameter[0] : startTimeParameter;
+
+    if (!startTime) {
+      return 0;
+    }
+
+    // Try "2h32m1s" format
+    const match = startTime.match(/^(?:(\d{1,2})h)?(?:(\d{1,2})m)?(?:(\d{1,2})s)?$/);
+
+    if (match) {
+      return parseInt(match[1] || '0') * 3600 + parseInt(match[2] || '0') * 60 + parseInt(match[3] || '0');
+    }
+
+    // Try plain seconds format
+    return parseInt(startTime.match(/^(\d+)$/)?.[1] || '0');
+  }
+
+  private decodeYouTubeVideoId(url: URI): string | null {
+    // Format is https://www.youtube.com/watch?v=0P7O69GuCII or https://youtu.be/0P7O69GuCII
+    const parameter = url.search(true).v;
+
+    return parameter
+      ? Array.isArray(parameter)
+        ? parameter[0]
+        : parameter
+      : url.pathname().substring(1).split('/')[0] || null;
+  }
+
+  private extractImageAndVideoUrls(parts: Array<BodyPart>): Array<BodyPart> {
+    return parts.map(part => {
+      if (part.type === 'url') {
+        const url = part.url;
+        const domain = url.domain();
+
+        if (IMAGE_SUFFIXES.includes(url.suffix().toLowerCase())) {
+          return { type: 'url', class: 'image', url: url };
+        } else if ((domain === 'youtube.com' && url.search(true).v) || domain === 'youtu.be') {
+          const videoId = this.decodeYouTubeVideoId(url);
+          const startTime = this.decodeYouTubeTimeParameter(url);
+
+          if (videoId) {
+            return { type: 'url', class: 'video', url, startTime, videoId };
+          } else {
+            return part;
+          }
         } else {
-          visibleLink = urlObj.readable();
+          return part;
         }
-
-        if (urlObj.protocol() === '') {
-          urlObj.protocol('http');
-        }
-
-        let normalized;
-
-        try {
-          normalized = urlObj.normalize();
-        } catch (e) {
-          normalized = urlObj;
-        }
-
-        body += this.renderLink(normalized.toString(), this.escapeHTMLStartTag(visibleLink));
-      } else {
-        body += this.escapeHTMLStartTag(part.data);
       }
-    }
 
-    return { body, parts: media };
-  }
-
-  private parseWhiteSpace(text: string) {
-    return text.replace(/ {2}/g, ' &nbsp;'); // Preserve whitespace.
-  }
-
-  private parseCustomFormatting(text: string) {
-    let result;
-
-    // Find @ character 1) after space, 2) in the beginning of string, 3) after HTML tag (>)
-    result = text.replace(/(^| |>)(@\S+)(?=( |$))/g, (match, p1, p2) => this.renderMention(p1, p2));
-
-    result = result.replace(/:\S+?:/g, match => {
-      const emoji = emoticons[match];
-
-      if (emoji) {
-        return this.renderEmoji(match, emoji);
-      }
-      return match;
+      return part;
     });
-
-    const keywords = result.match(/<(p|br)>/g);
-
-    // Assumes that marked is used which inserts at least one <p>, <ol>, or <ul>
-    const multiLine = !keywords || keywords.length > 1;
-
-    if (!multiLine) {
-      result = result.replace(/(\s*<p>|<\/p>\s*)/g, '');
-    }
-
-    return result;
   }
 
-  private renderLink(url: string, label: string) {
-    return `<a href="${url}" target="_blank">${label}</a>`;
-  }
+  private extractMentions(parts: Array<BodyPart>): Array<BodyPart> {
+    return parts.flatMap(part => {
+      if (part.type === 'text') {
+        const subParts: Array<BodyPart> = [];
 
-  private renderEmoji(name: string, src: string) {
-    return `<img align="absmiddle" alt="${name}" title="${name}" class="emoji" src="https://twemoji.maxcdn.com/v/latest/72x72/${src}.png"/>`;
-  }
+        part.text
+          .split(MENTION_REGEX)
+          .filter(mentionOrTextOrUndefined => mentionOrTextOrUndefined !== undefined)
+          .forEach((mentionOrText, index) => {
+            const isMention = index % 2 === 1;
+            const nick = isMention && mentionOrText.match(/@?(\S+?)(?=$|:)/)?.[1];
+            const user = nick && this.window.participants.get(nick);
 
-  private renderMention(beforeCharacter: string, nick: string) {
-    return `${beforeCharacter}<span class="nick-mention">${nick}</span>`;
-  }
+            if (user) {
+              subParts.push({ type: 'mention', text: mentionOrText, userId: user.id });
+            } else if (mentionOrText !== '') {
+              subParts.push({ type: 'text', text: mentionOrText });
+            }
+          });
 
-  private escapeHTMLStartTag(text: string) {
-    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+        return subParts;
+      }
+
+      return part;
+    });
   }
 }

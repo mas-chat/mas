@@ -44,7 +44,7 @@ class FriendStore {
       const user = this.rootStore.userStore.users.get(friend.userId);
 
       if (user) {
-        this.friends.set(friend.userId, new FriendModel(user, friend.online, friend.last));
+        this.friends.set(friend.userId, new FriendModel({ user, online: friend.online, last: friend.last }));
       }
     });
   }

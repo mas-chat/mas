@@ -9,9 +9,9 @@ class UserStore {
   rootStore: RootStore;
   socket: Socket;
   users = new Map<string, UserModel>([
-    [getUserId(), me],
-    ['m0', systemUser],
-    ['i0', ircSystemUser]
+    [me.id, me],
+    [systemUser.id, systemUser],
+    [ircSystemUser.id, ircSystemUser]
   ]);
 
   constructor(rootStore: RootStore, socket: Socket) {
@@ -56,7 +56,15 @@ class UserStore {
       if (existingUser) {
         existingUser.updateFromRecord(user);
       } else {
-        this.users.set(userId, new UserModel(user.nick, user.name, user.gravatar));
+        this.users.set(
+          userId,
+          new UserModel({
+            id: userId,
+            nick: user.nick,
+            name: user.name,
+            gravatar: user.gravatar
+          })
+        );
       }
     });
   }
