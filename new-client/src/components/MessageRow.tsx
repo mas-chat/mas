@@ -14,19 +14,19 @@ interface MessageRowProps {
 //   return `${beforeCharacter}<span class="nick-mention">${nick}</span>`;
 // }
 
-const Message: React.FunctionComponent<MessageRowProps> = ({ message }: MessageRowProps) => {
+const MessageRow: React.FunctionComponent<MessageRowProps> = ({ message }: MessageRowProps) => {
   const link = (href: string) => (
-    <Link href={href} target="_blank" color="tomato">
+    <Link key={Math.random()} href={href} target="_blank" color="tomato">
       {href}
     </Link>
   );
   const mention = (text: string) => (
-    <Badge variant="subtle" colorScheme="green">
+    <Badge key={Math.random()} variant="subtle" colorScheme="green">
       {text}
     </Badge>
   );
 
-  const emoji = (emoji: string) => <span>{emoji}</span>;
+  const emoji = (emoji: string) => <span key={Math.random()}>{emoji}</span>;
 
   const parts = message.bodyTokens.map(token => {
     if (token.type === 'url') {
@@ -41,7 +41,7 @@ const Message: React.FunctionComponent<MessageRowProps> = ({ message }: MessageR
   });
 
   return (
-    <Flex flexDirection="row">
+    <Flex key={message.gid} flexDirection="row">
       <Box minWidth="50px">{message.createdTime}</Box>
       <Box flex="1">
         <Text as="b" flex="1">
@@ -53,4 +53,4 @@ const Message: React.FunctionComponent<MessageRowProps> = ({ message }: MessageR
   );
 };
 
-export default Message;
+export default MessageRow;

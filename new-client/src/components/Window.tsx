@@ -36,8 +36,8 @@ const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage, i
   };
 
   return (
-    <Flex flex="1" flexDirection="column" bg="gray.50" color="black" margin="4px" border="1px">
-      <Heading size="s" padding="2px" bg="green.100">
+    <Flex flex="1" flexDirection="column" margin="4px">
+      <Heading size="s" px="6px" py="2px" bg="blue.100" borderRadius="md">
         {window.simplifiedName}
       </Heading>
       <Box flex="1" margin="4px">

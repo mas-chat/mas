@@ -4,6 +4,7 @@ import ModalStore from './ModalStore';
 import NetworkStore from './NetworkStore';
 import ProfileStore from './ProfileStore';
 import SettingStore from './SettingStore';
+import StartupStore from './StartupStore';
 import UserStore from './UserStore';
 import WindowStore from './WindowStore';
 import { Notification } from '../types/notifications';
@@ -20,6 +21,7 @@ class RootStore {
   networkStore: NetworkStore;
   profileStore: ProfileStore;
   settingStore: SettingStore;
+  startupStore: StartupStore;
   userStore: UserStore;
   windowStore: WindowStore;
 
@@ -34,6 +36,7 @@ class RootStore {
     this.networkStore = new NetworkStore(this, socket);
     this.profileStore = new ProfileStore(this, socket);
     this.settingStore = new SettingStore(this, socket);
+    this.startupStore = new StartupStore(this, socket);
     this.userStore = new UserStore(this, socket);
     this.windowStore = new WindowStore(this, socket);
 
@@ -44,6 +47,7 @@ class RootStore {
       this.networkStore,
       this.profileStore,
       this.settingStore,
+      this.startupStore,
       this.userStore,
       this.windowStore
     ];

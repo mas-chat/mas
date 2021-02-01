@@ -17,7 +17,7 @@ const Sidebar: React.FunctionComponent<SidebarProps> = ({ windowStore, settingsS
   };
 
   return (
-    <Flex width="140px" flexDirection="column">
+    <Flex width="140px" flexDirection="column" bgColor="gray.100">
       {desktops.map((desktop, index) => {
         return (
           <Box key={desktop.id} p="8px">

@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Flex } from '@chakra-ui/react';
-import { Desktop, Sidebar } from '.';
+import { LoadingView, DesktopApp } from '.';
 import type RootStore from '../stores/RootStore';
 
 interface RootContainerProps {
@@ -9,11 +8,14 @@ interface RootContainerProps {
 }
 
 const RootContainer: React.FunctionComponent<RootContainerProps> = ({ rootStore }: RootContainerProps) => {
+  const [isDesktopReady, setIsDesktopReady] = useState(false);
+  const { progress, currentlyLoading } = rootStore.startupStore;
+
   return (
-    <Flex width="100vw" height="100vh" bgColor="white">
-      <Sidebar windowStore={rootStore.windowStore} settingsStore={rootStore.settingStore} />
-      <Desktop flex="1" rootStore={rootStore}></Desktop>
-    </Flex>
+    <>
+      {!isDesktopReady && <LoadingView progress={progress} loadingDetail={currentlyLoading} />}
+      {progress == 100 && <DesktopApp rootStore={rootStore} firstRenderComplete={() => setIsDesktopReady(true)} />}
+    </>
   );
 };
 

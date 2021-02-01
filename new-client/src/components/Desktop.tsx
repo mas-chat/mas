@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Flex } from '@chakra-ui/react';
+import { Divider, Flex } from '@chakra-ui/react';
 import { Window } from '.';
 import type RootStore from '../stores/RootStore';
 import WindowModel from '../models/Window';
@@ -23,20 +23,25 @@ const Desktop: React.FunctionComponent<DesktopProps> = ({ rootStore, flex }: Des
     <Flex flex={flex} flexDirection="column">
       {rows.map(row => {
         return (
-          <Flex key={row} flex="1" flexDirection="row">
-            {visibleWindows
-              .filter(window => window.row === row)
-              .map(window => {
-                return (
-                  <Window
-                    key={window.id}
-                    onSendMessage={message => onSendMessage(window, message)}
-                    window={window}
-                    initDone={rootStore.windowStore.initDone}
-                  />
-                );
-              })}
-          </Flex>
+          <React.Fragment key={row}>
+            <Divider colorScheme="gray" />
+            <Flex flex="1" flexDirection="row">
+              {visibleWindows
+                .filter(window => window.row === row)
+                .map(window => {
+                  return (
+                    <React.Fragment key={window.id}>
+                      <Divider orientation="vertical" />
+                      <Window
+                        onSendMessage={message => onSendMessage(window, message)}
+                        window={window}
+                        initDone={rootStore.windowStore.initDone}
+                      />
+                    </React.Fragment>
+                  );
+                })}
+            </Flex>
+          </React.Fragment>
         );
       })}
     </Flex>

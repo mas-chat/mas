@@ -115,6 +115,7 @@ exports.init = async function init(user, session, maxBacklogLines, cachedUpto) {
 
   ntfs.push({ type: 'ADD_MESSAGES', messages });
   ntfs.push({ type: 'FINISH_INIT' });
+  ntfs.unshift({ type: 'STARTUP_SEQUENCE', length: ntfs.length });
 
   await notification.send(user, session.id, ntfs);
 

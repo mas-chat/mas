@@ -192,6 +192,11 @@ export interface DeleteMembers {
   }>;
 }
 
+export interface StartupSequence {
+  type: 'STARTUP_SEQUENCE';
+  length: number;
+}
+
 export type Notification =
   | AddAlert
   | UpdateFriends
@@ -206,4 +211,5 @@ export type Notification =
   | DeleteWindow
   | FinishInit
   | UpdateMembers
-  | DeleteMembers;
+  | DeleteMembers
+  | StartupSequence;
