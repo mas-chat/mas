@@ -12,7 +12,7 @@ interface DesktopProps {
 
 const Desktop: React.FunctionComponent<DesktopProps> = ({ rootStore, flex }: DesktopProps) => {
   const windows: WindowModel[] = Array.from(rootStore.windowStore.windows.values());
-  const visibleWindows = windows.filter(window => window.desktopId === rootStore.settingStore.settings.activeDesktop);
+  const visibleWindows = windows.filter(window => window.desktopId === rootStore.profileStore.settings.activeDesktop);
   const rows = [...new Set(visibleWindows.map(window => window.row))].sort();
 
   const onSendMessage = (window: WindowModel, message: string) => {

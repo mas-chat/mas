@@ -2,18 +2,18 @@ import React from 'react';
 import { Box, Flex, Heading, Spacer, Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import type WindowStore from '../stores/WindowStore';
-import type SettingStore from '../stores/SettingStore';
+import type ProfileStore from '../stores/ProfileStore';
 
 interface SidebarProps {
   windowStore: WindowStore;
-  settingsStore: SettingStore;
+  profileStore: ProfileStore;
 }
 
-const Sidebar: React.FunctionComponent<SidebarProps> = ({ windowStore, settingsStore }: SidebarProps) => {
+const Sidebar: React.FunctionComponent<SidebarProps> = ({ windowStore, profileStore }: SidebarProps) => {
   const { desktops } = windowStore;
 
   const switchDesktop = (desktopId: number) => {
-    settingsStore.changeActiveDesktop(desktopId);
+    profileStore.changeActiveDesktop(desktopId);
   };
 
   return (
@@ -29,7 +29,7 @@ const Sidebar: React.FunctionComponent<SidebarProps> = ({ windowStore, settingsS
               _hover={{
                 color: 'teal.500'
               }}
-              bgColor={desktop.id === settingsStore.settings.activeDesktop ? 'blue.100' : 'transparent'}
+              bgColor={desktop.id === profileStore.settings.activeDesktop ? 'blue.100' : 'transparent'}
             >
               Desktop #{index}
             </Heading>

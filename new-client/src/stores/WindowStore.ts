@@ -1,6 +1,5 @@
 import { observable, computed, makeObservable, action } from 'mobx';
 import dayjs from 'dayjs';
-import isMobile from 'ismobilejs';
 import Message from '../models/Message';
 import Window from '../models/Window';
 import UserModel, { systemUser, me, ircSystemUser } from '../models/User';
@@ -469,15 +468,13 @@ class WindowStore {
     window.row = row;
     window.desktopId = desktopId;
 
-    if (!isMobile().any) {
-      await this.socket.send<UpdateRequest>({
-        id: 'UPDATE',
-        windowId: id,
-        desktop: desktopId,
-        column,
-        row
-      });
-    }
+    await this.socket.send<UpdateRequest>({
+      id: 'UPDATE',
+      windowId: id,
+      desktop: desktopId,
+      column,
+      row
+    });
   }
 
   async handleToggleMemberListWidth(window: Window): Promise<void> {
@@ -492,7 +489,7 @@ class WindowStore {
 
   seekActiveDesktop(direction: number): void {
     const desktops = this.desktops;
-    const activeDesktopId = this.rootStore.settingStore.settings.activeDesktop;
+    const activeDesktopId = this.rootStore.profileStore.settings.activeDesktop;
     const activeDesktop = desktops.find(desktop => desktop.id === activeDesktopId);
 
     let index = activeDesktop && desktops.indexOf(activeDesktop);
@@ -509,7 +506,7 @@ class WindowStore {
       index = desktops.length - 1;
     }
 
-    this.rootStore.settingStore.changeActiveDesktop(desktops[index].id);
+    this.rootStore.profileStore.changeActiveDesktop(desktops[index].id);
   }
 
   finishStartup(): void {
@@ -523,11 +520,11 @@ class WindowStore {
     this.initDone = true;
 
     const validActiveDesktop = Array.from(this.windows.values()).some(
-      window => window.desktopId === this.rootStore.settingStore.settings.activeDesktop
+      window => window.desktopId === this.rootStore.profileStore.settings.activeDesktop
     );
 
     if (!validActiveDesktop && this.windows.size > 0) {
-      this.rootStore.settingStore.settings.activeDesktop = this.windows.values().next().value.desktop;
+      this.rootStore.profileStore.settings.activeDesktop = this.windows.values().next().value.desktop;
     }
   }
 

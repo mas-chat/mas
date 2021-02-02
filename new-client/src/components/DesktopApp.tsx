@@ -14,7 +14,7 @@ const DesktopApp: React.FunctionComponent<DesktopAppProps> = ({ rootStore, first
 
   return (
     <Flex width="100vw" height="100vh" bgColor="white">
-      <Sidebar windowStore={rootStore.windowStore} settingsStore={rootStore.settingStore} />
+      <Sidebar windowStore={rootStore.windowStore} profileStore={rootStore.profileStore} />
       <Desktop flex="1" rootStore={rootStore}></Desktop>
     </Flex>
   );
