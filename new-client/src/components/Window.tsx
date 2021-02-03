@@ -8,11 +8,10 @@ import { usePageVisibility } from '../hooks/pageVisibility';
 import { ServerContext } from './ServerContext';
 
 interface WindowProps {
-  onSendMessage: (message: string) => void;
   window: WindowModel;
 }
 
-const Window: FunctionComponent<WindowProps> = ({ window, onSendMessage }: WindowProps) => {
+const Window: FunctionComponent<WindowProps> = ({ window }: WindowProps) => {
   const { windowStore } = useContext(ServerContext);
   const virtuoso = useRef<VirtuosoHandle>(null);
   const [message, setMessage] = useState('');
@@ -31,7 +30,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, onSendMessage }: Windo
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
-      onSendMessage(message);
+      windowStore.sendText(window, message);
       setMessage('');
     }
   };

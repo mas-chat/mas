@@ -5,22 +5,14 @@ import { Window } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
 
-interface DesktopProps {
-  flex?: string;
-}
-
-const Desktop: FunctionComponent<DesktopProps> = ({ flex }: DesktopProps) => {
+const Desktop: FunctionComponent = () => {
   const { windowStore, profileStore } = useContext(ServerContext);
   const windows: WindowModel[] = Array.from(windowStore.windows.values());
   const visibleWindows = windows.filter(window => window.desktopId === profileStore.settings.activeDesktop);
   const rows = [...new Set(visibleWindows.map(window => window.row))].sort();
 
-  const onSendMessage = (window: WindowModel, message: string) => {
-    windowStore.sendText(window, message);
-  };
-
   return (
-    <Flex flex={flex} flexDirection="column">
+    <Flex flex="1" flexDirection="column">
       {rows.map(row => {
         return (
           <Fragment key={row}>
@@ -32,7 +24,7 @@ const Desktop: FunctionComponent<DesktopProps> = ({ flex }: DesktopProps) => {
                   return (
                     <Fragment key={window.id}>
                       <Divider orientation="vertical" />
-                      <Window onSendMessage={message => onSendMessage(window, message)} window={window} />
+                      <Window window={window} />
                     </Fragment>
                   );
                 })}

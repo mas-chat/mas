@@ -13,7 +13,7 @@ const DesktopApp: FunctionComponent<DesktopAppProps> = ({ firstRenderComplete }:
   return (
     <Flex width="100vw" height="100vh" bgColor="white">
       <Sidebar />
-      <Desktop flex="1" />
+      <Desktop />
     </Flex>
   );
 };
