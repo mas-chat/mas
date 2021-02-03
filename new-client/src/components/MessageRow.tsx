@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { Box, Flex, Link, Text, Badge } from '@chakra-ui/react';
+import { observer } from 'mobx-react-lite';
 import MessageModel from '../models/Message';
 
 interface MessageRowProps {
@@ -14,7 +15,7 @@ interface MessageRowProps {
 //   return `${beforeCharacter}<span class="nick-mention">${nick}</span>`;
 // }
 
-const MessageRow: React.FunctionComponent<MessageRowProps> = ({ message }: MessageRowProps) => {
+const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowProps) => {
   const link = (href: string) => (
     <Link key={Math.random()} href={href} target="_blank" color="tomato">
       {href}
@@ -53,4 +54,4 @@ const MessageRow: React.FunctionComponent<MessageRowProps> = ({ message }: Messa
   );
 };
 
-export default MessageRow;
+export default observer(MessageRow);

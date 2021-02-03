@@ -1,11 +1,13 @@
-import AlertStore from './AlertStore';
-import FriendStore from './FriendStore';
-import ModalStore from './ModalStore';
-import NetworkStore from './NetworkStore';
-import ProfileStore from './ProfileStore';
-import StartupStore from './StartupStore';
-import UserStore from './UserStore';
-import WindowStore from './WindowStore';
+import {
+  AlertStore,
+  FriendStore,
+  ModalStore,
+  NetworkStore,
+  ProfileStore,
+  StartupStore,
+  UserStore,
+  WindowStore
+} from '.';
 import { Notification } from '../types/notifications';
 import Socket from '../lib/socket';
 

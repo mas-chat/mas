@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
+import React, { FunctionComponent, useContext, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import { ServerContext } from './ServerContext';
 import { LoadingView, DesktopApp } from '.';
-import type RootStore from '../stores/RootStore';
 
-interface RootContainerProps {
-  rootStore: RootStore;
-}
-
-const RootContainer: React.FunctionComponent<RootContainerProps> = ({ rootStore }: RootContainerProps) => {
+const RootContainer: FunctionComponent = () => {
+  const { startupStore } = useContext(ServerContext);
   const [isDesktopReady, setIsDesktopReady] = useState(false);
-  const { progress, currentlyLoading } = rootStore.startupStore;
+
+  const onFirstRenderComplete = () => {
+    // Artificial delay makes sure the user sees the progress bar to complete
+    setTimeout(() => setIsDesktopReady(true), 100);
+  };
 
   return (
     <>
-      {!isDesktopReady && <LoadingView progress={progress} loadingDetail={currentlyLoading} />}
-      {progress == 100 && <DesktopApp rootStore={rootStore} firstRenderComplete={() => setIsDesktopReady(true)} />}
+      {!isDesktopReady && <LoadingView />}
+      {startupStore.progress == 100 && <DesktopApp firstRenderComplete={onFirstRenderComplete} />}
     </>
   );
 };

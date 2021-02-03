@@ -1,10 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
+import { ServerContextProvider } from './components/ServerContext';
 import { RootContainer } from './components';
-import RootStore from './stores/RootStore';
-
-const rootStore = new RootStore();
 
 const config = {
   initialColorMode: 'dark',
@@ -15,7 +13,9 @@ const theme = extendTheme(config);
 
 ReactDOM.render(
   <ChakraProvider theme={theme}>
-    <RootContainer rootStore={rootStore} />
+    <ServerContextProvider>
+      <RootContainer />
+    </ServerContextProvider>
   </ChakraProvider>,
   document.getElementById('root')
 );

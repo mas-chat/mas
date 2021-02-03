@@ -1,16 +1,10 @@
-import React from 'react';
+import React, { FunctionComponent, useContext } from 'react';
 import { Box, Flex, Heading, Spacer, Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
-import type WindowStore from '../stores/WindowStore';
-import type ProfileStore from '../stores/ProfileStore';
+import { ServerContext } from './ServerContext';
 
-interface SidebarProps {
-  windowStore: WindowStore;
-  profileStore: ProfileStore;
-}
-
-const Sidebar: React.FunctionComponent<SidebarProps> = ({ windowStore, profileStore }: SidebarProps) => {
-  const { desktops } = windowStore;
+const Sidebar: FunctionComponent = () => {
+  const { windowStore, profileStore } = useContext(ServerContext);
 
   const switchDesktop = (desktopId: number) => {
     profileStore.changeActiveDesktop(desktopId);
@@ -18,7 +12,7 @@ const Sidebar: React.FunctionComponent<SidebarProps> = ({ windowStore, profileSt
 
   return (
     <Flex width="140px" flexDirection="column" bgColor="gray.100">
-      {desktops.map((desktop, index) => {
+      {windowStore.desktops.map((desktop, index) => {
         return (
           <Box key={desktop.id} p="8px">
             <Heading

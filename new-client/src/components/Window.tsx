@@ -1,25 +1,26 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Box, Heading, Flex, Input } from '@chakra-ui/react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { MessageRow } from '.';
 import WindowModel from '../models/Window';
 import { usePageVisibility } from '../hooks/pageVisibility';
+import { ServerContext } from './ServerContext';
 
 interface WindowProps {
   onSendMessage: (message: string) => void;
   window: WindowModel;
-  initDone: boolean;
 }
 
-const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage, initDone }: WindowProps) => {
+const Window: FunctionComponent<WindowProps> = ({ window, onSendMessage }: WindowProps) => {
+  const { windowStore } = useContext(ServerContext);
   const virtuoso = useRef<VirtuosoHandle>(null);
   const [message, setMessage] = useState('');
   const messages = window.sortedMessages;
   const isVisible = usePageVisibility();
 
   useEffect(() => {
-    if (initDone && isVisible) {
+    if (windowStore.initDone && isVisible) {
       virtuoso.current?.scrollToIndex({
         index: messages.length - 1,
         align: 'end',
@@ -28,7 +29,7 @@ const Window: React.FunctionComponent<WindowProps> = ({ window, onSendMessage, i
     }
   }, [isVisible]);
 
-  const onKeyDown = (event: React.KeyboardEvent) => {
+  const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
       onSendMessage(message);
       setMessage('');
