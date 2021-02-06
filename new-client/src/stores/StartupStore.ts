@@ -40,6 +40,10 @@ class StartupStore {
   }
 
   updateMessage(ntf: Notification): void {
+    if (this.rootStore.windowStore.initDone) {
+      return;
+    }
+
     if (typeof this.startupNotifications !== 'undefined' && ntf.type !== 'ADD_USERS') {
       this.receivedNotifications++;
     }

@@ -52,13 +52,17 @@ class RootStore {
   }
 
   dispatch(ntf: Notification): void {
+    let consumed = false;
+
     for (const store of Object.values(this.stores)) {
       if (store.handlerServerNotification(ntf)) {
-        return;
+        consumed = true;
       }
     }
 
-    console.error(`No store handled action: ${ntf.type}`);
+    if (!consumed) {
+      console.error(`No store handled action: ${ntf.type}`);
+    }
   }
 }
 
