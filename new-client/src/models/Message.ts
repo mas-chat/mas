@@ -7,7 +7,6 @@ import UserModel, { me } from './User';
 import emoticons from '../lib/emoticons';
 import { MessageCategory, MessageRecord, MessageStatus } from '../types/notifications';
 
-const MENTION_REGEX = /(?:(?<=(?: |^))(@[^\s@]+)(?=(?: |$))|^([^\s@]+:))/g;
 const EMOTICON_REGEX = /(:[^\s:]+:)/;
 const EMOJI_REGEX = new RegExp(`(${buildEmojiRegex().source})`);
 const IMAGE_SUFFIXES = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
@@ -336,22 +335,40 @@ export default class MessageModel {
     return parts.flatMap(part => {
       if (part.type === 'text') {
         const subParts: Array<BodyPart> = [];
+        const { text } = part;
+        let subText = '';
+        let i = 0;
+        const ircMention = text.match(/^\S+:/)?.[0];
 
-        part.text
-          .split(MENTION_REGEX)
-          .filter(mentionOrTextOrUndefined => mentionOrTextOrUndefined !== undefined)
-          .forEach((mentionOrText, index) => {
-            const isMention = index % 2 === 1;
-            const nick = isMention && mentionOrText.match(/@?(\S+?)(?=$|:)/)?.[1];
-            const user = nick && this.window.participants.get(nick);
+        if (ircMention) {
+          const user = this.window.participants.get(ircMention.substring(0, ircMention.length - 1));
+          if (user) {
+            subParts.push({ type: 'mention', text: ircMention, userId: user.id });
+            i += ircMention.length;
+          }
+        }
+
+        while (i < text.length) {
+          const char = text[i];
+
+          if (char === '@') {
+            const mention = text.substring(i)?.match(/@\S+/)?.[0];
+            const user = mention && this.window.participants.get(mention.substring(1));
 
             if (user) {
-              subParts.push({ type: 'mention', text: mentionOrText, userId: user.id });
-            } else if (mentionOrText !== '') {
-              subParts.push({ type: 'text', text: mentionOrText });
+              subText.length > 0 && subParts.push({ type: 'text', text: subText });
+              subParts.push({ type: 'mention', text: mention, userId: user.id });
+              i += mention.length;
+              subText = '';
+              continue;
             }
-          });
+          }
 
+          i++;
+          subText = subText + char;
+        }
+
+        subText.length > 0 && subParts.push({ type: 'text', text: subText });
         return subParts;
       }
 

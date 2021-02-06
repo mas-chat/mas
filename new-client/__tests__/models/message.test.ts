@@ -161,6 +161,16 @@ describe('Message model', () => {
       expect(message.bodyTokens).toEqual([{ type: 'text', text: 'hi foo@example.com there' }]);
     });
 
+    it('Does not decode @ signs', async () => {
+      const message = MessageModelFactory.build({
+        body: '@ something @ something @',
+        window,
+        user
+      });
+
+      expect(message.bodyTokens).toEqual([{ type: 'text', text: '@ something @ something @' }]);
+    });
+
     it('Does not decode two mentions without a space', async () => {
       const message = MessageModelFactory.build({
         body: 'hi @foo@bar there',
@@ -178,12 +188,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'unknown:' },
-        { type: 'text', text: ' hi ' },
-        { type: 'text', text: '@stranger' },
-        { type: 'text', text: ' there' }
-      ]);
+      expect(message.bodyTokens).toEqual([{ type: 'text', text: 'unknown: hi @stranger there' }]);
     });
   });
 
