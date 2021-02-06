@@ -48,7 +48,9 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
         <Text as="b" flex="1">
           {message.nick}:
         </Text>{' '}
-        <Text as="span">{parts}</Text>
+        <Text overflowWrap="break-word" wordBreak="break-word" as="span">
+          {parts}
+        </Text>
       </Box>
     </Flex>
   );
