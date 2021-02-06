@@ -53,6 +53,7 @@ class WindowStore {
       windows: observable,
       initDone: observable,
       desktops: computed,
+      activeWindow: computed,
       addWindow: action,
       addMessage: action,
       finishStartup: action
@@ -78,6 +79,10 @@ class WindowStore {
     });
 
     return Object.entries(desktops).map(([desktop, value]) => ({ ...value, id: parseInt(desktop) }));
+  }
+
+  get activeWindow(): WindowModel | null {
+    return this.windows.get(this.rootStore.profileStore.settings.activeWindowId) || null;
   }
 
   handlerServerNotification(ntf: Notification): boolean {
@@ -487,28 +492,6 @@ class WindowStore {
     });
   }
 
-  seekActiveDesktop(direction: number): void {
-    const desktops = this.desktops;
-    const activeDesktopId = this.rootStore.profileStore.settings.activeDesktop;
-    const activeDesktop = desktops.find(desktop => desktop.id === activeDesktopId);
-
-    let index = activeDesktop && desktops.indexOf(activeDesktop);
-
-    if (!index) {
-      return;
-    }
-
-    index += direction;
-
-    if (index === desktops.length) {
-      index = 0;
-    } else if (index < 0) {
-      index = desktops.length - 1;
-    }
-
-    this.rootStore.profileStore.changeActiveDesktop(desktops[index].id);
-  }
-
   finishStartup(): void {
     // Remove possible deleted windows.
     this.windows.forEach(windowObject => {
@@ -519,12 +502,13 @@ class WindowStore {
 
     this.initDone = true;
 
-    const validActiveDesktop = Array.from(this.windows.values()).some(
-      window => window.desktopId === this.rootStore.profileStore.settings.activeDesktop
+    const settings = this.rootStore.profileStore.settings;
+    const isValidActiveWindowId = Array.from(this.windows.values()).some(
+      window => window.id === settings.activeWindowId
     );
 
-    if (!validActiveDesktop && this.windows.size > 0) {
-      this.rootStore.profileStore.settings.activeDesktop = this.windows.values().next().value.desktop;
+    if (!isValidActiveWindowId && this.windows.size > 0) {
+      settings.activeWindowId = this.windows.values().next().value.id;
     }
   }
 

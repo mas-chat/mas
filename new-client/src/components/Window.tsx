@@ -9,14 +9,16 @@ import { ServerContext } from './ServerContext';
 
 interface WindowProps {
   window: WindowModel;
+  onExit?: () => void;
 }
 
-const Window: FunctionComponent<WindowProps> = ({ window }: WindowProps) => {
+const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps) => {
   const { windowStore } = useContext(ServerContext);
   const virtuoso = useRef<VirtuosoHandle>(null);
   const [message, setMessage] = useState('');
   const messages = window.sortedMessages;
   const isVisible = usePageVisibility();
+  const isActive = windowStore.activeWindow === window;
 
   useEffect(() => {
     if (windowStore.initDone && isVisible) {
@@ -37,12 +39,14 @@ const Window: FunctionComponent<WindowProps> = ({ window }: WindowProps) => {
 
   return (
     <Flex flex="1" flexDirection="column" margin="4px">
-      <Heading size="s" px="6px" py="2px" bg="blue.100" borderRadius="md">
+      <Heading size="s" px="6px" py="2px" bg={isActive ? 'blue.100' : 'grey.400'} borderRadius="md">
+        {onExit && <Box onClick={onExit}>[back]</Box>}
         {window.simplifiedName}
       </Heading>
       <Box flex="1" margin="4px">
         <Virtuoso
           ref={virtuoso}
+          style={{ flex: 1 }}
           initialTopMostItemIndex={messages.length - 1}
           totalCount={messages.length}
           itemContent={index => <MessageRow message={messages[index]} />}

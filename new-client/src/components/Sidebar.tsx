@@ -2,41 +2,60 @@ import React, { FunctionComponent, useContext } from 'react';
 import { Box, Flex, Heading, Spacer, Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import { ServerContext } from './ServerContext';
+import type WindowModel from '../models/Window';
 
-const Sidebar: FunctionComponent = () => {
-  const { windowStore, profileStore } = useContext(ServerContext);
+interface SidebarProps {
+  width: string;
+  showDesktops: boolean;
+  onSwitchWindow?: () => void;
+}
 
-  const switchDesktop = (desktopId: number) => {
-    profileStore.changeActiveDesktop(desktopId);
+const Sidebar: FunctionComponent<SidebarProps> = ({ width, onSwitchWindow, showDesktops }: SidebarProps) => {
+  const { profileStore, windowStore } = useContext(ServerContext);
+
+  const onClick = (window: WindowModel) => {
+    profileStore.changeActiveWindowId(window.id);
+    onSwitchWindow?.();
   };
 
+  const windowItem = (window: WindowModel) => (
+    <Text
+      key={window.id}
+      isTruncated
+      as="button"
+      onClick={() => onClick(window)}
+      size="s"
+      width="100%"
+      _hover={{
+        color: 'teal.500'
+      }}
+      bgColor={window === windowStore.activeWindow ? 'blue.100' : 'transparent'}
+    >
+      {window.simplifiedName}
+    </Text>
+  );
+
+  const desktopItem = (header: string | null, windows: WindowModel[]) => (
+    <Box key={header} p="8px">
+      {header && (
+        <Heading size="s" textAlign="center">
+          Desktop #{header}
+        </Heading>
+      )}
+      {windows.map(window => windowItem(window))}
+    </Box>
+  );
+
+  const list =
+    showDesktops && windowStore.desktops.length > 1
+      ? windowStore.desktops.map((desktop, index) => {
+          return desktopItem(index.toString(), desktop.windows);
+        })
+      : desktopItem(null, Array.from(windowStore.windows.values()));
+
   return (
-    <Flex width="140px" flexDirection="column" bgColor="gray.100">
-      {windowStore.desktops.map((desktop, index) => {
-        return (
-          <Box key={desktop.id} p="8px">
-            <Heading
-              as="button"
-              onClick={() => switchDesktop(desktop.id)}
-              size="s"
-              width="100%"
-              _hover={{
-                color: 'teal.500'
-              }}
-              bgColor={desktop.id === profileStore.settings.activeDesktop ? 'blue.100' : 'transparent'}
-            >
-              Desktop #{index}
-            </Heading>
-            {desktop.windows.map(window => {
-              return (
-                <Text key={window.id} pl="10px" isTruncated>
-                  {window.simplifiedName}
-                </Text>
-              );
-            })}
-          </Box>
-        );
-      })}
+    <Flex width={width} height="100%" flexDirection="column" bgColor="gray.100">
+      {list}
       <Spacer />
       <Box p="8px">
         <Heading as="button" size="s" width="100%">

@@ -3,26 +3,26 @@ import { Theme } from '../types/notifications';
 
 type SettingModelProps = {
   theme?: Theme;
-  activeDesktop?: number;
+  activeWindowId?: number;
   emailConfirmed?: boolean;
   canUseIRC?: boolean;
 };
 
 export default class SettingModel {
   public theme: Theme;
-  public activeDesktop: number;
+  public activeWindowId: number;
   public emailConfirmed: boolean;
   public canUseIRC: boolean;
 
-  constructor({ theme, activeDesktop, emailConfirmed, canUseIRC }: SettingModelProps = {}) {
+  constructor({ theme, activeWindowId, emailConfirmed, canUseIRC }: SettingModelProps = {}) {
     this.theme = theme || Theme.Default;
-    this.activeDesktop = activeDesktop || 0;
+    this.activeWindowId = activeWindowId || 0;
     this.emailConfirmed = emailConfirmed || true;
     this.canUseIRC = canUseIRC || false;
 
     makeObservable(this, {
       theme: observable,
-      activeDesktop: observable,
+      activeWindowId: observable,
       emailConfirmed: observable,
       canUseIRC: observable
     });

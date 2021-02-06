@@ -31,8 +31,9 @@ class ProfileStore {
   handlerServerNotification(ntf: Notification): boolean {
     switch (ntf.type) {
       case 'UPDATE_SETTINGS':
-        const { theme, activeDesktop, emailConfirmed, canUseIRC } = ntf.settings;
-        this.updateSettings(theme, activeDesktop, emailConfirmed, canUseIRC);
+        // TODO: activeDesktop is converted to activeWindow here
+        const { theme, activeDesktop: activeWindowId, emailConfirmed, canUseIRC } = ntf.settings;
+        this.updateSettings(theme, activeWindowId, emailConfirmed, canUseIRC);
         break;
       default:
         return false;
@@ -64,12 +65,12 @@ class ProfileStore {
 
   updateSettings(
     theme?: Theme | undefined,
-    activeDesktop?: number | undefined,
+    activeWindowId?: number | undefined,
     emailConfirmed?: boolean | undefined,
     canUseIRC?: boolean | undefined
   ): void {
     this.settings.theme = theme === undefined ? this.settings.theme : theme;
-    this.settings.activeDesktop = activeDesktop === undefined ? this.settings.activeDesktop : activeDesktop;
+    this.settings.activeWindowId = activeWindowId === undefined ? this.settings.activeWindowId : activeWindowId;
     this.settings.emailConfirmed = emailConfirmed === undefined ? this.settings.emailConfirmed : emailConfirmed;
     this.settings.canUseIRC = canUseIRC === undefined ? this.settings.canUseIRC : canUseIRC;
   }
@@ -100,13 +101,13 @@ class ProfileStore {
     this.updateSettings(undefined, undefined, true);
   }
 
-  changeActiveDesktop(activeDesktop: number): void {
+  changeActiveWindowId(activeWindowId: number): void {
     if (!this.rootStore.windowStore.initDone) {
       return;
     }
 
-    this.updateSettings(undefined, activeDesktop);
-    this.socket.send({ id: 'SET', settings: { activeDesktop } });
+    this.updateSettings(undefined, activeWindowId);
+    this.socket.send({ id: 'SET', settings: { activeDesktop: activeWindowId } });
   }
 }
 
