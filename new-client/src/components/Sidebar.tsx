@@ -1,16 +1,16 @@
 import React, { FunctionComponent, useContext } from 'react';
-import { Box, Flex, Heading, Spacer, Text } from '@chakra-ui/react';
+import { Box, Flex, Heading, Spacer, Link, Avatar } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import { ServerContext } from './ServerContext';
 import type WindowModel from '../models/Window';
 
 interface SidebarProps {
-  width: string;
+  mode: 'mobile' | 'desktop';
   showDesktops: boolean;
   onSwitchWindow?: () => void;
 }
 
-const Sidebar: FunctionComponent<SidebarProps> = ({ width, onSwitchWindow, showDesktops }: SidebarProps) => {
+const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDesktops }: SidebarProps) => {
   const { profileStore, windowStore } = useContext(ServerContext);
 
   const onClick = (window: WindowModel) => {
@@ -19,31 +19,37 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ width, onSwitchWindow, showD
   };
 
   const windowItem = (window: WindowModel) => (
-    <Text
+    <Link
+      as="div"
       key={window.id}
       isTruncated
-      as="button"
       onClick={() => onClick(window)}
-      size="s"
       width="100%"
-      mb="0.3rem"
+      px="1rem"
+      py="0.3rem"
       _hover={{
         color: 'teal.500'
       }}
       bgColor={window === windowStore.activeWindow ? 'blue.100' : 'transparent'}
     >
+      {window.type === '1on1' && <Avatar width="25px" height="25px" src={window.peerUser?.gravatar}></Avatar>}{' '}
+      {window.type === 'group' && (
+        <Box display="inline-block" textAlign="center" width="25px" height="25px" bg="gray.300">
+          #
+        </Box>
+      )}{' '}
       {window.simplifiedName}
-    </Text>
+    </Link>
   );
 
   const desktopItem = (header: string | null, windows: WindowModel[]) => (
-    <Box key={header} p="8px">
+    <Box key={header} px="1rem">
       {header && (
-        <Heading size="s" textAlign="center">
+        <Heading mt="1rem" mb="0.5rem" size="s">
           Desktop #{header}
         </Heading>
       )}
-      {windows.map(window => windowItem(window))}
+      {windows.sort((a, b) => (a.type < b.type ? 1 : -1)).map(window => windowItem(window))}
     </Box>
   );
 
@@ -55,7 +61,13 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ width, onSwitchWindow, showD
       : desktopItem(null, Array.from(windowStore.windows.values()));
 
   return (
-    <Flex width={width} height="100%" flexDirection="column" bgColor="gray.100">
+    <Flex
+      width={mode === 'mobile' ? '100%' : '200px'}
+      padding={mode === 'mobile' ? '2rem' : undefined}
+      height="100%"
+      flexDirection="column"
+      bgColor="gray.100"
+    >
       {list}
       <Spacer />
       <Box p="8px">

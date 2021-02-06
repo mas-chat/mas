@@ -26,7 +26,7 @@ const MobileApp: FunctionComponent<MobileAppProps> = ({ firstRenderComplete }: M
     <>
       <Slide direction="left" in={windowSelector} style={{ zIndex: 10 }}>
         <Box height="100%" bgColor="red.300">
-          <Sidebar width="100%" onSwitchWindow={onSwitchWindow} showDesktops={false} />
+          <Sidebar mode="mobile" onSwitchWindow={onSwitchWindow} showDesktops={false} />
         </Box>
       </Slide>
 
