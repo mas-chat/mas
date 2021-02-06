@@ -26,6 +26,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ width, onSwitchWindow, showD
       onClick={() => onClick(window)}
       size="s"
       width="100%"
+      mb="0.3rem"
       _hover={{
         color: 'teal.500'
       }}

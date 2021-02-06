@@ -1,6 +1,6 @@
 import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Box, Heading, Flex, Input } from '@chakra-ui/react';
+import { Box, Button, Heading, Flex, Input } from '@chakra-ui/react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { MessageRow } from '.';
 import WindowModel from '../models/Window';
@@ -40,7 +40,11 @@ const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps)
   return (
     <Flex flex="1" height="100%" width="100%" flexDirection="column" margin="4px">
       <Heading size="s" px="6px" py="2px" bg={isActive ? 'blue.100' : 'grey.400'} borderRadius="md">
-        {onExit && <Box onClick={onExit}>[back]</Box>}
+        {onExit && (
+          <Button mr="1rem" onClick={onExit}>
+            Back
+          </Button>
+        )}
         {window.simplifiedName}
       </Heading>
       <Box flex="1" margin="4px">
