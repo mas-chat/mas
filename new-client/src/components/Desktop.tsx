@@ -17,14 +17,14 @@ const Desktop: FunctionComponent = () => {
       {rows.map(row => {
         return (
           <Fragment key={row}>
-            <Divider colorScheme="gray" />
+            {row !== 0 && <Divider color="gray.200" />}
             <Flex flex="1" flexDirection="row">
               {visibleWindows
                 .filter(window => window.row === row)
                 .map(window => {
                   return (
                     <Fragment key={window.id}>
-                      <Divider orientation="vertical" />
+                      <Divider color="gray.200" orientation="vertical" />
                       <Window window={window} />
                     </Fragment>
                   );
