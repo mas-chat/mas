@@ -18,6 +18,16 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDe
     onSwitchWindow?.();
   };
 
+  const sortWindows = (windows: WindowModel[]) => {
+    return windows.sort((a, b) => {
+      if (a.type !== b.type) {
+        return a.type === 'group' ? -1 : 1;
+      }
+
+      return a.simplifiedName.localeCompare(b.simplifiedName);
+    });
+  };
+
   const windowItem = (window: WindowModel) => (
     <Link
       as="div"
@@ -49,7 +59,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDe
           Desktop #{header}
         </Heading>
       )}
-      {windows.sort((a, b) => (a.type < b.type ? 1 : -1)).map(window => windowItem(window))}
+      {sortWindows(windows).map(window => windowItem(window))}
     </Box>
   );
 
