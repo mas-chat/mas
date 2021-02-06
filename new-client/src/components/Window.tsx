@@ -1,6 +1,7 @@
 import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef, useState } from 'react';
+import { autorun } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Box, Button, Heading, Flex, Input, Text } from '@chakra-ui/react';
+import { Box, Button, Heading, Flex, Input } from '@chakra-ui/react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { MessageRow } from '.';
 import WindowModel from '../models/Window';
@@ -13,12 +14,22 @@ interface WindowProps {
 }
 
 const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps) => {
-  const { windowStore } = useContext(ServerContext);
+  const { windowStore, profileStore } = useContext(ServerContext);
   const virtuoso = useRef<VirtuosoHandle>(null);
+  const input = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
   const messages = window.sortedMessages;
   const isVisible = usePageVisibility();
   const isActive = windowStore.activeWindow === window;
+
+  const focusIfActive = () => {
+    if (windowStore.activeWindow === window) {
+      input.current?.focus();
+    }
+  };
+
+  autorun(focusIfActive);
+  useEffect(focusIfActive, []);
 
   useEffect(() => {
     if (windowStore.initDone && isVisible) {
@@ -37,16 +48,13 @@ const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps)
     }
   };
 
+  const onClick = () => {
+    profileStore.changeActiveWindowId(window.id);
+  };
+
   return (
-    <Flex flex="1" height="100%" width="100%" flexDirection="column" p="4px">
-      <Flex
-        px="6px"
-        py="2px"
-        bg={isActive ? 'blue.100' : 'gray.100'}
-        borderRadius="md"
-        flexDirection="row"
-        alignItems="center"
-      >
+    <Flex onClick={onClick} flex="1" height="100%" width="100%" flexDirection="column" p="4px">
+      <Flex px="0.6rem" py="0.20rem" bg={isActive ? 'blue.100' : 'gray.100'} flexDirection="row" alignItems="center">
         {onExit && (
           <Button mr="1rem" onClick={onExit}>
             Back
@@ -67,6 +75,8 @@ const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps)
         />
       </Box>
       <Input
+        ref={input}
+        variant="flushed"
         onKeyDown={onKeyDown}
         onChange={e => setMessage(e.target.value)}
         placeholder="Write here…"
