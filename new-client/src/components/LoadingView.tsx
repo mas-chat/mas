@@ -6,7 +6,7 @@ const LoadingView: FunctionComponent = () => {
   const { startupStore } = useContext(ServerContext);
 
   return (
-    <Flex zIndex="1" height="100vh" mx="10vw" flexDirection="column" justify="center" alignItems="center">
+    <Flex zIndex="1" height="100%" mx="10vw" flexDirection="column" justify="center" alignItems="center">
       <Heading textAlign="center">Thanks for testing the new client!</Heading>
       <Progress width="30vw" marginTop="10vh" marginBottom="5vh" value={startupStore.progress} />
       <Text fontSize="sm">

@@ -38,7 +38,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps)
   };
 
   return (
-    <Flex flex="1" flexDirection="column" margin="4px">
+    <Flex flex="1" height="100%" width="100%" flexDirection="column" margin="4px">
       <Heading size="s" px="6px" py="2px" bg={isActive ? 'blue.100' : 'grey.400'} borderRadius="md">
         {onExit && <Box onClick={onExit}>[back]</Box>}
         {window.simplifiedName}

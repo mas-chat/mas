@@ -11,7 +11,7 @@ const DesktopApp: FunctionComponent<DesktopAppProps> = ({ firstRenderComplete }:
   useEffect(firstRenderComplete, []);
 
   return (
-    <Flex width="100vw" height="100vh" bgColor="white">
+    <Flex width="100vw" height="100%" bgColor="white">
       <Sidebar width="200px" showDesktops={true} />
       <Desktop />
     </Flex>

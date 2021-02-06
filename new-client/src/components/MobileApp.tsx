@@ -23,15 +23,15 @@ const MobileApp: FunctionComponent<MobileAppProps> = ({ firstRenderComplete }: M
   };
 
   return (
-    <Flex width="100vw" height="100vh" bgColor="white">
+    <>
       <Slide direction="left" in={windowSelector} style={{ zIndex: 10 }}>
-        <Box height="100vh" bgColor="red.300">
+        <Box height="100%" bgColor="red.300">
           <Sidebar width="100%" onSwitchWindow={onSwitchWindow} showDesktops={false} />
         </Box>
       </Slide>
 
       {windowStore.activeWindow && <Window onExit={onExit} window={windowStore.activeWindow} />}
-    </Flex>
+    </>
   );
 };
 

@@ -23,5 +23,19 @@
     {{{ extraClientBody }}}
 
     <div id="root"></div>
+
+    <script>
+      const appHeight = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * .01}px`);
+      window.addEventListener('resize', appHeight);
+      appHeight();
+    </script>
+
+    <style>
+      #root {
+        position: fixed;
+        width: 100vw;
+        height: calc(var(--vh, 1vh) * 100);
+      }
+    </style>
   </body>
 </html>
