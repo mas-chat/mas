@@ -355,7 +355,7 @@ export default class MessageModel {
             const mention = text.substring(i)?.match(/@\S+/)?.[0];
             const user = mention && this.window.participants.get(mention.substring(1));
 
-            if (user) {
+            if (mention && user) {
               subText.length > 0 && subParts.push({ type: 'text', text: subText });
               subParts.push({ type: 'mention', text: mention, userId: user.id });
               i += mention.length;
