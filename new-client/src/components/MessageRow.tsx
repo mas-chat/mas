@@ -71,7 +71,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
   });
 
   return (
-    <Flex key={message.gid} flexDirection="row">
+    <Flex key={message.gid} flexDirection="row" fontSize="15px">
       <Box minWidth="50px">{message.createdTime}</Box>
       <Box flex="1">
         <Text as="b" flex="1">
