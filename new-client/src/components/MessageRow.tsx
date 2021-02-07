@@ -2,6 +2,7 @@ import React, { FunctionComponent, useContext } from 'react';
 import { Box, Flex, Link, Text, Badge, Image } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import URI from 'urijs';
+import YouTube from 'react-youtube';
 import { ImageModal } from '.';
 import { ModalContext } from './ModalContext';
 import MessageModel, { UrlPartSubType } from '../models/Message';
@@ -39,17 +40,23 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
 
   const emoji = (emoji: string) => <span key={Math.random()}>{emoji}</span>;
 
-  const images =
-    message.hasImages &&
-    message.images.map(image => (
-      <Image
-        onClick={() => showModal(image.url)}
-        key={Math.random()}
-        maxHeight="8rem"
-        m="1rem"
-        src={image.url.toString()}
-      />
-    ));
+  const images = message.images.map(image => (
+    <Image
+      onClick={() => showModal(image.url)}
+      key={Math.random()}
+      maxHeight="8rem"
+      m="1rem"
+      src={image.url.toString()}
+    />
+  ));
+
+  const videos = message.videos.map(video => (
+    <YouTube
+      key={video.videoId}
+      id={video.videoId}
+      opts={{ playerVars: { origin: window.location.origin }, height: '128px', width: '228px' }}
+    />
+  ));
 
   const parts = message.bodyTokens.map(token => {
     if (token.type === 'url') {
@@ -73,7 +80,12 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
         <Text overflowWrap="break-word" wordBreak="break-word" as="span">
           {parts}
         </Text>
-        <Flex flexDirection="row">{images}</Flex>
+        {message.hasImages && <Flex flexDirection="row">{images}</Flex>}
+        {message.hasVideos && (
+          <Flex flexDirection="row" height="8rem" m="1rem">
+            {videos}
+          </Flex>
+        )}
       </Box>
     </Flex>
   );
