@@ -21,7 +21,7 @@ const theme = extendTheme({
 });
 
 ReactDOM.render(
-  <ChakraProvider>
+  <ChakraProvider theme={theme}>
     <ServerContextProvider>
       <RootContainer />
     </ServerContextProvider>
