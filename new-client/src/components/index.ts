@@ -6,3 +6,4 @@ export { default as RootContainer } from './RootContainer';
 export { default as LoadingView } from './LoadingView';
 export { default as DesktopApp } from './DesktopApp';
 export { default as MobileApp } from './MobileApp';
+export { default as ImageModal } from './ImageModal';

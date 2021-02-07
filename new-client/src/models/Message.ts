@@ -11,10 +11,16 @@ const EMOTICON_REGEX = /(:[^\s:]+:)/;
 const EMOJI_REGEX = new RegExp(`(${buildEmojiRegex().source})`);
 const IMAGE_SUFFIXES = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
 
+export enum UrlPartSubType {
+  Generic,
+  Image,
+  Video
+}
+
 type TextPart = { type: 'text'; text: string };
-type GenericUrlPart = { type: 'url'; url: URI; class: 'generic' };
-type ImageUrlPart = { type: 'url'; url: URI; class: 'image' };
-type VideoUrlPart = { type: 'url'; url: URI; class: 'video'; videoId: string; startTime: number };
+type GenericUrlPart = { type: 'url'; url: URI; class: UrlPartSubType.Generic };
+type ImageUrlPart = { type: 'url'; url: URI; class: UrlPartSubType.Image };
+type VideoUrlPart = { type: 'url'; url: URI; class: UrlPartSubType.Video; videoId: string; startTime: number };
 type EmojiPart = { type: 'emoji'; shortCode?: string; emoji: string };
 type MentionPart = { type: 'mention'; text: string; userId: string };
 
@@ -172,22 +178,22 @@ export default class MessageModel {
 
   get images(): ImageUrlPart[] {
     return this.bodyTokens.filter(
-      (part: BodyPart): part is ImageUrlPart => part.type === 'url' && part.class === 'image'
+      (part: BodyPart): part is ImageUrlPart => part.type === 'url' && part.class === UrlPartSubType.Image
     );
   }
 
   get hasImages(): boolean {
-    return this.bodyTokens.some(part => part.type === 'url' && part.class === 'image');
+    return this.bodyTokens.some(part => part.type === 'url' && part.class === UrlPartSubType.Image);
   }
 
   get videos(): VideoUrlPart[] {
     return this.bodyTokens.filter(
-      (part: BodyPart): part is VideoUrlPart => part.type === 'url' && part.class === 'video'
+      (part: BodyPart): part is VideoUrlPart => part.type === 'url' && part.class === UrlPartSubType.Video
     );
   }
 
   get hasVideos(): boolean {
-    return this.bodyTokens.some(part => part.type === 'url' && part.class === 'video');
+    return this.bodyTokens.some(part => part.type === 'url' && part.class === UrlPartSubType.Video);
   }
 
   private extractLinks(parts: Array<BodyPart>): Array<BodyPart> {
@@ -214,7 +220,7 @@ export default class MessageModel {
           if (type === 'text' && sub !== '') {
             subParts.push({ type, text: sub });
           } else if (type === 'url') {
-            subParts.push({ type, url: new URI(sub), class: 'generic' });
+            subParts.push({ type, url: new URI(sub), class: UrlPartSubType.Generic });
           }
         }
 
@@ -312,13 +318,13 @@ export default class MessageModel {
         const domain = url.domain();
 
         if (IMAGE_SUFFIXES.includes(url.suffix().toLowerCase())) {
-          return { type: 'url', class: 'image', url: url };
+          return { type: 'url', class: UrlPartSubType.Image, url: url };
         } else if ((domain === 'youtube.com' && url.search(true).v) || domain === 'youtu.be') {
           const videoId = this.decodeYouTubeVideoId(url);
           const startTime = this.decodeYouTubeTimeParameter(url);
 
           if (videoId) {
-            return { type: 'url', class: 'video', url, startTime, videoId };
+            return { type: 'url', class: UrlPartSubType.Video, url, startTime, videoId };
           } else {
             return part;
           }

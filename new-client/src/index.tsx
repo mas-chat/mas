@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import { ServerContextProvider } from './components/ServerContext';
+import { ModalContextProvider } from './components/ModalContext';
 import { RootContainer } from './components';
 
 // const config = {
@@ -23,7 +24,9 @@ const theme = extendTheme({
 ReactDOM.render(
   <ChakraProvider theme={theme}>
     <ServerContextProvider>
-      <RootContainer />
+      <ModalContextProvider>
+        <RootContainer />
+      </ModalContextProvider>
     </ServerContextProvider>
   </ChakraProvider>,
   document.getElementById('root')
