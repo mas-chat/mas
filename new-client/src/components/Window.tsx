@@ -5,7 +5,6 @@ import { Box, Button, Heading, Flex, Input } from '@chakra-ui/react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { MessageRow } from '.';
 import WindowModel from '../models/Window';
-import { usePageVisibility } from '../hooks/pageVisibility';
 import { ServerContext } from './ServerContext';
 
 interface WindowProps {
@@ -19,7 +18,6 @@ const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps)
   const input = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
   const messages = window.sortedMessages;
-  const isVisible = usePageVisibility();
   const isActive = windowStore.activeWindow === window;
 
   const focusIfActive = () => {
@@ -30,16 +28,6 @@ const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps)
 
   autorun(focusIfActive);
   useEffect(focusIfActive, []);
-
-  useEffect(() => {
-    if (windowStore.initDone && isVisible) {
-      virtuoso.current?.scrollToIndex({
-        index: messages.length - 1,
-        align: 'end',
-        behavior: 'auto'
-      });
-    }
-  }, [isVisible]);
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
@@ -69,8 +57,8 @@ const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps)
           ref={virtuoso}
           style={{ flex: 1 }}
           initialTopMostItemIndex={messages.length - 1}
-          totalCount={messages.length}
-          itemContent={index => <MessageRow message={messages[index]} />}
+          data={messages}
+          itemContent={(_index, message) => <MessageRow message={message} />}
           followOutput="smooth"
         />
       </Box>
