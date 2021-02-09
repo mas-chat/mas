@@ -7,3 +7,4 @@ export { default as LoadingView } from './LoadingView';
 export { default as DesktopApp } from './DesktopApp';
 export { default as MobileApp } from './MobileApp';
 export { default as ImageModal } from './ImageModal';
+export { default as YouTubePreview } from './YoutubePreview';

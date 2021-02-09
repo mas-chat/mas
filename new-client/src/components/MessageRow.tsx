@@ -2,8 +2,7 @@ import React, { FunctionComponent, useContext } from 'react';
 import { Box, Flex, Link, Text, Badge, Image } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import URI from 'urijs';
-import YouTube from 'react-youtube';
-import { ImageModal } from '.';
+import { ImageModal, YouTubePreview } from '.';
 import { ModalContext } from './ModalContext';
 import MessageModel, { UrlPartSubType } from '../models/Message';
 
@@ -53,11 +52,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
 
   const renderVideoPreviews = () =>
     message.videos.map(video => (
-      <YouTube
-        key={video.videoId}
-        id={video.videoId}
-        opts={{ playerVars: { origin: window.location.origin }, height: '128px', width: '228px' }}
-      />
+      <YouTubePreview key={video.videoId} videoId={video.videoId} startTime={video.startTime} />
     ));
 
   const renderMessageParts = () =>
