@@ -16,7 +16,7 @@ interface ModalProviderProps {
   children: ReactNode;
 }
 
-export const ModalContextProvider = ({ children }: ModalProviderProps) => {
+export const ModalContextProvider: FunctionComponent<ModalProviderProps> = ({ children }: ModalProviderProps) => {
   const [visible, setVisible] = useState(false);
   const [component, setComponent] = useState<ReactNode | undefined>(undefined);
 
