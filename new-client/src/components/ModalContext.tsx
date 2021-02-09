@@ -1,25 +1,22 @@
 import React, { createContext, FunctionComponent, useState, ReactNode } from 'react';
 import { Modal, ModalOverlay, ModalContent } from '@chakra-ui/react';
 
-interface ModalContextValue {
+interface ModalContextInterface {
   onShow: (content?: ReactNode) => void;
   onHide: () => void;
 }
 
-export const ModalContext = createContext<ModalContextValue>({
-  onShow: () => {
-    // Do nothing
-  },
-  onHide: () => {
-    // Do nothing
-  }
-});
+const doNothing = () => {
+  // Empty
+};
+
+export const ModalContext = createContext<ModalContextInterface>({ onShow: doNothing, onHide: doNothing });
 
 interface ModalProviderProps {
   children: ReactNode;
 }
 
-export const ModalContextProvider: FunctionComponent<ModalProviderProps> = ({ children }: ModalProviderProps) => {
+export const ModalContextProvider = ({ children }: ModalProviderProps) => {
   const [visible, setVisible] = useState(false);
   const [component, setComponent] = useState<ReactNode | undefined>(undefined);
 
