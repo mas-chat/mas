@@ -69,7 +69,8 @@ export default class MessageModel {
       updatedDateLong: computed,
       nick: computed,
       avatarUrl: computed,
-      channelActionText: computed,
+      isChannelAction: computed,
+      channelAction: computed,
       bodyTokens: computed,
       images: computed,
       hasImages: computed,
@@ -141,23 +142,19 @@ export default class MessageModel {
     return ['join', 'part', 'quit', 'kick'].includes(this.category);
   }
 
-  get channelActionText(): string {
+  get channelAction(): { userId: string; nick: string; text?: string } {
     const nick = this.nick;
     const groupName = this.window.name;
     const body = this.body;
 
-    switch (this.category) {
-      case 'join':
-        return `${nick} has joined ${groupName}.`;
-      case 'part':
-        return `${nick} has left ${groupName}. ${body}`;
-      case 'quit':
-        return `${nick} has quit irc. Reason: ${body}`;
-      case 'kick':
-        return `${nick} was kicked from ${groupName}. Reason: ${body}`;
-      default:
-        return '';
-    }
+    const text: Record<string, string> = {
+      join: `has joined ${groupName}.`,
+      part: `has left ${groupName}. ${body}`,
+      quit: `has quit irc. Reason: ${body}`,
+      kick: `was kicked from ${groupName}. Reason: ${body}`
+    };
+
+    return { userId: this.user.id, nick: nick || 'unknown', text: text[this.category] };
   }
 
   get bodyTokens(): Array<BodyPart> {

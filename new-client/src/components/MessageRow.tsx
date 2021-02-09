@@ -19,71 +19,87 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
   const modal = useContext(ModalContext);
   const showModal = (url: URI) => modal.onShow(<ImageModal src={url.toString()} />);
 
-  const imageLink = (uri: URI) => (
+  const renderImageLink = (uri: URI) => (
     <Link key={Math.random()} onClick={() => showModal(uri)} color="tomato">
       {uri.filename()}
     </Link>
   );
-  const genericLink = (uri: URI) => (
+  const renderGenericLink = (uri: URI) => (
     <Link key={Math.random()} href={uri.toString()} target="_blank" color="tomato">
       {uri.readable()}
     </Link>
   );
-  const link = (uri: URI, subType: UrlPartSubType) =>
-    subType === UrlPartSubType.Image ? imageLink(uri) : genericLink(uri);
+  const renderLink = (uri: URI, subType: UrlPartSubType) =>
+    subType === UrlPartSubType.Image ? renderImageLink(uri) : renderGenericLink(uri);
 
-  const mention = (text: string) => (
+  const renderMention = (text: string) => (
     <Badge key={Math.random()} variant="subtle" colorScheme="green">
       {text}
     </Badge>
   );
 
-  const emoji = (emoji: string) => <span key={Math.random()}>{emoji}</span>;
+  const renderEmoji = (emoji: string) => <span key={Math.random()}>{emoji}</span>;
 
-  const images = message.images.map(image => (
-    <Image
-      onClick={() => showModal(image.url)}
-      key={Math.random()}
-      maxHeight="8rem"
-      m="1rem"
-      src={image.url.toString()}
-    />
-  ));
+  const renderImagePreviews = () =>
+    message.images.map(image => (
+      <Image
+        onClick={() => showModal(image.url)}
+        key={Math.random()}
+        maxHeight="8rem"
+        m="1rem"
+        src={image.url.toString()}
+      />
+    ));
 
-  const videos = message.videos.map(video => (
-    <YouTube
-      key={video.videoId}
-      id={video.videoId}
-      opts={{ playerVars: { origin: window.location.origin }, height: '128px', width: '228px' }}
-    />
-  ));
+  const renderVideoPreviews = () =>
+    message.videos.map(video => (
+      <YouTube
+        key={video.videoId}
+        id={video.videoId}
+        opts={{ playerVars: { origin: window.location.origin }, height: '128px', width: '228px' }}
+      />
+    ));
 
-  const parts = message.bodyTokens.map(token => {
-    if (token.type === 'url') {
-      return link(token.url, token.class);
-    } else if (token.type === 'text') {
-      return token.text;
-    } else if (token.type === 'mention') {
-      return mention(token.text);
-    } else if (token.type === 'emoji') {
-      return emoji(token.emoji);
-    }
-  });
+  const renderMessageParts = () =>
+    message.bodyTokens.map(token => {
+      if (token.type === 'url') {
+        return renderLink(token.url, token.class);
+      } else if (token.type === 'text') {
+        return token.text;
+      } else if (token.type === 'mention') {
+        return renderMention(token.text);
+      } else if (token.type === 'emoji') {
+        return renderEmoji(token.emoji);
+      }
+    });
+
+  const renderMessage = () => (
+    <>
+      <Text as="b" flex="1">
+        {message.nick}:
+      </Text>{' '}
+      <Text overflowWrap="break-word" wordBreak="break-word" as="span">
+        {renderMessageParts()}
+      </Text>
+    </>
+  );
+
+  const renderAction = () => (
+    <Text overflowWrap="break-word" wordBreak="break-word" as="span">
+      {renderMention(message.channelAction.nick)} {message.channelAction.text}
+    </Text>
+  );
 
   return (
     <Flex key={message.gid} flexDirection="row" fontSize="15px">
       <Box minWidth="50px">{message.createdTime}</Box>
       <Box flex="1">
-        <Text as="b" flex="1">
-          {message.nick}:
-        </Text>{' '}
-        <Text overflowWrap="break-word" wordBreak="break-word" as="span">
-          {parts}
-        </Text>
-        {message.hasImages && <Flex flexDirection="row">{images}</Flex>}
+        {message.isChannelAction && renderAction()}
+        {!message.isChannelAction && renderMessage()}
+        {message.hasImages && <Flex flexDirection="row">{renderImagePreviews()}</Flex>}
         {message.hasVideos && (
           <Flex flexDirection="row" height="8rem" m="1rem">
-            {videos}
+            {renderVideoPreviews()}
           </Flex>
         )}
       </Box>
