@@ -2,8 +2,7 @@ import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef,
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Box, Button, Heading, Flex, Input } from '@chakra-ui/react';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { MessageRow } from '.';
+import { MessageList } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
 
@@ -14,10 +13,8 @@ interface WindowProps {
 
 const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps) => {
   const { windowStore, profileStore } = useContext(ServerContext);
-  const virtuoso = useRef<VirtuosoHandle>(null);
   const input = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
-  const messages = window.sortedMessages;
   const isActive = windowStore.activeWindow === window;
 
   const focusIfActive = () => {
@@ -52,16 +49,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps)
           {window.simplifiedName}
         </Heading>
       </Flex>
-      <Box flex="1" margin="4px">
-        <Virtuoso
-          ref={virtuoso}
-          style={{ flex: 1 }}
-          initialTopMostItemIndex={messages.length - 1}
-          data={messages}
-          itemContent={(_index, message) => <MessageRow message={message} />}
-          followOutput="smooth"
-        />
-      </Box>
+      <MessageList window={window} />
       <Input
         ref={input}
         variant="flushed"

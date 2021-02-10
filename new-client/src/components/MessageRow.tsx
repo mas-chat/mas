@@ -86,7 +86,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
   );
 
   return (
-    <Flex key={message.gid} flexDirection="row" fontSize="15px">
+    <Flex key={message.gid} flexDirection="row" fontSize="15px" width="100%">
       <Box minWidth="50px">{message.createdTime}</Box>
       <Box flex="1">
         {message.isChannelAction && renderAction()}
