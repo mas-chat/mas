@@ -7,12 +7,17 @@ module.exports = {
   },
   extends: [
     'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
     'prettier/@typescript-eslint'
   ],
   rules: {
-    '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^_' }]
+    '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^_' }],
+    'react/boolean-prop-naming': 'error',
+    'react/destructuring-assignment': 'error',
+    'react/no-array-index-key': 'error',
+    'react/no-multi-comp': 'error'
   },
   settings: {
     'import/extensions': ['.js', '.jsx'],
