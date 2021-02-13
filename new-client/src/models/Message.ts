@@ -69,7 +69,12 @@ export default class MessageModel {
       updatedDateLong: computed,
       nick: computed,
       avatarUrl: computed,
+      isMessageFromUser: computed,
       isChannelAction: computed,
+      isBanner: computed,
+      isServerNote: computed,
+      isInfo: computed,
+      isError: computed,
       channelAction: computed,
       bodyTokens: computed,
       images: computed,
@@ -138,8 +143,30 @@ export default class MessageModel {
     return this.bodyTokens.some(part => part.type === 'mention' && part.userId === me.id);
   }
 
+  get isMessageFromUser(): boolean {
+    return this.category === MessageCategory.Message;
+  }
+
   get isChannelAction(): boolean {
-    return ['join', 'part', 'quit', 'kick'].includes(this.category);
+    return [MessageCategory.Join, MessageCategory.Part, MessageCategory.Quit, MessageCategory.Kick].includes(
+      this.category
+    );
+  }
+
+  get isBanner(): boolean {
+    return this.category === MessageCategory.Banner;
+  }
+
+  get isServerNote(): boolean {
+    return this.category === MessageCategory.Server;
+  }
+
+  get isInfo(): boolean {
+    return this.category === MessageCategory.Info;
+  }
+
+  get isError(): boolean {
+    return this.category === MessageCategory.Error;
   }
 
   get channelAction(): { userId: string; nick: string; text?: string } {

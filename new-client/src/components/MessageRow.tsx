@@ -68,29 +68,50 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
       }
     });
 
-  const renderMessage = () => (
-    <>
-      <Text as="b" flex="1">
-        {message.nick}:
-      </Text>{' '}
-      <Text overflowWrap="break-word" wordBreak="break-word" as="span">
-        {renderMessageParts()}
-      </Text>
-    </>
-  );
+  const renderMessage = () => {
+    const color = message.fromMe ? 'blue.600' : 'black';
 
-  const renderAction = () => (
-    <Text overflowWrap="break-word" wordBreak="break-word" as="span">
-      {renderMention(message.channelAction.nick)} {message.channelAction.text}
-    </Text>
-  );
+    return (
+      <>
+        <Text as="b" flex="1" color={color}>
+          {message.nick}:
+        </Text>{' '}
+        <Text overflowWrap="break-word" wordBreak="break-word" as="span" color={color}>
+          {renderMessageParts()}
+        </Text>
+      </>
+    );
+  };
+
+  const renderNotMessage = () => {
+    if (message.isChannelAction) {
+      return (
+        <Text overflowWrap="break-word" wordBreak="break-word" as="span">
+          {renderMention(message.channelAction.nick)} {message.channelAction.text}
+        </Text>
+      );
+    } else if (message.isBanner) {
+      return (
+        <Text fontFamily="monospace" whiteSpace="pre">
+          {message.body}
+        </Text>
+      );
+    } else if (message.isServerNote) {
+      return <Text color="yellow.600">{message.body}</Text>;
+    } else if (message.isInfo) {
+      return <Text color="green.600">{message.body}</Text>;
+    } else if (message.isError) {
+      return <Text color="red.600">{message.body}</Text>;
+    }
+
+    return message.body;
+  };
 
   return (
     <Flex key={message.gid} flexDirection="row" fontSize="15px" width="100%">
       <Box minWidth="50px">{message.createdTime}</Box>
       <Box flex="1">
-        {message.isChannelAction && renderAction()}
-        {!message.isChannelAction && renderMessage()}
+        {message.isMessageFromUser ? renderMessage() : renderNotMessage()}
         {message.hasImages && <Flex flexDirection="row">{renderImagePreviews()}</Flex>}
         {message.hasVideos && (
           <Flex flexDirection="row" height="180px" m="1rem">
