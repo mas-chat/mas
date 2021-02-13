@@ -1,6 +1,6 @@
 import React, { FunctionComponent, Fragment, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Divider, Flex } from '@chakra-ui/react';
+import { Box, Flex } from '@chakra-ui/react';
 import { Window } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
@@ -17,14 +17,14 @@ const Desktop: FunctionComponent = () => {
       {rows.map(row => {
         return (
           <Fragment key={row}>
-            {row !== 0 && <Divider color="gray.200" />}
+            {row !== 0 && <Box borderTop="1px solid #bbb" />}
             <Flex flex="1" flexDirection="row">
               {visibleWindows
                 .filter(window => window.row === row)
                 .map(window => {
                   return (
                     <Fragment key={window.id}>
-                      <Divider color="gray.200" orientation="vertical" />
+                      <Box borderLeft="1px solid #bbb" />
                       <Window window={window} />
                     </Fragment>
                   );
