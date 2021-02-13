@@ -56,6 +56,7 @@ class WindowStore {
       activeWindow: computed,
       addWindow: action,
       addMessage: action,
+      sendText: action,
       finishStartup: action
     });
   }
