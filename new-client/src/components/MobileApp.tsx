@@ -12,7 +12,7 @@ const MobileApp: FunctionComponent<MobileAppProps> = ({ firstRenderComplete }: M
   const { windowStore } = useContext(ServerContext);
   const [windowSelector, setWindowSelector] = useState(true);
 
-  useEffect(firstRenderComplete, []);
+  useEffect(firstRenderComplete, [firstRenderComplete]);
 
   const onSwitchWindow = () => {
     setWindowSelector(false);
@@ -30,7 +30,7 @@ const MobileApp: FunctionComponent<MobileAppProps> = ({ firstRenderComplete }: M
         </Box>
       </Slide>
 
-      {windowStore.activeWindow && <Window onExit={onExit} window={windowStore.activeWindow} />}
+      {windowStore.activeWindow && <Window onExit={onExit} mobile={true} window={windowStore.activeWindow} />}
     </>
   );
 };

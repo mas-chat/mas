@@ -8,7 +8,7 @@ interface DesktopAppProps {
 }
 
 const DesktopApp: FunctionComponent<DesktopAppProps> = ({ firstRenderComplete }: DesktopAppProps) => {
-  useEffect(firstRenderComplete, []);
+  useEffect(firstRenderComplete, [firstRenderComplete]);
 
   return (
     <Flex width="100vw" height="100%" bgColor="white">

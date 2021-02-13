@@ -8,21 +8,22 @@ import { ServerContext } from './ServerContext';
 interface WindowProps {
   window: WindowModel;
   onExit?: () => void;
+  mobile?: boolean;
 }
 
-const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps) => {
+const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: WindowProps) => {
   const { windowStore, profileStore } = useContext(ServerContext);
   const input = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
   const isActive = windowStore.activeWindow === window;
 
   const focusIfActive = () => {
-    if (windowStore.activeWindow === window) {
+    if (!mobile && windowStore.activeWindow === window) {
       input.current?.focus();
     }
   };
 
-  useEffect(focusIfActive, [window, windowStore.activeWindow]);
+  useEffect(focusIfActive, [window, windowStore.activeWindow, mobile]);
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
