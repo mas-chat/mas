@@ -1,7 +1,7 @@
 import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef, useState } from 'react';
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Box, Button, Heading, Flex, Input } from '@chakra-ui/react';
+import { Button, Heading, Flex, Input } from '@chakra-ui/react';
 import { MessageList } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
