@@ -1,5 +1,4 @@
 import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef, useState } from 'react';
-import { autorun } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button, Heading, Flex, Input } from '@chakra-ui/react';
 import { MessageList } from '.';
@@ -23,8 +22,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, onExit }: WindowProps)
     }
   };
 
-  autorun(focusIfActive);
-  useEffect(focusIfActive, []);
+  useEffect(focusIfActive, [window, windowStore.activeWindow]);
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
