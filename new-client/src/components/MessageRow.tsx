@@ -93,7 +93,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
         {!message.isChannelAction && renderMessage()}
         {message.hasImages && <Flex flexDirection="row">{renderImagePreviews()}</Flex>}
         {message.hasVideos && (
-          <Flex flexDirection="row" height="8rem" m="1rem">
+          <Flex flexDirection="row" height="180px" m="1rem">
             {renderVideoPreviews()}
           </Flex>
         )}
