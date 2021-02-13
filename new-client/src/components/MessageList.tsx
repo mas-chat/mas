@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useLayoutEffect, useRef, useState } from 'react';
+import React, { FunctionComponent, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
 import { Box } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import useResizeObserver from 'use-resize-observer';
@@ -9,37 +9,29 @@ interface MessageListProps {
   window: WindowModel;
 }
 
+// Ref that is used only in after render hooks can't be null
+type LayoutRef = MutableRefObject<HTMLDivElement>;
+
 const MessageList: FunctionComponent<MessageListProps> = ({ window }: MessageListProps) => {
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
-  const placeholder = useRef<HTMLDivElement>(null);
-  const scrollContainer = useRef<HTMLDivElement>(null);
+  const placeholder = useRef<HTMLDivElement>(null) as LayoutRef;
+  const scrollContainer = useRef<HTMLDivElement>(null) as LayoutRef;
+  const messageListContainer = useRef<HTMLDivElement>(null);
   const { width = 0, height = 0 } = useResizeObserver<HTMLDivElement>({ ref: placeholder });
 
-  const scrollToBottom = (node: HTMLDivElement) => {
-    node.scrollTop = node.scrollHeight;
+  const scrollToBottom = () => {
+    scrollContainer.current.scrollTop = 9999999;
   };
 
+  useResizeObserver<HTMLDivElement>({ ref: messageListContainer, onResize: scrollToBottom });
+
   useLayoutEffect(() => {
-    const { current: placeHolderNode } = placeholder;
-
-    if (!placeHolderNode) {
-      return;
-    }
-
-    const { offsetWidth, offsetHeight } = placeHolderNode;
+    const { offsetWidth, offsetHeight } = placeholder.current;
 
     if (dimensions.width !== offsetWidth || dimensions.height !== offsetHeight) {
       setDimensions({ width: offsetWidth, height: offsetHeight });
     }
-  }, [width, height]);
-
-  useLayoutEffect(() => {
-    const { current: scrollContainerNode } = scrollContainer;
-
-    if (scrollContainerNode) {
-      scrollToBottom(scrollContainerNode);
-    }
-  });
+  }, [width, height, dimensions.width, dimensions.height]);
 
   return (
     <Box flex="1" ref={placeholder}>
@@ -51,9 +43,11 @@ const MessageList: FunctionComponent<MessageListProps> = ({ window }: MessageLis
         overflowX="hidden"
         ref={scrollContainer}
       >
-        {window.sortedMessages.map(message => (
-          <MessageRow key={message.gid} message={message} />
-        ))}
+        <Box ref={messageListContainer}>
+          {window.sortedMessages.map(message => (
+            <MessageRow key={message.gid} message={message} />
+          ))}
+        </Box>
       </Box>
     </Box>
   );
