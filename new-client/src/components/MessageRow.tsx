@@ -4,15 +4,13 @@ import { observer } from 'mobx-react-lite';
 import URI from 'urijs';
 import { ImageModal, YouTubePreview } from '.';
 import { ModalContext } from './ModalContext';
-import MessageModel, { UrlPartSubType } from '../models/Message';
+import MessageModel, { EmojiPart, UrlPartSubType } from '../models/Message';
+
+const TWEMOJI_CDN_BASE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/13.0.1';
 
 interface MessageRowProps {
   message: MessageModel;
 }
-
-// private renderEmoji(name: string, src: string) {
-//   return `<img align="absmiddle" alt="${name}" title="${name}" class="emoji" src="https://twemoji.maxcdn.com/v/latest/72x72/${src}.png"/>`;
-// }
 
 const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowProps) => {
   const modal = useContext(ModalContext);
@@ -37,7 +35,17 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
     </Badge>
   );
 
-  const renderEmoji = (emoji: string) => <span key={Math.random()}>{emoji}</span>;
+  const renderEmoji = (emoji: EmojiPart) => (
+    <Image
+      key={Math.random()}
+      display="inline-block"
+      draggable="false"
+      height="1rem"
+      alt={emoji.shortCode}
+      title={emoji.shortCode}
+      src={`${TWEMOJI_CDN_BASE_URL}/svg/${emoji.codePoint}.svg`}
+    />
+  );
 
   const renderImagePreviews = () =>
     message.images.map(image => (
@@ -64,7 +72,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
       } else if (token.type === 'mention') {
         return renderMention(token.text);
       } else if (token.type === 'emoji') {
-        return renderEmoji(token.emoji);
+        return renderEmoji(token);
       }
     });
 

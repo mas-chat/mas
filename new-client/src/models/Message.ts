@@ -2,6 +2,7 @@ import { computed, observable, makeObservable } from 'mobx';
 import dayjs from 'dayjs';
 import URI from 'urijs';
 import buildEmojiRegex from 'emoji-regex';
+import emojiUnicode from 'emoji-unicode';
 import WindowModel from './Window';
 import UserModel, { me } from './User';
 import emoticons from '../lib/emoticons';
@@ -21,7 +22,7 @@ type TextPart = { type: 'text'; text: string };
 type GenericUrlPart = { type: 'url'; url: URI; class: UrlPartSubType.Generic };
 type ImageUrlPart = { type: 'url'; url: URI; class: UrlPartSubType.Image };
 type VideoUrlPart = { type: 'url'; url: URI; class: UrlPartSubType.Video; videoId: string; startTime: number };
-type EmojiPart = { type: 'emoji'; shortCode?: string; emoji: string };
+export type EmojiPart = { type: 'emoji'; shortCode?: string; emoji: string; codePoint: string };
 type MentionPart = { type: 'mention'; text: string; userId: string };
 
 type BodyPart = TextPart | GenericUrlPart | ImageUrlPart | VideoUrlPart | EmojiPart | MentionPart;
@@ -267,7 +268,7 @@ export default class MessageModel {
             const isEmoticon = maybeEmoticon && emoji;
 
             if (isEmoticon) {
-              subParts.push({ type: 'emoji', shortCode: emojiOrText, emoji });
+              subParts.push({ type: 'emoji', shortCode: emojiOrText, emoji, codePoint: this.emojiCodePoint(emoji) });
             } else if (emojiOrText !== '') {
               subParts.push({ type: 'text', text: emojiOrText });
             }
@@ -291,7 +292,8 @@ export default class MessageModel {
               subParts.push({
                 type: 'emoji',
                 emoji: emojiOrText,
-                ...(shortCode ? { shortCode: `:${shortCode}:` } : {})
+                ...(shortCode ? { shortCode: `:${shortCode}:` } : {}),
+                codePoint: this.emojiCodePoint(emojiOrText)
               });
             } else if (emojiOrText !== '') {
               subParts.push({ type: 'text', text: emojiOrText });
@@ -303,6 +305,10 @@ export default class MessageModel {
 
         return part;
       });
+  }
+
+  private emojiCodePoint(emoji: string) {
+    return emojiUnicode(emoji).split(' ').join('-');
   }
 
   private decodeYouTubeTimeParameter(url: URI): number {
