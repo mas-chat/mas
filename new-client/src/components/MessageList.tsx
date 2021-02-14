@@ -36,7 +36,7 @@ const MessageList: FunctionComponent<MessageListProps> = ({ window }: MessageLis
   }, [width, height, dimensions.width, dimensions.height]);
 
   return (
-    <Box flex="1" ref={placeholder}>
+    <Box margin="0.3rem" flex="1" ref={placeholder}>
       <Box
         position="absolute"
         width={dimensions.width}
