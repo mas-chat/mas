@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useRef, useState } from 'react';
+import React, { Fragment, FunctionComponent, useRef, useState } from 'react';
 import { Flex, Box } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import useResizeObserver from 'use-resize-observer';
@@ -49,10 +49,10 @@ const MessageList: FunctionComponent<MessageListProps> = ({ window }: MessageLis
         >
           <Box ref={measurerContainer}>
             {window.sortedMessages.map((message, index, messages) => (
-              <>
+              <Fragment key={message.gid}>
                 {(index === 0 || !isFromSameDay(message, messages[index - 1])) && <WindowDayDivider ts={message.ts} />}
-                <MessageRow key={message.gid} message={message} />
-              </>
+                <MessageRow message={message} />
+              </Fragment>
             ))}
             {currentDate.isSame(lastMessage.ts, 'd') ? null : <WindowDayDivider ts={currentDate} />}
           </Box>
