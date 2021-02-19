@@ -11,12 +11,15 @@ interface WindowMemberListProps {
 const WindowMemberList: FunctionComponent<WindowMemberListProps> = ({ window, height }: WindowMemberListProps) => {
   const members = Array.from(window.participants.values());
 
-  const row = ({ style, index }: ListChildComponentProps) => (
-    <ListItem isTruncated style={style}>
-      <Avatar mr="0.5rem" size="xs" />
-      {members[index].nick['mas']}
-    </ListItem>
-  );
+  const row = ({ style, index }: ListChildComponentProps) => {
+    const user = members[index];
+    return (
+      <ListItem isTruncated style={style}>
+        <Avatar mr="0.5rem" size="xs" src={user.gravatarUrl}></Avatar>
+        {user.nick[window.network]}
+      </ListItem>
+    );
+  };
 
   const itemKey = (index: number) => members[index].id;
 

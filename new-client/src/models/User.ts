@@ -1,4 +1,4 @@
-import { observable, makeObservable } from 'mobx';
+import { computed, observable, makeObservable } from 'mobx';
 import { getUserId } from '../lib/cookie';
 import { UserRecord } from '../types/notifications';
 
@@ -28,8 +28,13 @@ export default class UserModel {
     makeObservable(this, {
       nick: observable,
       name: observable,
-      gravatar: observable
+      gravatar: observable,
+      gravatarUrl: computed
     });
+  }
+
+  get gravatarUrl(): string {
+    return `//gravatar.com/avatar/${this.gravatar}?d=mm`;
   }
 
   updateFromRecord(record: UserRecord): void {

@@ -42,7 +42,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDe
       }}
       bgColor={window === windowStore.activeWindow ? 'blue.100' : 'transparent'}
     >
-      {window.type === '1on1' && <Avatar width="25px" height="25px" src={window.peerUser?.gravatar}></Avatar>}{' '}
+      {window.type === '1on1' && <Avatar width="25px" height="25px" src={window.peerUser?.gravatarUrl}></Avatar>}{' '}
       {window.type === 'group' && (
         <Box display="inline-block" textAlign="center" width="25px" height="25px" bg="gray.300">
           #
