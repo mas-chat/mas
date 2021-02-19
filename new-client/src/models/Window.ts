@@ -20,6 +20,7 @@ export type WindowModelProps = {
   password?: string;
   alerts: AlertsRecord;
   role: Role;
+  isMemberListVisible: boolean;
 };
 
 export default class WindowModel {
@@ -41,7 +42,7 @@ export default class WindowModel {
   logMessages = new Map<number, MessageModel>();
   newMessagesCount = 0;
   notDelivered = false;
-  minimizedNamesList = false;
+  isMemberListVisible = false;
 
   operators: Array<UserModel>;
   voices: Array<UserModel>;
@@ -63,7 +64,8 @@ export default class WindowModel {
     column,
     password,
     alerts,
-    role
+    role,
+    isMemberListVisible
   }: WindowModelProps) {
     this.id = id;
     this.peerUser = peerUser;
@@ -81,6 +83,7 @@ export default class WindowModel {
     this.password = password;
     this.alerts = alerts;
     this.role = role;
+    this.isMemberListVisible = isMemberListVisible;
 
     makeObservable(this, {
       desktopId: observable,
@@ -98,7 +101,8 @@ export default class WindowModel {
       operators: observable,
       voices: observable,
       users: observable,
-      minimizedNamesList: observable,
+      role: observable,
+      isMemberListVisible: observable,
       sortedMessages: computed,
       sortedLogMessages: computed,
       participants: computed,
@@ -116,11 +120,12 @@ export default class WindowModel {
     this.row = record.row ?? this.row;
     this.column = record.column ?? this.column;
     this.desktopId = record.desktop ?? this.desktopId;
-    this.minimizedNamesList = record.minimizedNamesList ?? this.minimizedNamesList;
     this.alerts.email = record.alerts?.email ?? this.alerts.email;
     this.alerts.notification = record.alerts?.notification ?? this.alerts.notification;
     this.alerts.sound = record.alerts?.sound ?? this.alerts.sound;
     this.alerts.title = record.alerts?.title ?? this.alerts.title;
+    this.isMemberListVisible =
+      typeof record.minimizedNamesList === 'boolean' ? !record.minimizedNamesList : this.isMemberListVisible;
   }
 
   get sortedMessages(): Array<MessageModel> {

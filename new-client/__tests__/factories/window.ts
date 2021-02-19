@@ -15,6 +15,7 @@ function build(overrides: Partial<WindowModelProps> = {}): WindowModel {
     row: 1,
     column: 1,
     alerts: { email: true, notification: true, sound: true, title: true },
+    isMemberListVisible: true,
     ...overrides
   });
 }

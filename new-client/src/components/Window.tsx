@@ -1,7 +1,7 @@
 import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Button, Heading, Flex, Input } from '@chakra-ui/react';
-import { MessageList } from '.';
+import { WindowMessageList, WindowMenu } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
 
@@ -48,17 +48,21 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
           {window.simplifiedName}
         </Heading>
       </Flex>
-      <MessageList window={window} />
-      <Input
-        ref={input}
-        variant="flushed"
-        onKeyDown={onKeyDown}
-        onChange={e => setMessage(e.target.value)}
-        placeholder="Write here…"
-        value={message}
-        size="sm"
-        padding="6px"
-      />
+      <WindowMessageList window={window} />
+      <Flex>
+        <Input
+          flex="1"
+          ref={input}
+          variant="flushed"
+          onKeyDown={onKeyDown}
+          onChange={e => setMessage(e.target.value)}
+          placeholder="Write here…"
+          value={message}
+          size="sm"
+          padding="6px"
+        />
+        <WindowMenu window={window} />
+      </Flex>
     </Flex>
   );
 };

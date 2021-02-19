@@ -57,7 +57,8 @@ class WindowStore {
       addWindow: action,
       addMessage: action,
       sendText: action,
-      finishStartup: action
+      finishStartup: action,
+      handleToggleShowMemberList: action
     });
   }
 
@@ -409,7 +410,8 @@ class WindowStore {
           column: windowRecord.column,
           password: windowRecord.password,
           alerts: windowRecord.alerts,
-          role: windowRecord.role
+          role: windowRecord.role,
+          isMemberListVisible: !windowRecord.minimizedNamesList
         })
       );
     }
@@ -483,13 +485,13 @@ class WindowStore {
     });
   }
 
-  async handleToggleMemberListWidth(window: Window): Promise<void> {
-    window.minimizedNamesList = !window.minimizedNamesList;
+  async handleToggleShowMemberList(window: Window): Promise<void> {
+    window.isMemberListVisible = !window.isMemberListVisible;
 
     await this.socket.send<UpdateRequest>({
       id: 'UPDATE',
       windowId: window.id,
-      minimizedNamesList: window.minimizedNamesList
+      minimizedNamesList: !window.isMemberListVisible
     });
   }
 
