@@ -129,11 +129,13 @@ export default class WindowModel {
   }
 
   get sortedMessages(): Array<MessageModel> {
-    return Array.from(this.messages.values()).sort((a, b) => (a.ts === b.ts ? a.gid - b.gid : a.ts - b.ts));
+    return Array.from(this.messages.values()).sort((a, b) =>
+      a.ts === b.ts ? a.gid - b.gid : a.ts.isAfter(b.ts) ? 1 : -1
+    );
   }
 
   get sortedLogMessages(): Array<MessageModel> {
-    return Array.from(this.logMessages.values()).sort((a, b) => a.ts - b.ts);
+    return Array.from(this.logMessages.values()).sort((a, b) => (a.ts.isAfter(b.ts) ? 1 : -1));
   }
 
   get participants(): Map<string, UserModel> {
