@@ -4,7 +4,14 @@ import { observer } from 'mobx-react-lite';
 import URI from 'urijs';
 import { ImageModal, YouTubePreview } from '.';
 import { ModalContext } from './ModalContext';
-import MessageModel, { EmojiPart, UrlPartType, UrlPartSubType } from '../models/Message';
+import MessageModel, {
+  EmojiPart,
+  MentionPart,
+  TextPart,
+  UrlPartType,
+  UrlPartSubType,
+  UrlPart
+} from '../models/Message';
 
 const TWEMOJI_CDN_BASE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/13.0.1';
 
@@ -16,6 +23,8 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
   const modal = useContext(ModalContext);
   const showModal = (url: URI) => modal.onShow(<ImageModal src={url.toString()} />);
 
+  const renderText = (text: TextPart) => text;
+
   const renderImageLink = (uri: URI) => (
     <Link key={Math.random()} onClick={() => showModal(uri)} color="tomato">
       {uri.filename()}
@@ -26,12 +35,12 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
       {uri.readable()}
     </Link>
   );
-  const renderLink = (uri: URI, subType: UrlPartSubType) =>
-    subType === UrlPartSubType.Image ? renderImageLink(uri) : renderGenericLink(uri);
+  const renderLink = (url: UrlPart) =>
+    url.class === UrlPartSubType.Image ? renderImageLink(url.url) : renderGenericLink(url.url);
 
-  const renderMention = (text: string) => (
+  const renderMention = (mention: MentionPart | string) => (
     <Badge key={Math.random()} variant="subtle" colorScheme="green">
-      {text}
+      {typeof mention === 'string' ? mention : mention.text}
     </Badge>
   );
 
@@ -67,14 +76,15 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
 
   const renderMessageParts = () =>
     message.bodyTokens.map(token => {
-      if (token.type === UrlPartType.Url) {
-        return renderLink(token.url, token.class);
-      } else if (token.type === UrlPartType.Text) {
-        return token.text;
-      } else if (token.type === UrlPartType.Mention) {
-        return renderMention(token.text);
-      } else if (token.type === UrlPartType.Emoji) {
-        return renderEmoji(token);
+      switch (token.type) {
+        case UrlPartType.Url:
+          return renderLink(token);
+        case UrlPartType.Text:
+          return renderText(token);
+        case UrlPartType.Mention:
+          return renderMention(token);
+        case UrlPartType.Emoji:
+          return renderEmoji(token);
       }
     });
 

@@ -25,18 +25,19 @@ export enum UrlPartSubType {
   Video
 }
 
-type TextPart = { type: UrlPartType.Text; text: string };
-type GenericUrlPart = { type: UrlPartType.Url; url: URI; class: UrlPartSubType.Generic };
-type ImageUrlPart = { type: UrlPartType.Url; url: URI; class: UrlPartSubType.Image };
-type VideoUrlPart = {
+export type TextPart = { type: UrlPartType.Text; text: string };
+export type GenericUrlPart = { type: UrlPartType.Url; url: URI; class: UrlPartSubType.Generic };
+export type ImageUrlPart = { type: UrlPartType.Url; url: URI; class: UrlPartSubType.Image };
+export type VideoUrlPart = {
   type: UrlPartType.Url;
   url: URI;
   class: UrlPartSubType.Video;
   videoId: string;
   startTime: number;
 };
+export type UrlPart = GenericUrlPart | ImageUrlPart | VideoUrlPart;
 export type EmojiPart = { type: UrlPartType.Emoji; shortCode?: string; emoji: string; codePoint: string };
-type MentionPart = { type: UrlPartType.Mention; text: string; userId: string };
+export type MentionPart = { type: UrlPartType.Mention; text: string; userId: string };
 
 type BodyPart = TextPart | GenericUrlPart | ImageUrlPart | VideoUrlPart | EmojiPart | MentionPart;
 
