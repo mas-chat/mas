@@ -2,6 +2,7 @@ import URI from 'urijs';
 import UserModelFactory from '../factories/user';
 import WindowModelFactory from '../factories/window';
 import MessageModelFactory from '../factories/message';
+import { UrlPartSubType } from '../../src/models/Message';
 
 jest.mock('../../src/lib/cookie.ts', () => ({ getUserId: () => 'm42' }));
 
@@ -18,7 +19,7 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'url', class: 'generic', url: expect.any(URI) },
+        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) },
         { type: 'text', text: ' two' }
       ]);
     });
@@ -32,7 +33,7 @@ describe('Message model', () => {
 
       expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'one ' },
-        { type: 'url', class: 'generic', url: expect.any(URI) },
+        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) },
         { type: 'text', text: ' two' }
       ]);
     });
@@ -46,7 +47,7 @@ describe('Message model', () => {
 
       expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'one ' },
-        { type: 'url', class: 'generic', url: expect.any(URI) }
+        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) }
       ]);
     });
 
@@ -58,11 +59,11 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'url', class: 'generic', url: expect.any(URI) },
+        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) },
         { type: 'text', text: ' one ' },
-        { type: 'url', class: 'generic', url: expect.any(URI) },
+        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) },
         { type: 'text', text: ' two ' },
-        { type: 'url', class: 'generic', url: expect.any(URI) }
+        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) }
       ]);
     });
   });
@@ -201,7 +202,7 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'emoji', emoji: '😃', shortCode: ':smiley:' },
+        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
         { type: 'text', text: ' hello there' }
       ]);
     });
@@ -215,7 +216,7 @@ describe('Message model', () => {
 
       expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
-        { type: 'emoji', emoji: '😃', shortCode: ':smiley:' },
+        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
         { type: 'text', text: ' there' }
       ]);
     });
@@ -229,7 +230,7 @@ describe('Message model', () => {
 
       expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello there ' },
-        { type: 'emoji', emoji: '😃', shortCode: ':smiley:' }
+        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' }
       ]);
     });
 
@@ -241,9 +242,9 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'emoji', emoji: '😃', shortCode: ':smiley:' },
-        { type: 'emoji', emoji: '😃', shortCode: ':smiley:' },
-        { type: 'emoji', emoji: '😃', shortCode: ':smiley:' }
+        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
+        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
+        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' }
       ]);
     });
 
@@ -270,7 +271,7 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'emoji', emoji: '👩🏿', shortCode: ':woman_tone5:' },
+        { type: 'emoji', codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' },
         { type: 'text', text: ' hello there' }
       ]);
     });
@@ -284,7 +285,7 @@ describe('Message model', () => {
 
       expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
-        { type: 'emoji', emoji: '👩🏿', shortCode: ':woman_tone5:' },
+        { type: 'emoji', codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' },
         { type: 'text', text: ' there' }
       ]);
     });
@@ -298,7 +299,7 @@ describe('Message model', () => {
 
       expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello there ' },
-        { type: 'emoji', emoji: '👩🏿', shortCode: ':woman_tone5:' }
+        { type: 'emoji', codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' }
       ]);
     });
   });
@@ -313,7 +314,7 @@ describe('Message model', () => {
 
       expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
-        { type: 'url', class: 'image', url: expect.any(URI) },
+        { type: 'url', class: UrlPartSubType.Image, url: expect.any(URI) },
         { type: 'text', text: ' there' }
       ]);
     });
@@ -329,7 +330,7 @@ describe('Message model', () => {
 
       expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
-        { type: 'url', class: 'video', url: expect.any(URI), startTime: 77, videoId: 'SHNOyMsKCBE' },
+        { type: 'url', class: UrlPartSubType.Video, url: expect.any(URI), startTime: 77, videoId: 'SHNOyMsKCBE' },
         { type: 'text', text: ' there' }
       ]);
     });
@@ -343,7 +344,7 @@ describe('Message model', () => {
 
       expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
-        { type: 'url', class: 'video', url: expect.any(URI), startTime: 0, videoId: 'dDCfXJ50P3k' },
+        { type: 'url', class: UrlPartSubType.Video, url: expect.any(URI), startTime: 0, videoId: 'dDCfXJ50P3k' },
         { type: 'text', text: ' there' }
       ]);
     });
@@ -357,7 +358,7 @@ describe('Message model', () => {
 
       expect(message.bodyTokens).toEqual([
         { type: 'text', text: 'hello ' },
-        { type: 'url', class: 'video', url: expect.any(URI), startTime: 77, videoId: 'dDCfXJ50P3k' },
+        { type: 'url', class: UrlPartSubType.Video, url: expect.any(URI), startTime: 77, videoId: 'dDCfXJ50P3k' },
         { type: 'text', text: ' there' }
       ]);
     });
@@ -373,7 +374,7 @@ describe('Message model', () => {
         { type: 'text', text: 'hello ' },
         {
           type: 'url',
-          class: 'video',
+          class: UrlPartSubType.Video,
           url: expect.any(URI),
           startTime: 2 * 3600 + 12 * 60 + 6,
           videoId: 'dDCfXJ50P3k'
@@ -396,9 +397,9 @@ describe('Message model', () => {
         { text: ' ', type: 'text' },
         { text: '@user', type: 'mention', userId: 'm1' },
         { text: ' ', type: 'text' },
-        { type: 'emoji', emoji: '👩🏿', shortCode: ':woman_tone5:' },
+        { type: 'emoji', codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' },
         { type: 'text', text: ' hello ' },
-        { type: 'emoji', emoji: '💯', shortCode: ':100:' }
+        { type: 'emoji', codePoint: '1f4af', emoji: '💯', shortCode: ':100:' }
       ]);
     });
   });
