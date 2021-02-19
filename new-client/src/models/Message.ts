@@ -12,18 +12,31 @@ const EMOTICON_REGEX = /(:[^\s:]+:)/;
 const EMOJI_REGEX = new RegExp(`(${buildEmojiRegex().source})`);
 const IMAGE_SUFFIXES = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
 
+export enum UrlPartType {
+  Text,
+  Url,
+  Emoji,
+  Mention
+}
+
 export enum UrlPartSubType {
   Generic,
   Image,
   Video
 }
 
-type TextPart = { type: 'text'; text: string };
-type GenericUrlPart = { type: 'url'; url: URI; class: UrlPartSubType.Generic };
-type ImageUrlPart = { type: 'url'; url: URI; class: UrlPartSubType.Image };
-type VideoUrlPart = { type: 'url'; url: URI; class: UrlPartSubType.Video; videoId: string; startTime: number };
-export type EmojiPart = { type: 'emoji'; shortCode?: string; emoji: string; codePoint: string };
-type MentionPart = { type: 'mention'; text: string; userId: string };
+type TextPart = { type: UrlPartType.Text; text: string };
+type GenericUrlPart = { type: UrlPartType.Url; url: URI; class: UrlPartSubType.Generic };
+type ImageUrlPart = { type: UrlPartType.Url; url: URI; class: UrlPartSubType.Image };
+type VideoUrlPart = {
+  type: UrlPartType.Url;
+  url: URI;
+  class: UrlPartSubType.Video;
+  videoId: string;
+  startTime: number;
+};
+export type EmojiPart = { type: UrlPartType.Emoji; shortCode?: string; emoji: string; codePoint: string };
+type MentionPart = { type: UrlPartType.Mention; text: string; userId: string };
 
 type BodyPart = TextPart | GenericUrlPart | ImageUrlPart | VideoUrlPart | EmojiPart | MentionPart;
 
@@ -132,7 +145,7 @@ export default class MessageModel {
   }
 
   get mentionsMe(): boolean {
-    return this.bodyTokens.some(part => part.type === 'mention' && part.userId === me.id);
+    return this.bodyTokens.some(part => part.type === UrlPartType.Mention && part.userId === me.id);
   }
 
   get isMessageFromUser(): boolean {
@@ -177,7 +190,7 @@ export default class MessageModel {
   }
 
   get bodyTokens(): Array<BodyPart> {
-    let parts: Array<BodyPart> = [{ type: 'text', text: this.body }];
+    let parts: Array<BodyPart> = [{ type: UrlPartType.Text, text: this.body }];
 
     if (this.body !== '') {
       parts = this.extractLinks(parts);
@@ -194,27 +207,27 @@ export default class MessageModel {
 
   get images(): ImageUrlPart[] {
     return this.bodyTokens.filter(
-      (part: BodyPart): part is ImageUrlPart => part.type === 'url' && part.class === UrlPartSubType.Image
+      (part: BodyPart): part is ImageUrlPart => part.type === UrlPartType.Url && part.class === UrlPartSubType.Image
     );
   }
 
   get hasImages(): boolean {
-    return this.bodyTokens.some(part => part.type === 'url' && part.class === UrlPartSubType.Image);
+    return this.bodyTokens.some(part => part.type === UrlPartType.Url && part.class === UrlPartSubType.Image);
   }
 
   get videos(): VideoUrlPart[] {
     return this.bodyTokens.filter(
-      (part: BodyPart): part is VideoUrlPart => part.type === 'url' && part.class === UrlPartSubType.Video
+      (part: BodyPart): part is VideoUrlPart => part.type === UrlPartType.Url && part.class === UrlPartSubType.Video
     );
   }
 
   get hasVideos(): boolean {
-    return this.bodyTokens.some(part => part.type === 'url' && part.class === UrlPartSubType.Video);
+    return this.bodyTokens.some(part => part.type === UrlPartType.Url && part.class === UrlPartSubType.Video);
   }
 
   private extractLinks(parts: Array<BodyPart>): Array<BodyPart> {
     return parts.flatMap(part => {
-      if (part.type === 'text') {
+      if (part.type === UrlPartType.Text) {
         let urlLocations: Array<number> = [];
 
         URI.withinString(part.text, (url, start, end) => {
@@ -230,12 +243,12 @@ export default class MessageModel {
         const subParts: Array<BodyPart> = [];
 
         for (let i = 0; i < urlLocations.length - 1; i++) {
-          const type = i % 2 === 0 ? 'text' : 'url';
+          const type = i % 2 === 0 ? UrlPartType.Text : UrlPartType.Url;
           const sub = part.text.substring(urlLocations[i], urlLocations[i + 1]);
 
-          if (type === 'text' && sub !== '') {
+          if (type === UrlPartType.Text && sub !== '') {
             subParts.push({ type, text: sub });
-          } else if (type === 'url') {
+          } else if (type === UrlPartType.Url) {
             subParts.push({ type, url: new URI(sub), class: UrlPartSubType.Generic });
           }
         }
@@ -250,7 +263,7 @@ export default class MessageModel {
   private extractEmojis(parts: Array<BodyPart>): Array<BodyPart> {
     return parts
       .flatMap(part => {
-        if (part.type === 'text') {
+        if (part.type === UrlPartType.Text) {
           const subParts: Array<BodyPart> = [];
 
           part.text.split(EMOTICON_REGEX).forEach((emojiOrText, index) => {
@@ -259,9 +272,14 @@ export default class MessageModel {
             const isEmoticon = maybeEmoticon && emoji;
 
             if (isEmoticon) {
-              subParts.push({ type: 'emoji', shortCode: emojiOrText, emoji, codePoint: this.emojiCodePoint(emoji) });
+              subParts.push({
+                type: UrlPartType.Emoji,
+                shortCode: emojiOrText,
+                emoji,
+                codePoint: this.emojiCodePoint(emoji)
+              });
             } else if (emojiOrText !== '') {
-              subParts.push({ type: 'text', text: emojiOrText });
+              subParts.push({ type: UrlPartType.Text, text: emojiOrText });
             }
           });
 
@@ -271,7 +289,7 @@ export default class MessageModel {
         return part;
       })
       .flatMap(part => {
-        if (part.type === 'text') {
+        if (part.type === UrlPartType.Text) {
           const subParts: Array<BodyPart> = [];
 
           part.text.split(EMOJI_REGEX).forEach((emojiOrText, index, parts) => {
@@ -281,13 +299,13 @@ export default class MessageModel {
               const shortCode = Object.keys(emoticons).find(key => emoticons[key] === emojiOrText);
 
               subParts.push({
-                type: 'emoji',
+                type: UrlPartType.Emoji,
                 emoji: emojiOrText,
                 ...(shortCode ? { shortCode: `:${shortCode}:` } : {}),
                 codePoint: this.emojiCodePoint(emojiOrText)
               });
             } else if (emojiOrText !== '') {
-              subParts.push({ type: 'text', text: emojiOrText });
+              subParts.push({ type: UrlPartType.Text, text: emojiOrText });
             }
           });
 
@@ -334,18 +352,18 @@ export default class MessageModel {
 
   private extractImageAndVideoUrls(parts: Array<BodyPart>): Array<BodyPart> {
     return parts.map(part => {
-      if (part.type === 'url') {
+      if (part.type === UrlPartType.Url) {
         const url = part.url;
         const domain = url.domain();
 
         if (IMAGE_SUFFIXES.includes(url.suffix().toLowerCase())) {
-          return { type: 'url', class: UrlPartSubType.Image, url: url };
+          return { type: UrlPartType.Url, class: UrlPartSubType.Image, url: url };
         } else if ((domain === 'youtube.com' && url.search(true).v) || domain === 'youtu.be') {
           const videoId = this.decodeYouTubeVideoId(url);
           const startTime = this.decodeYouTubeTimeParameter(url);
 
           if (videoId) {
-            return { type: 'url', class: UrlPartSubType.Video, url, startTime, videoId };
+            return { type: UrlPartType.Url, class: UrlPartSubType.Video, url, startTime, videoId };
           } else {
             return part;
           }
@@ -360,7 +378,7 @@ export default class MessageModel {
 
   private extractMentions(parts: Array<BodyPart>): Array<BodyPart> {
     return parts.flatMap(part => {
-      if (part.type === 'text') {
+      if (part.type === UrlPartType.Text) {
         const subParts: Array<BodyPart> = [];
         const { text } = part;
         let subText = '';
@@ -370,7 +388,7 @@ export default class MessageModel {
         if (ircMention) {
           const user = this.window.participants.get(ircMention.substring(0, ircMention.length - 1));
           if (user) {
-            subParts.push({ type: 'mention', text: ircMention, userId: user.id });
+            subParts.push({ type: UrlPartType.Mention, text: ircMention, userId: user.id });
             i += ircMention.length;
           }
         }
@@ -383,8 +401,8 @@ export default class MessageModel {
             const user = mention && this.window.participants.get(mention.substring(1));
 
             if (mention && user) {
-              subText.length > 0 && subParts.push({ type: 'text', text: subText });
-              subParts.push({ type: 'mention', text: mention, userId: user.id });
+              subText.length > 0 && subParts.push({ type: UrlPartType.Text, text: subText });
+              subParts.push({ type: UrlPartType.Mention, text: mention, userId: user.id });
               i += mention.length;
               subText = '';
               continue;
@@ -395,7 +413,7 @@ export default class MessageModel {
           subText = subText + char;
         }
 
-        subText.length > 0 && subParts.push({ type: 'text', text: subText });
+        subText.length > 0 && subParts.push({ type: UrlPartType.Text, text: subText });
         return subParts;
       }
 

@@ -10,6 +10,7 @@
   "scripts": {
     "prod": "webpack --config webpack.prod.js",
     "dev": "webpack serve --config webpack.dev.js",
+    "build": "tsc",
     "lint": "eslint 'src/**/*.{js,ts,tsx}'",
     "test": "jest"
   },

@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import URI from 'urijs';
 import { ImageModal, YouTubePreview } from '.';
 import { ModalContext } from './ModalContext';
-import MessageModel, { EmojiPart, UrlPartSubType } from '../models/Message';
+import MessageModel, { EmojiPart, UrlPartType, UrlPartSubType } from '../models/Message';
 
 const TWEMOJI_CDN_BASE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/13.0.1';
 
@@ -67,13 +67,13 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
 
   const renderMessageParts = () =>
     message.bodyTokens.map(token => {
-      if (token.type === 'url') {
+      if (token.type === UrlPartType.Url) {
         return renderLink(token.url, token.class);
-      } else if (token.type === 'text') {
+      } else if (token.type === UrlPartType.Text) {
         return token.text;
-      } else if (token.type === 'mention') {
+      } else if (token.type === UrlPartType.Mention) {
         return renderMention(token.text);
-      } else if (token.type === 'emoji') {
+      } else if (token.type === UrlPartType.Emoji) {
         return renderEmoji(token);
       }
     });
