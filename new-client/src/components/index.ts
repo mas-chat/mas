@@ -11,3 +11,4 @@ export { default as ImageModal } from './ImageModal';
 export { default as YouTubePreview } from './YouTubePreview';
 export { default as WindowMessageList } from './WindowMessageList';
 export { default as WindowMenu } from './WindowMenu';
+export { default as WindowDayDivider } from './WindowDayDivider';

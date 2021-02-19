@@ -322,7 +322,9 @@ class WindowStore {
     const response = await this.socket.send<FetchRequest>({
       id: 'FETCH',
       windowId: window.id,
-      end: Array.from(window.messages.values()).sort((a, b) => a.gid - b.gid)[0].ts,
+      end: Array.from(window.messages.values())
+        .sort((a, b) => a.gid - b.gid)[0]
+        .ts.unix(),
       limit: 50
     });
 

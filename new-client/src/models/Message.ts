@@ -1,5 +1,5 @@
 import { computed, observable, makeObservable } from 'mobx';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import URI from 'urijs';
 import buildEmojiRegex from 'emoji-regex';
 import emojiUnicode from 'emoji-unicode';
@@ -42,8 +42,8 @@ export default class MessageModel {
   public readonly gid: number;
   public body = '';
   private readonly category: MessageCategory;
-  public readonly ts: number;
-  public updatedTs?: number;
+  public readonly ts: Dayjs;
+  public updatedTs?: Dayjs;
   public readonly user: UserModel;
   public readonly window: WindowModel;
   public status: MessageStatus;
@@ -52,8 +52,8 @@ export default class MessageModel {
     this.gid = gid;
     this.body = body || '';
     this.category = category;
-    this.ts = ts;
-    this.updatedTs = updatedTs;
+    this.ts = dayjs.unix(ts);
+    this.updatedTs = typeof updatedTs === 'number' ? dayjs.unix(updatedTs) : undefined;
     this.user = user;
     this.window = window;
     this.status = status;
@@ -88,7 +88,7 @@ export default class MessageModel {
   updateFromRecord(message: MessageRecord): void {
     this.body = message.body;
     this.status = message.status;
-    this.updatedTs = message.updatedTs ?? this.updatedTs;
+    this.updatedTs = typeof message.updatedTs === 'number' ? dayjs.unix(message.updatedTs) : this.updatedTs;
   }
 
   get edited(): boolean {
@@ -100,32 +100,23 @@ export default class MessageModel {
   }
 
   get createdTime(): string {
-    return dayjs.unix(this.ts).format('HH:mm');
+    return this.ts.format('HH:mm');
   }
 
   get updatedTime(): string {
-    const updatedTs = this.updatedTs;
-
-    if (!updatedTs) {
-      return '';
-    }
-
-    const originalTime = dayjs.unix(this.ts);
-    const updatedTime = dayjs.unix(updatedTs);
-
-    return updatedTime.format(originalTime.isSame(updatedTime, 'd') ? 'HH:mm' : 'MMM Do HH:mm');
+    return this.updatedTs ? this.updatedTs.format(this.ts.isSame(this.updatedTs, 'd') ? 'HH:mm' : 'MMM Do HH:mm') : '';
   }
 
   get updatedDate(): string {
     const updatedTs = this.updatedTs;
 
-    return updatedTs ? dayjs.unix(updatedTs).format('MMM Do HH:mm') : '';
+    return updatedTs ? updatedTs.format('MMM Do HH:mm') : '';
   }
 
   get updatedDateLong(): string {
     const updatedTs = this.updatedTs;
 
-    return updatedTs ? dayjs.unix(updatedTs).format('dddd, MMMM D HH:mm') : '';
+    return updatedTs ? updatedTs.format('dddd, MMMM D HH:mm') : '';
   }
 
   get nick(): string | undefined {

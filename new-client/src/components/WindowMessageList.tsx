@@ -2,9 +2,11 @@ import React, { FunctionComponent, useRef, useState } from 'react';
 import { Flex, Box } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import useResizeObserver from 'use-resize-observer';
-import { MessageRow, WindowMemberList } from '.';
+import { MessageRow, WindowMemberList, WindowDayDivider } from '.';
 import WindowModel from '../models/Window';
 import { WindowType } from '../types/notifications';
+import MessageModel from '../models/Message';
+import { useCurrentDate } from '../hooks/currentDate';
 
 const SCROLL_BOTTOM = Number.MAX_SAFE_INTEGER;
 
@@ -17,6 +19,8 @@ const MessageList: FunctionComponent<MessageListProps> = ({ window }: MessageLis
   const placeholder = useRef<HTMLDivElement>(null);
   const scrollContainer = useRef<HTMLDivElement>(null);
   const measurerContainer = useRef<HTMLDivElement>(null);
+  const currentDate = useCurrentDate();
+  const lastMessage = window.sortedMessages[window.sortedMessages.length - 1];
 
   const scrollToBottom = () => {
     const el = scrollContainer.current;
@@ -30,6 +34,8 @@ const MessageList: FunctionComponent<MessageListProps> = ({ window }: MessageLis
   useResizeObserver<HTMLDivElement>({ ref: measurerContainer, onResize: scrollToBottom });
   useResizeObserver<HTMLDivElement>({ ref: placeholder, onResize: handleContainerResize });
 
+  const isFromSameDay = (current: MessageModel, previous: MessageModel) => current.ts.isSame(previous.ts, 'd');
+
   return (
     <Flex margin="0.3rem" flex="1">
       <Box flex="1" ref={placeholder}>
@@ -42,9 +48,13 @@ const MessageList: FunctionComponent<MessageListProps> = ({ window }: MessageLis
           ref={scrollContainer}
         >
           <Box ref={measurerContainer}>
-            {window.sortedMessages.map(message => (
-              <MessageRow key={message.gid} message={message} />
+            {window.sortedMessages.map((message, index, messages) => (
+              <>
+                {(index === 0 || !isFromSameDay(message, messages[index - 1])) && <WindowDayDivider ts={message.ts} />}
+                <MessageRow key={message.gid} message={message} />
+              </>
             ))}
+            {currentDate.isSame(lastMessage.ts, 'd') ? null : <WindowDayDivider ts={currentDate} />}
           </Box>
         </Box>
       </Box>
