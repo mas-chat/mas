@@ -11,7 +11,8 @@
     "outDir": "ts-dist",
     "sourceMap": true,
     "declaration": true,
-    "noEmit": true
+    "noEmit": true,
+    "typeRoots": ["src/types", "node_modules/@types"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "__tests__/**/*.ts"],
   "exclude": ["node_modules"]
