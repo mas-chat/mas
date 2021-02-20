@@ -23,7 +23,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
   const modal = useContext(ModalContext);
   const showModal = (url: URI) => modal.onShow(<ImageModal src={url.toString()} />);
 
-  const renderText = (text: TextPart) => text;
+  const renderText = (text: TextPart) => text.text;
 
   const renderImageLink = (uri: URI) => (
     <Link key={Math.random()} onClick={() => showModal(uri)} color="tomato">
