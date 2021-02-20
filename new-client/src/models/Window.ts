@@ -107,7 +107,6 @@ export default class WindowModel {
       sortedLogMessages: computed,
       participants: computed,
       decoratedTitle: computed,
-      decoratedTopic: computed,
       simplifiedName: computed,
       tooltipTopic: computed,
       explainedType: computed
@@ -166,10 +165,6 @@ export default class WindowModel {
     }
 
     return title;
-  }
-
-  get decoratedTopic(): string {
-    return this.topic ? `- ${this.topic}` : '';
   }
 
   get simplifiedName(): string {

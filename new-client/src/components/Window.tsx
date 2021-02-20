@@ -53,7 +53,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
           </Button>
         )}
         <Heading flex="1" isTruncated size="s">
-          {window.simplifiedName}
+          {`${window.decoratedTitle} ${window.topic && `- ${window.topic}`}`}
         </Heading>
       </Flex>
       <WindowMessageList window={window} />
