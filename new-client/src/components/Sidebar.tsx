@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useContext } from 'react';
-import { Box, Flex, Heading, Spacer, Link, Avatar } from '@chakra-ui/react';
+import { Box, Flex, Heading, Spacer, LinkBox, Avatar, LinkOverlay } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import { ServerContext } from './ServerContext';
 import type WindowModel from '../models/Window';
@@ -29,27 +29,25 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDe
   };
 
   const windowItem = (window: WindowModel) => (
-    <Link
-      as="div"
+    <LinkBox
       key={window.id}
       isTruncated
       onClick={() => onClick(window)}
       width="100%"
       px="1rem"
       py="0.3rem"
-      _hover={{
-        color: 'teal.500'
-      }}
+      _hover={{ color: 'teal.500' }}
       bgColor={window === windowStore.activeWindow ? 'blue.100' : 'transparent'}
     >
-      {window.type === '1on1' && <Avatar width="25px" height="25px" src={window.peerUser?.gravatarUrl}></Avatar>}{' '}
-      {window.type === 'group' && (
+      {window.type === '1on1' ? (
+        <Avatar width="25px" height="25px" src={window.peerUser?.gravatarUrl}></Avatar>
+      ) : (
         <Box display="inline-block" textAlign="center" width="25px" height="25px" bg="gray.300">
           #
         </Box>
       )}{' '}
-      {window.simplifiedName}
-    </Link>
+      <LinkOverlay href="#">{window.simplifiedName}</LinkOverlay>
+    </LinkBox>
   );
 
   const desktopItem = (header: string | null, windows: WindowModel[]) => (
