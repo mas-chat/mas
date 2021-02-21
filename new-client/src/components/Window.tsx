@@ -14,18 +14,17 @@ interface WindowProps {
 }
 
 const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: WindowProps) => {
-  const { windowStore, profileStore } = useContext(ServerContext);
+  const { windowStore } = useContext(ServerContext);
   const input = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
-  const isActive = windowStore.activeWindow === window;
 
   const focusIfActive = () => {
-    if (!mobile && windowStore.activeWindow === window) {
+    if (!mobile && window.isActive) {
       input.current?.focus();
     }
   };
 
-  useEffect(focusIfActive, [window, windowStore.activeWindow, mobile]);
+  useEffect(focusIfActive, [window.isActive, mobile]);
 
   const onKeyUp = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
@@ -35,7 +34,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
   };
 
   const onClick = () => {
-    profileStore.changeActiveWindowId(window.id);
+    windowStore.changeActiveWindow(window);
   };
 
   const onDrop = (acceptedFiles: File[]) => {
@@ -46,7 +45,13 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
 
   return (
     <Flex onClick={onClick} flex="1" height="100%" width="100%" flexDirection="column" p="4px">
-      <Flex px="0.6rem" py="0.20rem" bg={isActive ? 'blue.100' : 'gray.100'} flexDirection="row" alignItems="center">
+      <Flex
+        px="0.6rem"
+        py="0.20rem"
+        bg={window.isActive ? 'blue.100' : 'gray.100'}
+        flexDirection="row"
+        alignItems="center"
+      >
         {onExit && (
           <Button mr="1rem" onClick={onExit}>
             Back

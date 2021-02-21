@@ -1,4 +1,4 @@
-import { observable, computed, makeObservable, action, runInAction } from 'mobx';
+import { autorun, observable, computed, makeObservable, action, runInAction } from 'mobx';
 import dayjs from 'dayjs';
 import Message from '../models/Message';
 import Window from '../models/Window';
@@ -34,6 +34,7 @@ import {
 import RootStore from './RootStore';
 import Socket from '../lib/socket';
 import { logout } from '../lib/cookie';
+import { setUnreadMessageCountBadge } from '../lib/favicon';
 
 let nextLocalGid = -1;
 
@@ -55,13 +56,27 @@ class WindowStore {
       initDone: observable,
       desktops: computed,
       activeWindow: computed,
+      totalUnreadMessages: computed,
       addWindow: action,
       addMessage: action,
       addError: action,
       sendText: action,
       finishStartup: action,
-      handleToggleShowMemberList: action
+      handleToggleShowMemberList: action,
+      changeActiveWindow: action
     });
+
+    autorun(() => {
+      this.initDone && setUnreadMessageCountBadge(this.totalUnreadMessages);
+    });
+
+    document.addEventListener('visibilitychange', () => this.processVisibilityChange, false);
+  }
+
+  processVisibilityChange(): void {
+    if (document.visibilityState === 'visible') {
+      this.activeWindow?.updateLastSeenGid();
+    }
   }
 
   get desktops(): { id: number; initials: string; messages: number; windows: Window[] }[] {
@@ -86,7 +101,17 @@ class WindowStore {
   }
 
   get activeWindow(): WindowModel | null {
-    return this.windows.get(this.rootStore.profileStore.settings.activeWindowId) || null;
+    return Array.from(this.windows.values()).find(window => window.isActive) || null;
+  }
+
+  get totalUnreadMessages(): number {
+    let unreadMessages = 0;
+
+    this.windows.forEach(window => {
+      unreadMessages += window.unreadMessageCount;
+    });
+
+    return unreadMessages;
   }
 
   handlerServerNotification(ntf: Notification): boolean {
@@ -509,12 +534,14 @@ class WindowStore {
     this.initDone = true;
 
     const settings = this.rootStore.profileStore.settings;
-    const isValidActiveWindowId = Array.from(this.windows.values()).some(
-      window => window.id === settings.activeWindowId
-    );
 
-    if (!isValidActiveWindowId && this.windows.size > 0) {
-      settings.activeWindowId = this.windows.values().next().value.id;
+    if (this.windows.size > 0) {
+      const activeWindow =
+        Array.from(this.windows.values()).find(window => window.id === settings.activeWindowId) ||
+        this.windows.values().next().value;
+
+      this.changeActiveWindow(activeWindow);
+      this.windows.forEach(window => window.updateLastSeenGid()); // TODO: In the future, last seen gid comes from server
     }
   }
 
@@ -594,7 +621,12 @@ class WindowStore {
     logout('User destroyed the account');
   }
 
-  upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): boolean {
+  changeActiveWindow(activeWindow: WindowModel): void {
+    this.rootStore.profileStore.changeActiveWindowId(activeWindow.id);
+    this.windows.forEach(window => window.setActive(window === activeWindow));
+  }
+
+  private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): boolean {
     const existingMessage = window[type].get(message.gid);
 
     if (existingMessage) {

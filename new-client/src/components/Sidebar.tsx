@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useContext } from 'react';
-import { Box, Flex, Heading, Spacer, LinkBox, Avatar, LinkOverlay } from '@chakra-ui/react';
+import { Box, Flex, Heading, Spacer, LinkBox, Avatar, LinkOverlay, Tag, TagLabel } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import { ServerContext } from './ServerContext';
 import type WindowModel from '../models/Window';
@@ -11,10 +11,10 @@ interface SidebarProps {
 }
 
 const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDesktops }: SidebarProps) => {
-  const { profileStore, windowStore } = useContext(ServerContext);
+  const { windowStore } = useContext(ServerContext);
 
   const onClick = (window: WindowModel) => {
-    profileStore.changeActiveWindowId(window.id);
+    windowStore.changeActiveWindow(window);
     onSwitchWindow?.();
   };
 
@@ -37,7 +37,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDe
       px="1rem"
       py="0.3rem"
       _hover={{ color: 'teal.500' }}
-      bgColor={window === windowStore.activeWindow ? 'blue.100' : 'transparent'}
+      bgColor={window.isActive ? 'blue.100' : 'transparent'}
     >
       {window.type === '1on1' ? (
         <Avatar width="25px" height="25px" src={window.peerUser?.gravatarUrl}></Avatar>
@@ -47,6 +47,11 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDe
         </Box>
       )}{' '}
       <LinkOverlay href="#">{window.simplifiedName}</LinkOverlay>
+      {window.unreadMessageCount !== 0 && (
+        <Tag size="sm" borderRadius="full" variant="solid" colorScheme="green">
+          <TagLabel>{window.unreadMessageCount}</TagLabel>
+        </Tag>
+      )}
     </LinkBox>
   );
 

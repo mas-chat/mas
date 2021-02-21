@@ -1,4 +1,4 @@
-import { computed, observable, makeObservable } from 'mobx';
+import { computed, observable, makeObservable, action, reaction } from 'mobx';
 import MessageModel from './Message';
 import UserModel, { ircSystemUser } from './User';
 import { AlertsRecord, Network, Role, WindowType, UpdatableWindowRecord } from '../types/notifications';
@@ -43,6 +43,8 @@ export default class WindowModel {
   newMessagesCount = 0;
   notDelivered = false;
   isMemberListVisible = false;
+  isActive = false;
+  lastSeenMessageGid = 0;
 
   operators: Array<UserModel>;
   voices: Array<UserModel>;
@@ -103,14 +105,28 @@ export default class WindowModel {
       users: observable,
       role: observable,
       isMemberListVisible: observable,
+      isActive: observable,
+      lastSeenMessageGid: observable,
+      lastMessageGid: computed,
       sortedMessages: computed,
       sortedLogMessages: computed,
+      unreadMessageCount: computed,
       participants: computed,
       decoratedTitle: computed,
       simplifiedName: computed,
       tooltipTopic: computed,
-      explainedType: computed
+      explainedType: computed,
+      setActive: action,
+      updateLastSeenGid: action
     });
+
+    reaction(
+      // visibilityState is not tracked but it doesn't need to for the reaction to work
+      () => this.isActive && document.visibilityState === 'visible' && this.lastMessageGid,
+      (lastMessageGid: number | false) => {
+        lastMessageGid && this.updateLastSeenGid();
+      }
+    );
   }
 
   updateFromRecord(record: UpdatableWindowRecord): void {
@@ -127,6 +143,14 @@ export default class WindowModel {
       typeof record.minimizedNamesList === 'boolean' ? !record.minimizedNamesList : this.isMemberListVisible;
   }
 
+  setActive(isActive: boolean): void {
+    this.isActive = isActive;
+  }
+
+  updateLastSeenGid(): void {
+    this.lastSeenMessageGid = this.lastMessageGid;
+  }
+
   get sortedMessages(): Array<MessageModel> {
     return Array.from(this.messages.values()).sort((a, b) =>
       a.ts === b.ts ? a.gid - b.gid : a.ts.isAfter(b.ts) ? 1 : -1
@@ -135,6 +159,14 @@ export default class WindowModel {
 
   get sortedLogMessages(): Array<MessageModel> {
     return Array.from(this.logMessages.values()).sort((a, b) => (a.ts.isAfter(b.ts) ? 1 : -1));
+  }
+
+  get lastMessageGid(): number {
+    return this.sortedMessages[this.sortedMessages.length - 1].gid;
+  }
+
+  get unreadMessageCount(): number {
+    return Array.from(this.messages.values()).filter(message => message.gid > this.lastSeenMessageGid).length;
   }
 
   get participants(): Map<string, UserModel> {
