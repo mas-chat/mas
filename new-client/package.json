@@ -42,7 +42,6 @@
     "@babel/plugin-proposal-class-properties": "^7.12.13",
     "@babel/preset-react": "^7.12.13",
     "@babel/preset-typescript": "^7.12.17",
-    "@types/favico.js": "^0.0.28",
     "@types/jest": "^26.0.20",
     "@types/js-cookie": "^2.2.6",
     "@types/marked": "^1.2.2",
