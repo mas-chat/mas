@@ -536,9 +536,7 @@ class WindowStore {
     const settings = this.rootStore.profileStore.settings;
 
     if (this.windows.size > 0) {
-      const activeWindow =
-        Array.from(this.windows.values()).find(window => window.id === settings.activeWindowId) ||
-        this.windows.values().next().value;
+      const activeWindow = this.windows.get(settings.activeWindowId) || this.windows.values().next().value;
 
       this.changeActiveWindow(activeWindow);
       this.windows.forEach(window => window.updateLastSeenGid()); // TODO: In the future, last seen gid comes from server
@@ -622,8 +620,9 @@ class WindowStore {
   }
 
   changeActiveWindow(activeWindow: WindowModel): void {
+    this.activeWindow?.setActive(false);
+    activeWindow.setActive(true);
     this.rootStore.profileStore.changeActiveWindowId(activeWindow.id);
-    this.windows.forEach(window => window.setActive(window === activeWindow));
   }
 
   private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): boolean {
