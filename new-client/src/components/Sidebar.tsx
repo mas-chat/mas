@@ -14,7 +14,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDe
   const { windowStore } = useContext(ServerContext);
 
   const onClick = (window: WindowModel) => {
-    windowStore.changeActiveWindow(window);
+    windowStore.setActiveWindow(window);
     onSwitchWindow?.();
   };
 

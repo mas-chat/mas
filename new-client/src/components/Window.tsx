@@ -34,7 +34,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
   };
 
   const onClick = () => {
-    windowStore.changeActiveWindow(window);
+    windowStore.setActiveWindow(window);
   };
 
   const onDrop = (acceptedFiles: File[]) => {

@@ -63,7 +63,7 @@ class WindowStore {
       sendText: action,
       finishStartup: action,
       handleToggleShowMemberList: action,
-      changeActiveWindow: action
+      setActiveWindow: action
     });
 
     autorun(() => {
@@ -538,7 +538,7 @@ class WindowStore {
     if (this.windows.size > 0) {
       const activeWindow = this.windows.get(settings.activeWindowId) || this.windows.values().next().value;
 
-      this.changeActiveWindow(activeWindow);
+      this.setActiveWindow(activeWindow);
       this.windows.forEach(window => window.updateLastSeenGid()); // TODO: In the future, last seen gid comes from server
     }
   }
@@ -619,7 +619,7 @@ class WindowStore {
     logout('User destroyed the account');
   }
 
-  changeActiveWindow(activeWindow: WindowModel): void {
+  setActiveWindow(activeWindow: WindowModel): void {
     this.activeWindow?.setActive(false);
     activeWindow.setActive(true);
     this.rootStore.profileStore.changeActiveWindowId(activeWindow.id);
