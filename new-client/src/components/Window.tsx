@@ -1,6 +1,8 @@
-import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef, useState } from 'react';
+import React, { FunctionComponent, KeyboardEvent, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Button, Heading, Flex, Input } from '@chakra-ui/react';
+import { useDropzone } from 'react-dropzone';
+import { Box, Button, IconButton, Heading, Flex, Input } from '@chakra-ui/react';
+import { PlusSquareIcon } from '@chakra-ui/icons';
 import { WindowMessageList, WindowMenu } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
@@ -36,6 +38,12 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
     profileStore.changeActiveWindowId(window.id);
   };
 
+  const onDrop = (acceptedFiles: File[]) => {
+    windowStore.uploadFiles(window, acceptedFiles);
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+
   return (
     <Flex onClick={onClick} flex="1" height="100%" width="100%" flexDirection="column" p="4px">
       <Flex px="0.6rem" py="0.20rem" bg={isActive ? 'blue.100' : 'gray.100'} flexDirection="row" alignItems="center">
@@ -61,6 +69,10 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
           size="sm"
           padding="6px"
         />
+        <Box>
+          <input {...getInputProps()} />
+          <IconButton {...getRootProps()} aria-label="Options" isActive={isDragActive} icon={<PlusSquareIcon />} />
+        </Box>
         <WindowMenu window={window} />
       </Flex>
     </Flex>

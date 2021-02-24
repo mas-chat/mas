@@ -1,4 +1,4 @@
-import { observable, computed, makeObservable, action } from 'mobx';
+import { observable, computed, makeObservable, action, runInAction } from 'mobx';
 import dayjs from 'dayjs';
 import Message from '../models/Message';
 import Window from '../models/Window';
@@ -56,6 +56,7 @@ class WindowStore {
       activeWindow: computed,
       addWindow: action,
       addMessage: action,
+      addError: action,
       sendText: action,
       finishStartup: action,
       handleToggleShowMemberList: action
@@ -135,16 +136,15 @@ class WindowStore {
     return true;
   }
 
-  async uploadFiles({ files, window }: { files: FileList; window: Window }): Promise<void> {
+  async uploadFiles(window: Window, files: File[]): Promise<void> {
     if (files.length === 0) {
       return;
     }
 
     const formData = new FormData();
-    const uploadedFiles = Array.from(files);
 
-    for (const file of uploadedFiles) {
-      formData.append('file', file, file.name || 'webcam-upload.jpg');
+    for (const file of files) {
+      formData.append('file', file, file.name || 'web-upload.jpg');
     }
 
     if (this.socket.sessionId) {
@@ -157,7 +157,7 @@ class WindowStore {
         body: formData
       });
 
-      if (response.status < 300) {
+      if (!response.ok) {
         throw `Server error ${response.status}.`;
       }
 
@@ -225,18 +225,20 @@ class WindowStore {
       const gid = response.gid as number;
       const ts = response.ts as number;
 
-      window.messages.set(
-        gid,
-        new Message({
+      runInAction(() => {
+        window.messages.set(
           gid,
-          body: text,
-          category: MessageCategory.Message,
-          ts,
-          user: me,
-          window,
-          status: MessageStatus.Original
-        })
-      );
+          new Message({
+            gid,
+            body: text,
+            category: MessageCategory.Message,
+            ts,
+            user: me,
+            window,
+            status: MessageStatus.Original
+          })
+        );
+      });
     }
   }
 
