@@ -12,7 +12,8 @@
     "sourceMap": true,
     "declaration": true,
     "noEmit": true,
-    "typeRoots": ["src/types", "node_modules/@types"]
+    "typeRoots": ["src/types", "node_modules/@types"],
+    "noPropertyAccessFromIndexSignature": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "__tests__/**/*.ts"],
   "exclude": ["node_modules"]

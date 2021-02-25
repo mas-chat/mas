@@ -322,7 +322,7 @@ export default class MessageModel {
   }
 
   private decodeYouTubeTimeParameter(url: URI): number {
-    const startTimeParameter = url.search(true).t;
+    const startTimeParameter = url.search(true)['t'];
     const startTime = Array.isArray(startTimeParameter) ? startTimeParameter[0] : startTimeParameter;
 
     if (!startTime) {
@@ -342,7 +342,7 @@ export default class MessageModel {
 
   private decodeYouTubeVideoId(url: URI): string | null {
     // Format is https://www.youtube.com/watch?v=0P7O69GuCII or https://youtu.be/0P7O69GuCII
-    const parameter = url.search(true).v;
+    const parameter = url.search(true)['v'];
 
     return parameter
       ? Array.isArray(parameter)
@@ -359,7 +359,7 @@ export default class MessageModel {
 
         if (IMAGE_SUFFIXES.includes(url.suffix().toLowerCase())) {
           return { type: UrlPartType.Url, class: UrlPartSubType.Image, url: url };
-        } else if ((domain === 'youtube.com' && url.search(true).v) || domain === 'youtu.be') {
+        } else if ((domain === 'youtube.com' && url.search(true)['v']) || domain === 'youtu.be') {
           const videoId = this.decodeYouTubeVideoId(url);
           const startTime = this.decodeYouTubeTimeParameter(url);
 
