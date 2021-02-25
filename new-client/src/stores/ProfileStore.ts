@@ -1,6 +1,7 @@
 import { observable, makeObservable, action } from 'mobx';
 import ProfileModel from '../models/Profile';
 import SettingsModel from '../models/Settings';
+import { ModalType } from '../models/Modal';
 import { Notification, Theme } from '../types/notifications';
 import { UpdateProfileRequest, GetProfileRequest, SendConfirmEmailRequest } from '../types/requests';
 import RootStore from './RootStore';
@@ -52,7 +53,7 @@ class ProfileStore {
       this.profile.name = name;
       this.profile.email = email;
     } else {
-      this.rootStore.modalStore.openModal('info-modal', { title: 'Error', body: response.errorMsg });
+      this.rootStore.modalStore.openModal({ type: ModalType.Info, title: 'Error', body: response.errorMsg as string });
     }
   }
 

@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useContext, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { ServerContext } from './ServerContext';
-import { LoadingView, DesktopApp, MobileApp } from '.';
+import { LoadingView, DesktopApp, MobileApp, ModalManager } from '.';
 
 const RootContainer: FunctionComponent = () => {
   const { startupStore } = useContext(ServerContext);
@@ -17,6 +17,7 @@ const RootContainer: FunctionComponent = () => {
 
   return (
     <>
+      <ModalManager />
       {!isDesktopReady && <LoadingView />}
       {startupStore.progress == 100 && <App firstRenderComplete={onFirstRenderComplete} />}
     </>

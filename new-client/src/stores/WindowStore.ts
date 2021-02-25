@@ -15,6 +15,7 @@ import {
   MessageStatus
 } from '../types/notifications';
 import WindowModel from '../models/Window';
+import { ModalType } from '../models/Modal';
 import {
   CreateRequest,
   SendRequest,
@@ -220,7 +221,7 @@ class WindowStore {
     window.notDelivered = false;
 
     if (response.status !== 'OK') {
-      this.rootStore.modalStore.openModal('info-modal', { title: 'Error', body: response.errorMsg });
+      this.rootStore.modalStore.openModal({ type: ModalType.Info, title: 'Error', body: response.errorMsg as string });
     } else {
       const gid = response.gid as number;
       const ts = response.ts as number;
@@ -251,7 +252,7 @@ class WindowStore {
     });
 
     if (response.status !== 'OK') {
-      this.rootStore.modalStore.openModal('info-modal', { title: 'Error', body: response.errorMsg });
+      this.rootStore.modalStore.openModal({ type: ModalType.Info, title: 'Error', body: response.errorMsg as string });
     }
   }
 
@@ -298,10 +299,7 @@ class WindowStore {
     });
 
     if (response.status !== 'OK') {
-      this.rootStore.modalStore.openModal('info-modal', {
-        title: 'Error',
-        body: response.errorMsg
-      });
+      this.rootStore.modalStore.openModal({ type: ModalType.Info, title: 'Error', body: response.errorMsg as string });
     }
   }
 
@@ -361,7 +359,7 @@ class WindowStore {
     }
 
     if (command === 'help') {
-      this.rootStore.modalStore.openModal('help-modal');
+      this.rootStore.modalStore.openModal({ type: ModalType.Help });
       return;
     }
 
@@ -384,9 +382,10 @@ class WindowStore {
     });
 
     if (response.status !== 'OK') {
-      this.rootStore.modalStore.openPriorityModal('info-modal', {
+      this.rootStore.modalStore.openPriorityModal({
+        type: ModalType.Info,
         title: 'Error',
-        body: response.errorMsg || ''
+        body: response.errorMsg as string
       });
     }
   }

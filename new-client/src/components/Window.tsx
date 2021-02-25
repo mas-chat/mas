@@ -1,4 +1,4 @@
-import React, { FunctionComponent, KeyboardEvent, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useDropzone } from 'react-dropzone';
 import { Box, Button, IconButton, Heading, Flex, Input } from '@chakra-ui/react';
@@ -27,9 +27,9 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
 
   useEffect(focusIfActive, [window, windowStore.activeWindow, mobile]);
 
-  const onKeyDown = (event: KeyboardEvent) => {
+  const onKeyUp = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
-      windowStore.sendText(window, message);
+      windowStore.processLine(window, message);
       setMessage('');
     }
   };
@@ -62,7 +62,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
           flex="1"
           ref={input}
           variant="flushed"
-          onKeyDown={onKeyDown}
+          onKeyUp={onKeyUp}
           onChange={e => setMessage(e.target.value)}
           placeholder="Write here…"
           value={message}

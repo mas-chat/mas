@@ -1,6 +1,7 @@
 import io from 'socket.io-client';
 import { Request, RequestReturn, Acknowledgement } from '../types/requests';
 import { Notification } from '../types/notifications';
+import { ModalType } from '../models/Modal';
 import RootStore from '../stores/RootStore';
 import { logout, getCookie, setCookie } from '../lib/cookie';
 
@@ -65,9 +66,11 @@ class Socket {
       this.connected = false;
 
       this.disconnectedTimer = window.setTimeout(() => {
-        this.rootStore.modalStore.openPriorityModal('non-interactive-modal', {
+        this.rootStore.modalStore.openPriorityModal({
+          type: ModalType.Info,
           title: 'Connection error',
-          body: 'Connection to server lost. Trying to reconnect…'
+          body: 'Connection to server lost. Trying to reconnect…',
+          forced: true
         });
 
         this.disconnectedTimer = undefined;

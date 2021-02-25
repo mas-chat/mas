@@ -12,3 +12,6 @@ export { default as YouTubePreview } from './YouTubePreview';
 export { default as WindowMessageList } from './WindowMessageList';
 export { default as WindowMenu } from './WindowMenu';
 export { default as WindowDayDivider } from './WindowDayDivider';
+export { default as InfoModal } from './InfoModal';
+export { default as HelpModal } from './HelpModal';
+export { default as ModalManager } from './ModalManager';

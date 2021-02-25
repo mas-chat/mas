@@ -1,5 +1,6 @@
 import { observable, makeObservable, action } from 'mobx';
 import FriendModel from '../models/Friend';
+import { ModalType } from '../models/Modal';
 import { Notification } from '../types/notifications';
 import { FriendVerdictRequest, RequestFriendRequest } from '../types/requests';
 import RootStore from './RootStore';
@@ -73,7 +74,24 @@ class FriendStore {
   }
 
   confirmRemoveFriend(userId: string): void {
-    this.rootStore.modalStore.openModal('remove-friend-modal', { userId });
+    const user = this.rootStore.userStore.users.get(userId);
+
+    if (!user) {
+      return;
+    }
+
+    this.rootStore.modalStore.openModal({
+      type: ModalType.Info,
+      title: 'Remove contact from the list',
+      body: `Are you sure you want to remove ${user.name} (${user.nick['mas']}) from the contacts list?`,
+      action: {
+        executedButton: 'Remove',
+        cancelButton: 'Cancel',
+        submit: () => {
+          this.removeFriend(userId);
+        }
+      }
+    });
   }
 
   async requestFriend(userId: string): Promise<void> {
