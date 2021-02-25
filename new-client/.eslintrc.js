@@ -9,8 +9,7 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-    'prettier/@typescript-eslint'
+    'plugin:prettier/recommended'
   ],
   rules: {
     '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^_' }],
