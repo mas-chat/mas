@@ -7,15 +7,18 @@ const msToMidnight = () => dayjs().add(1, 'day').startOf('date').diff(dayjs()) +
 export function useCurrentDate(): Dayjs {
   const [currentDate, setCurrentDate] = useState(dayjs());
 
-  const updateDate = useCallback(() => {
+  const updateDate = useCallback((): ReturnType<typeof setTimeout> => {
     const currentDate = dayjs();
     const msToNextDay = msToMidnight();
 
     setCurrentDate(currentDate);
-    setTimeout(updateDate, msToNextDay);
+    return setTimeout(updateDate, msToNextDay);
   }, []);
 
-  useEffect(updateDate, [updateDate]);
+  useEffect(() => {
+    const timer = updateDate();
+    return () => clearTimeout(timer);
+  }, [updateDate]);
 
   return currentDate;
 }
