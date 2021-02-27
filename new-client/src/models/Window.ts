@@ -1,4 +1,4 @@
-import { computed, observable, makeObservable, action, reaction } from 'mobx';
+import { computed, observable, makeObservable, action, autorun } from 'mobx';
 import MessageModel from './Message';
 import UserModel, { ircSystemUser } from './User';
 import { AlertsRecord, Network, Role, WindowType, UpdatableWindowRecord } from '../types/notifications';
@@ -116,17 +116,10 @@ export default class WindowModel {
       simplifiedName: computed,
       tooltipTopic: computed,
       explainedType: computed,
-      setActive: action,
-      updateLastSeenGid: action
+      setUnreadMessagesToZero: action
     });
 
-    reaction(
-      // visibilityState is not tracked but it doesn't need to for the reaction to work
-      () => this.isActive && document.visibilityState === 'visible' && this.lastMessageGid,
-      (lastMessageGid: number | false) => {
-        lastMessageGid && this.updateLastSeenGid();
-      }
-    );
+    autorun(() => this.isActive && this.lastMessageGid && this.setUnreadMessagesToZero());
   }
 
   updateFromRecord(record: UpdatableWindowRecord): void {
@@ -143,22 +136,16 @@ export default class WindowModel {
       typeof record.minimizedNamesList === 'boolean' ? !record.minimizedNamesList : this.isMemberListVisible;
   }
 
-  setActive(isActive: boolean): void {
-    this.isActive = isActive;
-  }
-
-  updateLastSeenGid(): void {
+  setUnreadMessagesToZero(): void {
     this.lastSeenMessageGid = this.lastMessageGid;
   }
 
   get sortedMessages(): Array<MessageModel> {
-    return Array.from(this.messages.values()).sort((a, b) =>
-      a.ts === b.ts ? a.gid - b.gid : a.ts.isAfter(b.ts) ? 1 : -1
-    );
+    return Array.from(this.messages.values()).sort((a, b) => a.gid - b.gid);
   }
 
   get sortedLogMessages(): Array<MessageModel> {
-    return Array.from(this.logMessages.values()).sort((a, b) => (a.ts.isAfter(b.ts) ? 1 : -1));
+    return Array.from(this.logMessages.values()).sort((a, b) => a.gid - b.gid);
   }
 
   get lastMessageGid(): number {

@@ -20,8 +20,6 @@ export function setFavicon(): void {
   if (!link) {
     document.getElementsByTagName('head')[0].appendChild(link);
   }
-
-  console.log('set!');
 }
 
 export function setUnreadMessageCountBadge(unreadMessages: number): void {

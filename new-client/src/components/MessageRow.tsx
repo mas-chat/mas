@@ -17,9 +17,10 @@ const TWEMOJI_CDN_BASE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/13.
 
 interface MessageRowProps {
   message: MessageModel;
+  isUnread: boolean;
 }
 
-const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowProps) => {
+const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: MessageRowProps) => {
   const modal = useContext(ModalContext);
   const showModal = (url: URI) => modal.onShow(<ImageModal src={url.toString()} />);
 
@@ -128,7 +129,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message }: MessageRowP
   };
 
   return (
-    <Flex key={message.gid} flexDirection="row" fontSize="15px" width="100%">
+    <Flex key={message.gid} flexDirection="row" fontSize="15px" width="100%" bgColor={isUnread ? 'blue.100' : 'white'}>
       <Box minWidth="50px">{message.createdTime}</Box>
       <Box flex="1">
         {message.isMessageFromUser ? renderMessage() : renderNotMessage()}

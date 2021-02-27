@@ -1,4 +1,4 @@
-import { autorun, observable, computed, makeObservable, action, runInAction } from 'mobx';
+import { autorun, observable, computed, makeObservable, action, runInAction, reaction } from 'mobx';
 import dayjs from 'dayjs';
 import Message from '../models/Message';
 import Window from '../models/Window';
@@ -42,6 +42,7 @@ class WindowStore {
   rootStore: RootStore;
   socket: Socket;
   windows = new Map<number, Window>();
+  activeWindow: Window | null = null;
 
   cachedUpto = 0;
 
@@ -53,9 +54,9 @@ class WindowStore {
 
     makeObservable(this, {
       windows: observable,
+      activeWindow: observable,
       initDone: observable,
       desktops: computed,
-      activeWindow: computed,
       totalUnreadMessages: computed,
       addWindow: action,
       addMessage: action,
@@ -70,13 +71,19 @@ class WindowStore {
       this.initDone && setUnreadMessageCountBadge(this.totalUnreadMessages);
     });
 
-    document.addEventListener('visibilitychange', () => this.processVisibilityChange, false);
-  }
+    reaction(
+      () => this.activeWindow,
+      (newActiveWindow, prevActiveWindow) => {
+        if (prevActiveWindow) {
+          prevActiveWindow.isActive = false;
+        }
 
-  processVisibilityChange(): void {
-    if (document.visibilityState === 'visible') {
-      this.activeWindow?.updateLastSeenGid();
-    }
+        if (newActiveWindow) {
+          newActiveWindow.isActive = true;
+          this.rootStore.profileStore.changeActiveWindowId(newActiveWindow.id);
+        }
+      }
+    );
   }
 
   get desktops(): { id: number; initials: string; messages: number; windows: Window[] }[] {
@@ -98,10 +105,6 @@ class WindowStore {
     });
 
     return Object.entries(desktops).map(([desktop, value]) => ({ ...value, id: parseInt(desktop) }));
-  }
-
-  get activeWindow(): WindowModel | null {
-    return Array.from(this.windows.values()).find(window => window.isActive) || null;
   }
 
   get totalUnreadMessages(): number {
@@ -531,16 +534,18 @@ class WindowStore {
       }
     });
 
-    this.initDone = true;
-
     const settings = this.rootStore.profileStore.settings;
 
     if (this.windows.size > 0) {
       const activeWindow = this.windows.get(settings.activeWindowId) || this.windows.values().next().value;
 
       this.setActiveWindow(activeWindow);
-      this.windows.forEach(window => window.updateLastSeenGid()); // TODO: In the future, last seen gid comes from server
+      this.windows.forEach(window => window.setUnreadMessagesToZero()); // TODO: In the future, last seen gid comes from server
     }
+
+    this.startTrackingVisibilityChanges();
+
+    this.initDone = true;
   }
 
   updateMembers(id: number, members: Array<{ userId: string; role: Role }>, reset: boolean): void {
@@ -619,10 +624,8 @@ class WindowStore {
     logout('User destroyed the account');
   }
 
-  setActiveWindow(activeWindow: WindowModel): void {
-    this.activeWindow?.setActive(false);
-    activeWindow.setActive(true);
-    this.rootStore.profileStore.changeActiveWindowId(activeWindow.id);
+  setActiveWindow(newActiveWindow: WindowModel | null): void {
+    this.activeWindow = newActiveWindow;
   }
 
   private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): boolean {
@@ -660,6 +663,28 @@ class WindowStore {
     window.operators = window.operators.filter(existingUser => user !== existingUser);
     window.voices = window.voices.filter(existingUser => user !== existingUser);
     window.users = window.users.filter(existingUser => user !== existingUser);
+  }
+
+  private startTrackingVisibilityChanges(): void {
+    let savedActiveWindow: Window | null;
+    let currentVisibilityState: VisibilityState;
+
+    document.addEventListener('visibilitychange', () => {
+      const newVisibilityState = document.visibilityState;
+
+      if (newVisibilityState === currentVisibilityState) {
+        return; // Probably should never happen
+      }
+
+      if (newVisibilityState === 'visible' && !this.activeWindow && this.windows.size > 0) {
+        this.setActiveWindow(savedActiveWindow || this.windows.values().next().value);
+      } else if (newVisibilityState === 'hidden') {
+        savedActiveWindow = this.activeWindow;
+        this.setActiveWindow(null);
+      }
+
+      currentVisibilityState = newVisibilityState;
+    });
   }
 }
 
