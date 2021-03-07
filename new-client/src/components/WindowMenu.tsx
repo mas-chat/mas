@@ -4,6 +4,7 @@ import { Menu, MenuButton, IconButton, MenuList, MenuOptionGroup, MenuItemOption
 import { HamburgerIcon } from '@chakra-ui/icons';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
+import { WindowType } from '../types/notifications';
 
 interface WindowMenuProps {
   window: WindowModel;
@@ -18,15 +19,17 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window }: WindowMenuPr
     <Menu>
       <MenuButton as={IconButton} aria-label="Options" icon={<HamburgerIcon />} />
       <MenuList>
-        <MenuOptionGroup
-          value={window.isMemberListVisible ? ['showGroupMembers'] : []}
-          onChange={handleShowMembersChange}
-          type="checkbox"
-        >
-          <MenuItemOption type="checkbox" value="showGroupMembers">
-            Show group members
-          </MenuItemOption>
-        </MenuOptionGroup>
+        {window.type === WindowType.Group && (
+          <MenuOptionGroup
+            value={window.isMemberListVisible ? ['showGroupMembers'] : []}
+            onChange={handleShowMembersChange}
+            type="checkbox"
+          >
+            <MenuItemOption type="checkbox" value="showGroupMembers">
+              Show group members
+            </MenuItemOption>
+          </MenuOptionGroup>
+        )}
       </MenuList>
     </Menu>
   );
