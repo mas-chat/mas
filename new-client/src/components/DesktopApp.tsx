@@ -1,19 +1,27 @@
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Flex } from '@chakra-ui/react';
-import { Desktop, Sidebar } from '.';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Desktop, Sidebar, WindowSettings } from '.';
+import { ServerContext } from './ServerContext';
 
 interface DesktopAppProps {
   firstRenderComplete: () => void;
 }
 
 const DesktopApp: FunctionComponent<DesktopAppProps> = ({ firstRenderComplete }: DesktopAppProps) => {
-  useEffect(firstRenderComplete, [firstRenderComplete]);
+  const { windowStore } = useContext(ServerContext);
+
+  useEffect(() => firstRenderComplete(), [firstRenderComplete]);
 
   return (
     <Flex width="100vw" height="100%" bgColor="white">
       <Sidebar mode="desktop" showDesktops={true} />
-      <Desktop />
+      <Routes basename="/app">
+        <Route path="c/:windowId" element={<Desktop />} />
+        <Route path="c/:windowId/settings" element={<WindowSettings />} />
+        <Route path="*" element={<Navigate to={`/app/c/${windowStore.startupActiveWindow?.id}`} />} />
+      </Routes>
     </Flex>
   );
 };

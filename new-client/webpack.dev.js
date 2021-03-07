@@ -22,17 +22,21 @@ module.exports = merge(common, {
   devServer: {
     host: 'localhost',
     open: true,
-    openPage: 'app/',
+    openPage: 'app',
+    historyApiFallback: {
+      index: '/app',
+      verbose: true
+    },
     overlay: true,
     dev: {
-      publicPath: '/app/'
+      publicPath: '/app'
     },
     proxy: {
       '/socket.io': {
         target: 'http://localhost:3200',
         ws: true
       },
-      '/': {
+      '^/(auth|login|api|register|forgot-password|reset-password|confirm-email|files|about|home|tos|pricing|support|website-assets)': {
         target: 'http://localhost:3200'
       }
     }

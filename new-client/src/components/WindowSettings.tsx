@@ -1,12 +1,18 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useContext } from 'react';
 import { Box } from '@chakra-ui/react';
-import WindowModel from '../models/Window';
+import { useParams } from 'react-router-dom';
+import { ServerContext } from './ServerContext';
 
-interface WindowSettingsProps {
-  window: WindowModel;
-}
+const WindowSettings: FunctionComponent = () => {
+  const { windowStore } = useContext(ServerContext);
+  const { windowId } = useParams();
 
-const WindowSettings: FunctionComponent<WindowSettingsProps> = ({ window }: WindowSettingsProps) => {
+  const window = windowStore.windows.get(parseInt(windowId));
+
+  if (!window) {
+    return null;
+  }
+
   return <Box>{window.decoratedTitle}</Box>;
 };
 

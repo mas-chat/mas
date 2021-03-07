@@ -1,7 +1,8 @@
 import React, { FunctionComponent, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Menu, MenuButton, IconButton, MenuList, MenuOptionGroup, MenuItemOption } from '@chakra-ui/react';
+import { Menu, MenuButton, IconButton, MenuList, MenuOptionGroup, MenuItemOption, MenuItem } from '@chakra-ui/react';
 import { HamburgerIcon } from '@chakra-ui/icons';
+import { Link } from 'react-router-dom';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
 import { WindowType } from '../types/notifications';
@@ -30,6 +31,9 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window }: WindowMenuPr
             </MenuItemOption>
           </MenuOptionGroup>
         )}
+        <MenuItem as={Link} to={`/app/c/${window.id}/settings`} onClick={e => e.stopPropagation()}>
+          Settings…
+        </MenuItem>
       </MenuList>
     </Menu>
   );

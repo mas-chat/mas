@@ -43,6 +43,7 @@ class WindowStore {
   socket: Socket;
   windows = new Map<number, Window>();
   activeWindow: Window | null = null;
+  startupActiveWindow: Window | null = null;
 
   cachedUpto = 0;
 
@@ -64,7 +65,8 @@ class WindowStore {
       sendText: action,
       finishStartup: action,
       handleToggleShowMemberList: action,
-      setActiveWindow: action
+      setActiveWindow: action,
+      setActiveWindowByIdWithFallback: action
     });
 
     autorun(() => {
@@ -537,9 +539,7 @@ class WindowStore {
     const settings = this.rootStore.profileStore.settings;
 
     if (this.windows.size > 0) {
-      const activeWindow = this.windows.get(settings.activeWindowId) || this.windows.values().next().value;
-
-      this.setActiveWindow(activeWindow);
+      this.startupActiveWindow = this.windows.get(settings.activeWindowId) || this.windows.values().next().value;
       this.windows.forEach(window => window.setUnreadMessagesToZero()); // TODO: In the future, last seen gid comes from server
     }
 
@@ -622,6 +622,20 @@ class WindowStore {
     });
 
     logout('User destroyed the account');
+  }
+
+  setActiveWindowByIdWithFallback(windowId: number | null): number | false {
+    const window = windowId !== null && !isNaN(windowId) && this.windows.get(windowId);
+
+    if (!window) {
+      const fallbackWindow = this.windows.values().next().value;
+      this.activeWindow = fallbackWindow || null;
+
+      return fallbackWindow ? fallbackWindow.id : false;
+    }
+
+    this.activeWindow = window;
+    return false;
   }
 
   setActiveWindow(newActiveWindow: WindowModel | null): void {

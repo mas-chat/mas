@@ -56,11 +56,12 @@ class StartupStore {
   get progress(): number {
     if (!this.startupNotifications) {
       return 0;
-    } else if (this.startupNotifications === 0) {
+    } else if (this.rootStore.windowStore.initDone) {
       return 100;
     }
 
-    return Math.floor((this.receivedNotifications / this.startupNotifications) * 100);
+    // Last percent is achieved when initDone changes to true
+    return Math.min(99, Math.floor((this.receivedNotifications / this.startupNotifications) * 100));
   }
 }
 

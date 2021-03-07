@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useDropzone } from 'react-dropzone';
 import { Box, Button, IconButton, Heading, Flex, Input } from '@chakra-ui/react';
 import { PlusSquareIcon } from '@chakra-ui/icons';
+import { useNavigate } from 'react-router-dom';
 import { WindowMessageList, WindowMenu } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
@@ -17,6 +18,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
   const { windowStore } = useContext(ServerContext);
   const input = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const focusIfActive = () => {
     if (!mobile && window.isActive) {
@@ -34,7 +36,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
   };
 
   const onClick = () => {
-    windowStore.setActiveWindow(window);
+    navigate(`/app/c/${window.id}`);
   };
 
   const onDrop = (acceptedFiles: File[]) => {
