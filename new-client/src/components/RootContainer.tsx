@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useContext, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { ServerContext } from './ServerContext';
 import { LoadingView, DesktopApp, MobileApp, ModalManager } from '.';
 
@@ -19,7 +20,11 @@ const RootContainer: FunctionComponent = () => {
     <>
       <ModalManager />
       {!isDesktopReady && <LoadingView />}
-      {startupStore.progress == 100 && <App firstRenderComplete={onFirstRenderComplete} />}
+      {startupStore.progress == 100 && (
+        <Router>
+          <App firstRenderComplete={onFirstRenderComplete} />
+        </Router>
+      )}
     </>
   );
 };
