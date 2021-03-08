@@ -18,7 +18,7 @@ const MobileApp: FunctionComponent<MobileAppProps> = ({ firstRenderComplete }: M
   useEffect(firstRenderComplete, [firstRenderComplete]);
 
   return (
-    <Flex width="100vw" height="100vh">
+    <Flex width="100vw" height="100%" minHeight="100%">
       <Routes basename="/app">
         <Route path="c/:windowId" element={<Desktop singleWindowMode={true} />} />
         <Route path="*" element={<SlidingSidebar />} />
