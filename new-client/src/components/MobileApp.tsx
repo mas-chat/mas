@@ -10,7 +10,7 @@ interface MobileAppProps {
 
 const SlidingSidebar = () => (
   <Slide direction="left" in={true} style={{ zIndex: 10 }}>
-    <Sidebar mode="mobile" showDesktops={false} />
+    <Sidebar fullScreen={true} showDesktops={false} />
   </Slide>
 );
 

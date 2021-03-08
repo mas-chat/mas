@@ -10,22 +10,21 @@ import { ServerContext } from './ServerContext';
 
 interface WindowProps {
   window: WindowModel;
-  mobile?: boolean;
+  singleWindowMode?: boolean;
 }
 
-const Window: FunctionComponent<WindowProps> = ({ window, mobile }: WindowProps) => {
+const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: WindowProps) => {
   const { windowStore } = useContext(ServerContext);
   const input = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const focusIfActive = () => {
-    if (!mobile && window.isActive) {
+  useEffect(() => {
+    // singleWindowMode check is here because we don't want the VKB to open automatically on mobile
+    if (!singleWindowMode && window.isActive) {
       input.current?.focus();
     }
-  };
-
-  useEffect(focusIfActive, [window.isActive, mobile]);
+  }, [window.isActive, singleWindowMode]);
 
   const onKeyUp = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
@@ -54,7 +53,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile }: WindowProps)
         flexDirection="row"
         alignItems="center"
       >
-        {mobile && (
+        {singleWindowMode && (
           <IconButton
             as={Link}
             to={'/app'}

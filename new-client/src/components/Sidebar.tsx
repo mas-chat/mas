@@ -6,11 +6,11 @@ import { ServerContext } from './ServerContext';
 import type WindowModel from '../models/Window';
 
 interface SidebarProps {
-  mode: 'mobile' | 'desktop';
+  fullScreen?: boolean;
   showDesktops: boolean;
 }
 
-const Sidebar: FunctionComponent<SidebarProps> = ({ mode, showDesktops }: SidebarProps) => {
+const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesktops }: SidebarProps) => {
   const { windowStore } = useContext(ServerContext);
 
   const sortWindows = (windows: WindowModel[]) => {
@@ -71,8 +71,8 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ mode, showDesktops }: Sideba
 
   return (
     <Flex
-      width={mode === 'mobile' ? '100%' : '200px'}
-      padding={mode === 'mobile' ? '2rem' : undefined}
+      width={fullScreen ? '100%' : '200px'}
+      padding={fullScreen ? '2rem' : undefined}
       height="100%"
       flexDirection="column"
       bgColor="gray.100"

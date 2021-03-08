@@ -28,7 +28,7 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
   }, [windowStore, windowId, navigate]);
 
   if (singleWindowMode) {
-    return windowStore.activeWindow ? <Window mobile={true} window={windowStore.activeWindow} /> : null;
+    return windowStore.activeWindow ? <Window singleWindowMode={true} window={windowStore.activeWindow} /> : null;
   }
 
   return (
