@@ -15,8 +15,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^_' }],
     'react/boolean-prop-naming': 'error',
     'react/destructuring-assignment': 'error',
-    'react/no-array-index-key': 'error',
-    'react/no-multi-comp': 'error'
+    'react/no-array-index-key': 'error'
   },
   settings: {
     'import/extensions': ['.js', '.jsx'],

@@ -1,24 +1,17 @@
 import React, { FunctionComponent, useContext } from 'react';
 import { Box, Flex, Heading, Spacer, LinkBox, Avatar, LinkOverlay, Tag, TagLabel } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ServerContext } from './ServerContext';
 import type WindowModel from '../models/Window';
 
 interface SidebarProps {
   mode: 'mobile' | 'desktop';
   showDesktops: boolean;
-  onSwitchWindow?: () => void;
 }
 
-const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDesktops }: SidebarProps) => {
+const Sidebar: FunctionComponent<SidebarProps> = ({ mode, showDesktops }: SidebarProps) => {
   const { windowStore } = useContext(ServerContext);
-  const navigate = useNavigate();
-
-  const onClick = (window: WindowModel) => {
-    onSwitchWindow?.();
-    navigate(`/app/c/${window.id}`);
-  };
 
   const sortWindows = (windows: WindowModel[]) => {
     return windows.sort((a, b) => {
@@ -34,7 +27,6 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDe
     <LinkBox
       key={window.id}
       isTruncated
-      onClick={() => onClick(window)}
       width="100%"
       px="1rem"
       py="0.3rem"
@@ -48,7 +40,9 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ mode, onSwitchWindow, showDe
           #
         </Box>
       )}{' '}
-      <LinkOverlay href="#">{window.simplifiedName}</LinkOverlay>
+      <LinkOverlay as={Link} to={`/app/c/${window.id}`}>
+        {window.simplifiedName}
+      </LinkOverlay>
       {window.unreadMessageCount !== 0 && (
         <Tag size="sm" borderRadius="full" variant="solid" colorScheme="green">
           <TagLabel>{window.unreadMessageCount}</TagLabel>

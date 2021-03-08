@@ -6,7 +6,11 @@ import { Window } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
 
-const Desktop: FunctionComponent = () => {
+interface DesktopProps {
+  singleWindowMode?: boolean;
+}
+
+const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: DesktopProps) => {
   const { windowStore } = useContext(ServerContext);
   const windows: WindowModel[] = Array.from(windowStore.windows.values());
   const activeDesktop = windowStore.activeWindow?.desktopId;
@@ -22,6 +26,10 @@ const Desktop: FunctionComponent = () => {
       navigate(`/app/c/${fallbackWindowId}`);
     }
   }, [windowStore, windowId, navigate]);
+
+  if (singleWindowMode) {
+    return windowStore.activeWindow ? <Window mobile={true} window={windowStore.activeWindow} /> : null;
+  }
 
   return (
     <Flex flex="1" flexDirection="column">

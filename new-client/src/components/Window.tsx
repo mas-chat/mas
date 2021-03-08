@@ -1,20 +1,19 @@
 import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useDropzone } from 'react-dropzone';
-import { Box, Button, IconButton, Heading, Flex, Input } from '@chakra-ui/react';
-import { PlusSquareIcon } from '@chakra-ui/icons';
-import { useNavigate } from 'react-router-dom';
+import { Box, IconButton, Heading, Flex, Input } from '@chakra-ui/react';
+import { PlusSquareIcon, ArrowBackIcon } from '@chakra-ui/icons';
+import { Link, useNavigate } from 'react-router-dom';
 import { WindowMessageList, WindowMenu } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
 
 interface WindowProps {
   window: WindowModel;
-  onExit?: () => void;
   mobile?: boolean;
 }
 
-const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: WindowProps) => {
+const Window: FunctionComponent<WindowProps> = ({ window, mobile }: WindowProps) => {
   const { windowStore } = useContext(ServerContext);
   const input = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
@@ -35,7 +34,8 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
     }
   };
 
-  const onClick = () => {
+  const handleWindowClick = () => {
+    // Focus this window
     navigate(`/app/c/${window.id}`);
   };
 
@@ -46,7 +46,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
-    <Flex onClick={onClick} flex="1" height="100%" width="100%" flexDirection="column" p="4px">
+    <Flex onClick={handleWindowClick} flex="1" height="100%" width="100%" flexDirection="column" p="4px">
       <Flex
         px="0.6rem"
         py="0.20rem"
@@ -54,10 +54,15 @@ const Window: FunctionComponent<WindowProps> = ({ window, mobile, onExit }: Wind
         flexDirection="row"
         alignItems="center"
       >
-        {onExit && (
-          <Button mr="1rem" onClick={onExit}>
-            Back
-          </Button>
+        {mobile && (
+          <IconButton
+            as={Link}
+            to={'/app'}
+            mr="1rem"
+            aria-label="Back"
+            icon={<ArrowBackIcon />}
+            onClick={e => e.stopPropagation()}
+          />
         )}
         <Heading flex="1" isTruncated size="s">
           {`${window.decoratedTitle}${window.topic && `- ${window.topic}`}`}
