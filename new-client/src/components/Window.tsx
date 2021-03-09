@@ -21,10 +21,10 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
 
   useEffect(() => {
     // singleWindowMode check is here because we don't want the VKB to open automatically on mobile
-    if (!singleWindowMode && window.isActive) {
+    if (!singleWindowMode && window.focused) {
       input.current?.focus();
     }
-  }, [window.isActive, singleWindowMode]);
+  }, [window.focused, singleWindowMode]);
 
   const onKeyUp = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
@@ -49,7 +49,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
       <Flex
         px="0.6rem"
         py="0.20rem"
-        bg={window.isActive ? 'blue.100' : 'gray.100'}
+        bg={window.focused ? 'blue.100' : 'gray.100'}
         flexDirection="row"
         alignItems="center"
       >

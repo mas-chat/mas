@@ -1,4 +1,4 @@
-import { autorun, observable, computed, makeObservable, action, runInAction, reaction } from 'mobx';
+import { autorun, observable, computed, makeObservable, action, runInAction } from 'mobx';
 import dayjs from 'dayjs';
 import Message from '../models/Message';
 import Window from '../models/Window';
@@ -65,27 +65,13 @@ class WindowStore {
       sendText: action,
       finishStartup: action,
       handleToggleShowMemberList: action,
-      setActiveWindow: action,
+      setActiveWindowFocus: action,
       setActiveWindowByIdWithFallback: action
     });
 
     autorun(() => {
       this.initDone && setUnreadMessageCountBadge(this.totalUnreadMessages);
     });
-
-    reaction(
-      () => this.activeWindow,
-      (newActiveWindow, prevActiveWindow) => {
-        if (prevActiveWindow) {
-          prevActiveWindow.isActive = false;
-        }
-
-        if (newActiveWindow) {
-          newActiveWindow.isActive = true;
-          this.rootStore.profileStore.changeActiveWindowId(newActiveWindow.id);
-        }
-      }
-    );
   }
 
   get desktops(): { id: number; initials: string; messages: number; windows: Window[] }[] {
@@ -625,21 +611,29 @@ class WindowStore {
   }
 
   setActiveWindowByIdWithFallback(windowId: number | null): number | false {
-    const window = windowId !== null && !isNaN(windowId) && this.windows.get(windowId);
+    const foundWindow = windowId !== null && !isNaN(windowId) && this.windows.get(windowId);
+    const fallbackWindow = foundWindow ? null : this.windows.values().next().value || null;
+    const activeWindow = this.activeWindow;
+    const newActiveWindow = foundWindow || fallbackWindow;
 
-    if (!window) {
-      const fallbackWindow = this.windows.values().next().value;
-      this.activeWindow = fallbackWindow || null;
-
-      return fallbackWindow ? fallbackWindow.id : false;
+    if (activeWindow) {
+      activeWindow.focused = false;
     }
 
-    this.activeWindow = window;
-    return false;
+    if (newActiveWindow) {
+      newActiveWindow.focused = true;
+      this.rootStore.profileStore.changeActiveWindowId(newActiveWindow.id);
+    }
+
+    this.activeWindow = newActiveWindow;
+
+    return fallbackWindow ? fallbackWindow.id : false;
   }
 
-  setActiveWindow(newActiveWindow: WindowModel | null): void {
-    this.activeWindow = newActiveWindow;
+  setActiveWindowFocus(isFocused: boolean): void {
+    if (this.activeWindow) {
+      this.activeWindow.focused = isFocused;
+    }
   }
 
   private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): boolean {
@@ -680,7 +674,6 @@ class WindowStore {
   }
 
   private startTrackingVisibilityChanges(): void {
-    let savedActiveWindow: Window | null;
     let currentVisibilityState: VisibilityState;
 
     document.addEventListener('visibilitychange', () => {
@@ -690,12 +683,7 @@ class WindowStore {
         return; // Probably should never happen
       }
 
-      if (newVisibilityState === 'visible' && !this.activeWindow && this.windows.size > 0) {
-        this.setActiveWindow(savedActiveWindow || this.windows.values().next().value);
-      } else if (newVisibilityState === 'hidden') {
-        savedActiveWindow = this.activeWindow;
-        this.setActiveWindow(null);
-      }
+      this.setActiveWindowFocus(newVisibilityState === 'visible');
 
       currentVisibilityState = newVisibilityState;
     });

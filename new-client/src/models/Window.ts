@@ -43,7 +43,7 @@ export default class WindowModel {
   newMessagesCount = 0;
   notDelivered = false;
   isMemberListVisible = false;
-  isActive = false;
+  focused = false;
   lastSeenMessageGid = 0;
 
   operators: Array<UserModel>;
@@ -105,7 +105,7 @@ export default class WindowModel {
       users: observable,
       role: observable,
       isMemberListVisible: observable,
-      isActive: observable,
+      focused: observable,
       lastSeenMessageGid: observable,
       lastMessageGid: computed,
       sortedMessages: computed,
@@ -119,7 +119,7 @@ export default class WindowModel {
       setUnreadMessagesToZero: action
     });
 
-    autorun(() => this.isActive && this.lastMessageGid && this.setUnreadMessagesToZero());
+    autorun(() => this.focused && this.lastMessageGid && this.setUnreadMessagesToZero());
   }
 
   updateFromRecord(record: UpdatableWindowRecord): void {

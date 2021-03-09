@@ -31,7 +31,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesk
       px="1rem"
       py="0.3rem"
       _hover={{ color: 'teal.500' }}
-      bgColor={window.isActive ? 'blue.100' : 'transparent'}
+      bgColor={window.focused ? 'blue.100' : 'transparent'}
     >
       {window.type === '1on1' ? (
         <Avatar width="25px" height="25px" src={window.peerUser?.gravatarUrl}></Avatar>

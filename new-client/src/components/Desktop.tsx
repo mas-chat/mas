@@ -12,12 +12,13 @@ interface DesktopProps {
 
 const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: DesktopProps) => {
   const { windowStore } = useContext(ServerContext);
-  const windows: WindowModel[] = Array.from(windowStore.windows.values());
-  const activeDesktop = windowStore.activeWindow?.desktopId;
-  const visibleWindows = windows.filter(window => window.desktopId === activeDesktop);
-  const rows = [...new Set(visibleWindows.map(window => window.row))].sort();
   const { windowId } = useParams();
   const navigate = useNavigate();
+  const windows: WindowModel[] = Array.from(windowStore.windows.values());
+  const activeWindow = windowStore.activeWindow;
+  const activeDesktop = activeWindow?.desktopId;
+  const visibleWindows = windows.filter(window => window.desktopId === activeDesktop);
+  const rows = [...new Set(visibleWindows.map(window => window.row))].sort();
 
   useEffect(() => {
     const fallbackWindowId = windowStore.setActiveWindowByIdWithFallback(parseInt(windowId));
@@ -27,8 +28,12 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
     }
   }, [windowStore, windowId, navigate]);
 
+  if (!activeWindow) {
+    return <Box>Welcome!</Box>;
+  }
+
   if (singleWindowMode) {
-    return windowStore.activeWindow ? <Window singleWindowMode={true} window={windowStore.activeWindow} /> : null;
+    return <Window singleWindowMode={true} window={activeWindow} />;
   }
 
   return (
