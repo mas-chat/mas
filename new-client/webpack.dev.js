@@ -24,7 +24,7 @@ module.exports = merge(common, {
     open: true,
     openPage: 'app',
     historyApiFallback: {
-      index: '/app',
+      rewrites: [{ from: /app.*/, to: '/app/index.html' }],
       verbose: true
     },
     overlay: true,
@@ -36,7 +36,7 @@ module.exports = merge(common, {
         target: 'http://localhost:3200',
         ws: true
       },
-      '^/(auth|login|api|register|forgot-password|reset-password|confirm-email|files|about|home|tos|pricing|support|website-assets)': {
+      '/': {
         target: 'http://localhost:3200'
       }
     }
