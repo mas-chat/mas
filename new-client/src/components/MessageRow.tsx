@@ -129,7 +129,14 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
   };
 
   return (
-    <Flex key={message.gid} flexDirection="row" fontSize="15px" width="100%" bgColor={isUnread ? 'blue.100' : 'white'}>
+    <Flex
+      key={message.gid}
+      flexDirection="row"
+      fontSize="15px"
+      width="100%"
+      bgColor={isUnread ? 'blue.100' : 'white'}
+      style={{ transition: 'background-color 1.5s ease-in' }}
+    >
       <Box minWidth="50px">{message.createdTime}</Box>
       <Box flex="1">
         {message.isMessageFromUser ? renderMessage() : renderNotMessage()}
