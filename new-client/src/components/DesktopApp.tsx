@@ -15,7 +15,7 @@ const DesktopApp: FunctionComponent<DesktopAppProps> = ({ firstRenderComplete }:
   useEffect(() => firstRenderComplete(), [firstRenderComplete]);
 
   return (
-    <Flex width="100vw" height="100vh" bgColor="white">
+    <Flex width="100vw" height="100vh">
       <Sidebar showDesktops={true} />
       <Routes basename="/app">
         <Route path="c/:windowId" element={<Desktop />} />
