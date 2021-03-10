@@ -139,15 +139,15 @@ export default class WindowModel {
   }
 
   get sortedMessages(): Array<MessageModel> {
-    return Array.from(this.messages.values()).sort((a, b) => a.gid - b.gid);
+    return Array.from(this.messages.values()).sort((a, b) => a.timestamp - b.timestamp);
   }
 
   get sortedLogMessages(): Array<MessageModel> {
-    return Array.from(this.logMessages.values()).sort((a, b) => a.gid - b.gid);
+    return Array.from(this.logMessages.values()).sort((a, b) => a.timestamp - b.timestamp);
   }
 
   get lastMessageGid(): number {
-    return this.sortedMessages[this.sortedMessages.length - 1].gid;
+    return this.sortedMessages[this.sortedMessages.length - 1]?.gid || 0;
   }
 
   get unreadMessageCount(): number {

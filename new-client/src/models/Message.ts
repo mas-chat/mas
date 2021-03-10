@@ -45,8 +45,8 @@ export type MessageModelProps = {
   gid: number;
   body?: string;
   category: MessageCategory;
-  ts: number;
-  updatedTs?: number;
+  timestamp: number;
+  updatedTimestamp?: number;
   user: UserModel;
   window: WindowModel;
   status: MessageStatus;
@@ -56,28 +56,30 @@ export default class MessageModel {
   public readonly gid: number;
   public body = '';
   private readonly category: MessageCategory;
-  public readonly ts: Dayjs;
-  public updatedTs?: Dayjs;
+  public readonly timestamp: number;
+  public updatedTimestamp?: number;
   public readonly user: UserModel;
   public readonly window: WindowModel;
   public status: MessageStatus;
 
-  constructor({ gid, body, category, ts, updatedTs, user, window, status }: MessageModelProps) {
+  constructor({ gid, body, category, timestamp, updatedTimestamp, user, window, status }: MessageModelProps) {
     this.gid = gid;
     this.body = body || '';
     this.category = category;
-    this.ts = dayjs.unix(ts);
-    this.updatedTs = typeof updatedTs === 'number' ? dayjs.unix(updatedTs) : undefined;
+    this.timestamp = timestamp;
+    this.updatedTimestamp = updatedTimestamp;
     this.user = user;
     this.window = window;
     this.status = status;
 
     makeObservable(this, {
       body: observable,
-      updatedTs: observable,
+      updatedTimestamp: observable,
       status: observable,
       edited: computed,
       deleted: computed,
+      createdAt: computed,
+      updatedAt: computed,
       createdTime: computed,
       updatedTime: computed,
       updatedDate: computed,
@@ -103,7 +105,7 @@ export default class MessageModel {
   updateFromRecord(message: MessageRecord): void {
     this.body = message.body;
     this.status = message.status;
-    this.updatedTs = typeof message.updatedTs === 'number' ? dayjs.unix(message.updatedTs) : this.updatedTs;
+    this.updatedTimestamp = message.updatedTs ?? this.updatedTimestamp;
   }
 
   get edited(): boolean {
@@ -114,24 +116,40 @@ export default class MessageModel {
     return this.status === 'deleted';
   }
 
+  get createdAt(): Dayjs {
+    return dayjs.unix(this.timestamp);
+  }
+
+  get updatedAt(): Dayjs | undefined {
+    return this.updatedTimestamp ? dayjs.unix(this.updatedTimestamp) : undefined;
+  }
+
   get createdTime(): string {
-    return this.ts.format('HH:mm');
+    return this.createdAt.format('HH:mm');
   }
 
   get updatedTime(): string {
-    return this.updatedTs ? this.updatedTs.format(this.ts.isSame(this.updatedTs, 'd') ? 'HH:mm' : 'MMM Do HH:mm') : '';
+    if (!this.updatedAt) {
+      return '';
+    }
+
+    return this.updatedAt.format(this.createdAt.isSame(this.updatedAt, 'd') ? 'HH:mm' : 'MMM Do HH:mm');
   }
 
   get updatedDate(): string {
-    const updatedTs = this.updatedTs;
+    if (!this.updatedAt) {
+      return '';
+    }
 
-    return updatedTs ? updatedTs.format('MMM Do HH:mm') : '';
+    return this.updatedAt.format('MMM Do HH:mm');
   }
 
   get updatedDateLong(): string {
-    const updatedTs = this.updatedTs;
+    if (!this.updatedAt) {
+      return '';
+    }
 
-    return updatedTs ? updatedTs.format('dddd, MMMM D HH:mm') : '';
+    return this.updatedAt.format('dddd, MMMM D HH:mm');
   }
 
   get nick(): string | undefined {

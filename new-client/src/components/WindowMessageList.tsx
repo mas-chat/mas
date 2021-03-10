@@ -27,7 +27,8 @@ const WindowMessageList: FunctionComponent<WindowMessageListProps> = ({ window }
   useResizeObserver<HTMLDivElement>({ ref: measurerContainer, onResize: scrollToBottom });
   const { width = 0, height = 0 } = useResizeObserver<HTMLDivElement>({ ref: placeholder });
 
-  const isFromSameDay = (current: MessageModel, previous: MessageModel) => current.ts.isSame(previous.ts, 'd');
+  const isFromSameDay = (current: MessageModel, previous: MessageModel) =>
+    current.createdAt.isSame(previous.createdAt, 'd');
 
   return (
     <Flex margin="0.3rem" flex="1">
@@ -43,11 +44,13 @@ const WindowMessageList: FunctionComponent<WindowMessageListProps> = ({ window }
           <Box ref={measurerContainer}>
             {window.sortedMessages.map((message, index, messages) => (
               <Fragment key={message.gid}>
-                {(index === 0 || !isFromSameDay(message, messages[index - 1])) && <WindowDayDivider ts={message.ts} />}
+                {(index === 0 || !isFromSameDay(message, messages[index - 1])) && (
+                  <WindowDayDivider ts={message.createdAt} />
+                )}
                 <MessageRow isUnread={message.gid > window.lastSeenMessageGid} message={message} />
               </Fragment>
             ))}
-            {currentDate.isSame(lastMessage.ts, 'd') ? null : <WindowDayDivider ts={currentDate} />}
+            {currentDate.isSame(lastMessage.createdAt, 'd') ? null : <WindowDayDivider ts={currentDate} />}
           </Box>
         </Box>
       </Box>

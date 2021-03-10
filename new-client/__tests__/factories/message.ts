@@ -10,7 +10,7 @@ function build(overrides: Partial<MessageModelProps> & Pick<MessageModelProps, '
     gid: sequence,
     category: MessageCategory.Message,
     body: 'Hello world',
-    ts: Date.now(),
+    timestamp: Date.now(),
     status: MessageStatus.Original,
     ...overrides
   });
