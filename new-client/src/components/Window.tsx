@@ -64,7 +64,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
           />
         )}
         <Heading flex="1" isTruncated size="s">
-          {`${window.decoratedTitle}${window.topic && `- ${window.topic}`}`}
+          {`${window.decoratedTitle}${window.topic ? `- ${window.topic}` : ''}`}
         </Heading>
       </Flex>
       <WindowMessageList window={window} />
