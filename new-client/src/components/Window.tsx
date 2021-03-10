@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { WindowMessageList, WindowMenu } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
+import { rootUrl, windowUrl } from '../lib/urls';
 
 interface WindowProps {
   window: WindowModel;
@@ -35,7 +36,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
 
   const handleWindowClick = () => {
     // Focus this window
-    navigate(`/app/c/${window.id}`);
+    navigate(windowUrl({ windowId: window.id }));
   };
 
   const onDrop = (acceptedFiles: File[]) => {
@@ -56,7 +57,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
         {singleWindowMode && (
           <IconButton
             as={Link}
-            to={'/app'}
+            to={rootUrl()}
             mr="1rem"
             aria-label="Back"
             icon={<ArrowBackIcon />}

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Window } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
+import { BASE_ID, windowUrl } from '../lib/urls';
 
 interface DesktopProps {
   singleWindowMode?: boolean;
@@ -21,10 +22,10 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
   const rows = [...new Set(visibleWindows.map(window => window.row))].sort();
 
   useEffect(() => {
-    const fallbackWindowId = windowStore.setActiveWindowByIdWithFallback(parseInt(windowId));
+    const fallbackWindowId = windowStore.setActiveWindowByIdWithFallback(parseInt(windowId, 36) - BASE_ID);
 
     if (fallbackWindowId) {
-      navigate(`/app/c/${fallbackWindowId}`);
+      navigate(windowUrl({ windowId: fallbackWindowId }));
     }
   }, [windowStore, windowId, navigate]);
 

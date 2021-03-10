@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { Link } from 'react-router-dom';
 import { ServerContext } from './ServerContext';
 import type WindowModel from '../models/Window';
+import { windowUrl } from '../lib/urls';
 
 interface SidebarProps {
   fullScreen?: boolean;
@@ -40,7 +41,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesk
           #
         </Box>
       )}{' '}
-      <LinkOverlay as={Link} to={`/app/c/${window.id}`}>
+      <LinkOverlay as={Link} to={windowUrl({ windowId: window.id })}>
         {window.simplifiedName}
       </LinkOverlay>
       {window.unreadMessageCount !== 0 && (

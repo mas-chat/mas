@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
 import { WindowType } from '../types/notifications';
+import { windowSettingsUrl } from '../lib/urls';
 
 interface WindowMenuProps {
   window: WindowModel;
@@ -31,7 +32,7 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window }: WindowMenuPr
             </MenuItemOption>
           </MenuOptionGroup>
         )}
-        <MenuItem as={Link} to={`/app/c/${window.id}/settings`} onClick={e => e.stopPropagation()}>
+        <MenuItem as={Link} to={windowSettingsUrl({ windowId: window.id })} onClick={e => e.stopPropagation()}>
           Settings…
         </MenuItem>
       </MenuList>

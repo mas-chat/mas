@@ -4,6 +4,7 @@ import { Flex } from '@chakra-ui/react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Desktop, Sidebar, WindowSettings } from '.';
 import { ServerContext } from './ServerContext';
+import { windowUrl } from '../lib/urls';
 
 interface DesktopAppProps {
   firstRenderComplete: () => void;
@@ -20,7 +21,10 @@ const DesktopApp: FunctionComponent<DesktopAppProps> = ({ firstRenderComplete }:
       <Routes basename="/app">
         <Route path="c/:windowId" element={<Desktop />} />
         <Route path="c/:windowId/settings" element={<WindowSettings />} />
-        <Route path="*" element={<Navigate to={`/app/c/${windowStore.startupActiveWindow?.id}`} />} />
+        <Route
+          path="*"
+          element={<Navigate to={windowUrl({ windowId: windowStore.startupActiveWindow?.id as number })} />}
+        />
       </Routes>
     </Flex>
   );
