@@ -53,6 +53,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
         bg={window.focused ? 'blue.100' : 'gray.100'}
         flexDirection="row"
         alignItems="center"
+        overflow="hidden"
       >
         {singleWindowMode && (
           <IconButton
