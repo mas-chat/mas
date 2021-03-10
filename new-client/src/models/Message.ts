@@ -86,6 +86,7 @@ export default class MessageModel {
       avatarUrl: computed,
       isMessageFromUser: computed,
       isChannelAction: computed,
+      isNotable: computed,
       isBanner: computed,
       isServerNote: computed,
       isInfo: computed,
@@ -157,6 +158,10 @@ export default class MessageModel {
     return [MessageCategory.Join, MessageCategory.Part, MessageCategory.Quit, MessageCategory.Kick].includes(
       this.category
     );
+  }
+
+  get isNotable(): boolean {
+    return [MessageCategory.Message, MessageCategory.Action].includes(this.category) && !this.fromMe;
   }
 
   get isBanner(): boolean {

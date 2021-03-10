@@ -74,21 +74,16 @@ class WindowStore {
     });
   }
 
-  get desktops(): { id: number; initials: string; messages: number; windows: Window[] }[] {
-    const desktops: { [key: number]: { initials: string; messages: number; windows: Window[] } } = {};
+  get desktops(): { id: number; windows: Window[] }[] {
+    const desktops: { [key: number]: { windows: Window[] } } = {};
 
     this.windows.forEach(window => {
-      const { newMessagesCount, desktopId } = window;
+      const { desktopId } = window;
 
       if (desktops[desktopId]) {
-        desktops[desktopId].messages += newMessagesCount;
         desktops[desktopId].windows.push(window);
       } else {
-        desktops[desktopId] = {
-          messages: newMessagesCount,
-          initials: window.simplifiedName.substr(0, 2).toUpperCase(),
-          windows: [window]
-        };
+        desktops[desktopId] = { windows: [window] };
       }
     });
 
@@ -192,13 +187,8 @@ class WindowStore {
       return;
     }
 
-    const newMessage = this.upsertMessage(window, messageRecord, 'messages');
-
-    if (newMessage) {
-      if (messageRecord.cat === 'msg' || messageRecord.cat === 'action') {
-        window.newMessagesCount++;
-      }
-    }
+    this.upsertMessage(window, messageRecord, 'messages');
+    window.resetLastSeenGid({ onlyIfFocused: true });
   }
 
   addError(window: WindowModel, body: string): void {
@@ -526,7 +516,7 @@ class WindowStore {
 
     if (this.windows.size > 0) {
       this.startupActiveWindow = this.windows.get(settings.activeWindowId) || this.windows.values().next().value;
-      this.windows.forEach(window => window.setUnreadMessagesToZero()); // TODO: In the future, last seen gid comes from server
+      this.windows.forEach(window => window.resetLastSeenGid()); // TODO: In the future, last seen gid comes from server
     }
 
     this.startTrackingVisibilityChanges();
@@ -636,35 +626,31 @@ class WindowStore {
     }
   }
 
-  private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): boolean {
+  private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): void {
     const existingMessage = window[type].get(message.gid);
 
     if (existingMessage) {
       existingMessage.updateFromRecord(message);
-      return false;
+      return;
     }
 
     const user = this.rootStore.userStore.users.get(message.userId);
 
-    if (!user) {
-      return true;
+    if (user) {
+      window[type].set(
+        message.gid,
+        new Message({
+          gid: message.gid,
+          body: message.body,
+          category: message.cat,
+          ts: message.ts,
+          user,
+          window,
+          status: message.status,
+          updatedTs: message.updatedTs
+        })
+      );
     }
-
-    window[type].set(
-      message.gid,
-      new Message({
-        gid: message.gid,
-        body: message.body,
-        category: message.cat,
-        ts: message.ts,
-        user,
-        window,
-        status: message.status,
-        updatedTs: message.updatedTs
-      })
-    );
-
-    return true;
   }
 
   private removeUser(user: UserModel, window: WindowModel) {

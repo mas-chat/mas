@@ -1,4 +1,4 @@
-import { computed, observable, makeObservable, action, autorun } from 'mobx';
+import { computed, observable, makeObservable, action } from 'mobx';
 import MessageModel from './Message';
 import UserModel, { ircSystemUser } from './User';
 import { AlertsRecord, Network, Role, WindowType, UpdatableWindowRecord } from '../types/notifications';
@@ -40,7 +40,6 @@ export default class WindowModel {
 
   messages = new Map<number, MessageModel>();
   logMessages = new Map<number, MessageModel>();
-  newMessagesCount = 0;
   notDelivered = false;
   isMemberListVisible = false;
   focused = false;
@@ -98,7 +97,6 @@ export default class WindowModel {
       messages: observable,
       logMessages: observable,
       generation: observable,
-      newMessagesCount: observable,
       notDelivered: observable,
       operators: observable,
       voices: observable,
@@ -116,10 +114,8 @@ export default class WindowModel {
       simplifiedName: computed,
       tooltipTopic: computed,
       explainedType: computed,
-      setUnreadMessagesToZero: action
+      resetLastSeenGid: action
     });
-
-    autorun(() => this.focused && this.lastMessageGid && this.setUnreadMessagesToZero());
   }
 
   updateFromRecord(record: UpdatableWindowRecord): void {
@@ -136,8 +132,10 @@ export default class WindowModel {
       typeof record.minimizedNamesList === 'boolean' ? !record.minimizedNamesList : this.isMemberListVisible;
   }
 
-  setUnreadMessagesToZero(): void {
-    this.lastSeenMessageGid = this.lastMessageGid;
+  resetLastSeenGid({ onlyIfFocused }: { onlyIfFocused: boolean } = { onlyIfFocused: false }): void {
+    if (!onlyIfFocused || this.focused) {
+      this.lastSeenMessageGid = this.lastMessageGid;
+    }
   }
 
   get sortedMessages(): Array<MessageModel> {
@@ -153,7 +151,9 @@ export default class WindowModel {
   }
 
   get unreadMessageCount(): number {
-    return Array.from(this.messages.values()).filter(message => message.gid > this.lastSeenMessageGid).length;
+    return Array.from(this.messages.values()).filter(
+      message => message.gid > this.lastSeenMessageGid && message.isNotable
+    ).length;
   }
 
   get participants(): Map<string, UserModel> {
