@@ -114,7 +114,8 @@ export default class WindowModel {
       simplifiedName: computed,
       tooltipTopic: computed,
       explainedType: computed,
-      resetLastSeenGid: action
+      resetLastSeenGid: action,
+      setFocus: action
     });
   }
 
@@ -138,6 +139,11 @@ export default class WindowModel {
     }
   }
 
+  setFocus(isFocused: boolean): void {
+    this.focused = isFocused;
+    this.resetLastSeenGid({ onlyIfFocused: true });
+  }
+
   get sortedMessages(): Array<MessageModel> {
     return Array.from(this.messages.values()).sort((a, b) => a.timestamp - b.timestamp);
   }
@@ -151,9 +157,7 @@ export default class WindowModel {
   }
 
   get unreadMessageCount(): number {
-    return Array.from(this.messages.values()).filter(
-      message => message.gid > this.lastSeenMessageGid && message.isNotable
-    ).length;
+    return this.sortedMessages.filter(message => message.gid > this.lastSeenMessageGid && message.isNotable).length;
   }
 
   get participants(): Map<string, UserModel> {

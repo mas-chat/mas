@@ -65,7 +65,6 @@ class WindowStore {
       sendText: action,
       finishStartup: action,
       handleToggleShowMemberList: action,
-      setActiveWindowFocus: action,
       setActiveWindowByIdWithFallback: action
     });
 
@@ -180,6 +179,19 @@ class WindowStore {
     }
   }
 
+  addError(window: WindowModel, body: string): void {
+    this.addMessage(window.id, {
+      gid: nextLocalGid,
+      userId: systemUser.id,
+      ts: dayjs().unix(),
+      cat: MessageCategory.Error,
+      body,
+      status: MessageStatus.Original
+    });
+
+    nextLocalGid--;
+  }
+
   addMessage(windowId: number, messageRecord: MessageRecord): void {
     const window = this.windows.get(windowId);
 
@@ -189,23 +201,6 @@ class WindowStore {
 
     this.upsertMessage(window, messageRecord, 'messages');
     window.resetLastSeenGid({ onlyIfFocused: true });
-  }
-
-  addError(window: WindowModel, body: string): void {
-    window.messages.set(
-      nextLocalGid,
-      new Message({
-        gid: nextLocalGid,
-        body,
-        category: MessageCategory.Error,
-        ts: dayjs().unix(),
-        user: systemUser,
-        window,
-        status: MessageStatus.Original
-      })
-    );
-
-    nextLocalGid--;
   }
 
   async sendText(window: WindowModel, text: string): Promise<void> {
@@ -230,21 +225,17 @@ class WindowStore {
       this.rootStore.modalStore.openModal({ type: ModalType.Info, title: 'Error', body: response.errorMsg as string });
     } else {
       const gid = response.gid as number;
-      const ts = response.ts as number;
+      const timestamp = response.ts as number;
 
       runInAction(() => {
-        window.messages.set(
+        this.addMessage(window.id, {
           gid,
-          new Message({
-            gid,
-            body: text,
-            category: MessageCategory.Message,
-            ts,
-            user: me,
-            window,
-            status: MessageStatus.Original
-          })
-        );
+          userId: me.id,
+          ts: timestamp,
+          cat: MessageCategory.Message,
+          body: text,
+          status: MessageStatus.Original
+        });
       });
     }
   }
@@ -605,23 +596,17 @@ class WindowStore {
     const newActiveWindow = foundWindow || fallbackWindow;
 
     if (activeWindow) {
-      activeWindow.focused = false;
+      activeWindow.setFocus(false);
     }
 
     if (newActiveWindow) {
-      newActiveWindow.focused = true;
+      newActiveWindow.setFocus(true);
       this.rootStore.profileStore.changeActiveWindowId(newActiveWindow.id);
     }
 
     this.activeWindow = newActiveWindow;
 
     return fallbackWindow ? fallbackWindow.id : false;
-  }
-
-  setActiveWindowFocus(isFocused: boolean): void {
-    if (this.activeWindow) {
-      this.activeWindow.focused = isFocused;
-    }
   }
 
   private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): void {
@@ -638,14 +623,14 @@ class WindowStore {
       window[type].set(
         message.gid,
         new Message({
+          user,
+          window,
           gid: message.gid,
           body: message.body,
           category: message.cat,
-          ts: message.ts,
-          user,
-          window,
-          status: message.status,
-          updatedTs: message.updatedTs
+          timestamp: message.ts,
+          updatedTimestamp: message.updatedTs,
+          status: message.status
         })
       );
     }
@@ -658,18 +643,8 @@ class WindowStore {
   }
 
   private startTrackingVisibilityChanges(): void {
-    let currentVisibilityState: VisibilityState;
-
     document.addEventListener('visibilitychange', () => {
-      const newVisibilityState = document.visibilityState;
-
-      if (newVisibilityState === currentVisibilityState) {
-        return; // Probably should never happen
-      }
-
-      this.setActiveWindowFocus(newVisibilityState === 'visible');
-
-      currentVisibilityState = newVisibilityState;
+      this.activeWindow?.setFocus(document.visibilityState === 'visible');
     });
   }
 }
