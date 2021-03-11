@@ -16,3 +16,4 @@ export { default as InfoModal } from './InfoModal';
 export { default as HelpModal } from './HelpModal';
 export { default as ModalManager } from './ModalManager';
 export { default as WindowSettings } from './WindowSettings';
+export { default as ProfileMenu } from './ProfileMenu';

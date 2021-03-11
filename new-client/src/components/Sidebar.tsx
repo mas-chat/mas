@@ -3,6 +3,7 @@ import { Box, Flex, Heading, Spacer, LinkBox, Avatar, LinkOverlay, Tag, TagLabel
 import { observer } from 'mobx-react-lite';
 import { Link } from 'react-router-dom';
 import { ServerContext } from './ServerContext';
+import { ProfileMenu } from '.';
 import type WindowModel from '../models/Window';
 import { windowUrl } from '../lib/urls';
 
@@ -53,9 +54,9 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesk
   );
 
   const desktopItem = (header: string | null, windows: WindowModel[]) => (
-    <Box key={header} px="1rem">
+    <Box key={header} mx="1rem" mb="1rem">
       {header && (
-        <Heading mt="1rem" mb="0.5rem" size="s">
+        <Heading mb="0.5rem" size="s">
           Desktop #{header}
         </Heading>
       )}
@@ -73,7 +74,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesk
   return (
     <Flex
       width={fullScreen ? '100%' : '200px'}
-      padding={fullScreen ? '2rem' : undefined}
+      p={fullScreen ? '2rem' : '1rem 0rem'}
       height="100%"
       flexDirection="column"
       bgColor="gray.100"
@@ -85,11 +86,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesk
           Search
         </Heading>
       </Box>
-      <Box p="8px">
-        <Heading as="button" size="s" width="100%">
-          Profile
-        </Heading>
-      </Box>
+      <ProfileMenu />
     </Flex>
   );
 };

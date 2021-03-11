@@ -569,10 +569,6 @@ class WindowStore {
   // TODO: Move these handlers somewhere else
 
   async handleLogout(allSessions: boolean): Promise<void> {
-    if (typeof Storage !== 'undefined') {
-      window.localStorage.removeItem('data');
-    }
-
     await this.socket.send<LogoutRequest>({
       id: 'LOGOUT',
       allSessions: !!allSessions
