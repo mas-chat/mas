@@ -23,12 +23,9 @@ module.exports = merge(common, {
     host: 'localhost',
     open: true,
     openPage: 'app',
-    historyApiFallback: {
-      rewrites: [{ from: /app.*/, to: '/app/index.html' }],
-      verbose: true
-    },
     overlay: true,
     dev: {
+      index: '',
       publicPath: '/app'
     },
     proxy: {
@@ -37,7 +34,14 @@ module.exports = merge(common, {
         ws: true
       },
       '/': {
-        target: 'http://localhost:3200'
+        target: 'http://localhost:3200',
+        bypass: req => {
+          if (req.url.startsWith('/app')) {
+            return '/app/index.html';
+          }
+
+          return null;
+        }
       }
     }
   }
