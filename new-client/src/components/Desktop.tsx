@@ -38,12 +38,12 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
   }
 
   return (
-    <Flex flex="1" flexDirection="column">
+    <Flex flex="1" minWidth="0" flexDirection="column">
       {rows.map(row => {
         return (
           <Fragment key={row}>
             {row !== 0 && <Box borderTop="1px solid #bbb" />}
-            <Flex flex="1" flexDirection="row">
+            <Flex flex="1" minWidth="0" flexDirection="row">
               {visibleWindows
                 .filter(window => window.row === row)
                 .map(window => {

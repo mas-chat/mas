@@ -46,14 +46,13 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
-    <Flex onClick={handleWindowClick} flex="1" height="100%" width="100%" flexDirection="column" p="4px">
+    <Flex onClick={handleWindowClick} flex="1" minWidth="0" height="100%" flexDirection="column" p="4px">
       <Flex
         px="0.6rem"
         py="0.20rem"
         bg={window.focused ? 'blue.100' : 'gray.100'}
         flexDirection="row"
         alignItems="center"
-        overflow="hidden"
       >
         {singleWindowMode && (
           <IconButton
