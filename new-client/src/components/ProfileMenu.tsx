@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Menu, MenuButton, MenuList, MenuItem, Heading } from '@chakra-ui/react';
+import { Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
 import { ServerContext } from './ServerContext';
 
 const ProfileMenu: FunctionComponent = () => {
