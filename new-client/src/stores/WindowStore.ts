@@ -424,10 +424,10 @@ class WindowStore {
     }
   }
 
-  async closeWindow(id: number): Promise<void> {
+  async closeWindow(closedWindow: Window): Promise<void> {
     await this.socket.send<CloseRequest>({
       id: 'CLOSE',
-      windowId: id
+      windowId: closedWindow.id
     });
   }
 

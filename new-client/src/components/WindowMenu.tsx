@@ -1,6 +1,15 @@
 import React, { FunctionComponent, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Menu, MenuButton, IconButton, MenuList, MenuOptionGroup, MenuItemOption, MenuItem } from '@chakra-ui/react';
+import {
+  Menu,
+  MenuButton,
+  IconButton,
+  MenuList,
+  MenuOptionGroup,
+  MenuItemOption,
+  MenuItem,
+  MenuDivider
+} from '@chakra-ui/react';
 import { HamburgerIcon } from '@chakra-ui/icons';
 import { Link } from 'react-router-dom';
 import WindowModel from '../models/Window';
@@ -16,6 +25,9 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window }: WindowMenuPr
   const { windowStore } = useContext(ServerContext);
 
   const handleShowMembersChange = () => windowStore.handleToggleShowMemberList(window);
+  const handleClose = () => {
+    windowStore.closeWindow(window);
+  };
 
   return (
     <Menu>
@@ -35,6 +47,8 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window }: WindowMenuPr
         <MenuItem as={Link} to={windowSettingsUrl({ windowId: window.id })} onClick={e => e.stopPropagation()}>
           Settings…
         </MenuItem>
+        <MenuDivider />
+        <MenuItem onClick={handleClose}>Close window and exit this {window.explainedType}</MenuItem>
       </MenuList>
     </Menu>
   );
