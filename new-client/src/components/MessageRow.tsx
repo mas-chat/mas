@@ -135,7 +135,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
       fontSize="15px"
       width="100%"
       bgColor={isUnread ? 'blue.100' : 'white'}
-      style={{ transition: 'background-color 1.5s ease-in' }}
+      transition="background-color 1.5s ease-in"
     >
       <Box minWidth="50px">{message.createdTime}</Box>
       <Box flex="1">
