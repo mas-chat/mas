@@ -90,6 +90,10 @@ class WindowStore {
     return Object.entries(desktops).map(([desktop, value]) => ({ ...value, id: parseInt(desktop) }));
   }
 
+  get windowsArray(): Array<Window> {
+    return Array.from(this.windows.values());
+  }
+
   get totalUnreadMessages(): number {
     let unreadMessages = 0;
 
@@ -98,6 +102,10 @@ class WindowStore {
     });
 
     return unreadMessages;
+  }
+
+  get firstWindow(): Window {
+    return this.windowsArray[0];
   }
 
   handlerServerNotification(ntf: Notification): boolean {

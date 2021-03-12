@@ -15,10 +15,9 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
   const { windowStore } = useContext(ServerContext);
   const { windowId } = useParams();
   const navigate = useNavigate();
-  const windows: WindowModel[] = Array.from(windowStore.windows.values());
+  const windows = windowStore.windowsArray;
   const activeWindow = windowStore.activeWindow;
-  const activeDesktop = activeWindow?.desktopId;
-  const visibleWindows = windows.filter(window => window.desktopId === activeDesktop);
+  const visibleWindows = windows.filter(window => window.desktopId === activeWindow?.desktopId);
   const rows = [...new Set(visibleWindows.map(window => window.row))].sort();
 
   useEffect(() => {

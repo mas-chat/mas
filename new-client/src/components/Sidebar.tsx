@@ -69,7 +69,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesk
       ? windowStore.desktops.map((desktop, index) => {
           return desktopItem(index.toString(), desktop.windows);
         })
-      : desktopItem(null, Array.from(windowStore.windows.values()));
+      : desktopItem(null, windowStore.windowsArray);
 
   return (
     <Flex
