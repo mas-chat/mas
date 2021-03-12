@@ -608,7 +608,7 @@ class WindowStore {
     this.activeWindow = newActiveWindow || null;
 
     if (newActiveWindow) {
-      this.rootStore.profileStore.changeActiveWindowId(newActiveWindow.id);
+      this.rootStore.profileStore.changeActiveWindowId(newActiveWindow);
       newActiveWindow.setFocus(true);
 
       this.nextActiveWindowId = null; // Next active window was either used or invalid.

@@ -1,6 +1,7 @@
 import { observable, makeObservable, action } from 'mobx';
 import ProfileModel from '../models/Profile';
 import SettingsModel from '../models/Settings';
+import WindowModel from '../models/Window';
 import { ModalType } from '../models/Modal';
 import { Notification, Theme } from '../types/notifications';
 import { UpdateProfileRequest, GetProfileRequest, SendConfirmEmailRequest } from '../types/requests';
@@ -102,13 +103,13 @@ class ProfileStore {
     this.updateSettings(undefined, undefined, true);
   }
 
-  changeActiveWindowId(activeWindowId: number): void {
+  changeActiveWindowId(activeWindow: WindowModel): void {
     if (!this.rootStore.windowStore.initDone) {
       return;
     }
 
-    this.updateSettings(undefined, activeWindowId);
-    this.socket.send({ id: 'SET', settings: { activeDesktop: activeWindowId } });
+    this.updateSettings(undefined, activeWindow.id);
+    this.socket.send({ id: 'SET', settings: { activeDesktop: activeWindow.desktopId } });
   }
 }
 
