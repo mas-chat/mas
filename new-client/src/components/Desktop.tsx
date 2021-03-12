@@ -4,7 +4,7 @@ import { Box, Flex } from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Window } from '.';
 import { ServerContext } from './ServerContext';
-import { BASE_ID, windowUrl, rootUrl } from '../lib/urls';
+import { BASE_ID, windowUrl, welcomeUrl } from '../lib/urls';
 
 interface DesktopProps {
   singleWindowMode?: boolean;
@@ -18,6 +18,7 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
   const activeWindow = windowStore.activeWindow;
   const visibleWindows = windows.filter(window => window.desktopId === activeWindow?.desktopId);
   const rows = [...new Set(visibleWindows.map(window => window.row))].sort();
+  const windowsSignature = windows.map(window => window.id).join();
 
   useEffect(() => {
     // windowId URL parameter is source of truth for the active window. This hook
@@ -25,10 +26,19 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
     // URL points to non-existing window then we navigate to root which makes
     // some other window active by navigating second time.
     const newWindowId = parseInt(windowIdUrlParam, 36) - BASE_ID;
-    const success = windowStore.tryChangeActiveWindowById(newWindowId);
+    const result = windowStore.tryChangeActiveWindowById(newWindowId);
 
-    navigate(success ? windowUrl({ windowId: newWindowId }) : rootUrl());
-  }, [windowStore, windowIdUrlParam, navigate, ...windows.map(window => window.id)]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!result.changed) {
+      return;
+    }
+
+    if (result.success) {
+      navigate(windowUrl({ windowId: newWindowId }));
+    } else {
+      const nextActiveWindow = windowStore.resolveNextActiveWindow();
+      navigate(nextActiveWindow ? windowUrl({ windowId: nextActiveWindow.id }) : welcomeUrl());
+    }
+  }, [windowStore, windowIdUrlParam, navigate, windowsSignature]);
 
   if (singleWindowMode) {
     return activeWindow && <Window singleWindowMode={true} window={activeWindow} />;

@@ -43,7 +43,7 @@ class WindowStore {
   socket: Socket;
   windows = new Map<number, Window>();
   activeWindow: Window | null = null;
-  nextActiveWindow: Window | null = null;
+  nextActiveWindowId: number | null = null;
 
   cachedUpto = 0;
 
@@ -60,7 +60,7 @@ class WindowStore {
       desktops: computed,
       totalUnreadMessages: computed,
       addWindow: action,
-      deleteWindow: action,
+      deleteWindowById: action,
       addMessage: action,
       closeWindow: action,
       addError: action,
@@ -106,8 +106,8 @@ class WindowStore {
     return unreadMessages;
   }
 
-  get firstWindow(): Window {
-    return this.windowsArray[0];
+  get firstWindow(): Window | null {
+    return this.windowsArray[0] || null;
   }
 
   handlerServerNotification(ntf: Notification): boolean {
@@ -136,7 +136,7 @@ class WindowStore {
         break;
       }
       case 'DELETE_WINDOW': {
-        this.deleteWindow(ntf.windowId);
+        this.deleteWindowById(ntf.windowId);
         break;
       }
       case 'FINISH_INIT': {
@@ -435,8 +435,8 @@ class WindowStore {
   }
 
   async closeWindow(closedWindow: Window): Promise<void> {
-    this.nextActiveWindow =
-      this.windowsArray.find(window => window.desktopId === closedWindow.desktopId) || this.firstWindow || null;
+    this.nextActiveWindowId =
+      (this.windowsArray.find(window => window.desktopId === closedWindow.desktopId) || this.firstWindow)?.id || null;
 
     await this.socket.send<CloseRequest>({
       id: 'CLOSE',
@@ -444,7 +444,7 @@ class WindowStore {
     });
   }
 
-  deleteWindow(id: number): void {
+  deleteWindowById(id: number): void {
     this.windows.delete(id);
   }
 
@@ -517,11 +517,9 @@ class WindowStore {
 
     const settings = this.rootStore.profileStore.settings;
 
-    if (this.windows.size > 0) {
-      this.nextActiveWindow = this.windows.get(settings.activeWindowId) || this.firstWindow;
-      this.windows.forEach(window => window.resetLastSeenGid()); // TODO: In the future, last seen gid comes from server
-    }
-
+    this.nextActiveWindowId = settings.activeWindowId;
+    console.log({ starupwindow: this.nextActiveWindowId });
+    this.windows.forEach(window => window.resetLastSeenGid()); // TODO: In the future, last seen gid comes from server
     this.startTrackingVisibilityChanges();
 
     this.initDone = true;
@@ -599,8 +597,12 @@ class WindowStore {
     logout('User destroyed the account');
   }
 
-  tryChangeActiveWindowById(windowId: number): boolean {
+  tryChangeActiveWindowById(windowId: number): { changed: boolean; success: boolean } {
     const newActiveWindow = this.windows.get(windowId);
+
+    if (newActiveWindow === this.activeWindow) {
+      return { changed: false, success: true };
+    }
 
     this.activeWindow?.setFocus(false);
     this.activeWindow = newActiveWindow || null;
@@ -608,9 +610,20 @@ class WindowStore {
     if (newActiveWindow) {
       this.rootStore.profileStore.changeActiveWindowId(newActiveWindow.id);
       newActiveWindow.setFocus(true);
+
+      this.nextActiveWindowId = null; // Next active window was either used or invalid.
     }
 
-    return !!newActiveWindow;
+    return { changed: true, success: !!newActiveWindow };
+  }
+
+  resolveNextActiveWindow(): WindowModel | null {
+    const window = this.nextActiveWindowId && this.windows.get(this.nextActiveWindowId);
+
+    // resolveNextActiveWindow can't be set to null in this function as this function gets
+    // called also "unnecessary" from <Route path="*">
+
+    return window || this.firstWindow;
   }
 
   private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): void {

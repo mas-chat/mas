@@ -16,13 +16,8 @@ const DesktopApp: FunctionComponent<DesktopAppProps> = ({ firstRenderComplete }:
   useEffect(() => firstRenderComplete(), [firstRenderComplete]);
 
   const defaultRedirectUrl = () => {
-    if (windowStore.windows.size > 0) {
-      const window = windowStore.activeWindow || windowStore.nextActiveWindow || windowStore.firstWindow;
-
-      return windowUrl({ windowId: window.id as number });
-    } else {
-      return welcomeUrl();
-    }
+    const nextActiveWindow = windowStore.resolveNextActiveWindow();
+    return nextActiveWindow ? windowUrl({ windowId: nextActiveWindow.id }) : welcomeUrl();
   };
 
   return (
