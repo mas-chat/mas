@@ -65,7 +65,8 @@ class WindowStore {
       sendText: action,
       finishStartup: action,
       handleToggleShowMemberList: action,
-      setActiveWindowByIdWithFallback: action
+      setActiveWindowByIdWithFallback: action,
+      removeUser: action
     });
 
     autorun(() => {
@@ -632,7 +633,7 @@ class WindowStore {
     }
   }
 
-  private removeUser(user: UserModel, window: WindowModel) {
+  removeUser(user: UserModel, window: WindowModel): void {
     window.operators = window.operators.filter(existingUser => user !== existingUser);
     window.voices = window.voices.filter(existingUser => user !== existingUser);
     window.users = window.users.filter(existingUser => user !== existingUser);
