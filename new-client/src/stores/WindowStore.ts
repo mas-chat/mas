@@ -43,7 +43,7 @@ class WindowStore {
   socket: Socket;
   windows = new Map<number, Window>();
   activeWindow: Window | null = null;
-  startupActiveWindow: Window | null = null;
+  nextActiveWindow: Window | null = null;
 
   cachedUpto = 0;
 
@@ -62,6 +62,7 @@ class WindowStore {
       addWindow: action,
       deleteWindow: action,
       addMessage: action,
+      closeWindow: action,
       addError: action,
       sendText: action,
       finishStartup: action,
@@ -434,6 +435,9 @@ class WindowStore {
   }
 
   async closeWindow(closedWindow: Window): Promise<void> {
+    this.nextActiveWindow =
+      this.windowsArray.find(window => window.desktopId === closedWindow.desktopId) || this.firstWindow || null;
+
     await this.socket.send<CloseRequest>({
       id: 'CLOSE',
       windowId: closedWindow.id
@@ -514,7 +518,7 @@ class WindowStore {
     const settings = this.rootStore.profileStore.settings;
 
     if (this.windows.size > 0) {
-      this.startupActiveWindow = this.windows.get(settings.activeWindowId) || this.windows.values().next().value;
+      this.nextActiveWindow = this.windows.get(settings.activeWindowId) || this.firstWindow;
       this.windows.forEach(window => window.resetLastSeenGid()); // TODO: In the future, last seen gid comes from server
     }
 
