@@ -289,10 +289,10 @@ class WindowStore {
     return { success, ...(success ? {} : { errorMsg: response.errorMsg }) };
   }
 
-  async startChat(userId: string, network: Network): Promise<void> {
+  async startChat(user: UserModel, network: Network): Promise<void> {
     const response = await this.socket.send<ChatRequest>({
       id: 'CHAT',
-      userId,
+      userId: user.id,
       network
     });
 
