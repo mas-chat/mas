@@ -25,7 +25,7 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
     // URL points to non-existing window then we navigate to root which makes
     // some other window active by navigating second time.
     const newWindowId = parseInt(windowIdUrlParam, 36) - BASE_ID;
-    const success = windowStore.setActiveWindowByIdWithFallback(newWindowId);
+    const success = windowStore.tryChangeActiveWindowById(newWindowId);
 
     navigate(success ? windowUrl({ windowId: newWindowId }) : rootUrl());
   }, [windowStore, windowIdUrlParam, navigate, ...windows.map(window => window.id)]); // eslint-disable-line react-hooks/exhaustive-deps

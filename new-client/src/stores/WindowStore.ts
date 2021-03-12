@@ -65,7 +65,7 @@ class WindowStore {
       sendText: action,
       finishStartup: action,
       handleToggleShowMemberList: action,
-      setActiveWindowByIdWithFallback: action,
+      tryChangeActiveWindowById: action,
       removeUser: action
     });
 
@@ -594,24 +594,18 @@ class WindowStore {
     logout('User destroyed the account');
   }
 
-  setActiveWindowByIdWithFallback(windowId: number | null): number | false {
-    const foundWindow = windowId !== null && !isNaN(windowId) && this.windows.get(windowId);
-    const fallbackWindow = foundWindow ? null : this.windows.values().next().value || null;
-    const activeWindow = this.activeWindow;
-    const newActiveWindow = foundWindow || fallbackWindow;
+  tryChangeActiveWindowById(windowId: number): boolean {
+    const newActiveWindow = this.windows.get(windowId);
 
-    if (activeWindow) {
-      activeWindow.setFocus(false);
-    }
+    this.activeWindow?.setFocus(false);
+    this.activeWindow = newActiveWindow || null;
 
     if (newActiveWindow) {
-      newActiveWindow.setFocus(true);
       this.rootStore.profileStore.changeActiveWindowId(newActiveWindow.id);
+      newActiveWindow.setFocus(true);
     }
 
-    this.activeWindow = newActiveWindow;
-
-    return fallbackWindow ? fallbackWindow.id : false;
+    return !!newActiveWindow;
   }
 
   private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): void {
