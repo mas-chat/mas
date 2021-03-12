@@ -50,7 +50,7 @@ const WindowMessageList: FunctionComponent<WindowMessageListProps> = ({ window }
                 <MessageRow isUnread={message.gid > window.lastSeenMessageGid} message={message} />
               </Fragment>
             ))}
-            {currentDate.isSame(lastMessage.createdAt, 'd') ? null : <WindowDayDivider ts={currentDate} />}
+            {lastMessage && !currentDate.isSame(lastMessage.createdAt, 'd') && <WindowDayDivider ts={currentDate} />}
           </Box>
         </Box>
       </Box>
