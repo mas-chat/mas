@@ -31,7 +31,7 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
   }, [windowStore, windowIdUrlParam, navigate, ...windows.map(window => window.id)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (singleWindowMode) {
-    return <Window singleWindowMode={true} window={activeWindow} />;
+    return activeWindow && <Window singleWindowMode={true} window={activeWindow} />;
   }
 
   return (
