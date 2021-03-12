@@ -3,10 +3,10 @@ import Cookies from 'js-cookie';
 let userId: string | undefined;
 
 export function logout(reason?: string): never {
-  console.log(reason);
-
   Cookies.remove('mas', { path: '/' });
   window.location.pathname = '/';
+
+  throw `Redirecting to root, reason: ${reason}...`;
 }
 
 export function getCookie(): string {
