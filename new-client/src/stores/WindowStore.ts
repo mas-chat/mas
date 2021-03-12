@@ -60,6 +60,7 @@ class WindowStore {
       desktops: computed,
       totalUnreadMessages: computed,
       addWindow: action,
+      deleteWindow: action,
       addMessage: action,
       addError: action,
       sendText: action,
