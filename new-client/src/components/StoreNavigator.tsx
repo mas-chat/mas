@@ -21,17 +21,13 @@ const StoreNavigator: FunctionComponent<StoreNavigatorProps> = ({ children }: St
     newPath && navigate(newPath);
   }, [windowStore.navigateToPath, navigate]);
 
-  // windowId URL parameter is source of truth for the active window. This hook
-  // detects changes in the URL and syncs the activeWindow windowStore prop.
+  // URL parameters are source of truth. This hook detects changes in them
+  // and syncs the values to mobx store.
   useEffect(() => {
-    const matches = matchRoutes(isMobile ? mobileRoutes : desktopRoutes, location, '/app');
-
-    if (!matches) {
-      return;
-    }
+    const matches = matchRoutes(isMobile ? mobileRoutes : desktopRoutes, location, '/app') || [];
 
     const routerParams: Record<string, string> = matches.reduce(
-      (accumulator, value) => ({ ...accumulator, ...value.params }),
+      (accumulator, route) => ({ ...accumulator, ...route.params }),
       {}
     );
 

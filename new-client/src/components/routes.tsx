@@ -1,11 +1,6 @@
 import React from 'react';
-import Welcome from './Welcome';
-import WindowSettings from './WindowSettings';
-import SlidingSidebar from './SlidingSidebar';
-import DesktopRootRedirect from './DesktopRootRedirect';
-import Sidebar from './Sidebar';
-import { Desktop } from '.';
 import { Outlet } from 'react-router-dom';
+import { Desktop, DesktopRootRedirect, Sidebar, SlidingSidebar, Welcome, WindowSettings } from '.';
 
 const routeGenerator = (mobile: boolean) => [
   {
