@@ -43,7 +43,7 @@ class WindowStore {
   socket: Socket;
   windows = new Map<number, Window>();
   activeWindow: Window | null = null;
-  nextActiveWindowId: number | null = null;
+  overrideActiveWindowId: number | null = null;
 
   cachedUpto = 0;
 
@@ -404,6 +404,8 @@ class WindowStore {
       window.updateGeneration(this.socket.sessionId as string);
       window.updateFromRecord(windowRecord);
     } else {
+      this.overrideActiveWindowId = windowRecord.windowId;
+
       this.windows.set(
         windowRecord.windowId,
         new Window({
@@ -435,7 +437,7 @@ class WindowStore {
   }
 
   async closeWindow(closedWindow: Window): Promise<void> {
-    this.nextActiveWindowId =
+    this.overrideActiveWindowId =
       (this.windowsArray.find(window => window.desktopId === closedWindow.desktopId) || this.firstWindow)?.id || null;
 
     await this.socket.send<CloseRequest>({
@@ -515,10 +517,9 @@ class WindowStore {
       }
     });
 
-    const settings = this.rootStore.profileStore.settings;
+    const { activeWindowId } = this.rootStore.profileStore.settings;
+    this.overrideActiveWindowId = activeWindowId;
 
-    this.nextActiveWindowId = settings.activeWindowId;
-    console.log({ starupwindow: this.nextActiveWindowId });
     this.windows.forEach(window => window.resetLastSeenGid()); // TODO: In the future, last seen gid comes from server
     this.startTrackingVisibilityChanges();
 
@@ -597,33 +598,31 @@ class WindowStore {
     logout('User destroyed the account');
   }
 
-  tryChangeActiveWindowById(windowId: number): { changed: boolean; success: boolean } {
-    const newActiveWindow = this.windows.get(windowId);
+  tryChangeActiveWindowById(windowId: number): number | undefined {
+    const newActiveWindow = this.windows.get(this.overrideActiveWindowId || windowId) || this.firstWindow;
 
-    if (newActiveWindow === this.activeWindow) {
-      return { changed: false, success: true };
+    this.overrideActiveWindowId = null;
+
+    if (newActiveWindow !== this.activeWindow) {
+      this.activeWindow?.setFocus(false);
+      this.activeWindow = newActiveWindow;
+
+      if (newActiveWindow) {
+        this.rootStore.profileStore.changeActiveWindowId(newActiveWindow);
+        newActiveWindow.setFocus(true);
+      }
     }
 
-    this.activeWindow?.setFocus(false);
-    this.activeWindow = newActiveWindow || null;
-
-    if (newActiveWindow) {
-      this.rootStore.profileStore.changeActiveWindowId(newActiveWindow);
-      newActiveWindow.setFocus(true);
-
-      this.nextActiveWindowId = null; // Next active window was either used or invalid.
-    }
-
-    return { changed: true, success: !!newActiveWindow };
+    return newActiveWindow?.id;
   }
 
   resolveNextActiveWindow(): WindowModel | null {
-    const window = this.nextActiveWindowId && this.windows.get(this.nextActiveWindowId);
+    const overrideWindow = this.overrideActiveWindowId && this.windows.get(this.overrideActiveWindowId);
 
     // resolveNextActiveWindow can't be set to null in this function as this function gets
     // called also "unnecessary" from <Route path="*">
 
-    return window || this.firstWindow;
+    return overrideWindow || this.firstWindow;
   }
 
   private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): void {

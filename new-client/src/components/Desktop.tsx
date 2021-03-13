@@ -22,21 +22,14 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
 
   useEffect(() => {
     // windowId URL parameter is source of truth for the active window. This hook
-    // detects changes in the URL and syncs the activeWindow store prop. If the
-    // URL points to non-existing window then we navigate to root which makes
-    // some other window active by navigating second time.
-    const newWindowId = parseInt(windowIdUrlParam, 36) - BASE_ID;
-    const result = windowStore.tryChangeActiveWindowById(newWindowId);
+    // detects changes in the URL and syncs the activeWindow windowStore prop. If the
+    // URL points to non-existing window then tryChangeActiveWindowById() returns
+    // fallback window id or null when there are zero windows.
+    const urlWindowId = parseInt(windowIdUrlParam, 36) - BASE_ID;
+    const newActiveWindowId = windowStore.tryChangeActiveWindowById(urlWindowId);
 
-    if (!result.changed) {
-      return;
-    }
-
-    if (result.success) {
-      navigate(windowUrl({ windowId: newWindowId }));
-    } else {
-      const nextActiveWindow = windowStore.resolveNextActiveWindow();
-      navigate(nextActiveWindow ? windowUrl({ windowId: nextActiveWindow.id }) : welcomeUrl());
+    if (newActiveWindowId !== urlWindowId) {
+      navigate(newActiveWindowId ? windowUrl({ windowId: newActiveWindowId }) : welcomeUrl());
     }
   }, [windowStore, windowIdUrlParam, navigate, windowsSignature]);
 
