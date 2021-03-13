@@ -404,7 +404,9 @@ class WindowStore {
       window.updateGeneration(this.socket.sessionId as string);
       window.updateFromRecord(windowRecord);
     } else {
-      this.overrideActiveWindowId = windowRecord.windowId;
+      if (this.initDone) {
+        this.overrideActiveWindowId = windowRecord.windowId;
+      }
 
       this.windows.set(
         windowRecord.windowId,
@@ -437,9 +439,6 @@ class WindowStore {
   }
 
   async closeWindow(closedWindow: Window): Promise<void> {
-    this.overrideActiveWindowId =
-      (this.windowsArray.find(window => window.desktopId === closedWindow.desktopId) || this.firstWindow)?.id || null;
-
     await this.socket.send<CloseRequest>({
       id: 'CLOSE',
       windowId: closedWindow.id
@@ -447,6 +446,13 @@ class WindowStore {
   }
 
   deleteWindowById(id: number): void {
+    const deletedWindow = this.windows.get(id);
+
+    if (this.activeWindow && this.activeWindow === deletedWindow) {
+      const sameDesktopWindow = this.windowsArray.find(window => window.desktopId === deletedWindow?.desktopId);
+      this.overrideActiveWindowId = sameDesktopWindow?.id || this.firstWindow?.id || null;
+    }
+
     this.windows.delete(id);
   }
 
