@@ -2,7 +2,7 @@ import React, { FunctionComponent, useContext, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ServerContext } from './ServerContext';
-import { LoadingView, DesktopApp, MobileApp, ModalManager, StoreNavigator } from '.';
+import { LoadingView, App, ModalManager, StoreNavigator } from '.';
 
 const RootContainer: FunctionComponent = () => {
   const { startupStore } = useContext(ServerContext);
@@ -12,9 +12,6 @@ const RootContainer: FunctionComponent = () => {
     // Artificial delay makes sure the user sees the progress bar to complete
     setTimeout(() => setIsDesktopReady(true), 100);
   };
-
-  const isMobile = window.innerWidth <= 768;
-  const App = isMobile ? MobileApp : DesktopApp;
 
   return (
     <>

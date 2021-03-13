@@ -1,14 +1,17 @@
 import React, { FunctionComponent, useContext, useEffect, ReactNode } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useLocation, useNavigate, matchPath } from 'react-router-dom';
+import { matchRoutes, useLocation, useNavigate } from 'react-router-dom';
 import { ServerContext } from './ServerContext';
+import { desktopRoutes, mobileRoutes } from './routes';
 import { parseWindowIdParam } from '../lib/urls';
+import { useIsMobile } from '../hooks/isMobile';
 
 interface StoreNavigatorProps {
   children: ReactNode;
 }
 
 const StoreNavigator: FunctionComponent<StoreNavigatorProps> = ({ children }: StoreNavigatorProps) => {
+  const { isMobile } = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
   const { windowStore } = useContext(ServerContext);
@@ -21,12 +24,25 @@ const StoreNavigator: FunctionComponent<StoreNavigatorProps> = ({ children }: St
   // windowId URL parameter is source of truth for the active window. This hook
   // detects changes in the URL and syncs the activeWindow windowStore prop.
   useEffect(() => {
-    const match = matchPath({ path: '/app/c/:windowId', end: false }, location.pathname);
+    const matches = matchRoutes(isMobile ? mobileRoutes : desktopRoutes, location, '/app');
 
-    if (match) {
-      windowStore.changeActiveWindowById(parseWindowIdParam(match.params['windowId']));
+    if (!matches) {
+      return;
     }
-  }, [location, windowStore]);
+
+    const routerParams: Record<string, string> = matches.reduce(
+      (accumulator, value) => ({ ...accumulator, ...value.params }),
+      {}
+    );
+
+    Object.entries(routerParams).forEach(([key, value]) => {
+      switch (key) {
+        case 'windowId':
+          windowStore.changeActiveWindowById(parseWindowIdParam(value));
+          break;
+      }
+    });
+  }, [isMobile, location, windowStore]);
 
   return <>{children}</>;
 };

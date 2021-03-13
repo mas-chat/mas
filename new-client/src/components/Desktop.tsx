@@ -3,19 +3,17 @@ import { observer } from 'mobx-react-lite';
 import { Box, Flex } from '@chakra-ui/react';
 import { Window } from '.';
 import { ServerContext } from './ServerContext';
+import { useIsMobile } from '../hooks/isMobile';
 
-interface DesktopProps {
-  singleWindowMode?: boolean;
-}
-
-const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: DesktopProps) => {
+const Desktop: FunctionComponent = () => {
   const { windowStore } = useContext(ServerContext);
+  const { isMobile } = useIsMobile();
   const windows = windowStore.windowsArray;
   const activeWindow = windowStore.activeWindow;
   const visibleWindows = windows.filter(window => window.desktopId === activeWindow?.desktopId);
   const rows = [...new Set(visibleWindows.map(window => window.row))].sort();
 
-  if (singleWindowMode) {
+  if (isMobile) {
     return activeWindow && <Window singleWindowMode={true} window={activeWindow} />;
   }
 

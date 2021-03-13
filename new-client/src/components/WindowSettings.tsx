@@ -1,4 +1,5 @@
 import React, { FunctionComponent, useContext } from 'react';
+import { observer } from 'mobx-react-lite';
 import { Box } from '@chakra-ui/react';
 import { ServerContext } from './ServerContext';
 
@@ -12,4 +13,4 @@ const WindowSettings: FunctionComponent = () => {
   return <Box>{windowStore.activeWindow.decoratedTitle}</Box>;
 };
 
-export default WindowSettings;
+export default observer(WindowSettings);
