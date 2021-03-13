@@ -4,7 +4,7 @@ import { Box, Flex } from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Window } from '.';
 import { ServerContext } from './ServerContext';
-import { BASE_ID, windowUrl, welcomeUrl } from '../lib/urls';
+import { parseWindowIdParam } from '../lib/urls';
 
 interface DesktopProps {
   singleWindowMode?: boolean;
@@ -18,20 +18,12 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
   const activeWindow = windowStore.activeWindow;
   const visibleWindows = windows.filter(window => window.desktopId === activeWindow?.desktopId);
   const rows = [...new Set(visibleWindows.map(window => window.row))].sort();
-  const windowsSignature = windows.map(window => window.id).join();
 
+  // windowId URL parameter is source of truth for the active window. This hook
+  // detects changes in the URL and syncs the activeWindow windowStore prop.
   useEffect(() => {
-    // windowId URL parameter is source of truth for the active window. This hook
-    // detects changes in the URL and syncs the activeWindow windowStore prop. If the
-    // URL points to non-existing window then tryChangeActiveWindowById() returns
-    // fallback window id or null when there are zero windows.
-    const urlWindowId = parseInt(windowIdUrlParam, 36) - BASE_ID;
-    const newActiveWindowId = windowStore.tryChangeActiveWindowById(urlWindowId);
-
-    if (newActiveWindowId !== urlWindowId) {
-      navigate(newActiveWindowId ? windowUrl({ windowId: newActiveWindowId }) : welcomeUrl());
-    }
-  }, [windowStore, windowIdUrlParam, navigate, windowsSignature]);
+    windowStore.changeActiveWindowById(parseWindowIdParam(windowIdUrlParam));
+  }, [windowStore, windowIdUrlParam, navigate]);
 
   if (singleWindowMode) {
     return activeWindow && <Window singleWindowMode={true} window={activeWindow} />;

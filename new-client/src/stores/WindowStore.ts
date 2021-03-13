@@ -35,6 +35,7 @@ import RootStore from './RootStore';
 import Socket from '../lib/socket';
 import { logout } from '../lib/cookie';
 import { setUnreadMessageCountBadge } from '../lib/favicon';
+import { rootUrl, welcomeUrl, windowUrl } from '../lib/urls';
 
 let nextLocalGid = -1;
 
@@ -43,7 +44,7 @@ class WindowStore {
   socket: Socket;
   windows = new Map<number, Window>();
   activeWindow: Window | null = null;
-  overrideActiveWindowId: number | null = null;
+  navigateToPath: string | null = null;
 
   cachedUpto = 0;
 
@@ -56,6 +57,7 @@ class WindowStore {
     makeObservable(this, {
       windows: observable,
       activeWindow: observable,
+      navigateToPath: observable,
       initDone: observable,
       desktops: computed,
       totalUnreadMessages: computed,
@@ -67,7 +69,8 @@ class WindowStore {
       sendText: action,
       finishStartup: action,
       handleToggleShowMemberList: action,
-      tryChangeActiveWindowById: action,
+      changeActiveWindowById: action,
+      navigateTo: action,
       removeUser: action
     });
 
@@ -108,6 +111,10 @@ class WindowStore {
 
   get firstWindow(): Window | null {
     return this.windowsArray[0] || null;
+  }
+
+  get fallbackWindow(): Window | null {
+    return this.windows.get(this.rootStore.profileStore.settings.activeWindowId) || this.firstWindow;
   }
 
   handlerServerNotification(ntf: Notification): boolean {
@@ -404,10 +411,6 @@ class WindowStore {
       window.updateGeneration(this.socket.sessionId as string);
       window.updateFromRecord(windowRecord);
     } else {
-      if (this.initDone) {
-        this.overrideActiveWindowId = windowRecord.windowId;
-      }
-
       this.windows.set(
         windowRecord.windowId,
         new Window({
@@ -427,6 +430,8 @@ class WindowStore {
           isMemberListVisible: !windowRecord.minimizedNamesList
         })
       );
+
+      this.initDone && this.navigateTo(windowUrl({ windowId: windowRecord.windowId }));
     }
   }
 
@@ -448,12 +453,14 @@ class WindowStore {
   deleteWindowById(id: number): void {
     const deletedWindow = this.windows.get(id);
 
+    this.windows.delete(id);
+
     if (this.activeWindow && this.activeWindow === deletedWindow) {
       const sameDesktopWindow = this.windowsArray.find(window => window.desktopId === deletedWindow?.desktopId);
-      this.overrideActiveWindowId = sameDesktopWindow?.id || this.firstWindow?.id || null;
-    }
+      const windowId = sameDesktopWindow?.id || this.firstWindow?.id;
 
-    this.windows.delete(id);
+      this.navigateTo(windowId ? windowUrl({ windowId }) : welcomeUrl());
+    }
   }
 
   async updatePassword(window: Window, password: string): Promise<{ success: boolean; errorMsg?: string }> {
@@ -522,9 +529,6 @@ class WindowStore {
         this.windows.delete(windowObject.id);
       }
     });
-
-    const { activeWindowId } = this.rootStore.profileStore.settings;
-    this.overrideActiveWindowId = activeWindowId;
 
     this.windows.forEach(window => window.resetLastSeenGid()); // TODO: In the future, last seen gid comes from server
     this.startTrackingVisibilityChanges();
@@ -604,31 +608,22 @@ class WindowStore {
     logout('User destroyed the account');
   }
 
-  tryChangeActiveWindowById(windowId: number): number | undefined {
-    const newActiveWindow = this.windows.get(this.overrideActiveWindowId || windowId) || this.firstWindow;
+  changeActiveWindowById(windowId: number): void {
+    const newActiveWindow = this.windows.get(windowId);
 
-    this.overrideActiveWindowId = null;
-
-    if (newActiveWindow !== this.activeWindow) {
+    if (!newActiveWindow) {
+      this.navigateTo(rootUrl());
+    } else if (newActiveWindow !== this.activeWindow) {
       this.activeWindow?.setFocus(false);
       this.activeWindow = newActiveWindow;
+      this.activeWindow.setFocus(true);
 
-      if (newActiveWindow) {
-        this.rootStore.profileStore.changeActiveWindowId(newActiveWindow);
-        newActiveWindow.setFocus(true);
-      }
+      this.rootStore.profileStore.changeActiveWindowId(newActiveWindow);
     }
-
-    return newActiveWindow?.id;
   }
 
-  resolveNextActiveWindow(): WindowModel | null {
-    const overrideWindow = this.overrideActiveWindowId && this.windows.get(this.overrideActiveWindowId);
-
-    // resolveNextActiveWindow can't be set to null in this function as this function gets
-    // called also "unnecessary" from <Route path="*">
-
-    return overrideWindow || this.firstWindow;
+  navigateTo(path: string): void {
+    this.navigateToPath = path;
   }
 
   private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): void {
