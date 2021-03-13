@@ -3,7 +3,6 @@ import { observer } from 'mobx-react-lite';
 import { Box, Flex } from '@chakra-ui/react';
 import { Window } from '.';
 import { ServerContext } from './ServerContext';
-import { useUrlParamsSync } from '../hooks/urlParamsSync';
 
 interface DesktopProps {
   singleWindowMode?: boolean;
@@ -15,8 +14,6 @@ const Desktop: FunctionComponent<DesktopProps> = ({ singleWindowMode = false }: 
   const activeWindow = windowStore.activeWindow;
   const visibleWindows = windows.filter(window => window.desktopId === activeWindow?.desktopId);
   const rows = [...new Set(visibleWindows.map(window => window.row))].sort();
-
-  useUrlParamsSync();
 
   if (singleWindowMode) {
     return activeWindow && <Window singleWindowMode={true} window={activeWindow} />;
