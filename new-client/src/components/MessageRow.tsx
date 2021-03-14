@@ -90,7 +90,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     });
 
   const renderMessage = () => {
-    const color = message.fromMe ? 'blue.600' : 'black';
+    const color = message.fromMe ? 'blue.600' : 'transparent';
 
     return (
       <>
@@ -134,7 +134,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
       flexDirection="row"
       fontSize="15px"
       width="100%"
-      bgColor={isUnread ? 'blue.100' : 'white'}
+      bgColor={isUnread ? 'blue.100' : 'transparent'}
       transition="background-color 1.5s ease-in"
     >
       <Box minWidth="50px">{message.createdTime}</Box>

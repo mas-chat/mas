@@ -50,7 +50,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
       <Flex
         px="0.6rem"
         py="0.20rem"
-        bg={window.focused ? 'blue.100' : 'gray.100'}
+        bg={window.focused ? 'themeActiveBg' : 'themeBg'}
         flexDirection="row"
         alignItems="center"
       >

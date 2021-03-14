@@ -33,12 +33,12 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesk
       px="1rem"
       py="0.3rem"
       _hover={{ color: 'teal.500' }}
-      bgColor={window.focused ? 'blue.100' : 'transparent'}
+      bgColor={window.focused ? 'themeActiveBg' : 'transparent'}
     >
       {window.type === '1on1' ? (
         <Avatar width="25px" height="25px" src={window.peerUser?.gravatarUrl}></Avatar>
       ) : (
-        <Box display="inline-block" textAlign="center" width="25px" height="25px" bg="gray.300">
+        <Box display="inline-block" textAlign="center" width="25px" height="25px" bg="themeBg">
           #
         </Box>
       )}{' '}
@@ -77,7 +77,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesk
       p={fullScreen ? '2rem' : '1rem 0rem'}
       height="100%"
       flexDirection="column"
-      bgColor="gray.100"
+      bgColor="themeBg"
     >
       {list}
       <Spacer />
