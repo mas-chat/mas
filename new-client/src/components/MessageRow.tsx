@@ -91,10 +91,11 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
 
   const renderMessage = () => {
     const color = message.fromMe ? 'blue.600' : undefined;
+    const nickColor = message.fromMe ? 'blue.600' : '#617eb5';
 
     return (
       <>
-        <Text as="b" flex="1" color={color}>
+        <Text fontWeight="extrabold" display="inline-block" flex="1" color={nickColor}>
           {message.nick}:
         </Text>{' '}
         <Text overflowWrap="break-word" wordBreak="break-word" as="span" color={color}>

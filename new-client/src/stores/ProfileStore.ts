@@ -1,4 +1,4 @@
-import { observable, makeObservable, action } from 'mobx';
+import { observable, makeObservable, action, runInAction } from 'mobx';
 import ProfileModel from '../models/Profile';
 import SettingsModel from '../models/Settings';
 import WindowModel from '../models/Window';
@@ -24,6 +24,8 @@ class ProfileStore {
     makeObservable(this, {
       profile: observable,
       settings: observable,
+      setName: action,
+      setEmail: action,
       updateProfile: action,
       fetchProfile: action,
       updateSettings: action
@@ -37,11 +39,21 @@ class ProfileStore {
         const { theme, activeDesktop: activeWindowId, emailConfirmed, canUseIRC } = ntf.settings;
         this.updateSettings(theme, activeWindowId, emailConfirmed, canUseIRC);
         break;
+      case 'FINISH_INIT':
+        this.fetchProfile();
       default:
         return false;
     }
 
     return true;
+  }
+
+  setName(name: string): void {
+    this.profile.name = name;
+  }
+
+  setEmail(email: string): void {
+    this.profile.email = email;
   }
 
   async updateProfile(name: string, email: string): Promise<void> {
@@ -61,8 +73,10 @@ class ProfileStore {
   async fetchProfile(): Promise<void> {
     const response = await this.socket.send<GetProfileRequest>({ id: 'GET_PROFILE' });
 
-    this.profile.name = response.name;
-    this.profile.email = response.email;
+    runInAction(() => {
+      this.profile.name = response.name;
+      this.profile.email = response.email;
+    });
   }
 
   updateSettings(

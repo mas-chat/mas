@@ -1,6 +1,6 @@
 import { observable, makeObservable, computed } from 'mobx';
 import UserModel, { systemUser, me, ircSystemUser } from '../models/User';
-import { Notification } from '../types/notifications';
+import { Notification, Network } from '../types/notifications';
 import { getUserId } from '../lib/cookie';
 import RootStore from './RootStore';
 import Socket from '../lib/socket';
@@ -24,7 +24,7 @@ class UserStore {
     });
   }
 
-  myNick(network: 'mas' | 'ircnet' | 'freenode' | 'w3c'): string | undefined {
+  myNick(network: Network): string | undefined {
     return this.me.nick[network];
   }
 
