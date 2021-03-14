@@ -44,7 +44,7 @@ class WindowStore {
   socket: Socket;
   windows = new Map<number, Window>();
   activeWindow: Window | null = null;
-  navigateToPath: string | null = null;
+  navigateToPath: { ts: number; path?: string } = { ts: 0 };
 
   cachedUpto = 0;
 
@@ -623,7 +623,7 @@ class WindowStore {
   }
 
   navigateTo(path: string): void {
-    this.navigateToPath = path;
+    this.navigateToPath = { ts: Date.now(), path };
   }
 
   private upsertMessage(window: WindowModel, message: MessageRecord, type: 'messages' | 'logMessages'): void {

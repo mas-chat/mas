@@ -17,8 +17,8 @@ const StoreNavigator: FunctionComponent<StoreNavigatorProps> = ({ children }: St
   const { windowStore } = useContext(ServerContext);
 
   useEffect(() => {
-    const newPath = windowStore.navigateToPath;
-    newPath && navigate(newPath);
+    const { ts, path } = windowStore.navigateToPath;
+    ts && path && navigate(path);
   }, [windowStore.navigateToPath, navigate]);
 
   // URL parameters are source of truth. This hook detects changes in them
