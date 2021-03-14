@@ -114,7 +114,9 @@ class WindowStore {
   }
 
   get fallbackWindow(): Window | null {
-    return this.windows.get(this.rootStore.profileStore.settings.activeWindowId) || this.firstWindow;
+    return (
+      this.activeWindow || this.windows.get(this.rootStore.profileStore.settings.activeWindowId) || this.firstWindow
+    );
   }
 
   handlerServerNotification(ntf: Notification): boolean {

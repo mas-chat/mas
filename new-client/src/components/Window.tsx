@@ -1,7 +1,7 @@
 import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useDropzone } from 'react-dropzone';
-import { Box, IconButton, Heading, Flex, Input } from '@chakra-ui/react';
+import { HStack, IconButton, Heading, Flex, Input } from '@chakra-ui/react';
 import { PlusSquareIcon, ArrowBackIcon } from '@chakra-ui/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { WindowMessageList, WindowMenu } from '.';
@@ -81,10 +81,17 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
           size="sm"
           padding="6px"
         />
-        <Box>
+        <HStack spacing="0.5rem">
           <input {...getInputProps()} />
-          <IconButton {...getRootProps()} aria-label="Options" isActive={isDragActive} icon={<PlusSquareIcon />} />
-        </Box>
+          <IconButton
+            {...getRootProps()}
+            aria-label="Options"
+            isActive={isDragActive}
+            icon={<PlusSquareIcon />}
+            variant="outline"
+            size="sm"
+          />
+        </HStack>
         <WindowMenu window={window} />
       </Flex>
     </Flex>

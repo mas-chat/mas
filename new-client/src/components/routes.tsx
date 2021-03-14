@@ -1,6 +1,17 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { Desktop, DesktopRootRedirect, Sidebar, SlidingSidebar, Welcome, WindowSettings } from '.';
+import {
+  Desktop,
+  DesktopRootRedirect,
+  Profile,
+  Search,
+  Sidebar,
+  SlidingSidebar,
+  Welcome,
+  WindowSettings,
+  CreateChannel,
+  JoinChannel
+} from '.';
 
 const routeGenerator = (mobile: boolean) => [
   {
@@ -15,11 +26,15 @@ const routeGenerator = (mobile: boolean) => [
       </>
     ),
     children: [
+      { caseSensitive: false, path: 'welcome', element: <Welcome /> },
+      { caseSensitive: false, path: 'profile', element: <Profile /> },
+      { caseSensitive: false, path: 'search', element: <Search /> },
+      { caseSensitive: false, path: 'create-channel', element: <CreateChannel /> },
+      { caseSensitive: false, path: 'join-channel', element: <JoinChannel /> },
       { caseSensitive: false, path: '/:activeWindowId/settings', element: <WindowSettings /> },
       { caseSensitive: false, path: '/:activeWindowId', element: <Desktop /> }
     ]
   },
-  { caseSensitive: false, path: 'welcome', element: <Welcome /> },
   { caseSensitive: false, path: '*', element: mobile ? <SlidingSidebar /> : <DesktopRootRedirect /> }
 ];
 

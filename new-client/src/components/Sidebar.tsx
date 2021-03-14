@@ -2,8 +2,8 @@ import React, { FunctionComponent, useContext } from 'react';
 import { Box, Flex, Heading, Spacer, LinkBox, Avatar, LinkOverlay, Tag, TagLabel } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import { Link } from 'react-router-dom';
+import { SidebarMenu } from '.';
 import { ServerContext } from './ServerContext';
-import { ProfileMenu } from '.';
 import type WindowModel from '../models/Window';
 import { windowUrl } from '../lib/urls';
 
@@ -81,12 +81,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesk
     >
       {list}
       <Spacer />
-      <Box p="8px">
-        <Heading as="button" size="s" width="100%">
-          Search
-        </Heading>
-      </Box>
-      <ProfileMenu />
+      <SidebarMenu />
     </Flex>
   );
 };

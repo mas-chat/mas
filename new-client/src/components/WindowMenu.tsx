@@ -31,7 +31,7 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window }: WindowMenuPr
 
   return (
     <Menu>
-      <MenuButton as={IconButton} aria-label="Options" icon={<HamburgerIcon />} />
+      <MenuButton as={IconButton} aria-label="Options" icon={<HamburgerIcon />} variant="outline" size="sm" />
       <MenuList>
         {window.type === WindowType.Group && (
           <MenuOptionGroup
@@ -44,11 +44,11 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window }: WindowMenuPr
             </MenuItemOption>
           </MenuOptionGroup>
         )}
+        <MenuDivider />
         <MenuItem as={Link} to={windowSettingsUrl({ windowId: window.id })} onClick={e => e.stopPropagation()}>
           Settings…
         </MenuItem>
-        <MenuDivider />
-        <MenuItem onClick={handleClose}>Close window and exit this {window.explainedType}</MenuItem>
+        <MenuItem onClick={handleClose}>Leave {window.explainedType}</MenuItem>
       </MenuList>
     </Menu>
   );
