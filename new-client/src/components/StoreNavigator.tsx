@@ -33,7 +33,7 @@ const StoreNavigator: FunctionComponent<StoreNavigatorProps> = ({ children }: St
 
     Object.entries(routerParams).forEach(([key, value]) => {
       switch (key) {
-        case 'windowId':
+        case 'activeWindowId':
           windowStore.changeActiveWindowById(parseWindowIdParam(value));
           break;
       }

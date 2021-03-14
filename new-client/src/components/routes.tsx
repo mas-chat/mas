@@ -15,8 +15,8 @@ const routeGenerator = (mobile: boolean) => [
       </>
     ),
     children: [
-      { caseSensitive: false, path: '/:windowId/settings', element: <WindowSettings /> },
-      { caseSensitive: false, path: '/:windowId', element: <Desktop /> }
+      { caseSensitive: false, path: '/:activeWindowId/settings', element: <WindowSettings /> },
+      { caseSensitive: false, path: '/:activeWindowId', element: <Desktop /> }
     ]
   },
   { caseSensitive: false, path: 'welcome', element: <Welcome /> },
