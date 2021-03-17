@@ -135,7 +135,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
       flexDirection="row"
       fontSize="15px"
       width="100%"
-      bgColor={isUnread ? 'blue.100' : 'transparent'}
+      bgColor={isUnread ? '#ff024d1a' : 'transparent'}
       transition="background-color 1.5s ease-in"
     >
       <Box minWidth="50px">{message.createdTime}</Box>
