@@ -1,11 +1,16 @@
-import React, { FunctionComponent, useContext, useState } from 'react';
+import React, { FunctionComponent, useContext, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { useColorMode } from '@chakra-ui/react';
+import { Theme } from '../types/notifications';
+import { ServerContextProvider } from './ServerContext';
+import { ModalContextProvider } from './ModalContext';
 import { ServerContext } from './ServerContext';
 import { LoadingView, App, ModalManager, StoreNavigator } from '.';
 
 const RootContainer: FunctionComponent = () => {
-  const { startupStore } = useContext(ServerContext);
+  const { startupStore, profileStore } = useContext(ServerContext);
+  const { setColorMode } = useColorMode();
   const [isDesktopReady, setIsDesktopReady] = useState(false);
 
   const onFirstRenderComplete = () => {
@@ -13,18 +18,24 @@ const RootContainer: FunctionComponent = () => {
     setTimeout(() => setIsDesktopReady(true), 100);
   };
 
+  useEffect(() => {
+    setColorMode(profileStore.settings.theme === Theme.Default ? 'light' : 'dark');
+  }, [profileStore.settings.theme, setColorMode]);
+
   return (
-    <>
-      <ModalManager />
-      {!isDesktopReady && <LoadingView />}
-      {startupStore.progress == 100 && (
-        <Router>
-          <StoreNavigator>
-            <App firstRenderComplete={onFirstRenderComplete} />
-          </StoreNavigator>
-        </Router>
-      )}
-    </>
+    <ServerContextProvider>
+      <ModalContextProvider>
+        <ModalManager />
+        {!isDesktopReady && <LoadingView />}
+        {startupStore.progress == 100 && (
+          <Router>
+            <StoreNavigator>
+              <App firstRenderComplete={onFirstRenderComplete} />
+            </StoreNavigator>
+          </Router>
+        )}
+      </ModalContextProvider>
+    </ServerContextProvider>
   );
 };
 

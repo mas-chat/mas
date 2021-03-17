@@ -91,15 +91,12 @@ class ProfileStore {
     this.settings.canUseIRC = canUseIRC === undefined ? this.settings.canUseIRC : canUseIRC;
   }
 
-  toggleTheme(): void {
-    const newTheme = this.settings.theme === Theme.Dark ? Theme.Default : Theme.Default;
-    this.updateSettings(newTheme);
+  setTheme(theme: Theme): void {
+    this.updateSettings(theme);
 
     this.socket.send({
       id: 'SET',
-      settings: {
-        theme: newTheme
-      }
+      settings: { theme }
     });
   }
 
