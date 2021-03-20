@@ -2,8 +2,7 @@ import React, { FunctionComponent, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Link, useNavigate } from 'react-router-dom';
 import { ButtonGroup, Flex, IconButton, Menu, MenuButton, MenuList, MenuItem, MenuDivider } from '@chakra-ui/react';
-import { AddIcon, SearchIcon } from '@chakra-ui/icons';
-import { IoPerson } from 'react-icons/io5';
+import { IoAdd, IoSearch, IoPerson } from 'react-icons/io5';
 import { ServerContext } from './ServerContext';
 import { searchUrl, profileUrl, createChannel, joinChannel } from '../lib/urls';
 
@@ -16,9 +15,14 @@ const DesktopMenu: FunctionComponent = () => {
   return (
     <Flex width="100%" justifyContent="center">
       <ButtonGroup size="sm" isAttached variant="outline">
-        <IconButton onClick={() => navigate(searchUrl())} aria-label="Search" icon={<SearchIcon />} />
         <Menu placement="right">
-          <MenuButton as={IconButton} aria-label="Add or Create" icon={<AddIcon />} variant="outline" size="sm" />
+          <MenuButton
+            as={IconButton}
+            aria-label="Add or Create"
+            icon={<IoAdd size="1.2rem" />}
+            variant="outline"
+            size="sm"
+          />
           <MenuList>
             <MenuItem as={Link} to={joinChannel()}>
               Join channel…
@@ -28,6 +32,7 @@ const DesktopMenu: FunctionComponent = () => {
             </MenuItem>
           </MenuList>
         </Menu>
+        <IconButton onClick={() => navigate(searchUrl())} aria-label="Search" icon={<IoSearch size="1.1rem" />} />
         <Menu placement="right">
           <MenuButton
             as={IconButton}
