@@ -2,7 +2,8 @@ import React, { FunctionComponent, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Link, useNavigate } from 'react-router-dom';
 import { ButtonGroup, Flex, IconButton, Menu, MenuButton, MenuList, MenuItem, MenuDivider } from '@chakra-ui/react';
-import { AddIcon, SearchIcon, ViewIcon } from '@chakra-ui/icons';
+import { AddIcon, SearchIcon } from '@chakra-ui/icons';
+import { IoPerson } from 'react-icons/io5';
 import { ServerContext } from './ServerContext';
 import { searchUrl, profileUrl, createChannel, joinChannel } from '../lib/urls';
 
@@ -28,7 +29,13 @@ const DesktopMenu: FunctionComponent = () => {
           </MenuList>
         </Menu>
         <Menu placement="right">
-          <MenuButton as={IconButton} aria-label="Profile" icon={<ViewIcon />} variant="outline" size="sm" />
+          <MenuButton
+            as={IconButton}
+            aria-label="Profile"
+            icon={<IoPerson size="1.1rem" />}
+            variant="outline"
+            size="sm"
+          />
           <MenuList>
             <MenuItem as={Link} to={profileUrl()}>
               Profile…
