@@ -86,6 +86,9 @@ module.exports = function buildRouter() {
   // Client
   router.get('/app', clientController);
 
+  // TODO: Improve when V1 client (route below) is removed
+  router.get(/^\/app\/c\/(.+)/, clientController);
+
   // V1 Client assets
   router.get(/^\/app\/(.+)/, async ctx => {
     const subPath = ctx.params[0];
