@@ -19,7 +19,7 @@ const RootContainer: FunctionComponent = () => {
   };
 
   useEffect(() => {
-    setColorMode(profileStore.settings.theme === Theme.Default ? 'light' : 'dark');
+    setColorMode(profileStore.settings.theme === Theme.DefaultV2 ? 'light' : 'dark');
   }, [profileStore.settings.theme, setColorMode]);
 
   return (

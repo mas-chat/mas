@@ -15,7 +15,7 @@ export default class SettingModel {
   public canUseIRC: boolean;
 
   constructor({ theme, activeWindowId, emailConfirmed, canUseIRC }: SettingModelProps = {}) {
-    this.theme = theme || Theme.Default;
+    this.theme = theme || Theme.DefaultV2;
     this.activeWindowId = activeWindowId || 0;
     this.emailConfirmed = emailConfirmed || true;
     this.canUseIRC = canUseIRC || false;

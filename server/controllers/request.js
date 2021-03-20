@@ -356,7 +356,7 @@ async function handleSet({ user, command }) {
         }
         break;
       case 'theme':
-        if (!(value === 'default' || value === 'dark')) {
+        if (!(value === 'default' || value === 'dark' || value === 'default-v2' || value === 'dark-v2')) {
           return { status: 'ERROR', errorMsg: 'Unknown theme' };
         }
         break;

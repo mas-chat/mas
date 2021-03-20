@@ -55,6 +55,10 @@ export default Component.extend({
 
     toggleDarkTheme() {
       dispatch('TOGGLE_THEME');
+    },
+
+    switchClient() {
+      dispatch('SWITCH_CLIENT');
     }
   },
 

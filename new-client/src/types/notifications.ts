@@ -19,7 +19,9 @@ export enum MessageStatus {
 
 export enum Theme {
   Default = 'default',
-  Dark = 'dark'
+  Dark = 'dark',
+  DefaultV2 = 'default-v2',
+  DarkV2 = 'dark-v2'
 }
 
 export enum Network {

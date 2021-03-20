@@ -21,6 +21,20 @@ class SettingStore {
     });
   }
 
+  handleSwitchClient() {
+    socket.send(
+      {
+        id: 'SET',
+        settings: {
+          theme: 'dark-v2'
+        }
+      },
+      () => {
+        window.location = '/';
+      }
+    );
+  }
+
   handleConfirmEmail() {
     const msg = "Confirmation link sent. Check your spam folder if you don't see it in inbox.";
 

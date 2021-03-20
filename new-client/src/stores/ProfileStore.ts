@@ -91,13 +91,18 @@ class ProfileStore {
     this.settings.canUseIRC = canUseIRC === undefined ? this.settings.canUseIRC : canUseIRC;
   }
 
-  setTheme(theme: Theme): void {
+  async setTheme(theme: Theme): Promise<void> {
     this.updateSettings(theme);
 
-    this.socket.send({
+    await this.socket.send({
       id: 'SET',
       settings: { theme }
     });
+
+    // TODO: Remove when old client is removed
+    if (theme === Theme.Default) {
+      window.location.href = '/';
+    }
   }
 
   async handleConfirmEmail(): Promise<void> {

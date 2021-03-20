@@ -19,6 +19,7 @@ import { get, root } from '../lib/conf';
 const fs = require('fs');
 const path = require('path');
 const handlebars = require('handlebars');
+const Settings = require('../models/settings');
 
 let templateV1;
 let templateV2;
@@ -47,7 +48,17 @@ try {
 module.exports = async function index(ctx) {
   ctx.set('Cache-control', 'private, max-age=0, no-cache');
 
-  const template = 'v2' in ctx.query ? templateV2 : templateV1;
+  const user = ctx.mas.user;
+
+  if (!user) {
+    ctx.response.redirect('/');
+    return;
+  }
+
+  const settings = await Settings.findFirst({ userId: user.id });
+  const theme = settings.get('theme').split('-')[0];
+  const version = settings.get('theme').split('-')[1] || 'v1';
+  const template = version === 'v1' ? templateV1 : templateV2;
 
   if (!template) {
     ctx.body = 'Generated index.html file is missing.';
@@ -61,6 +72,7 @@ module.exports = async function index(ctx) {
     }),
     extraClientHead: get('snippets:extra_client_head') || '',
     extraClientBody: get('snippets:extra_client_body') || '',
+    colorMode: theme === 'default' ? 'light' : 'dark',
     revision
   });
 };

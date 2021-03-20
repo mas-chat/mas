@@ -55,8 +55,9 @@ const Profile: FunctionComponent = () => {
           <FormLabel as="legend">UI Theme</FormLabel>
           <RadioGroup onChange={value => profileStore.setTheme(value as Theme)} value={profileStore.settings.theme}>
             <HStack spacing="24px">
-              <Radio value="default">Light</Radio>
-              <Radio value="dark">Dark</Radio>
+              <Radio value="default">Old client</Radio>
+              <Radio value="default-v2">Light</Radio>
+              <Radio value="dark-v2">Dark</Radio>
             </HStack>
           </RadioGroup>
         </FormControl>
