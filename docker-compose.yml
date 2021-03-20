@@ -67,7 +67,7 @@ services:
     ports:
       - '127.0.0.1:9100:9100'
   redis:
-    image: 'redis:6.0.9'
+    image: 'redis:6.2.1'
     restart: always
     ports:
       - '127.0.0.1:6379:6379'
