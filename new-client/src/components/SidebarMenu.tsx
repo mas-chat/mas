@@ -4,11 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ButtonGroup, Flex, IconButton, Menu, MenuButton, MenuList, MenuItem, MenuDivider } from '@chakra-ui/react';
 import { IoAdd, IoSearch, IoPerson } from 'react-icons/io5';
 import { ServerContext } from './ServerContext';
-import { searchUrl, profileUrl, createChannel, joinChannel } from '../lib/urls';
+import { searchUrl, profileUrl, createChannel, joinChannel, joinIRCChannel } from '../lib/urls';
 
 const DesktopMenu: FunctionComponent = () => {
   const navigate = useNavigate();
-  const { windowStore } = useContext(ServerContext);
+  const { windowStore, profileStore } = useContext(ServerContext);
 
   const handleLogout = (allSessions: boolean) => windowStore.handleLogout(allSessions);
 
@@ -30,6 +30,11 @@ const DesktopMenu: FunctionComponent = () => {
             <MenuItem as={Link} to={createChannel()}>
               Create channel…
             </MenuItem>
+            {profileStore.settings.canUseIRC && (
+              <MenuItem as={Link} to={joinIRCChannel()}>
+                Join IRC channel…
+              </MenuItem>
+            )}
           </MenuList>
         </Menu>
         <IconButton onClick={() => navigate(searchUrl())} aria-label="Search" icon={<IoSearch size="1.1rem" />} />

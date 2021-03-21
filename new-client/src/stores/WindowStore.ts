@@ -295,7 +295,7 @@ class WindowStore {
   async joinIrcChannel(
     name: string,
     network: Network,
-    password: string
+    password?: string
   ): Promise<{ success: boolean; errorMsg?: string }> {
     const response = await this.socket.send<JoinRequest>({
       id: 'JOIN',

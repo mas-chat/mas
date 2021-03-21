@@ -10,7 +10,8 @@ import {
   Welcome,
   WindowSettings,
   CreateChannel,
-  JoinChannel
+  JoinChannel,
+  JoinIRCChannel
 } from '.';
 
 const routeGenerator = (mobile: boolean) => [
@@ -31,6 +32,7 @@ const routeGenerator = (mobile: boolean) => [
       { caseSensitive: false, path: 'search', element: <Search /> },
       { caseSensitive: false, path: 'create-channel', element: <CreateChannel /> },
       { caseSensitive: false, path: 'join-channel', element: <JoinChannel /> },
+      { caseSensitive: false, path: 'join-irc-channel', element: <JoinIRCChannel /> },
       { caseSensitive: false, path: '/:activeWindowId/settings', element: <WindowSettings /> },
       { caseSensitive: false, path: '/:activeWindowId', element: <Desktop /> }
     ]

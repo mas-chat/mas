@@ -13,6 +13,8 @@ export const createChannel = (): string => '/app/c/create-channel';
 
 export const joinChannel = (): string => '/app/c/join-channel';
 
+export const joinIRCChannel = (): string => '/app/c/join-irc-channel';
+
 export const windowUrl = ({ windowId }: { windowId: number }): string => `/app/c/${encodeId(windowId)}`;
 
 export const windowSettingsUrl = ({ windowId }: { windowId: number }): string =>

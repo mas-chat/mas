@@ -7,6 +7,7 @@ export { default as Search } from './Search';
 export { default as SidebarMenu } from './SidebarMenu';
 export { default as CreateChannel } from './CreateChannel';
 export { default as JoinChannel } from './JoinChannel';
+export { default as JoinIRCChannel } from './JoinIRCChannel';
 export { default as Desktop } from './Desktop';
 export { default as Sidebar } from './Sidebar';
 export { default as Window } from './Window';
