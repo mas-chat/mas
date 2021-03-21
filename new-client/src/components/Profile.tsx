@@ -37,27 +37,18 @@ const Profile: FunctionComponent = () => {
     setNick(userStore.myNick);
   }, [profileStore.profile.email, profileStore.profile.name, userStore.myNick]);
 
-  const handleSave = async (type: string) => {
-    let error: false | string = false;
-
-    switch (type) {
-      case 'name':
-        error = await profileStore.updateName(name);
-        break;
-      case 'email':
-        error = await profileStore.updateEmail(email);
-        break;
-      case 'nick':
-        error = await profileStore.updateNick(nick);
-        break;
-    }
+  const handleSave = async (type: 'name' | 'email' | 'nick') => {
+    const value = type === 'name' ? name : type === 'email' ? 'email' : 'nick';
+    const { success, errorMsg } = await profileStore.updateProfile(type, value);
 
     const capitalizedType = `${type.substr(0, 1).toUpperCase()}${type.substr(1)}`;
 
     toast({
-      title: error ? 'Failed to save' : 'Saved',
-      description: error ? `Failed to update ${type}. Reason: ${error}` : `${capitalizedType} updated successfully.`,
-      status: error ? 'error' : 'success',
+      title: success ? 'Saved' : 'Failed to save',
+      description: success
+        ? `${capitalizedType} updated successfully.`
+        : `Failed to update ${type}. Reason: ${errorMsg}`,
+      status: success ? 'success' : 'error',
       duration: 3000,
       isClosable: true
     });

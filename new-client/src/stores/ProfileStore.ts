@@ -2,7 +2,6 @@ import { observable, makeObservable, action, runInAction } from 'mobx';
 import ProfileModel from '../models/Profile';
 import SettingsModel from '../models/Settings';
 import WindowModel from '../models/Window';
-import { ModalType } from '../models/Modal';
 import { Notification, Theme } from '../types/notifications';
 import { UpdateProfileRequest, GetProfileRequest, SendConfirmEmailRequest } from '../types/requests';
 import RootStore from './RootStore';
@@ -24,9 +23,6 @@ class ProfileStore {
     makeObservable(this, {
       profile: observable,
       settings: observable,
-      updateName: action,
-      updateEmail: action,
-      updateNick: action,
       fetchProfile: action,
       updateSettings: action
     });
@@ -48,34 +44,26 @@ class ProfileStore {
     return true;
   }
 
-  async updateName(name: string): Promise<false | string> {
-    const response = await this.socket.send<UpdateProfileRequest>({ id: 'UPDATE_PROFILE', name });
-
-    if (response.status === 'OK') {
-      this.profile.name = name;
-      return false;
+  async updateProfile(
+    type: 'name' | 'email' | 'nick',
+    value: string
+  ): Promise<{ success: boolean; errorMsg?: string }> {
+    if (type === 'nick') {
+      return { success: false, errorMsg: 'No implemented yet.' };
     }
 
-    return response.errorMsg as string;
-  }
-
-  async updateEmail(email: string): Promise<false | string> {
-    const response = await this.socket.send<UpdateProfileRequest>({ id: 'UPDATE_PROFILE', email });
+    const response = await this.socket.send<UpdateProfileRequest>({ id: 'UPDATE_PROFILE', [type]: value });
 
     if (response.status === 'OK') {
-      // Don't nag about unconfirmed email address anymore in this session
-      this.setEmailConfirmed();
+      if (type === 'email') {
+        this.setEmailConfirmed();
+      }
 
-      this.profile.email = email;
-      return false;
+      this.profile[type] = value;
+      return { success: true };
     }
 
-    return response.errorMsg as string;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async updateNick(nick: string): Promise<false | string> {
-    return 'No implemented yet.';
+    return { success: false, errorMsg: response.errorMsg };
   }
 
   async fetchProfile(): Promise<void> {
