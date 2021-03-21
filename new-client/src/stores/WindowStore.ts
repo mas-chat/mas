@@ -280,12 +280,13 @@ class WindowStore {
     return { success, ...(success ? {} : { errorMsg: response.errorMsg }) };
   }
 
-  async joinGroup(name: string, password: string): Promise<{ success: boolean; errorMsg?: string }> {
+  async joinGroup(name: string): Promise<{ success: boolean; errorMsg?: string }> {
+    // TODO: Remove support for channel passwords in mas
     const response = await this.socket.send<JoinRequest>({
       id: 'JOIN',
       network: Network.Mas,
       name,
-      password
+      password: ''
     });
     const success = response.status === 'OK';
 
