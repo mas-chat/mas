@@ -273,8 +273,8 @@ class WindowStore {
     }
   }
 
-  async createGroup(name: string, password: string): Promise<{ success: boolean; errorMsg?: string }> {
-    const response = await this.socket.send<CreateRequest>({ id: 'CREATE', name, password });
+  async createGroup(name: string): Promise<{ success: boolean; errorMsg?: string }> {
+    const response = await this.socket.send<CreateRequest>({ id: 'CREATE', name });
     const success = response.status === 'OK';
 
     return { success, ...(success ? {} : { errorMsg: response.errorMsg }) };
@@ -285,8 +285,7 @@ class WindowStore {
     const response = await this.socket.send<JoinRequest>({
       id: 'JOIN',
       network: Network.Mas,
-      name,
-      password: ''
+      name
     });
     const success = response.status === 'OK';
 

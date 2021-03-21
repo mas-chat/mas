@@ -3,7 +3,7 @@ import { Network, MessageRecord, AlertsRecord } from './notifications';
 export interface CreateRequest {
   id: 'CREATE';
   name: string;
-  password: string;
+  password?: string;
 }
 
 export interface CreateAcknowledgement {
@@ -40,7 +40,7 @@ export interface JoinRequest {
   id: 'JOIN';
   network: Network;
   name: string;
-  password: string;
+  password?: string;
 }
 
 export interface JoinAcknowledgement {
