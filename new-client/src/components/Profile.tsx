@@ -12,19 +12,56 @@ import {
   Radio,
   RadioGroup,
   HStack,
-  VStack
+  VStack,
+  Button,
+  useToast
 } from '@chakra-ui/react';
 import { ServerContext } from './ServerContext';
-import { Network, Theme } from '../types/notifications';
+import { Theme } from '../types/notifications';
 import { rootUrl } from '../lib/urls';
 
 const Profile: FunctionComponent = () => {
+  const toast = useToast();
   const { profileStore, userStore } = useContext(ServerContext);
-  const [nick, setNick] = useState(userStore.myNick(Network.Mas));
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [nick, setNick] = useState<string>('');
 
   useEffect(() => {
     profileStore.fetchProfile();
   }, [profileStore]);
+
+  useEffect(() => {
+    setName(profileStore.profile.name);
+    setEmail(profileStore.profile.email);
+    setNick(userStore.myNick);
+  }, [profileStore.profile.email, profileStore.profile.name, userStore.myNick]);
+
+  const handleSave = async (type: string) => {
+    let error: false | string = false;
+
+    switch (type) {
+      case 'name':
+        error = await profileStore.updateName(name);
+        break;
+      case 'email':
+        error = await profileStore.updateEmail(email);
+        break;
+      case 'nick':
+        error = await profileStore.updateNick(nick);
+        break;
+    }
+
+    const capitalizedType = `${type.substr(0, 1).toUpperCase()}${type.substr(1)}`;
+
+    toast({
+      title: error ? 'Failed to save' : 'Saved',
+      description: error ? `Failed to update ${type}. Reason: ${error}` : `${capitalizedType} updated successfully.`,
+      status: error ? 'error' : 'success',
+      duration: 3000,
+      isClosable: true
+    });
+  };
 
   return (
     <Flex width="100%" height="100%" p="1rem" direction="column">
@@ -32,23 +69,55 @@ const Profile: FunctionComponent = () => {
         <Heading flex="1">Profile</Heading>
         <CloseButton as={Link} to={rootUrl()} />
       </Flex>
-      <VStack flex="1" spacing="1rem">
+      <VStack flex="1" spacing="1rem" maxWidth="800px">
         <FormControl id="name">
           <FormLabel>Your name</FormLabel>
-          <Input type="text" value={profileStore.profile.name} onChange={e => profileStore.setName(e.target.value)} />
+          <Flex direction="row">
+            <Input type="text" value={name} onChange={e => setName(e.target.value)} />
+            {name !== profileStore.profile.name && (
+              <>
+                <Button onClick={() => handleSave('name')} mx="1rem">
+                  Save
+                </Button>
+                <Button onClick={() => setName(profileStore.profile.name)} variant="ghost" mr="1rem">
+                  Cancel
+                </Button>
+              </>
+            )}
+          </Flex>
         </FormControl>
         <FormControl id="email">
           <FormLabel>Your Email address</FormLabel>
-          <Input
-            type="email"
-            value={profileStore.profile.email}
-            onChange={e => profileStore.setEmail(e.target.value)}
-          />
+          <Flex direction="row">
+            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} />
+            {email !== profileStore.profile.email && (
+              <>
+                <Button onClick={() => handleSave('email')} mx="1rem">
+                  Save
+                </Button>
+                <Button onClick={() => setEmail(profileStore.profile.email)} variant="ghost" mr="1rem">
+                  Cancel
+                </Button>
+              </>
+            )}
+          </Flex>
           <FormHelperText>We will never share your email.</FormHelperText>
         </FormControl>
         <FormControl id="nick">
           <FormLabel>Your Nick Name</FormLabel>
-          <Input type="text" value={nick} onChange={e => setNick(e.target.value)} />
+          <Flex direction="row">
+            <Input type="text" value={nick} onChange={e => setNick(e.target.value)} />
+            {nick !== userStore.myNick && (
+              <>
+                <Button onClick={() => handleSave('nick')} mx="1rem">
+                  Save
+                </Button>
+                <Button onClick={() => setNick(userStore.myNick)} variant="ghost" mr="1rem">
+                  Cancel
+                </Button>
+              </>
+            )}
+          </Flex>
           <FormHelperText>Can be 3-10 characters long?</FormHelperText>
         </FormControl>
         <FormControl as="fieldset">

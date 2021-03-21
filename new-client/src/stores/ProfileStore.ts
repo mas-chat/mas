@@ -24,9 +24,9 @@ class ProfileStore {
     makeObservable(this, {
       profile: observable,
       settings: observable,
-      setName: action,
-      setEmail: action,
-      updateProfile: action,
+      updateName: action,
+      updateEmail: action,
+      updateNick: action,
       fetchProfile: action,
       updateSettings: action
     });
@@ -48,26 +48,34 @@ class ProfileStore {
     return true;
   }
 
-  setName(name: string): void {
-    this.profile.name = name;
+  async updateName(name: string): Promise<false | string> {
+    const response = await this.socket.send<UpdateProfileRequest>({ id: 'UPDATE_PROFILE', name });
+
+    if (response.status === 'OK') {
+      this.profile.name = name;
+      return false;
+    }
+
+    return response.errorMsg as string;
   }
 
-  setEmail(email: string): void {
-    this.profile.email = email;
-  }
-
-  async updateProfile(name: string, email: string): Promise<void> {
-    const response = await this.socket.send<UpdateProfileRequest>({ id: 'UPDATE_PROFILE', name, email });
+  async updateEmail(email: string): Promise<false | string> {
+    const response = await this.socket.send<UpdateProfileRequest>({ id: 'UPDATE_PROFILE', email });
 
     if (response.status === 'OK') {
       // Don't nag about unconfirmed email address anymore in this session
       this.setEmailConfirmed();
 
-      this.profile.name = name;
       this.profile.email = email;
-    } else {
-      this.rootStore.modalStore.openModal({ type: ModalType.Info, title: 'Error', body: response.errorMsg as string });
+      return false;
     }
+
+    return response.errorMsg as string;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async updateNick(nick: string): Promise<false | string> {
+    return 'No implemented yet.';
   }
 
   async fetchProfile(): Promise<void> {

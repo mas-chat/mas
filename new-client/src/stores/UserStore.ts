@@ -20,12 +20,13 @@ class UserStore {
 
     makeObservable(this, {
       users: observable,
-      me: computed
+      me: computed,
+      myNick: computed
     });
   }
 
-  myNick(network: Network): string | undefined {
-    return this.me.nick[network];
+  get myNick(): string {
+    return this.me.nick[Network.Mas];
   }
 
   get me(): UserModel {
