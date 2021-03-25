@@ -1,3 +1,7 @@
+/* eslint  @typescript-eslint/no-var-requires: off */
+
+const CopyPlugin = require('copy-webpack-plugin');
+
 module.exports = {
   entry: './src/index.tsx',
   resolve: {
@@ -15,5 +19,10 @@ module.exports = {
         enforce: 'pre'
       }
     ]
-  }
+  },
+  plugins: [
+    new CopyPlugin({
+      patterns: [{ from: '../client/public/assets/sounds/staple_gun.mp3', to: 'staple_gun.mp3' }]
+    })
+  ]
 };
