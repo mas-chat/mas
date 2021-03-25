@@ -1,22 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 
-// Plus one to make sure rounding doesn't interfere
-const msToMidnight = () => dayjs().add(1, 'day').startOf('date').diff(dayjs()) + 1;
+const DAY_POLLING_FREQUENCY = 1000 * 10; // 10 seconds
 
 export function useCurrentDate(): Dayjs {
   const [currentDate, setCurrentDate] = useState(dayjs());
 
-  const updateDate = useCallback((): ReturnType<typeof setTimeout> => {
-    const currentDate = dayjs();
-    const msToNextDay = msToMidnight();
+  const updateDate = useCallback((): void => {
+    const newCurrentDate = dayjs();
 
-    setCurrentDate(currentDate);
-    return setTimeout(updateDate, msToNextDay);
-  }, []);
+    if (!newCurrentDate.isSame(currentDate, 'day')) {
+      setCurrentDate(newCurrentDate);
+    }
+  }, [currentDate]);
 
   useEffect(() => {
-    const timer = updateDate();
+    updateDate();
+    const timer = setInterval(updateDate, DAY_POLLING_FREQUENCY);
     return () => clearTimeout(timer);
   }, [updateDate]);
 
