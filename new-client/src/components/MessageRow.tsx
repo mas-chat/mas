@@ -90,8 +90,8 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     });
 
   const renderMessage = () => {
-    const color = message.fromMe ? 'blue.600' : undefined;
-    const nickColor = message.fromMe ? 'blue.600' : '#617eb5';
+    const color = message.isFromMe ? 'blue.600' : undefined;
+    const nickColor = message.isFromMe ? 'blue.600' : '#617eb5';
 
     return (
       <>

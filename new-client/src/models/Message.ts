@@ -88,6 +88,7 @@ export default class MessageModel {
       avatarUrl: computed,
       isMessageFromUser: computed,
       isChannelAction: computed,
+      isFromMe: computed,
       isNotable: computed,
       isBanner: computed,
       isServerNote: computed,
@@ -160,7 +161,7 @@ export default class MessageModel {
     return `//gravatar.com/avatar/${this.user.gravatar}?d=mm`;
   }
 
-  get fromMe(): boolean {
+  get isFromMe(): boolean {
     return this.user === me;
   }
 
@@ -179,7 +180,7 @@ export default class MessageModel {
   }
 
   get isNotable(): boolean {
-    return [MessageCategory.Message, MessageCategory.Action].includes(this.category) && !this.fromMe;
+    return [MessageCategory.Message, MessageCategory.Action].includes(this.category) && !this.isFromMe;
   }
 
   get isBanner(): boolean {

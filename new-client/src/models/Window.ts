@@ -44,6 +44,7 @@ export default class WindowModel {
   isMemberListVisible = false;
   focused = false;
   lastSeenMessageGid = 0;
+  unreadMessageCount = 0;
 
   operators: Array<UserModel>;
   voices: Array<UserModel>;
@@ -105,10 +106,10 @@ export default class WindowModel {
       isMemberListVisible: observable,
       focused: observable,
       lastSeenMessageGid: observable,
+      unreadMessageCount: observable,
       lastMessageGid: computed,
       sortedMessages: computed,
       sortedLogMessages: computed,
-      unreadMessageCount: computed,
       participants: computed,
       decoratedTitle: computed,
       simplifiedName: computed,
@@ -136,6 +137,7 @@ export default class WindowModel {
   resetLastSeenGid({ onlyIfFocused }: { onlyIfFocused: boolean } = { onlyIfFocused: false }): void {
     if (!onlyIfFocused || this.focused) {
       this.lastSeenMessageGid = this.lastMessageGid;
+      this.unreadMessageCount = 0;
     }
   }
 
@@ -154,10 +156,6 @@ export default class WindowModel {
 
   get lastMessageGid(): number {
     return this.sortedMessages[this.sortedMessages.length - 1]?.gid || 0;
-  }
-
-  get unreadMessageCount(): number {
-    return this.sortedMessages.filter(message => message.gid > this.lastSeenMessageGid && message.isNotable).length;
   }
 
   get participants(): Map<string, UserModel> {

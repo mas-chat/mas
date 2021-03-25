@@ -39,6 +39,9 @@ import { rootUrl, welcomeUrl, windowUrl } from '../lib/urls';
 
 let nextLocalGid = -1;
 
+const soundAlertElement = new Audio('staple_gun.mp3');
+const DesktopNotification = window.Notification;
+
 class WindowStore {
   rootStore: RootStore;
   socket: Socket;
@@ -70,6 +73,7 @@ class WindowStore {
       finishStartup: action,
       handleToggleShowMemberList: action,
       changeActiveWindowById: action,
+      updateWindowAlerts: action,
       navigateTo: action,
       removeUser: action
     });
@@ -476,7 +480,7 @@ class WindowStore {
     return { success, ...(success ? {} : { errorMsg: response.errorMsg }) };
   }
 
-  async updateTopic(window: Window, topic: string): Promise<void> {
+  async updateTopic(window: Window, topic: string | null): Promise<void> {
     await this.socket.send<UpdateTopicRequest>({
       id: 'UPDATE_TOPIC',
       windowId: window.id,
@@ -639,19 +643,51 @@ class WindowStore {
     const user = this.rootStore.userStore.users.get(message.userId);
 
     if (user) {
-      window[type].set(
-        message.gid,
-        new Message({
-          user,
-          window,
-          gid: message.gid,
+      const messageModel = new Message({
+        user,
+        window,
+        gid: message.gid,
+        body: message.body,
+        category: message.cat,
+        timestamp: message.ts,
+        updatedTimestamp: message.updatedTs,
+        status: message.status
+      });
+
+      window[type].set(message.gid, messageModel);
+
+      this.newMessageAlert(window, messageModel);
+    }
+  }
+
+  private newMessageAlert(window: WindowModel, message: Message) {
+    if (!message.isNotable || message.isFromMe || !this.initDone) {
+      return;
+    }
+
+    if (window.alerts.sound) {
+      soundAlertElement.pause();
+      soundAlertElement.currentTime = 0;
+      soundAlertElement.play().catch(e => {
+        console.log(`Sound notification failed, reason: ${e}`);
+      });
+    }
+
+    if (window.alerts.notification) {
+      const notificationsSupported = typeof DesktopNotification === 'function';
+
+      if (notificationsSupported && DesktopNotification.permission === 'granted') {
+        const ntf = new DesktopNotification(`${message.nick} (${window.type})`, {
           body: message.body,
-          category: message.cat,
-          timestamp: message.ts,
-          updatedTimestamp: message.updatedTs,
-          status: message.status
-        })
-      );
+          icon: message.avatarUrl
+        });
+
+        ntf.onclick = () => this.navigateTo(windowUrl({ windowId: window.id }));
+      }
+    }
+
+    if (window.alerts.title) {
+      window.unreadMessageCount++;
     }
   }
 

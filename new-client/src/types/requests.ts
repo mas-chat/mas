@@ -107,7 +107,7 @@ export interface UpdatePasswordAcknowledgement {
 export interface UpdateTopicRequest {
   id: 'UPDATE_TOPIC';
   windowId: number;
-  topic: string;
+  topic: string | null;
 }
 
 export interface UpdateTopicAcknowledgement {
