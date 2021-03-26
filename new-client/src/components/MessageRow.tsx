@@ -209,7 +209,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
         onMouseLeave={handleUnfocused}
         bgColor={focused ? '#253f726b' : 'transparent'}
       >
-        {message.isMessageFromUser && !editedBody && (
+        {message.isMessageFromUser && message.isFromMe && !editedBody && (
           <Box position="absolute" right="0">
             <Menu placement="left">
               <MenuButton
