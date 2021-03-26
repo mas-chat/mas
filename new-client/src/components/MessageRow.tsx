@@ -1,7 +1,23 @@
-import React, { FunctionComponent, useContext } from 'react';
-import { Box, Flex, Link, Text, Badge, Image } from '@chakra-ui/react';
+import React, { FunctionComponent, useContext, useState, KeyboardEvent } from 'react';
+import {
+  Box,
+  Flex,
+  Icon,
+  Link,
+  Text,
+  Badge,
+  Image,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Input
+} from '@chakra-ui/react';
+import { IoMenu, IoPencil } from 'react-icons/io5';
 import { observer } from 'mobx-react-lite';
 import URI from 'urijs';
+import { ServerContext } from './ServerContext';
 import { ImageModal, YouTubePreview } from '.';
 import { ModalContext } from './ModalContext';
 import MessageModel, {
@@ -22,6 +38,10 @@ interface MessageRowProps {
 
 const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: MessageRowProps) => {
   const modal = useContext(ModalContext);
+  const { windowStore } = useContext(ServerContext);
+  const [focused, setFocused] = useState<boolean>(false);
+  const [editedBody, setEditedBody] = useState<string | null>(null);
+
   const showModal = (url: URI) => modal.onShow(<ImageModal src={url.toString()} />);
 
   const renderText = (text: TextPart) => text.text;
@@ -89,18 +109,47 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
       }
     });
 
+  const editedLabel = () =>
+    message.edited && (
+      <Text as="span" fontSize="xs" ml="0.5rem">
+        <Icon as={IoPencil} /> {message.updatedTime}
+      </Text>
+    );
+
+  const onKeyUp = (event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      windowStore.editMessage(message, editedBody || '');
+      setEditedBody(null);
+    }
+
+    if (event.key === 'Escape') {
+      setEditedBody(null);
+    }
+  };
+
   const renderMessage = () => {
     const color = message.isFromMe ? 'blue.600' : undefined;
     const nickColor = message.isFromMe ? 'blue.600' : '#617eb5';
+
+    if (editedBody) {
+      return <Input onKeyUp={onKeyUp} onChange={e => setEditedBody(e.target.value)} value={editedBody} />;
+    }
 
     return (
       <>
         <Text fontWeight="extrabold" display="inline-block" flex="1" color={nickColor}>
           {message.nick}:
         </Text>{' '}
-        <Text overflowWrap="break-word" wordBreak="break-word" as="span" color={color}>
-          {renderMessageParts()}
-        </Text>
+        {message.deleted ? (
+          <Badge variant="subtle" colorScheme="red">
+            DELETED
+          </Badge>
+        ) : (
+          <Box overflowWrap="break-word" wordBreak="break-word" as="span" color={color}>
+            {renderMessageParts()}
+            {editedLabel()}
+          </Box>
+        )}
       </>
     );
   };
@@ -129,6 +178,22 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     return message.body;
   };
 
+  const handleFocused = () => {
+    setFocused(true);
+  };
+
+  const handleUnfocused = () => {
+    setFocused(false);
+  };
+
+  const handleDelete = () => {
+    windowStore.editMessage(message, '');
+  };
+
+  const handleEdit = () => {
+    setEditedBody(message.body);
+  };
+
   return (
     <Flex
       key={message.gid}
@@ -136,18 +201,46 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
       fontSize="15px"
       width="100%"
       bgColor={isUnread ? '#ff024d1a' : 'transparent'}
-      transition="background-color 1.5s ease-in"
+      transition="background-color 1s ease-in"
     >
-      <Box minWidth="50px">{message.createdTime}</Box>
-      <Box flex="1">
-        {message.isMessageFromUser ? renderMessage() : renderNotMessage()}
-        {message.hasImages && <Flex flexDirection="row">{renderImagePreviews()}</Flex>}
-        {message.hasVideos && (
-          <Flex flexDirection="row" height="180px" m="1rem">
-            {renderVideoPreviews()}
-          </Flex>
+      <Flex
+        width="100%"
+        onMouseEnter={handleFocused}
+        onMouseLeave={handleUnfocused}
+        bgColor={focused ? '#253f726b' : 'transparent'}
+      >
+        {message.isMessageFromUser && !editedBody && (
+          <Box position="absolute" right="0">
+            <Menu placement="left">
+              <MenuButton
+                visibility={focused ? 'visible' : 'hidden'}
+                as={IconButton}
+                width="1.1rem"
+                minWidth="1.2rem"
+                height="1.2rem"
+                variant="ghost"
+                aria-label="Menu"
+                fontSize="1rem"
+                icon={<IoMenu />}
+              />
+              <MenuList minWidth="0">
+                <MenuItem onClick={handleEdit}>Edit</MenuItem>
+                <MenuItem onClick={handleDelete}>Delete</MenuItem>
+              </MenuList>
+            </Menu>
+          </Box>
         )}
-      </Box>
+        <Box minWidth="50px">{message.createdTime}</Box>
+        <Box flex="1">
+          {message.isMessageFromUser ? renderMessage() : renderNotMessage()}
+          {message.hasImages && <Flex flexDirection="row">{renderImagePreviews()}</Flex>}
+          {message.hasVideos && (
+            <Flex flexDirection="row" height="180px" m="1rem">
+              {renderVideoPreviews()}
+            </Flex>
+          )}
+        </Box>
+      </Flex>
     </Flex>
   );
 };

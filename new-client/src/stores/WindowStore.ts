@@ -36,6 +36,7 @@ import Socket from '../lib/socket';
 import { logout } from '../lib/cookie';
 import { setUnreadMessageCountBadge } from '../lib/favicon';
 import { rootUrl, welcomeUrl, windowUrl } from '../lib/urls';
+import MessageModel from '../models/Message';
 
 let nextLocalGid = -1;
 
@@ -392,11 +393,11 @@ class WindowStore {
     this.sendText(window, body);
   }
 
-  async editMessage(window: WindowModel, gid: number, body: string): Promise<void> {
+  async editMessage(message: MessageModel, body: string): Promise<void> {
     const response = await this.socket.send<EditRequest>({
       id: 'EDIT',
-      windowId: window.id,
-      gid,
+      windowId: message.window.id,
+      gid: message.gid,
       text: body
     });
 

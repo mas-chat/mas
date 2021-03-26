@@ -82,7 +82,6 @@ export default class MessageModel {
       updatedAt: computed,
       createdTime: computed,
       updatedTime: computed,
-      updatedDate: computed,
       updatedDateLong: computed,
       nick: computed,
       avatarUrl: computed,
@@ -134,15 +133,7 @@ export default class MessageModel {
       return '';
     }
 
-    return this.updatedAt.format(this.createdAt.isSame(this.updatedAt, 'd') ? 'HH:mm' : 'MMM Do HH:mm');
-  }
-
-  get updatedDate(): string {
-    if (!this.updatedAt) {
-      return '';
-    }
-
-    return this.updatedAt.format('MMM Do HH:mm');
+    return this.updatedAt.format(dayjs().isSame(this.updatedAt, 'd') ? 'HH:mm' : 'MMM D HH:mm');
   }
 
   get updatedDateLong(): string {

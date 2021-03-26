@@ -22,6 +22,7 @@ const DesktopMenu: FunctionComponent = () => {
             icon={<IoAdd size="1.2rem" />}
             variant="outline"
             size="sm"
+            onClick={e => e.stopPropagation()}
           />
           <MenuList>
             <MenuItem as={Link} to={joinChannel()}>
