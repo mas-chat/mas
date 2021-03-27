@@ -1,4 +1,4 @@
-# MAS server and desktop web app
+# MAS server and web app
 
 MAS is a web group chat application with a sleek windowed UI.
 
@@ -21,11 +21,11 @@ For more info, see
 - IRC connections are kept active also when the user is not logged in
 - Separate mobile mode
 
-## Status:
+## Status
 
 TBD
 
-## Dependencies:
+## Dependencies
 
 - Node.js: http://nodejs.org/
 - Yarn: https://yarnpkg.com/
