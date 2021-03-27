@@ -1,11 +1,8 @@
-MAS server and desktop web app
-==============================
+# MAS server and desktop web app
 
 MAS is a web group chat application with a sleek windowed UI.
 
-![Screenshot](http://i.imgur.com/dlagvoY.gif)
-
-*NOTE:* Redis database format will change before 1.0 release. Supported migration tool is not guaranteed. After 1.0 release, mas becomes suitable for the general use.
+_NOTE:_ The project is in flux. Can't be recommended for any kind of general use.
 
 For more info, see
 
@@ -26,13 +23,7 @@ For more info, see
 
 ## Status:
 
-[![Build Status](https://secure.travis-ci.org/ilkkao/mas.png)](http://travis-ci.org/ilkkao/mas)
-
-Server: [![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat&path=server)](https://david-dm.org/ilkkao/mas?path=server) [![devDependency Status](https://david-dm.org/ilkkao/mas/dev-status.svg?style=flat&path=server)](https://david-dm.org/ilkkao/mas?path=server#info=devDependencies)
-
-Client: [![Dependency Status](https://david-dm.org/ilkkao/mas.svg?style=flat&path=client)](https://david-dm.org/ilkkao/mas?path=client) [![devDependency Status](https://david-dm.org/ilkkao/mas/dev-status.svg?style=flat&path=client)](https://david-dm.org/ilkkao/mas?path=client#info=devDependencies)
-
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/mas-ci.svg)](https://saucelabs.com/u/mas-ci)
+TBD
 
 ## Dependencies:
 
@@ -67,24 +58,20 @@ MacOS/Linux/Windows.
    $ ./dev.sh start
    ```
 
-4. Browse to ```http://localhost:3200/``` and register an account.
+4. Browse to `http://localhost:3200/` and register an account.
 
 ## Production like setup
 
 First check `docker-compose.yml` file. To customize your installation, add [default configuration value](https://github.com/ilkkao/mas/blob/master/server/mas.conf.default) overrides
 to that file as new environment variables. Then you are ready launch the stack:
 
-   ```bash
-   $ docker-compose up -d
-   ```
+```bash
+$ docker-compose up -d
+```
 
 When everything is running, navigate to `http://localhost/`. MAS frontend server is listening on port 80 on all interfaces.
 
 Docker compose will create three data volumes. One of the is for the frontend server. Frontend server needs it to store uploaded files. Also if HTTPS is enabled, one option is to place the certs to this volume. In that case it's simplest to use a volume that is mounted from the host.
-
-## Code Climate
-
-[![Code Climate](https://codeclimate.com/github/ilkkao/mas/badges/gpa.svg)](https://codeclimate.com/github/ilkkao/mas)
 
 ## Feedback
 
