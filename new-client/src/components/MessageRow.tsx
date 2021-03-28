@@ -56,7 +56,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
 
   const renderMention = (user: UserModel, network: Network) => (
     <UserInfoPopover key={message.body} user={user}>
-      <NickLabel>{user.nick[network]}</NickLabel>
+      <NickLabel>@{user.nick[network]}</NickLabel>
     </UserInfoPopover>
   );
 
