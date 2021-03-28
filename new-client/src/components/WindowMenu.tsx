@@ -29,26 +29,30 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window }: WindowMenuPr
     windowStore.closeWindow(window);
   };
 
+  const closeLabel = window.type === WindowType.Group ? `Leave ${window.explainedType}` : `Hide this conversation`;
+
   return (
     <Menu>
       <MenuButton as={IconButton} aria-label="Options" icon={<HamburgerIcon />} variant="outline" size="sm" />
       <MenuList>
         {window.type === WindowType.Group && (
-          <MenuOptionGroup
-            value={window.isMemberListVisible ? ['showGroupMembers'] : []}
-            onChange={handleShowMembersChange}
-            type="checkbox"
-          >
-            <MenuItemOption type="checkbox" value="showGroupMembers">
-              Show group members
-            </MenuItemOption>
-          </MenuOptionGroup>
+          <>
+            <MenuOptionGroup
+              value={window.isMemberListVisible ? ['showGroupMembers'] : []}
+              onChange={handleShowMembersChange}
+              type="checkbox"
+            >
+              <MenuItemOption type="checkbox" value="showGroupMembers">
+                Show group members
+              </MenuItemOption>
+            </MenuOptionGroup>
+            <MenuDivider />
+          </>
         )}
-        <MenuDivider />
         <MenuItem as={Link} to={windowSettingsUrl({ windowId: window.id })} onClick={e => e.stopPropagation()}>
           Settings…
         </MenuItem>
-        <MenuItem onClick={handleClose}>Leave {window.explainedType}</MenuItem>
+        <MenuItem onClick={handleClose}>{closeLabel}</MenuItem>
       </MenuList>
     </Menu>
   );

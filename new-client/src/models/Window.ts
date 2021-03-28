@@ -206,7 +206,7 @@ export default class WindowModel {
     const network = this.network;
 
     if (type === 'group') {
-      return network === 'mas' ? 'group' : 'channel';
+      return network === 'mas' ? 'group' : 'IRC channel';
     }
     return '1on1';
   }
