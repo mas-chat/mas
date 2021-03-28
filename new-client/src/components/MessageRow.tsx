@@ -54,9 +54,12 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
   const renderLink = (url: UrlPart) =>
     url.class === UrlPartSubType.Image ? renderImageLink(url.url) : renderGenericLink(url.url);
 
-  const renderMention = (user: UserModel, network: Network) => (
+  const renderMention = (user: UserModel, network: Network, insertAt = false) => (
     <UserInfoPopover key={message.body} user={user}>
-      <NickLabel>@{user.nick[network]}</NickLabel>
+      <NickLabel>
+        {insertAt ? '@' : ''}
+        {user.nick[network]}
+      </NickLabel>
     </UserInfoPopover>
   );
 
@@ -98,7 +101,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
         case UrlPartType.Text:
           return renderText(token);
         case UrlPartType.Mention:
-          return renderMention(token.user, message.window.network);
+          return renderMention(token.user, message.window.network, true);
         case UrlPartType.Emoji:
           return renderEmoji(token);
       }
