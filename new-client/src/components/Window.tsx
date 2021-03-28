@@ -73,6 +73,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
         <Input
           flex="1"
           ref={input}
+          focusBorderColor="gray.400"
           onKeyUp={onKeyUp}
           onChange={e => setMessage(e.target.value)}
           placeholder="Write here…"
@@ -80,7 +81,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
           size="sm"
           padding="6px"
         />
-        <HStack spacing="0.5rem">
+        <HStack spacing="0.2rem">
           <input {...getInputProps()} />
           <IconButton
             {...getRootProps()}
@@ -90,8 +91,8 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
             variant="outline"
             size="sm"
           />
+          <WindowMenu window={window} />
         </HStack>
-        <WindowMenu window={window} />
       </Flex>
     </Flex>
   );
