@@ -73,7 +73,6 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
         <Input
           flex="1"
           ref={input}
-          variant="flushed"
           onKeyUp={onKeyUp}
           onChange={e => setMessage(e.target.value)}
           placeholder="Write here…"
