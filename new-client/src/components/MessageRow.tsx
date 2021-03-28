@@ -18,7 +18,7 @@ import { IoMenu, IoPencil } from 'react-icons/io5';
 import { observer } from 'mobx-react-lite';
 import URI from 'urijs';
 import { ServerContext } from './ServerContext';
-import { ImageModal, YouTubePreview, UserInfoPopover } from '.';
+import { ImageModal, YouTubePreview, UserInfoPopover, NickLabel } from '.';
 import { ModalContext } from './ModalContext';
 import MessageModel, { EmojiPart, TextPart, UrlPartType, UrlPartSubType, UrlPart } from '../models/Message';
 import UserModel from '../models/User';
@@ -56,9 +56,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
 
   const renderMention = (user: UserModel, network: Network) => (
     <UserInfoPopover key={message.body} user={user}>
-      <Badge variant="subtle" colorScheme="green">
-        {user.nick[network]}
-      </Badge>
+      <NickLabel>{user.nick[network]}</NickLabel>
     </UserInfoPopover>
   );
 

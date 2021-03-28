@@ -17,6 +17,7 @@ export { default as RootContainer } from './RootContainer';
 export { default as LoadingView } from './LoadingView';
 export { default as StoreNavigator } from './StoreNavigator';
 export { default as App } from './App';
+export { default as NickLabel } from './NickLabel';
 export { default as ImageModal } from './ImageModal';
 export { default as YouTubePreview } from './YouTubePreview';
 export { default as WindowMessageList } from './WindowMessageList';
