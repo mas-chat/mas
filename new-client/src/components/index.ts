@@ -25,3 +25,4 @@ export { default as WindowDayDivider } from './WindowDayDivider';
 export { default as InfoModal } from './InfoModal';
 export { default as HelpModal } from './HelpModal';
 export { default as ModalManager } from './ModalManager';
+export { default as UserInfoPopover } from './UserInfoPopover';

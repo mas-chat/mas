@@ -18,16 +18,11 @@ import { IoMenu, IoPencil } from 'react-icons/io5';
 import { observer } from 'mobx-react-lite';
 import URI from 'urijs';
 import { ServerContext } from './ServerContext';
-import { ImageModal, YouTubePreview } from '.';
+import { ImageModal, YouTubePreview, UserInfoPopover } from '.';
 import { ModalContext } from './ModalContext';
-import MessageModel, {
-  EmojiPart,
-  MentionPart,
-  TextPart,
-  UrlPartType,
-  UrlPartSubType,
-  UrlPart
-} from '../models/Message';
+import MessageModel, { EmojiPart, TextPart, UrlPartType, UrlPartSubType, UrlPart } from '../models/Message';
+import UserModel from '../models/User';
+import { Network } from '../types/notifications';
 
 const TWEMOJI_CDN_BASE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/13.0.1';
 
@@ -39,7 +34,7 @@ interface MessageRowProps {
 const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: MessageRowProps) => {
   const modal = useContext(ModalContext);
   const { windowStore } = useContext(ServerContext);
-  const [focused, setFocused] = useState<boolean>(false);
+  const [isFocused, setFocused] = useState<boolean>(false);
   const [editedBody, setEditedBody] = useState<string | null>(null);
 
   const showModal = (url: URI) => modal.onShow(<ImageModal src={url.toString()} />);
@@ -47,27 +42,29 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
   const renderText = (text: TextPart) => text.text;
 
   const renderImageLink = (uri: URI) => (
-    <Link key={Math.random()} onClick={() => showModal(uri)} color="tomato">
+    <Link key={message.body} onClick={() => showModal(uri)} color="tomato">
       {uri.filename()}
     </Link>
   );
   const renderGenericLink = (uri: URI) => (
-    <Link key={Math.random()} href={uri.toString()} target="_blank" color="tomato">
+    <Link key={message.body} href={uri.toString()} target="_blank" color="tomato">
       {uri.readable()}
     </Link>
   );
   const renderLink = (url: UrlPart) =>
     url.class === UrlPartSubType.Image ? renderImageLink(url.url) : renderGenericLink(url.url);
 
-  const renderMention = (mention: MentionPart | string) => (
-    <Badge key={Math.random()} variant="subtle" colorScheme="green">
-      {typeof mention === 'string' ? mention : mention.text}
-    </Badge>
+  const renderMention = (user: UserModel, network: Network) => (
+    <UserInfoPopover key={message.body} user={user}>
+      <Badge variant="subtle" colorScheme="green">
+        {user.nick[network]}
+      </Badge>
+    </UserInfoPopover>
   );
 
   const renderEmoji = (emoji: EmojiPart) => (
     <Image
-      key={Math.random()}
+      key={message.body}
       display="inline-block"
       draggable="false"
       height="1.2rem"
@@ -83,7 +80,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     message.images.map(image => (
       <Image
         onClick={() => showModal(image.url)}
-        key={Math.random()}
+        key={message.body}
         maxHeight="8rem"
         m="1rem"
         src={image.url.toString()}
@@ -103,7 +100,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
         case UrlPartType.Text:
           return renderText(token);
         case UrlPartType.Mention:
-          return renderMention(token);
+          return renderMention(token.user, message.window.network);
         case UrlPartType.Emoji:
           return renderEmoji(token);
       }
@@ -137,9 +134,11 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
 
     return (
       <>
-        <Text fontWeight="extrabold" display="inline-block" flex="1" color={nickColor}>
-          {message.nick}:
-        </Text>{' '}
+        <UserInfoPopover user={message.user}>
+          <Text fontWeight="extrabold" display="inline-block" flex="1" color={nickColor}>
+            {message.nick}:
+          </Text>
+        </UserInfoPopover>{' '}
         {message.deleted ? (
           <Badge variant="subtle" colorScheme="red">
             DELETED
@@ -158,7 +157,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     if (message.isChannelAction) {
       return (
         <Text overflowWrap="break-word" wordBreak="break-word" as="span">
-          {renderMention(message.channelAction.nick)} {message.channelAction.text}
+          {renderMention(message.user, message.window.network)} {message.channelAction}
         </Text>
       );
     } else if (message.isBanner) {
@@ -207,13 +206,13 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
         width="100%"
         onMouseEnter={handleFocused}
         onMouseLeave={handleUnfocused}
-        bgColor={focused ? '#253f726b' : 'transparent'}
+        bgColor={isFocused ? '#253f726b' : 'transparent'}
       >
         {message.isMessageFromUser && message.isFromMe && !editedBody && (
           <Box position="absolute" right="0">
             <Menu placement="left">
               <MenuButton
-                visibility={focused ? 'visible' : 'hidden'}
+                visibility={isFocused ? 'visible' : 'hidden'}
                 as={IconButton}
                 width="1.1rem"
                 minWidth="1.2rem"

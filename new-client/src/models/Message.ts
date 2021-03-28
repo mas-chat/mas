@@ -37,7 +37,7 @@ export type VideoUrlPart = {
 };
 export type UrlPart = GenericUrlPart | ImageUrlPart | VideoUrlPart;
 export type EmojiPart = { type: UrlPartType.Emoji; shortCode?: string; emoji: string; codePoint: string };
-export type MentionPart = { type: UrlPartType.Mention; text: string; userId: string };
+export type MentionPart = { type: UrlPartType.Mention; user: UserModel };
 
 type BodyPart = TextPart | GenericUrlPart | ImageUrlPart | VideoUrlPart | EmojiPart | MentionPart;
 
@@ -157,7 +157,7 @@ export default class MessageModel {
   }
 
   get mentionsMe(): boolean {
-    return this.bodyTokens.some(part => part.type === UrlPartType.Mention && part.userId === me.id);
+    return this.bodyTokens.some(part => part.type === UrlPartType.Mention && part.user === me);
   }
 
   get isMessageFromUser(): boolean {
@@ -190,8 +190,7 @@ export default class MessageModel {
     return this.category === MessageCategory.Error;
   }
 
-  get channelAction(): { userId: string; nick: string; text?: string } {
-    const nick = this.nick;
+  get channelAction(): string {
     const groupName = this.window.name;
     const body = this.body;
 
@@ -202,7 +201,7 @@ export default class MessageModel {
       kick: `was kicked from ${groupName}. Reason: ${body}`
     };
 
-    return { userId: this.user.id, nick: nick || 'unknown', text: text[this.category] };
+    return text[this.category];
   }
 
   get bodyTokens(): Array<BodyPart> {
@@ -404,7 +403,7 @@ export default class MessageModel {
         if (ircMention) {
           const user = this.window.participants.get(ircMention.substring(0, ircMention.length - 1));
           if (user) {
-            subParts.push({ type: UrlPartType.Mention, text: ircMention, userId: user.id });
+            subParts.push({ type: UrlPartType.Mention, user });
             i += ircMention.length;
           }
         }
@@ -418,7 +417,7 @@ export default class MessageModel {
 
             if (mention && user) {
               subText.length > 0 && subParts.push({ type: UrlPartType.Text, text: subText });
-              subParts.push({ type: UrlPartType.Mention, text: mention, userId: user.id });
+              subParts.push({ type: UrlPartType.Mention, user });
               i += mention.length;
               subText = '';
               continue;
