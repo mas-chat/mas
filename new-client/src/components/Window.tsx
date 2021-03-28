@@ -73,7 +73,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
         <Input
           flex="1"
           ref={input}
-          focusBorderColor="gray.400"
+          _focus={{ boxShadow: 'none', borderColor: '#bbb' }}
           onKeyUp={onKeyUp}
           onChange={e => setMessage(e.target.value)}
           placeholder="Write here…"
