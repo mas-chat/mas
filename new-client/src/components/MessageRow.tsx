@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useContext, useState, KeyboardEvent } from 'react';
 import {
+  Button,
   Box,
   Flex,
   Icon,
@@ -114,14 +115,22 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
       </Text>
     );
 
+  const cancelEdit = () => {
+    setEditedBody(null);
+  };
+
+  const saveEdit = () => {
+    windowStore.editMessage(message, editedBody || '');
+    setEditedBody(null);
+  };
+
   const onKeyUp = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
-      windowStore.editMessage(message, editedBody || '');
-      setEditedBody(null);
+      saveEdit();
     }
 
     if (event.key === 'Escape') {
-      setEditedBody(null);
+      cancelEdit();
     }
   };
 
@@ -130,7 +139,17 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     const nickColor = message.isFromMe ? 'blue.600' : '#617eb5';
 
     if (editedBody) {
-      return <Input onKeyUp={onKeyUp} onChange={e => setEditedBody(e.target.value)} value={editedBody} />;
+      return (
+        <>
+          <Input onKeyUp={onKeyUp} onChange={e => setEditedBody(e.target.value)} value={editedBody} autoFocus />
+          <Button onClick={saveEdit} size="xs" my="0.5rem">
+            Change
+          </Button>
+          <Button onClick={cancelEdit} size="xs" variant="ghost" ml="0.5rem" my="0.5rem">
+            Cancel
+          </Button>
+        </>
+      );
     }
 
     return (
