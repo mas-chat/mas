@@ -66,6 +66,7 @@ class WindowStore {
       desktops: computed,
       totalUnreadMessages: computed,
       addWindow: action,
+      updateWindow: action,
       deleteWindowById: action,
       addMessage: action,
       closeWindow: action,
@@ -642,23 +643,22 @@ class WindowStore {
     }
 
     const user = this.rootStore.userStore.users.get(message.userId);
+    const networkSystemUser = window.network === Network.Mas ? systemUser : ircSystemUser;
 
-    if (user) {
-      const messageModel = new Message({
-        user,
-        window,
-        gid: message.gid,
-        body: message.body,
-        category: message.cat,
-        timestamp: message.ts,
-        updatedTimestamp: message.updatedTs,
-        status: message.status
-      });
+    const messageModel = new Message({
+      user: user || networkSystemUser,
+      window,
+      gid: message.gid,
+      body: message.body,
+      category: message.cat,
+      timestamp: message.ts,
+      updatedTimestamp: message.updatedTs,
+      status: message.status
+    });
 
-      window[type].set(message.gid, messageModel);
+    window[type].set(message.gid, messageModel);
 
-      this.newMessageAlert(window, messageModel);
-    }
+    this.newMessageAlert(window, messageModel);
   }
 
   private newMessageAlert(window: WindowModel, message: Message) {
