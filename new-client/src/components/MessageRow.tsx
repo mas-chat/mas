@@ -211,7 +211,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
       >
         {message.isMessageFromUser && message.isFromMe && !editedBody && (
           <Box position="absolute" right="0">
-            <Menu placement="left">
+            <Menu isLazy placement="left">
               <MenuButton
                 visibility={isFocused ? 'visible' : 'hidden'}
                 as={IconButton}

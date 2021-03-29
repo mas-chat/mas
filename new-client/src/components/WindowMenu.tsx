@@ -19,20 +19,28 @@ import { windowSettingsUrl } from '../lib/urls';
 
 interface WindowMenuProps {
   window: WindowModel;
+  onStartMove: () => void;
 }
 
-const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window }: WindowMenuProps) => {
+const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window, onStartMove }: WindowMenuProps) => {
   const { windowStore } = useContext(ServerContext);
 
   const handleShowMembersChange = () => windowStore.handleToggleShowMemberList(window);
-  const handleClose = () => {
+
+  const handleMove = (e: MouseEvent) => {
+    e.stopPropagation();
+    onStartMove();
+  };
+
+  const handleClose = (e: MouseEvent) => {
+    e.stopPropagation();
     windowStore.closeWindow(window);
   };
 
   const closeLabel = window.type === WindowType.Group ? `Leave ${window.explainedType}` : `Hide this conversation`;
 
   return (
-    <Menu>
+    <Menu isLazy>
       <MenuButton as={IconButton} aria-label="Options" icon={<HamburgerIcon />} variant="outline" size="sm" />
       <MenuList>
         {window.type === WindowType.Group && (
