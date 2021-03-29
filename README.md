@@ -14,7 +14,7 @@ For more info, see
 - Next generation windowed UI
 - Messages can include mentions, links, emojis, markdown, images, and youtube videos
 - Opt-in email alerts of missed messages
-- Infinite scrolling to get older messages
+- Infinite scrolling to see older messages
 - Another view to browse messages by group and date
 - Contacts list with precense information
 - Support for 1on1s, local groups and IRC channels (IRC backend implements RFC 2812)
@@ -32,11 +32,7 @@ TBD
 - Redis: http://redis.io/
 - Elasticsearch: https://www.elastic.co/products/elasticsearch/ (optional)
 
-## OS support
-
-MacOS/Linux/Windows.
-
-## Development setup
+## Development setup on Mac
 
 1. Install Redis, yarn, and latest release of node.js (version 7.6 or later is required)
 
@@ -58,7 +54,12 @@ MacOS/Linux/Windows.
    $ ./dev.sh start
    ```
 
-4. Browse to `http://localhost:3200/` and register an account.
+4. Run the frontend
+
+   ```bash
+   $ cd new-client
+   $ yarn run dev
+   ```
 
 ## Production like setup
 
