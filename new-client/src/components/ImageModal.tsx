@@ -1,5 +1,16 @@
 import React, { FunctionComponent, useRef } from 'react';
-import { ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Image, Text, Flex, Link } from '@chakra-ui/react';
+import {
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Image,
+  Text,
+  Flex,
+  Link,
+  Button,
+  useClipboard
+} from '@chakra-ui/react';
 import useResizeObserver from 'use-resize-observer';
 
 interface ImageModalProps {
@@ -8,6 +19,7 @@ interface ImageModalProps {
 
 const ImageModal: FunctionComponent<ImageModalProps> = ({ src }: ImageModalProps) => {
   const placeholder = useRef<HTMLDivElement>(null);
+  const { hasCopied, onCopy } = useClipboard(src);
   const { width = 0, height = 0 } = useResizeObserver<HTMLDivElement>({ ref: placeholder });
 
   return (
@@ -23,6 +35,9 @@ const ImageModal: FunctionComponent<ImageModalProps> = ({ src }: ImageModalProps
         <Text fontSize="sm">
           <Link href={src}>{src}</Link>
         </Text>
+        <Button onClick={onCopy} ml="1rem">
+          {hasCopied ? 'Copied' : 'Copy link'}
+        </Button>
       </ModalFooter>
     </>
   );
