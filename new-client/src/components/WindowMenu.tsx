@@ -60,7 +60,7 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window, onStartMove }:
         <MenuItem as={Link} to={windowSettingsUrl({ windowId: window.id })} onClick={e => e.stopPropagation()}>
           Settings…
         </MenuItem>
-        <MenuItem onClick={handleMove}>Move</MenuItem>
+        <MenuItem onClick={handleMove}>Move…</MenuItem>
         <MenuItem onClick={handleClose}>{closeLabel}</MenuItem>
       </MenuList>
     </Menu>
