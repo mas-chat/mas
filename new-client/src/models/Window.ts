@@ -3,6 +3,13 @@ import MessageModel from './Message';
 import UserModel, { ircSystemUser } from './User';
 import { AlertsRecord, Network, Role, WindowType, UpdatableWindowRecord } from '../types/notifications';
 
+export enum WindowMoveDirection {
+  Up,
+  Down,
+  Left,
+  Right
+}
+
 export type WindowModelProps = {
   id: number;
   peerUser?: UserModel;

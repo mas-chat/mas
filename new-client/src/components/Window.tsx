@@ -4,20 +4,22 @@ import { useDropzone } from 'react-dropzone';
 import { HStack, IconButton, Heading, Flex, Input } from '@chakra-ui/react';
 import { PlusSquareIcon, ArrowBackIcon } from '@chakra-ui/icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { WindowMessageList, WindowMenu } from '.';
+import { WindowMessageList, WindowMenu, WindowMoveControls } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
 import { rootUrl, windowUrl } from '../lib/urls';
 
 interface WindowProps {
   window: WindowModel;
+  height?: number;
   singleWindowMode?: boolean;
 }
 
-const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: WindowProps) => {
+const Window: FunctionComponent<WindowProps> = ({ window, height = 100, singleWindowMode }: WindowProps) => {
   const { windowStore } = useContext(ServerContext);
   const input = useRef<HTMLInputElement>(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState<string>('');
+  const [isMoving, setIsMoving] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,6 +41,14 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
     navigate(windowUrl({ windowId: window.id }));
   };
 
+  const handleStartMove = () => {
+    setIsMoving(true);
+  };
+
+  const handleEndMove = () => {
+    setIsMoving(false);
+  };
+
   const onDrop = (acceptedFiles: File[]) => {
     windowStore.uploadFiles(window, acceptedFiles);
   };
@@ -46,7 +56,16 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
-    <Flex onClick={handleWindowClick} flex="1" minWidth="0" height="100%" flexDirection="column" p="4px">
+    <Flex
+      onClick={handleWindowClick}
+      flex="1"
+      minWidth="0"
+      minHeight="0"
+      height={`${height}%`}
+      flexDirection="column"
+      p="4px"
+      opacity={windowStore.windowMoveInProgress && !isMoving ? '30%' : '100%'}
+    >
       <Flex
         px="0.6rem"
         py="0.20rem"
@@ -68,7 +87,11 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
           {`${window.decoratedTitle}${window.topic ? `- ${window.topic}` : ''}`}
         </Heading>
       </Flex>
-      <WindowMessageList window={window} />
+      {isMoving ? (
+        <WindowMoveControls window={window} onEndMove={handleEndMove} />
+      ) : (
+        <WindowMessageList window={window} />
+      )}
       <Flex>
         <Input
           flex="1"
@@ -91,7 +114,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, singleWindowMode }: Wi
             variant="outline"
             size="sm"
           />
-          <WindowMenu window={window} />
+          <WindowMenu window={window} onStartMove={handleStartMove} />
         </HStack>
       </Flex>
     </Flex>

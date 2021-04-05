@@ -31,7 +31,7 @@ const WindowMessageList: FunctionComponent<WindowMessageListProps> = ({ window }
     current.createdAt.isSame(previous.createdAt, 'd');
 
   return (
-    <Flex margin="0.3rem" flex="1">
+    <Flex margin="0.3rem" flex="1" minHeight="0">
       <Box flex="1" ref={placeholder}>
         <Box
           position="absolute"

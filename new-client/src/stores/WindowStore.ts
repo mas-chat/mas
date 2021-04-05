@@ -1,7 +1,7 @@
 import { autorun, observable, computed, makeObservable, action, runInAction } from 'mobx';
 import dayjs from 'dayjs';
 import Message from '../models/Message';
-import Window from '../models/Window';
+import Window, { WindowMoveDirection } from '../models/Window';
 import UserModel, { systemUser, me, ircSystemUser } from '../models/User';
 import {
   Notification,
@@ -48,6 +48,7 @@ class WindowStore {
   socket: Socket;
   windows = new Map<number, Window>();
   activeWindow: Window | null = null;
+  windowMoveStartingPoint: Array<{ window: Window; desktopId: number; row: number; column: number }> | null = null;
   navigateToPath: { ts: number; path?: string } = { ts: 0 };
 
   cachedUpto = 0;
@@ -64,6 +65,9 @@ class WindowStore {
       navigateToPath: observable,
       initDone: observable,
       desktops: computed,
+      windowsArray: computed,
+      visibleWindowsGrid: computed,
+      windowMoveInProgress: computed,
       totalUnreadMessages: computed,
       addWindow: action,
       updateWindow: action,
@@ -77,7 +81,12 @@ class WindowStore {
       changeActiveWindowById: action,
       updateWindowAlerts: action,
       navigateTo: action,
-      removeUser: action
+      removeUser: action,
+      startWindowMove: action,
+      cancelWindowMove: action,
+      saveWindowMove: action,
+      moveWindow: action,
+      moveWindowToDesktop: action
     });
 
     autorun(() => {
@@ -85,24 +94,43 @@ class WindowStore {
     });
   }
 
-  get desktops(): { id: number; windows: Window[] }[] {
+  get desktops(): { id: number; name: string; windows: Window[] }[] {
     const desktops: { [key: number]: { windows: Window[] } } = {};
 
     this.windows.forEach(window => {
       const { desktopId } = window;
-
-      if (desktops[desktopId]) {
-        desktops[desktopId].windows.push(window);
-      } else {
-        desktops[desktopId] = { windows: [window] };
-      }
+      desktops[desktopId] = desktops[desktopId] ?? { windows: [] };
+      desktops[desktopId].windows.push(window);
     });
 
-    return Object.entries(desktops).map(([desktop, value]) => ({ ...value, id: parseInt(desktop) }));
+    return Object.entries(desktops).map(([desktopId, value], index) => ({
+      id: parseInt(desktopId),
+      windows: value.windows,
+      name: `Desktop #${index}`
+    }));
   }
 
   get windowsArray(): Array<Window> {
     return Array.from(this.windows.values());
+  }
+
+  get visibleWindowsGrid(): Array<Array<Window>> {
+    const activeWindow = this.activeWindow;
+
+    if (!activeWindow) {
+      return [];
+    }
+
+    const visibleWindows = this.windowsArray.filter(window => window.desktopId === activeWindow.desktopId);
+    const rows = [...new Set(visibleWindows.map(window => window.row))].sort();
+
+    return rows.map(row =>
+      visibleWindows.filter(window => window.row === row).sort((a: Window, b: Window) => (a.column > b.column ? 1 : -1))
+    );
+  }
+
+  get windowMoveInProgress(): boolean {
+    return !!this.windowMoveStartingPoint;
   }
 
   get totalUnreadMessages(): number {
@@ -500,24 +528,94 @@ class WindowStore {
     });
   }
 
-  async moveWindow(id: number, column: number, row: number, desktopId: number): Promise<void> {
-    const window = this.windows.get(id);
+  startWindowMove(): void {
+    this.windowMoveStartingPoint = this.windowsArray.map(window => ({
+      window,
+      desktopId: window.desktopId,
+      row: window.row,
+      column: window.column
+    }));
+  }
 
-    if (!window) {
+  cancelWindowMove(): void {
+    this.windowMoveStartingPoint?.forEach(entry => {
+      const window = entry.window;
+
+      window.desktopId = entry.desktopId;
+      window.row = entry.row;
+      window.column = entry.column;
+    });
+
+    this.windowMoveStartingPoint = null;
+  }
+
+  saveWindowMove(): void {
+    this.windowsArray.forEach(window => {
+      this.socket.send<UpdateRequest>({
+        id: 'UPDATE',
+        windowId: window.id,
+        desktop: window.desktopId,
+        column: window.column,
+        row: window.row
+      });
+    });
+
+    this.windowMoveStartingPoint = null;
+  }
+
+  moveWindow(movingWindow: Window, direction: WindowMoveDirection): void {
+    const windowRowIndex = this.visibleWindowsGrid.findIndex(row => row.includes(movingWindow));
+    const windowRow = this.visibleWindowsGrid[windowRowIndex];
+
+    if (!windowRow) {
       return;
     }
 
-    window.column = column;
-    window.row = row;
-    window.desktopId = desktopId;
+    if (direction === WindowMoveDirection.Left || direction === WindowMoveDirection.Right) {
+      this.moveInArray(movingWindow, windowRow, direction).forEach((window, index) => {
+        window.column = index;
+      });
+      return;
+    }
 
-    await this.socket.send<UpdateRequest>({
-      id: 'UPDATE',
-      windowId: id,
-      desktop: desktopId,
-      column,
-      row
-    });
+    if (windowRow.length === 1) {
+      if (
+        (direction === WindowMoveDirection.Up && windowRowIndex === 0) ||
+        (direction === WindowMoveDirection.Down && windowRowIndex === this.visibleWindowsGrid.length - 1)
+      ) {
+        return;
+      }
+    }
+
+    movingWindow.row += direction === WindowMoveDirection.Up ? -1 : 1;
+  }
+
+  moveWindowToDesktop(movingWindow: Window, desktopId: number | 'new'): void {
+    movingWindow.desktopId =
+      desktopId === 'new' ? Math.max(...this.desktops.map(desktop => desktop.id)) + 1 : desktopId;
+  }
+
+  private moveInArray(
+    window: Window,
+    array: Array<Window>,
+    direction: WindowMoveDirection.Left | WindowMoveDirection.Right
+  ): Array<Window> {
+    const index = array.indexOf(window);
+
+    if (
+      (index === 0 && direction === WindowMoveDirection.Left) ||
+      (index === array.length - 1 && direction === WindowMoveDirection.Right)
+    ) {
+      return array;
+    }
+
+    const toIndex = index + (direction === WindowMoveDirection.Left ? -1 : 1);
+
+    const current = array[toIndex];
+    array[toIndex] = window;
+    array[index] = current;
+
+    return array;
   }
 
   async handleToggleShowMemberList(window: Window): Promise<void> {

@@ -53,11 +53,11 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesk
     </LinkBox>
   );
 
-  const desktopItem = (header: string | null, windows: WindowModel[]) => (
-    <Box key={header} mx="1rem" mb="1rem">
-      {header && (
+  const desktopItem = (id: number | null, name: string | null, windows: WindowModel[]) => (
+    <Box key={id} mx="1rem" mb="1rem">
+      {name && (
         <Heading mb="0.5rem" size="s">
-          Desktop #{header}
+          {name}
         </Heading>
       )}
       {sortWindows(windows).map(window => windowItem(window))}
@@ -66,10 +66,8 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ fullScreen = false, showDesk
 
   const list =
     showDesktops && windowStore.desktops.length > 1
-      ? windowStore.desktops.map((desktop, index) => {
-          return desktopItem(index.toString(), desktop.windows);
-        })
-      : desktopItem(null, windowStore.windowsArray);
+      ? windowStore.desktops.map(desktop => desktopItem(desktop.id, desktop.name, desktop.windows))
+      : desktopItem(null, null, windowStore.windowsArray);
 
   return (
     <Flex

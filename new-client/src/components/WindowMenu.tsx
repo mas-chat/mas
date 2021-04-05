@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useContext } from 'react';
+import React, { FunctionComponent, useContext, MouseEvent } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Menu,
@@ -60,6 +60,7 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window, onStartMove }:
         <MenuItem as={Link} to={windowSettingsUrl({ windowId: window.id })} onClick={e => e.stopPropagation()}>
           Settings…
         </MenuItem>
+        <MenuItem onClick={handleMove}>Move</MenuItem>
         <MenuItem onClick={handleClose}>{closeLabel}</MenuItem>
       </MenuList>
     </Menu>
