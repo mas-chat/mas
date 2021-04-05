@@ -28,3 +28,4 @@ export { default as HelpModal } from './HelpModal';
 export { default as ModalManager } from './ModalManager';
 export { default as UserInfoPopover } from './UserInfoPopover';
 export { default as WindowMoveControls } from './WindowMoveControls';
+export { default as MessageEditor } from './MessageEditor';

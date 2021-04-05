@@ -42,21 +42,21 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
 
   const renderText = (text: TextPart) => text.text;
 
-  const renderImageLink = (uri: URI) => (
-    <Link key={message.body} onClick={() => showModal(uri)} color="tomato">
+  const renderImageLink = (uri: URI, index: number) => (
+    <Link key={`${uri}-${index}`} onClick={() => showModal(uri)} color="tomato">
       {uri.filename()}
     </Link>
   );
-  const renderGenericLink = (uri: URI) => (
-    <Link key={message.body} href={uri.toString()} target="_blank" color="tomato">
+  const renderGenericLink = (uri: URI, index: number) => (
+    <Link key={`${uri}-${index}`} href={uri.toString()} target="_blank" color="tomato">
       {uri.readable()}
     </Link>
   );
-  const renderLink = (url: UrlPart) =>
-    url.class === UrlPartSubType.Image ? renderImageLink(url.url) : renderGenericLink(url.url);
+  const renderLink = (url: UrlPart, index: number) =>
+    url.class === UrlPartSubType.Image ? renderImageLink(url.url, index) : renderGenericLink(url.url, index);
 
-  const renderMention = (user: UserModel, network: Network, insertAt = false) => (
-    <UserInfoPopover key={message.body} user={user}>
+  const renderMention = (user: UserModel, index: number, network: Network, insertAt = false) => (
+    <UserInfoPopover key={`${user.nick[network]}-${index}`} user={user}>
       <NickLabel>
         {insertAt ? '@' : ''}
         {user.nick[network]}
@@ -64,9 +64,9 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     </UserInfoPopover>
   );
 
-  const renderEmoji = (emoji: EmojiPart) => (
+  const renderEmoji = (emoji: EmojiPart, index: number) => (
     <Image
-      key={message.body}
+      key={`${emoji.codePoint}-${index}`}
       display="inline-block"
       draggable="false"
       height="1.2rem"
@@ -82,7 +82,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     message.images.map(image => (
       <Image
         onClick={() => showModal(image.url)}
-        key={message.body}
+        key={image.url.toString()}
         maxHeight="8rem"
         m="1rem"
         src={image.url.toString()}
@@ -95,16 +95,16 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     ));
 
   const renderMessageParts = () =>
-    message.bodyTokens.map(token => {
+    message.bodyTokens.map((token, index) => {
       switch (token.type) {
         case UrlPartType.Url:
-          return renderLink(token);
+          return renderLink(token, index);
         case UrlPartType.Text:
           return renderText(token);
         case UrlPartType.Mention:
-          return renderMention(token.user, message.window.network, true);
+          return renderMention(token.user, index, message.window.network, true);
         case UrlPartType.Emoji:
-          return renderEmoji(token);
+          return renderEmoji(token, index);
       }
     });
 
@@ -177,7 +177,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     if (message.isChannelAction) {
       return (
         <Text overflowWrap="break-word" wordBreak="break-word" as="span">
-          {renderMention(message.user, message.window.network)} {message.channelAction}
+          {renderMention(message.user, 0, message.window.network)} {message.channelAction}
         </Text>
       );
     } else if (message.isBanner) {

@@ -1,10 +1,10 @@
-import React, { FunctionComponent, KeyboardEvent, useContext, useEffect, useRef, useState } from 'react';
+import React, { FunctionComponent, useContext, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useDropzone } from 'react-dropzone';
-import { HStack, IconButton, Heading, Flex, Input } from '@chakra-ui/react';
+import { HStack, IconButton, Heading, Flex } from '@chakra-ui/react';
 import { PlusSquareIcon, ArrowBackIcon } from '@chakra-ui/icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { WindowMessageList, WindowMenu, WindowMoveControls } from '.';
+import { WindowMessageList, WindowMenu, WindowMoveControls, MessageEditor } from '.';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
 import { rootUrl, windowUrl } from '../lib/urls';
@@ -17,24 +17,8 @@ interface WindowProps {
 
 const Window: FunctionComponent<WindowProps> = ({ window, height = 100, singleWindowMode }: WindowProps) => {
   const { windowStore } = useContext(ServerContext);
-  const input = useRef<HTMLInputElement>(null);
-  const [message, setMessage] = useState<string>('');
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // singleWindowMode check is here because we don't want the VKB to open automatically on mobile
-    if (!singleWindowMode && window.focused) {
-      input.current?.focus();
-    }
-  }, [window.focused, singleWindowMode]);
-
-  const onKeyUp = (event: KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      windowStore.processLine(window, message);
-      setMessage('');
-    }
-  };
 
   const handleWindowClick = () => {
     // Focus this window
@@ -93,17 +77,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, height = 100, singleWi
         <WindowMessageList window={window} />
       )}
       <Flex>
-        <Input
-          flex="1"
-          ref={input}
-          _focus={{ boxShadow: 'none', borderColor: '#bbb' }}
-          onKeyUp={onKeyUp}
-          onChange={e => setMessage(e.target.value)}
-          placeholder="Write here…"
-          value={message}
-          size="sm"
-          padding="6px"
-        />
+        <MessageEditor window={window} />
         <HStack spacing="0.2rem">
           <input {...getInputProps()} />
           <IconButton
