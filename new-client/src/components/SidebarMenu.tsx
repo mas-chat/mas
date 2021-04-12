@@ -15,7 +15,7 @@ const DesktopMenu: FunctionComponent = () => {
   return (
     <Flex width="100%" justifyContent="center">
       <ButtonGroup size="sm" isAttached variant="outline">
-        <Menu placement="right">
+        <Menu placement="right" isLazy>
           <MenuButton
             as={IconButton}
             aria-label="Add or Create"
@@ -39,7 +39,7 @@ const DesktopMenu: FunctionComponent = () => {
           </MenuList>
         </Menu>
         <IconButton onClick={() => navigate(searchUrl())} aria-label="Search" icon={<IoSearch size="1.1rem" />} />
-        <Menu placement="right">
+        <Menu placement="right" isLazy>
           <MenuButton
             as={IconButton}
             aria-label="Profile"

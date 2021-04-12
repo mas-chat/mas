@@ -1,4 +1,4 @@
-import React, { ReactNode, FunctionComponent, useContext } from 'react';
+import React, { MouseEvent, ReactNode, FunctionComponent, useContext, useState } from 'react';
 import {
   Portal,
   Popover,
@@ -29,39 +29,55 @@ const UserInfoPopover: FunctionComponent<UserInfoPopoverProps> = ({
   children
 }: UserInfoPopoverProps) => {
   const { windowStore } = useContext(ServerContext);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleChat = (onClose: () => void) => {
-    windowStore.startChat(user, network);
-    onClose();
+  const open = (e: MouseEvent) => {
+    e.stopPropagation();
+    setIsOpen(!isOpen);
   };
 
+  const close = () => {
+    setIsOpen(false);
+  };
+
+  const handleChat = () => {
+    windowStore.startChat(user, network);
+    close();
+  };
+
+  const Content = () => (
+    <Box as="span" _hover={{ cursor: 'pointer' }} onClick={open}>
+      {children}
+    </Box>
+  );
+
+  if (!isOpen) {
+    return <Content />;
+  }
+
   return (
-    <Popover isLazy>
-      {({ onClose }) => (
-        <>
-          <PopoverTrigger>
-            <Box as="span" _hover={{ cursor: 'pointer' }} onClick={e => e.stopPropagation()}>
-              {children}
+    <Popover isLazy onClose={close} returnFocusOnClose={false} isOpen={isOpen}>
+      <PopoverTrigger>
+        <Box as="span" _hover={{ cursor: 'pointer' }}>
+          <Content />
+        </Box>
+      </PopoverTrigger>
+      <Portal>
+        <PopoverContent>
+          <PopoverArrow />
+          <PopoverCloseButton />
+          <PopoverHeader>{user.name}</PopoverHeader>
+          <PopoverBody>
+            <Box>
+              <Image boxSize="100px" objectFit="cover" src={user.gravatarUrl} alt={user.name} />
+              <Flex direction="row" alignItems="center">
+                <Box flex="1">{user.nick[network]}</Box>
+                <Button onClick={handleChat}>Chat</Button>
+              </Flex>
             </Box>
-          </PopoverTrigger>
-          <Portal>
-            <PopoverContent>
-              <PopoverArrow />
-              <PopoverCloseButton />
-              <PopoverHeader>{user.name}</PopoverHeader>
-              <PopoverBody>
-                <Box>
-                  <Image boxSize="100px" objectFit="cover" src={user.gravatarUrl} alt={user.name} />
-                  <Flex direction="row" alignItems="center">
-                    <Box flex="1">{user.nick[network]}</Box>
-                    <Button onClick={() => handleChat(onClose)}>Chat</Button>
-                  </Flex>
-                </Box>
-              </PopoverBody>
-            </PopoverContent>
-          </Portal>
-        </>
-      )}
+          </PopoverBody>
+        </PopoverContent>
+      </Portal>
     </Popover>
   );
 };

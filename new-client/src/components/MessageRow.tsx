@@ -13,7 +13,8 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  Input
+  Input,
+  Portal
 } from '@chakra-ui/react';
 import { IoMenu, IoPencil } from 'react-icons/io5';
 import { observer } from 'mobx-react-lite';
@@ -230,7 +231,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
       >
         {message.isMessageFromUser && message.isFromMe && !editedBody && (
           <Box position="absolute" right="0">
-            <Menu isLazy placement="left">
+            <Menu isLazy flip={false} placement="left">
               <MenuButton
                 visibility={isFocused ? 'visible' : 'hidden'}
                 as={IconButton}
@@ -242,10 +243,12 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
                 fontSize="1rem"
                 icon={<IoMenu />}
               />
-              <MenuList minWidth="0">
-                <MenuItem onClick={handleEdit}>Edit</MenuItem>
-                <MenuItem onClick={handleDelete}>Delete</MenuItem>
-              </MenuList>
+              <Portal>
+                <MenuList minWidth="0">
+                  <MenuItem onClick={handleEdit}>Edit</MenuItem>
+                  <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                </MenuList>
+              </Portal>
             </Menu>
           </Box>
         )}
