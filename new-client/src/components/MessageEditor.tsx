@@ -1,10 +1,15 @@
 import React, { FunctionComponent, useContext, useEffect, useState, useMemo, KeyboardEvent } from 'react';
-import { createEditor, Descendant, Node } from 'slate';
+import { createEditor, Descendant } from 'slate';
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
+import unified from 'unified';
+import stringify from 'remark-stringify';
+import { slateToRemark } from 'remark-slate-transformer';
 import { Box } from '@chakra-ui/react';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
+
+const processor = unified().use(slateToRemark).use(stringify);
 
 interface MessageEditorProps {
   window: WindowModel;
@@ -34,7 +39,12 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
 
   const handleKeyUp = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
-      windowStore.processLine(window, message.map(n => Node.string(n)).join('\n'));
+      const ast = processor.runSync({
+        type: 'root',
+        children: message
+      });
+
+      windowStore.processLine(window, processor.stringify(ast));
       setMessage(initialValue);
     }
   };
