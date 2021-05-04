@@ -20,7 +20,6 @@ module.exports = {
     'jsx-a11y/no-autofocus': 'off'
   },
   settings: {
-    'import/extensions': ['.js', '.jsx'],
     react: {
       version: 'detect'
     }
