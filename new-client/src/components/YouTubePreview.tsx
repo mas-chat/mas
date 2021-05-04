@@ -11,7 +11,7 @@ const YouTubePreview: FunctionComponent<YouTubePreviewProps> = ({ videoId, start
 
   return (
     <Box>
-      <iframe height="180x" width="320px" src={src} allowFullScreen frameBorder="0" />
+      <iframe title="YouTube video" height="180x" width="320px" src={src} allowFullScreen frameBorder="0" />
     </Box>
   );
 };
