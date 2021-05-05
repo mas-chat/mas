@@ -118,7 +118,7 @@ function createFrontendApp() {
     await next();
   });
 
-  app.use(compress()); // Enable GZIP compression
+  app.use(compress()); // Enable brotli and GZIP compression
 
   app.use(passport.initialize());
 
