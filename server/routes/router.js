@@ -15,7 +15,7 @@
 //
 
 const path = require('path');
-const Router = require('koa-router');
+const Router = require('@koa/router');
 const send = require('koa-send');
 const body = require('koa-body');
 const conf = require('../lib/conf');
