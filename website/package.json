@@ -14,7 +14,7 @@
     "classnames": "~2.2.6",
     "font-awesome": "~4.7.0",
     "formsy-react": "~2.2.3",
-    "postcss": "^8.2.6",
+    "postcss": "^8.2.10",
     "prop-types": "^15.7.2",
     "react": "16",
     "react-dom": "16",
