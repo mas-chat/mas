@@ -16,7 +16,8 @@ interface MessageEditorProps {
   singleWindowMode?: boolean;
 }
 
-const initialValue = [
+// Note editors can't share initialValue object, using a function for that reason
+const createInitialValue = () => [
   {
     type: 'paragraph',
     children: [{ text: '' }]
@@ -26,7 +27,7 @@ const initialValue = [
 const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWindowMode }: MessageEditorProps) => {
   const { windowStore } = useContext(ServerContext);
 
-  const [message, setMessage] = useState<Descendant[]>(initialValue);
+  const [message, setMessage] = useState<Descendant[]>(createInitialValue);
   // TODO: Remove type cast after https://github.com/ianstormtaylor/slate/issues/4144
   const editor = useMemo(() => withHistory(withReact(createEditor() as ReactEditor)), []);
 
@@ -45,7 +46,7 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
       });
 
       windowStore.processLine(window, processor.stringify(ast));
-      setMessage(initialValue);
+      setMessage(createInitialValue());
     }
   };
 
