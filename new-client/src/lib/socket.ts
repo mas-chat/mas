@@ -1,4 +1,4 @@
-import io from 'socket.io-client';
+import io, { ManagerOptions } from 'socket.io-client';
 import { Request, RequestReturn, Acknowledgement } from '../types/requests';
 import { Notification } from '../types/notifications';
 import { ModalType } from '../models/Modal';
@@ -7,12 +7,12 @@ import { logout, getCookie, setCookie } from '../lib/cookie';
 
 declare const config: { socketHost: string | false };
 
-const socketIOOptions = {
+const socketIOOptions: Partial<ManagerOptions> = {
   transports: ['websocket', 'polling']
 };
 
 // Start the connection as early as possible.
-const ioSocket = config.socketHost ? io.connect(config.socketHost, socketIOOptions) : io.connect(socketIOOptions);
+const ioSocket = config.socketHost ? io(config.socketHost, socketIOOptions) : io(socketIOOptions);
 
 class Socket {
   rootStore: RootStore;
