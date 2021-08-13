@@ -2,7 +2,7 @@
 
 MAS is a web group chat application with a sleek windowed UI.
 
-_NOTE:_ The project is in flux. Can't be recommended for any kind of general use.
+_NOTE:_ The project is in flux. hoo Can't be recommended for any kind of general use.
 
 For more info, see
 
