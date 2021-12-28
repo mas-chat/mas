@@ -1,4 +1,3 @@
-
 # MAS client API
 
 Protocol version: 1
@@ -15,7 +14,7 @@ MAS protocol is event based, server driven and built on top of
 Login endpoint expects user name and password in URL encoded form (like normal form submission).
 
 ```
-POST /login
+POST /api/v1/login
 
 username=john&password=123456
 ```
@@ -32,6 +31,7 @@ Set-Cookie: mas=eyAidG9rZW4iOiAiZm9vYmFyIiwgInVzZXJJZCI6IDAgfQo=; Expires=Wed, 2
 ```
 
 `mas` cookie is base64 encoded JSON string in format:
+
 ```JSON
 "{ "token": "foobar", "userId": 0 }"
 ```
@@ -67,7 +67,7 @@ The user is allowed to have multiple concurrent active sessions (socket.io socke
 List of used custom events.
 
 | Socket.io event name | Originator |
-|----------------------|------------|
+| -------------------- | ---------- |
 | init                 | client     |
 | initok               | server     |
 | terminate            | server     |
@@ -94,15 +94,15 @@ the client should use the cachedUpto parameter.
 }
 ```
 
-| Parameter      | Type      | Description                                        |
-|----------------|-----------|----------------------------------------------------|
-| userId         | mandatory | User Id                                            |
-| cookie         | mandatory | Authentication cookie                              |
-| clientName     | optional  | Client name                                        |
-| clientOS       | optional  | Client operating system                            |
-| version        | mandatory | Must be string "1.0"                               |
+| Parameter      | Type      | Description                                                                                                                                                                                                                                                                                                                                                                 |
+| -------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| userId         | mandatory | User Id                                                                                                                                                                                                                                                                                                                                                                     |
+| cookie         | mandatory | Authentication cookie                                                                                                                                                                                                                                                                                                                                                       |
+| clientName     | optional  | Client name                                                                                                                                                                                                                                                                                                                                                                 |
+| clientOS       | optional  | Client operating system                                                                                                                                                                                                                                                                                                                                                     |
+| version        | mandatory | Must be string "1.0"                                                                                                                                                                                                                                                                                                                                                        |
 | cachedUpto     | optional  | Every ADD_MESSAGE notification has a gid field which is ever increasing global id. This parameter communicates the highest the client has already seen and stored. The server will omit of sending events with lower gid in the beginning of session. Without this option, the server sends up to 200 ADD_MESSAGE notification for every window to fill the window backlog. |
-| maxBacklogMsgs | optional  | Maximum amount of messages per window the client wants the server to send when a new session starts. Server might not respect this value, see 'initok' event.
+| maxBacklogMsgs | optional  | Maximum amount of messages per window the client wants the server to send when a new session starts. Server might not respect this value, see 'initok' event.                                                                                                                                                                                                               |
 
 ## Initok event payload
 
@@ -112,10 +112,10 @@ the client should use the cachedUpto parameter.
 }
 ```
 
-| Parameter  | Type      | Description                                        |
-|------------|-----------|----------------------------------------------------|
-| sessionId  | mandatory | Session identifier. Client needs it currently only when uploading images. |
-| maxBacklogMsgs | mandatory | Maximum amount of messages per window the server sends to the client before 'FINISH_INIT' notification. This is either the value the client sent in 'init' message if the server approved it or a default value if the client didn't send maxBacklogMsgs parameter or the value it send was rejected.
+| Parameter      | Type      | Description                                                                                                                                                                                                                                                                                           |
+| -------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| sessionId      | mandatory | Session identifier. Client needs it currently only when uploading images.                                                                                                                                                                                                                             |
+| maxBacklogMsgs | mandatory | Maximum amount of messages per window the server sends to the client before 'FINISH_INIT' notification. This is either the value the client sent in 'init' message if the server approved it or a default value if the client didn't send maxBacklogMsgs parameter or the value it send was rejected. |
 
 ## Terminate event payload
 
@@ -126,10 +126,10 @@ the client should use the cachedUpto parameter.
 }
 ```
 
-| Parameter  | Type      | Description                                        |
-|------------|-----------|----------------------------------------------------|
-| code       | mandatory | Can be "INVALID_SECRET", "UNSUPPORTED_PROTOCOL_VERSION" |
-| reason     | mandatory | Textual description of the failure reason.         |
+| Parameter | Type      | Description                                             |
+| --------- | --------- | ------------------------------------------------------- |
+| code      | mandatory | Can be "INVALID_SECRET", "UNSUPPORTED_PROTOCOL_VERSION" |
+| reason    | mandatory | Textual description of the failure reason.              |
 
 ## Ntf and req event payload
 
@@ -140,17 +140,17 @@ the client should use the cachedUpto parameter.
 }
 ```
 
-| Parameter  | Type      | Description                                        |
-|------------|-----------|----------------------------------------------------|
-| id         | mandatory | Type of the notification, request                  |
+| Parameter | Type      | Description                       |
+| --------- | --------- | --------------------------------- |
+| id        | mandatory | Type of the notification, request |
 
 Other parameters are specific to notification or request type. See below.
 
 ## Refresh session event payload
 
-| Parameter     | Type      | Description                                        |
-|---------------|-----------|----------------------------------------------------|
-| refreshCookie | mandatory | A new cookie that the client must use during the next init.
+| Parameter     | Type      | Description                                                 |
+| ------------- | --------- | ----------------------------------------------------------- |
+| refreshCookie | mandatory | A new cookie that the client must use during the next init. |
 
 Server sends this event after successful session init to refresh the cookie. Client must respond by emitting a `refresh_done` event (no payload).
 
@@ -188,30 +188,30 @@ Add a message line to window.
 }
 ```
 
-```ts``` is a unix timestamp, seconds since epoch.
+`ts` is a unix timestamp, seconds since epoch.
 
-```updatedTs`` is an optional last edit timestamp. Included if `status` is `edited` or `deleted`.
+``updatedTs` is an optional last edit timestamp. Included if `status` is `edited` or `deleted`.
 
-```cat``` can be
+`cat` can be
 
-| Value   | Description                                                       |
-|---------|-------------------------------------------------------------------|
-| msg     | Normal message                                                    |
-| info    | Info message related to the network status                        |
-| server  | Normal message from the IRC server                                |
-| banner  | Banner message from the IRC server (e.g MOTD line)                |
-| error   | Error message from the IRC server                                 |
-| join    | Join indication, body is empty                                    |
-| part    | Part indication, body is the part message                         |
-| quit    | Quit indication, body is the quit reason                          |
-| kick    | Kick indication, body is the kick reason                          |
-| action  | Action message                                                    |
+| Value  | Description                                        |
+| ------ | -------------------------------------------------- |
+| msg    | Normal message                                     |
+| info   | Info message related to the network status         |
+| server | Normal message from the IRC server                 |
+| banner | Banner message from the IRC server (e.g MOTD line) |
+| error  | Error message from the IRC server                  |
+| join   | Join indication, body is empty                     |
+| part   | Part indication, body is the part message          |
+| quit   | Quit indication, body is the quit reason           |
+| kick   | Kick indication, body is the kick reason           |
+| action | Action message                                     |
 
 Client can for example use different colors for different categories.
 
-```gid``` is a globally unique identifier (integer) for the message. Given two messages, a newer one has always larger gid. Gid can increase by more than one between subsequent messages inside a window.
+`gid` is a globally unique identifier (integer) for the message. Given two messages, a newer one has always larger gid. Gid can increase by more than one between subsequent messages inside a window.
 
-```status``` is an optional property. It can be have value 'original', 'edited', or 'deleted'. A missing ```status``` property means 'original'.
+`status` is an optional property. It can be have value 'original', 'edited', or 'deleted'. A missing `status` property means 'original'.
 
 ### ADD_MESSAGES
 
@@ -263,7 +263,7 @@ Close window.
 
 ### ADD_WINDOW
 
-Create new window. Window identifier is either ```userId``` or ```name```.
+Create new window. Window identifier is either `userId` or `name`.
 
 ```JSON
 {
@@ -290,19 +290,19 @@ Create new window. Window identifier is either ```userId``` or ```name```.
 }
 ```
 
-```type``` can be ```group```, ```1on1```
+`type` can be `group`, `1on1`
 
-```network``` can be ```MAS```, ```IRCNet```, ```FreeNode``` etc.
+`network` can be `MAS`, `IRCNet`, `FreeNode` etc.
 
-```password``` an empty string if password protection is disabled, a string containing the password otherwise
+`password` an empty string if password protection is disabled, a string containing the password otherwise
 
-```role``` can be ```u``` (participant), ```v``` (voice), ```@``` (operator), ```*``` (owner)
+`role` can be `u` (participant), `v` (voice), `@` (operator), `*` (owner)
 
-```name``` is an empty string if ```type``` is ```1on1```
+`name` is an empty string if `type` is `1on1`
 
-```userId``` is null if ```type``` is ```group```
+`userId` is null if `type` is `group`
 
-If the ```type``` is ```1on1``` and the ```userId``` is ```i0``` then the window is an 1on1 with IRC network server. These are normal 1on1s except the user can only send messages starting with `/` character. Other messages are silently ignored.
+If the `type` is `1on1` and the `userId` is `i0` then the window is an 1on1 with IRC network server. These are normal 1on1s except the user can only send messages starting with `/` character. Other messages are silently ignored.
 
 ### ADD_USERS
 
@@ -338,7 +338,7 @@ Information about the userIds. Server sends ADD_USERS command containing a userI
 }
 ```
 
-Server can send ADD_USERS command to update information that it sent in earlier ADD_USERS command. This happens for example when any user changes his nick. Note that the ```nick``` attribute is a hash, user can have different nicks in different networks.
+Server can send ADD_USERS command to update information that it sent in earlier ADD_USERS command. This happens for example when any user changes his nick. Note that the `nick` attribute is a hash, user can have different nicks in different networks.
 
 The first ADD_USERS notification arrives immediately after 'initok' and contains an entry for the API user itself.
 
@@ -359,7 +359,7 @@ List of configured networks the user able to connect using JOIN request. The lis
 }
 ```
 
-UPDATE_NETWORKS notification arrives immediately after successful session initialization. ```networks``` is a full list of networks and replaces potentially existing list.
+UPDATE_NETWORKS notification arrives immediately after successful session initialization. `networks` is a full list of networks and replaces potentially existing list.
 
 ### UPDATE_FRIENDS
 
@@ -382,11 +382,11 @@ Full list of user's contacts (friends). Send by the server during the session st
 }
 ```
 
-```reset``` if true, then the existing list needs to be cleared. Otherwise the command adds new users or updates existing users' information on the list.
+`reset` if true, then the existing list needs to be cleared. Otherwise the command adds new users or updates existing users' information on the list.
 
-```online``` can be ```true```, ```false```. Indicates the current situation.
+`online` can be `true`, `false`. Indicates the current situation.
 
-```last``` is included if ```online``` is ```false```. It's a unix timestamp indicating when this user was logged in last time. Also possible is a special value ```-1``` which means this user hasn't ever logged in.
+`last` is included if `online` is `false`. It's a unix timestamp indicating when this user was logged in last time. Also possible is a special value `-1` which means this user hasn't ever logged in.
 
 ### ADD_ALERT
 
@@ -436,9 +436,9 @@ Add or update users in window participant list.
 }
 ```
 
-If ```reset``` is true, then the existing list needs to be cleared. Otherwise the command adds new users or updates existing users' roles on the list.
+If `reset` is true, then the existing list needs to be cleared. Otherwise the command adds new users or updates existing users' roles on the list.
 
-```role``` Value is either ```*``` if the user is the owner, ```@``` if the user is an operator, ```+``` if the user has voice, and ```u``` if the user is a normal user.
+`role` Value is either `*` if the user is the owner, `@` if the user is an operator, `+` if the user has voice, and `u` if the user is a normal user.
 
 ### DELETE_MEMBERS
 
@@ -475,8 +475,8 @@ Update settings and application wide parameters
 
 Currently only valid settings are
 
-- ```activeDesktop```, client must switch to this desktop when it receives the notification.
-- ```emailConfirmed```, user email becomes confirmed or unconfirmed
+- `activeDesktop`, client must switch to this desktop when it receives the notification.
+- `emailConfirmed`, user email becomes confirmed or unconfirmed
 
 ### UPDATE_WINDOW
 
@@ -494,9 +494,9 @@ Update existing parameter for existing window.
 }
 ```
 
-Updates a value initially received in ```ADD_WINDOW``` command.
+Updates a value initially received in `ADD_WINDOW` command.
 
-Attributes in ```ADD_WINDOW``` command that can be update are: ```password```, ```topic```, ```row```, ```column```, ```role```, ```minimizedNamesList``, ```desktop```, and ```alerts```.
+Attributes in `ADD_WINDOW` command that can be update are: `password`, `topic`, `row`, `column`, `role`, ` minimizedNamesList``,  `desktop`, and `alerts```.
 
 ### CONFIRM_FRIENDS
 
@@ -514,7 +514,7 @@ Another user(s) wants to add the user to his/her contacts list
 }
 ```
 
-Client must send one ```FRIEND_VERDICT``` request per received userId after the user has made the decision.
+Client must send one `FRIEND_VERDICT` request per received userId after the user has made the decision.
 
 # Requests and acknowledgments
 
@@ -526,7 +526,7 @@ Following requests are supported. Under every request is corresponding acknowled
 
 Send a message to a group or 1on1 discussion.
 
-Note that the session that sends SEND request doesn't receive the corresponding ADD_MESSAGE notification. Therefore the acknowledgment contains ```gid``` property that the other sessions and users learn from ```ADD_MESSAGE``` notifications (other ADD_MESSAGE notification properties the client can easily compute locally).
+Note that the session that sends SEND request doesn't receive the corresponding ADD_MESSAGE notification. Therefore the acknowledgment contains `gid` property that the other sessions and users learn from `ADD_MESSAGE` notifications (other ADD_MESSAGE notification properties the client can easily compute locally).
 
 ```JSON
 {
@@ -589,9 +589,9 @@ Join to new MAS group or IRC channel
 }
 ```
 
-Contains ```errorMsg``` property if the status is not ```OK```
+Contains `errorMsg` property if the status is not `OK`
 
-Status can be ```OK```, ```NOT_FOUND```, ```INCORRECT_PASSWORD```, ```ALREADY_JOINED```, ```PARAMETER_MISSING```
+Status can be `OK`, `NOT_FOUND`, `INCORRECT_PASSWORD`, `ALREADY_JOINED`, `PARAMETER_MISSING`
 
 ### CREATE
 
@@ -614,9 +614,9 @@ Create new MAS group
 }
 ```
 
-Contains ```errorMsg``` property if the status is not ```OK```
+Contains `errorMsg` property if the status is not `OK`
 
-Status can be ```OK```, ```ERROR_NAME_MISSING```, or ```ERROR_EXISTS```
+Status can be `OK`, `ERROR_NAME_MISSING`, or `ERROR_EXISTS`
 
 ### CLOSE
 
@@ -659,7 +659,7 @@ Ask server to start a 1on1 conversation with another user. The server will follo
 }
 ```
 
-Contains ```errorMsg``` property if the status is not ```OK```
+Contains `errorMsg` property if the status is not `OK`
 
 ### LOGOUT
 
@@ -711,7 +711,7 @@ Update an application parameter or setting.
 }
 ```
 
-Currently the possible setting is ```activeDesktop```.
+Currently the possible setting is `activeDesktop`.
 
 #### Acknowledgment
 
@@ -740,7 +740,7 @@ User wants to add another user to his/her contacts list.
 }
 ```
 
-Contains ```errorMsg``` property if the status is not ```OK```
+Contains `errorMsg` property if the status is not `OK`
 
 ### FRIEND_VERDICT
 
@@ -754,7 +754,7 @@ This is a request that the client can send after receiving CONFIRM_FRIENDS notif
 }
 ```
 
-```allow``` is set to true if the user accepts to be added to another user's contacts list.
+`allow` is set to true if the user accepts to be added to another user's contacts list.
 
 #### Acknowledgment
 
@@ -764,7 +764,7 @@ This is a request that the client can send after receiving CONFIRM_FRIENDS notif
 }
 ```
 
-Contains ```errorMsg``` property if the status is not ```OK```
+Contains `errorMsg` property if the status is not `OK`
 
 ### REMOVE_FRIEND
 
@@ -795,7 +795,7 @@ Contains ```errorMsg``` property if the status is not ```OK```
 }
 ```
 
-Password protection will be disabled if ```password``` is an empty string.
+Password protection will be disabled if `password` is an empty string.
 
 #### Acknowledgment
 
@@ -805,7 +805,7 @@ Password protection will be disabled if ```password``` is an empty string.
 }
 ```
 
-Contains ```errorMsg``` property if the status is not ```OK```
+Contains `errorMsg` property if the status is not `OK`
 
 ### UPDATE_TOPIC
 
@@ -826,7 +826,7 @@ Contains ```errorMsg``` property if the status is not ```OK```
 }
 ```
 
-Contains ```errorMsg``` property if the status is not ```OK```
+Contains `errorMsg` property if the status is not `OK`
 
 ### GET_PROFILE
 
@@ -865,7 +865,7 @@ Contains ```errorMsg``` property if the status is not ```OK```
 }
 ```
 
-Contains ```errorMsg``` property if the status is not ```OK```
+Contains `errorMsg` property if the status is not `OK`
 
 ### DESTROY_ACCOUNT
 
@@ -886,6 +886,7 @@ WARNING: Can't be undone.
   "status": "OK"
 }
 ```
+
 ### FETCH
 
 Fetches old messages.
@@ -931,4 +932,3 @@ Update window settings.
   "status": "OK"
 }
 ```
-
