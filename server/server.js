@@ -83,7 +83,7 @@ function createHTTPServers() {
     );
 
     httpsServer.listen(httpsPort, () => {
-      log.info(`MAS frontend HTTPS server listening, https://0.0.0.0:${httpsPort}/`);
+      log.info(`MAS app HTTPS server listening, https://0.0.0.0:${httpsPort}/`);
     });
 
     httpServer = http.Server(createForceSSLApp().callback());
@@ -92,7 +92,7 @@ function createHTTPServers() {
   }
 
   httpServer.listen(httpPort, () => {
-    log.info(`Frontend HTTP server listening: http://0.0.0.0:${httpPort}/`);
+    log.info(`MAS app HTTP server listening: http://0.0.0.0:${httpPort}/`);
   });
 
   return { httpServer, httpsServer };

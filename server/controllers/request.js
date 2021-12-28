@@ -570,7 +570,7 @@ async function sendEmailConfirmationEmail(user, email) {
     'emails/build/confirmEmail.hbs',
     {
       name: user.get('name'),
-      url: `${conf.getComputed('site_url')}/confirm-email/${emailConfirmationToken}`
+      url: `${conf.getComputed('site_url')}/app/confirm-email/${emailConfirmationToken}`
     },
     email || user.get('email'),
     'Please confirm your email address'

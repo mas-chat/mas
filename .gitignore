@@ -1,4 +1,4 @@
-#Ignore emacs temporary files
+g#Ignore emacs temporary files
 *~
 [#]*[#]
 .\#*
@@ -10,9 +10,9 @@
 /server/node_modules/
 /server/test/browser/node_modules/
 /website/node_modules/
+/website/dist/
 
 /server/build/
-/website-dist/
 /server/emails/build/
 
 /client/dist/

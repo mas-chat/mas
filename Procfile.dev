@@ -3,3 +3,4 @@ loopback: cd server && yarn run --silent start-loopback-dev
 irc: cd server && yarn run --silent start-irc-dev
 #ircscktmgr: cd server && yarn run --silent start-irc-scktmgr-dev
 redis: mkdir -p tmp && redis-server --dir tmp/ --save 600 1
+nginx: nginx -c $PWD/nginx.conf.dev

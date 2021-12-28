@@ -38,7 +38,7 @@ case "$1" in
         rm -fr client/node_modules client/tmp client/dist
         rm -fr new-client/node_modules new-client/dist
         rm -fr server/node_modules
-        rm -fr website/node_modules website-dist
+        rm -fr website/node_modules website/dist
         rm -fr server/emails/build
         rm -fr server/test/browser/node_modules
         find . -name npm-debug.log | xargs rm

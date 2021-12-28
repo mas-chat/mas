@@ -1,0 +1,30 @@
+worker_processes 1;
+daemon off;
+error_log /dev/stdout info;
+
+events{
+}
+
+http {
+  server {
+    listen 3000;
+
+    location ~* ^/(auth|api|files)/ {
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_pass http://0.0.0.0:3200;
+    }
+
+    location ~* ^/app(/|$) {
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_pass http://0.0.0.0:3200;
+    }
+
+    location / {
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_pass http://0.0.0.0:3100;
+    }
+  }
+}

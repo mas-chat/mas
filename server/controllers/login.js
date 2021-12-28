@@ -37,7 +37,7 @@ exports.externalLogin = function externalLogin(provider) {
     await passport.authenticate(provider, async (err, user, info) => {
       if (user) {
         await createAuthSession(ctx, user);
-        ctx.redirect(user.get('inUse') ? '/app' : '/register?ext=true');
+        ctx.redirect(user.get('inUse') ? '/app' : '/api/v1/register?ext=true');
       } else {
         ctx.body = `External login failed, reason: ${err || info.message}`;
         log.warn(`Invalid external login, err: ${util.inspect(err || info.message)}`);

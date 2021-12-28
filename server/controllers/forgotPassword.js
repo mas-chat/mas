@@ -28,7 +28,7 @@ exports.create = async function create(ctx) {
 
   if (userRecord) {
     const token = uuid(30);
-    const link = `${conf.getComputed('site_url')}/reset-password/${token}`;
+    const link = `${conf.getComputed('site_url')}/app/reset-password/${token}`;
 
     mailer.send(
       'emails/build/resetPassword.hbs',

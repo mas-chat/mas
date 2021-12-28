@@ -10,7 +10,7 @@ module.exports = merge(common, {
   mode: 'production',
   output: {
     filename: '[name]-[contenthash].bundle.js',
-    publicPath: '/client-assets/',
+    publicPath: '/app/client-assets/',
     path: path.resolve(__dirname, 'dist/client-assets')
   },
   plugins: [

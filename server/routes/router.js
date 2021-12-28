@@ -23,7 +23,6 @@ const log = require('../lib/log');
 const passport = require('../lib/passport');
 const registerController = require('../controllers/register');
 const loginController = require('../controllers/login');
-const websiteController = require('../controllers/website');
 const clientController = require('../controllers/client');
 const uploadController = require('../controllers/upload');
 const userFilesController = require('../controllers/userFiles');
@@ -36,7 +35,7 @@ const fingerPrintRe = /^assets\/\S+-.{32}\.\w+$/;
 const devMode = process.env.NODE_ENV !== 'production';
 
 module.exports = function buildRouter() {
-  log.info('Registering website routes');
+  log.info('Registering app routes');
 
   const router = new Router();
 
@@ -62,23 +61,23 @@ module.exports = function buildRouter() {
     router.get('/auth/cloudron/callback', loginController.externalLogin('cloudron'));
   }
 
-  router.post('/login', body(), loginController.localLogin);
+  router.post('/api/v1/login', body(), loginController.localLogin);
 
   // File upload endpoint
   router.post('/api/v1/upload', body({ multipart: true }), uploadController);
 
   // Registration routes
-  router.get('/register', registerController.index);
-  router.post('/register', body(), registerController.create);
-  router.post('/register-ext', registerController.createExt);
-  router.post('/register-reset', registerController.createReset);
+  router.get('/api/v1/register', registerController.index);
+  router.post('/api/v1/register', body(), registerController.create);
+  router.post('/api/v1/register-ext', registerController.createExt);
+  router.post('/api/v1/register-reset', registerController.createReset);
 
   // Forgot password
-  router.post('/forgot-password', body(), forgotPasswordController.create);
-  router.get('/reset-password/:token', registerController.indexReset);
+  router.post('/api/v1/forgot-password', body(), forgotPasswordController.create);
+  router.get('/app/reset-password/:token', registerController.indexReset);
 
   // Confirm email
-  router.get('/confirm-email/:token', confirmEmailController.show);
+  router.get('/app/confirm-email/:token', confirmEmailController.show);
 
   // Public uploaded files
   router.get('/files/:uuid/:slug*', userFilesController);
@@ -103,24 +102,10 @@ module.exports = function buildRouter() {
     await sendFile(ctx, 'client/dist/', subPath, { maxage });
   });
 
-  if (devMode) {
-    // V1 Client Ember CLI Live Reload redirect hack
-    router.get('/ember-cli-live-reload.js', ctx => ctx.redirect('http://localhost:4200/ember-cli-live-reload.js'));
-  }
-
   // V2 Client assets
-  router.get(/^\/client-assets\/(.+)/, async ctx => {
+  router.get(/^\/app\/client-assets\/(.+)/, async ctx => {
     const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
     await sendFile(ctx, 'new-client/dist/client-assets/', ctx.params[0], { maxage });
-  });
-
-  // Web site pages
-  router.get(/^\/(about|home|tos|pricing|support|$)\/?$/, websiteController);
-
-  // Web site assets
-  router.get(/^\/website-assets\/(.+)/, async ctx => {
-    const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
-    await sendFile(ctx, 'website-dist/website-assets/', ctx.params[0], { maxage });
   });
 
   return router;
