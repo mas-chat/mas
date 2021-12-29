@@ -44,7 +44,7 @@ async function sendFile(ctx: Context, prefix: string, filePath: string, options 
 function main() {
   const { mode, fileName: mainEntryFileName } = getMainEntryFileNameAndMode();
   const googleAuthEnabled = process.env['GOOGLE_AUTH'] === 'true';
-  const serverPort = process.env['WEBSITE_PORT'] || 3100;
+  const serverPort = process.env['WEB_SERVER_PORT'] || 3100;
 
   console.log(`Running in ${mode} mode`);
 
