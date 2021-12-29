@@ -9,8 +9,8 @@ const DEFAULT_ENTRY_FILE_NAME = 'index.js';
 const ONE_YEAR_IN_MS = 1000 * 60 * 60 * 24 * 365;
 
 enum Mode {
-  Dev,
-  Prod
+  Dev = 'development',
+  Prod = 'production'
 }
 
 function getMainEntryFileNameAndMode(): { mode: Mode; fileName: string } {
@@ -19,7 +19,17 @@ function getMainEntryFileNameAndMode(): { mode: Mode; fileName: string } {
     const outputs = Object.keys(JSON.parse(metaDataFile).outputs) || [];
     const fileNameWithPath = outputs.find(file => file.match(/^dist\/index-/));
 
-    return { mode: Mode.Prod, fileName: fileNameWithPath.split('/').pop() };
+    if (!fileNameWithPath) {
+      throw new Error('No entry file found');
+    }
+
+    const fileName = fileNameWithPath.split('/').pop();
+
+    if (typeof fileName !== 'string') {
+      throw new Error('No entry file found');
+    }
+
+    return { mode: Mode.Prod, fileName };
   } catch {
     return { mode: Mode.Dev, fileName: DEFAULT_ENTRY_FILE_NAME };
   }
@@ -33,8 +43,8 @@ async function sendFile(ctx: Context, prefix: string, filePath: string, options 
 
 function main() {
   const { mode, fileName: mainEntryFileName } = getMainEntryFileNameAndMode();
-  const googleAuthEnabled = process.env.GOOGLE_AUTH === 'true';
-  const serverPort = process.env.PORT || 3100;
+  const googleAuthEnabled = process.env['GOOGLE_AUTH'] === 'true';
+  const serverPort = process.env['PORT'] || 3100;
 
   console.log(`Running in ${mode} mode`);
 
