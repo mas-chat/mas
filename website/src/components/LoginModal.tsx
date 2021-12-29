@@ -1,5 +1,4 @@
 import React, { FunctionComponent, useState } from 'react';
-import 'whatwg-fetch';
 import {
   Box,
   Button,

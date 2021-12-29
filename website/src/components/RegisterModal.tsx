@@ -17,7 +17,6 @@ import {
   Checkbox
 } from '@chakra-ui/react';
 import { Formik, Form, Field, FormikState, FormikHelpers } from 'formik';
-import 'whatwg-fetch';
 import { IoLogoGoogle } from 'react-icons/io5';
 import { getConfig } from '../lib/config';
 
