@@ -28,7 +28,7 @@ case "$1" in
         yarn run prod
         cd ../website
         yarn
-        yarn run prod
+        yarn run build-prod
         set +x
         echo "Install done."
         ;;

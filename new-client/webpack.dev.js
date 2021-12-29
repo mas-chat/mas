@@ -30,11 +30,11 @@ module.exports = merge(common, {
     },
     proxy: {
       '/socket.io': {
-        target: 'http://localhost:3200',
+        target: 'http://localhost:3000',
         ws: true
       },
       '/': {
-        target: 'http://localhost:3200',
+        target: 'http://localhost:3000',
         bypass: req => {
           if (req.url.startsWith('/app')) {
             return '/app/index.html';
