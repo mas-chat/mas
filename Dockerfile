@@ -20,7 +20,7 @@ COPY website /app/website/
 WORKDIR /app/website/
 
 RUN yarn install \
-  && yarn run prod \
+  && yarn run build-prod \
   && rm -fr node_modules \
   && yarn cache clean
 
