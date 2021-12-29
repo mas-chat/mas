@@ -42,7 +42,7 @@
     "slate-react": "^0.63.0",
     "socket.io-client": "^4.1.2",
     "unified": "^9.2.1",
-    "urijs": "^1.19.6",
+    "urijs": "^1.19.7",
     "use-resize-observer": "^7.0.0"
   },
   "devDependencies": {
