@@ -140,7 +140,7 @@ export const RegisterModal: FunctionComponent<RegisterModalProps> = ({ isOpen, o
             {({ field, form }: InputRenderProps<InputProps>) => (
               <FormControl mt={4} isInvalid={Boolean(form.errors.email) && form.touched.email}>
                 <FormLabel htmlFor="email">Email Address</FormLabel>
-                <Input {...field} id="email" placeholder="email" />
+                <Input {...field} type="email" id="email" placeholder="email" />
                 <FormErrorMessage>{form.errors.email}</FormErrorMessage>
               </FormControl>
             )}
