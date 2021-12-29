@@ -22,7 +22,7 @@ case "$1" in
         yarn run build-dev
         cd ../new-client
         yarn
-        yarn run prod
+        yarn run build-prod
         cd ../server
         yarn
         yarn run prod

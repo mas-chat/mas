@@ -1,6 +1,7 @@
 FROM node:16.13.1
 
 ARG REVISION=unknown
+ARG SOCKET_HOST
 
 RUN apt-get update && apt-get install -y \
   exiftran \
@@ -36,7 +37,7 @@ COPY new-client /app/new-client/
 WORKDIR /app/new-client/
 
 RUN yarn install \
-  && yarn run prod  \
+  && yarn run build-prod  \
   && rm -fr node_modules \
   && yarn cache clean
 

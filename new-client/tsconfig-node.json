@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "commonjs",
+    "target": "ESNext",
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "lib": ["ESNext", "dom"],
+    "outDir": "ts-dist",
+    "sourceMap": true,
+    "declaration": true,
+    "noEmit": true,
+    "typeRoots": ["src/types", "node_modules/@types"],
+    "noPropertyAccessFromIndexSignature": true,
+    "useDefineForClassFields": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "__tests__/**/*.ts"],
+  "exclude": ["node_modules"]
+}

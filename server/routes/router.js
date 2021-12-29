@@ -91,7 +91,7 @@ module.exports = function buildRouter() {
   // V2 Client assets
   router.get(/^\/app\/client-assets\/(.+)/, async ctx => {
     const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
-    await sendFile(ctx, 'new-client/dist/client-assets/', ctx.params[0], { maxage });
+    await sendFile(ctx, 'new-client/dist/', ctx.params[0], { maxage });
   });
 
   // V1 Client assets

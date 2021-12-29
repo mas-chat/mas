@@ -8,9 +8,9 @@
   "license": "Apache-2.0",
   "private": false,
   "scripts": {
-    "prod": "webpack --config webpack.prod.js",
-    "dev": "webpack serve --config webpack.dev.js",
-    "build": "tsc",
+    "build-prod": "ts-node -P tsconfig-node.json ./esbuild.ts",
+    "dev": "ts-node -P tsconfig-node.json ./esbuild.ts --devMode",
+    "compile": "tsc",
     "lint": "eslint 'src/**/*.{js,ts,tsx}'",
     "test": "jest"
   },
@@ -46,34 +46,29 @@
     "use-resize-observer": "^7.0.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
     "@types/jest": "^26.0.23",
     "@types/js-cookie": "^2.2.6",
     "@types/react": "^17.0.6",
     "@types/react-dom": "^17.0.5",
     "@types/react-window": "^1.8.3",
     "@types/urijs": "^1.19.15",
+    "@types/yargs": "^17.0.8",
     "@typescript-eslint/eslint-plugin": "^4.24.0",
     "@typescript-eslint/parser": "^4.24.0",
-    "copy-webpack-plugin": "^9.0.0",
+    "esbuild": "^0.14.9",
     "eslint": "^7.27.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.23.2",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "fork-ts-checker-webpack-plugin": "^6.2.10",
-    "handlebars": "^4.7.7",
-    "handlebars-loader": "^1.7.1",
-    "html-webpack-plugin": "^5.3.1",
+    "fs-extra": "^10.0.0",
     "jest": "^26.6.3",
     "prettier": "^2.3.0",
-    "source-map-loader": "^3.0.0",
     "ts-jest": "^26.5.6",
-    "ts-loader": "^9.2.1",
+    "ts-node": "^10.4.0",
     "typescript": "^4.2.4",
-    "webpack": "^5.37.1",
-    "webpack-cli": "^4.7.0",
-    "webpack-dev-server": "^4.0.0-beta.0",
-    "webpack-merge": "^5.7.3"
+    "yargs": "^17.3.1"
   }
 }

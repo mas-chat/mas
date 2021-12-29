@@ -20,6 +20,31 @@ const fs = require('fs');
 const path = require('path');
 const handlebars = require('handlebars');
 const Settings = require('../models/settings');
+const log = require('../lib/log');
+
+const DEFAULT_ENTRY_FILE_NAME = 'index.js';
+
+function getMainEntryFileNameAndModeForV2Client() {
+  try {
+    const metaDataFile = fs.readFileSync(path.join(root(), 'new-client/dist/meta.json'), 'utf8');
+    const outputs = Object.keys(JSON.parse(metaDataFile).outputs) || [];
+    const fileNameWithPath = outputs.find(file => file.match(/^dist\/index-/));
+
+    if (!fileNameWithPath) {
+      throw new Error('No entry file found');
+    }
+
+    const fileName = fileNameWithPath.split('/').pop();
+
+    if (typeof fileName !== 'string') {
+      throw new Error('No entry file found');
+    }
+
+    return { mode: 'production', fileName };
+  } catch {
+    return { mode: 'development', fileName: DEFAULT_ENTRY_FILE_NAME };
+  }
+}
 
 let templateV1;
 let templateV2;
@@ -31,7 +56,7 @@ try {
 }
 
 try {
-  templateV2 = handlebars.compile(fs.readFileSync(path.join(root(), 'new-client/dist/index.html'), 'utf8'));
+  templateV2 = handlebars.compile(fs.readFileSync(path.join(root(), 'new-client/html/index.html'), 'utf8'));
 } catch (e) {
   templateV2 = null;
 }
@@ -44,6 +69,10 @@ try {
 } catch (e) {
   revision = 'unknown';
 }
+
+const { mode, fileName: mainEntryFileName } = getMainEntryFileNameAndModeForV2Client();
+
+log.info(`Server new client in ${mode} mode`);
 
 module.exports = async function index(ctx) {
   ctx.set('Cache-control', 'private, max-age=0, no-cache');
@@ -61,7 +90,7 @@ module.exports = async function index(ctx) {
   const template = version === 'v1' ? templateV1 : templateV2;
 
   if (!template) {
-    ctx.body = 'Generated index.html file is missing.';
+    ctx.body = 'index.html file is missing.';
     return;
   }
 
@@ -70,6 +99,7 @@ module.exports = async function index(ctx) {
       socketHost: get('session:socket_host'),
       revision
     }),
+    jsScriptTag: `<script src="/app/client-assets/${mainEntryFileName}"></script>`,
     extraClientHead: get('snippets:extra_client_head') || '',
     extraClientBody: get('snippets:extra_client_body') || '',
     colorMode: theme === 'default' ? 'light' : 'dark',
