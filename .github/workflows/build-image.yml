@@ -10,14 +10,17 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ilkkao
           password: ${{ secrets.ILKKA_PAT_FOR_PUBLISH }}
+
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
@@ -26,7 +29,6 @@ jobs:
           tags: ghcr.io/mas-chat/${{ github.repository }}:latest
           build-args: |
             REVISION=${{ github.sha }}
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+
       - name: Trigger a meetandspeak.com deployment (private)
-        run: 'curl -XPOST -u ''ilkkao:${{ secrets.ILKKA_PAT_FOR_PUBLISH }}'' -H ''Accept: application/vnd.github.v3+json'' -H ''Content-Type: application/json'' https://api.github.com/repos/mas-chat/meetandspeak-deploy/actions/workflows/4499707/dispatches -d ''{"ref":"master"}'''
+        run: 'curl -XPOST -u ''ilkkao:${{ secrets.ILKKA_PAT_FOR_PUBLISH }}'' -H ''Accept: application/vnd.github.v3+json'' -H ''Content-Type: application/json'' https://api.github.com/repos/mas-chat/meetandspeak-deploy/actions/workflows/4499707/dispatches -d ''{"ref":"master", "inputs": {"deploy-digest":"${{ steps.docker_build.outputs.digest }}"}}'''
