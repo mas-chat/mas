@@ -88,6 +88,12 @@ module.exports = function buildRouter() {
   // TODO: Improve when V1 client (route below) is removed
   router.get(/^\/app\/c\/(.+)/, clientController);
 
+  // V2 Client assets
+  router.get(/^\/app\/client-assets\/(.+)/, async ctx => {
+    const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
+    await sendFile(ctx, 'new-client/dist/client-assets/', ctx.params[0], { maxage });
+  });
+
   // V1 Client assets
   router.get(/^\/app\/(.+)/, async ctx => {
     const subPath = ctx.params[0];
@@ -100,12 +106,6 @@ module.exports = function buildRouter() {
     }
 
     await sendFile(ctx, 'client/dist/', subPath, { maxage });
-  });
-
-  // V2 Client assets
-  router.get(/^\/app\/client-assets\/(.+)/, async ctx => {
-    const maxage = devMode ? 0 : ONE_YEAR_IN_MS;
-    await sendFile(ctx, 'new-client/dist/client-assets/', ctx.params[0], { maxage });
   });
 
   return router;

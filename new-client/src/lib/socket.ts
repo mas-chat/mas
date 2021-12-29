@@ -8,7 +8,7 @@ import { logout, getCookie, setCookie } from '../lib/cookie';
 declare const config: { socketHost: string | false };
 
 const socketIOOptions: Partial<ManagerOptions> = {
-  transports: ['websocket', 'polling']
+  transports: ['polling'] // TODO: Add 'websocket' as the first option when nginx and k8s support
 };
 
 // Start the connection as early as possible.
