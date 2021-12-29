@@ -16,13 +16,13 @@ import {
   ModalBody,
   Checkbox
 } from '@chakra-ui/react';
-import { Formik, Form, Field, FormikState } from 'formik';
+import { Formik, Form, Field, FormikState, FormikHelpers } from 'formik';
 import 'whatwg-fetch';
 import { IoLogoGoogle } from 'react-icons/io5';
 import { getConfig } from '../lib/config';
 
-interface Values {
-  realName: string;
+interface RegisterValues {
+  name: string;
   email: string;
   password: string;
   passwordAgain: string;
@@ -30,14 +30,9 @@ interface Values {
   tos: boolean;
 }
 
-interface InputRenderProps {
-  field: InputProps;
-  form: FormikState<Values>;
-}
-
-interface CheckboxRenderProps {
-  field: CheckboxProps;
-  form: FormikState<Values>;
+interface InputRenderProps<T> {
+  field: T;
+  form: FormikState<RegisterValues>;
 }
 
 interface RegisterModalProps {
@@ -46,7 +41,7 @@ interface RegisterModalProps {
 }
 
 export const RegisterModal: FunctionComponent<RegisterModalProps> = ({ isOpen, onClose }: RegisterModalProps) => {
-  const validateRealName = (value: string) => {
+  const validateName = (value: string) => {
     if (!value) {
       return 'Name is required';
     } else if (value.length < 6) {
@@ -66,9 +61,21 @@ export const RegisterModal: FunctionComponent<RegisterModalProps> = ({ isOpen, o
     }
   };
 
+  const validateNick = (value: string) => {
+    if (value.length < 3) {
+      return 'Nickname is too short';
+    }
+  };
+
   const validateTos = (value: boolean) => {
     if (!value) {
       return 'You must agree to the terms of service';
+    }
+  };
+
+  const validatePasswordMatch = (password: string, value: string) => {
+    if (password !== value) {
+      return 'Passwords do not match';
     }
   };
 
@@ -76,10 +83,38 @@ export const RegisterModal: FunctionComponent<RegisterModalProps> = ({ isOpen, o
     window.location.pathname = '/auth/google';
   };
 
+  const handleRegister = async (values: RegisterValues, actions: FormikHelpers<RegisterValues>) => {
+    let data;
+
+    try {
+      const response = await fetch('/api/v1/register', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(values),
+        credentials: 'include'
+      });
+
+      data = await response.json();
+    } catch (e) {
+      actions.setErrors({ name: 'Network error. Please try again later.' });
+      return;
+    }
+
+    if (data.success === true) {
+      // Server has set the cookie, just redirect
+      window.location.pathname = '/app/';
+    } else {
+      actions.setErrors(data.errors);
+    }
+  };
+
   const extRegister = getConfig().auth.google ? (
-    <Box mt="2rem">
+    <Box mt={8}>
       <Box>Register with an existing account:</Box>
-      <Button mt="1rem" onClick={googleRedirect} leftIcon={<IoLogoGoogle />}>
+      <Button mt={4} onClick={googleRedirect} leftIcon={<IoLogoGoogle />}>
         Google Account
       </Button>
     </Box>
@@ -87,42 +122,23 @@ export const RegisterModal: FunctionComponent<RegisterModalProps> = ({ isOpen, o
 
   const form = (
     <Formik
-      initialValues={{ realName: '', email: '', password: '', passwordAgain: '', nick: '', tos: false }}
-      onSubmit={(values, actions) => {
-        fetch('/api/v1/register', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(values),
-          credentials: 'include'
-        })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success === true) {
-              // Server has set the cookie, just redirect
-              window.location.pathname = '/app/';
-            } else {
-              actions.setErrors(data.errors);
-            }
-          });
-      }}
+      initialValues={{ name: '', email: '', password: '', passwordAgain: '', nick: '', tos: false }}
+      onSubmit={handleRegister}
     >
-      {formProps => (
+      {({ isSubmitting, values }) => (
         <Form>
-          <Field name="realName" validate={validateRealName}>
-            {({ field, form }: InputRenderProps) => (
-              <FormControl mt="1rem" isInvalid={!!(form.errors.realName && form.touched.realName)}>
-                <FormLabel htmlFor="realName">Your Name</FormLabel>
-                <Input {...field} id="realName" placeholder="name" />
-                <FormErrorMessage>{form.errors.realName}</FormErrorMessage>
+          <Field name="name" validate={validateName}>
+            {({ field, form }: InputRenderProps<InputProps>) => (
+              <FormControl mt={4} isInvalid={Boolean(form.errors.name) && form.touched.name}>
+                <FormLabel htmlFor="name">Your Name</FormLabel>
+                <Input {...field} id="name" placeholder="name" />
+                <FormErrorMessage>{form.errors.name}</FormErrorMessage>
               </FormControl>
             )}
           </Field>
           <Field name="email" validate={validateEmail}>
-            {({ field, form }: InputRenderProps) => (
-              <FormControl mt="1rem" isInvalid={!!(form.errors.email && form.touched.email)}>
+            {({ field, form }: InputRenderProps<InputProps>) => (
+              <FormControl mt={4} isInvalid={Boolean(form.errors.email) && form.touched.email}>
                 <FormLabel htmlFor="email">Email Address</FormLabel>
                 <Input {...field} id="email" placeholder="email" />
                 <FormErrorMessage>{form.errors.email}</FormErrorMessage>
@@ -130,26 +146,31 @@ export const RegisterModal: FunctionComponent<RegisterModalProps> = ({ isOpen, o
             )}
           </Field>
           <Field name="password" validate={validatePassword}>
-            {({ field, form }: InputRenderProps) => (
-              <FormControl mt="1rem" isInvalid={!!(form.errors.password && form.touched.password)}>
+            {({ field, form }: InputRenderProps<InputProps>) => (
+              <FormControl mt={4} isInvalid={Boolean(form.errors.password) && form.touched.password}>
                 <FormLabel htmlFor="password">Password</FormLabel>
-                <Input {...field} id="password" placeholder="password" />
+                <Input {...field} type="password" id="password" placeholder="password" />
                 <FormErrorMessage>{form.errors.password}</FormErrorMessage>
               </FormControl>
             )}
           </Field>
-          <Field name="passwordAgain" validate={validatePassword}>
-            {({ field, form }: InputRenderProps) => (
-              <FormControl mt="1rem" isInvalid={!!(form.errors.passwordAgain && form.touched.passwordAgain)}>
+          <Field
+            name="passwordAgain"
+            validate={(value: string) => validatePasswordMatch(values.password, value)}
+            validateOnBlur={true}
+            validateOnChange={false}
+          >
+            {({ field, form }: InputRenderProps<InputProps>) => (
+              <FormControl mt={4} isInvalid={Boolean(form.errors.passwordAgain) && form.touched.passwordAgain}>
                 <FormLabel htmlFor="passwordAgain">Password (again)</FormLabel>
-                <Input {...field} id="passwordAgain" placeholder="passwordAgain" />
+                <Input {...field} type="password" id="passwordAgain" placeholder="passwordAgain" />
                 <FormErrorMessage>{form.errors.passwordAgain}</FormErrorMessage>
               </FormControl>
             )}
           </Field>
-          <Field name="nick" validate={validatePassword}>
-            {({ field, form }: InputRenderProps) => (
-              <FormControl mt="1rem" isInvalid={!!(form.errors.nick && form.touched.nick)}>
+          <Field name="nick" validate={validateNick}>
+            {({ field, form }: InputRenderProps<InputProps>) => (
+              <FormControl mt={4} isInvalid={Boolean(form.errors.nick) && form.touched.nick}>
                 <FormLabel htmlFor="nick">Nickname</FormLabel>
                 <Input {...field} id="nick" placeholder="nick" />
                 <FormErrorMessage>{form.errors.nick}</FormErrorMessage>
@@ -157,16 +178,15 @@ export const RegisterModal: FunctionComponent<RegisterModalProps> = ({ isOpen, o
             )}
           </Field>
           <Field name="tos" validate={validateTos}>
-            {({ field, form }: CheckboxRenderProps) => (
-              <FormControl mt="1rem" isInvalid={!!(form.errors.tos && form.touched.tos)}>
+            {({ field, form }: InputRenderProps<CheckboxProps>) => (
+              <FormControl mt={4} isInvalid={Boolean(form.errors.tos) && form.touched.tos}>
                 <FormLabel htmlFor="tos">I agree MAS Terms of Service</FormLabel>
                 <Checkbox {...field} id="tos" placeholder="tos" />
                 <FormErrorMessage>{form.errors.tos}</FormErrorMessage>
               </FormControl>
             )}
           </Field>
-
-          <Button mt={4} colorScheme="teal" isLoading={formProps.isSubmitting} type="submit">
+          <Button mt={4} isLoading={isSubmitting} type="submit">
             Register
           </Button>
         </Form>
@@ -180,7 +200,7 @@ export const RegisterModal: FunctionComponent<RegisterModalProps> = ({ isOpen, o
       <ModalContent>
         <ModalHeader>Register</ModalHeader>
         <ModalCloseButton />
-        <ModalBody px="2rem" py="1rem">
+        <ModalBody px={8} py={4}>
           {form}
           {extRegister}
         </ModalBody>

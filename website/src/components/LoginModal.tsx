@@ -5,7 +5,6 @@ import {
   Button,
   FormControl,
   FormErrorMessage,
-  FormLabel,
   Input,
   InputProps,
   Modal,
@@ -16,174 +15,175 @@ import {
   ModalBody,
   Heading
 } from '@chakra-ui/react';
-import { Formik, Form, Field, FormikState } from 'formik';
+import { Formik, Form, Field, FormikState, FormikHelpers } from 'formik';
 import { IoLogoGoogle } from 'react-icons/io5';
 import { getConfig } from '../lib/config';
 
-interface Values {
-  username: string;
-  password: string;
-}
-
-interface ForgotPasswordValues {
-  email: string;
-}
-
-interface InputRenderProps {
-  field: InputProps;
-  form: FormikState<Values>;
-}
-
-interface ForgotPasswordInputRenderProps {
-  field: InputProps;
-  form: FormikState<ForgotPasswordValues>;
-}
+type BaseInputRenderProps<T> = { field: InputProps; form: FormikState<T> };
+type LoginValues = { username: string; password: string };
+type LoginInputRenderProps = BaseInputRenderProps<LoginValues>;
+type ForgotPasswordValues = { email: string };
+type ForgotPasswordInputRenderProps = BaseInputRenderProps<ForgotPasswordValues>;
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type Mode = 'login' | 'forgotPassword' | 'forgotPasswordDone';
+enum Mode {
+  Login,
+  ForgotPassword,
+  ForgotPasswordDone
+}
 
 export const LoginModal: FunctionComponent<LoginModalProps> = ({ isOpen, onClose }: LoginModalProps) => {
-  const [mode, setMode] = useState<Mode>('login');
+  const [mode, setMode] = useState<Mode>(Mode.Login);
 
   const googleRedirect = () => {
     window.location.pathname = '/auth/google';
   };
 
+  const handleLogin = async (values: LoginValues, actions: FormikHelpers<LoginValues>) => {
+    let data;
+
+    try {
+      const response = await fetch('/api/v1/login', {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: values.username, password: values.password }),
+        credentials: 'include'
+      });
+
+      data = await response.json();
+    } catch (e) {
+      actions.setErrors({ password: 'Network error. Please try again later.' });
+      return;
+    }
+
+    if (data.success) {
+      // Server has set the session cookie, just redirect
+      window.location.pathname = '/app/';
+    } else {
+      actions.setErrors({ password: data.msg });
+    }
+  };
+
+  const handleForgotPassword = async (values: ForgotPasswordValues, actions: FormikHelpers<ForgotPasswordValues>) => {
+    let data;
+
+    try {
+      const response = await fetch('/api/v1/forgot-password', {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: values.email }),
+        credentials: 'include'
+      });
+
+      data = await response.json();
+    } catch (e) {
+      actions.setErrors({ email: 'Network error. Please try again later.' });
+      return;
+    }
+
+    if (data.success) {
+      setMode(Mode.ForgotPasswordDone);
+    } else {
+      actions.setErrors({ email: 'Something went wrong' });
+    }
+  };
+
   const AuthButtons = getConfig().auth.google ? (
-    <Box>
-      <Box>Sign in with account</Box>
-      <Button mt="1rem" onClick={googleRedirect} leftIcon={<IoLogoGoogle />}>
+    <Box mt={8}>
+      <Heading size="sm">Sign in with an existing account</Heading>
+      <Button mt={4} width="100%" onClick={googleRedirect} leftIcon={<IoLogoGoogle />}>
         Google Account
       </Button>
     </Box>
   ) : null;
 
-  const loginPanel = (
-    <>
-      <Formik
-        initialValues={{ username: '', password: '' }}
-        onSubmit={(values, actions) => {
-          fetch('/api/v1/login', {
-            method: 'POST',
-            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: values.username, password: values.password }),
-            credentials: 'include'
-          })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success === true) {
-                // Server has set the session cookie, just redirect
-                window.location.pathname = '/app/';
-              } else {
-                actions.setErrors(data.errors);
-              }
-            });
-        }}
-      >
+  const loginPanel = mode === Mode.Login && (
+    <Box>
+      <Heading size="sm">Sign in with a password</Heading>
+      <Formik initialValues={{ username: '', password: '' }} onSubmit={handleLogin}>
         {formProps => (
           <Form>
-            <Field name="realName">
-              {({ field, form }: InputRenderProps) => (
-                <FormControl mt="1rem" isInvalid={!!form.errors.username}>
-                  <FormLabel htmlFor="username">Username or email</FormLabel>
-                  <Input {...field} id="username" placeholder="name" />
+            <Field name="username">
+              {({ field, form }: LoginInputRenderProps) => (
+                <FormControl mt={4} isInvalid={!!form.errors.username}>
+                  <Input {...field} id="username" placeholder="Username or email" />
                   <FormErrorMessage>{form.errors.username}</FormErrorMessage>
                 </FormControl>
               )}
             </Field>
-            <Field name="email">
-              {({ field, form }: InputRenderProps) => (
-                <FormControl mt="1rem" isInvalid={!!form.errors.password}>
-                  <FormLabel htmlFor="password">Password</FormLabel>
-                  <Input {...field} id="password" placeholder="password" />
+            <Field name="password">
+              {({ field, form }: LoginInputRenderProps) => (
+                <FormControl mt={4} isInvalid={Boolean(form.errors.password)}>
+                  <Input {...field} type="password" id="password" placeholder="Password" />
                   <FormErrorMessage>{form.errors.password}</FormErrorMessage>
                 </FormControl>
               )}
             </Field>
-            <Button mt={4} colorScheme="teal" isLoading={formProps.isSubmitting} type="submit">
+            <Button mt={4} width="100%" isLoading={formProps.isSubmitting} type="submit">
               Enter
+            </Button>
+            <Button mt={4} width="100%" variant="link" onClick={() => setMode(Mode.ForgotPassword)}>
+              Forgot password?
             </Button>
           </Form>
         )}
       </Formik>
       {AuthButtons}
-      <Button variant="link" onClick={() => setMode('forgotPassword')}>
-        Forgot password?
-      </Button>
-    </>
+    </Box>
   );
 
-  const forgotPasswordPanel = (
+  const forgotPasswordPanel = mode === Mode.ForgotPassword && (
     <Box>
-      <Heading>Reset your password</Heading>
-      <Formik
-        initialValues={{ email: '' }}
-        onSubmit={values => {
-          fetch('/api/v1/forgot-password', {
-            method: 'POST',
-            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: values.email }),
-            credentials: 'include'
-          })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success === true) {
-                setMode('forgotPasswordDone');
-              }
-            });
-        }}
-      >
+      <Heading size="sm">Start the recovery</Heading>
+      <Formik initialValues={{ email: '' }} onSubmit={handleForgotPassword}>
         {formProps => (
           <Form>
             <Field name="email">
               {({ field, form }: ForgotPasswordInputRenderProps) => (
-                <FormControl mt="1rem">
-                  <FormLabel htmlFor="email">Type your email</FormLabel>
-                  <Input {...field} id="email" placeholder="name" />
+                <FormControl mt={4}>
+                  <Input {...field} id="email" placeholder="Your email address" />
                   <FormErrorMessage>{form.errors.email}</FormErrorMessage>
                 </FormControl>
               )}
             </Field>
-            <Button mt={4} colorScheme="teal" isLoading={formProps.isSubmitting} type="submit">
+            <Button mt={4} width="100%" isLoading={formProps.isSubmitting} type="submit">
               Proceed
             </Button>
           </Form>
         )}
       </Formik>
-      <Button onClick={() => setMode('login')}>Back to sign</Button>
+      <Button mt={8} width="100%" variant="link" onClick={() => setMode(Mode.Login)}>
+        Back to sign in
+      </Button>
     </Box>
   );
 
-  const forgotPasswordDonePanel = (
+  const forgotPasswordDonePanel = mode === Mode.ForgotPasswordDone && (
     <Box>
-      <Heading>Done</Heading>
-      Password reset email sent! See your spam folder if you don&apos;t see it in couple minutes.
-      <Button onClick={() => setMode('login')}>Ok</Button>
+      <Box>Password reset email is now sent if the email address you gave matches a MAS user!</Box>
+      <Box mt={4}>See your spam folder if you don&apos;t see it in couple minutes.</Box>
+      <Button mt={8} width="100%" onClick={() => setMode(Mode.Login)}>
+        Ok
+      </Button>
     </Box>
   );
 
-  let panel;
-
-  if (mode === 'login') {
-    panel = loginPanel;
-  } else if (mode === 'forgotPassword') {
-    panel = forgotPasswordPanel;
-  } else {
-    panel = forgotPasswordDonePanel;
-  }
+  const title = mode === Mode.Login ? 'Sign in' : mode === Mode.ForgotPassword ? 'Reset your password' : 'Done';
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="xs">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Sign in</ModalHeader>
+        <ModalHeader>{title}</ModalHeader>
         <ModalCloseButton />
-        <ModalBody px="2rem" py="1rem">
-          {panel}
+        <ModalBody px={8} pt={4} pb={8}>
+          {loginPanel}
+          {forgotPasswordPanel}
+          {forgotPasswordDonePanel}
         </ModalBody>
       </ModalContent>
     </Modal>

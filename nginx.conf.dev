@@ -9,21 +9,25 @@ http {
   server {
     listen 3000;
 
-    location ~* ^/(auth|api|files)/ {
+    location ~* ^/(auth|api|files|socket.io)/ {
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header Upgrade $http_upgrade;
+
       proxy_pass http://0.0.0.0:3200;
     }
 
     location ~* ^/app(/|$) {
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;
+
       proxy_pass http://0.0.0.0:3200;
     }
 
     location / {
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;
+
       proxy_pass http://0.0.0.0:3100;
     }
   }

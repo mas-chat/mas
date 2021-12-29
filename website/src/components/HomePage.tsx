@@ -10,8 +10,8 @@ export const HomePage: FunctionComponent = () => {
   return (
     <main>
       <div>
-        <VStack spacing="4rem">
-          <Heading py="4rem" size="4xl">
+        <VStack spacing={16}>
+          <Heading py={16} size="4xl">
             A modern open source chat tool for teams
           </Heading>
           <Button size="lg" onClick={onOpen}>
