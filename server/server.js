@@ -21,6 +21,7 @@ const init = require('./lib/init');
 init.configureProcess('frontend');
 
 const fs = require('fs');
+const zlib = require('zlib');
 const http = require('http');
 const https = require('https');
 const path = require('path');
@@ -118,7 +119,15 @@ function createFrontendApp() {
     await next();
   });
 
-  app.use(compress()); // Enable brotli and GZIP compression
+  app.use(
+    compress({
+      br: {
+        params: {
+          [zlib.constants.BROTLI_PARAM_QUALITY]: 4 // TODO: default is still 11 and way too slow
+        }
+      }
+    })
+  ); // Enable brotli and GZIP compression
 
   app.use(passport.initialize());
 
