@@ -33,8 +33,8 @@ const routeGenerator = (mobile: boolean) => [
       { caseSensitive: false, path: 'create-channel', element: <CreateChannel /> },
       { caseSensitive: false, path: 'join-channel', element: <JoinChannel /> },
       { caseSensitive: false, path: 'join-irc-channel', element: <JoinIRCChannel /> },
-      { caseSensitive: false, path: '/:activeWindowId/settings', element: <WindowSettings /> },
-      { caseSensitive: false, path: '/:activeWindowId', element: <Desktop /> }
+      { caseSensitive: false, path: ':activeWindowId/settings', element: <WindowSettings /> },
+      { caseSensitive: false, path: ':activeWindowId', element: <Desktop /> }
     ]
   },
   { caseSensitive: false, path: '*', element: mobile ? <SlidingSidebar /> : <DesktopRootRedirect /> }

@@ -13,8 +13,9 @@
     "declaration": true,
     "noEmit": true,
     "typeRoots": ["src/types", "node_modules/@types"],
-    "noPropertyAccessFromIndexSignature": true,
-    "useDefineForClassFields": true
+    // "noPropertyAccessFromIndexSignature": true,
+    "useDefineForClassFields": true,
+    "skipLibCheck": true // TODO: Remove when chakra UI is updated and compiles again without this option
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "__tests__/**/*.ts"],
   "exclude": ["node_modules"]
