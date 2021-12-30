@@ -50,6 +50,27 @@ function main() {
 
   const router = new Router();
 
+  // Favicon
+  router.get(/^\/favicon.ico/, async (ctx: Context) => {
+    ctx.body = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'></svg>`;
+  });
+
+  // Web site pages
+  router.get(/^\/(home|about|support|tos|pricing|$)/, async (ctx: Context) => {
+    const sessionCookie = ctx.cookies.get('mas');
+
+    if (sessionCookie) {
+      ctx.redirect('/app');
+    } else {
+      ctx.set('Cache-control', 'private, max-age=0, no-cache');
+
+      await ctx['render']('index', {
+        config: JSON.stringify({ auth: { google: googleAuthEnabled } }),
+        entryFile: `website-assets/${mainEntryFileName}`
+      });
+    }
+  });
+
   // Web site assets
   router.get(/^\/website-assets\/(.+)/, async (ctx: Context) => {
     const maxage = mode === Mode.Dev ? 0 : ONE_YEAR_IN_MS;
@@ -66,23 +87,6 @@ function main() {
 
   app.use(router.routes());
   app.use(router.allowedMethods());
-
-  app.use(async (ctx, next) => {
-    await next();
-
-    const sessionCookie = ctx.cookies.get('mas');
-
-    if (sessionCookie) {
-      ctx.redirect('/app');
-    } else {
-      ctx.set('Cache-control', 'private, max-age=0, no-cache');
-
-      await ctx['render']('index', {
-        config: JSON.stringify({ auth: { google: googleAuthEnabled } }),
-        entryFile: `website-assets/${mainEntryFileName}`
-      });
-    }
-  });
 
   app.listen(serverPort, () => console.log(`Website HTTP server listening : http://0.0.0.0:${serverPort}/`));
 }
