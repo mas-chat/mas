@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useContext, useEffect, useState, useMemo, KeyboardEvent } from 'react';
-import { createEditor, Descendant } from 'slate';
+import { createEditor, Transforms, Descendant } from 'slate';
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
 import unified from 'unified';
@@ -17,7 +17,7 @@ interface MessageEditorProps {
 }
 
 // Note editors can't share initialValue object, using a function for that reason
-const createInitialValue = () => [
+const slateInitialValue = [
   {
     type: 'paragraph',
     children: [{ text: '' }]
@@ -27,7 +27,7 @@ const createInitialValue = () => [
 const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWindowMode }: MessageEditorProps) => {
   const { windowStore } = useContext(ServerContext);
 
-  const [message, setMessage] = useState<Descendant[]>(createInitialValue);
+  const [message, setMessage] = useState<Descendant[]>(slateInitialValue);
   // TODO: Remove type cast after https://github.com/ianstormtaylor/slate/issues/4144
   const editor = useMemo(() => withHistory(withReact(createEditor() as ReactEditor)), []);
 
@@ -46,7 +46,7 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
       });
 
       windowStore.processLine(window, processor.stringify(ast));
-      setMessage(createInitialValue());
+      Transforms.removeNodes(editor, { at: [0] });
     }
   };
 
