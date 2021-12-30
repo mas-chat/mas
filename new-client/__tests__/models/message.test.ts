@@ -2,7 +2,7 @@ import URI from 'urijs';
 import UserModelFactory from '../factories/user';
 import WindowModelFactory from '../factories/window';
 import MessageModelFactory from '../factories/message';
-import { UrlPartSubType } from '../../src/models/Message';
+import { UrlPartSubType, UrlPartType } from '../../src/models/Message';
 
 jest.mock('../../src/lib/cookie.ts', () => ({ getUserId: () => 'm42' }));
 
@@ -19,8 +19,8 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) },
-        { type: 'text', text: ' two' }
+        { type: UrlPartType.Url, class: UrlPartSubType.Generic, url: expect.any(URI) },
+        { type: UrlPartType.Text, text: ' two' }
       ]);
     });
 
@@ -32,9 +32,9 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'one ' },
-        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) },
-        { type: 'text', text: ' two' }
+        { type: UrlPartType.Text, text: 'one ' },
+        { type: UrlPartType.Url, class: UrlPartSubType.Generic, url: expect.any(URI) },
+        { type: UrlPartType.Text, text: ' two' }
       ]);
     });
 
@@ -46,8 +46,8 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'one ' },
-        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) }
+        { type: UrlPartType.Text, text: 'one ' },
+        { type: UrlPartType.Url, class: UrlPartSubType.Generic, url: expect.any(URI) }
       ]);
     });
 
@@ -59,11 +59,11 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) },
-        { type: 'text', text: ' one ' },
-        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) },
-        { type: 'text', text: ' two ' },
-        { type: 'url', class: UrlPartSubType.Generic, url: expect.any(URI) }
+        { type: UrlPartType.Url, class: UrlPartSubType.Generic, url: expect.any(URI) },
+        { type: UrlPartType.Text, text: ' one ' },
+        { type: UrlPartType.Url, class: UrlPartSubType.Generic, url: expect.any(URI) },
+        { type: UrlPartType.Text, text: ' two ' },
+        { type: UrlPartType.Url, class: UrlPartSubType.Generic, url: expect.any(URI) }
       ]);
     });
   });
@@ -77,8 +77,8 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'mention', text: 'user:', userId: user.id },
-        { type: 'text', text: ' hello there' }
+        { type: UrlPartType.Mention, user },
+        { type: UrlPartType.Text, text: ' hello there' }
       ]);
     });
 
@@ -90,8 +90,8 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'mention', text: '@user', userId: user.id },
-        { type: 'text', text: ' hello there' }
+        { type: UrlPartType.Mention, user },
+        { type: UrlPartType.Text, text: ' hello there' }
       ]);
     });
 
@@ -103,9 +103,9 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hi ' },
-        { type: 'mention', text: '@user', userId: user.id },
-        { type: 'text', text: ' hello there' }
+        { type: UrlPartType.Text, text: 'hi ' },
+        { type: UrlPartType.Mention, user },
+        { type: UrlPartType.Text, text: ' hello there' }
       ]);
     });
 
@@ -117,8 +117,8 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hi ' },
-        { type: 'mention', text: '@user', userId: user.id }
+        { type: UrlPartType.Text, text: 'hi ' },
+        { type: UrlPartType.Mention, user }
       ]);
     });
 
@@ -130,11 +130,11 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'mention', text: '@user', userId: user.id },
-        { type: 'text', text: ' hi ' },
-        { type: 'mention', text: '@user', userId: user.id },
-        { type: 'text', text: ' bye ' },
-        { type: 'mention', text: '@user', userId: user.id }
+        { type: UrlPartType.Mention, user },
+        { type: UrlPartType.Text, text: ' hi ' },
+        { type: UrlPartType.Mention, user },
+        { type: UrlPartType.Text, text: ' bye ' },
+        { type: UrlPartType.Mention, user }
       ]);
     });
 
@@ -146,9 +146,9 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'mention', text: 'user:', userId: user.id },
-        { type: 'text', text: ' hi ' },
-        { type: 'mention', text: '@user', userId: user.id }
+        { type: UrlPartType.Mention, user },
+        { type: UrlPartType.Text, text: ' hi ' },
+        { type: UrlPartType.Mention, user }
       ]);
     });
 
@@ -159,7 +159,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyTokens).toEqual([{ type: 'text', text: 'hi foo@example.com there' }]);
+      expect(message.bodyTokens).toEqual([{ type: UrlPartType.Text, text: 'hi foo@example.com there' }]);
     });
 
     it('Does not decode @ signs', async () => {
@@ -169,7 +169,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyTokens).toEqual([{ type: 'text', text: '@ something @ something @' }]);
+      expect(message.bodyTokens).toEqual([{ type: UrlPartType.Text, text: '@ something @ something @' }]);
     });
 
     it('Does not decode two mentions without a space', async () => {
@@ -179,7 +179,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyTokens).toEqual([{ type: 'text', text: 'hi @foo@bar there' }]);
+      expect(message.bodyTokens).toEqual([{ type: UrlPartType.Text, text: 'hi @foo@bar there' }]);
     });
 
     it('Does not decode unknown nicks', async () => {
@@ -189,7 +189,7 @@ describe('Message model', () => {
         user
       });
 
-      expect(message.bodyTokens).toEqual([{ type: 'text', text: 'unknown: hi @stranger there' }]);
+      expect(message.bodyTokens).toEqual([{ type: UrlPartType.Text, text: 'unknown: hi @stranger there' }]);
     });
   });
 
@@ -202,8 +202,8 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
-        { type: 'text', text: ' hello there' }
+        { type: UrlPartType.Emoji, codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
+        { type: UrlPartType.Text, text: ' hello there' }
       ]);
     });
 
@@ -215,9 +215,9 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hello ' },
-        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
-        { type: 'text', text: ' there' }
+        { type: UrlPartType.Text, text: 'hello ' },
+        { type: UrlPartType.Emoji, codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
+        { type: UrlPartType.Text, text: ' there' }
       ]);
     });
 
@@ -229,8 +229,8 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hello there ' },
-        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' }
+        { type: UrlPartType.Text, text: 'hello there ' },
+        { type: UrlPartType.Emoji, codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' }
       ]);
     });
 
@@ -242,9 +242,9 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
-        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
-        { type: 'emoji', codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' }
+        { type: UrlPartType.Emoji, codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
+        { type: UrlPartType.Emoji, codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' },
+        { type: UrlPartType.Emoji, codePoint: '1f603', emoji: '😃', shortCode: ':smiley:' }
       ]);
     });
 
@@ -256,8 +256,8 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hello there ' },
-        { type: 'text', text: ':brokensmiley:' }
+        { type: UrlPartType.Text, text: 'hello there ' },
+        { type: UrlPartType.Text, text: ':brokensmiley:' }
       ]);
     });
   });
@@ -271,8 +271,8 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'emoji', codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' },
-        { type: 'text', text: ' hello there' }
+        { type: UrlPartType.Emoji, codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' },
+        { type: UrlPartType.Text, text: ' hello there' }
       ]);
     });
 
@@ -284,9 +284,9 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hello ' },
-        { type: 'emoji', codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' },
-        { type: 'text', text: ' there' }
+        { type: UrlPartType.Text, text: 'hello ' },
+        { type: UrlPartType.Emoji, codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' },
+        { type: UrlPartType.Text, text: ' there' }
       ]);
     });
 
@@ -298,8 +298,8 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hello there ' },
-        { type: 'emoji', codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' }
+        { type: UrlPartType.Text, text: 'hello there ' },
+        { type: UrlPartType.Emoji, codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' }
       ]);
     });
   });
@@ -313,9 +313,9 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hello ' },
-        { type: 'url', class: UrlPartSubType.Image, url: expect.any(URI) },
-        { type: 'text', text: ' there' }
+        { type: UrlPartType.Text, text: 'hello ' },
+        { type: UrlPartType.Url, class: UrlPartSubType.Image, url: expect.any(URI) },
+        { type: UrlPartType.Text, text: ' there' }
       ]);
     });
   });
@@ -329,9 +329,15 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hello ' },
-        { type: 'url', class: UrlPartSubType.Video, url: expect.any(URI), startTime: 77, videoId: 'SHNOyMsKCBE' },
-        { type: 'text', text: ' there' }
+        { type: UrlPartType.Text, text: 'hello ' },
+        {
+          type: UrlPartType.Url,
+          class: UrlPartSubType.Video,
+          url: expect.any(URI),
+          startTime: 77,
+          videoId: 'SHNOyMsKCBE'
+        },
+        { type: UrlPartType.Text, text: ' there' }
       ]);
     });
 
@@ -343,9 +349,15 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hello ' },
-        { type: 'url', class: UrlPartSubType.Video, url: expect.any(URI), startTime: 0, videoId: 'dDCfXJ50P3k' },
-        { type: 'text', text: ' there' }
+        { type: UrlPartType.Text, text: 'hello ' },
+        {
+          type: UrlPartType.Url,
+          class: UrlPartSubType.Video,
+          url: expect.any(URI),
+          startTime: 0,
+          videoId: 'dDCfXJ50P3k'
+        },
+        { type: UrlPartType.Text, text: ' there' }
       ]);
     });
 
@@ -357,9 +369,15 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hello ' },
-        { type: 'url', class: UrlPartSubType.Video, url: expect.any(URI), startTime: 77, videoId: 'dDCfXJ50P3k' },
-        { type: 'text', text: ' there' }
+        { type: UrlPartType.Text, text: 'hello ' },
+        {
+          type: UrlPartType.Url,
+          class: UrlPartSubType.Video,
+          url: expect.any(URI),
+          startTime: 77,
+          videoId: 'dDCfXJ50P3k'
+        },
+        { type: UrlPartType.Text, text: ' there' }
       ]);
     });
 
@@ -371,15 +389,15 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { type: 'text', text: 'hello ' },
+        { type: UrlPartType.Text, text: 'hello ' },
         {
-          type: 'url',
+          type: UrlPartType.Url,
           class: UrlPartSubType.Video,
           url: expect.any(URI),
           startTime: 2 * 3600 + 12 * 60 + 6,
           videoId: 'dDCfXJ50P3k'
         },
-        { type: 'text', text: ' there' }
+        { type: UrlPartType.Text, text: ' there' }
       ]);
     });
   });
@@ -393,13 +411,13 @@ describe('Message model', () => {
       });
 
       expect(message.bodyTokens).toEqual([
-        { text: 'user:', type: 'mention', userId: 'm1' },
-        { text: ' ', type: 'text' },
-        { text: '@user', type: 'mention', userId: 'm1' },
-        { text: ' ', type: 'text' },
-        { type: 'emoji', codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' },
-        { type: 'text', text: ' hello ' },
-        { type: 'emoji', codePoint: '1f4af', emoji: '💯', shortCode: ':100:' }
+        { type: UrlPartType.Mention, user },
+        { text: ' ', type: UrlPartType.Text },
+        { type: UrlPartType.Mention, user },
+        { text: ' ', type: UrlPartType.Text },
+        { type: UrlPartType.Emoji, codePoint: '1f469-1f3ff', emoji: '👩🏿', shortCode: ':woman_tone5:' },
+        { type: UrlPartType.Text, text: ' hello ' },
+        { type: UrlPartType.Emoji, codePoint: '1f4af', emoji: '💯', shortCode: ':100:' }
       ]);
     });
   });
