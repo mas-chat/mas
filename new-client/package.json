@@ -21,7 +21,7 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "dayjs": "^1.10.7",
-    "emoji-regex": "^9.2.2",
+    "emoji-regex": "^10.0.0",
     "emoji-unicode": "^2.0.1",
     "favico.js": "^0.3.10",
     "framer-motion": "^5.5.5",
