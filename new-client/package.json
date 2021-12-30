@@ -9,7 +9,7 @@
   "private": false,
   "scripts": {
     "build-prod": "ts-node -P tsconfig-node.json ./esbuild.ts",
-    "dev": "ts-node -P tsconfig-node.json ./esbuild.ts --devMode",
+    "dev": "ts-node -T -P tsconfig-node.json ./esbuild.ts --devMode",
     "compile": "tsc",
     "lint": "eslint 'src/**/*.{js,ts,tsx}'",
     "test": "jest"

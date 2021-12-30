@@ -53,7 +53,6 @@
     "@types/node": "^15.0.2",
     "chai": "^4.2.0",
     "foreman": "^3.0.0",
-    "mocha": "^8.2.1",
     "proxyquire": "^2.1.3",
     "sinon": "^12.0.1",
     "sinon-chai": "^3.7.0",
@@ -67,12 +66,10 @@
     "start-loopback": "cd build && node ./bin/create-db.js && node ./backends/loopback/server.js",
     "start-irc": "cd build && node ./bin/create-db.js && node ./backends/irc/server.js",
     "start-irc-scktmgr": "cd build && node ./bin/create-db.js && node ./backends/irc/connection-manager/server.js",
-    "start-frontend-dev": "ts-node ./bin/create-db.ts && ts-node-dev ./server.js",
-    "start-loopback-dev": "ts-node ./bin/create-db.ts && ts-node-dev ./backends/loopback/server.js",
-    "start-irc-dev": "ts-node ./bin/create-db.ts && ts-node-dev ./backends/irc/server.js",
-    "start-irc-scktmgr-dev": "ts-node ./bin/create-db.ts && ts-node-dev ./backends/irc/connection-manager/server.js",
-    "test": "mocha --recursive test/unit && ./test/browser/bin/run-tests saucelabs",
-    "test-server": "mocha server/test/**/*test.js"
+    "start-frontend-dev": "ts-node -T ./bin/create-db.ts && ts-node-dev ./server.js",
+    "start-loopback-dev": "ts-node -T ./bin/create-db.ts && ts-node-dev ./backends/loopback/server.js",
+    "start-irc-dev": "ts-node -T ./bin/create-db.ts && ts-node-dev ./backends/irc/server.js",
+    "start-irc-scktmgr-dev": "ts-node -T ./bin/create-db.ts && ts-node-dev ./backends/irc/connection-manager/server.js"
   },
   "repository": {
     "type": "git",
