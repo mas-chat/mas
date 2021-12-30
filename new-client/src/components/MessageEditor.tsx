@@ -2,7 +2,7 @@ import React, { FunctionComponent, useContext, useEffect, useState, useMemo, Key
 import { createEditor, Transforms, Descendant } from 'slate';
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
-import unified from 'unified';
+import { unified } from 'unified';
 import stringify from 'remark-stringify';
 import { slateToRemark } from 'remark-slate-transformer';
 import { Box } from '@chakra-ui/react';
