@@ -1,53 +1,83 @@
-import React, { FunctionComponent, useContext, useEffect, useState, useMemo, KeyboardEvent } from 'react';
-import { createEditor, Transforms, Descendant } from 'slate';
-import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
-import { withHistory } from 'slate-history';
-import { unified } from 'unified';
-import stringify from 'remark-stringify';
-import { slateToRemark } from 'remark-slate-transformer';
+import React, { FunctionComponent, useCallback, useContext, useEffect, useState, useMemo } from 'react';
 import { Box } from '@chakra-ui/react';
+import {
+  BoldExtension,
+  ItalicExtension,
+  UnderlineExtension,
+  MarkdownExtension,
+  HardBreakExtension
+} from 'remirror/extensions';
+import { Remirror, EditorComponent, useRemirror, useRemirrorContext, useKeymap, useHelpers } from '@remirror/react';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
-
-const processor = unified().use(slateToRemark).use(stringify);
 
 interface MessageEditorProps {
   window: WindowModel;
   singleWindowMode?: boolean;
 }
 
-// Note editors can't share initialValue object, using a function for that reason
-const slateInitialValue = [
-  {
-    type: 'paragraph',
-    children: [{ text: '' }]
-  }
-];
+interface UseSaveHook {
+  saving: boolean;
+  error: Error | undefined;
+}
+
+function useSaveHook(onSave: (text: string) => void) {
+  const helpers = useHelpers();
+  const [state, setState] = useState<UseSaveHook>({ saving: false, error: undefined });
+
+  useKeymap(
+    'Enter',
+    useCallback(() => {
+      const markdown = helpers.getMarkdown();
+
+      setState({ saving: true, error: undefined });
+      onSave(markdown);
+
+      return true;
+    }, [helpers, onSave])
+  );
+
+  return state;
+}
 
 const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWindowMode }: MessageEditorProps) => {
   const { windowStore } = useContext(ServerContext);
 
-  const [message, setMessage] = useState<Descendant[]>(slateInitialValue);
-  // TODO: Remove type cast after https://github.com/ianstormtaylor/slate/issues/4144
-  const editor = useMemo(() => withHistory(withReact(createEditor() as ReactEditor)), []);
+  const extensions = useMemo(
+    () => () =>
+      [
+        new BoldExtension(),
+        new ItalicExtension(),
+        new UnderlineExtension(),
+        new MarkdownExtension(),
+        new HardBreakExtension()
+      ],
+    []
+  );
+
+  const { manager, onChange, state, getContext } = useRemirror({
+    extensions,
+    content: '',
+    stringHandler: 'html',
+    selection: 'end'
+  });
 
   useEffect(() => {
     // singleWindowMode check is here because we don't want the VKB to open automatically on mobile
     if (!singleWindowMode && window.focused) {
-      ReactEditor.focus(editor);
+      getContext()?.chain.focus('end').run();
     }
-  }, [window.focused, singleWindowMode, editor]);
+  }, [window.focused, singleWindowMode, getContext]);
 
-  const handleKeyUp = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
-      const ast = processor.runSync({
-        type: 'root',
-        children: message
-      });
+  const EditorBindings = () => {
+    const { chain } = useRemirrorContext();
 
-      windowStore.processLine(window, processor.stringify(ast));
-      Transforms.removeNodes(editor, { at: [0] });
-    }
+    useSaveHook(text => {
+      windowStore.processLine(window, text);
+      chain.setContent('').focus('end').run();
+    });
+
+    return null;
   };
 
   return (
@@ -58,11 +88,16 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
       borderColor={window.focused ? '#bbb' : 'inherit'}
       borderWidth="1px"
       borderRadius="base"
-      // onClick={e => e.stopPropagation()}
+      __css={{
+        '& .remirror-editor:focus-visible': { outline: 'none' }
+      }}
     >
-      <Slate editor={editor} value={message} onChange={value => setMessage(value)}>
-        <Editable onKeyUp={handleKeyUp} placeholder="Write here…" />
-      </Slate>
+      <Remirror onChange={onChange} manager={manager} initialContent={state}>
+        <div>
+          <EditorBindings />
+          <EditorComponent />
+        </div>
+      </Remirror>
     </Box>
   );
 };
