@@ -89,9 +89,8 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
       borderWidth="1px"
       borderRadius="base"
       __css={{
-        '& .remirror-editor:focus-visible .remirror-editor:focus': {
-          outline: 'none'
-        }
+        '& .remirror-editor:focus-visible': { outline: 'none' },
+        '& .remirror-editor:focus': { outline: 'none' }
       }}
     >
       <Remirror onChange={onChange} manager={manager} initialContent={state}>
