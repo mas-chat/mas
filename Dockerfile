@@ -36,7 +36,9 @@ RUN yarn install \
 COPY new-client /app/new-client/
 WORKDIR /app/new-client/
 
+# TODO: Remove the temporary esbuild remirror fix (rm -fr node_modules/jsdom)
 RUN yarn install \
+  && rm -fr node_modules/jsdom \
   && yarn run build-prod  \
   && rm -fr node_modules \
   && yarn cache clean
