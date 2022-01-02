@@ -6,14 +6,25 @@ import {
   UnderlineExtension,
   HardBreakExtension,
   LinkExtension,
-  CodeBlockExtension
+  CodeBlockExtension,
+  PlaceholderExtension,
+  MentionExtension
 } from 'remirror/extensions';
 import css from 'refractor/lang/css';
 import javascript from 'refractor/lang/javascript';
 import json from 'refractor/lang/json';
 import typescript from 'refractor/lang/typescript';
 import markdown from 'refractor/lang/markdown';
-import { Remirror, EditorComponent, useRemirror, useRemirrorContext, useKeymap, useHelpers } from '@remirror/react';
+import {
+  ThemeProvider,
+  Remirror,
+  EditorComponent,
+  useRemirror,
+  useRemirrorContext,
+  useKeymap,
+  useHelpers
+} from '@remirror/react';
+import { MentionSuggestor } from './MentionSuggestor';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
 
@@ -35,7 +46,11 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
         new LinkExtension({ autoLink: true }),
         new CodeBlockExtension({
           supportedLanguages: [css, javascript, json, typescript, markdown]
-        })
+        }),
+        new MentionExtension({
+          matchers: [{ name: 'user', char: '@', appendText: ' ', matchOffset: 0 }]
+        }),
+        new PlaceholderExtension({ placeholder: 'Write here' })
       ],
     []
   );
@@ -43,7 +58,7 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
   const { manager, onChange, state, getContext } = useRemirror({
     extensions,
     content: '',
-    stringHandler: 'html',
+    stringHandler: 'text',
     selection: 'end'
   });
 
@@ -83,12 +98,13 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
         '& .remirror-editor:focus': { outline: 'none' }
       }}
     >
-      <Remirror onChange={onChange} manager={manager} initialContent={state}>
-        <div>
+      <ThemeProvider>
+        <Remirror onChange={onChange} manager={manager} initialContent={state}>
           <EditorBindings />
+          <MentionSuggestor users={window.participants} />
           <EditorComponent />
-        </div>
-      </Remirror>
+        </Remirror>
+      </ThemeProvider>
     </Box>
   );
 };

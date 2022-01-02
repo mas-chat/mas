@@ -4,7 +4,6 @@ import {
   Box,
   Flex,
   Icon,
-  Link,
   Text,
   Badge,
   Image,
@@ -29,15 +28,38 @@ import {
   TextHandler
 } from '@remirror/react';
 import { observer } from 'mobx-react-lite';
-import URI from 'urijs';
 import { ServerContext } from './ServerContext';
 import { ImageModal, YouTubePreview, UserInfoPopover, NickLabel } from '.';
 import { ModalContext } from './ModalContext';
-import MessageModel, { EmojiPart, TextPart, UrlPartType, UrlPartSubType, UrlPart } from '../models/Message';
+import MessageModel from '../models/Message';
 import UserModel from '../models/User';
 import { Network } from '../types/notifications';
+import { UserStore } from '../stores';
 
-const TWEMOJI_CDN_BASE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/13.0.1';
+//const TWEMOJI_CDN_BASE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/13.0.1';
+
+const renderMention = (user: UserModel, network: Network, insertAt = false) => (
+  <UserInfoPopover key={user.nick[network]} user={user}>
+    <NickLabel>
+      {insertAt ? '@' : ''}
+      {user.nick[network]}
+    </NickLabel>
+  </UserInfoPopover>
+);
+
+const createMentionHandler = (userStore: UserStore, network: Network) => {
+  const mentionHandler: FunctionComponent<{ id: string; label: string }> = ({ id, label }) => {
+    const user = userStore.users.get(id);
+
+    if (!user) {
+      return <span>{label}</span>;
+    }
+
+    return renderMention(user, network, true);
+  };
+
+  return mentionHandler;
+};
 
 const typeMap: MarkMap = {
   blockquote: 'blockquote',
@@ -56,14 +78,6 @@ const typeMap: MarkMap = {
   text: TextHandler
 };
 
-const markMap: MarkMap = {
-  italic: 'em',
-  bold: 'strong',
-  code: 'code',
-  link: createLinkHandler({ target: '_blank' }),
-  underline: 'u'
-};
-
 interface MessageRowProps {
   message: MessageModel;
   isUnread: boolean;
@@ -71,49 +85,20 @@ interface MessageRowProps {
 
 const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: MessageRowProps) => {
   const modal = useContext(ModalContext);
-  const { windowStore } = useContext(ServerContext);
+  const { windowStore, userStore } = useContext(ServerContext);
   const [isFocused, setFocused] = useState<boolean>(false);
   const [editedBody, setEditedBody] = useState<string | null>(null);
 
   const showModal = (url: URI) => modal.onShow(<ImageModal src={url.toString()} />);
 
-  const renderText = (text: TextPart) => text.text;
-
-  const renderImageLink = (uri: URI, index: number) => (
-    <Link key={`${uri}-${index}`} onClick={() => showModal(uri)} color="tomato">
-      {uri.filename()}
-    </Link>
-  );
-  const renderGenericLink = (uri: URI, index: number) => (
-    <Link key={`${uri}-${index}`} href={uri.toString()} target="_blank" color="tomato">
-      {uri.readable()}
-    </Link>
-  );
-  const renderLink = (url: UrlPart, index: number) =>
-    url.class === UrlPartSubType.Image ? renderImageLink(url.url, index) : renderGenericLink(url.url, index);
-
-  const renderMention = (user: UserModel, index: number, network: Network, insertAt = false) => (
-    <UserInfoPopover key={`${user.nick[network]}-${index}`} user={user}>
-      <NickLabel>
-        {insertAt ? '@' : ''}
-        {user.nick[network]}
-      </NickLabel>
-    </UserInfoPopover>
-  );
-
-  const renderEmoji = (emoji: EmojiPart, index: number) => (
-    <Image
-      key={`${emoji.codePoint}-${index}`}
-      display="inline-block"
-      draggable="false"
-      height="1.2rem"
-      verticalAlign="text-top"
-      marginTop="-0.05rem"
-      alt={emoji.shortCode}
-      title={emoji.shortCode}
-      src={`${TWEMOJI_CDN_BASE_URL}/svg/${emoji.codePoint}.svg`}
-    />
-  );
+  const markMap: MarkMap = {
+    italic: 'em',
+    bold: 'strong',
+    code: 'code',
+    link: createLinkHandler({ target: '_blank' }),
+    underline: 'u',
+    mention: createMentionHandler(userStore, message.window.network)
+  };
 
   const renderImagePreviews = () =>
     message.images.map(image => (
@@ -131,23 +116,12 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
       <YouTubePreview key={video.videoId} videoId={video.videoId} startTime={video.startTime} />
     ));
 
-  const renderMessageParts = () => {
+  const renderUserMessage = () => {
     if (message.doc) {
       return <RemirrorRenderer json={message.doc} typeMap={typeMap} markMap={markMap} />;
     }
 
-    return message.bodyTokens.map((token, index) => {
-      switch (token.type) {
-        case UrlPartType.Url:
-          return renderLink(token, index);
-        case UrlPartType.Text:
-          return renderText(token);
-        case UrlPartType.Mention:
-          return renderMention(token.user, index, message.window.network, true);
-        case UrlPartType.Emoji:
-          return renderEmoji(token, index);
-      }
-    });
+    return message.body;
   };
 
   const editedLabel = () =>
@@ -207,7 +181,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
           </Badge>
         ) : (
           <Box overflowWrap="break-word" wordBreak="break-word" as="span" color={color}>
-            {renderMessageParts()}
+            {renderUserMessage()}
             {editedLabel()}
           </Box>
         )}
@@ -219,7 +193,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     if (message.isChannelAction) {
       return (
         <Text overflowWrap="break-word" wordBreak="break-word" as="span">
-          {renderMention(message.user, 0, message.window.network)} {message.channelAction}
+          {renderMention(message.user, message.window.network)} {message.channelAction}
         </Text>
       );
     } else if (message.isBanner) {
