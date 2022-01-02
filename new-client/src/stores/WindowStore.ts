@@ -1,5 +1,6 @@
 import { autorun, observable, computed, makeObservable, action, runInAction } from 'mobx';
 import dayjs from 'dayjs';
+import { RemirrorJSON } from 'remirror';
 import Message from '../models/Message';
 import Window, { WindowMoveDirection } from '../models/Window';
 import UserModel, { systemUser, me, ircSystemUser } from '../models/User';
@@ -257,7 +258,7 @@ class WindowStore {
     window.resetLastSeenGid({ onlyIfFocused: true });
   }
 
-  async sendText(window: WindowModel, text: string, doc?: any): Promise<void> {
+  async sendText(window: WindowModel, text: string, doc?: RemirrorJSON): Promise<void> {
     let sent = false;
 
     setTimeout(() => {
@@ -391,7 +392,7 @@ class WindowStore {
     return response.msgs.length !== 0;
   }
 
-  processLine(window: WindowModel, body: string, doc: any): void {
+  processLine(window: WindowModel, body: string, doc: RemirrorJSON): void {
     let command;
     let commandParams;
 
