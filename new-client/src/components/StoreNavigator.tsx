@@ -24,7 +24,7 @@ const StoreNavigator: FunctionComponent<StoreNavigatorProps> = ({ children }: St
   // URL parameters are source of truth. This hook detects changes in them
   // and syncs the values to mobx store.
   useEffect(() => {
-    const matches = matchRoutes(isMobile ? mobileRoutes : desktopRoutes, location, '/app') || [];
+    const matches = matchRoutes(isMobile ? mobileRoutes : desktopRoutes, location) || [];
 
     const routerParams: Record<string, string> = matches.reduce(
       (accumulator, route) => ({ ...accumulator, ...route.params }),

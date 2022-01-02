@@ -17,7 +17,7 @@ import {
 const routeGenerator = (mobile: boolean) => [
   {
     caseSensitive: false,
-    path: '/c',
+    path: '/app/c',
     element: mobile ? (
       <Outlet />
     ) : (

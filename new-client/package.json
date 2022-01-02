@@ -35,7 +35,7 @@
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.4.2",
     "react-icons": "^4.3.1",
-    "react-router-dom": "^6.0.0-beta.0",
+    "react-router-dom": "^6.2.1",
     "react-window": "^1.8.6",
     "remirror": "^1.0.54",
     "socket.io-client": "^4.4.0",
