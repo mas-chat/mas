@@ -17,6 +17,17 @@ import {
   Portal
 } from '@chakra-ui/react';
 import { IoMenu, IoPencil } from 'react-icons/io5';
+import {
+  Callout,
+  CodeBlock,
+  createIFrameHandler,
+  createLinkHandler,
+  Doc,
+  Heading,
+  MarkMap,
+  RemirrorRenderer,
+  TextHandler
+} from '@remirror/react';
 import { observer } from 'mobx-react-lite';
 import URI from 'urijs';
 import { ServerContext } from './ServerContext';
@@ -27,6 +38,31 @@ import UserModel from '../models/User';
 import { Network } from '../types/notifications';
 
 const TWEMOJI_CDN_BASE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/13.0.1';
+
+const typeMap: MarkMap = {
+  blockquote: 'blockquote',
+  bulletList: 'ul',
+  callout: Callout,
+  codeBlock: CodeBlock,
+  doc: Doc,
+  hardBreak: 'br',
+  heading: Heading,
+  horizontalRule: 'hr',
+  iframe: createIFrameHandler(),
+  image: 'img',
+  listItem: 'li',
+  paragraph: 'p',
+  orderedList: 'ol',
+  text: TextHandler
+};
+
+const markMap: MarkMap = {
+  italic: 'em',
+  bold: 'strong',
+  code: 'code',
+  link: createLinkHandler({ target: '_blank' }),
+  underline: 'u'
+};
 
 interface MessageRowProps {
   message: MessageModel;
@@ -95,8 +131,12 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
       <YouTubePreview key={video.videoId} videoId={video.videoId} startTime={video.startTime} />
     ));
 
-  const renderMessageParts = () =>
-    message.bodyTokens.map((token, index) => {
+  const renderMessageParts = () => {
+    if (message.doc) {
+      return <RemirrorRenderer json={message.doc} typeMap={typeMap} markMap={markMap} />;
+    }
+
+    return message.bodyTokens.map((token, index) => {
       switch (token.type) {
         case UrlPartType.Url:
           return renderLink(token, index);
@@ -108,6 +148,7 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
           return renderEmoji(token, index);
       }
     });
+  };
 
   const editedLabel = () =>
     message.edited && (
