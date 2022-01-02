@@ -1,12 +1,18 @@
-import React, { FunctionComponent, useCallback, useContext, useEffect, useState, useMemo } from 'react';
+import React, { FunctionComponent, useCallback, useContext, useEffect, useMemo } from 'react';
 import { Box } from '@chakra-ui/react';
 import {
   BoldExtension,
   ItalicExtension,
   UnderlineExtension,
-  MarkdownExtension,
-  HardBreakExtension
+  HardBreakExtension,
+  LinkExtension,
+  CodeBlockExtension
 } from 'remirror/extensions';
+import css from 'refractor/lang/css';
+import javascript from 'refractor/lang/javascript';
+import json from 'refractor/lang/json';
+import typescript from 'refractor/lang/typescript';
+import markdown from 'refractor/lang/markdown';
 import { Remirror, EditorComponent, useRemirror, useRemirrorContext, useKeymap, useHelpers } from '@remirror/react';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
@@ -14,30 +20,6 @@ import { ServerContext } from './ServerContext';
 interface MessageEditorProps {
   window: WindowModel;
   singleWindowMode?: boolean;
-}
-
-interface UseSaveHook {
-  saving: boolean;
-  error: Error | undefined;
-}
-
-function useSaveHook(onSave: (text: string) => void) {
-  const helpers = useHelpers();
-  const [state, setState] = useState<UseSaveHook>({ saving: false, error: undefined });
-
-  useKeymap(
-    'Enter',
-    useCallback(() => {
-      const markdown = helpers.getMarkdown();
-
-      setState({ saving: true, error: undefined });
-      onSave(markdown);
-
-      return true;
-    }, [helpers, onSave])
-  );
-
-  return state;
 }
 
 const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWindowMode }: MessageEditorProps) => {
@@ -49,8 +31,11 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
         new BoldExtension(),
         new ItalicExtension(),
         new UnderlineExtension(),
-        new MarkdownExtension(),
-        new HardBreakExtension()
+        new HardBreakExtension(),
+        new LinkExtension({ autoLink: true }),
+        new CodeBlockExtension({
+          supportedLanguages: [css, javascript, json, typescript, markdown]
+        })
       ],
     []
   );
@@ -71,11 +56,16 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
 
   const EditorBindings = () => {
     const { chain } = useRemirrorContext();
+    const { getJSON, getText } = useHelpers();
 
-    useSaveHook(text => {
-      windowStore.processLine(window, text);
-      chain.setContent('').focus('end').run();
-    });
+    useKeymap(
+      'Enter',
+      useCallback(() => {
+        windowStore.processLine(window, getText(), getJSON());
+        chain.setContent('').focus('end').run();
+        return true;
+      }, [chain, getText, getJSON])
+    );
 
     return null;
   };
