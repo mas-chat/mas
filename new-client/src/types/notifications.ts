@@ -1,3 +1,5 @@
+import { RemirrorJSON } from 'remirror';
+
 export enum MessageCategory {
   Message = 'msg',
   Info = 'info',
@@ -58,6 +60,7 @@ export type MessageRecord = {
   ts: number;
   cat: MessageCategory;
   body: string;
+  doc?: RemirrorJSON;
   updatedTs?: number;
   status: MessageStatus;
 };

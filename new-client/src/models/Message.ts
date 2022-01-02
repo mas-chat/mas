@@ -7,6 +7,7 @@ import WindowModel from './Window';
 import UserModel, { me } from './User';
 import emoticons from '../lib/emoticons';
 import { MessageCategory, MessageRecord, MessageStatus } from '../types/notifications';
+import { RemirrorJSON } from 'remirror';
 
 const EMOTICON_REGEX = /(:[^\s:]+:)/;
 const EMOJI_REGEX = new RegExp(`(${buildEmojiRegex().source})`);
@@ -44,6 +45,7 @@ type BodyPart = TextPart | GenericUrlPart | ImageUrlPart | VideoUrlPart | EmojiP
 export type MessageModelProps = {
   gid: number;
   body?: string;
+  doc?: RemirrorJSON;
   category: MessageCategory;
   timestamp: number;
   updatedTimestamp?: number;
@@ -55,6 +57,7 @@ export type MessageModelProps = {
 export default class MessageModel {
   public readonly gid: number;
   public body = '';
+  public doc?: RemirrorJSON;
   private readonly category: MessageCategory;
   public readonly timestamp: number;
   public updatedTimestamp?: number;
@@ -62,9 +65,10 @@ export default class MessageModel {
   public readonly window: WindowModel;
   public status: MessageStatus;
 
-  constructor({ gid, body, category, timestamp, updatedTimestamp, user, window, status }: MessageModelProps) {
+  constructor({ gid, body, doc, category, timestamp, updatedTimestamp, user, window, status }: MessageModelProps) {
     this.gid = gid;
     this.body = body || '';
+    this.doc = doc;
     this.category = category;
     this.timestamp = timestamp;
     this.updatedTimestamp = updatedTimestamp;
@@ -74,6 +78,7 @@ export default class MessageModel {
 
     makeObservable(this, {
       body: observable,
+      doc: observable,
       updatedTimestamp: observable,
       status: observable,
       edited: computed,

@@ -257,7 +257,7 @@ class WindowStore {
     window.resetLastSeenGid({ onlyIfFocused: true });
   }
 
-  async sendText(window: WindowModel, text: string): Promise<void> {
+  async sendText(window: WindowModel, text: string, doc?: any): Promise<void> {
     let sent = false;
 
     setTimeout(() => {
@@ -288,6 +288,7 @@ class WindowStore {
           ts: timestamp,
           cat: MessageCategory.Message,
           body: text,
+          doc,
           status: MessageStatus.Original
         });
       });
@@ -390,7 +391,7 @@ class WindowStore {
     return response.msgs.length !== 0;
   }
 
-  processLine(window: WindowModel, body: string): void {
+  processLine(window: WindowModel, body: string, doc: any): void {
     let command;
     let commandParams;
 
@@ -419,7 +420,7 @@ class WindowStore {
       return;
     }
 
-    this.sendText(window, body);
+    this.sendText(window, body, doc);
   }
 
   async editMessage(message: MessageModel, body: string): Promise<void> {
@@ -748,6 +749,7 @@ class WindowStore {
       window,
       gid: message.gid,
       body: message.body,
+      doc: message.doc,
       category: message.cat,
       timestamp: message.ts,
       updatedTimestamp: message.updatedTs,
