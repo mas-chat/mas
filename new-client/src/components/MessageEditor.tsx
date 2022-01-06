@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { FunctionComponent, useContext, useEffect, useMemo } from 'react';
 import { Box } from '@chakra-ui/react';
 import {
   BoldExtension,
@@ -49,6 +49,9 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
 
   const { manager, onChange, state, getContext } = useRemirror({
     extensions,
+    builtin: {
+      excludeBaseKeymap: true // TODO: custom base keymap needed that doesn't set "Enter"
+    },
     content: '',
     stringHandler: 'text',
     selection: 'end'
@@ -65,14 +68,17 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
     const { chain } = useRemirrorContext();
     const { getJSON, getText } = useHelpers();
 
-    useKeymap(
-      'Enter',
-      useCallback(() => {
+    useKeymap('Enter', ({ next }) => {
+      const enterConsumed = next();
+
+      if (!enterConsumed) {
         windowStore.processLine(window, getText(), getJSON());
         chain.setContent('').focus('end').run();
         return true;
-      }, [chain, getText, getJSON])
-    );
+      }
+
+      return false;
+    });
 
     return null;
   };

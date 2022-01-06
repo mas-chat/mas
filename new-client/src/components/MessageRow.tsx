@@ -27,6 +27,7 @@ import {
   RemirrorRenderer,
   TextHandler
 } from '@remirror/react';
+import { ProsemirrorNode } from '@remirror/core';
 import { observer } from 'mobx-react-lite';
 import { ServerContext } from './ServerContext';
 import { ImageModal, YouTubePreview, UserInfoPopover, NickLabel } from '.';
@@ -48,11 +49,11 @@ const renderMention = (user: UserModel, network: Network, insertAt = false) => (
 );
 
 const createMentionHandler = (userStore: UserStore, network: Network) => {
-  const mentionHandler: FunctionComponent<{ id: string; label: string }> = ({ id, label }) => {
-    const user = userStore.users.get(id);
+  const mentionHandler: FunctionComponent<{ node: ProsemirrorNode }> = ({ node }) => {
+    const user = userStore.users.get(node.attrs.id);
 
     if (!user) {
-      return <span>{label}</span>;
+      return <span>{node.attrs.label}</span>;
     }
 
     return renderMention(user, network, true);
