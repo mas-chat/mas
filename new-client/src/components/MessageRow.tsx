@@ -61,23 +61,6 @@ const createMentionHandler = (userStore: UserStore, network: Network) => {
   return mentionHandler;
 };
 
-const typeMap: MarkMap = {
-  blockquote: 'blockquote',
-  bulletList: 'ul',
-  callout: Callout,
-  codeBlock: CodeBlock,
-  doc: Doc,
-  hardBreak: 'br',
-  heading: Heading,
-  horizontalRule: 'hr',
-  iframe: createIFrameHandler(),
-  image: 'img',
-  listItem: 'li',
-  paragraph: 'p',
-  orderedList: 'ol',
-  text: TextHandler
-};
-
 interface MessageRowProps {
   message: MessageModel;
   isUnread: boolean;
@@ -96,8 +79,25 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     bold: 'strong',
     code: 'code',
     link: createLinkHandler({ target: '_blank' }),
-    underline: 'u',
-    mention: createMentionHandler(userStore, message.window.network)
+    underline: 'u'
+  };
+
+  const typeMap: MarkMap = {
+    blockquote: 'blockquote',
+    bulletList: 'ul',
+    callout: Callout,
+    codeBlock: CodeBlock,
+    doc: Doc,
+    hardBreak: 'br',
+    heading: Heading,
+    horizontalRule: 'hr',
+    iframe: createIFrameHandler(),
+    image: 'img',
+    listItem: 'li',
+    paragraph: 'p',
+    orderedList: 'ol',
+    text: TextHandler,
+    mentionAtom: createMentionHandler(userStore, message.window.network)
   };
 
   const renderImagePreviews = () =>
