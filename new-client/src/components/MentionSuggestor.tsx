@@ -50,7 +50,8 @@ export const MentionSuggestor: FunctionComponent<MentionSuggestorProps> = ({ use
             return (
               <Box
                 key={user.id}
-                bgColor={isHovered ? 'blue.300' : isHighlighted ? 'red.300' : 'white'}
+                p={1}
+                bgColor={isHovered ? 'blue.300' : isHighlighted ? 'red.300' : 'gray.700'}
                 {...getItemProps({
                   item: user,
                   index
