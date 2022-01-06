@@ -8,22 +8,14 @@ import {
   LinkExtension,
   CodeBlockExtension,
   PlaceholderExtension,
-  MentionExtension
+  MentionAtomExtension
 } from 'remirror/extensions';
 import css from 'refractor/lang/css';
 import javascript from 'refractor/lang/javascript';
 import json from 'refractor/lang/json';
 import typescript from 'refractor/lang/typescript';
 import markdown from 'refractor/lang/markdown';
-import {
-  ThemeProvider,
-  Remirror,
-  EditorComponent,
-  useRemirror,
-  useRemirrorContext,
-  useKeymap,
-  useHelpers
-} from '@remirror/react';
+import { Remirror, EditorComponent, useRemirror, useRemirrorContext, useKeymap, useHelpers } from '@remirror/react';
 import { MentionSuggestor } from './MentionSuggestor';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
@@ -47,7 +39,7 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
         new CodeBlockExtension({
           supportedLanguages: [css, javascript, json, typescript, markdown]
         }),
-        new MentionExtension({
+        new MentionAtomExtension({
           matchers: [{ name: 'user', char: '@', appendText: ' ', matchOffset: 0 }]
         }),
         new PlaceholderExtension({ placeholder: 'Write here' })
@@ -95,16 +87,16 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({ window, singleWi
       borderRadius="base"
       __css={{
         '& .remirror-editor:focus-visible': { outline: 'none' },
-        '& .remirror-editor:focus': { outline: 'none' }
+        '& .remirror-editor:focus': { outline: 'none' },
+        '& .remirror-mention-atom-user': { border: '1px solid #bbb', borderRadius: 5 },
+        '& .remirror-mention-atom-user:before': { content: '"@"' }
       }}
     >
-      <ThemeProvider>
-        <Remirror onChange={onChange} manager={manager} initialContent={state}>
-          <EditorBindings />
-          <MentionSuggestor users={window.participants} />
-          <EditorComponent />
-        </Remirror>
-      </ThemeProvider>
+      <Remirror onChange={onChange} manager={manager} initialContent={state}>
+        <EditorBindings />
+        <MentionSuggestor users={window.participants} />
+        <EditorComponent />
+      </Remirror>
     </Box>
   );
 };
