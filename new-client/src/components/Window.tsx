@@ -2,10 +2,11 @@ import React, { FunctionComponent, useContext, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useDropzone } from 'react-dropzone';
 import { HStack, IconButton, Heading, Flex } from '@chakra-ui/react';
-import { PlusSquareIcon, ArrowBackIcon } from '@chakra-ui/icons';
+import { IoShareOutline, IoArrowBack } from 'react-icons/io5';
 import { Link, useNavigate } from 'react-router-dom';
-import { WindowMessageList, WindowMenu, WindowMoveControls, MessageEditor } from '.';
+import { WindowMessageList, WindowEmojiPicker, WindowMenu, WindowMoveControls, MessageEditor } from '.';
 import WindowModel from '../models/Window';
+import { useMessageRemirror } from '../hooks/remirror';
 import { ServerContext } from './ServerContext';
 import { rootUrl, windowUrl } from '../lib/urls';
 
@@ -39,6 +40,8 @@ const Window: FunctionComponent<WindowProps> = ({ window, height = 100, singleWi
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
+  const messageRemirror = useMessageRemirror();
+
   return (
     <Flex
       onClick={handleWindowClick}
@@ -63,7 +66,7 @@ const Window: FunctionComponent<WindowProps> = ({ window, height = 100, singleWi
             to={rootUrl()}
             mr="1rem"
             aria-label="Back"
-            icon={<ArrowBackIcon />}
+            icon={<IoArrowBack />}
             onClick={e => e.stopPropagation()}
           />
         )}
@@ -77,14 +80,15 @@ const Window: FunctionComponent<WindowProps> = ({ window, height = 100, singleWi
         <WindowMessageList window={window} />
       )}
       <Flex>
-        <MessageEditor window={window} />
-        <HStack spacing="0.2rem">
+        <MessageEditor window={window} messageRemirror={messageRemirror} />
+        <HStack ml="0.2rem" spacing="0.2rem">
+          <WindowEmojiPicker manager={messageRemirror.manager} />
           <input {...getInputProps()} />
           <IconButton
             {...getRootProps()}
             aria-label="Options"
             isActive={isDragActive}
-            icon={<PlusSquareIcon />}
+            icon={<IoShareOutline />}
             variant="outline"
             size="sm"
           />
