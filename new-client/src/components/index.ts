@@ -21,6 +21,7 @@ export { default as NickLabel } from './NickLabel';
 export { default as ImageModal } from './ImageModal';
 export { default as YouTubePreview } from './YouTubePreview';
 export { default as WindowMessageList } from './WindowMessageList';
+export { default as WindowEmojiPicker } from './WindowEmojiPicker';
 export { default as WindowMenu } from './WindowMenu';
 export { default as WindowDayDivider } from './WindowDayDivider';
 export { default as InfoModal } from './InfoModal';
