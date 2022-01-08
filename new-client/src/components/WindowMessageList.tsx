@@ -2,7 +2,7 @@ import React, { Fragment, FunctionComponent, useRef } from 'react';
 import { Flex, Box } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import useResizeObserver from 'use-resize-observer';
-import { MessageRow, WindowMemberList, WindowDayDivider } from '.';
+import { MessageRenderer, WindowMemberList, WindowDayDivider } from '.';
 import WindowModel from '../models/Window';
 import { WindowType } from '../types/notifications';
 import MessageModel from '../models/Message';
@@ -47,7 +47,7 @@ const WindowMessageList: FunctionComponent<WindowMessageListProps> = ({ window }
                 {(index === 0 || !isFromSameDay(message, messages[index - 1])) && (
                   <WindowDayDivider ts={message.createdAt} />
                 )}
-                <MessageRow isUnread={message.gid > window.lastSeenMessageGid} message={message} />
+                <MessageRenderer isUnread={message.gid > window.lastSeenMessageGid} message={message} />
               </Fragment>
             ))}
             {lastMessage && !currentDate.isSame(lastMessage.createdAt, 'd') && <WindowDayDivider ts={currentDate} />}

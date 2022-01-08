@@ -12,7 +12,7 @@ export { default as Desktop } from './Desktop';
 export { default as Sidebar } from './Sidebar';
 export { default as Window } from './Window';
 export { default as WindowMemberList } from './WindowMemberList';
-export { default as MessageRow } from './MessageRow';
+export { default as MessageRenderer } from './MessageRenderer';
 export { default as RootContainer } from './RootContainer';
 export { default as LoadingView } from './LoadingView';
 export { default as StoreNavigator } from './StoreNavigator';
