@@ -45,6 +45,7 @@ export function useMessageRemirror(): MessageRemirror {
           supportedLanguages: [css, javascript, json, typescript, markdown]
         }),
         new MentionAtomExtension({
+          extraAttributes: { type: 'user' },
           matchers: [{ name: 'user', char: '@', appendText: ' ', matchOffset: 0 }]
         }),
         new PlaceholderExtension({ placeholder: 'Write here' }),

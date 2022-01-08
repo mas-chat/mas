@@ -9,6 +9,8 @@ interface MentionSuggestorProps {
 }
 
 export const MentionSuggestor: FunctionComponent<MentionSuggestorProps> = ({ users }: MentionSuggestorProps) => {
+  const [proposedUsers, setProposedUsers] = useState<MentionExtensionAttributes[]>([]);
+
   const usersArray: MentionExtensionAttributes[] = useMemo(
     () =>
       Array.from(users.values()).map(user => ({
@@ -18,9 +20,8 @@ export const MentionSuggestor: FunctionComponent<MentionSuggestorProps> = ({ use
     [users]
   );
 
-  const [proposedUsers, setProposedUsers] = useState<MentionExtensionAttributes[]>([]);
   const { state, getMenuProps, getItemProps, indexIsHovered, indexIsSelected } = useMentionAtom({
-    items: usersArray
+    items: proposedUsers
   });
 
   useEffect(() => {
