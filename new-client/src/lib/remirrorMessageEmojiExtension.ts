@@ -40,7 +40,7 @@ export class MessageEmojiExtension extends NodeExtension {
       inline: true,
 
       atom: true,
-      attrs: { ...extra.defaults(), emoji: {} },
+      attrs: { ...extra.defaults(), unicode: {} },
       parseDOM: [
         {
           tag: `span[${EMOJI_DATA_ATTRIBUTE}`,
@@ -49,8 +49,7 @@ export class MessageEmojiExtension extends NodeExtension {
               return;
             }
 
-            const emoji = node.getAttribute(EMOJI_DATA_ATTRIBUTE);
-            return { ...extra.parse(node), emoji };
+            return { ...extra.parse(node), unicode: node.getAttribute(EMOJI_DATA_ATTRIBUTE) };
           }
         },
         ...(override.parseDOM ?? [])
@@ -59,9 +58,9 @@ export class MessageEmojiExtension extends NodeExtension {
         return [
           'input',
           {
-            [EMOJI_DATA_ATTRIBUTE]: node.attrs.emoji,
+            [EMOJI_DATA_ATTRIBUTE]: node.attrs.unicode,
             style: 'border:none;background-color:unset',
-            value: node.attrs.emoji,
+            value: node.attrs.unicode,
             disabled: 'true',
             size: '1'
           }
@@ -85,8 +84,8 @@ export class MessageEmojiExtension extends NodeExtension {
       return !captureGroup || !getUniCodeEmoji(captureGroup);
     };
 
-    const getAttributes: GetAttributes = ([, match]) => ({ emoji: getUniCodeEmoji(match) });
-    const getAttributesEmoji: GetAttributes = ([, match]) => ({ emoji: match });
+    const getAttributes: GetAttributes = ([, match]) => ({ unicode: getUniCodeEmoji(match) });
+    const getAttributesEmoji: GetAttributes = ([, match]) => ({ unicode: match });
 
     return [
       nodeInputRule({
@@ -122,7 +121,7 @@ export class MessageEmojiExtension extends NodeExtension {
         return props => {
           return store.commands.replaceText.original({
             type: type,
-            attrs: { emoji: emoji },
+            attrs: { unicode: emoji },
             selection: options.selection
           })(props);
         };

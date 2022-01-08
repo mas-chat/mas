@@ -15,6 +15,7 @@ import {
   Input,
   Portal
 } from '@chakra-ui/react';
+import styled from '@emotion/styled';
 import { IoMenu, IoPencil } from 'react-icons/io5';
 import {
   Callout,
@@ -38,6 +39,14 @@ import { Network } from '../types/notifications';
 import { UserStore } from '../stores';
 
 //const TWEMOJI_CDN_BASE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/13.0.1';
+
+const OverridesWrapper = styled.div`
+  &,
+  & > div,
+  & > div > p {
+    display: inline;
+  }
+`;
 
 const renderMention = (user: UserModel, network: Network, insertAt = false) => (
   <UserInfoPopover key={user.nick[network]} user={user}>
@@ -63,7 +72,7 @@ const createMentionHandler = (userStore: UserStore, network: Network) => {
 };
 
 const createEmojiHandler = () => {
-  const emojiHandler: FunctionComponent<{ node: ProsemirrorNode }> = ({ node }) => node.attrs.emoji;
+  const emojiHandler: FunctionComponent<{ node: ProsemirrorNode }> = ({ node }) => node.attrs.unicode;
 
   return emojiHandler;
 };
@@ -126,7 +135,11 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
 
   const renderUserMessage = () => {
     if (message.doc) {
-      return <RemirrorRenderer json={message.doc} typeMap={typeMap} markMap={markMap} />;
+      return (
+        <OverridesWrapper className="testing">
+          <RemirrorRenderer json={message.doc} typeMap={typeMap} markMap={markMap} />
+        </OverridesWrapper>
+      );
     }
 
     return message.body;
