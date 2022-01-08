@@ -24,6 +24,7 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ manager }: WindowMenuP
       <PopoverTrigger>
         <Button
           as={IconButton}
+          backgroundColor="transparent"
           onClick={open}
           aria-label="Options"
           icon={<IoHappyOutline />}
