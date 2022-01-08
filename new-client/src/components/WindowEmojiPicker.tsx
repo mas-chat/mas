@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useState } from 'react';
 import { Picker, EmojiData } from 'emoji-mart';
 import { IconButton, Button, Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@chakra-ui/react';
+import { BaseEmoji } from 'emoji-mart';
 import { IoHappyOutline } from 'react-icons/io5';
 import { MessageRemirrorManager } from '../hooks/remirror';
 
@@ -14,8 +15,7 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ manager }: WindowMenuP
   const close = () => setIsOpen(false);
 
   const handleSelect = (emoji: EmojiData) => {
-    console.log(emoji);
-    manager.store.commands.addEmoji(emoji.native);
+    manager.store.commands.addEmoji((emoji as BaseEmoji).native);
     close();
   };
 
