@@ -9,6 +9,16 @@ import { ServerContext } from './ServerContext';
 import { MessageRemirror } from '../hooks/remirror';
 
 const OverridesWrapper = styled.div`
+  & .remirror-editor-wrapper {
+    padding: 0;
+  }
+
+  & .remirror-editor {
+    min-height: unset !important;
+    box-shadow: unset !important;
+    padding: 0 !important;
+  }
+
   & .remirror-editor:focus-visible {
     outline: none;
   }
@@ -23,10 +33,6 @@ const OverridesWrapper = styled.div`
 
   & .remirror-suggest-atom {
     color: white;
-  }
-
-  & .remirror-emoji-image {
-    display: inline-block;
   }
 `;
 
@@ -79,17 +85,17 @@ const MessageEditor: FunctionComponent<MessageEditorProps> = ({
       borderWidth="1px"
       borderRadius="base"
     >
-      <ThemeProvider>
-        <AllStyledComponent>
-          <OverridesWrapper className="overrides">
+      <AllStyledComponent>
+        <ThemeProvider>
+          <OverridesWrapper>
             <Remirror onChange={onChange} manager={manager} initialContent={state}>
               <EditorBindings />
               <MentionSuggestor users={window.participants} />
               <EditorComponent />
             </Remirror>
           </OverridesWrapper>
-        </AllStyledComponent>
-      </ThemeProvider>
+        </ThemeProvider>
+      </AllStyledComponent>
     </Box>
   );
 };
