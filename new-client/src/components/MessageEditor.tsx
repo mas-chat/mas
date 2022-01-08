@@ -9,21 +9,15 @@ import { ServerContext } from './ServerContext';
 import { MessageRemirror } from '../hooks/remirror';
 
 const OverridesWrapper = styled.div`
-  & .remirror-editor-wrapper {
-    padding: 0;
-  }
-
+  & .remirror-editor-wrapper,
   & .remirror-editor {
     min-height: unset !important;
     box-shadow: unset !important;
     padding: 0 !important;
   }
 
+  & .remirror-editor:focus,
   & .remirror-editor:focus-visible {
-    outline: none;
-  }
-
-  & .remirror-editor:focus {
     outline: none;
   }
 
