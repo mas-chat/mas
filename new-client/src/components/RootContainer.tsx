@@ -8,6 +8,8 @@ import { ModalContextProvider } from './ModalContext';
 import { ServerContext } from './ServerContext';
 import { LoadingView, App, ModalManager, StoreNavigator } from '.';
 
+import 'emoji-mart/css/emoji-mart.css';
+
 const RootContainer: FunctionComponent = () => {
   const { startupStore, profileStore } = useContext(ServerContext);
   const { setColorMode } = useColorMode();

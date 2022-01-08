@@ -14,6 +14,7 @@
 //   governing permissions and limitations under the License.
 //
 
+import { type } from 'os';
 import { get, root } from '../lib/conf';
 
 const fs = require('fs');
@@ -23,26 +24,29 @@ const Settings = require('../models/settings');
 const log = require('../lib/log');
 
 const DEFAULT_ENTRY_FILE_NAME = 'index.js';
+const DEFAULT_CSS_FILE_NAME = 'index.css';
 
-function getMainEntryFileNameAndModeForV2Client() {
+function getMainEntryFileNamesAndModeForV2Client() {
   try {
     const metaDataFile = fs.readFileSync(path.join(root(), 'new-client/dist/meta.json'), 'utf8');
     const outputs = Object.keys(JSON.parse(metaDataFile).outputs) || [];
-    const fileNameWithPath = outputs.find(file => file.match(/^dist\/index-/));
+    const jsFileNameWithPath = outputs.find(file => file.match(/^dist\/index-\w+.js$/));
+    const cssFileNameWithPath = outputs.find(file => file.match(/^dist\/index-\w+.css$/));
 
-    if (!fileNameWithPath) {
+    if (!jsFileNameWithPath || !cssFileNameWithPath) {
       throw new Error('No entry file found');
     }
 
-    const fileName = fileNameWithPath.split('/').pop();
+    const jsFileName = jsFileNameWithPath.split('/').pop();
+    const cssFileName = cssFileNameWithPath.split('/').pop();
 
-    if (typeof fileName !== 'string') {
+    if (typeof jsFileName !== 'string' || typeof cssFileName !== 'string') {
       throw new Error('No entry file found');
     }
 
-    return { mode: 'production', fileName };
+    return { mode: 'production', jsFileName, cssFileName };
   } catch {
-    return { mode: 'development', fileName: DEFAULT_ENTRY_FILE_NAME };
+    return { mode: 'development', jsFileName: DEFAULT_ENTRY_FILE_NAME, cssFileName: DEFAULT_CSS_FILE_NAME };
   }
 }
 
@@ -70,7 +74,7 @@ try {
   revision = 'unknown';
 }
 
-const { mode, fileName: mainEntryFileName } = getMainEntryFileNameAndModeForV2Client();
+const { mode, cssFileName, jsFileName } = getMainEntryFileNamesAndModeForV2Client();
 
 log.info(`Server new client in ${mode} mode`);
 
@@ -99,7 +103,8 @@ module.exports = async function index(ctx) {
       socketHost: get('session:socket_host'),
       revision
     }),
-    jsScriptTag: `<script src="/app/client-assets/${mainEntryFileName}"></script>`,
+    jsScriptTag: `<script src="/app/client-assets/${jsFileName}"></script>`,
+    cssTag: `<link rel="stylesheet" href="/app/client-assets/${cssFileName}">`,
     extraClientHead: get('snippets:extra_client_head') || '',
     extraClientBody: get('snippets:extra_client_body') || '',
     colorMode: theme === 'default' ? 'light' : 'dark',
