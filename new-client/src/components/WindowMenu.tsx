@@ -10,7 +10,7 @@ import {
   MenuItem,
   MenuDivider
 } from '@chakra-ui/react';
-import { HamburgerIcon } from '@chakra-ui/icons';
+import { IoMenu } from 'react-icons/io5';
 import { Link } from 'react-router-dom';
 import WindowModel from '../models/Window';
 import { ServerContext } from './ServerContext';
@@ -41,7 +41,7 @@ const WindowMenu: FunctionComponent<WindowMenuProps> = ({ window, onStartMove }:
 
   return (
     <Menu isLazy>
-      <MenuButton as={IconButton} aria-label="Options" icon={<HamburgerIcon />} variant="outline" size="sm" />
+      <MenuButton as={IconButton} aria-label="Options" icon={<IoMenu />} variant="outline" size="sm" />
       <MenuList>
         {window.type === WindowType.Group && (
           <>
