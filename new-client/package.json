@@ -25,7 +25,6 @@
     "@remirror/styles": "^1.1.2",
     "dayjs": "^1.10.7",
     "emoji-mart": "^3.0.1",
-    "emoji-unicode": "^2.0.1",
     "favico.js": "^0.3.10",
     "framer-motion": "^5.5.5",
     "history": "^5.2.0",
