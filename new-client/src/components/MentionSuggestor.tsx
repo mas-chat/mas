@@ -40,7 +40,7 @@ export const MentionSuggestor: FunctionComponent<MentionSuggestorProps> = ({ use
   const enabled = !!state;
 
   return (
-    <FloatingWrapper positioner="cursor" enabled={enabled} placement="bottom-start">
+    <FloatingWrapper positioner="cursor" enabled={enabled} placement="bottom-start" renderOutsideEditor>
       <Box {...getMenuProps()} className="suggestions">
         {enabled &&
           proposedUsers.map((user, index) => {
