@@ -73,7 +73,7 @@ export class MessageEmojiExtension extends NodeExtension {
   createInputRules(): InputRule[] {
     const getUniCodeEmoji = (text: string) => {
       const emojis = emojiIndex.search(text.replace(/^:(.+):$/, (_match, name) => name));
-      debugger;
+
       if (!emojis || emojis.length === 0) {
         return;
       }
