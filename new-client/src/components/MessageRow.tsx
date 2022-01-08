@@ -62,6 +62,12 @@ const createMentionHandler = (userStore: UserStore, network: Network) => {
   return mentionHandler;
 };
 
+const createEmojiHandler = () => {
+  const emojiHandler: FunctionComponent<{ node: ProsemirrorNode }> = ({ node }) => node.attrs.emoji;
+
+  return emojiHandler;
+};
+
 interface MessageRowProps {
   message: MessageModel;
   isUnread: boolean;
@@ -98,7 +104,8 @@ const MessageRow: FunctionComponent<MessageRowProps> = ({ message, isUnread }: M
     paragraph: 'p',
     orderedList: 'ol',
     text: TextHandler,
-    mentionAtom: createMentionHandler(userStore, message.window.network)
+    mentionAtom: createMentionHandler(userStore, message.window.network),
+    messageEmoji: createEmojiHandler()
   };
 
   const renderImagePreviews = () =>
