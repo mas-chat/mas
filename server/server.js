@@ -108,9 +108,9 @@ function createFrontendApp() {
     }
   });
 
-  if (process.env.NODE_ENV === 'development') {
-    app.use(logger());
-  }
+  //  if (process.env.NODE_ENV === 'development') {
+  app.use(logger());
+  //  }
 
   app.use(error());
 
