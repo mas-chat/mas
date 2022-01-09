@@ -63,9 +63,6 @@ TBD
 
 ## Production like setup
 
-First check `docker-compose.yml` file. To customize your installation, add [default configuration value](https://github.com/ilkkao/mas/blob/master/server/mas.conf.default) overrides
-to that file as new environment variables. Then you are ready launch the stack:
-
 ```bash
 $ docker-compose up -d
 ```

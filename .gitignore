@@ -4,8 +4,6 @@ g#Ignore emacs temporary files
 .\#*
 
 #Ignore generated files/directories
-/server/mas.conf
-
 /node_modules/
 /server/node_modules/
 /server/test/browser/node_modules/

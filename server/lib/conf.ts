@@ -14,30 +14,21 @@
 //   governing permissions and limitations under the License.
 //
 
-'use strict';
-
 import path from 'path';
 import assert from 'assert';
+import dotenv from 'dotenv';
 import nconf from 'nconf';
 import 'colors';
 
 const rootPath = computeRoot();
 
-nconf
-  .env({
-    separator: '__',
-    lowerCase: true,
-    parseValues: true
-  })
-  .argv()
-  .file('user_overrides', {
-    file: path.join(rootPath, 'server', 'mas.conf'),
-    format: nconf.formats.ini
-  })
-  .file('defaults', {
-    file: path.join(rootPath, 'server', 'mas.conf.default'),
-    format: nconf.formats.ini
-  });
+dotenv.config({ path: path.join(rootPath, 'mas.default.env') });
+
+nconf.env({
+  separator: '__',
+  lowerCase: true,
+  parseValues: true
+});
 
 export function get(key: string) {
   return getValue(key);

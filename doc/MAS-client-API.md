@@ -344,7 +344,7 @@ The first ADD_USERS notification arrives immediately after 'initok' and contains
 
 ### UPDATE_NETWORKS
 
-List of configured networks the user able to connect using JOIN request. The list always contains internal MAS network. Additionally it contains IRC networks that are configured in mas.conf file.
+List of configured networks the user able to connect using JOIN request. The list always contains internal MAS network. Additionally it contains IRC networks that are configured in the instance configuration.
 
 ```JSON
 {
