@@ -20,9 +20,7 @@ import dotenv from 'dotenv';
 import nconf from 'nconf';
 import 'colors';
 
-const rootPath = computeRoot();
-
-dotenv.config({ path: path.join(rootPath, 'mas.default.env') });
+dotenv.config();
 
 nconf.env({
   separator: '__',
