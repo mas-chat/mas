@@ -14,6 +14,7 @@ export interface CreateAcknowledgement {
 export interface SendRequest {
   id: 'SEND';
   text: string;
+  doc: string;
   windowId: number;
 }
 

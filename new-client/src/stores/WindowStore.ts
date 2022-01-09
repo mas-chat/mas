@@ -270,6 +270,7 @@ class WindowStore {
     const response = await this.socket.send<SendRequest>({
       id: 'SEND',
       text,
+      doc,
       windowId: window.id
     });
 
