@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 ENV NPM_CONFIG_LOGLEVEL warn
 ENV PROJECT_ROOT /app/
 
-COPY mas.default.conf /app/
+COPY .env /app/
 
 COPY server /app/server/
 WORKDIR /app/server/
