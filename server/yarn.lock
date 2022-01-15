@@ -1031,10 +1031,10 @@ domutils@^2.5.2:
     domelementtype "^2.2.0"
     domhandler "^4.2.0"
 
-dotenv@^10.0.0:
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-10.0.0.tgz#3d4227b8fb95f81096cdd2b66653fb2c7085ba81"
-  integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
+dotenv@^12.0.3:
+  version "12.0.3"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-12.0.3.tgz#362b83f866dfed8e540deaa5bbcb3c8ab401dcb6"
+  integrity sha512-RlOysyzyGiABgDFgITo5fRnMV1QStdoVvkXhnxQc5Or/CiQo52s2Bh6DVMvzZsmFQ9IrNxYHOC/gdpNwHsitnQ==
 
 dynamic-dedupe@^0.3.0:
   version "0.3.0"
@@ -1436,10 +1436,10 @@ he@^1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-hot-shots@^8.3.1:
-  version "8.3.1"
-  resolved "https://registry.yarnpkg.com/hot-shots/-/hot-shots-8.3.1.tgz#de262964cd506978f03218e2d1f0bcd90b931093"
-  integrity sha512-eB20m2neM+uV7IM3JDCZg8/NU1+WGM7Qh7kpvC/sGIWNg4Ng+9O8JT/zrLuA+2JStiQLEy9z/9VEDFH0BzYf0A==
+hot-shots@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/hot-shots/-/hot-shots-9.0.0.tgz#b88421aa81c1ef37f4cc53ade7f1e3daaa584b5e"
+  integrity sha512-fpljto22PvfzDGznnzUpWgFMgccyZRtWo+fY8R4ktwipkv3ywDyeaTLijYaM629DEZvtnEDAN00yV6zxzivnpQ==
   optionalDependencies:
     unix-dgram "2.0.x"
 
