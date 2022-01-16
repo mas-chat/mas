@@ -4,4 +4,3 @@ new-client/node_modules
 server/node_modules
 website/node_modules
 dev-env-data
-tmp

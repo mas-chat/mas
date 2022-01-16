@@ -20,14 +20,9 @@ g#Ignore emacs temporary files
 /new-client/node_modules/
 /new-client/dist/
 
-npm-debug.log
-/logs/
-/run/
-/data/
 /test/browser/reports/
 
 /private
-/tmp
 
 #Mac files
 .DS_Store
