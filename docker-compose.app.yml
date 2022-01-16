@@ -1,0 +1,61 @@
+version: '3'
+services:
+  mas-frontend:
+    image: 'mas:latest'
+    build: .
+    ports:
+      - '80:3200'
+      - '443:3201'
+    volumes:
+      - ./development-data/mas:/data
+    restart: always
+    environment:
+      &app-environment
+      NODE_ENV: production
+      PROJECT_ROOT: /app/
+      FILES__UPLOAD_DIRECTORY: /data/mas/uploads/
+      FILES__CACHE_DIRECTORY: /data/mas/cache/
+      FILES__AUTOROTATE_JPEGS: 'true'
+      REDIS__HOST: localhost
+      ELASTICSEARCH__ENABLED: 'true'
+      ELASTICSEARCH__HOST: elasticsearch
+    command: yarn run start-frontend
+  mas-loopback:
+    image: 'mas:latest'
+    build: .
+    volumes:
+      - ./development-data/mas:/data
+    restart: always
+    environment:
+      <<: *app-environment
+    command: yarn run start-loopback
+  mas-irc:
+    image: 'mas:latest'
+    build: .
+    volumes:
+      - ./development-data/mas:/data
+    restart: always
+    environment:
+      <<: *app-environment
+    command: yarn run start-irc
+  mas-irc-scktmgr:
+    image: 'mas:latest'
+    build: .
+    volumes:
+      - ./development-data/mas:/data
+    restart: always
+    environment:
+      <<: *app-environment
+    command: yarn run start-irc-scktmgr
+    ports:
+      - '113:113'
+  mas-website:
+    image: 'mas:latest'
+    build: .
+    restart: always
+    environment:
+      <<: *app-environment
+    working_dir: /app/website
+    command: yarn run server
+    ports:
+      - '3100:3100'
