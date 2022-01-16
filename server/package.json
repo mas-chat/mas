@@ -64,16 +64,16 @@
   },
   "scripts": {
     "prod": "tsc && cd build && node ./bin/build-emails.js",
-    "dev": "cd .. && nf --procfile Procfile.dev --env conf/env.dev start",
-    "migrate-db": "prisma migrate deploy && cd build && node ./bin/migrate-db.js",
+    "dev": "ts-node -T ./bin/create-db.ts && cd .. && nf --procfile Procfile.dev --env conf/env.dev start",
+    "migrate-db": "prisma migrate deploy && cd build && node ./bin/create-db.js",
     "start-frontend": "cd build && node ./server.js",
     "start-loopback": "cd build && node ./backends/loopback/server.js",
     "start-irc": "cd build && node ./backends/irc/server.js",
     "start-irc-scktmgr": "cd build && node ./backends/irc/connection-manager/server.js",
-    "start-frontend-dev": "ts-node -T ./bin/create-db.ts && ts-node-dev ./server.js",
-    "start-loopback-dev": "ts-node -T ./bin/create-db.ts && ts-node-dev ./backends/loopback/server.js",
-    "start-irc-dev": "ts-node -T ./bin/create-db.ts && ts-node-dev ./backends/irc/server.js",
-    "start-irc-scktmgr-dev": "ts-node -T ./bin/create-db.ts && ts-node-dev ./backends/irc/connection-manager/server.js"
+    "start-frontend-dev": "ts-node-dev ./server.js",
+    "start-loopback-dev": "ts-node-dev ./backends/loopback/server.js",
+    "start-irc-dev": "ts-node-dev ./backends/irc/server.js",
+    "start-irc-scktmgr-dev": "ts-node-dev ./backends/irc/connection-manager/server.js"
   },
   "repository": {
     "type": "git",
