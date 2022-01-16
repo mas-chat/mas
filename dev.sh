@@ -12,6 +12,7 @@ case "$1" in
     s|start)
         clear
         cd server
+        yarn run --silent migrate-db-dev
         yarn run --silent dev
         ;;
 

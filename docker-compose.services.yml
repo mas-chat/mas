@@ -1,21 +1,17 @@
 version: '3'
 services:
   elasticsearch:
-    image: 'docker.elastic.co/elasticsearch/elasticsearch:6.8.23'
+    image: 'docker.elastic.co/elasticsearch/elasticsearch:7.16.3'
     restart: always
     ulimits:
       memlock:
         soft: -1
         hard: -1
     environment:
-      - xpack.security.enabled=false
-      - xpack.monitoring.enabled=false
-      - xpack.graph.enabled=false
-      - xpack.watcher.enabled=false
-      - xpack.ml.enabled=false
+      - discovery.type=single-node
     ports:
-      - '127.0.0.1:9200:9200'
-      - '127.0.0.1:9300:9300'
+      - '9200:9200'
+      - '9300:9300'
     volumes:
       - ./mas-development/es:/usr/share/elasticsearch/data
   redis:
@@ -26,10 +22,13 @@ services:
     command: redis-server --save 600 1 --save 300 10 --save 60 10000
     volumes:
       - ./mas-development/redis:/data
-  nginx:
-    image: 'nginx:1.13.6'
+  postgres:
+    image: 'postgres:11.1'
     restart: always
     ports:
-      - '3000:3000'
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=mas
+      - POSTGRES_PASSWORD=password
     volumes:
-      - ./nginx.conf.dev:/etc/nginx/nginx.conf:ro
+      - ./mas-development/postgres:/var/lib/postgresql/data

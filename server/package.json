@@ -64,8 +64,9 @@
   },
   "scripts": {
     "prod": "tsc && cd build && node ./bin/build-emails.js",
-    "dev": "ts-node -T ./bin/create-db.ts && cd .. && nf --procfile Procfile.dev --env conf/env.dev start",
-    "migrate-db": "prisma migrate deploy && cd build && node ./bin/create-db.js",
+    "dev": "cd .. && nf --procfile Procfile.dev --env conf/env.dev start",
+    "migrate-db-dev": "prisma migrate dev && ts-node -T ./bin/create-db.ts",
+    "migrate-db-prod": "prisma migrate deploy && cd build && node ./bin/create-db.js",
     "start-frontend": "cd build && node ./server.js",
     "start-loopback": "cd build && node ./backends/loopback/server.js",
     "start-irc": "cd build && node ./backends/irc/server.js",
