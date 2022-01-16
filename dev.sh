@@ -9,6 +9,10 @@ export PROJECT_ROOT=$ROOT
 cd $ROOT
 
 case "$1" in
+    sd|start-deps)
+        docker-compose -f docker-compose.services.yml up -d
+        ;;
+
     s|start)
         clear
         cd server
