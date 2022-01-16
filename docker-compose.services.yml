@@ -13,7 +13,7 @@ services:
       - '9200:9200'
       - '9300:9300'
     volumes:
-      - ./mas-development/es:/usr/share/elasticsearch/data
+      - ./dev-env-data/es:/usr/share/elasticsearch/data
   redis:
     image: 'redis:6.2.3'
     restart: always
@@ -21,7 +21,7 @@ services:
       - '6379:6379'
     command: redis-server --save 600 1 --save 300 10 --save 60 10000
     volumes:
-      - ./mas-development/redis:/data
+      - ./dev-env-data/redis:/data
   postgres:
     image: 'postgres:11.1'
     restart: always
@@ -31,4 +31,4 @@ services:
       - POSTGRES_USER=mas
       - POSTGRES_PASSWORD=password
     volumes:
-      - ./mas-development/postgres:/var/lib/postgresql/data
+      - ./dev-env-data/postgres:/var/lib/postgresql/data

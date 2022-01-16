@@ -13,6 +13,10 @@ case "$1" in
         docker-compose -f docker-compose.services.yml up -d
         ;;
 
+    ed|stop-deps)
+        docker-compose -f docker-compose.services.yml down
+        ;;
+
     s|start)
         clear
         cd server

@@ -22,6 +22,8 @@ g#Ignore emacs temporary files
 
 /test/browser/reports/
 
+/dev-env-data
+
 /private
 
 #Mac files
