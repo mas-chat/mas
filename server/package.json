@@ -4,7 +4,7 @@
   "private": true,
   "description": "MAS Web App",
   "dependencies": {
-    "@elastic/elasticsearch": "6",
+    "@elastic/elasticsearch": "7.16.0",
     "@koa/router": "8",
     "@prisma/client": "3.8.1",
     "bcrypt": "^5.0.0",
