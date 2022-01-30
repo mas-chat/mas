@@ -29,7 +29,6 @@ export async function storeMessage(conversationId, msg) {
   try {
     await elasticSearchClient.create({
       index: 'messages',
-      type: 'message',
       id: msg.gid,
       body: {
         ts: msg.ts * 1000,
@@ -55,7 +54,6 @@ export async function updateMessage(gid, msg) {
   try {
     await elasticSearchClient.update({
       index: 'messages',
-      type: 'message',
       id: gid,
       body: {
         doc: {
