@@ -25,7 +25,9 @@ async function buildAll(devMode = false) {
     outdir: outDir,
     loader: { '.png': 'file' },
     metafile: !devMode,
-    watch: devMode
+    watch: devMode,
+    platform: 'node',
+    external:['canvas']
   };
 
   if (devMode) {
